@@ -115,6 +115,8 @@ namespace MetNoFimex
         MIFI_DEPRECATED(virtual const boost::shared_array<double> asConstDouble() const) = 0;
         /// @brief retrieve data as double
         virtual boost::shared_array<double> asDouble() const = 0;
+        /// @brief retrieve data as array of strings
+        virtual boost::shared_array<std::string> asStrings() const = 0;
         /// @brief retrieve the whole array as a string (with possible separator)
         virtual std::string asString(std::string separator = "") const = 0;
 
@@ -271,6 +273,14 @@ namespace MetNoFimex
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
     DataPtr createData(size_t length, boost::shared_array<unsigned char> array);
+    /**
+     * @brief create a Data-pointer of type CDM_STRINGS
+     *
+     * @param length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    DataPtr createData(size_t length, boost::shared_array<std::string> array);
 
     /**
      * @brief create a Data-pointer of the datatype and fill with the data from the iterator

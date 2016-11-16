@@ -62,6 +62,7 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh testInterpolation2DataFillValue.sh \
 @HAVE_NETCDF_TRUE@              testVerticalInterpolator.sh testVerticalInterpolator2.sh \
 @HAVE_NETCDF_TRUE@              testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
+@HAVE_NETCDF_TRUE@              testNcString.sh \
 @HAVE_NETCDF_TRUE@              testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
@@ -71,7 +72,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testCharNc.sh.in $(srcdir)/testFiIndexGribs.sh.in \
 	$(srcdir)/testInterpolation2DataFillValue.sh.in \
 	$(srcdir)/testMerger.sh.in $(srcdir)/testMergerTarget.sh.in \
-	$(srcdir)/testQEmask.xml.in \
+	$(srcdir)/testNcString.sh.in $(srcdir)/testQEmask.xml.in \
 	$(srcdir)/testQualityExtractorFimex.sh.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
@@ -112,7 +113,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = testCharNc.sh testFiIndexGribs.sh \
 	testVerticalInterpolator.sh testVerticalInterpolator2.sh \
 	testVerticalInterpolatorHeight.sh \
-	testVerticalInterpolatorOceanSG2ToDepth.sh \
+	testVerticalInterpolatorOceanSG2ToDepth.sh testNcString.sh \
 	testInterpolation2DataFillValue.sh testQEmask.xml \
 	testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 CONFIG_CLEAN_VPATH_FILES =
@@ -695,8 +696,8 @@ red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator2.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorHeight.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorOceanSG2ToDepth.sh \
-@HAVE_NETCDF_TRUE@	testQualityExtractorFimex.sh testMerger.sh \
-@HAVE_NETCDF_TRUE@	testMergerTarget.sh
+@HAVE_NETCDF_TRUE@	testNcString.sh testQualityExtractorFimex.sh \
+@HAVE_NETCDF_TRUE@	testMerger.sh testMergerTarget.sh
 am__EXEEXT_13 = $(am__EXEEXT_12) $(am__append_5)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -894,8 +895,9 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in \
 	testMergerTarget.sh.in testFeltReadNetCDFWrite.sh \
 	testNetCDFReadWrite.sh testNcmlRead.sh \
 	testInterpolation2DataFillValue.sh.in testdata_int2data_in.nc \
-	testdata_int2data_ex.nc nccmp.sh inData.txt diana.setup \
-	felt2netcdf.cfg cdmGribReaderConfig_newEarth.xml \
+	testdata_int2data_ex.nc testNcString.sh.in ncStringInput.nc \
+	ncStringExpected.nc ncStringWriter.xml nccmp.sh inData.txt \
+	diana.setup felt2netcdf.cfg cdmGribReaderConfig_newEarth.xml \
 	felt2nc_variables_level1000.xml test.ncml fillInterpolator.cfg \
 	testXMLDoc.xml coordTest.nc char.nc satellite_cma.nc \
 	testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc \
@@ -1049,6 +1051,8 @@ testVerticalInterpolator2.sh: $(top_builddir)/config.status $(srcdir)/testVertic
 testVerticalInterpolatorHeight.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorHeight.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolatorOceanSG2ToDepth.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorOceanSG2ToDepth.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testNcString.sh: $(top_builddir)/config.status $(srcdir)/testNcString.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testInterpolation2DataFillValue.sh: $(top_builddir)/config.status $(srcdir)/testInterpolation2DataFillValue.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

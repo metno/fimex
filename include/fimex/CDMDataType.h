@@ -44,7 +44,8 @@ enum CDMDataType {
     CDM_USHORT,
     CDM_UINT,
     CDM_INT64,
-    CDM_UINT64
+    CDM_UINT64,
+    CDM_STRINGS
 };
 
 /// translate float/string/... to the appropriate CDMDataType

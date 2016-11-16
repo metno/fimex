@@ -44,6 +44,20 @@ static LoggerPtr logger = getLogger("fimex.NetCDF_Utils");
 // hdf5 lib is usually not thread-safe, so reading from one file and writing to another fails
 static MutexType ncMutex;
 
+namespace {
+
+DataPtr createDataStringsFromNc(boost::shared_array<char*> cvals, size_t len)
+{
+    boost::shared_array<std::string> vals(new std::string[len]);
+    for (size_t i=0; i<len; ++i) {
+        vals[i] = cvals[i];
+    }
+    nc_free_string(len, &cvals[0]);
+    return createData(len, vals);
+}
+
+} // namesspace
+
 void ncCheck(int status)
 {
     if (status != NC_NOERR) {
@@ -107,6 +121,7 @@ nc_type cdmDataType2ncType(CDMDataType dt) {
     case CDM_FLOAT: return NC_FLOAT;
     case CDM_DOUBLE: return NC_DOUBLE;
 #ifdef NC_NETCDF4
+    case CDM_STRINGS: return NC_STRING;
     case CDM_UCHAR: return NC_UBYTE;
     case CDM_USHORT: return NC_USHORT;
     case CDM_UINT: return NC_UINT;
@@ -128,7 +143,7 @@ CDMDataType ncType2cdmDataType(nc_type dt) {
     case NC_FLOAT: return CDM_FLOAT;
     case NC_DOUBLE: return CDM_DOUBLE;
 #ifdef NC_NETCDF4
-    case NC_STRING: return CDM_STRING;
+    case NC_STRING: return CDM_STRINGS;
     case NC_UBYTE: return CDM_UCHAR;
     case NC_USHORT: return CDM_USHORT;
     case NC_UINT: return CDM_UINT;
@@ -149,9 +164,6 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
-#ifdef NC_NETCDF4
-    case NC_STRING:
-#endif
     case NC_CHAR: {
         boost::shared_array<char> vals(new char[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
@@ -210,6 +222,11 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
+    case NC_STRING: {
+        boost::shared_array<char*> cvals(new char*[attrLen]);
+        ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&cvals[0])));
+        return createDataStringsFromNc(cvals, attrLen);
+    }
 #endif
     case NC_NAT:
     default: return createData(0, boost::shared_array<int>(new int[0]));
@@ -232,9 +249,6 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
 
     switch (dt) {
     case NC_BYTE:
-#ifdef NC_NETCDF4
-    case NC_STRING:
-#endif
     case NC_CHAR: {
         boost::shared_array<char> vals(new char[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
@@ -286,6 +300,12 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
+    case NC_STRING: {
+        // this will fail if NetCDF file does not support NC_STRING, e.g. for NetCDF 3 or NetCDF 4 classic
+        boost::shared_array<char*> cvals(new char*[sliceLen]);
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&cvals[0])));
+        return createDataStringsFromNc(cvals, sliceLen);
+    }
 #endif
     case NC_NAT:
     default: return createData(0, boost::shared_array<int>(new int[0]));
@@ -313,9 +333,6 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
 
     switch (type) {
     case NC_BYTE:
-#ifdef NC_NETCDF4
-    case NC_STRING:
-#endif
     case NC_CHAR: {
         // use general nc_put_vara here; nc_put_vara_schar will give problems with nc-internal data-checks
         // in case of real characters != bytes
@@ -339,6 +356,15 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
         break;
     }
 #if NC_NETCDF4
+    case NC_STRING: {
+        const size_t dataLen = data->size();
+        boost::shared_array<std::string> svals = data->asStrings();
+        boost::shared_array<const char*> cvals(new const char*[dataLen]);
+        for (size_t i=0; i<dataLen; ++i)
+            cvals[i] = svals[i].c_str();
+        ncCheck(nc_put_vara(ncId, varId, start, count, &cvals[0]));
+        break;
+    }
     case NC_UBYTE: {
         ncCheck(nc_put_vara_uchar(ncId, varId, start, count, data->asUChar().get()));
         break;

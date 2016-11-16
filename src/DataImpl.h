@@ -40,6 +40,37 @@
 namespace MetNoFimex
 {
 
+/** type cast as a functor.
+ *
+ *  In contrast to the version in fimex/Utils.h, this includes
+ *  conversion from and to std::string.
+ */
+template<typename OUT, typename IN>
+struct data_caster {
+    OUT operator()(const IN& in) { return static_cast<OUT>(in); }
+};
+
+template<typename INOUT>
+struct data_caster<INOUT, INOUT> {
+    INOUT operator()(const INOUT& in) { return in; }
+};
+
+template<typename IN>
+struct data_caster<std::string, IN> {
+    std::string operator()(const IN& in) { return type2string(in); }
+};
+
+template<typename OUT>
+struct data_caster<OUT, std::string> {
+    OUT operator()(const std::string& in) { return string2type<OUT>(in); }
+};
+
+//template<>
+//char data_caster<char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
+//template<>
+//unsigned char data_caster<unsigned char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
+
+
     /**
      * @headerfile "DataImpl.h"
      */
@@ -125,6 +156,8 @@ namespace MetNoFimex
         virtual const boost::shared_array<unsigned long long> asConstUInt64() const {return as<unsigned long long>();}
         /// @brief retrieve data as uint64
         virtual boost::shared_array<unsigned long long> asUInt64() const {return as<unsigned long long>();}
+        /// @brief retrieve data as array of strings
+        virtual boost::shared_array<std::string> asStrings() const {return as<std::string>();}
         virtual const boost::shared_array<float> asConstFloat() const {return as<float>();}
         virtual boost::shared_array<float> asFloat() const {return as<float>();}
         virtual const boost::shared_array<double> asConstDouble() const {return as<double>();}
@@ -132,11 +165,11 @@ namespace MetNoFimex
         virtual std::string asString(std::string separator = "") const;
 
 
-        virtual double getDouble(size_t pos) {return static_cast<double>(theData[pos]);}
-        virtual long long getLongLong(size_t pos) {return static_cast<long long>(theData[pos]);}
-        virtual void setValue(size_t pos, double val) {theData[pos] = static_cast<C>(val);}
+        virtual double getDouble(size_t pos) {return data_caster<double, C>()(theData[pos]);}
+        virtual long long getLongLong(size_t pos) {return data_caster<long long, C>()(theData[pos]);}
+        virtual void setValue(size_t pos, double val) {theData[pos] = data_caster<C, double>()(val);}
         virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
-        virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, static_cast<C>(val));}
+        virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, data_caster<C, double>()(val));}
         virtual DataPtr clone() const {return DataPtr(new DataImpl<C>(*this));}
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
@@ -234,6 +267,8 @@ namespace MetNoFimex
     void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
     template<>
     void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<std::string>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 
     /**
      * recursively copy data by moving the newData and orgData pointers forward and copy the data at the current position
@@ -302,7 +337,7 @@ namespace MetNoFimex
         size_t dist = std::distance(begin, end);
         if ((dist + dataStartPos) > length)
             throw CDMException("dataPos " + type2string(dist+dataStartPos) + " >= dataLength " + type2string(length));
-        std::transform(begin, end, &theData[dataStartPos], staticCast<C>());
+        std::transform(begin, end, &theData[dataStartPos], data_caster<C, typename InputIterator::value_type>());
     }
 
     template<typename OUT, typename IN>
@@ -335,10 +370,17 @@ namespace MetNoFimex
         case CDM_UINT64: data = DataPtr(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
         case CDM_FLOAT: data = DataPtr(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
         case CDM_DOUBLE: data = DataPtr(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_STRING: throw CDMException("cannot convert string datatype"); break;
+        case CDM_STRING: throw CDMException("cannot convert CDM_STRING datatype"); break;
+        case CDM_STRINGS: throw CDMException("cannot convert CDM_STRINGS datatype"); break;
         case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
         }
         return data;
+    }
+
+    template<>
+    DataPtr DataImpl<std::string>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
+    {
+        throw CDMException("cannot convert string datatype");
     }
 
     template<typename C>
@@ -356,16 +398,23 @@ namespace MetNoFimex
         case CDM_UINT64: data = DataPtr(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
         case CDM_FLOAT: data = DataPtr(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
         case CDM_DOUBLE: data = DataPtr(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_STRING: throw CDMException("cannot convert string datatype"); break;
+        case CDM_STRING: throw CDMException("cannot convert CDM_STRING datatype"); break;
+        case CDM_STRINGS: throw CDMException("cannot convert CDM_STRINGS datatype"); break;
         case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
         }
         return data;
     }
 
+    template<>
+    DataPtr DataImpl<std::string>::convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitsConverter, CDMDataType newType, double newFill, double newScale, double newOffset)
+    {
+        throw CDMException("cannot convert string datatype");
+    }
+
     template<typename T1, typename T2>
     boost::shared_array<T1> ArrayTypeConverter<T1,T2>::operator()() {
         boost::shared_array<T1> outData(new T1[length]);
-        std::transform(&inData[0], &inData[length], &outData[0], staticCast<T2>());
+        std::transform(&inData[0], &inData[length], &outData[0], data_caster<T1, T2>());
         return outData;
     }
 

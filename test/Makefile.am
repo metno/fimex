@@ -4,6 +4,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
              testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
              testInterpolation2DataFillValue.sh.in testdata_int2data_in.nc testdata_int2data_ex.nc \
+             testNcString.sh.in ncStringInput.nc ncStringExpected.nc ncStringWriter.xml \
              nccmp.sh \
              inData.txt diana.setup felt2netcdf.cfg \
              cdmGribReaderConfig_newEarth.xml \
@@ -90,6 +91,7 @@ if HAVE_NETCDF
               testInterpolatorFill.sh testInterpolation2DataFillValue.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
+              testNcString.sh \
               testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 endif
 if HAVE_GRIBAPI
