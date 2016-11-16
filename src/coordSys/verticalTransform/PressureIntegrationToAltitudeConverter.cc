@@ -24,10 +24,10 @@ VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDM
 
     // air_temperature and/or pressureConverter define shape
     const std::string air_temperature = findVariableWithCS(rcdm, cs, "air_temperature");
-    const std::string specific_humidity = findVariableWithCS(rcdm, cs, "specific_humidity"); // no problem if empty
-    if (air_temperature.empty() || specific_humidity.empty())
+    if (air_temperature.empty())
         return VerticalConverterPtr();
 
+    const std::string specific_humidity = findVariableWithCS(rcdm, cs, "specific_humidity"); // no problem if empty
     std::vector<std::string> surface_shape(reader->getCDM().getVariable(air_temperature).getShape());
     erase_value(surface_shape, cs->getGeoZAxis()->getName());
     removeDimsWithLength1(rcdm, surface_shape);
