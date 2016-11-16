@@ -97,14 +97,15 @@ std::string CoordinateSystem::horizontalId() const
 {
     ConstAxisPtr xAxis = getGeoXAxis();
     ConstAxisPtr yAxis = getGeoYAxis();
-    string id;
-    if (xAxis.get() != 0) {
-        id = xAxis->getName() + ",";
+    if (xAxis.get() != 0 && yAxis.get() != 0) {
+        return xAxis->getName() + "," + yAxis->getName();
+    } else if (xAxis.get() != 0) {
+        return xAxis->getName();
+    } else if (yAxis.get() != 0) {
+        return yAxis->getName();
+    } else {
+        return std::string();
     }
-    if (yAxis.get() != 0) {
-        id += yAxis->getName();
-    }
-    return id;
 }
 
 
