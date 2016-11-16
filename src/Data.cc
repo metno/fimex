@@ -24,6 +24,8 @@
 #include "fimex/Data.h"
 #include "DataImpl.h"
 
+#include <boost/make_shared.hpp>
+
 namespace MetNoFimex
 {
 
@@ -66,6 +68,8 @@ DataPtr createData(size_t length, boost::shared_array<long long> array)
 DataPtr createData(size_t length, boost::shared_array<unsigned long long> array)
 { return createDataT(length, array); }
 
+DataPtr createData(size_t length, boost::shared_array<std::string> array)
+{ return createDataT(length, array); }
 
 DataPtr createDataPtr_(CDMDataType datatype, size_t length)
 {
@@ -81,6 +85,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
         case CDM_UINT:   return boost::shared_ptr<DataImpl<unsigned int> >(new DataImpl<unsigned int>(length));
         case CDM_USHORT: return boost::shared_ptr<DataImpl<unsigned short> >(new DataImpl<unsigned short>(length));
         case CDM_UCHAR:  return boost::shared_ptr<DataImpl<unsigned char> >(new DataImpl<unsigned char>(length));
+        case CDM_STRINGS: return boost::make_shared< DataImpl<std::string> >(length);
         case CDM_NAT: return DataPtr(new DataImpl<char>(length));
         default: break;
     }
@@ -107,6 +112,7 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
         case CDM_UINT:    { boost::shared_ptr<DataImpl<unsigned int> > mydata(new DataImpl<unsigned int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_USHORT:  { boost::shared_ptr<DataImpl<unsigned short> > mydata(new DataImpl<unsigned short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_UCHAR:   { boost::shared_ptr<DataImpl<unsigned char> > mydata(new DataImpl<unsigned char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_STRINGS: { boost::shared_ptr<DataImpl<std::string> > mydata(new DataImpl<std::string>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_NAT: return DataPtr(new DataImpl<char>(0));
         default: break;
     }
@@ -152,6 +158,10 @@ template<>
 void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
     copyData(startPos, data.asDouble(), data.size(), first, last);
 }
+template<>
+void DataImpl<std::string>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
+    copyData(startPos, data.asStrings(), data.size(), first, last);
+}
 
 // specializations of getDataType
 template<>
@@ -174,5 +184,7 @@ template<>
 CDMDataType DataImpl<float>::getDataType() const {return CDM_FLOAT;}
 template<>
 CDMDataType DataImpl<double>::getDataType() const {return CDM_DOUBLE;}
+template<>
+CDMDataType DataImpl<std::string>::getDataType() const {return CDM_STRINGS;}
 
 }

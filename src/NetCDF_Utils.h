@@ -49,6 +49,8 @@ public:
     bool isOpen;
     pid_t pid;
     void reopen_if_forked();
+    bool supports_nc_string() const
+      { return format == NC_FORMAT_NETCDF4; }
 };
 
 

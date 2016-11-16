@@ -228,6 +228,7 @@ AC_CONFIG_FILES([test/testVerticalInterpolator.sh],[chmod +x test/testVerticalIn
 AC_CONFIG_FILES([test/testVerticalInterpolator2.sh],[chmod +x test/testVerticalInterpolator2.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolatorHeight.sh],[chmod +x test/testVerticalInterpolatorHeight.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolatorOceanSG2ToDepth.sh],[chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh])
+AC_CONFIG_FILES([test/testNcString.sh],[chmod +x test/testNcString.sh])
 AC_CONFIG_FILES([test/testInterpolation2DataFillValue.sh],[chmod +x test/testInterpolation2DataFillValue.sh])
 AC_CONFIG_FILES([test/testQEmask.xml])
 AC_CONFIG_FILES([test/testQualityExtractorFimex.sh],[chmod +x test/testQualityExtractorFimex.sh])

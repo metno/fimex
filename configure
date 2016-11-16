@@ -26214,6 +26214,8 @@ ac_config_files="$ac_config_files test/testVerticalInterpolatorHeight.sh"
 
 ac_config_files="$ac_config_files test/testVerticalInterpolatorOceanSG2ToDepth.sh"
 
+ac_config_files="$ac_config_files test/testNcString.sh"
+
 ac_config_files="$ac_config_files test/testInterpolation2DataFillValue.sh"
 
 ac_config_files="$ac_config_files test/testQEmask.xml"
@@ -27505,6 +27507,7 @@ do
     "test/testVerticalInterpolator2.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator2.sh" ;;
     "test/testVerticalInterpolatorHeight.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorHeight.sh" ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorOceanSG2ToDepth.sh" ;;
+    "test/testNcString.sh") CONFIG_FILES="$CONFIG_FILES test/testNcString.sh" ;;
     "test/testInterpolation2DataFillValue.sh") CONFIG_FILES="$CONFIG_FILES test/testInterpolation2DataFillValue.sh" ;;
     "test/testQEmask.xml") CONFIG_FILES="$CONFIG_FILES test/testQEmask.xml" ;;
     "test/testQualityExtractorFimex.sh") CONFIG_FILES="$CONFIG_FILES test/testQualityExtractorFimex.sh" ;;
@@ -29156,6 +29159,7 @@ _LT_EOF
     "test/testVerticalInterpolator2.sh":F) chmod +x test/testVerticalInterpolator2.sh ;;
     "test/testVerticalInterpolatorHeight.sh":F) chmod +x test/testVerticalInterpolatorHeight.sh ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh":F) chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh ;;
+    "test/testNcString.sh":F) chmod +x test/testNcString.sh ;;
     "test/testInterpolation2DataFillValue.sh":F) chmod +x test/testInterpolation2DataFillValue.sh ;;
     "test/testQualityExtractorFimex.sh":F) chmod +x test/testQualityExtractorFimex.sh ;;
     "test/testMerger.sh":F) chmod +x test/testMerger.sh ;;

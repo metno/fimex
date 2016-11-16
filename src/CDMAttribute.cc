@@ -140,6 +140,12 @@ void CDMAttribute::initDataByArray(const std::vector<std::string>& values)
         *this = CDMAttribute(name, join(values.begin(), values.end(), " "));
         break;
     }
+    case CDM_STRINGS: {
+        boost::shared_array<std::string> array(new std::string[values.size()]);
+        std::copy(values.begin(), values.end(), &array[0]);
+        data = createData(values.size(), array);
+        break;
+    }
     default: {
         throw CDMException("Unknown type to generate attribute " + name);
     }

@@ -534,6 +534,24 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap) {
                 ncCheck(nc_put_att_double(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asDouble().get() ));
                 break;
 #ifdef NC_NETCDF4
+            case CDM_STRINGS: {
+                DataPtr attrData = attr.getData();
+                const size_t attrLen = attrData->size();
+                boost::shared_array<std::string> svals = attrData->asStrings();
+                if (ncFile->supports_nc_string()) {
+                    boost::shared_array<const char*> cvals(new const char*[attrLen]);
+                    for (size_t i=0; i<attrLen; ++i)
+                        cvals[i] = svals[i].c_str();
+                    ncCheck(nc_put_att(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attrLen, &cvals[0]));
+                } else if (attrLen == 1) {
+                    // convert 1 string to char attribute
+                    const std::string& s0 = svals[0];
+                    ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), s0.size(), s0.c_str()));
+                } else {
+                    throw CDMException("cannot write CDM_STRINGS with more than 1 entry to this NetCDF format for attribute '" + attr.getName() + "'");
+                }
+                break;
+            }
             case CDM_UCHAR:
                 ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asUChar().get() ));
                 break;
