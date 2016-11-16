@@ -28,6 +28,7 @@
 #define COORDSYSIMPL_H_
 
 #include <vector>
+#include <set>
 #include <string>
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/Projection.h"
@@ -38,8 +39,8 @@ namespace MetNoFimex {
 struct CoordSysImpl {
     std::string conventionName_;
     bool isSimpleSpatialGridded_;
-    std::vector<std::string> isCSForVec_;
-    std::vector<std::string> isCompleteVec_;
+    std::set<std::string> isCSForVars_;
+    std::set<std::string> isCompleteVars_;
     std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
     std::vector<boost::shared_ptr<const CoordinateAxis> > auxiliaryAxes_;
     std::set<std::string> dependencyVars_;

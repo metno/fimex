@@ -120,53 +120,39 @@ void CoordinateSystem::setConventionName(const std::string& conventionName)
     pimpl_->conventionName_ = conventionName;
 }
 
-// search a string in a vector
-inline bool isStringInVector(const vector<string>& vec, const std::string & str)
+// search a string in a set
+inline bool set_contains(const set<string>& s, const std::string & str)
 {
-    return find(vec.begin(), vec.end(), str) != vec.end();
+    return s.find(str) != s.end();
 }
 
-// add/remove a string to a vector, avoid doubles
-inline void setStringToVector(vector<string>& vec, const std::string& str, bool set)
+// add/remove a string to a set
+inline void set_insert_erase(set<string>& s, const std::string& str, bool set)
 {
-    vector<string>::iterator vecIt = find(vec.begin(), vec.end(), str);
-    if (vecIt != vec.end()) { // str exists
-        if (set) {
-            // nothing required, already there
-        } else {
-            // remove varName
-            vec.erase(vecIt);
-        }
-    } else {
-        if (set) {
-            vec.push_back(str);
-        } else {
-            // not there, nothing to remove
-        }
-    }
+    if (set)
+        s.insert(str);
+    else
+        s.erase(str);
 }
 
 bool CoordinateSystem::isComplete(const std::string & varName) const
 {
-    return isStringInVector(pimpl_->isCompleteVec_, varName);
+    return set_contains(pimpl_->isCompleteVars_, varName);
 }
-
 
 void CoordinateSystem::setComplete(const std::string & varName, bool set)
 {
-    setStringToVector(pimpl_->isCompleteVec_, varName, set);
+    set_insert_erase(pimpl_->isCompleteVars_, varName, set);
 }
-
-
 
 bool CoordinateSystem::isCSFor(const std::string & varName) const
 {
-    return isStringInVector(pimpl_->isCSForVec_, varName);
+    return set_contains(pimpl_->isCSForVars_, varName);
 }
 
 void CoordinateSystem::setCSFor(const std::string & varName, bool set)
 {
-    setStringToVector(pimpl_->isCSForVec_, varName, set);
+    set_insert_erase(pimpl_->isCSForVars_, varName, set);
 }
 
 bool CoordinateSystem::isCSAndCompleteFor(const std::string& varName) const
