@@ -1677,7 +1677,7 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         da = ah[k+1]- ah[k];
         db = bh[k+1]- bh[k];
         if (MIFI_DEBUG)
-            fprintf(stderr, "k = %d, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
+            fprintf(stderr, "k = %lu, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
         for (size_t j = 0; j < ny; ++j) {
             for (size_t i = 0; i < nx; ++i) {
                 double pm = ah[k]   + bh[k]*ps[i+j*nx];
@@ -1689,7 +1689,7 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         }
     }
     if (MIFI_DEBUG)
-        fprintf(stderr, "k = %d, ah = %f, bh= %f\n", nz, ah[nz], bh[nz]);
+        fprintf(stderr, "k = %lu, ah = %f, bh= %f\n", nz, ah[nz], bh[nz]);
 
     if (MIFI_DEBUG)
         fprintf(stderr, "vertical integration of hydrostatic equation\n");
