@@ -41,13 +41,14 @@ const std::string& getCSVarFromCDM_(const CDM& cdm, boost::shared_ptr<const Coor
 {
     const CDM::VarVec& vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-        if (cs->isCSFor(v->getName()) && cs->isComplete(v->getName())) {
+        if (cs->isCSAndCompleteFor(v->getName())) {
             // return first variable
             return v->getName();
         }
     }
     throw CDMException("no variable belonging to CoordinateSystem found in CoordinateSystem for CoordinateSystemSliceBuilder");
 }
+
 CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
 : SliceBuilder(cdm, getCSVarFromCDM_(cdm, cs)), cs_(cs)
 {

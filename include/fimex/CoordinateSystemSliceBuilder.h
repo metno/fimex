@@ -48,7 +48,7 @@ class CoordinateSystemSliceBuilder: public MetNoFimex::SliceBuilder
 {
 public:
     CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
-    virtual ~CoordinateSystemSliceBuilder() {};
+    virtual ~CoordinateSystemSliceBuilder() {}
 
     /**
      * Get the types of the dimensions.
