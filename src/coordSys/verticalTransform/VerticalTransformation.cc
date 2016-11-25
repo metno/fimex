@@ -92,6 +92,7 @@ VerticalConverterPtr VerticalTransformation::getAltitudeConverter(CDMReaderPtr r
     if (VerticalConverterPtr c = PressureIntegrationToAltitudeConverter::createConverter(reader, cs, pressure))
         return c;
 
+    LOG4FIMEX(logger, Logger::WARN, "unable to use anything better than standard atmosphere to derive altitude from pressure");
     return PressureToStandardAltitudeConverter::createConverter(reader, cs, pressure);
 }
 
