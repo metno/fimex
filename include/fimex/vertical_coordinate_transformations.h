@@ -252,6 +252,9 @@ extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const 
 /**
  * convert the vertical pressure change omega to vertical wind-speed using omega = - rho * g * w
  *
+ * Even though we write here that omega and p should be in Pa/s or Pa, they actually only need to be
+ * in the same unit, e.g. it is also okay to have both in hPa/s and hPa.
+ *
  * @param n size of the array omega, p, t, w
  * @param omega vertical flow in Pa/s
  * @param p pressure in Pa
