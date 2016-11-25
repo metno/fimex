@@ -94,20 +94,17 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
     set<string> dimsVars;
     for (set<string>::iterator sit = variables.begin(); sit != variables.end(); ++sit) {
         if (cdm.hasVariable(*sit)) {
-            vector<string> shape = cdm.getVariable(*sit).getShape();
-            for (vector<string>::iterator shapeIt = shape.begin(); shapeIt != shape.end(); ++shapeIt) {
+            const vector<string>& shape = cdm.getVariable(*sit).getShape();
+            for (vector<string>::const_iterator shapeIt = shape.begin(); shapeIt != shape.end(); ++shapeIt) {
                 if (cdm.hasVariable(*shapeIt)) {
                     dimsVars.insert(*shapeIt);
                 }
             }
         }
     }
-    size_t count = 0;
+    bool inserted = false;
     for (set<string>::iterator dIt = dimsVars.begin(); dIt != dimsVars.end(); ++dIt) {
-        if (variables.find(*dIt) == variables.end()) {
-            variables.insert(*dIt);
-            count++;
-        }
+        inserted |= variables.insert(*dIt).second;
     }
 
 
@@ -118,14 +115,11 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
         if (cs.get()) {
             set<string> csDepVars = cs->getDependencyVariables();
             for (set<string>::iterator dIt = csDepVars.begin(); dIt != csDepVars.end(); ++dIt) {
-                if (variables.find(*dIt) == variables.end()) {
-                    variables.insert(*dIt);
-                    count++;
-                }
+                inserted |= variables.insert(*dIt).second;
             }
         }
     }
-    if (count > 0) {
+    if (inserted) {
         addAuxiliary(variables, cdm, coordSys);
     }
 }
