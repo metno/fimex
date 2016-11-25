@@ -7,7 +7,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testNcString.sh.in ncStringInput.nc ncStringExpected.nc ncStringWriter.xml \
              nccmp.sh \
              inData.txt diana.setup felt2netcdf.cfg \
-             cdmGribReaderConfig_newEarth.xml \
+             cdmGribReaderConfig_newEarth.xml cdmGribWriterConfig_append.xml \
              felt2nc_variables_level1000.xml \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
              satellite_cma.nc \
