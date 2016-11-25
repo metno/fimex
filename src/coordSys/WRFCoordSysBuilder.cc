@@ -467,7 +467,14 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
 }
 std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {
+#if 0
+    // this will cause a failed assert(reader != 0)
     return wrfListCoordinateSystems(cdm, boost::shared_ptr<CDMReader>());
+#else
+    LOG4FIMEX(logger, Logger::ERROR,
+            "cannot list WRF coordinate systems from a CDM, please pass a CDMReader");
+    return std::vector<boost::shared_ptr<const CoordinateSystem> >();
+#endif
 }
 
 std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
