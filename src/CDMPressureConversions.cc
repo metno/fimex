@@ -224,6 +224,7 @@ DataPtr ThetaTemperatureConverter::getDataSlice(size_t unLimDimPos)
     boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
 
+    const float add_offset = reader_->getCDM().getAddOffset(theta_);
     boost::shared_array<float> thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
 
     const float cp = 1004.; // J/kgK
@@ -233,7 +234,7 @@ DataPtr ThetaTemperatureConverter::getDataSlice(size_t unLimDimPos)
     const float Rcp = R/cp;
     for (size_t i = 0; i < size; i++) {
         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
-        thetaValues[i] *= pow(pressureValues[i]*psX1, Rcp);
+        thetaValues[i] = ((thetaValues[i]+add_offset)*pow(pressureValues[i]*psX1, Rcp))-add_offset;
     }
     return createData(size, thetaValues);
 }
