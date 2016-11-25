@@ -650,11 +650,11 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
                             (variableTypeChanges[varName] != CDM_NAT)) {
                         double oldFill = cdmReader->getCDM().getFillValue(varName);
-                        double oldScale = getOldAttribute(varName, "scale_factor", 1.);
-                        double oldOffset = getOldAttribute(varName, "add_offset", 0.);
+                        double oldScale = cdmReader->getCDM().getScaleFactor(varName);
+                        double oldOffset = cdmReader->getCDM().getAddOffset(varName);
                         double newFill = cdm.getFillValue(varName);
-                        double newScale = getNewAttribute(varName, "scale_factor", 1.);
-                        double newOffset = getNewAttribute(varName, "add_offset", 0.);
+                        double newScale = cdm.getScaleFactor(varName);
+                        double newOffset = cdm.getAddOffset(varName);
 
                         // changes of the units
                         double unitSlope = 1.;
@@ -662,8 +662,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                         std::string oldUnit;
                         std::string newUnit;
                         try {
-                            oldUnit = cdmReader->getCDM().getAttribute(varName, "units").getData()->asString();
-                            newUnit = getAttribute(varName, "units").getData()->asString();
+                            oldUnit = cdmReader->getCDM().getUnits(varName);
+                            newUnit = cdm.getUnits(varName);
                             if (oldUnit != newUnit) {
                                 units.convert(oldUnit, newUnit, unitSlope, unitOffset);
                             }

@@ -354,7 +354,7 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
             verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
         } else if (cdm.getAttribute(verticalAxis, "units", attr)) {
             // units compatible to Pa or m
-            std::string unit = attr.getData()->asString();
+            std::string unit = attr.getStringValue();
             Units units;
             if (units.areConvertible(unit, "m")) {
                 verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
@@ -396,18 +396,11 @@ DataPtr GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(const std::string&
     GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "bitMapIndicator", 1), "setting bitmap");
 
-    CDMAttribute attr;
-    double scale = 1.;
-    double offset = 0.;
-    if (cdm.getAttribute(varName, "scale_factor", attr)) {
-        scale = attr.getData()->asDouble()[0];
-    }
-    if (cdm.getAttribute(varName, "add_offset", attr)) {
-        offset = attr.getData()->asDouble()[0];
-    }
+    double scale = cdm.getScaleFactor(varName);
+    double offset = cdm.getAddOffset(varName);
     // scale and offset by units
-    if (cdm.getAttribute(varName, "units", attr)) {
-        std::string unit = attr.getData()->asString();
+    const std::string unit = cdm.getUnits(varName);
+    if (!unit.empty()) {
         xmlNodePtr node = getNodePtr(varName, levelValue);
         std::string gUnit = getXmlProp(node, "units");
         if (gUnit != "") {

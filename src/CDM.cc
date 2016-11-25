@@ -57,9 +57,9 @@ public:
     virtual ~CDMCompatibleLatLongUnit() {}
     bool operator() (const std::string& varName) const {
         try {
-            const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
-            std::string testUnit(unitAttr.getData()->asString());
-            if (testUnit == "") return false;
+            std::string testUnit = cdm.getUnits(varName);
+            if (testUnit.empty())
+                return false;
             return compatibleDegrees.find(testUnit) != compatibleDegrees.end();
         } catch (CDMException& e) {
             // varName doesn't have units
@@ -667,8 +667,8 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
         }
     }
     // units and values
-    xAxisUnits = getAttribute(xAxis, "units").getStringValue();
-    yAxisUnits = getAttribute(yAxis, "units").getStringValue();
+    xAxisUnits = getUnits(xAxis);
+    yAxisUnits = getUnits(yAxis);
 
     return retVal;
 }
@@ -689,14 +689,14 @@ void CDM::generateProjectionCoordinates(boost::shared_ptr<const Projection> proj
     size_t yDimLength = getDimension(yDim).getLength();
     assert(xDimLength == xVar.getData()->size());
     assert(yDimLength == yVar.getData()->size());
-    std::string xUnits = getAttribute(xDim, "units").getData()->asString();
+    std::string xUnits = getUnits(xDim);
     if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         boost::shared_array<double> newXData(new double[xDimLength]);
         std::transform(&xData[0], &xData[0]+xDimLength, &newXData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
         xData = newXData;
     }
-    std::string yUnits = getAttribute(yDim, "units").getData()->asString();;
+    std::string yUnits = getUnits(yDim);
     if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         boost::shared_array<double> newYData(new double[yDimLength]);

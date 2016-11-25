@@ -419,7 +419,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
             verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
         } else if (cdmReader->getCDM().getAttribute(verticalAxis, "units", attr)) {
             // units compatible to Pa or m
-            std::string unit = attr.getData()->asString();
+            std::string unit = attr.getStringValue();
             if (units.areConvertible(unit, "m")) {
                 verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
             } else if (units.areConvertible(unit, "Pa")) {
@@ -435,15 +435,8 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
         verticalAxisXPath += "[@standard_name=\"\"]";
     }
     // scale the original levels according to the cdm
-    double scale_factor = 1.;
-    double add_offset = 0.;
-    CDMAttribute attr;
-    if (cdm.getAttribute(verticalAxis, "scale_factor", attr)) {
-        scale_factor = attr.getData()->asDouble()[0];
-    }
-    if (cdm.getAttribute(verticalAxis, "add_offset", attr)) {
-        add_offset = attr.getData()->asDouble()[0];
-    }
+    double scale_factor = cdm.getScaleFactor(verticalAxis);
+    double add_offset = cdm.getAddOffset(verticalAxis);
     std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(scale_factor, add_offset));
 
 
@@ -467,10 +460,11 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
         // scale the levels from cf-units to grib-untis
         std::string gribUnits = getXmlProp(node, "units");
         if (gribUnits != "") {
+            CDMAttribute attr;
             if (cdm.getAttribute(verticalAxis, "units", attr)) {
                 double slope;
                 double offset;
-                units.convert(attr.getData()->asString(), gribUnits, slope, offset);
+                units.convert(attr.getStringValue(), gribUnits, slope, offset);
                 std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(slope, offset));
             }
         }

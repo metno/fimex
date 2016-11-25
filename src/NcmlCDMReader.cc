@@ -540,24 +540,12 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
     if (dtIt != variableTypeChanges.end()) {
         double orgFill = orgCDM.getFillValue(orgVarName);
-        CDMAttribute attr;
-        double orgScale = 1.;
-        double orgOffset = 0.;
-        if (orgCDM.getAttribute(orgVarName, "scale_factor", attr)) {
-            orgScale = attr.getData()->asDouble()[0];
-        }
-        if (orgCDM.getAttribute(orgVarName, "add_offset", attr)) {
-            orgOffset = attr.getData()->asDouble()[0];
-        }
+        double orgScale = orgCDM.getScaleFactor(orgVarName);
+        double orgOffset = orgCDM.getAddOffset(orgVarName);
+
         double newFill = cdm_->getFillValue(varName);
-        double newScale = 1.;
-        double newOffset = 0.;
-        if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-            newScale = attr.getData()->asDouble()[0];
-        }
-        if (cdm_->getAttribute(varName, "add_offset", attr)) {
-            newOffset = attr.getData()->asDouble()[0];
-        }
+        double newScale = cdm_->getScaleFactor(varName);
+        double newOffset = cdm_->getAddOffset(varName);
 
         data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
     }
@@ -618,24 +606,12 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
     if (dtIt != variableTypeChanges.end()) {
         const CDM& orgCDM = dataReader->getCDM();
         double orgFill = orgCDM.getFillValue(orgVarName);
-        CDMAttribute attr;
-        double orgScale = 1.;
-        double orgOffset = 0.;
-        if (orgCDM.getAttribute(orgVarName, "scale_factor", attr)) {
-            orgScale = attr.getData()->asDouble()[0];
-        }
-        if (orgCDM.getAttribute(orgVarName, "add_offset", attr)) {
-            orgOffset = attr.getData()->asDouble()[0];
-        }
+        double orgScale = orgCDM.getScaleFactor(orgVarName);
+        double orgOffset = orgCDM.getAddOffset(orgVarName);
+
         double newFill = cdm_->getFillValue(varName);
-        double newScale = 1.;
-        double newOffset = 0.;
-        if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-            newScale = attr.getData()->asDouble()[0];
-        }
-        if (cdm_->getAttribute(varName, "add_offset", attr)) {
-            newOffset = attr.getData()->asDouble()[0];
-        }
+        double newScale = cdm_->getScaleFactor(varName);
+        double newOffset = cdm_->getAddOffset(varName);
 
         data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
     }

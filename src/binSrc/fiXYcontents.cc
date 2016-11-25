@@ -320,9 +320,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
             if (cdm.getAttribute(*varIt, "standard_name", attr)) {
                 stdName = attr.getStringValue();
             }
-            if (cdm.getAttribute(*varIt, "units", attr)) {
-                unit = attr.getStringValue();
-            }
+            unit = cdm.getUnits(*varIt);
             printf("Var: %17s %17s %10s %15s %ldx%ld: %ld\n", varIt->c_str(), stdName.c_str(), unit.c_str(), boost::posix_time::to_iso_string(refTime).c_str(), xSize, ySize, csbs.size());
             boost::shared_array<float> tArray, zArray;
             if (tData.get() != 0) tArray = tData->asFloat();
