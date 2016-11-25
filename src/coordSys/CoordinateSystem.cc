@@ -92,6 +92,17 @@ CoordinateSystem::ConstAxisPtr findTypeInAxes(CoordinateAxis::AxisType type, Coo
     return CoordinateSystem::ConstAxisPtr();
 }
 
+void removeAxis(CoordinateSystem::ConstAxisList& axes, const std::string& axisname)
+{
+    CoordinateSystem::ConstAxisList::iterator found = axes.begin();
+    while (true) {
+        found = find_if(found, axes.end(), CDMNameEqualPtr(axisname));
+        if (found == axes.end())
+            break;
+        found = axes.erase(found);
+    }
+}
+
 } // anonymous namespace
 
 static LoggerPtr logger = getLogger("fimex.coordSys.CoordinateSystem");
@@ -292,11 +303,7 @@ void CoordinateSystem::setAxis(ConstAxisPtr axis)
     assert(axis.get() != 0);
     ConstAxisList& v = pimpl_->axes_;
     // remove axis with same name
-    ConstAxisList::iterator found = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
-    while (found != v.end()) {
-        v.erase(found);
-        found = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
-    }
+    removeAxis(v, axis->getName());
     // add new axis
     if (axis->getAxisType() != CoordinateAxis::Undefined &&
         hasTypeInAxes(axis->getAxisType(), v)) {
@@ -308,11 +315,7 @@ void CoordinateSystem::setAxis(ConstAxisPtr axis)
     // remove auxiliary axes
     ConstAxisList& va = pimpl_->auxiliaryAxes_;
     // remove axis with same name
-    ConstAxisList::iterator f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
-    while (f != va.end()) {
-        va.erase(f);
-        f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
-    }
+    removeAxis(va, axis->getName());
 }
 
 void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
@@ -333,11 +336,7 @@ void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
 
     ConstAxisList& va = pimpl_->auxiliaryAxes_;
     // remove axis with same name
-    ConstAxisList::iterator f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
-    while (f != va.end()) {
-        va.erase(f);
-        f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
-    }
+    removeAxis(va, axis->getName());
     va.push_back(axis);
 }
 
