@@ -44,6 +44,8 @@
 namespace MetNoFimex
 {
 
+static LoggerPtr logger = getLogger("fimex.WRFCoordSysBuilder");
+
 WRFCoordSysBuilder::WRFCoordSysBuilder()
 {
 }
@@ -78,7 +80,7 @@ void WRFCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> re
             if (yv.isSpatialVector()) continue;
             xv.setAsSpatialVector(yv.getName(), "x");
             yv.setAsSpatialVector(xv.getName(), "y");
-            LOG4FIMEX(getLogger("fimex.WRFCoordSysBuilder"), Logger::INFO, "making "<< xv.getName() << "," << yv.getName() << " a vector");
+            LOG4FIMEX(logger, Logger::INFO, "making "<< xv.getName() << "," << yv.getName() << " a vector");
         }
     }
 }
@@ -99,7 +101,6 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     assert(reader.get() != 0);
     // reader might be 0
     using namespace std;
-    LoggerPtr logger = getLogger("fimex.coordSys.WRFCoordSysBuilder");
     std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys;
     if (!WRFCoordSysBuilder().isMine(cdm))
         return coordSys;
