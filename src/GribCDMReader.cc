@@ -927,8 +927,10 @@ void GribCDMReader::initAddProjection()
     // gridDefinition -> gridType
     map<GridDefinition, string> gridDefs;
     for (vector<GribFileMessage>::const_iterator idx = p_->indices.begin(); idx != p_->indices.end(); ++idx) {
-        gridDefs[idx->getGridDefinition()] = idx->getTypeOfGrid();
-        LOG4FIMEX(logger, Logger::DEBUG,"found gridDef:" << idx->getGridDefinition().id());
+        bool inserted = gridDefs.insert(std::make_pair(idx->getGridDefinition(), idx->getTypeOfGrid())).second;
+        if (inserted) {
+            LOG4FIMEX(logger, Logger::DEBUG,"found gridDef:" << idx->getGridDefinition().id());
+        }
     }
     assert(!gridDefs.empty());
 
