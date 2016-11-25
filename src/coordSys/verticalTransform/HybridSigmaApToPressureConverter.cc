@@ -26,9 +26,36 @@ VerticalConverterPtr HybridSigmaApToPressureConverter::createConverter(CDMReader
 
 std::vector<std::string> HybridSigmaApToPressureConverter::getShape() const
 {
+    const CDM& rcdm = reader_->getCDM();
     // combine shapes of a, b (length = height) and ps (other dimensions)
-    std::vector<std::string> shape = reader_->getCDM().getVariable(ps_).getShape();
-    shape[2] = cs_->getGeoZAxis()->getName(); // FIXME this is a crazy hack!
+    std::vector<std::string> shape = rcdm.getVariable(ps_).getShape();
+
+    bool have_z = false;
+    if (cs_->getGeoZAxis()) {
+        const std::string& cs_z_name = cs_->getGeoZAxis()->getName();
+
+        // FIXME listCoordinateSystems probably makes this very slow ...
+        std::vector<boost::shared_ptr<const CoordinateSystem> > css = listCoordinateSystems(reader_);
+        boost::shared_ptr<const CoordinateSystem> cs_ps = findCompleteCoordinateSystemFor(css, ps_);
+        if (cs_ps && cs_ps->getGeoZAxis()) {
+            const std::string& ps_z_name = cs_ps->getGeoZAxis()->getName();
+            std::vector<std::string>::iterator it_z = std::find(shape.begin(), shape.end(), ps_z_name);
+            if (it_z != shape.end()) {
+                *it_z = cs_z_name;
+                have_z = true;
+            }
+        }
+        if (!have_z) {
+            std::vector<std::string>::iterator it_z = shape.end();
+            if (rcdm.hasUnlimitedDim(rcdm.getVariable(ps_)))
+                --it_z;
+            shape.insert(it_z, cs_z_name);
+            have_z = true;
+        }
+    }
+    if (!have_z)
+        throw CDMException("no vertical axis for HybridSigmaApToPressureConverter shape");
+
     return shape;
 }
 
