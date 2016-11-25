@@ -1,4 +1,8 @@
-  * 2016-05-23 fimex-0.63.2
+  * 2016-11-25 fimex-0.63.3
+    * new data type CDM_STRINGS corresponding to NetCDF NC_STRING
+    * added grib2 codes to config
+    * grib output append
+  * 2016-09-27 fimex-0.63.2
     * bugfixes in CDMPressureConversions
     * bugfixes in CDMInterpolator / CDMVerticalInterpolator
   * 2016-05-23 fimex-0.63.1

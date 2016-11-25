@@ -261,7 +261,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlAggregationReader.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc \
+	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
 	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
@@ -741,7 +741,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlAggregationReader.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc \
+	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
 	$(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4) $(am__append_6)

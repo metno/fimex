@@ -1,3 +1,9 @@
+fimex (0.63.3-1precise+met1) lucid; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Fri, 25 Nov 2016 08:00:08 +0200
+
 fimex (0.63.2-1precise+met1) precise; urgency=low
 
   * new fimex version
