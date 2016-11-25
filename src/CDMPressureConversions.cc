@@ -414,7 +414,7 @@ DataPtr OmegaVerticalConverter::getDataSlice(size_t unLimDimPos)
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
     boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData); // unit: hPa
     const size_t size = pressureData->size();
-    VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(reader_->getDataSlice(temperature_, unLimDimPos), size, temperature_));
+    VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_));
     VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(omega_, "hPa/s", unLimDimPos), size, omega_));
 
     convert_omega_to_vertical_wind(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
