@@ -156,17 +156,8 @@ DataPtr CDMReader::getData(const std::string& varName)
 
 void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset) const
 {
-    // init
-    scale = 1.;
-    offset = 0.;
-
-    CDMAttribute attr;
-    if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-        scale = attr.getData()->asDouble()[0];
-    }
-    if (cdm_->getAttribute(varName, "add_offset", attr)) {
-        offset = attr.getData()->asDouble()[0];
-    }
+    scale = cdm_->getScaleFactor(varName);
+    offset = cdm_->getAddOffset(varName);
 }
 
 // handle data scaling using add_offset, scale_factor and _FillValue from the varName variable

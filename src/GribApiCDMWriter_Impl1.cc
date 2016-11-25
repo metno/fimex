@@ -393,18 +393,11 @@ DataPtr GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string&
     // need bitmap to represent missing values in grib1
     GRIB_CHECK(grib_set_long(gribHandle.get(), "bitmapPresent", 1), "setting bitmap");
 
-    CDMAttribute attr;
-    double scale = 1.;
-    double offset = 0.;
-    if (cdm.getAttribute(varName, "scale_factor", attr)) {
-        scale = attr.getData()->asDouble()[0];
-    }
-    if (cdm.getAttribute(varName, "add_offset", attr)) {
-        offset = attr.getData()->asDouble()[0];
-    }
+    double scale = cdm.getScaleFactor(varName);
+    double offset = cdm.getAddOffset(varName);
     // scale and offset by units
-    if (cdm.getAttribute(varName, "units", attr)) {
-        std::string unit = attr.getData()->asString();
+    const std::string unit = cdm.getUnits(varName);
+    if (!unit.empty()) {
         xmlNodePtr node = getNodePtr(varName, levelValue);
         std::string gUnit = getXmlProp(node, "units");
         if (gUnit != "") {
