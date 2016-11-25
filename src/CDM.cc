@@ -531,6 +531,25 @@ double CDM::getValidMax(const std::string& varName) const
     return MIFI_UNDEFINED_D;
 }
 
+double CDM::getAddOffset(const std::string& varName) const
+{
+    CDMAttribute attr;
+    if (getAttribute(varName, "add_offset", attr)) {
+        return attr.getData()->asDouble()[0];
+    } else {
+        return 0;
+    }
+}
+
+double CDM::getScaleFactor(const std::string& varName) const
+{
+    CDMAttribute attr;
+    if (getAttribute(varName, "scale_factor", attr)) {
+        return attr.getData()->asDouble()[0];
+    } else {
+        return 1;
+    }
+}
 
 std::string CDM::getUnits(const std::string& varName) const
 {
