@@ -288,6 +288,20 @@ public:
     double getValidMax(const std::string& varName) const;
 
     /**
+     * find add_offset value for a variable
+     * @param varName
+     * @return double value of "add_offset" attribute, or 0 if there is no such attribute
+     */
+    double getAddOffset(const std::string& varName) const;
+
+    /**
+     * find scale_factor value for a variable
+     * @param varName
+     * @return double value of "scale_factor" attribute, or 1 if there is no such attribute
+     */
+    double getScaleFactor(const std::string& varName) const;
+
+    /**
      * get the value of the "units" attribute
      * @return unitsString or ""
      */
