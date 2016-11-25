@@ -286,7 +286,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                 // variable is coordinateAxis, i.e. it doesn't need a coordinateSystem
             } else {
                 set<string> axes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
-                set<string> coords = getCoordinateAxesNamesCF1_x(cdm, *varIt);
+                set<string> coords = getCoordinateNamesCF1_x(cdm, *varIt);
                 if (axes.size()) {
                     CoordinateSystem cs("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
@@ -316,8 +316,8 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         const CDM::VarVec& vars = cdm.getVariables();
         for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
             CoordinateSystem::ConstAxisList csAxesPtr = cit->second.getAxes();
-            vector<string> csAxes;
-            transform(csAxesPtr.begin(), csAxesPtr.end(), back_inserter(csAxes), getPtrName);
+            set<string> csAxes;
+            transform(csAxesPtr.begin(), csAxesPtr.end(), inserter(csAxes, csAxes.begin()), getPtrName);
             for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
                 set<string> varAxes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 // all csAxes part of varAxes
