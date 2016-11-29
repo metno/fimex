@@ -257,7 +257,6 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
     case MIFI_VINT_METHOD_NN: intFunc = &mifi_get_values_nearest_f; break;
-    default: assert(false); break;
     }
 
     const std::string& geoZi = cs->getGeoZAxis()->getName();
