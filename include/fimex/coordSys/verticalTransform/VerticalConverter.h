@@ -21,7 +21,7 @@ public:
     typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
-    virtual ~VerticalConverter() {}
+    virtual ~VerticalConverter();
 
     virtual std::vector<std::string> getShape() const = 0;
 

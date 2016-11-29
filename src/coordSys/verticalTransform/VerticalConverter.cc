@@ -3,6 +3,10 @@
 
 namespace MetNoFimex {
 
+VerticalConverter::~VerticalConverter()
+{
+}
+
 DataPtr BasicVerticalConverter::getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const
 {
     return DataPtr();
