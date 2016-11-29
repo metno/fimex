@@ -499,6 +499,10 @@ double CDM::getFillValue(const std::string& varName) const
 {
     CDMAttribute attr;
     if (getAttribute(varName, "_FillValue", attr)) {
+        CDMVariable var = getVariable(varName);
+        if (var.getDataType() != attr.getDataType())
+            throw CDMException("variable '" + varName + "' has type " + datatype2string(var.getDataType())
+                               + " and FillValue type " + datatype2string(attr.getDataType()));
         return attr.getData()->asDouble()[0];
     }
     if (hasVariable(varName)) {

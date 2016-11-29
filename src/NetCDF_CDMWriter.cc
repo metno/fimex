@@ -297,6 +297,8 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
         for (int i = 0; i < size; i++) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
+            CDMVariable& v = cdm.getVariable(name);
+            v.setDataType(type);
             variableTypeChanges[name] = type;
         }
     }
