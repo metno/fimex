@@ -41,6 +41,8 @@
 #include "CF1_xCoordSysBuilder.h"
 #include "WRFCoordSysBuilder.h"
 
+#include <boost/make_shared.hpp>
+
 namespace MetNoFimex
 {
 using namespace std;
@@ -101,6 +103,18 @@ void removeAxis(CoordinateSystem::ConstAxisList& axes, const std::string& axisna
             break;
         found = axes.erase(found);
     }
+}
+
+typedef boost::shared_ptr<CoordSysBuilder> CoordSysBuilderPtr;
+typedef std::vector<CoordSysBuilderPtr> builders_t;
+
+builders_t createBuilders()
+{
+    builders_t builders;
+    // supported conventions, 1st will be used as fallback
+    builders.push_back(boost::make_shared<CF1_xCoordSysBuilder>());
+    builders.push_back(boost::make_shared<WRFCoordSysBuilder>());
+    return builders;
 }
 
 } // anonymous namespace
@@ -460,14 +474,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     // the return value
     vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
 
-    vector<boost::shared_ptr<CoordSysBuilder> > builders;
-    // supported conventions
-    boost::shared_ptr<CoordSysBuilder> cfBuilder(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
-    builders.push_back(cfBuilder);
-    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
+    const builders_t builders = createBuilders();
 
     for (size_t i = 0; i < builders.size(); ++i) {
-        boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
+        CoordSysBuilderPtr builder = builders.at(i);
         if (builder->isMine(cdm)) {
             vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(cdm);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
@@ -476,9 +486,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
             LOG4FIMEX(logger, Logger::DEBUG, "no convention found for convention: " << builder->getName());
         }
     }
-    if (coordSystems.size() == 0) {
-        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking CF");
-        coordSystems = cfBuilder->listCoordinateSystems(cdm);
+    if (coordSystems.empty() && !builders.empty()) {
+        CoordSysBuilderPtr b0 = builders.front();
+        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
+        coordSystems = b0->listCoordinateSystems(cdm);
     }
 
     LOG4FIMEX(logger, Logger::DEBUG, "total conventions found: " << coordSystems.size());
@@ -490,14 +501,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
     // the return value
     vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
 
-    vector<boost::shared_ptr<CoordSysBuilder> > builders;
-    // supported conventions
-    boost::shared_ptr<CoordSysBuilder> cfBuilder(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
-    builders.push_back(cfBuilder);
-    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
+    const builders_t builders = createBuilders();
 
     for (size_t i = 0; i < builders.size(); ++i) {
-        boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
+        CoordSysBuilderPtr builder = builders.at(i);
         if (builder->isMine(reader->getCDM())) {
             vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(reader);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
@@ -506,9 +513,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
             LOG4FIMEX(logger, Logger::DEBUG, "no convention found for convention: " << builder->getName());
         }
     }
-    if (coordSystems.size() == 0) {
-        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking CF");
-        coordSystems = cfBuilder->listCoordinateSystems(reader);
+    if (coordSystems.empty() && !builders.empty()) {
+        CoordSysBuilderPtr b0 = builders.front();
+        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
+        coordSystems = b0->listCoordinateSystems(reader);
     }
 
     LOG4FIMEX(logger, Logger::DEBUG, "total conventions found: " << coordSystems.size());
@@ -517,15 +525,11 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
 
 void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
 {
-    vector<boost::shared_ptr<CoordSysBuilder> > builders;
-    // supported conventions
-    boost::shared_ptr<CoordSysBuilder> cfBuilder(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
-    builders.push_back(cfBuilder);
-    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
+    const builders_t builders = createBuilders();
 
     bool found = false;
     for (size_t i = 0; i < builders.size(); ++i) {
-        boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
+        CoordSysBuilderPtr builder = builders.at(i);
         if (builder->isMine(reader->getCDM())) {
             found = true;
             builder->enhanceVectorProperties(reader);
@@ -534,9 +538,10 @@ void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
             LOG4FIMEX(logger, Logger::DEBUG, "no convention found for convention: " << builder->getName());
         }
     }
-    if (!found) {
-        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking CF");
-        cfBuilder->enhanceVectorProperties(reader);
+    if (!found && !builders.empty()) {
+        CoordSysBuilderPtr b0 = builders.front();
+        LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
+        b0->enhanceVectorProperties(reader);
     }
 }
 
