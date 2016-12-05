@@ -220,7 +220,6 @@ bool CDM::renameVariable(const std::string& oldName, const std::string& newName)
         // variable not found, return false
         return false;
     }
-    return false;
 }
 
 bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const
