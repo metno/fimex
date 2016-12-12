@@ -587,6 +587,8 @@ extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
  */
 extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
 
+extern size_t mifi_nand2bad(double* posPtr, double* endPtr, double badVal);
+
 /**
  * check if the value is a nan
  *

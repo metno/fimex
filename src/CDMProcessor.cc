@@ -467,12 +467,21 @@ struct UnScaleOffset : public std::unary_function<double, T>
     }
 };
 
+static void replaceNanWith0(boost::shared_array<double> dp, size_t n)
+{
+    mifi_nand2bad(&dp[0], &dp[0]+n, 0);
+}
+
 // add d2 to d1 and return d1
-static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
+static void addDataP2Data(DataPtr& data, DataPtr& dataP, bool addingFirstTimeStep) {
     if ((data->size() != 0) && (dataP->size() != 0)) {
         assert(data->size() == dataP->size());
         boost::shared_array<double> d = data->asDouble();
         boost::shared_array<double> dp = dataP->asDouble();
+        if (addingFirstTimeStep) {
+            // in step 0, replace undef with 0
+            replaceNanWith0(dp, dataP->size());
+        }
         // this might modify the original data in the reader
         std::transform(&d[0], &d[0]+data->size(), &dp[0], &d[0], std::plus<double>());
         data = createData(data->size(), d);
@@ -533,13 +542,13 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
                     data = p_->sliceCache.data;
                 } else {
                     DataPtr dataP = p_->sliceCache.data;
-                    addDataP2Data(data, dataP);
+                    addDataP2Data(data, dataP, false);
                 }
             }
             // data contains last slice + eventually cache
             for (size_t i = start; i <= unLimDimPos-1; ++i) {
                 DataPtr dataP = p_->dataReader->getDataSlice(varName, i);
-                addDataP2Data(data, dataP);
+                addDataP2Data(data, dataP, i == 0);
             }
             // fill the cache
             p_->sliceCache.varName = varName;
@@ -557,6 +566,10 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
                 assert(data->size() == dataP->size());
                 boost::shared_array<double> d = data->asDouble();
                 boost::shared_array<double> dp = dataP->asDouble();
+                if (unLimDimPos == 1) {
+                    // in step 0, replace undef with 0
+                    replaceNanWith0(dp, dataP->size());
+                }
                 // this might modify the original data in the reader
                 std::transform(&d[0], &d[0]+data->size(), &dp[0], &d[0], std::minus<double>());
                 data = createData(data->size(), d);

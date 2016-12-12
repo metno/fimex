@@ -1785,6 +1785,16 @@ size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
     return 0;
 }
 
+size_t mifi_nand2bad(double* posPtr, double* endPtr, double badVal) {
+    if (!isnan(badVal)) {
+        while (posPtr != endPtr) {
+            *posPtr = (isnan(*posPtr)) ? badVal : *posPtr;
+            posPtr++;
+        }
+    }
+    return 0;
+}
+
 int mifi_isnanf(float val)
 {
     return isnan(val);
