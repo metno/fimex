@@ -524,7 +524,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
     // accumulation
     if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {
-        LOG4FIMEX(logger, Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
+        LOG4FIMEX(logger, Logger::DEBUG, varName << " at slice " << unLimDimPos << " accumulate");
         if (unLimDimPos > 0) { // cannot accumulate first
             size_t start = 0;
             if (p_->sliceCache.varName == varName && p_->sliceCache.ulimDimPos <= unLimDimPos) {
