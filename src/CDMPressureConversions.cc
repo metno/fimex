@@ -115,6 +115,7 @@ class Converter  {
 public:
     Converter(const std::string& varName)
         : varName_(varName) { }
+    virtual ~Converter();
 
     const std::string& variableName() const
         { return varName_; }
@@ -126,6 +127,10 @@ private:
 };
 typedef boost::shared_ptr<Converter> ConverterPtr;
 typedef std::vector<ConverterPtr> ConverterPtr_v;
+
+Converter::~Converter()
+{
+}
 
 // ------------------------------------------------------------------------------------------------
 
