@@ -246,11 +246,7 @@ void NcmlCDMReader::initVariableDataChange()
         if (name == "") throw CDMException("ncml-file "+ configId + " has no name for variable");
         if (cdm_->hasVariable(name)) {
             std::string values = getXmlContent(nodes->nodeTab[i]);
-            std::vector<std::string> tokens = tokenize(values, " \t\r\n");
-            std::vector<double> dvals;
-            dvals.reserve(tokens.size());
-            std::transform(tokens.begin(), tokens.end(),
-                    std::back_inserter(dvals), string2type<double>);
+            std::vector<double> dvals = tokenizeDotted<double>(values, " ,\t\r\n");
             CDMVariable& var = cdm_->getVariable(name);
             // check that no. of values == shape-size
             vector<string> dims = var.getShape();
