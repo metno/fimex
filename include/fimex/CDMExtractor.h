@@ -46,6 +46,16 @@ private:
     typedef std::map<std::string, std::vector<size_t> > DimSlicesMap;
     DimSlicesMap dimSlices_;
     /**
+     * Helper functions to read slices of slices from the input-reader. Slices might be build with reduce-dimension
+     * or similar, and then reduced further through the getDataSlice(string, SliceBuilder) interface. The slices should be
+     * joined before returning with the joinSlices static function.
+     *
+     * @param varName the variable name to fetch data from
+     * @param sb the request of the dataslice
+     * @param slices return value, list of subslices building all data requested
+     */
+    DataPtr getDataSlice_(const std::string& varName, const SliceBuilder& sb);
+    /**
      * all extractors need to have another Reader with input-data
      */
     CDMExtractor();
