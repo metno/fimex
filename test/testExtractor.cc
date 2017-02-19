@@ -103,6 +103,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
         BOOST_CHECK(precData1[mifi_3d_array_position(0,6,t,50,50,12)] == precData2[mifi_3d_array_position(0,3,t,2,4,12)]);
         BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(1,3,t,2,4,12)]);
     }
+    NetCDF_CDMWriter(extract, "test4.nc");
     BOOST_CHECK(true);
 
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
@@ -134,6 +135,37 @@ BOOST_AUTO_TEST_CASE( test_extract )
         BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(3,3,t,50,4,12)]);
     }
     BOOST_CHECK(true);
+
+    // slicebuilder along x
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
+    extract->reduceDimension("y", slices);
+    BOOST_CHECK(extract->getData("y")->size() == 4);
+    BOOST_CHECK(extract->getData("time")->size() == 12);
+    //cerr << extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0] << endl;
+    SliceBuilder sb(extract->getCDM(), "air_temperature");
+    sb.setStartAndSize("x", 80, 50);
+
+    DataPtr airTemp = extract->getDataSlice("air_temperature", sb);
+    BOOST_CHECK(airTemp->size() == 4*50*12);
+    precData2 = airTemp->asFloat();
+
+    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
+    for (size_t t = 0; t < 12; t++) {
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,0,t,50,50,12)] == precData2[mifi_3d_array_position(0,0,t,50,4,12)]);
+//        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(3,0,t,50,4,12)] << endl;
+//        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,50,4,12)] << endl;;
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,0,t,50,50,12)] == precData2[mifi_3d_array_position(3,0,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,1,t,50,50,12)] == precData2[mifi_3d_array_position(0,1,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,1,t,50,50,12)] == precData2[mifi_3d_array_position(3,1,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,3,t,50,50,12)] == precData2[mifi_3d_array_position(0,2,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,3,t,50,50,12)] == precData2[mifi_3d_array_position(3,2,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,6,t,50,50,12)] == precData2[mifi_3d_array_position(0,3,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(3,3,t,50,4,12)]);
+    }
+    BOOST_CHECK(true);
+
 
 
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
