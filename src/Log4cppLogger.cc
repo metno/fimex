@@ -29,8 +29,7 @@
 #include "fimex/Utils.h"
 #include "log4cpp/CategoryStream.hh"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace log4cpp;
 
@@ -43,9 +42,12 @@ Priority::Value logLevel2cppPriority(Logger::LogLevel level)
     case Logger::INFO: return Priority::INFO;
     case Logger::DEBUG: return Priority::DEBUG;
     case Logger::OFF: return Priority::NOTSET;
-    default: assert(false); break;
     }
-    return Priority::FATAL;
+}
+
+Log4cppLogger::Log4cppLogger(const std::string& className)
+    : log_(log4cpp::Category::getInstance(className))
+{
 }
 
 bool Log4cppLogger::isEnabledFor(Logger::LogLevel level)
@@ -53,12 +55,19 @@ bool Log4cppLogger::isEnabledFor(Logger::LogLevel level)
     Priority::Value prio = logLevel2cppPriority(level);
     return log_.isPriorityEnabled(prio);
 }
-void Log4cppLogger::forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
+
+void Log4cppLogger::log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
 {
-    using namespace std;
-    stringstream ss;
-    ss << message << " in " << filename << " at line " << lineNumber;
-    log_.getStream(logLevel2cppPriority(level)) << ss.str();
+    log_.getStream(logLevel2cppPriority(level))
+            << message
+            << " in " << filename
+            << " at line " << lineNumber;
+}
+
+LoggerImpl* Log4cppClass::loggerFor(Logger* logger, const std::string& className)
+{
+    remember(logger);
+    return new Log4cppLogger(className);
 }
 
 } /* namespace MetNoFimex */

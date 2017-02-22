@@ -27,9 +27,12 @@
 #ifndef LOG4CPPLOGGER_H_
 #define LOG4CPPLOGGER_H_
 
-#include "fimex/Logger.h"
+#ifdef HAVE_CONFIG_H
 #include "../config.h"
+#endif // HAVE_CONFIG_H
+
 #ifdef HAVE_LOG4CPP
+#include "fimex/Logger.h"
 #include "log4cpp/Appender.hh"
 #include "log4cpp/OstreamAppender.hh"
 #include "log4cpp/Layout.hh"
@@ -39,30 +42,35 @@
 #include <boost/shared_ptr.hpp>
 #include "log4cpp/Category.hh"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 log4cpp::Priority::Value logLevel2cppPriority(Logger::LogLevel level);
 
-class Log4cppLogger: public MetNoFimex::Logger
-{
+class Log4cppLogger : public LoggerImpl {
 public:
-    Log4cppLogger(const std::string& className) : Logger(className), log_(log4cpp::Category::getInstance(className)) {};
-    virtual ~Log4cppLogger() {};
+    Log4cppLogger(const std::string& className);
+
     /**
      * check if the loglevel of this logger is active
      */
-    virtual bool isEnabledFor(LogLevel level);
+    bool isEnabledFor(Logger::LogLevel level) /* override */;
+
     /**
-     * log (without checking) for this loglevel
+     * log for this loglevel
      * @param level log-level to log
      * @param message log-message
      * @param filename best retrieved with __FILE__
      * @param lineNumber best retrieved with __LINE__
      */
-    virtual void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
+    void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
+
 private:
     log4cpp::Category& log_;
+};
+
+class Log4cppClass : public LoggerClass {
+public:
+    LoggerImpl* loggerFor(Logger* logger, const std::string& className) /* override */;
 };
 
 } /* namespace MetNoFimex */

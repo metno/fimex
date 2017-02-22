@@ -23,47 +23,72 @@
 
 #include "fimex/Logger.h"
 #include "Log4cppLogger.h"
+
+#ifdef HAVE_CONFIG_H
 #include "../config.h"
+#endif // HAVE_CONFIG_H
+
+#include <boost/make_shared.hpp>
 #include <iostream>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 // the standard implementation of Logger
-class Log2Stderr : public Logger
-{
+class Log2StderrLogger : public LoggerImpl {
 public:
-    Log2Stderr(const std::string& className) : Logger(className) {}
-    virtual ~Log2Stderr() {}
-    virtual bool isEnabledFor(LogLevel level) {
-        if (level >= defaultLogLevel()) {
-            return true;
-        }
-        return false;
-    }
-    virtual void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) {
-        std::string levelName;
-        switch (level) {
-        case Logger::FATAL: levelName = "FATAL: "; break;
-        case Logger::ERROR: levelName = "ERROR: "; break;
-        case Logger::WARN : levelName = "WARN: "; break;
-        case Logger::INFO:  levelName = "INFO: "; break;
-        case Logger::DEBUG: levelName = "DEBUG: "; break;
-        default: levelName = "LOG: "; break;
-        }
-        std::cerr << levelName << message << " in " << filename << " at line " << lineNumber << std::endl;
-    }
+    Log2StderrLogger(const std::string& className)
+        : className_(className) {}
 
+    bool isEnabledFor(Logger::LogLevel level) /* override */;
+    void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) /* override */;
 
+private:
+    std::string className_;
 };
 
-Logger::LogLevel defaultLL = Logger::WARN;
-Logger::LogLevel defaultLogLevel() {
+bool Log2StderrLogger::isEnabledFor(Logger::LogLevel level)
+{
+    return (level >= defaultLogLevel());
+}
+
+void Log2StderrLogger::log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
+{
+    const char* levelName = "LOG";
+    switch (level) {
+    case Logger::FATAL: levelName = "FATAL: "; break;
+    case Logger::ERROR: levelName = "ERROR: "; break;
+    case Logger::WARN : levelName = "WARN: "; break;
+    case Logger::INFO:  levelName = "INFO: "; break;
+    case Logger::DEBUG: levelName = "DEBUG: "; break;
+    case Logger::OFF:   levelName = "OFF"; break;
+    }
+    std::cerr << levelName << message << " in " << filename << " at line " << lineNumber << std::endl;
+}
+
+class Log2StderrClass : public LoggerClass {
+public:
+    LoggerImpl* loggerFor(Logger* logger, const std::string& className) /* override */;
+};
+
+LoggerImpl* Log2StderrClass::loggerFor(Logger* logger, const std::string& className)
+{
+    remember(logger);
+    return new Log2StderrLogger(className);
+}
+
+// ========================================================================
+
+static Logger::LogLevel defaultLL = Logger::WARN;
+
+Logger::LogLevel defaultLogLevel()
+{
     return defaultLL;
 }
-void defaultLogLevel(Logger::LogLevel logLevel) {
+
+void defaultLogLevel(Logger::LogLevel logLevel)
+{
     defaultLL = logLevel;
-#ifdef HAVE_LOG4CPP
+#if 0 && defined(HAVE_LOG4CPP)
     log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
     appender1->setLayout(new log4cpp::BasicLayout());
 
@@ -73,63 +98,116 @@ void defaultLogLevel(Logger::LogLevel logLevel) {
 #endif
 }
 
-static Logger::LogClass logClass_ = Logger::LOG2STDERR;
-bool Logger::setClass(LogClass logClass) {
-    switch (logClass) {
-    case LOG2STDERR: logClass_ = logClass; return true;
-    case LOG4CPP: {
-#ifdef HAVE_LOG4CPP
-        logClass_ = logClass;
-        return true;
-#endif
-    }
-    }
+// ========================================================================
 
-    logClass_ = LOG2STDERR;
-    return false;
-}
+static LoggerClass* loggerClass_ = 0;
 
-LoggerPtr getLogger(const std::string& className)
+bool Logger::setClass(LoggerClass* lc)
 {
-    return boost::shared_ptr<Logger>(new Logger(className));
+    delete loggerClass_;
+    loggerClass_ = lc;
+    return (lc != 0);
 }
+
+bool Logger::setClass(LogClass logClass)
+{
+#ifdef HAVE_LOG4CPP
+    if (logClass == LOG4CPP) {
+        return setClass(new Log4cppClass);
+    }
+#endif
+    bool ok = setClass(new Log2StderrClass);
+    return ok && (logClass == LOG2STDERR);
+}
+
+LoggerClass* getLoggerClass()
+{
+    if (!loggerClass_)
+        Logger::setClass(Logger::LOG4CPP);
+    return loggerClass_;
+}
+
+// ========================================================================
+
+LoggerImpl::~LoggerImpl()
+{
+}
+
+LoggerClass::~LoggerClass()
+{
+    reset();
+}
+
+void LoggerClass::remember(Logger* logger)
+{
+    loggers_.push_back(logger);
+}
+
+void LoggerClass::reset()
+{
+#ifdef _OPENMP
+#pragma omp critical (MIFI_LOGGER)
+    {
+#endif
+        for (loggers_t::iterator it = loggers_.begin(); it != loggers_.end(); ++it)
+            (*it)->reset();
+#ifdef _OPENMP
+    }
+#endif
+}
+
+// ========================================================================
 
 Logger::Logger(const std::string& className)
-: className_(className) {
-    // default, nothing to do
+    : className_(className)
+{
 }
 
 Logger::~Logger()
 {
 }
 
-Logger* Logger::getImpl() {
+LoggerImpl* Logger::impl()
+{
+    LoggerImpl* i;
 #ifdef _OPENMP
 #pragma omp critical (MIFI_LOGGER)
     {
 #endif
     if (pimpl_.get() == 0) {
-        switch (logClass_) {
-        case LOG4CPP:
-#ifdef HAVE_LOG4CPP
-            pimpl_ = std::auto_ptr<Logger>(new Log4cppLogger(className_)); break;
-#endif
-        case LOG2STDERR:
-        default: pimpl_ = std::auto_ptr<Logger>(new Log2Stderr(className_)); break;
-        }
+        pimpl_.reset(getLoggerClass()->loggerFor(this, className_));
     }
+    i = pimpl_.get();
 #ifdef _OPENMP
     }
 #endif
-
-    return pimpl_.get();
+    return i;
 }
 
-bool Logger::isEnabledFor(LogLevel level) {
-    return getImpl()->isEnabledFor(level);
-}
-void Logger::forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) {
-    return getImpl()->forcedLog(level, message, filename, lineNumber);
+void Logger::reset()
+{
+    pimpl_.reset(0);
 }
 
+bool Logger::isEnabledFor(LogLevel level)
+{
+    if (LoggerImpl* i = impl())
+        return i->isEnabledFor(level);
+    else
+        return false;
 }
+
+void Logger::forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
+{
+    if (LoggerImpl* i = impl())
+        i->log(level, message, filename, lineNumber);
+}
+
+// ========================================================================
+
+LoggerPtr getLogger(const std::string& className)
+{
+    return boost::make_shared<Logger>(className);
+}
+
+} // namespace MetNoFimex
