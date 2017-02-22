@@ -25,10 +25,14 @@
 #define LOGGER_H_
 
 #include <boost/shared_ptr.hpp>
+#include <list>
 #include <string>
 #include <sstream>
 
 namespace MetNoFimex {
+
+class LoggerClass;
+class LoggerImpl;
 
 /**
  * @headerfile fimex/Logger.h
@@ -46,8 +50,9 @@ class Logger
 {
 private:
     std::string className_;
-    std::auto_ptr<Logger> pimpl_; // lazy initialized member
-    Logger* getImpl();
+    std::auto_ptr<LoggerImpl> pimpl_; // lazy initialized member
+    LoggerImpl* impl();
+
 public:
     /**
      * different log levels
@@ -60,20 +65,27 @@ public:
         INFO = 600,
         DEBUG = 500
     };
+
     Logger(const std::string& className);
-    virtual ~Logger();
+    ~Logger();
+
     /**
      * check if the loglevel of this logger is active
      */
-    virtual bool isEnabledFor(LogLevel level);
+    bool isEnabledFor(LogLevel level);
+
+    /** Delete the present logger implementation. */
+    void reset();
+
     /**
-     * log (without checking) for this loglevel
+     * log for this loglevel
      * @param level log-level to log
      * @param message log-message
      * @param filename best retrieved with __FILE__
      * @param lineNumber best retrieved with __LINE__
      */
-    virtual void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
+    void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
+
     /**
      * different logger eventually enabled in fimex
      */
@@ -88,7 +100,46 @@ public:
      * @return false if the logClass is not compiled into fimex
      */
     static bool setClass(LogClass logClass);
+
+    /**
+     * Choose a loggerclass in fimex
+     *
+     * Changing LoggerClass after invoking any functions in the
+     * library (more precisely, after any creation of LoggerImpl
+     * objects), is experimental.
+     *
+     * Ownership of lc is transferred. To destroy the LoggerClass,
+     * e.g. before exit, it is necessary to call setClass(0).
+     *
+     * @param lc, ownership is transferred; deletes the present loggerclass instance
+     * @return false if lc is null
+     */
+    static bool setClass(LoggerClass* lc);
 };
+
+
+class LoggerImpl {
+public:
+    virtual ~LoggerImpl();
+    virtual bool isEnabledFor(Logger::LogLevel level) = 0;
+    virtual void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) = 0;
+};
+
+
+class LoggerClass {
+public:
+    virtual ~LoggerClass();
+    virtual LoggerImpl* loggerFor(Logger* logger, const std::string& className) = 0;
+
+protected:
+    void remember(Logger* logger);
+    void reset();
+
+protected:
+    typedef std::list<Logger*> loggers_t;
+    loggers_t loggers_;
+};
+
 
 /**
  * the defaultLogLevel can be used by the implemented logger to determine
