@@ -117,7 +117,7 @@ public:
         : varName_(varName) { }
     virtual ~Converter();
 
-    const std::string& variableName() const
+    const std::string& getName() const
         { return varName_; }
 
     virtual DataPtr getDataSlice(size_t unLimDimPos) = 0;
@@ -644,7 +644,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
 
             ConverterPtr_v convs = best_factory->createConverter(env, oper);
             for (ConverterPtr_v::const_iterator itC = convs.begin(); itC != convs.end(); ++itC) {
-                const std::string& varName = (*itC)->variableName();
+                const std::string& varName = (*itC)->getName();
                 p_->converters.insert(std::make_pair(varName, *itC));
             }
         } else {
