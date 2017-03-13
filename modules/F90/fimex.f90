@@ -321,6 +321,12 @@ MODULE Fimex
       INTEGER(KIND=C_INT)                                :: c_mifi_read_field
     END FUNCTION c_mifi_read_field
 
+! void free(void *ptr);
+    subroutine C_free(ptr) bind(C,name="free")
+      USE iso_c_binding, ONLY : C_PTR, C_NULL_PTR
+      type(C_ptr), value, intent(in) :: ptr
+    end subroutine C_free
+
     !> F90-wrapper for mifi_free_slicebuilder()
     SUBROUTINE c_mifi_free_slicebuilder(sb) BIND(C,NAME="mifi_free_slicebuilder")
       USE iso_c_binding,     ONLY: C_PTR
@@ -684,6 +690,7 @@ MODULE Fimex
       call C_F_POINTER(str_ptr,tmp_name)
       slen = INDEX(tmp_name,C_NULL_CHAR) - 1
       get_dimname = tmp_name(1:slen)
+      call C_free(str_ptr)
     ELSE
       get_dimname = ""
     ENDIF
