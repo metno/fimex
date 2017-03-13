@@ -316,6 +316,8 @@ extern int mifi_slicebuilder_ndims(mifi_slicebuilder* sb);
  * @param sb
  * @param pos
  * @return "" on failure
+ *
+ * The returned string should be free'd after usage.
  */
 extern const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos);
 /**

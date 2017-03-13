@@ -374,7 +374,11 @@ int mifi_slicebuilder_ndims(mifi_slicebuilder* sb)
 const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos)
 {
     if (sb != 0) {
-        return sb->sb_->getDimensionNames().at(pos).c_str();
+        std::string retStr = sb->sb_->getDimensionNames().at(pos);
+        char* rval = (char*) std::calloc((retStr.size()+1), sizeof(char));
+        std::strncpy(rval, retStr.c_str(), retStr.size());
+        rval[retStr.size()] = 0;
+        return rval;
     }
     return "";
 }
