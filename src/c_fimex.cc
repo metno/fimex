@@ -63,6 +63,24 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("c_fimex");
 
+static const char EMPTY_C_STR[] = "";
+
+static int string_cpy(const std::string& src, char* dest, int n)
+{
+    char* d = dest;
+    if (src.size()+1 <= n) {
+        d = std::copy(src.begin(), src.end(), dest);
+        *d++ = '\0';
+    }
+    std::fill(d, dest + n, '\0');
+    return d - dest;
+}
+
+static const char* string_dup(const std::string& src)
+{
+    return strdup(src.c_str());
+}
+
 void mifi_free_cdm_reader(mifi_cdm_reader* reader)
 {
     delete(reader);
@@ -227,6 +245,7 @@ size_t mifi_get_variable_number(mifi_cdm_reader* reader)
 const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos)
 {
     try {
+        // c_str from a member in CDMVariable, no strdup needed
         return reader->reader_->getCDM().getVariables().at(pos).getName().c_str();
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_variable_name: " << ex.what());
@@ -258,6 +277,7 @@ size_t mifi_get_dimension_number(mifi_cdm_reader* reader)
 const char* mifi_get_dimension_name(mifi_cdm_reader* reader, size_t pos)
 {
     try {
+        // c_str from a member in CDMDimension, no strdup needed
         return reader->reader_->getCDM().getDimensions().at(pos).getName().c_str();
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_dimension_name: " << ex.what());
@@ -279,61 +299,53 @@ size_t mifi_get_dimension_size(mifi_cdm_reader* reader, const char* dimName)
 
 const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader)
 {
+    // c_str from a member in CDMDimension, or const char*, no strdup needed
     const CDMDimension* udim = reader->reader_->getCDM().getUnlimitedDim();
     if (udim != 0) {
         return udim->getName().c_str();
     }
-    return "";
+    return EMPTY_C_STR;
 }
 
-const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName) {
-    std::string lon,lat;
-    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return strdup(lon.c_str());
-    }
-    return "";
-}
-
-const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName) {
-    std::string lon,lat;
-    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return strdup(lat.c_str());
-    }
-    return "";
-}
-
-static int string_cpy(const std::string& src, char* dest, int n)
+static std::string do_mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName)
 {
-    char* d = dest;
-    if (src.size()+1 <= n) {
-        d = std::copy(src.begin(), src.end(), dest);
-        *d++ = '\0';
+    std::string lon,lat;
+    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
+        return lon;
     }
-    std::fill(d, dest + n, '\0');
-    return d - dest;
+    return "";
+}
+
+const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName)
+{
+    // we get a temporary, we need strdup and caller must call free
+    return string_dup(do_mifi_get_var_longitude(reader, varName));
 }
 
 int mifi_get_var_longitude_cpy(mifi_cdm_reader* reader, const char* varName, char* lonName, int n)
 {
-    std::string lon,lat;
-    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return string_cpy(lon, lonName, n);
-    } else {
-        return -1;
-    }
+    return string_cpy(do_mifi_get_var_longitude(reader, varName), lonName, n);
 }
 
-
-int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char* latName, int n)
+static std::string do_mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName)
 {
     std::string lon,lat;
     if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return string_cpy(lat, latName, n);
-    } else {
-        return -1;
+        return lat;
     }
+    return "";
 }
 
+const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName)
+{
+    // we get a temporary, we need strdup and caller must call free
+    return string_dup(do_mifi_get_var_latitude(reader, varName));
+}
+
+int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char* latName, int n)
+{
+    return string_cpy(do_mifi_get_var_latitude(reader, varName), latName, n);
+}
 
 mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName)
 {
@@ -371,12 +383,23 @@ int mifi_slicebuilder_ndims(mifi_slicebuilder* sb)
     return 0;
 }
 
-const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos)
+static std::string do_mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos)
 {
     if (sb != 0) {
-        return sb->sb_->getDimensionNames().at(pos).c_str();
+        return sb->sb_->getDimensionNames().at(pos);
     }
     return "";
+}
+
+const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos)
+{
+    // we get a temporary, we need strdup and caller must call free
+    return string_dup(do_mifi_slicebuilder_dimname(sb, pos));
+}
+
+int mifi_slicebuilder_dimname_cpy(mifi_slicebuilder* sb, int pos, char* dimName, int n)
+{
+    return string_cpy(do_mifi_slicebuilder_dimname(sb, pos), dimName, n);
 }
 
 int mifi_slicebuilder_get_start_size(mifi_slicebuilder* sb, unsigned int* start, unsigned int* size)
@@ -407,7 +430,7 @@ int mifi_slicebuilder_get_axistype(mifi_slicebuilder* sb, int* axistype)
     return -1;
 }
 
-const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
+static std::string do_mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
 {
     string retVal = "";
     if (mifi_slicebuilder_has_CS(sb) == 1) {
@@ -418,7 +441,18 @@ const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
             retVal = pr->getProj4String();
         }
     }
-    return retVal.c_str();
+    return retVal;
+}
+
+const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
+{
+    // we get a temporary, we need strdup and caller must call free
+    return string_dup(do_mifi_slicebuilder_get_proj4(sb));
+}
+
+int mifi_slicebuilder_get_proj4_cpy(mifi_slicebuilder* sb, char* proj4, int n)
+{
+    return string_cpy(do_mifi_slicebuilder_get_proj4(sb), proj4, n);
 }
 
 int mifi_slicebuilder_set_dim_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size)

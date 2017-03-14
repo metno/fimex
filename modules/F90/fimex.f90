@@ -274,12 +274,14 @@ MODULE Fimex
     END FUNCTION c_mifi_slicebuilder_set_dim_start_size
 
     !> F90-wrapper for mifi_slicebuilder_dimname()
-    FUNCTION c_mifi_slicebuilder_dimname(sb, pos) BIND(C,NAME="mifi_slicebuilder_dimname")
-      USE iso_c_binding, ONLY: C_PTR, C_INT
+    FUNCTION c_mifi_slicebuilder_dimname(sb, pos, dimName, n) BIND(C,NAME="mifi_slicebuilder_dimname_cpy")
+      USE iso_c_binding, ONLY: C_INT, C_CHAR, C_PTR
       IMPLICIT NONE
       TYPE(C_PTR), VALUE                   :: sb
       INTEGER(KIND=C_INT), VALUE           :: pos
-      TYPE(C_PTR)                          :: c_mifi_slicebuilder_dimname
+      CHARACTER(KIND=C_CHAR),INTENT(OUT)   :: dimName(*)
+      INTEGER(KIND=C_INT), VALUE           :: n
+      INTEGER(KIND=C_INT)                  :: c_mifi_slicebuilder_dimname
     END FUNCTION c_mifi_slicebuilder_dimname
 
     !> F90-wrapper for mifi_fill_scaled_double_dataslice()
@@ -673,20 +675,18 @@ MODULE Fimex
     INTEGER, INTENT(IN)           :: pos
     CHARACTER(LEN=1024)           :: get_dimname
     INTEGER(KIND=C_INT)           :: c_pos
-    TYPE(C_PTR)                   :: str_ptr
-    INTEGER                       :: slen
-    CHARACTER(LEN=1024), POINTER  :: tmp_name
+    CHARACTER(LEN=1025)           :: var_array
+    INTEGER                       :: i
 
     c_pos = pos - 1
-    slen = 0
+    get_dimname = ""
     IF ( C_ASSOCIATED(this%sb) .AND. pos <= c_mifi_slicebuilder_ndims(this%sb) ) THEN
-      str_ptr = c_mifi_slicebuilder_dimname(this%sb, c_pos)
-      call C_F_POINTER(str_ptr,tmp_name)
-      slen = INDEX(tmp_name,C_NULL_CHAR) - 1
-      get_dimname = tmp_name(1:slen)
-    ELSE
-      get_dimname = ""
+       i = c_mifi_slicebuilder_dimname(this%sb, c_pos, var_array, 1025)
+       IF (i >= 1) THEN
+          get_dimname(1:i) = var_array(1:i)
+       ENDIF
     ENDIF
+    RETURN
   END FUNCTION get_dimname
 
   !> Get the global size of a file's dimension
