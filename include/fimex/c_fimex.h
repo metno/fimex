@@ -245,14 +245,6 @@ extern const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader);
  * @return longitude-variable name, which must be free'd, or NULL
  */
 extern const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName);
-/**
- * Get the name of the latitude variable belonging to a parameter. The latitude
- * variable might be a dimension (1D), or an 2D field.
- * @param reader
- * @param varName The name of a parameter.
- * @return latitude-variable name, which must be free'd, or NULL
- */
-extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
 
 /**
  * Get the name of the latitude variable belonging to a parameter. This function is similar
@@ -266,6 +258,15 @@ extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* va
  *         number of characters copied to lonName, including final NUL.
  */
 extern int mifi_get_var_longitude_cpy(mifi_cdm_reader* reader, const char* varName, char* lonName, int n);
+
+/**
+ * Get the name of the latitude variable belonging to a parameter. The latitude
+ * variable might be a dimension (1D), or an 2D field.
+ * @param reader
+ * @param varName The name of a parameter.
+ * @return latitude-variable name, which must be free'd, or NULL
+ */
+extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
 
 /**
  * Get the name of the latitude variable belonging to a parameter. This function is similar
@@ -300,9 +301,20 @@ extern int mifi_slicebuilder_has_CS(mifi_slicebuilder* sb);
  * Get the projection of the slicebuilder, if it belongs to a
  * coordinate-system with projection.
  * @param sb
- * @return proj4 string or empty string
+ * @return proj4 string or empty string, which both must be free'd
  */
 extern const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb);
+
+/**
+ * Get the projection of the slicebuilder. This function is similar to
+ * mifi_slicebuilder_get_proj4, except that the name is copied to proj4 which
+ * is expected to have a capacity of n.
+ * @param sb
+ * @param proj4 The place to copy the projection information to.
+ * @param n The capacity of proj4 -- 10 means at most 9 characters plus a final 0 byte.
+ * @return 0 if n is too small, else the number of characters copied to proj4, including final NUL.
+ */
+extern int mifi_slicebuilder_get_proj4_cpy(mifi_slicebuilder* sb, char* proj4, int n);
 
 /**
  * Get the number of dimensions (i.e. the rank) of the slicebuilder.
@@ -315,11 +327,22 @@ extern int mifi_slicebuilder_ndims(mifi_slicebuilder* sb);
  * position.
  * @param sb
  * @param pos
- * @return "" on failure
- *
- * The returned string should be free'd after usage.
+ * @return dimension's name or empty string, which both must be free'd
  */
 extern const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos);
+
+/**
+ * Get the projection of the slicebuilder. This function is similar to
+ * mifi_slicebuilder_get_proj4, except that the name is copied to proj4 which
+ * is expected to have a capacity of n.
+ * @param sb
+ * @param pos
+ * @param dimName The place to copy the dimension name to.
+ * @param n The capacity of dimName -- 10 means at most 9 characters plus a final 0 byte.
+ * @return 0 if n is too small, else the number of characters copied to dimName, including final NUL.
+ */
+extern int mifi_slicebuilder_dimname_cpy(mifi_slicebuilder* sb, int pos, char* dimName, int n);
+
 /**
  * Get the current start positions and dimension-sizes for all dimensions.
  * @param sb
