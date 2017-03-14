@@ -4,7 +4,7 @@ PROGRAM fortran_test
   USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
                                       FILETYPE_RW
   IMPLICIT NONE
-  TYPE(FimexIO)                   :: fio, finter, frw
+  TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
@@ -21,21 +21,20 @@ PROGRAM fortran_test
   INTEGER(KIND=8)          :: vars
   CHARACTER(LEN=10)               :: cunit,cfiletype
   CHARACTER(LEN=1024)             :: dimname
-  INTEGER,EXTERNAL                :: iargc
 
 
-  IF (( iargc() /= 4 ) .AND. ( iargc() /= 5 )) THEN
+  IF (( COMMAND_ARGUMENT_COUNT() /= 4 ) .AND. ( COMMAND_ARGUMENT_COUNT() /= 5 )) THEN
     WRITE(*,*) "Usage: ./fortran_test input-file file-type variable unit [config]"
     WRITE(*,*) "Example ./fortran_test /opdata/arome_norway25/AROME_Norway25_00.nc netcdf surface_air_pressure hPa"
     WRITE(*,*) "        ./fortran_test /opdata/arome_norway25/preprod/AROME_Norway25_00.dat felt surface_air_pressure "//&
                         "hPa ~/metop/arome_norway25/etc/AromeFeltReaderConfig.xml"
   ELSE
-    CALL getarg(1,input_file)
-    CALL getarg(2,cfiletype)
-    CALL getarg(3,varName)
-    CALL getarg(4,cunit)
-    IF ( iargc() == 5 ) THEN
-      CALL getarg(5,config_file)
+    CALL GET_COMMAND_ARGUMENT(1,input_file)
+    CALL GET_COMMAND_ARGUMENT(2,cfiletype)
+    CALL GET_COMMAND_ARGUMENT(3,varName)
+    CALL GET_COMMAND_ARGUMENT(4,cunit)
+    IF ( COMMAND_ARGUMENT_COUNT() == 5 ) THEN
+      CALL GET_COMMAND_ARGUMENT(5,config_file)
     ELSE
       config_file = ""
     ENDIF

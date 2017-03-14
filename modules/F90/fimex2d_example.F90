@@ -12,7 +12,6 @@ PROGRAM FIMEX2D_EXAMPLE
   CHARACTER(LEN=1024)                            :: DIMNAME_T
   CHARACTER(LEN=10)                              :: CDTG
   INTEGER                                        :: I,T
-  INTEGER,EXTERNAL                               :: IARGC
   INTEGER(KIND=IKIND)                            :: NX,NY
   LOGICAL                                        :: FOUND12
   TYPE(FIMEXIO)                                  :: FIO_IN,FIO_OUT
@@ -23,14 +22,14 @@ PROGRAM FIMEX2D_EXAMPLE
   INTEGER                                        :: NTIMES,IERR
 
   ! Set arguments
-  IF ((IARGC() /= 3 ) .AND. (IARGC() /= 4 ) ) THEN
+  IF ((COMMAND_ARGUMENT_COUNT() /= 3 ) .AND. (COMMAND_ARGUMENT_COUNT() /= 4 ) ) THEN
     WRITE(*,*) "Usage: ./fimex2d_example infile outfile infile-fileformat [configfile]"
     CALL ABORT
   ENDIF
 
   CONFIGFILE=""
-  DO I = 1, IARGC()
-    CALL GETARG(I, ARG)
+  DO I = 1, COMMAND_ARGUMENT_COUNT()
+    CALL GET_COMMAND_ARGUMENT(I, ARG)
     SELECT CASE (I)
       CASE(1)
          INFILE=ARG
@@ -50,7 +49,7 @@ PROGRAM FIMEX2D_EXAMPLE
               CALL ABORT
          END SELECT
       CASE(4)
-         IF (IARGC() == 4 ) THEN
+         IF (COMMAND_ARGUMENT_COUNT() == 4 ) THEN
            CONFIGFILE=ARG
          ENDIF
     END SELECT
