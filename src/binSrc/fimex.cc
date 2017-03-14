@@ -430,7 +430,7 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
             cerr << "process.rotateVector.direction != 'latlon' or 'grid' : " << vm["process.rotateVector.direction"].as<string>() << " invalid" << endl;
             exit(1);
         }
-        if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.x")) {
+        if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.y")) {
             vector<string> xvars = vm["process.rotateVector.x"].as<vector<string> >();
             vector<string> yvars = vm["process.rotateVector.y"].as<vector<string> >();
             vector<string> stdX, stdY;
