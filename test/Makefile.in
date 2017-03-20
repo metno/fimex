@@ -898,11 +898,12 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in \
 	testdata_int2data_ex.nc testNcString.sh.in ncStringInput.nc \
 	ncStringExpected.nc ncStringWriter.xml nccmp.sh inData.txt \
 	diana.setup felt2netcdf.cfg cdmGribReaderConfig_newEarth.xml \
-	felt2nc_variables_level1000.xml test.ncml fillInterpolator.cfg \
-	testXMLDoc.xml coordTest.nc char.nc satellite_cma.nc \
-	testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc \
-	testQEmask.xml.in coordRefTimeTest.nc test.ncml \
-	twoCoordsTest.nc verticalPressure.nc verticalSigmaHybrid.nc \
+	cdmGribWriterConfig_append.xml felt2nc_variables_level1000.xml \
+	test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+	char.nc satellite_cma.nc testQualityConfig.xml \
+	testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
+	coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
+	verticalPressure.nc verticalSigmaHybrid.nc \
 	verticalPressurePressure.nc verticalSigmaHybridPressure.nc \
 	verticalPressureHeight.nc verticalOceanSG2.nc \
 	verticalOceanSG2_depth.nc sample_ed1.gm sample_ed2.gm \
