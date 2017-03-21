@@ -1,3 +1,5 @@
+  * 2017-03-20 fimex-0.63.5
+    * bugfix of bugfix in fortran interface
   * 2017-03-20 fimex-0.63.4
     * bugfix in fortran interface
     * bugfixes elsewhere
