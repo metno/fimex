@@ -56,15 +56,21 @@ PROGRAM fortran_test
 
   ! Get dimensions
   ndims=fio%get_dimensions(varName)
-  IF ( ndims <= 0 ) CALL error("Can't make slicebuilder")
+  IF ( ndims .ne. 3 ) CALL error("Unexpected dimension count")
   WRITE(0,*) "get_dimensions: ", ndims
+
+  if ("x"    .ne. fio%get_dimname(1)) CALL error("Unexpected 'x' dimension name")
+  if ("y"    .ne. fio%get_dimname(2)) CALL error("Unexpected 'y' dimension name")
+  if ("time" .ne. fio%get_dimname(3)) CALL error("Unexpected 'time' dimension name")
 
   ALLOCATE(start(ndims))
   ALLOCATE(vsize(ndims))
   ierr = fio%get_dimension_start_size(start, vsize)
-  DO i = 1, ndims
-    WRITE(*,*) "dimname ", i, ": ", trim(fio%get_dimname(i)), vsize(i)
-  END DO
+
+  if (229 .ne. vsize(1)) CALL error("Unexpected 'x' dimension size")
+  if (196 .ne. vsize(2)) CALL error("Unexpected 'y' dimension size")
+  if ( 61 .ne. vsize(3)) CALL error("Unexpected 'time' dimension size")
+
   ALLOCATE(atypes(ndims))
   ierr = fio%get_axistypes(atypes)
 
