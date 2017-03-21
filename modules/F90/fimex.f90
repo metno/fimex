@@ -682,7 +682,8 @@ MODULE Fimex
     get_dimname = ""
     IF ( C_ASSOCIATED(this%sb) .AND. pos <= c_mifi_slicebuilder_ndims(this%sb) ) THEN
        i = c_mifi_slicebuilder_dimname(this%sb, c_pos, var_array, 1025)
-       IF (i >= 1) THEN
+       IF (i >= 2) THEN
+          i = i - 1
           get_dimname(1:i) = var_array(1:i)
        ENDIF
     ENDIF
@@ -766,7 +767,8 @@ MODULE Fimex
     ENDIF
     i = c_mifi_get_var_longitude(this%io, TRIM(varName)//C_NULL_CHAR, var_array, 1025)
     get_var_longitude = ""
-    IF (i >= 1) THEN
+    IF (i >= 2) THEN
+       i = i - 1
        get_var_longitude(1:i) = var_array(1:i)
     ENDIF
     RETURN
@@ -792,7 +794,8 @@ MODULE Fimex
     ENDIF
     i = c_mifi_get_var_latitude(this%io, TRIM(varName)//C_NULL_CHAR, var_array, 1025)
     get_var_latitude = ""
-    IF (i >= 1) THEN
+    IF (i >= 2) THEN
+       i = i - 1
        get_var_latitude(1:i) = var_array(1:i)
     ENDIF
     RETURN
