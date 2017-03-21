@@ -77,7 +77,7 @@ PROGRAM fortran_test
       CASE(AXIS_GeoY, AXIS_Lat)
         ny = vsize(i)
       CASE DEFAULT
-       WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
+       WRITE(*,*) "reducing dimension ", i, " ",TRIM(fio%get_dimname(i))
        ierr=fio%reduce_dimension(fio%get_dimname(i), 0, 1)
     END SELECT
   END DO
@@ -135,7 +135,7 @@ PROGRAM fortran_test
       CASE(AXIS_GeoY, AXIS_Lat)
         ny = vsize(i)
       CASE DEFAULT
-       WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter%get_dimname(i))
+       WRITE(*,*) "reducing dimension ", i, " ",TRIM(finter%get_dimname(i))
        ierr=finter%reduce_dimension(finter%get_dimname(i), 0, 1)
     END SELECT
   END DO
@@ -197,7 +197,7 @@ PROGRAM fortran_test
       CASE(AXIS_GeoY, AXIS_Lat)
         ny = vsize(i)
       CASE DEFAULT
-       WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter2%get_dimname(i))
+       WRITE(*,*) "reducing dimension ", i, " ",TRIM(finter2%get_dimname(i))
        ierr=finter2%reduce_dimension(finter2%get_dimname(i), 0, 1)
     END SELECT
   END DO
