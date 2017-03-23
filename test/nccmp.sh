@@ -41,5 +41,6 @@ if test "$NC1MD5" != "$NC2MD5"; then
     $NCDUMP -f c -n anonymous -p 8,15 "$NC1" > "${NC2}_expect.dump"
     $NCDUMP -f c -n anonymous -p 8,15 "$NC2" > "${NC2}_actual.dump"
     diff -u "${NC2}_expect.dump" "${NC2}_actual.dump"
+    rm -f "${NC2}_expect.dump" "${NC2}_actual.dump"
     exit 1
 fi
