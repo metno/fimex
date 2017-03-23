@@ -177,13 +177,13 @@ std::vector<boost::shared_ptr<Felt_Array2> > Felt_File2::listFeltArrays() const 
 template<typename T>
 class Scale : public unary_function<short, T> {
 public:
-    Scale(double newFillValue, double scalingFactor) : newFill(static_cast<T>(newFillValue)), scalingFactor(scalingFactor) {}
+    Scale(T newFillValue, double scalingFactor) : newFill(newFillValue), scalingFactor(scalingFactor) {}
     T operator()(short val) {
-        return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
+        return (val == ANY_VALUE() ? newFill : data_caster<T, double>()(val * scalingFactor));
     }
 private:
     const T newFill;
-    const float scalingFactor;
+    const double scalingFactor;
 };
 
 // convert felt short to a scaled Data
