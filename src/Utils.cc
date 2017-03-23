@@ -39,13 +39,18 @@ namespace MetNoFimex
 
 static LoggerPtr logger = getLogger("fimex.Utils");
 
-int round(double num) {
-    return static_cast<int>(num < 0.0 ? std::ceil(num - 0.5) : std::floor(num + 0.5));
-}
-
 int RoundAndClamp::operator()(double d) const
 {
-  int r = lround(d);
+  return clamped(round(d));
+}
+
+int RoundAndClamp::operator()(float f) const
+{
+  return clamped(round(f));
+}
+
+int RoundAndClamp::clamped(int r) const
+{
   if (r>=mini && r<=maxi)
     return r;
   else

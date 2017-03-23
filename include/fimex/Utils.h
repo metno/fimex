@@ -39,19 +39,114 @@
 
 namespace MetNoFimex
 {
+
+/**
+ * convert a type (i.e. int, float) to string representation
+ */
+template<typename T>
+std::string type2string(T in) {
+    std::ostringstream buffer;
+    buffer << in;
+    return buffer.str();
+}
+
+/**
+ * specialization for high prececision
+ */
+template<>
+std::string type2string<double>(double in);
+
+
+template<typename T>
+T string2type(std::string s) {
+    T retVal;
+    std::stringstream buffer;
+    buffer << s;
+    buffer >> retVal;
+    return retVal;
+}
+
 /**
  * Round a double to integer.
  */
-int round(double num);
+inline int round(double num)
+{
+    return ::lround(num);
+}
 
-/** Round a double to integer, and if the value is outside a range, replace with an "invalid" value.
+/**
+ * Round a float to integer.
+ */
+inline int round(float num)
+{
+    return ::lroundf(num);
+}
+
+/** Cast with rounding as functor.
+ *
+ * Rounding is used if destination type (OUT) is integer and original type (IN) is not.
+ */
+template<typename OUT, typename IN, bool R>
+struct data_rounder;
+
+template<typename OUT, typename IN>
+struct data_rounder<OUT, IN, true> {
+    inline OUT operator()(const IN& in) const { return static_cast<OUT>(round(in)); }
+};
+
+template<typename OUT, typename IN>
+struct data_rounder<OUT, IN, false> {
+    inline OUT operator()(const IN& in) const { return static_cast<OUT>(in); }
+};
+
+/** Type cast as a functor.
+ *
+ * Uses data_rounder for type conversion.
+ */
+template<typename OUT, typename IN>
+struct data_caster {
+    inline OUT operator()(const IN& in) const;
+};
+
+template<typename OUT, typename IN>
+OUT data_caster<OUT, IN>::operator()(const IN& in) const
+{
+    return data_rounder<OUT, IN, std::numeric_limits<OUT>::is_integer && !std::numeric_limits<IN>::is_integer>()(in);
+}
+
+template<typename INOUT>
+struct data_caster<INOUT, INOUT> {
+    INOUT operator()(const INOUT& in) { return in; }
+};
+
+template<typename IN>
+struct data_caster<std::string, IN> {
+    std::string operator()(const IN& in) { return type2string(in); }
+};
+
+template<typename OUT>
+struct data_caster<OUT, std::string> {
+    OUT operator()(const std::string& in) { return string2type<OUT>(in); }
+};
+
+//template<>
+//char data_caster<char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
+//template<>
+//unsigned char data_caster<unsigned char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
+
+
+/** Round a double orr float to integer, and if the value is outside a range, replace with an "invalid" value.
  */
 struct RoundAndClamp {
   int mini, maxi, invalid;
 
   RoundAndClamp(int vb, int ve, int inv)
     : mini(vb), maxi(ve), invalid(inv) { }
+
   int operator()(double d) const;
+  int operator()(float f) const;
+
+  int clamped(int r) const;
 };
 
 /**
@@ -233,32 +328,6 @@ std::vector<std::string> tokenize(const std::string& str, const std::string& del
 std::string string2lowerCase(const std::string& str);
 
 /**
- * convert a type (i.e. int, float) to string representation
- */
-template<typename T>
-std::string type2string(T in) {
-    std::ostringstream buffer;
-    buffer << in;
-    return buffer.str();
-}
-
-/**
- * specialization for high prececision
- */
-template<>
-std::string type2string<double>(double in);
-
-
-template<typename T>
-T string2type(std::string s) {
-    T retVal;
-    std::stringstream buffer;
-    buffer << s;
-    buffer >> retVal;
-    return retVal;
-}
-
-/**
  * Typesafe varargs implementation, for pre-C11 variadic functions
  */
 template<typename T>
@@ -337,13 +406,6 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
     return vals;
 }
 
-/** static_cast as a functor */
-template<typename OUT>
-struct staticCast {
-    template<typename IN>
-    OUT operator()(const IN& in) { return static_cast<OUT>(in); }
-};
-
 /**
  * template to declare isnan function in c++
  * @param x
@@ -394,7 +456,7 @@ public:
     OUT operator()(const IN& in) const {
         return (in == oldFill_ || mifi_isnan<IN>(in))
             ? newFill_
-            : static_cast<OUT>(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
+            : data_caster<OUT, double>()(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
             //(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
             // => ((oldScale_*in + oldOffsetMinusNewOffset_)*newScaleInv_);
             // => oldScaleNewScale_ * in + oldOffsetMinusNewOffsetNewScale_
@@ -423,7 +485,7 @@ public:
     OUT operator()(const IN& in) const {
         return (in == oldFill_ || mifi_isnan<IN>(in))
                 ? newFill_
-                : static_cast<OUT>((uconv_->convert(oldScale_*in + oldOffset_)-newOffset_)*newScaleInv_);
+                : data_caster<OUT, double>()((uconv_->convert(oldScale_*in + oldOffset_)-newOffset_)*newScaleInv_);
     }
 };
 
@@ -469,7 +531,6 @@ template<typename T>
 boost::shared_array<const T> makeSharedArrayConst(const boost::shared_array<T>& sa) {
     return boost::shared_array<const T>(sa.get(), SharedArrayConstCastDeleter<T>(sa));
 }
-
 
 }
 

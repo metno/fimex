@@ -24,52 +24,22 @@
 #ifndef DATAIMPL_H_
 #define DATAIMPL_H_
 
-#include <typeinfo>
-#include <boost/shared_ptr.hpp>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iterator>
-#include <cmath>
-#include <algorithm>
 #include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"
 
+#include <boost/shared_ptr.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <string>
+
 namespace MetNoFimex
 {
-
-/** type cast as a functor.
- *
- *  In contrast to the version in fimex/Utils.h, this includes
- *  conversion from and to std::string.
- */
-template<typename OUT, typename IN>
-struct data_caster {
-    OUT operator()(const IN& in) { return static_cast<OUT>(in); }
-};
-
-template<typename INOUT>
-struct data_caster<INOUT, INOUT> {
-    INOUT operator()(const INOUT& in) { return in; }
-};
-
-template<typename IN>
-struct data_caster<std::string, IN> {
-    std::string operator()(const IN& in) { return type2string(in); }
-};
-
-template<typename OUT>
-struct data_caster<OUT, std::string> {
-    OUT operator()(const std::string& in) { return string2type<OUT>(in); }
-};
-
-//template<>
-//char data_caster<char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
-//template<>
-//unsigned char data_caster<unsigned char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
-
 
     /**
      * @headerfile "DataImpl.h"

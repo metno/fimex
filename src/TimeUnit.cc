@@ -118,7 +118,7 @@ bool FimexTime::parseISO8601(const std::string& isoStr)
         vector<string> seconds = tokenize(time[2], ".");
         int milliSecs = 0;
         if (seconds.size() > 1) {
-            milliSecs = static_cast<int>(round(string2type<double>("."+seconds[1]) * 1000));
+            milliSecs = round(string2type<double>("."+seconds[1]) * 1000);
         }
         setTime(date[0], date[1], date[2], string2type<short>(time[0]), string2type<short>(time[1]), string2type<short>(seconds[0]), milliSecs);
         return true;

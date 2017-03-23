@@ -218,6 +218,36 @@ BOOST_AUTO_TEST_CASE( test_slice_segfault )
 
 }
 
+BOOST_AUTO_TEST_CASE( test_rounding )
+{
+    DataPtr dataDouble(new DataImpl<double>(40));
+    for (int i = -20; i < 20; i++) {
+        const int j = i+20;
+        dataDouble->setValue(j, i*0.1);
+    }
+    DataPtr dataShort = dataDouble->convertDataType(1e30, 1, 0, CDM_SHORT, -32768, 1, 0);
+    boost::shared_array<short> asS = dataShort->asShort();
+
+    boost::shared_array<int> asI = dataDouble->asInt();
+    for (int i = -20; i < 20; i++) {
+        const int j = i+20;
+        int expect;
+        if (i <= -15)
+            expect = -2;
+        else if (i <= -5)
+            expect = -1;
+        else if (i < 5)
+            expect = 0;
+        else if (i < 15)
+            expect = 1;
+        else
+            expect = 2;
+
+        BOOST_CHECK_MESSAGE(asS[j] == expect, "short: i=" << i << " have == " << asS[j] << " expected " << expect);
+        BOOST_CHECK_MESSAGE(asI[j] == expect, "int:   i=" << i << " have == " << asI[j] << " expected " << expect);
+    }
+}
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {
