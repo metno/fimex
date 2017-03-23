@@ -443,10 +443,12 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 }
 
 
-struct static_cast_func
+namespace {
+struct double_to_float_cast
 {
   float operator()(const double& x) const { return static_cast<float>(x); }
 };
+} // namespace
 
 void CDMInterpolator::changeProjection(int method,
         const vector<double>& lonVals, const vector<double>& latVals)
@@ -467,9 +469,9 @@ void CDMInterpolator::changeProjection(int method,
         boost::shared_array<float> tmplLonVals(new float[lonVals.size()]);
 
         std::transform(latVals.begin(), latVals.end(), &tmplLatVals[0],
-                static_cast_func());
+                double_to_float_cast());
         std::transform(lonVals.begin(), lonVals.end(), &tmplLonVals[0],
-                static_cast_func());
+                double_to_float_cast());
 
         vector<double> yVals(1);
         yVals.at(0) = 0;
@@ -1025,7 +1027,7 @@ void flannTranslatePointsToClosestInputCell(double maxDist, vector<double>& poin
     LOG4FIMEX(logger, Logger::DEBUG, "finished loading kdTree after " << (time(0) - start) << "s");
 
     // using square since distance is not sqrt
-    const double search_radius = static_cast<double>(maxDist * maxDist);
+    const double search_radius = maxDist * maxDist;
     nanoflann::SearchParams params;
     params.sorted = true;
     for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
