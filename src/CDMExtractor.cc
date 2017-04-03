@@ -445,68 +445,76 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     if (west < -180. || west > 180) throw CDMException("reduceLatLonBoundingBox west outside domain: " + type2string(west));
     if (east < -180. || east > 180) throw CDMException("reduceLatLonBoundingBox east outside domain: " + type2string(east));
 
-    if (west > east) {
-        west -= 360;
-    }
+    const bool wrap180 = (west > east);
+
     // find coordinate-systems
-    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+    typedef vector<CoordinateSystemPtr> CsList;
     CsList coordsys = listCoordinateSystems(dataReader_);
-    typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
-    VAxesList vAxes;
     set<string> convertedAxes;
-    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
-        if ((*cs)->isSimpleSpatialGridded()) {
-            string xAxisName = (*cs)->getGeoXAxis()->getName();
-            string yAxisName = (*cs)->getGeoYAxis()->getName();
-            // check for projection and if the axes have already been processed by another cs
-            if ((*cs)->hasProjection() &&
-                (convertedAxes.find(xAxisName) == convertedAxes.end()) &&
-                (convertedAxes.find(yAxisName) == convertedAxes.end())) {
-                // create a set of border-points to the projection to avoid singularities in the projected plane
-                vector<double> xLonVals;
-                vector<double> yLatVals;
-                const int steps = 7;
-                double northSouthStep = (north - south) / steps;
-                double eastWestStep = (east - west) / steps;
-                for (int i = 0; i < steps; ++i) {
-                    // going along southern axis to east
-                    xLonVals.push_back(west + i*eastWestStep);
-                    yLatVals.push_back(south);
-                    // going along eastern axis to north
-                    xLonVals.push_back(east);
-                    yLatVals.push_back(south + i*northSouthStep);
-                    // going along northern axis to west
-                    xLonVals.push_back(east - i*eastWestStep);
-                    yLatVals.push_back(north);
-                    // going along western axis to south
-                    xLonVals.push_back(west);
-                    yLatVals.push_back(north - i*northSouthStep);
-                }
-                // reproject the border-points (in place)
-                boost::shared_ptr<const Projection> proj = (*cs)->getProjection();
-                proj->convertFromLonLat(xLonVals, yLatVals);
+    for (CsList::const_iterator ics = coordsys.begin(); ics != coordsys.end(); ++ics) {
+        CoordinateSystemPtr cs = *ics;
 
-                // find the minimum and maximum values in each projection-axis
-                double xMin = *min_element(xLonVals.begin(), xLonVals.end());
-                double xMax = *max_element(xLonVals.begin(), xLonVals.end());
-                double yMin = *min_element(yLatVals.begin(), yLatVals.end());
-                double yMax = *max_element(yLatVals.begin(), yLatVals.end());
+        if (!cs->isSimpleSpatialGridded())
+            continue;
 
-                // run reduceAxes to the min/max values
-                vector<CoordinateAxis::AxisType> xAxis;
-                xAxis.push_back((*cs)->getGeoXAxis()->getAxisType());
-                vector<CoordinateAxis::AxisType> yAxis;
-                yAxis.push_back((*cs)->getGeoYAxis()->getAxisType());
-                string unit = proj->isDegree() ? "degree" : "m";
-                reduceAxes(xAxis, unit, xMin, xMax);
-                reduceAxes(yAxis, unit, yMin, yMax);
-                // avoid double conversion
-                convertedAxes.insert(xAxisName);
-                convertedAxes.insert(yAxisName);
+        if (!cs->hasProjection())
+            continue;
+
+        const string& xAxisName = cs->getGeoXAxis()->getName();
+        const string& yAxisName = cs->getGeoYAxis()->getName();
+        // check if the axes have already been processed by another cs
+        if (convertedAxes.find(xAxisName) != convertedAxes.end()
+                || convertedAxes.find(yAxisName) != convertedAxes.end())
+            continue;
+
+        const vector<string>& shapeX = cs->getGeoXAxis()->getShape();
+        const vector<string>& shapeY = cs->getGeoYAxis()->getShape();
+        if (shapeX.size() != 1 || shapeY.size() != 1) {
+            LOG4FIMEX(logger, Logger::WARN, "cannot reduce x/y axis: axis is not 1-dim");
+            continue;
+        }
+
+        DataPtr xData = dataReader_->getScaledData(xAxisName);
+        DataPtr yData = dataReader_->getScaledData(yAxisName);
+        const size_t nx = xData->size(), ny = yData->size();
+        if (nx == 0 || ny == 0)
+            continue;
+
+        // reproject grid to lon-lat
+        boost::shared_array<double> xArray = xData->asDouble();
+        boost::shared_array<double> yArray = yData->asDouble();
+        vector<double> xLonVals(nx*ny), yLatVals(nx*ny);
+        for (size_t ix = 0, i = 0; ix < nx; ++ix) {
+            for (size_t iy = 0; iy < ny; ++iy, ++i) {
+                xLonVals[i] = xArray[ix];
+                yLatVals[i] = yArray[iy];
             }
         }
-    }
+        cs->getProjection()->convertToLonLat(xLonVals, yLatVals);
 
+        // keep x and y indices when grid point is inside bbox
+        std::set<std::size_t> xSlices, ySlices;
+        for (size_t ix = 0, i = 0; ix < nx; ++ix) {
+            for (size_t iy = 0; iy < ny; ++iy, ++i) {
+                const double lon = xLonVals[i], lat = yLatVals[i];
+                if (lat < south || lat > north)
+                    continue;
+                if (wrap180 && lon > east && lon < west)
+                    continue;
+                else if (!wrap180 && (lon < west || lon > east))
+                    continue;
+
+                xSlices.insert(ix);
+                ySlices.insert(iy);
+            }
+        }
+        reduceDimension(xAxisName, xSlices);
+        reduceDimension(yAxisName, ySlices);
+
+        // avoid double conversion
+        convertedAxes.insert(xAxisName);
+        convertedAxes.insert(yAxisName);
+    }
 }
 
 
