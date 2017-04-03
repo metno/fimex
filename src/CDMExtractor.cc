@@ -116,6 +116,11 @@ DataPtr CDMExtractor::getDataSlice_(const std::string& varName,
                     sliceIt != slices.end(); ++sliceIt) {
                 sliceIt->setStartAndSize(dim.getName(), sbStart, sbSize);
             }
+        } else if (foundDim->second.empty()) {
+            for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin();
+                    sliceIt != slices.end(); ++sliceIt) {
+                sliceIt->setStartAndSize(dim.getName(), sbStart, 0);
+            }
         } else {
             // handle slices in chunks
             const std::vector<std::size_t>& positions = foundDim->second;
@@ -327,10 +332,6 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
 {
     using namespace std;
     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of "<< aUnits << "(" << startVal << "," << endVal <<")");
-    if (startVal > endVal) {
-        // make sure startVal <= endVal
-        swap(startVal, endVal);
-    }
 
     Units units;
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
@@ -394,14 +395,9 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
 
 
                 // reduce dimension according to these points (name, startPos, size)
-                size_t startPos = distance(&vArray[0], lower);
-                size_t size = distance(lower, upper);
-                if ((size == 0) &&
-                    ((cdm.getUnlimitedDim() == 0) || (cdm.getUnlimitedDim()->getName() != shape[0]))) {
-                    // 0 size only allowed in unlim-dim, using best effort
-                    LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes lower == upper => size = 0: increasing size to 1");
-                    size = 1;
-                }
+                long startPos = distance(&vArray[0], lower);
+                long endPos = distance(&vArray[0], upper);
+                size_t size = std::max(endPos - startPos, 0l);
                 if (isReverse) {
                     startPos = vData->size() - size - startPos;
                     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxis on reverse data, new (start,size) = ("<<startPos<<","<<size<<")" );
