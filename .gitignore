@@ -225,12 +225,14 @@
 /test/testProcessor
 /test/testVerticalInterpolatorOceanSG2ToDepth.sh
 /test/testCharNc.sh
+/test/testNcString.sh
 /test/testMerger
 /test/testQualityExtractorFimex.sh
 /test/testMerger.sh
 /test/testNetCDFReaderWriter
 /test/test_netcdfrw.nc
 /test/testFillWriter
+/test/testInterpolation2DataFillValue.sh
 /test/fillOut.nc
 /test/testNcmlAggregationReader
 /test/a.out
