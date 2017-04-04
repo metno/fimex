@@ -47,7 +47,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
+static LoggerPtr logger = getLogger("fimex.NcmlCDMReader");
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())

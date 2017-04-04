@@ -45,7 +45,7 @@ namespace MetNoFimex
 using namespace std;
 
 namespace {
-LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
+LoggerPtr logger = getLogger("fimex.NcmlAggregationReader");
 }
 
 void getFileTypeConfig(const string& location, string& file, string& type, string& config)

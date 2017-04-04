@@ -43,6 +43,8 @@
 
 namespace MetNoFimex {
 
+static LoggerPtr logger = getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute");
+
 boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::createMetGmCommentAttributeParser(const boost::shared_ptr<CDMReader>& pCdmReader) {
     boost::shared_ptr<MetGmCommentAttributeParser> parser =
             boost::shared_ptr<MetGmCommentAttributeParser>(new MetGmCommentAttributeParser);
@@ -80,7 +82,7 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
             }
         } catch (CDMException& exception) {
             // ignore
-            LOG4FIMEX(getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute"), Logger::DEBUG, "failed parsing global attribute 'comment' as xml: '" << metgmMetaData.getStringValue() << "'");
+            LOG4FIMEX(logger, Logger::DEBUG, "failed parsing global attribute 'comment' as xml: '" << metgmMetaData.getStringValue() << "'");
         }
     }
 

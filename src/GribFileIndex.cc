@@ -65,6 +65,8 @@ namespace MetNoFimex
 {
 using namespace std;
 static LoggerPtr logger = getLogger("fimex.GribFileIndex");
+static LoggerPtr loggerGFM = getLogger("fimex.GribFileMessage");
+
 /**
  * @warn This variable is only for functions inside the GribFileIndex initialization.
  *       Don't use otherwise.
@@ -1190,7 +1192,7 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     // remove the 'file:' prefix, needs to be improved when streams are allowed
     url = url.substr(5);
     FILE* fileh = fopen(url.c_str(), "rb");
-    LOG4FIMEX(getLogger("fimex.GribFileMessage"), Logger::DEBUG, "opening file: " << url << " filehandle: " << fileh);
+    LOG4FIMEX(loggerGFM, Logger::DEBUG, "opening file: " << url << " filehandle: " << fileh);
     if (fileh == 0) {
         throw runtime_error("cannot open file: " + url);
     }

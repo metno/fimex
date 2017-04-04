@@ -46,7 +46,7 @@ namespace wdb
 {
 namespace
 {
-LoggerPtr logger = getLogger("WdbConnection");
+LoggerPtr logger = getLogger("fimex.WdbConnection");
 }
 
 // a cache holding references to all connections

@@ -37,6 +37,8 @@
 namespace MetNoFimex
 {
 
+static LoggerPtr logger = getLogger("fimex.Utils");
+
 int round(double num) {
     return static_cast<int>(num < 0.0 ? std::ceil(num - 0.5) : std::floor(num + 0.5));
 }
@@ -72,7 +74,7 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
 {
     using namespace std;
     using namespace boost::filesystem;
-    LOG4FIMEX(getLogger("fimex.Utils"), Logger::DEBUG, "scanning directory " + dir.string());
+    LOG4FIMEX(logger, Logger::DEBUG, "scanning directory " + dir.string());
     if (depthCount > 1000) {
         throw CDMException("possible circular reference: more than 1000 subdirectories found at " + dir.string());
     }
@@ -92,7 +94,7 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
 #else
             string ename = e->leaf();
 #endif
-            LOG4FIMEX(getLogger("Fimex.scanFiles"), Logger::WARN, "skipping "<< ename << ": " << ex.what());
+            LOG4FIMEX(logger, Logger::WARN, "skipping "<< ename << ": " << ex.what());
             continue;
         }
         if (stat.type() == directory_file) {

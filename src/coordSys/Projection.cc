@@ -55,6 +55,8 @@
 namespace MetNoFimex
 {
 
+static LoggerPtr logger = getLogger("fimex.Projection");
+
 bool Projection::operator==(const  Projection& b) const
 {
     return toString() == b.toString();
@@ -217,12 +219,12 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
     } else if (VerticalPerspectiveProjection::acceptsProj4(projStr)) {
         attrs = VerticalPerspectiveProjection::parametersFromProj4(projStr);
     } else if (UnknownToFgdcProjection::acceptsProj4(projStr)) {
-        LOG4FIMEX(getLogger("fimex.Projection"), Logger::WARN, "projStr not supported by FGDC, trying UnknownToFgdcProjection for '" << projStr << "'");
+        LOG4FIMEX(logger, Logger::WARN, "projStr not supported by FGDC, trying UnknownToFgdcProjection for '" << projStr << "'");
         attrs = UnknownToFgdcProjection::parametersFromProj4(projStr);
     }
 
     if (attrs.size() == 0) {
-        LOG4FIMEX(getLogger("fimex.Projection"), Logger::ERROR, "translation of proj4 '" << projStr << "' to FGDC/CF not supported");
+        LOG4FIMEX(logger, Logger::ERROR, "translation of proj4 '" << projStr << "' to FGDC/CF not supported");
         throw CDMException("proj-string "+projStr+" to FGDC/CF not supported");
     }
     return Projection::create(attrs);

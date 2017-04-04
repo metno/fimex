@@ -42,7 +42,7 @@ namespace MetNoFimex
 {
 
 static MutexType mutex;
-static LoggerPtr logger = getLogger("Fimex::ProradXMLCDMReader");
+static LoggerPtr logger = getLogger("fimex.ProradXMLCDMReader");
 
 class ProradXMLImpl {
 public:
