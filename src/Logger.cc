@@ -88,14 +88,6 @@ Logger::LogLevel defaultLogLevel()
 void defaultLogLevel(Logger::LogLevel logLevel)
 {
     defaultLL = logLevel;
-#if 0 && defined(HAVE_LOG4CPP)
-    log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
-    appender1->setLayout(new log4cpp::BasicLayout());
-
-    log4cpp::Category& root = log4cpp::Category::getRoot();
-    root.setPriority(logLevel2cppPriority(logLevel));
-    root.addAppender(appender1);
-#endif
 }
 
 // ========================================================================
@@ -113,6 +105,7 @@ bool Logger::setClass(LogClass logClass)
 {
 #ifdef HAVE_LOG4CPP
     if (logClass == LOG4CPP) {
+        Log4cppClass::configureMinimal(defaultLogLevel());
         return setClass(new Log4cppClass);
     }
 #endif
