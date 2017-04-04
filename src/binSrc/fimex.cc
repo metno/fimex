@@ -1148,29 +1148,35 @@ int run(int argc, char* args[])
         return 0;
     }
 
-    defaultLogLevel(Logger::WARN);
+    const int opt_debug = vm.count("debug");
+    if (opt_debug >= 1) {
+        // TODO allow for multiple occurances and use INFO as == 1
+        defaultLogLevel(Logger::DEBUG);
+    } else {
+        defaultLogLevel(Logger::WARN);
+    }
+
     if (vm.count("log4cpp")) {
 #ifdef HAVE_LOG4CPP
         Logger::setClass(Logger::LOG4CPP);
         std::string propFile = vm["log4cpp"].as<string>();
         if (propFile != "-") {
             log4cpp::PropertyConfigurator::configure(propFile);
+            if (opt_debug)
+                LOG4FIMEX(logger, Logger::WARN, "--log4cpp config file overrides loglevel from --debug");
         }
 #else
-        defaultLogLevel(Logger::DEBUG);
+        Logger::setClass(Logger::LOG2STDERR);
+        LOG4FIMEX(logger, Logger::WARN, "fimex was compiled without log4cpp");
 #endif
+    } else {
+        Logger::setClass(Logger::LOG2STDERR);
     }
-    if (vm.count("debug") >= 1) {
-        // TODO allow for multiple occurances and use INFO as == 1
-        defaultLogLevel(Logger::DEBUG);
-    } else if (vm.count("debug") > 1) {
-        defaultLogLevel(Logger::DEBUG);
-    }
+
     mifi_setNumThreads(num_threads);
     if (vm.count("print-options")) {
         writeOptions(cout, vm);
-    }
-    if (vm.count("debug") && !vm.count("print-options")) {
+    } else if (opt_debug) {
         writeOptions(cerr, vm);
     }
     if (!(vm.count("input.file"))) {

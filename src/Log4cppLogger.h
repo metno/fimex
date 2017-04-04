@@ -71,6 +71,7 @@ private:
 class Log4cppClass : public LoggerClass {
 public:
     LoggerImpl* loggerFor(Logger* logger, const std::string& className) /* override */;
+    static void configureMinimal(Logger::LogLevel logLevel);
 };
 
 } /* namespace MetNoFimex */

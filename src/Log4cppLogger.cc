@@ -70,5 +70,20 @@ LoggerImpl* Log4cppClass::loggerFor(Logger* logger, const std::string& className
     return new Log4cppLogger(className);
 }
 
+// static
+void Log4cppClass::configureMinimal(Logger::LogLevel logLevel)
+{
+    log4cpp::Category& root = log4cpp::Category::getRoot();
+    log4cpp::Category& fimex = log4cpp::Category::getInstance("fimex");
+    if (root.getAllAppenders().empty() && fimex.getAllAppenders().empty()) {
+        log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
+        appender1->setLayout(new log4cpp::BasicLayout());
+        root.addAppender(appender1);
+    }
+    if (fimex.getChainedPriority() == log4cpp::Priority::NOTSET) {
+        fimex.setPriority(logLevel2cppPriority(logLevel));
+    }
+}
+
 } /* namespace MetNoFimex */
 #endif /* HAVE_LOG4CPP */
