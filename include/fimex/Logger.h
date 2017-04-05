@@ -130,6 +130,7 @@ class LoggerClass {
 public:
     virtual ~LoggerClass();
     virtual LoggerImpl* loggerFor(Logger* logger, const std::string& className) = 0;
+    void forget(Logger* logger);
 
 protected:
     void remember(Logger* logger);
