@@ -23,18 +23,30 @@ ToVLevelConverterAdapter::ToVLevelConverterAdapter(boost::shared_ptr<CDMReader> 
     , converter_(converter)
     , unlimitedTimePos_(NOTSET)
 {
-    if (CoordinateSystem::ConstAxisPtr xax = cs->getGeoXAxis())
-        varGeoX_ = xax->getName();
+    const std::vector<std::string>& shape = converter_->getShape();
+    const std::set<std::string> shapedims(shape.begin(), shape.end());
 
-    if (CoordinateSystem::ConstAxisPtr yax = cs->getGeoYAxis())
-        varGeoY_ = yax->getName();
+    if (CoordinateSystem::ConstAxisPtr xax = cs->getGeoXAxis()) {
+        const std::string& xdim0 = xax->getShape().front();
+        if (shapedims.count(xdim0))
+            varGeoX_ = xdim0;
+    }
+
+    if (CoordinateSystem::ConstAxisPtr yax = cs->getGeoYAxis()) {
+        const std::string& ydim0 = yax->getShape().front();
+        if (shapedims.count(ydim0))
+            varGeoY_ = ydim0;
+    }
 
     if (CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis()) {
-        varTime_ = tax->getName();
+        const std::string& tdim0 = tax->getShape().front();
+        if (shapedims.count(tdim0)) {
+            varTime_ = tdim0;
 
-        const CDMDimension& tDim = reader_->getCDM().getDimension(tax->getShape().front());
-        if (tDim.isUnlimited())
-            unlimitedTimePos_ = unLimDimPos;
+            const CDMDimension& tDim = reader_->getCDM().getDimension(tdim0);
+            if (tDim.isUnlimited())
+                unlimitedTimePos_ = unLimDimPos;
+        }
     }
 }
 
