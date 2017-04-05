@@ -383,6 +383,12 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             double yMin = *(min_element(&latVals[0], &latVals[latSize]));
             double xMax = *(max_element(&lonVals[0], &lonVals[latSize]));
             double yMax = *(max_element(&latVals[0], &latVals[latSize]));
+            if (getProjectionName(proj_input) == "ob_tran") {
+                xMin *= RAD_TO_DEG;
+                yMin *= RAD_TO_DEG;
+                xMax *= RAD_TO_DEG;
+                yMax *= RAD_TO_DEG;
+            }
             xAxisSpec.setStartEnd(xMin, xMax);
             yAxisSpec.setStartEnd(yMin, yMax);
             LOG4FIMEX(logger, Logger::INFO, "changeProjection, boundingbox: (" <<  xMin << "," << yMin << "), (" << xMax << "," << yMax << ")");
