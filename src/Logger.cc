@@ -29,6 +29,7 @@
 #endif // HAVE_CONFIG_H
 
 #include <boost/make_shared.hpp>
+#include <algorithm>
 #include <iostream>
 
 namespace MetNoFimex {
@@ -143,17 +144,17 @@ void LoggerClass::remember(Logger* logger)
     loggers_.push_back(logger);
 }
 
+void LoggerClass::forget(Logger* logger)
+{
+    loggers_.erase(std::remove(loggers_.begin(), loggers_.end(), logger), loggers_.end());
+}
+
 void LoggerClass::reset()
 {
-#ifdef _OPENMP
-#pragma omp critical (MIFI_LOGGER)
-    {
-#endif
-        for (loggers_t::iterator it = loggers_.begin(); it != loggers_.end(); ++it)
-            (*it)->reset();
-#ifdef _OPENMP
-    }
-#endif
+    loggers_t oldloggers;
+    std::swap(loggers_, oldloggers);
+    for (loggers_t::iterator it = oldloggers.begin(); it != oldloggers.end(); ++it)
+        (*it)->reset();
 }
 
 // ========================================================================
@@ -165,6 +166,7 @@ Logger::Logger(const std::string& className)
 
 Logger::~Logger()
 {
+    reset();
 }
 
 LoggerImpl* Logger::impl()
@@ -186,7 +188,15 @@ LoggerImpl* Logger::impl()
 
 void Logger::reset()
 {
-    pimpl_.reset(0);
+#ifdef _OPENMP
+#pragma omp critical (MIFI_LOGGER)
+    {
+#endif
+        getLoggerClass()->forget(this);
+        pimpl_.reset(0);
+#ifdef _OPENMP
+    }
+#endif
 }
 
 bool Logger::isEnabledFor(LogLevel level)
