@@ -77,7 +77,7 @@ static int string_cpy(const std::string& src, char* dest, int n)
     return d - dest;
 }
 
-static const char* string_dup(const std::string& src)
+static char* string_dup(const std::string& src)
 {
     return strdup(src.c_str());
 }
@@ -317,7 +317,7 @@ static std::string do_mifi_get_var_longitude(mifi_cdm_reader* reader, const char
     return "";
 }
 
-const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName)
+char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName)
 {
     // we get a temporary, we need strdup and caller must call free
     return string_dup(do_mifi_get_var_longitude(reader, varName));
@@ -337,7 +337,7 @@ static std::string do_mifi_get_var_latitude(mifi_cdm_reader* reader, const char*
     return "";
 }
 
-const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName)
+char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName)
 {
     // we get a temporary, we need strdup and caller must call free
     return string_dup(do_mifi_get_var_latitude(reader, varName));

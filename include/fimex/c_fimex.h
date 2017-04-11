@@ -244,7 +244,7 @@ extern const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader);
  * @param varName The name of a parameter.
  * @return longitude-variable name, which must be free'd, or NULL
  */
-extern const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName);
+extern char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName);
 
 /**
  * Get the name of the latitude variable belonging to a parameter. This function is similar
@@ -266,7 +266,7 @@ extern int mifi_get_var_longitude_cpy(mifi_cdm_reader* reader, const char* varNa
  * @param varName The name of a parameter.
  * @return latitude-variable name, which must be free'd, or NULL
  */
-extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
+extern char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
 
 /**
  * Get the name of the latitude variable belonging to a parameter. This function is similar

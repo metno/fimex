@@ -287,7 +287,7 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
     }
 
 
-    const char* lonName = mifi_get_var_longitude(feltReader, "altitude");
+    char* lonName = mifi_get_var_longitude(feltReader, "altitude");
     if (!lonName) {
         retVal++;
         fprintf(stderr, "longitude not found\n");
