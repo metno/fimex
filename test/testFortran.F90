@@ -30,7 +30,7 @@ PROGRAM fortran_test
   INQUIRE(file=input_file, exist=fileExist)
   IF (.not. fileExist) THEN
     WRITE(*,*) "no input-file: ", input_file, " skipping test"
-    STOP(0)
+    STOP (0)
   ENDIF
 
   ! Open file
