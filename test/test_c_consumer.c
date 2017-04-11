@@ -50,12 +50,12 @@ int testFeltVariables(const char* feltFile, const char* configFile) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
     }
-    int varCount = mifi_get_variable_number(feltReader);
+    size_t varCount = mifi_get_variable_number(feltReader);
     int found = 0;
-    for (int i=0; i < varCount; i++) {
+    for (size_t i=0; i < varCount; i++) {
         const char* varName = mifi_get_variable_name(feltReader, i);
         if (varName == 0) {
-            fprintf(stderr, "unable to read variable number %d\n", i);
+            fprintf(stderr, "unable to read variable number %lu\n", i);
             retVal++;
         } else {
             //printf("found variable: %s\n", varName);
@@ -98,7 +98,7 @@ int testFeltData(const char* feltFile, const char* configFile) {
                 retVal++;
                 fprintf(stderr, "error: no data allocated\n");
             } else {
-                for (int i = 0; i < size; ++i) {
+                for (size_t i = 0; i < size; ++i) {
                     // check accessibility of data, might segfault on error
                     double x = data[i];
                     x++;
@@ -124,7 +124,7 @@ int testFeltData(const char* feltFile, const char* configFile) {
                 retVal++;
                 fprintf(stderr, "error: no data allocated\n");
             } else {
-                for (int i = 0; i < size; ++i) {
+                for (size_t i = 0; i < size; ++i) {
                     // check accessibility of data, might segfault on error
                     double x = data[i];
                     x++;
@@ -185,7 +185,7 @@ int testNetcdfReadNetcdfWrite() {
 
 int doubleCallback(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double* scaledData, size_t dataSize)
 {
-    for (int i = 0; i < dataSize; ++i) {
+    for (size_t i = 0; i < dataSize; ++i) {
         *scaledData++ = (double) i;
     }
     return 0;
@@ -237,10 +237,10 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
         fprintf(stderr, "wrong number of ndims, 2 != %d", ndims);
     }
 
-    int totDims = mifi_get_dimension_number(feltReader);
+    size_t totDims = mifi_get_dimension_number(feltReader);
     if (totDims != 4) {
         retVal++;
-        fprintf(stderr, "wrong number of totDims, 4 != %d\n", totDims);
+        fprintf(stderr, "wrong number of totDims, 4 != %lu\n", totDims);
     }
 
     const char* dimName = mifi_get_dimension_name(feltReader, 2);
@@ -252,7 +252,7 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
     size_t dSize = mifi_get_dimension_size(feltReader, dimName);
     if (dSize != 229) {
         retVal++;
-        fprintf(stderr, "dimension %s has size %d != 229\n", dimName, dSize);
+        fprintf(stderr, "dimension %s has size %lu != 229\n", dimName, dSize);
     }
 
     const char* undimName = mifi_get_unlimited_dimension_name(feltReader);
@@ -264,7 +264,7 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
     dSize = mifi_get_dimension_size(feltReader, undimName);
     if (dSize != 61) {
         retVal++;
-        fprintf(stderr, "unlimited dimension %s has size %d != 61\n", undimName, dSize);
+        fprintf(stderr, "unlimited dimension %s has size %lu != 61\n", undimName, dSize);
     }
 
 
