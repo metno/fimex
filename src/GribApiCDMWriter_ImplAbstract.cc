@@ -68,31 +68,25 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, co
     logger = getLogger("fimex.GribApi_CDMWriter");
 
     {
-        std::string gribTemplate("GRIB" + type2string(gribVersion));
         std::string templXPath("/cdm_gribwriter_config/template_file");
         XPathObjPtr xPObj = xmlConfig->getXPathObject(templXPath);
         xmlNodeSetPtr nodes = xPObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size == 1) {
-            std::string gribTemplate = getXmlProp(nodes->nodeTab[0], "name");
+            const std::string gribTemplate = getXmlProp(nodes->nodeTab[0], "name");
             int error;
             FILE* fh = std::fopen(gribTemplate.c_str(), "r");
-            if (fh != 0) {
-                gribHandle =
-                        boost::shared_ptr < grib_handle
-                                > (grib_handle_new_from_file(0, fh, &error), grib_handle_delete);
-            } else {
-                throw CDMException(
-                        "unable to open grib_handle_from_template for grib-template: "
-                                + gribTemplate + std::strerror(errno));
-            }
+            if (!fh)
+                throw CDMException("unable to open grib template file '" + gribTemplate + "', error is:" + std::strerror(errno));
+            gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_file(0, fh, &error), grib_handle_delete);
+            if (!gribHandle)
+                throw CDMException("unable to create grib handle for template '" + gribTemplate + "'");
         } else {
-            gribHandle =
-                    boost::shared_ptr < grib_handle
-                            > (grib_handle_new_from_template(0,
-                                    gribTemplate.c_str()), grib_handle_delete);
+            const std::string gribTemplate("GRIB" + type2string(gribVersion));
+            gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_samples(0, gribTemplate.c_str()), grib_handle_delete);
+            if (!gribHandle)
+                throw CDMException("unable to create grib handle from samples '" + gribTemplate + "'");
         }
-        if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
     }
     // check the file
     {
@@ -120,7 +114,8 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, co
             gribFile.open(outputFile.c_str(), mode);
             LOG4FIMEX(logger, Logger::DEBUG, "opened '"<<outputFile<<"' in overwrite-mode");
         }
-        if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
+        if (!gribFile.is_open())
+            throw CDMException("Cannot write grib-file: "+outputFile);
     }
 }
 
