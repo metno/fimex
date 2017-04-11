@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
         read1 = rw->getScaledDataSlice("ga_2t_1", 0);
         BOOST_CHECK(read1.get() != 0);
 
-        DataPtr write1 = rw->getScaledDataSliceInUnit("ga_2t_1", "Fahrenheit", 0);
+        DataPtr write1 = rw->getScaledDataSliceInUnit("ga_2t_1", "deg_F", 0);
         BOOST_CHECK(write1.get() != 0);
 
         const size_t size1 = write1->size();
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
             write1->setValue(i, newF);
         }
 
-        rw->putScaledDataSliceInUnit("ga_2t_1", "Fahrenheit", 0, write1);
+        rw->putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, write1);
     }
     {
         boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));

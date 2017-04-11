@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
 #ifdef HAVE_NETCDF_H
     string outputFile("testQualityExtractor.nc");
     NetCDF_CDMWriter(qe, outputFile);
-    BOOST_CHECK((ifstream(outputFile.c_str()) != 0));
+    BOOST_CHECK(std::ifstream(outputFile.c_str()).is_open());
 #else
     Null_CDMWriter(qe, "");
     BOOST_CHECK(true);

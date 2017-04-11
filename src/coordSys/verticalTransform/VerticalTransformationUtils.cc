@@ -15,14 +15,11 @@
 
 namespace MetNoFimex {
 
-using std::string;
-
 namespace {
 
 static LoggerPtr logger = getLogger("fimex.VerticalTransformationUtils");
 
-typedef std::vector<string> string_v;
-typedef std::vector<size_t> size_v;
+typedef std::map<std::string, std::string> string_string_m;
 
 struct CompleteCSForVariable : public std::unary_function<std::string, bool>
 {
@@ -36,9 +33,9 @@ private:
 
 } // anonymous namespace
 
-void removeDimsWithLength1(const CDM& cdm, std::vector<std::string>& dims)
+void removeDimsWithLength1(const CDM& cdm, string_v& dims)
 {
-    std::vector<string>::iterator it = dims.begin();
+    string_v::iterator it = dims.begin();
     while (it != dims.end()) {
         if (!cdm.hasDimension(*it) || cdm.getDimension(*it).getLength() == 1)
             it = dims.erase(it);
@@ -47,30 +44,30 @@ void removeDimsWithLength1(const CDM& cdm, std::vector<std::string>& dims)
     }
 }
 
-std::string findVariableWithDims(const CDM& cdm, const string& standard_name, const std::vector<string>& dims)
+std::string findVariableWithDims(const CDM& cdm, const std::string& standard_name, const string_v& dims)
 {
-    std::map<string, string> attrs;
+    string_string_m attrs;
     attrs["standard_name"] = standard_name;
-    const std::vector<string> vars = cdm.findVariables(attrs, dims);
+    const string_v vars = cdm.findVariables(attrs, dims);
     if (!vars.empty())
         return vars.front();
     // maybe try removing axes of undefined type ... ?
-    return string();
+    return std::string();
 }
 
-std::string findVariableWithCS(const CDM& cdm, CoordSysPtr cs, const string& standard_name)
+std::string findVariableWithCS(const CDM& cdm, CoordSysPtr cs, const std::string& standard_name)
 {
-    std::map<string, string> attrs;
+    string_string_m attrs;
     attrs["standard_name"] = standard_name;
-    const std::vector<string> vars = cdm.findVariables(attrs, std::vector<string>());
-    std::vector<string>::const_iterator it = std::find_if(vars.begin(), vars.end(), CompleteCSForVariable(cs));
+    const string_v vars = cdm.findVariables(attrs, string_v());
+    string_v::const_iterator it = std::find_if(vars.begin(), vars.end(), CompleteCSForVariable(cs));
     if (it != vars.end())
         return *it;
     // maybe try removing axes of undefined type ... ?
-    return string();
+    return std::string();
 }
 
-size_t getSliceSize(const SliceBuilder& sb, const string& dimName)
+size_t getSliceSize(const SliceBuilder& sb, const std::string& dimName)
 {
     size_t start, size;
     sb.getStartAndSize(dimName, start, size);
@@ -109,9 +106,9 @@ boost::shared_array<double> getSliceDoubles(CDMReaderPtr reader, const SliceBuil
     return getSliceData(reader, sbOrig, varName, unit)->asDouble();
 }
 
-std::vector<size_t> getDimSizes(const CDM& cdm, const std::vector<std::string>& dimNames)
+std::vector<size_t> getDimSizes(const CDM& cdm, const string_v& dimNames)
 {
-    std::vector<size_t> dimSizes(dimNames.size(), 1);
+    size_v dimSizes(dimNames.size(), 1);
     for (size_t i=0; i<dimNames.size(); ++i) {
         if (cdm.hasDimension(dimNames[i]))
             dimSizes[i] = cdm.getDimension(dimNames[i]).getLength();
@@ -119,9 +116,9 @@ std::vector<size_t> getDimSizes(const CDM& cdm, const std::vector<std::string>& 
     return dimSizes;
 }
 
-SliceBuilder createSliceBuilder(const CDM& cdm, const std::vector<std::string>& dimNames)
+SliceBuilder createSliceBuilder(const CDM& cdm, const string_v& dimNames)
 {
-    const std::vector<size_t> dimSizes = getDimSizes(cdm, dimNames);
+    const size_v dimSizes = getDimSizes(cdm, dimNames);
     return SliceBuilder(dimNames, dimSizes);
 }
 
@@ -134,7 +131,7 @@ void setUnLimDimPos(const CDM& cdm, SliceBuilder& sb, size_t unLimDimPos)
 {
     if (const CDMDimension* uld = cdm.getUnlimitedDim()) {
         LOG4FIMEX(logger, Logger::DEBUG, "cdm has unlimited dim '" << uld->getName() << "'");
-        const std::vector<std::string> dimNames = sb.getDimensionNames();
+        const string_v dimNames = sb.getDimensionNames();
         if (std::find(dimNames.begin(), dimNames.end(), uld->getName()) != dimNames.end())
             sb.setStartAndSize(uld->getName(), unLimDimPos, 1);
     }
@@ -179,9 +176,9 @@ void forceUnLimDimLength1(const CDM& cdm, ArrayDims& s1, ArrayDims& s2, ArrayDim
         set_length(uld->getName(), 1, s1, s2, s3, s4, s5);
 }
 
-ArrayDims makeArrayDims(const CDM& cdm, const std::vector<std::string>& dimNames)
+ArrayDims makeArrayDims(const CDM& cdm, const string_v& dimNames)
 {
-    const std::vector<size_t> dimSizes = getDimSizes(cdm, dimNames);
+    const size_v dimSizes = getDimSizes(cdm, dimNames);
     return ArrayDims(dimNames, dimSizes);
 }
 
@@ -192,15 +189,15 @@ ArrayDims makeArrayDims(const CDM& cdm, const std::string& varName)
 
 ArrayDims makeArrayDims(const CDM& cdm, boost::shared_ptr<VerticalConverter> converter)
 {
-    const std::vector<std::string> dimNames = converter->getShape();
-    const std::vector<size_t> dimSizes = getDimSizes(cdm, dimNames);
+    const string_v dimNames = converter->getShape();
+    const size_v dimSizes = getDimSizes(cdm, dimNames);
     return ArrayDims(dimNames, dimSizes);
 }
 
 ArrayDims makeArrayDims(const SliceBuilder& sb)
 {
-    const std::vector<std::string> dimNames = sb.getDimensionNames();
-    const std::vector<size_t> dimSizes = sb.getDimensionSizes();
+    const string_v dimNames = sb.getDimensionNames();
+    const size_v dimSizes = sb.getDimensionSizes();
     return ArrayDims(dimNames, dimSizes);
 }
 

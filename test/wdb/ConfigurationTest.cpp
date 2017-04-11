@@ -45,7 +45,7 @@ class ConfigurationTest
     WdbConfiguration config_;
 public:
     ConfigurationTest() :
-        config_(TEST_DIR"/local.wdb.xml")
+        config_(WDB_TEST_DIR "/local.wdb.xml")
     {}
 
     explicit ConfigurationTest(const std::string & init) :
@@ -84,7 +84,7 @@ BOOST_FIXTURE_TEST_CASE(testFileInitialization, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(indirectSpecifictionOfConfigFile, ConfigurationTest)
 {
-    WdbConfiguration config("file="TEST_DIR"/local.wdb.xml");
+    WdbConfiguration config("file=" WDB_TEST_DIR "/local.wdb.xml");
     BOOST_CHECK_EQUAL("dbname=wdb host=localhost port=5432 user=vegardb", config.pqDatabaseConnectString());
     BOOST_CHECK_EQUAL("vegardb", config.wciUser());
     BOOST_CHECK_EQUAL(expected(), config.query());
@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(indirectSpecifictionOfConfigFile, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(dataProviderAdditionToConfigFile, ConfigurationTest)
 {
-    WdbConfiguration config("file="TEST_DIR"/local.wdb.xml;dataprovider=someone");
+    WdbConfiguration config("file=" WDB_TEST_DIR "/local.wdb.xml;dataprovider=someone");
     BOOST_CHECK_EQUAL("dbname=wdb host=localhost port=5432 user=vegardb", config.pqDatabaseConnectString());
     BOOST_CHECK_EQUAL("vegardb", config.wciUser());
 
@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(dataProviderAdditionToConfigFile, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(removeDataProviderFromConfigFile, ConfigurationTest)
 {
-    WdbConfiguration config("file="TEST_DIR"/local.wdb.xml;dataprovider=-;dataprovider=someone");
+    WdbConfiguration config("file=" WDB_TEST_DIR "/local.wdb.xml;dataprovider=-;dataprovider=someone");
 
     WciReadQuerySpecification s = expected();
     WciReadQuerySpecification spec(0, s.location(), s.referenceTime(), s.validTime(), s.parameter(), s.dataVersion());
@@ -146,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE(parameterInExtraSpec, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(dataVersionAdditionToConfigFile, ConfigurationTest)
 {
-    WdbConfiguration config("file="TEST_DIR"/local.wdb.xml;dataversion=34");
+    WdbConfiguration config("file=" WDB_TEST_DIR "/local.wdb.xml;dataversion=34");
 
     WciReadQuerySpecification spec = expected();
     spec.addDataVersion(34);
@@ -155,7 +155,7 @@ BOOST_FIXTURE_TEST_CASE(dataVersionAdditionToConfigFile, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(removeDataVersionFromConfigFile, ConfigurationTest)
 {
-    WdbConfiguration config("file="TEST_DIR"/local.wdb.xml;dataversion=-;dataversion=4");
+    WdbConfiguration config("file=" WDB_TEST_DIR "/local.wdb.xml;dataversion=-;dataversion=4");
 
     WciReadQuerySpecification s = expected();
     WciReadQuerySpecification spec(s.dataProvider(), s.location(), s.referenceTime(), s.validTime(), s.parameter(), 0);
@@ -166,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(removeDataVersionFromConfigFile, ConfigurationTest)
 BOOST_FIXTURE_TEST_CASE(notIntegerInDataVersion, ConfigurationTest)
 {
     BOOST_CHECK_THROW(
-            WdbConfiguration("file="TEST_DIR"/local.wdb.xml;dataversion=q"),
+            WdbConfiguration("file=" WDB_TEST_DIR "/local.wdb.xml;dataversion=q"),
             std::runtime_error
     );
 }
@@ -211,7 +211,7 @@ BOOST_FIXTURE_TEST_CASE(wciUserInExtraSpec, ConfigurationTest)
 BOOST_FIXTURE_TEST_CASE(missingValueInExtraSpec, ConfigurationTest)
 {
     BOOST_CHECK_THROW(
-            WdbConfiguration("file="TEST_DIR"/local.wdb.xml;dataversion"),
+            WdbConfiguration("file=" WDB_TEST_DIR "/local.wdb.xml;dataversion"),
             std::runtime_error
     );
 }
@@ -219,7 +219,7 @@ BOOST_FIXTURE_TEST_CASE(missingValueInExtraSpec, ConfigurationTest)
 BOOST_FIXTURE_TEST_CASE(rubbishInExtraSpec, ConfigurationTest)
 {
     BOOST_CHECK_THROW(
-            WdbConfiguration("file="TEST_DIR"/local.wdb.xml;qwerty#!$"),
+            WdbConfiguration("file=" WDB_TEST_DIR "/local.wdb.xml;qwerty#!$"),
             std::runtime_error
     );
 }
@@ -227,14 +227,14 @@ BOOST_FIXTURE_TEST_CASE(rubbishInExtraSpec, ConfigurationTest)
 BOOST_FIXTURE_TEST_CASE(emptyContentBetweenSeparators, ConfigurationTest)
 {
     BOOST_CHECK_NO_THROW(
-            WdbConfiguration("file="TEST_DIR"/local.wdb.xml;;;;dataprovider=af")
+            WdbConfiguration("file=" WDB_TEST_DIR "/local.wdb.xml;;;;dataprovider=af")
     );
 }
 
 BOOST_FIXTURE_TEST_CASE(specEndingWithSeparator, ConfigurationTest)
 {
     BOOST_CHECK_NO_THROW(
-            WdbConfiguration("file="TEST_DIR"/local.wdb.xml;dataprovider=af:")
+            WdbConfiguration("file=" WDB_TEST_DIR "/local.wdb.xml;dataprovider=af:")
     );
 }
 

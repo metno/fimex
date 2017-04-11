@@ -29,8 +29,10 @@
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
+
+#define BOOST_TEST_MODULE fimex
+
 #include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include <unistd.h>
 #include <iostream>
@@ -45,26 +47,32 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
+namespace {
 struct TestConfig {
     char oldDir[2048];
-    TestConfig() {
-        string topSrcDir(TOP_SRCDIR);
-        char* cwd = getcwd(oldDir, 2048);
-        assert(cwd == oldDir);
-        if (chdir((topSrcDir+"/test/data").c_str()) != 0) {
-            std::cerr << "cannot go to: " << (topSrcDir+"/test/data") << endl;
-            BOOST_CHECK(false);
-        }
-    }
-    ~TestConfig() {
-        if (chdir(oldDir) != 0) {
-            std::cerr << "cannot go to: " << oldDir << endl;
-            BOOST_CHECK(false);
-        }
-    }
+    TestConfig();
+    ~TestConfig();
 };
+TestConfig::TestConfig()
+{
+    string topSrcDir(TOP_SRCDIR);
+    char* cwd = getcwd(oldDir, sizeof(oldDir));
+    assert(cwd == oldDir);
+    if (chdir((topSrcDir+"/test/data").c_str()) != 0) {
+        std::cerr << "cannot go to: " << (topSrcDir+"/test/data") << endl;
+        BOOST_CHECK(false);
+    }
+}
+TestConfig::~TestConfig()
+{
+    if (chdir(oldDir) != 0) {
+        std::cerr << "cannot go to: " << oldDir << endl;
+        BOOST_CHECK(false);
+    }
+}
+} // namespace
 
-BOOST_GLOBAL_FIXTURE(TestConfig)
+BOOST_FIXTURE_TEST_SUITE(suite, TestConfig);
 
 BOOST_AUTO_TEST_CASE( test_joinExisting )
 {
@@ -167,6 +175,7 @@ BOOST_AUTO_TEST_CASE( test_union )
 
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
 #else
 // no boost testframework

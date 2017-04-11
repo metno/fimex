@@ -11,10 +11,9 @@ wdbTest_SOURCES = \
 	wdb/GlobalWdbConfigurationTest.cpp \
 	wdb/TimeHandlerTest.cpp
 
-wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
+wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DWDB_TEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
 wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
-
-LDADD += @BOOST_PROGRAM_OPTIONS_LIB@
+wdbTest_LDADD = $(LDADD) @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_SYSTEM_LIB@
 
 test_wdb: wdbTest
 	@./wdbTest

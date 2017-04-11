@@ -3,7 +3,7 @@ AC_INIT([fimex],m4_esyscmd([grep MIFI_VERSION_STRING include/fimex/CDMconstants.
 AM_INIT_AUTOMAKE([tar-pax -Wall foreign subdir-objects])
 
 AC_CONFIG_MACRO_DIR([m4])
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR]) # AM_PROG_AR only available after automake 1.11.2
 AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_LIBTOOL
