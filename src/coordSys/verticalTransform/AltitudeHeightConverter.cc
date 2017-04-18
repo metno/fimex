@@ -51,7 +51,7 @@ AltitudeHeightConverter::AltitudeHeightConverter(CDMReaderPtr reader, CoordSysPt
 {
     // FIXME next lines copied from CDMProcessor::addVerticalVelocity()
     const std::string stdName = reader->getCDM().getAttribute(topography, "standard_name").getStringValue();
-    if (stdName == "altitude" || stdName == "geopotential_height") {
+    if (stdName == "surface_altitude" || stdName == "altitude" || stdName == "geopotential_height") {
         topographyUnit_ = "m";
     } else {
         topographyFactor_ /= MIFI_EARTH_GRAVITY;

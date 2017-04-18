@@ -217,7 +217,7 @@ void CDMProcessor::addVerticalVelocity()
     LOG4FIMEX(logger, Logger::DEBUG, "found x_wind, y_wind, temp: '" << vvcs.at(0).xWind << "','" << vvcs.at(0).yWind << "', '" << vvcs.at(0).temp << "'");
 
     // find geopotential, surface_geopotential or geopotential_height (units: m) (2d)
-    vector<string> geopots = cdm_->findVariables("standard_name","(surface_geopotential|altitude|geopotential_height|geopotential)");
+    vector<string> geopots = cdm_->findVariables("standard_name","(surface_geopotential|altitude|surface_altitude|geopotential_height|geopotential)");
     for (vector<VerticalVelocityComps>::iterator vvcIt = vvcs.begin(); vvcIt != vvcs.end(); vvcIt++) {
         for (vector<string>::iterator gpIt = geopots.begin(); gpIt != geopots.end(); gpIt++) {
             CoordSysPtr gpCs = findCompleteCoordinateSystemFor(coordSys, *gpIt);
@@ -237,7 +237,7 @@ void CDMProcessor::addVerticalVelocity()
                         }
                         string stdName = cdm_->getAttribute(*gpIt, "standard_name").getStringValue();
                         string gpUnit;
-                        if (stdName == "altitude" || stdName == "geopotential_height") {
+                        if (stdName == "surface_altitude" || stdName == "altitude" || stdName == "geopotential_height") {
                             gpUnit = "m";
                         } else {
                             gpUnit = "1/9.81*m^2/s^2"; // division of gepotential by gravity
