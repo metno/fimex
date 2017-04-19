@@ -30,7 +30,7 @@ VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReaderPtr reade
     dims.push_back(xAxis->getShape()[0]);
     dims.push_back(yAxis->getShape()[0]);
     map<string, string> attrs;
-    attrs["standard_name"] = "(surface_geopotential|altitude|geopotential_height|geopotential)";
+    attrs["standard_name"] = "(surface_geopotential|surface_altitude|altitude|geopotential_height|geopotential)";
 
     vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
     if (topoVars.empty()) {
