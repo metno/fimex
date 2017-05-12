@@ -39,6 +39,7 @@
 #include "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include "fimex/coordSys/MercatorProjection.h"
+#include "fimex/coordSys/ObliqueMercatorProjection.h"
 #include "fimex/coordSys/OrthographicProjection.h"
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
