@@ -232,11 +232,13 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
+	coordSys/GeostationaryProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
 	coordSys/LambertConformalConicProjection.cc \
 	coordSys/LambertCylindricalEqualAreaProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
+	coordSys/ObliqueMercatorProjection.cc \
 	coordSys/OrthographicProjection.cc \
 	coordSys/PolarStereographicProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
@@ -395,11 +397,13 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	coordSys/ProjectionImpl.lo \
 	coordSys/AlbersConicalEqualAreaProjection.lo \
 	coordSys/AzimuthalEquidistantProjection.lo \
+	coordSys/GeostationaryProjection.lo \
 	coordSys/LambertAzimuthalEqualAreaProjection.lo \
 	coordSys/LambertConformalConicProjection.lo \
 	coordSys/LambertCylindricalEqualAreaProjection.lo \
 	coordSys/LatitudeLongitudeProjection.lo \
 	coordSys/MercatorProjection.lo \
+	coordSys/ObliqueMercatorProjection.lo \
 	coordSys/OrthographicProjection.lo \
 	coordSys/PolarStereographicProjection.lo \
 	coordSys/RotatedLatitudeLongitudeProjection.lo \
@@ -746,11 +750,13 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
+	coordSys/GeostationaryProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
 	coordSys/LambertConformalConicProjection.cc \
 	coordSys/LambertCylindricalEqualAreaProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
+	coordSys/ObliqueMercatorProjection.cc \
 	coordSys/OrthographicProjection.cc \
 	coordSys/PolarStereographicProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
@@ -901,6 +907,8 @@ coordSys/AlbersConicalEqualAreaProjection.lo:  \
 	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
 coordSys/AzimuthalEquidistantProjection.lo: coordSys/$(am__dirstamp) \
 	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/GeostationaryProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
 coordSys/LambertAzimuthalEqualAreaProjection.lo:  \
 	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
 coordSys/LambertConformalConicProjection.lo: coordSys/$(am__dirstamp) \
@@ -910,6 +918,8 @@ coordSys/LambertCylindricalEqualAreaProjection.lo:  \
 coordSys/LatitudeLongitudeProjection.lo: coordSys/$(am__dirstamp) \
 	coordSys/$(DEPDIR)/$(am__dirstamp)
 coordSys/MercatorProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/ObliqueMercatorProjection.lo: coordSys/$(am__dirstamp) \
 	coordSys/$(DEPDIR)/$(am__dirstamp)
 coordSys/OrthographicProjection.lo: coordSys/$(am__dirstamp) \
 	coordSys/$(DEPDIR)/$(am__dirstamp)
@@ -1130,6 +1140,8 @@ mostlyclean-compile:
 	-rm -f coordSys/CoordinateAxis.lo
 	-rm -f coordSys/CoordinateSystem.$(OBJEXT)
 	-rm -f coordSys/CoordinateSystem.lo
+	-rm -f coordSys/GeostationaryProjection.$(OBJEXT)
+	-rm -f coordSys/GeostationaryProjection.lo
 	-rm -f coordSys/LambertAzimuthalEqualAreaProjection.$(OBJEXT)
 	-rm -f coordSys/LambertAzimuthalEqualAreaProjection.lo
 	-rm -f coordSys/LambertConformalConicProjection.$(OBJEXT)
@@ -1140,6 +1152,8 @@ mostlyclean-compile:
 	-rm -f coordSys/LatitudeLongitudeProjection.lo
 	-rm -f coordSys/MercatorProjection.$(OBJEXT)
 	-rm -f coordSys/MercatorProjection.lo
+	-rm -f coordSys/ObliqueMercatorProjection.$(OBJEXT)
+	-rm -f coordSys/ObliqueMercatorProjection.lo
 	-rm -f coordSys/OrthographicProjection.$(OBJEXT)
 	-rm -f coordSys/OrthographicProjection.lo
 	-rm -f coordSys/PolarStereographicProjection.$(OBJEXT)
@@ -1366,11 +1380,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordSysUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordinateAxis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordinateSystem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/GeostationaryProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/MercatorProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/ObliqueMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/OrthographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/Projection.Plo@am__quote@
