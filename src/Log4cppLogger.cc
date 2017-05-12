@@ -80,9 +80,9 @@ void Log4cppClass::configureMinimal(Logger::LogLevel logLevel)
         appender1->setLayout(new log4cpp::BasicLayout());
         root.addAppender(appender1);
     }
-    if (fimex.getChainedPriority() == log4cpp::Priority::NOTSET) {
-        fimex.setPriority(logLevel2cppPriority(logLevel));
-    }
+    const log4cpp::Priority::Value log4cppLevel = logLevel2cppPriority(logLevel);
+    if (fimex.getChainedPriority() < log4cppLevel)
+        fimex.setPriority(log4cppLevel);
 }
 
 } /* namespace MetNoFimex */
