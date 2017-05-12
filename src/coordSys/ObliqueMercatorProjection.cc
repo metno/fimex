@@ -71,7 +71,6 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
 
     // azimuth of central line
     double azimuthOfCentralLine = 0.;
-    boost::smatch what;
     if (boost::regex_search(proj4Str, what, boost::regex("\\+alpha=(\\S+)"))) {
         azimuthOfCentralLine = string2type<double>(what[1].str());
     }
