@@ -80,6 +80,11 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
     if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
         attrs.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
     }
+
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+no_rot"))) {
+            attrs.push_back(CDMAttribute("no_rotation", ""));
+        }
+
     proj4GetEarthAttributes(proj4Str, attrs);
     attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
@@ -92,6 +97,7 @@ std::ostream& ObliqueMercatorProjection::getProj4ProjectionPart(std::ostream& op
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
     addParameterToStream(oproj, "azimuth_of_central_line", " +alpha=");
     addParameterToStream(oproj, "scale_factor_at_projection_origin", " +k_0=");
+    addParameterToStream(oproj, "no_rotation", " +no_rot");
     return oproj;
 }
 
