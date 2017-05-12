@@ -24,9 +24,9 @@
  */
 #define MIFI_VERSION_MAJOR  0
 #define MIFI_VERSION_MINOR 63
-#define MIFI_VERSION_PATCH  6
+#define MIFI_VERSION_PATCH  7
 #define MIFI_VERSION_STATUS 0xF0
-#define MIFI_VERSION_STRING "0.63.6"
+#define MIFI_VERSION_STRING "0.63.7"
 
 #define MIFI_VERSION_INT(major,minor,patch) \
     (1000000*major + 1000*minor + patch)
