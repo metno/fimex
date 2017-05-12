@@ -93,7 +93,7 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
 std::ostream& ObliqueMercatorProjection::getProj4ProjectionPart(std::ostream& oproj) const
 {
     oproj << "+proj=omerc";
-    addParameterToStream(oproj, "longitude_of_projection_orgin", " +lonc=");
+    addParameterToStream(oproj, "longitude_of_projection_origin", " +lonc=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
     addParameterToStream(oproj, "azimuth_of_central_line", " +alpha=");
     addParameterToStream(oproj, "scale_factor_at_projection_origin", " +k_0=");
