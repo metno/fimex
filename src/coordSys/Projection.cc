@@ -34,6 +34,7 @@
 // list over supported projections
 #include "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
 #include "fimex/coordSys/AzimuthalEquidistantProjection.h"
+#include "fimex/coordSys/GeostationaryProjection.h"
 #include "fimex/coordSys/LambertAzimuthalEqualAreaProjection.h"
 #include "fimex/coordSys/LambertConformalConicProjection.h"
 #include "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
