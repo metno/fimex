@@ -73,6 +73,7 @@ std::vector<CDMAttribute> GeostationaryProjection::parametersFromProj4(const std
     if (boost::regex_search(proj4Str, what, boost::regex("\\+sweep=(\\S+)"))) {
         sweep = what[1].str();
     }
+    attrs.push_back(CDMAttribute("sweep_axis", sweep));
 
     proj4GetEarthAttributes(proj4Str, attrs);
     attrs.push_back(CDMAttribute("proj4", proj4Str));
