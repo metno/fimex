@@ -40,7 +40,7 @@ VerticalPerspectiveProjection::VerticalPerspectiveProjection()
 
 bool VerticalPerspectiveProjection::acceptsProj4(const std::string& proj4Str)
 {
-    return proj4ProjectionMatchesName(proj4Str, "geos");
+    return proj4ProjectionMatchesName(proj4Str, "nsper");
 }
 
 std::vector<CDMAttribute> VerticalPerspectiveProjection::parametersFromProj4(const std::string& proj4Str)
@@ -77,7 +77,7 @@ std::vector<CDMAttribute> VerticalPerspectiveProjection::parametersFromProj4(con
 
 std::ostream& VerticalPerspectiveProjection::getProj4ProjectionPart(std::ostream& oproj) const
 {
-    oproj << "+proj=geos";
+    oproj << "+proj=nsper";
     addParameterToStream(oproj, "longitude_of_projection_origin", " +lon_0=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
     addParameterToStream(oproj, "perspective_point_height", " +h=");
