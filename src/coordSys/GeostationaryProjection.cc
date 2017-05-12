@@ -1,4 +1,4 @@
-geostationary/*
+/*
  * Fimex, GeostationaryProjection.cc
  *
  * (C) Copyright 2011, met.no
