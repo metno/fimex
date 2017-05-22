@@ -34,11 +34,13 @@
 // list over supported projections
 #include "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
 #include "fimex/coordSys/AzimuthalEquidistantProjection.h"
+#include "fimex/coordSys/GeostationaryProjection.h"
 #include "fimex/coordSys/LambertAzimuthalEqualAreaProjection.h"
 #include "fimex/coordSys/LambertConformalConicProjection.h"
 #include "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include "fimex/coordSys/MercatorProjection.h"
+#include "fimex/coordSys/ObliqueMercatorProjection.h"
 #include "fimex/coordSys/OrthographicProjection.h"
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
@@ -157,6 +159,8 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
             proj = boost::shared_ptr<Projection>(new AlbersConicalEqualAreaProjection());
         } else if (projName == "azimuthal_equidistant") {
                     proj =  boost::shared_ptr<Projection>(new AzimuthalEquidistantProjection());
+        } else if (projName == "geostationary") {
+            proj =  boost::shared_ptr<Projection>(new GeostationaryProjection());
         } else if (projName == "lambert_azimuthal_equal_area") {
             proj =  boost::shared_ptr<Projection>(new LambertAzimuthalEqualAreaProjection());
         } else if (projName == "lambert_conformal_conic") {
@@ -167,6 +171,8 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
             proj =  boost::shared_ptr<Projection>(new LatitudeLongitudeProjection());
         } else if (projName == "mercator") {
             proj =  boost::shared_ptr<Projection>(new MercatorProjection());
+        } else if (projName == "oblique_mercator") {
+            proj =  boost::shared_ptr<Projection>(new ObliqueMercatorProjection());
         } else if (projName == "orthographic") {
             proj =  boost::shared_ptr<Projection>(new OrthographicProjection());
         } else if (projName == "polar_stereographic") {
@@ -196,6 +202,8 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
         attrs = AlbersConicalEqualAreaProjection::parametersFromProj4(projStr);
     } else if (AzimuthalEquidistantProjection::acceptsProj4(projStr)) {
         attrs = AzimuthalEquidistantProjection::parametersFromProj4(projStr);
+    } else if (GeostationaryProjection::acceptsProj4(projStr)) {
+        attrs = GeostationaryProjection::parametersFromProj4(projStr);
     } else if (LambertAzimuthalEqualAreaProjection::acceptsProj4(projStr)) {
         attrs = LambertAzimuthalEqualAreaProjection::parametersFromProj4(projStr);
     } else if (LambertConformalConicProjection::acceptsProj4(projStr)) {
@@ -206,6 +214,8 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
         attrs = LatitudeLongitudeProjection::parametersFromProj4(projStr);
     } else if (MercatorProjection::acceptsProj4(projStr)) {
         attrs = MercatorProjection::parametersFromProj4(projStr);
+    } else if (ObliqueMercatorProjection::acceptsProj4(projStr)) {
+        attrs = ObliqueMercatorProjection::parametersFromProj4(projStr);
     } else if (OrthographicProjection::acceptsProj4(projStr)) {
         attrs = OrthographicProjection::parametersFromProj4(projStr);
     } else if (PolarStereographicProjection::acceptsProj4(projStr)) {

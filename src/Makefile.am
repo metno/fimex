@@ -65,11 +65,13 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/ProjectionImpl.cc \
                      coordSys/AlbersConicalEqualAreaProjection.cc \
                      coordSys/AzimuthalEquidistantProjection.cc \
+                     coordSys/GeostationaryProjection.cc \
                      coordSys/LambertAzimuthalEqualAreaProjection.cc \
                      coordSys/LambertConformalConicProjection.cc \
                      coordSys/LambertCylindricalEqualAreaProjection.cc \
                      coordSys/LatitudeLongitudeProjection.cc \
                      coordSys/MercatorProjection.cc \
+                     coordSys/ObliqueMercatorProjection.cc \
                      coordSys/OrthographicProjection.cc \
                      coordSys/PolarStereographicProjection.cc \
                      coordSys/RotatedLatitudeLongitudeProjection.cc \
