@@ -185,8 +185,10 @@ void Logger::reset()
 #pragma omp critical (MIFI_LOGGER)
     {
 #endif
-        getLoggerClass()->forget(this);
-        pimpl_.reset(0);
+        if (pimpl_.get() != 0) {
+            getLoggerClass()->forget(this);
+            pimpl_.reset(0);
+        }
 #ifdef _OPENMP
     }
 #endif
