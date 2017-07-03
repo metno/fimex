@@ -140,6 +140,8 @@ private:
     void initAttributeNameChange();
     void initAddReassignAttribute();
 
+    DataPtr applyVariableTypeChange(DataPtr data, const std::string &varName, const std::string &orgVarName);
+
     std::string configId;
     boost::shared_ptr<XMLDoc> doc;
     std::auto_ptr<MutexType> mutex_;

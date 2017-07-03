@@ -520,7 +520,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
             data = dataReader->getDataSlice(orgVarName, sb);
         } else {
             // one dimension has size 0 -> 0 length data
-            data = createData(dataReader->getCDM().getVariable(orgVarName).getDataType(), 0, 0.0);
+            data = createData(dataReader->getCDM().getVariable(varName).getDataType(), 0); // no data type conversion necessary
         }
     } else {
         // check if extended unlimited dimension slice
@@ -528,26 +528,13 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
                 (orgCDM.getVariable(orgVarName).checkDimension(orgUnlimDim->getName())) &&
                 (orgUnlimDim->getLength() <= unLimDimPos)) {
             LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
-            data = createData(cdm_->getVariable(varName).getDataType(), 0);
+            return createData(cdm_->getVariable(varName).getDataType(), 0); // no data type conversion necessary
         } else {
             // get data as usual
             data = dataReader->getDataSlice(orgVarName, unLimDimPos);
         }
     }
-    // eventually, change the type from the old type to the new type
-    map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
-    if (dtIt != variableTypeChanges.end()) {
-        double orgFill = orgCDM.getFillValue(orgVarName);
-        double orgScale = orgCDM.getScaleFactor(orgVarName);
-        double orgOffset = orgCDM.getAddOffset(orgVarName);
-
-        double newFill = cdm_->getFillValue(varName);
-        double newScale = cdm_->getScaleFactor(varName);
-        double newOffset = cdm_->getAddOffset(varName);
-
-        data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
-    }
-    return data;
+    return applyVariableTypeChange(data, varName, orgVarName);
 }
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -596,23 +583,26 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
 
     // get data from original source with slicebuilder
     DataPtr data = dataReader->getDataSlice(orgVarName, orgSb);
+    return applyVariableTypeChange(data, varName, orgVarName);
+}
 
+DataPtr NcmlCDMReader::applyVariableTypeChange(DataPtr data, const std::string& varName, const std::string& orgVarName)
+{
     // eventually, change the type from the old type to the new type
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
-    if (dtIt != variableTypeChanges.end()) {
-        const CDM& orgCDM = dataReader->getCDM();
-        double orgFill = orgCDM.getFillValue(orgVarName);
-        double orgScale = orgCDM.getScaleFactor(orgVarName);
-        double orgOffset = orgCDM.getAddOffset(orgVarName);
+    if (dtIt == variableTypeChanges.end())
+        return data;
 
-        double newFill = cdm_->getFillValue(varName);
-        double newScale = cdm_->getScaleFactor(varName);
-        double newOffset = cdm_->getAddOffset(varName);
+    const CDM& orgCDM = dataReader->getCDM();
+    double orgFill = orgCDM.getFillValue(orgVarName);
+    double orgScale = orgCDM.getScaleFactor(orgVarName);
+    double orgOffset = orgCDM.getAddOffset(orgVarName);
 
-        data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
-    }
+    double newFill = cdm_->getFillValue(varName);
+    double newScale = cdm_->getScaleFactor(varName);
+    double newOffset = cdm_->getAddOffset(varName);
 
-    return data;
+    return data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
 }
 
 }
