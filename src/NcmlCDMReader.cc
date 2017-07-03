@@ -551,7 +551,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     ScopedCritical sc(*mutex_);
-    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", sb)");
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", " << sb << ")");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
