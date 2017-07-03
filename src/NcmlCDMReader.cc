@@ -496,7 +496,6 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
     DataPtr data;
     const CDM& orgCDM = dataReader->getCDM();
     const CDMDimension* orgUnlimDim = orgCDM.getUnlimitedDim();
-    string orgUnlimDimNm = (orgUnlimDim != 0) ? orgUnlimDim->getName() : "";
     const CDMDimension* unlimDim = cdm_->getUnlimitedDim();
     string unlimDimNm = (unlimDim != 0) ? unlimDim->getName() : "";
     if ( (unlimitedDimensionChanges.size() > 0) &&
