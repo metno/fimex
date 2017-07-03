@@ -498,17 +498,17 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
     const CDMDimension* orgUnlimDim = orgCDM.getUnlimitedDim();
     const CDMDimension* unlimDim = cdm_->getUnlimitedDim();
     string unlimDimNm = (unlimDim != 0) ? unlimDim->getName() : "";
-    if ( (unlimitedDimensionChanges.size() > 0) &&
-         find(cdm_->getVariable(varName).getShape().begin(),
-              cdm_->getVariable(varName).getShape().end(),
-              unlimitedDimensionChanges.begin()->first) != cdm_->getVariable(varName).getShape().end()
-       ) {
+    const vector<string>& shape = cdm_->getVariable(varName).getShape();
+    if (!unlimitedDimensionChanges.empty()
+            && find(shape.begin(), shape.end(), unlimitedDimensionChanges.begin()->first) != shape.end())
+    {
         // not working for several unlimited dimensions yet
-        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim " << unlimitedDimensionChanges[unlimDimNm]);
+        const std::string& orgUnlimDim = unlimitedDimensionChanges[unlimDimNm];
+        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim '" << orgUnlimDim << "'");
         SliceBuilder sb(dataReader->getCDM(), orgVarName);
         vector<string> dimNames = sb.getDimensionNames();
-        if (find(dimNames.begin(), dimNames.end(), unlimitedDimensionChanges[unlimDimNm]) != dimNames.end()) {
-            sb.setStartAndSize(unlimitedDimensionChanges[unlimDimNm], unLimDimPos, 1);
+        if (find(dimNames.begin(), dimNames.end(), orgUnlimDim) != dimNames.end()) {
+            sb.setStartAndSize(orgUnlimDim, unLimDimPos, 1);
         }
         //
         const vector<size_t>& sizes = sb.getDimensionSizes();
