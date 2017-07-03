@@ -490,11 +490,8 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
     }
 
     // find the original name, to fetch the data from the dataReader
-    std::string orgVarName = varName;
     map<string, string>::iterator vit = variableNameChanges.find(varName);
-    if (vit != variableNameChanges.end()) {
-        orgVarName = vit->second;
-    }
+    const std::string& orgVarName = (vit != variableNameChanges.end()) ? vit->second : varName;
 
     DataPtr data;
     const CDM& orgCDM = dataReader->getCDM();
