@@ -174,6 +174,16 @@ public:
     bool renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException);
 
     /**
+     * @brief rename a dimension
+     *
+     * Rename a dimension.
+     *
+     * @return false if the original name does not exist.
+     * @throw CDMException if newName already in use and ignoreInUse is false
+     */
+    bool renameDimension(const std::string& oldName, const std::string& newName, bool ignoreInUse) throw(CDMException);
+
+    /**
      * @brief remove a dimension
      *
      * Remove a dimension, if it is not in use by a variable.
@@ -182,6 +192,16 @@ public:
      * @throw CDMException if dimension in us in a variable
      */
     bool removeDimension(const std::string& name) throw(CDMException);
+
+    /**
+     * @brief remove a dimension
+     *
+     * Remove a dimension. Unless ignoreInUse is true, fail if it is in use by a variable.
+     *
+     * @return true if dimension existed, false otherwise
+     * @throw CDMException if dimension in us in a variable unless ignoreInUse is true
+     */
+    bool removeDimension(const std::string& name, bool ignoreInUse) throw(CDMException);
 
     /**
      * @brief retrieve the unlimited dimension

@@ -366,10 +366,12 @@ void NcmlCDMReader::initDimensionNameChange()
     for (int i = 0; i < size; i++) {
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
         if (cdm_->hasDimension(orgName)) {
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            if (name == "") throw CDMException("ncml-file "+ configId + " has no name for dimension with orgName: "+ orgName);
-            cdm_->renameDimension(orgName, name);
-            dimensionNameChanges[name] = orgName;
+            std::string newName = getXmlProp(nodes->nodeTab[i], "name");
+            if (newName == "")
+                throw CDMException("ncml-file "+ configId + " has no new name for dimension with orgName: '" + orgName + "'");
+            bool overwrite = (getXmlProp(nodes->nodeTab[i], "overwriteName") == "true");
+            cdm_->renameDimension(orgName, newName, overwrite);
+            dimensionNameChanges[orgName] = newName;
         }
     }
     // add dimensions not existing
@@ -567,23 +569,21 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
     }
 
     // find the original name, to fetch the data from the dataReader
-    std::string orgVarName = varName;
-    map<string, string>::iterator vit = variableNameChanges.find(varName);
-    if (vit != variableNameChanges.end()) {
-        orgVarName = vit->second;
-    }
+    map<string, string>::const_iterator vit = variableNameChanges.find(varName);
+    const std::string& orgVarName = (vit != variableNameChanges.end()) ? vit->second : varName;
 
     SliceBuilder orgSb(dataReader->getCDM(), orgVarName);
     {
-        vector<string> shape = sb.getDimensionNames();
-        vector<size_t> sizes = sb.getDimensionSizes();
-        vector<size_t> start = sb.getDimensionStartPositions();
-        vector<string> orgShape = orgSb.getDimensionNames();
-        for (size_t i = 0; i < shape.size(); ++i) {
-            string orgDim = dimensionNameChanges[shape.at(i)];
-            if (orgDim == "") orgDim = shape[i]; // no name change
-            if (find(orgShape.begin(), orgShape.end(), orgDim) != orgShape.end()) {
-                orgSb.setStartAndSize(orgDim, start.at(i), sizes.at(i));
+        const vector<string> shape = sb.getDimensionNames();
+        const vector<string> orgShape = orgSb.getDimensionNames();
+        for (size_t i = 0; i < orgShape.size(); ++i) {
+            const std::string& orgDim = orgShape[i];
+            std::map<std::string, std::string>::const_iterator itChanged = dimensionNameChanges.find(orgDim);
+            const std::string& newDim = (itChanged != dimensionNameChanges.end()) ? itChanged->second : orgDim;
+            if (find(shape.begin(), shape.end(), newDim) != shape.end()) {
+                size_t strt, sz;
+                sb.getStartAndSize(newDim, strt, sz);
+                orgSb.setStartAndSize(orgDim, strt, sz);
             }
         }
         // set all other dims to 1

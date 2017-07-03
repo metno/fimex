@@ -88,6 +88,7 @@ Changes are;
       <xsd:attribute name="isVariableLength" type="xsd:boolean" default="false"/>
       <xsd:attribute name="isShared" type="xsd:boolean" default="true"/>
       <xsd:attribute name="orgName" type="xsd:string"/>
+      <xsd:attribute name="overwriteName" type="xsd:boolean" default="false"/>
     </xsd:complexType>
   </xsd:element>
 
