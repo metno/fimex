@@ -1,3 +1,5 @@
+  * 2017-07-04 fimex-0.63.8
+    * bugfix logging cleanup on exit
   * 2017-05-11 fimex-0.63.7
     * bugfix --debug logging
   * 2017-04-05 fimex-0.63.6
