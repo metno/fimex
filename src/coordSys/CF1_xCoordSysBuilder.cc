@@ -233,6 +233,30 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     return listCoordinateSystems(reader->getInternalCDM());
 }
 
+static bool isCSForTerm(const CDM& cdm, const CoordinateSystem& cs, const std::string& term)
+{
+    if (term.empty())
+        return true;
+
+    CoordinateSystem::ConstAxisList csAxesPtr = cs.getAxes();
+    set<string> csAxes;
+    transform(csAxesPtr.begin(), csAxesPtr.end(), inserter(csAxes, csAxes.begin()), getPtrName);
+
+    const set<string> varAxes = getCoordinateAxesNamesCF1_x(cdm, cdm.getVariable(term));
+    for (set<string>::const_iterator vaxit = varAxes.begin(); vaxit != varAxes.end(); ++vaxit) {
+        if (cdm.hasDimension(*vaxit)) {
+            const CDMDimension& dim = cdm.getDimension(*vaxit);
+            if (dim.getLength() == 1) {
+                continue;
+            }
+            if (!csAxes.count(*vaxit)) {
+                LOG4FIMEX(logger, Logger::INFO, "formula_term "<< term << " missing " << *vaxit << " in cs " << cs.id());
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {
@@ -425,24 +449,44 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                     CDMAttribute standardName;
                     if (cdm.getAttribute(zAxis->getName(), "standard_name", standardName)) {
                         const std::string  standardNameValue = standardName.getStringValue();
+
+                        // * check that the CS is a CS for all the formula terms used
+                        // * problem: surface fields often have their own z axis, which makes isCSFor return false!
+
                         if (standardNameValue == "atmosphere_hybrid_sigma_pressure_coordinate") {
+                            if (!(isCSForTerm(cdm, cs, terms["p"]) && isCSForTerm(cdm, cs, terms["ps"]) && isCSForTerm(cdm, cs, terms["p0"])))
+                                continue;
                             if (terms["ap"] == "") {
+                                if (!isCSForTerm(cdm, cs, terms["a"]))
+                                    continue;
                                 cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                         new HybridSigmaPressure2(terms["a"], terms["b"],terms["ps"],terms["p0"])));
                             } else {
+                                if (!isCSForTerm(cdm, cs, terms["ap"]))
+                                    continue;
                                 cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                         new HybridSigmaPressure1(terms["ap"], terms["b"],terms["ps"],terms["p0"])));
                             }
                         } else if (standardNameValue == "atmosphere_ln_pressure_coordinate") {
+                            if (!(isCSForTerm(cdm, cs, terms["lev"]) && isCSForTerm(cdm, cs, terms["p0"])))
+                                continue;
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new LnPressure(terms["lev"], terms["p0"])));
                         } else if (standardNameValue == "atmosphere_sigma_coordinate") {
+                            if (!(isCSForTerm(cdm, cs, terms["sigma"]) && isCSForTerm(cdm, cs, terms["ptop"]) && isCSForTerm(cdm, cs, terms["ps"])))
+                                continue;
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new AtmosphereSigma(terms["sigma"],terms["ptop"],terms["ps"])));
                         } else if (standardNameValue == "ocean_s_coordinate_g1") {
+                            if (!(isCSForTerm(cdm, cs, terms["s"]) && isCSForTerm(cdm, cs, terms["C"]) && isCSForTerm(cdm, cs, terms["depth"])
+                                  && isCSForTerm(cdm, cs, terms["depth_c"]) && isCSForTerm(cdm, cs, terms["eta"])))
+                                continue;
                             cs.setVerticalTransformation(boost::make_shared<OceanSG1>(
                                     OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
                         } else if (standardNameValue == "ocean_s_coordinate_g2") {
+                            if (!(isCSForTerm(cdm, cs, terms["s"]) && isCSForTerm(cdm, cs, terms["C"]) && isCSForTerm(cdm, cs, terms["depth"])
+                                  && isCSForTerm(cdm, cs, terms["depth_c"]) && isCSForTerm(cdm, cs, terms["eta"])))
+                                continue;
                             cs.setVerticalTransformation(boost::make_shared<OceanSG2>(
                                     OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
                         } else {

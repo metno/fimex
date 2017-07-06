@@ -9,8 +9,6 @@
 #include "fimex/SliceBuilder.h"
 #include "fimex/Utils.h"
 
-#include "ArrayLoop.h"
-
 #include <map>
 
 namespace MetNoFimex {
@@ -74,20 +72,156 @@ size_t getSliceSize(const SliceBuilder& sb, const std::string& dimName)
     return size;
 }
 
+ShapeMerger& ShapeMerger::merge(const std::string& varName, bool skipLength1)
+{
+    if (!varName.empty())
+        return merge(rcdm_.getVariable(varName).getShape(), skipLength1);
+    else
+        return *this;
+}
+
+ShapeMerger& ShapeMerger::merge(VerticalConverterPtr vc, bool skipLength1)
+{
+    return merge(vc->getShape(), skipLength1);
+}
+
+const std::string& ShapeMerger::axisDim(CoordinateSystem::ConstAxisPtr axis) const
+{
+    return rcdm_.getVariable(axis->getName()).getShape().front();
+}
+
+ShapeMerger::shape_t::iterator ShapeMerger::findAxis(CoordinateSystem::ConstAxisPtr axis)
+{
+    if (axis)
+        return std::find(shape_.begin(), shape_.end(), axisDim(axis));
+    else
+        return shape_.end();
+}
+
+bool ShapeMerger::equalsAxisDim(const std::string& dim, CoordinateSystem::ConstAxisPtr axis) const
+{
+    return axis && dim == axisDim(axis);
+}
+
+ShapeMerger& ShapeMerger::merge(const shape_t& append, bool skipLength1)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "merge initial shape:");
+    for (size_t i=0; i<shape_.size(); ++i)
+        LOG4FIMEX(logger, Logger::DEBUG, "shape_[" << i << "]='" << shape_[i] << "'");
+    LOG4FIMEX(logger, Logger::DEBUG, "merge adding shape:");
+    for (size_t i=0; i<append.size(); ++i)
+        LOG4FIMEX(logger, Logger::DEBUG, "append[" << i << "]='" << append[i] << "'");
+
+    // not sure if it would be better to use cs_ to construct a shape ...
+    for (shape_t::const_iterator it = append.begin(); it != append.end(); ++it) {
+        if (skipLength1) {
+            if (rcdm_.getDimension(*it).getLength() == 1)
+                continue;
+        }
+        if (std::find(shape_.begin(), shape_.end(), *it) != shape_.end()) {
+            LOG4FIMEX(logger, Logger::DEBUG, "not appending '" << *it << "', already in shape_");
+            continue;
+        }
+
+        // need to insert at a good position: x,y,z,others,time, see CF
+        shape_t::iterator itI = shape_.end();
+        bool placement = false;
+        if (equalsAxisDim(*it, cs_->getGeoXAxis())) {
+            itI = shape_.begin(); // x axis first
+            placement = true;
+            LOG4FIMEX(logger, Logger::DEBUG, "inserting x axis '" << *it << "' at start");
+        } else if (equalsAxisDim(*it, cs_->getGeoYAxis())) {
+            LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "'");
+            shape_t::iterator itF;
+            if ((itF = findAxis(cs_->getGeoXAxis())) != shape_.end()) {
+                itI = ++itF; // y after x
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "' after x");
+            }
+            if (!placement && (itF = findAxis(cs_->getGeoZAxis())) != shape_.end()) {
+                itI = itF; // y before z
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "' before z");
+            }
+            if (!placement) {
+                itI = shape_.begin();
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "inserting y axis '" << *it << "' at start");
+            }
+        } else if (equalsAxisDim(*it, cs_->getGeoZAxis())) {
+            LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "'");
+            shape_t::iterator itF;
+            if ((itF = findAxis(cs_->getGeoYAxis())) != shape_.end()) {
+                itI = ++itF; // z after y
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "' after y");
+            }
+            if (!placement && (itF = findAxis(cs_->getGeoXAxis())) != shape_.end()) {
+                itI = ++itF; // z after x if no y
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "' after x because no y");
+            }
+            if (!placement) {
+                itI = shape_.begin();
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "inserting z axis '" << *it << "' at start");
+            }
+        } else if (equalsAxisDim(*it, cs_->getTimeAxis())) {
+            // itI = shape_.end(); time at end
+            placement = true;
+            LOG4FIMEX(logger, Logger::DEBUG, "appending t axis '" << *it << "' at end");
+        }
+        if (!placement) {
+            shape_t::iterator itF;
+            if ((itF = findAxis(cs_->getTimeAxis())) != shape_.end()) {
+                itI = itF; // insert before t
+                placement = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "inserting axis '" << *it << "' before time axis");
+            }
+        }
+        shape_.insert(itI, *it);
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "merge final shape:");
+    for (size_t i=0; i<shape_.size(); ++i)
+        LOG4FIMEX(logger, Logger::DEBUG, "shape_[" << i << "]='" << shape_[i] << "'");
+    return *this;
+}
+
+static void copySliceBuilder(SliceBuilder& sbVar, const SliceBuilder& sb)
+{
+    const string_v& varDimNames = sbVar.getDimensionNames();
+    const string_v& orgDimNames = sb.getDimensionNames();
+    for (string_v::const_iterator itO = orgDimNames.begin(); itO != orgDimNames.end(); ++itO) {
+        LOG4FIMEX(logger, Logger::DEBUG, "*itO='" << *itO << "'");
+    }
+    for (string_v::const_iterator itD = varDimNames.begin(); itD != varDimNames.end(); ++itD) {
+        LOG4FIMEX(logger, Logger::DEBUG, "*itD='" << *itD << "'");
+        if (std::find(orgDimNames.begin(), orgDimNames.end(), *itD) != orgDimNames.end()) {
+            size_t start, size;
+            sb.getStartAndSize(*itD, start, size);
+            LOG4FIMEX(logger, Logger::DEBUG, "*itD copy start=" << start << " size=" << size);
+            sbVar.setStartAndSize(*itD, start, size);
+        } else {
+            size_t start, size;
+            sbVar.getStartAndSize(*itD, start, size);
+            LOG4FIMEX(logger, Logger::DEBUG, "*itD default start=" << start << " size=" << size);
+        }
+    }
+}
+
 SliceBuilder adaptSliceBuilder(const CDM& cdm, const std::string& varName, const SliceBuilder& sb)
 {
     SliceBuilder sbVar(cdm, varName);
-    const string_v& orgDimNames = sb.getDimensionNames();
-    const string_v& varShape = cdm.getVariable(varName).getShape();
-    for (string_v::const_iterator itD = varShape.begin(); itD != varShape.end(); ++itD) {
-        const string_v::const_iterator itS = std::find(orgDimNames.begin(), orgDimNames.end(), *itD);
-        if (itS != orgDimNames.end()) {
-            size_t start, size;
-            sb.getStartAndSize(*itD, start, size);
-            sbVar.setStartAndSize(*itD, start, size);
-        }
-    }
+    copySliceBuilder(sbVar, sb);
     return sbVar;
+}
+
+SliceBuilder adaptSliceBuilder(const CDM& cdm, VerticalConverterPtr converter, const SliceBuilder& sb)
+{
+    const string_v& conShape= converter->getShape();
+    SliceBuilder sbCon(conShape, getDimSizes(cdm, conShape));
+    copySliceBuilder(sbCon, sb);
+    return sbCon;
 }
 
 DataPtr getSliceData(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
@@ -197,7 +331,7 @@ ArrayDims makeArrayDims(const CDM& cdm, boost::shared_ptr<VerticalConverter> con
 ArrayDims makeArrayDims(const SliceBuilder& sb)
 {
     const string_v dimNames = sb.getDimensionNames();
-    const size_v dimSizes = sb.getDimensionSizes();
+    const size_v& dimSizes = sb.getDimensionSizes();
     return ArrayDims(dimNames, dimSizes);
 }
 
@@ -234,5 +368,44 @@ DataPtr checkData(DataPtr data, size_t expected, const std::string& what)
         throw CDMException("no data for '" + what + "'");
     return checkSize(data, expected, what);
 }
+
+Var::Var(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+    : sb(adaptSliceBuilder(reader->getCDM(), varName, sbOrig))
+    , dims(makeArrayDims(sb))
+    , data(getSliceData(reader, sb, varName, unit))
+{
+}
+
+Var::Var(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+    : sb(adaptSliceBuilder(reader->getCDM(), converter, sbOrig))
+    , dims(makeArrayDims(sb))
+    , data(converter->getDataSlice(sb))
+{
+}
+
+VarFloat::VarFloat(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+    : Var(reader, varName, unit, sbOrig)
+    , values(data ? data->asFloat() : boost::shared_array<float>())
+{
+}
+
+VarFloat::VarFloat(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+    : Var(reader, converter, sbOrig)
+    , values(data ? data->asFloat() : boost::shared_array<float>())
+{
+}
+
+VarDouble::VarDouble(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+    : Var(reader, varName, unit, sbOrig)
+    , values(data ? data->asDouble() : boost::shared_array<double>())
+{
+}
+
+VarDouble::VarDouble(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+    : Var(reader, converter, sbOrig)
+    , values(data ? data->asDouble() : boost::shared_array<double>())
+{
+}
+
 
 } // namespace MetNoFimex

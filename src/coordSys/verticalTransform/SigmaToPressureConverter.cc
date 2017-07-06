@@ -40,41 +40,33 @@ using std::vector;
 
 std::vector<std::string> SigmaToPressureConverter::getShape() const
 {
-    // combine shapes of a, b (length = height) and ps (other dimensions)
-    std::vector<std::string> shape = reader_->getCDM().getVariable(ps_).getShape();
-    shape.insert(shape.begin() + 2, cs_->getGeoZAxis()->getName()); // FIXME this is a crazy hack!
-    return shape;
+    return ShapeMerger(reader_->getCDM(), cs_)
+            .merge(ps_, true)
+            .merge(ptop_, true)
+            .merge(sigma_, true)
+            .shape();
 }
 
 DataPtr SigmaToPressureConverter::getDataSlice(const SliceBuilder& sb) const
 {
-    DataPtr psData = getSliceData(reader_, sb, ps_, "hPa");
+    VarDouble ps(reader_, ps_, "hPa", sb);
+    VarDouble ptop(reader_, ptop_, "hPa", sb);
+    VarDouble sigma(reader_, sigma_, "", sb);
 
-    const size_t unLimDimPos = 0;
-    const vector<double> sigma = getDataSliceInUnit(reader_, sigma_, "", unLimDimPos);
-    const double ptop = getDataSliceInUnit(reader_, ptop_, "hPa", unLimDimPos).front();
+    ArrayDims out_dims = makeArrayDims(sb);
+    boost::shared_array<double> out_values(new double[out_dims.volume()]);
 
-    const size_t nx = getSliceSize(sb, cs_->getGeoXAxis()->getName());
-    const size_t ny = getSliceSize(sb, cs_->getGeoYAxis()->getName());
-    const size_t nl = getSliceSize(sb, cs_->getGeoZAxis()->getName());
-    const size_t sizeXY = nx*ny, sizeXYZ = sizeXY*nl;
-    const size_t size = psData->size() * nl, sizeOther = size / sizeXYZ;
+    enum { PS, PTOP, SIGMA, OUT };
+    ArrayGroup group;
+    group.add(ps.dims).add(ptop.dims).add(sigma.dims).add(out_dims);
 
-    boost::shared_array<double> pVal(new double[size]);
-
-    // loop over all dims but z, calculate pressure
-    // FIXME the following code assumes that x,y,z are the lowest dimensions for all variables
-    size_t offset = 0, offsetSurface = 0;
-    for (size_t i=0; i<sizeOther; ++i, offset += sizeXYZ, offsetSurface += sizeXY) {
-        for (size_t xy=0; xy < sizeXY; ++xy) {
-            const size_t idxSurface = offsetSurface + xy;
-            for (size_t l = 0; l < nl; l += 1) {
-                const size_t idx = offset + xy + l*sizeXY;
-                mifi_atmosphere_sigma_pressure(1, ptop, ps_[idxSurface], &sigma[l], &pVal[idx]);
-            }
-        }
-    }
-    return createData(size, pVal);
+    const size_t shared = group.sharedVolume();
+    Loop loop(group);
+    do {
+        mifi_atmosphere_sigma_pressure(shared, ptop.values[loop[PTOP]], ps.values[loop[PS]],
+                &sigma.values[loop[SIGMA]], &out_values[loop[OUT]]);
+    } while (loop.next());
+    return createData(out_dims.volume(), out_values);
 }
 
 } // namespace MetNoFimex

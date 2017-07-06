@@ -24,43 +24,37 @@ VerticalConverterPtr HybridSigmaToPressureConverter::createConverter(CDMReaderPt
 
 std::vector<std::string> HybridSigmaToPressureConverter::getShape() const
 {
-    // combine shapes of a, b (length = height) and ps (other dimensions)
-    std::vector<std::string> shape = reader_->getCDM().getVariable(ps_).getShape();
-    shape[2] = cs_->getGeoZAxis()->getName(); // FIXME this is a crazy hack!
-    return shape;
+    return ShapeMerger(reader_->getCDM(), cs_)
+            .merge(ps_, true)
+            .merge(p0_, true) // empty p0_ handled in ShapeMerger
+            .merge(a_, true)
+            .merge(b_, true)
+            .shape();
 }
 
 DataPtr HybridSigmaToPressureConverter::getDataSlice(const SliceBuilder& sb) const
 {
-    int unLimDimPos = 0; // TODO is this correct?
-    const vector<double> aVec = getDataSliceInUnit(reader_, a_, "", unLimDimPos);
-    const vector<double> bVec = getDataSliceInUnit(reader_, b_, "", unLimDimPos);
+    VarDouble ps(reader_, ps_, "hPa", sb);
+    VarDouble a(reader_, a_, "", sb);
+    VarDouble b(reader_, b_, "", sb);
+
+    ArrayDims out_dims = makeArrayDims(sb);
+    boost::shared_array<double> out_values(new double[out_dims.volume()]);
+
+    enum { PS, A, B, OUT };
+    ArrayGroup group;
+    group.add(ps.dims).add(a.dims).add(b.dims).add(out_dims);
+
+    const int unLimDimPos = 0; // TODO is this correct?
     const double p0 = getDataSliceInUnit(reader_, p0_, "hPa", unLimDimPos).front();
 
-    DataPtr psData = getSliceData(reader_, sb, ps_, "hPa");
-
-    const size_t nx = getSliceSize(sb, cs_->getGeoXAxis()->getName());
-    const size_t ny = getSliceSize(sb, cs_->getGeoYAxis()->getName());
-    const size_t nl = getSliceSize(sb, cs_->getGeoZAxis()->getName());
-    const size_t sizeXY = nx*ny, sizeXYZ = sizeXY*nl;
-    const size_t size = psData->size() * nl, sizeOther = size / sizeXYZ;
-
-    boost::shared_array<double> psVal = psData->asDouble();
-    boost::shared_array<double> pVal(new double[size]);
-
-    // loop over all dims but z, calculate pressure
-    // FIXME the following code assumes that x,y,z are the lowest dimensions for all variables
-    size_t offset = 0, offsetSurface = 0;
-    for (size_t i=0; i<sizeOther; ++i, offset += sizeXYZ, offsetSurface += sizeXY) {
-        for (size_t xy=0; xy < sizeXY; ++xy) {
-            const size_t idxSurface = offsetSurface + xy;
-            for (size_t l = 0; l < nl; l += 1) {
-                const size_t idx = offset + xy + l*sizeXY;
-                mifi_atmosphere_hybrid_sigma_pressure(1, p0, psVal[idxSurface], &aVec[l], &bVec[l], &pVal[idx]);
-            }
-        }
-    }
-    return createData(size, pVal);
+    const size_t shared = group.sharedVolume();
+    Loop loop(group);
+    do {
+        mifi_atmosphere_hybrid_sigma_pressure(shared, p0, ps.values[loop[PS]], &a.values[loop[A]],
+                &b.values[loop[B]], &out_values[loop[OUT]]);
+    } while (loop.next());
+    return createData(out_dims.volume(), out_values);
 }
 
 } // namespace MetNoFimex

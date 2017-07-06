@@ -36,7 +36,7 @@
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "coordSys/CoordSysUtils.h"
 
-#include "ArrayLoop.h"
+#include "fimex/ArrayLoop.h"
 #include "leap_iterator.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 

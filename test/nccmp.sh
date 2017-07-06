@@ -37,4 +37,9 @@ nc5sum() {
 NC1MD5=`nc5sum "$NC1"`
 NC2MD5=`nc5sum "$NC2"`
 
-test "$NC1MD5" = "$NC2MD5"
+if test "$NC1MD5" != "$NC2MD5"; then
+    $NCDUMP -f c -n anonymous -p 8,15 "$NC1" > "${NC2}_expect.dump"
+    $NCDUMP -f c -n anonymous -p 8,15 "$NC2" > "${NC2}_actual.dump"
+    diff -u "${NC2}_expect.dump" "${NC2}_actual.dump"
+    exit 1
+fi

@@ -26210,7 +26210,15 @@ ac_config_files="$ac_config_files test/testVerticalInterpolator.sh"
 
 ac_config_files="$ac_config_files test/testVerticalInterpolator2.sh"
 
+ac_config_files="$ac_config_files test/testVerticalInterpolator3.sh"
+
+ac_config_files="$ac_config_files test/testVerticalInterpolator4.sh"
+
 ac_config_files="$ac_config_files test/testVerticalInterpolatorHeight.sh"
+
+ac_config_files="$ac_config_files test/testVerticalInterpolatorAltitude.sh"
+
+ac_config_files="$ac_config_files test/testVerticalInterpolatorConversion.sh"
 
 ac_config_files="$ac_config_files test/testVerticalInterpolatorOceanSG2ToDepth.sh"
 
@@ -27505,7 +27513,11 @@ do
     "test/testFiIndexGribs.sh") CONFIG_FILES="$CONFIG_FILES test/testFiIndexGribs.sh" ;;
     "test/testVerticalInterpolator.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator.sh" ;;
     "test/testVerticalInterpolator2.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator2.sh" ;;
+    "test/testVerticalInterpolator3.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator3.sh" ;;
+    "test/testVerticalInterpolator4.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator4.sh" ;;
     "test/testVerticalInterpolatorHeight.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorHeight.sh" ;;
+    "test/testVerticalInterpolatorAltitude.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorAltitude.sh" ;;
+    "test/testVerticalInterpolatorConversion.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorConversion.sh" ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorOceanSG2ToDepth.sh" ;;
     "test/testNcString.sh") CONFIG_FILES="$CONFIG_FILES test/testNcString.sh" ;;
     "test/testInterpolation2DataFillValue.sh") CONFIG_FILES="$CONFIG_FILES test/testInterpolation2DataFillValue.sh" ;;
@@ -29157,7 +29169,11 @@ _LT_EOF
     "test/testFiIndexGribs.sh":F) chmod +x test/testFiIndexGribs.sh ;;
     "test/testVerticalInterpolator.sh":F) chmod +x test/testVerticalInterpolator.sh ;;
     "test/testVerticalInterpolator2.sh":F) chmod +x test/testVerticalInterpolator2.sh ;;
+    "test/testVerticalInterpolator3.sh":F) chmod +x test/testVerticalInterpolator3.sh ;;
+    "test/testVerticalInterpolator4.sh":F) chmod +x test/testVerticalInterpolator4.sh ;;
     "test/testVerticalInterpolatorHeight.sh":F) chmod +x test/testVerticalInterpolatorHeight.sh ;;
+    "test/testVerticalInterpolatorAltitude.sh":F) chmod +x test/testVerticalInterpolatorAltitude.sh ;;
+    "test/testVerticalInterpolatorConversion.sh":F) chmod +x test/testVerticalInterpolatorConversion.sh ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh":F) chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh ;;
     "test/testNcString.sh":F) chmod +x test/testNcString.sh ;;
     "test/testInterpolation2DataFillValue.sh":F) chmod +x test/testInterpolation2DataFillValue.sh ;;

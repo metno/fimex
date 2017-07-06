@@ -270,8 +270,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/verticalTransform/VerticalConverter.cc \
 	coordSys/verticalTransform/VerticalTransformation.cc \
 	coordSys/verticalTransform/VerticalTransformationUtils.cc \
-	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.h \
-	ArrayLoop.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.cc \
+	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
@@ -788,8 +788,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/verticalTransform/VerticalConverter.cc \
 	coordSys/verticalTransform/VerticalTransformation.cc \
 	coordSys/verticalTransform/VerticalTransformationUtils.cc \
-	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.h \
-	ArrayLoop.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.cc \
+	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \

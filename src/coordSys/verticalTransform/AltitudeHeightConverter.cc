@@ -7,6 +7,8 @@
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 
+#include "fimex/ArrayLoop.h"
+
 #include <boost/make_shared.hpp>
 
 #include <map>
@@ -61,36 +63,30 @@ AltitudeHeightConverter::AltitudeHeightConverter(CDMReaderPtr reader, CoordSysPt
 
 std::vector<std::string> AltitudeHeightConverter::getShape() const
 {
-    return altitudeOrHeight_->getShape();
+    return ShapeMerger(reader_->getCDM(), cs_)
+            .merge(topography_, true)
+            .merge(altitudeOrHeight_)
+            .shape();
 }
 
 DataPtr AltitudeHeightConverter::getDataSlice(const SliceBuilder& sb) const
 {
-    DataPtr ahData = altitudeOrHeight_->getDataSlice(sb);
+    VarDouble topo(reader_, topography_, topographyUnit_, sb);
+    VarDouble altiOrHeight(reader_, altitudeOrHeight_, sb);
 
-    const SliceBuilder sbTopo = adaptSliceBuilder(reader_->getCDM(), topography_, sb);
-    DataPtr topoData = reader_->getScaledDataSliceInUnit(topography_, topographyUnit_, sbTopo);
+    ArrayDims out_dims = makeArrayDims(sb);
+    boost::shared_array<double> out_values(new double[out_dims.volume()]);
 
-    const size_t nx = getSliceSize(sb, cs_->getGeoXAxis()->getName());
-    const size_t ny = getSliceSize(sb, cs_->getGeoYAxis()->getName());
-    const size_t sizeXY = nx*ny;
-    const size_t size = ahData->size();
-    const size_t sizeOther = size / sizeXY;
+    enum { TOPO, IN_ALTI, OUT_HEIGHT };
+    ArrayGroup group = ArrayGroup().add(topo.dims).add(altiOrHeight.dims).add(out_dims);
+    group.minimizeShared(0); // FIXME do not treat each value separately
 
-    checkSize(topoData, sizeXY, topography_);
-
-    boost::shared_array<float> ahVal = ahData->asFloat();
-    boost::shared_array<float> topoVal = topoData->asFloat();
-    boost::shared_array<float> haVal(new float[size]);
-
-    for (size_t xy=0; xy < sizeXY; ++xy) {
-        const float deltaSurface = topographyFactor_ * topoVal[xy];
-        size_t idxHA = xy;
-        for (size_t i=0; i<sizeOther; ++i, idxHA += sizeXY) {
-            haVal[idxHA] = ahVal[idxHA] + deltaSurface;
-        }
-    }
-    return createData(size, haVal);
+    Loop loop(group);
+    do { // sharedVolume() == 1 because we called minimizeShared before
+        out_values[loop[OUT_HEIGHT]] = altiOrHeight.values[loop[IN_ALTI]]
+                + topographyFactor_ * topo.values[loop[TOPO]];
+    } while (loop.next());
+    return createData(out_dims.volume(), out_values);
 }
 
 } // namespace MetNoFimex

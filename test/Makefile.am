@@ -1,6 +1,9 @@
 EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testVerticalInterpolator.sh.in testVerticalInterpolator2.sh.in \
-             testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorOceanSG2ToDepth.sh.in \
+             testVerticalInterpolator3.sh.in testVerticalInterpolator4.sh.in \
+             testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorAltitude.sh.in \
+             testVerticalInterpolatorOceanSG2ToDepth.sh.in \
+             testVerticalInterpolatorConversion.sh.in \
              testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
              testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
              testInterpolation2DataFillValue.sh.in testdata_int2data_in.nc testdata_int2data_ex.nc \
@@ -14,7 +17,10 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
-             verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
+             verticalSigmaHybridPressure.nc verticalPressureHeight.nc verticalPressureAltitude.nc  \
+             testdata_altitude_height_ex.nc testdata_altitude_height_in.nc \
+             testdata_conversion_ex.nc testdata_conversion_in.nc \
+             testdata_vertical_ensemble_in.nc \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc  c11.nc c11.ncml \
@@ -90,7 +96,11 @@ if HAVE_NETCDF
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
               testInterpolatorFill.sh testInterpolation2DataFillValue.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
-              testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
+              testVerticalInterpolator3.sh  testVerticalInterpolator4.sh \
+              testVerticalInterpolatorHeight.sh \
+              testVerticalInterpolatorAltitude.sh \
+              testVerticalInterpolatorConversion.sh \
+              testVerticalInterpolatorOceanSG2ToDepth.sh \
               testNcString.sh \
               testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 endif

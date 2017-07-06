@@ -2,8 +2,6 @@
 #include "fimex/coordSys/verticalTransform/PressureToStandardAltitudeConverter.h"
 
 #include "fimex/CDM.h"
-#include "fimex/CDMReader.h"
-#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/vertical_coordinate_transformations.h"

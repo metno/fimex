@@ -107,7 +107,6 @@ libfimex_la_SOURCES = interpolation.c \
 					 DataImpl.h \
                      DataIndex.cc \
                      leap_iterator.h \
-                     ArrayLoop.h \
                      ArrayLoop.cc \
 					 DataTypeChanger.cc \
 					 Felt_Array2.h \

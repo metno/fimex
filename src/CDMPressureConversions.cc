@@ -484,19 +484,27 @@ ConverterPtr_v OmegaVerticalConverterFactory::createConverter(Environment& env, 
 
 class AddPressure4DConverter : public Converter {
 public:
-    AddPressure4DConverter(const std::string& pressure4d, CDMReaderPtr reader, CoordSysPtr cs)
-        : Converter(pressure4d), reader_(reader), cs_(cs) { }
+    AddPressure4DConverter(const std::string& pressure4d, CDMReaderPtr reader,
+                           VerticalConverterPtr vc, const std::vector<std::string>& shape4d)
+        : Converter(pressure4d), reader_(reader), vc_(vc), shape4d_(shape4d) { }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
     CDMReaderPtr reader_;
-    CoordSysPtr cs_;
+    VerticalConverterPtr vc_;
+    std::vector<std::string> shape4d_;
 };
 
 DataPtr AddPressure4DConverter::getDataSlice(size_t unLimDimPos)
 {
-    return verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
+    const CDM& rcdm = reader_->getCDM();
+    DataPtr vcdata = verticalData4D(vc_, rcdm, unLimDimPos);
+    if (vc_->getShape() != shape4d_) {
+        LOG4FIMEX(logger, Logger::WARN, "4d pressure shape change not implemented, results are probably wrong");
+        // FIXME vcdata = reshape(rcdm, vc_->getShape(), shape4d_, vcdata);
+    }
+    return vcdata;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -520,54 +528,71 @@ ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, 
         return ConverterPtr_v();
     }
 
-    CoordSysPtr cs;
+    VerticalConverterPtr vc;
     size_t dimsizeOld = 0;
-    vector<string> shape;
+    vector<string> shape4d;
     for (CoordSysPtr_v::const_iterator it = env.inputCoordSys.begin(); it != env.inputCoordSys.end(); ++it) {
         CoordSysPtr csi = *it;
-        if (csi->getGeoXAxis() && csi->getGeoYAxis() && csi->getGeoZAxis()
-                && csi->getTimeAxis() && csi->hasVerticalTransformation())
-        {
-            const size_t dimsize = env.inputCDM.getDimension(csi->getGeoZAxis()->getShape()[0]).getLength();
-            if (!cs || dimsize > dimsizeOld) {
-                try {
-                    VerticalConverterPtr vconv = csi->getVerticalTransformation()->getConverter(env.inputReader, csi, MIFI_VINT_PRESSURE);
-                    if (!vconv) {
-                        LOG4FIMEX(logger, Logger::INFO, "no pressure converter");
-                        continue;
-                    }
-                    const vector<string> vshape = vconv->getShape();
-                    int non1dims = 0;
-                    for (vector<string>::const_iterator itS = vshape.begin(); itS != vshape.end(); ++itS) {
-                        const size_t length = env.inputCDM.getDimension(*itS).getLength();
-                        if (length > 1)
-                            non1dims += 1;
-                    }
-                    if (non1dims != 4) {
-                        LOG4FIMEX(logger, Logger::WARN, "vertical converter has != 4 dimensions with length > 1, skipped");
-                        continue;
-                    }
-                    // use the largest coordinate-system with largest zAxis
-                    cs = *it;
-                    dimsizeOld = dimsize;
-                    shape = vshape;
-                } catch (CDMException& ex) {
-                    LOG4FIMEX(logger, Logger::WARN, "exception when retrieving pressure converter for coordinate system, skipped: " << ex.what());
-                }
+        CoordinateSystem::ConstAxisPtr csiX = csi->getGeoXAxis();
+        CoordinateSystem::ConstAxisPtr csiY = csi->getGeoYAxis();
+        CoordinateSystem::ConstAxisPtr csiZ = csi->getGeoZAxis();
+        CoordinateSystem::ConstAxisPtr csiT = csi->getTimeAxis();
+        if (!(csiX && csiY && csiZ && csiT))
+            continue;
+
+        // use the largest coordinate-system with largest zAxis
+        const size_t dimsize = env.inputCDM.getDimension(csi->getGeoZAxis()->getShape()[0]).getLength();
+        if (vc && dimsize <= dimsizeOld)
+            continue;
+
+        if (!csi->hasVerticalTransformation())
+            continue;
+
+        VerticalConverterPtr vconv;
+        try {
+            vconv = csi->getVerticalTransformation()->getConverter(env.inputReader, csi, MIFI_VINT_PRESSURE);
+            if (!vconv)
+                continue;
+        } catch (CDMException& ex) {
+            LOG4FIMEX(logger, Logger::WARN, "exception when retrieving pressure converter for coordinate system, skipped: " << ex.what());
+        }
+
+        vector<string> pshape(4);
+        pshape[0] = csiX->getShape().front();
+        pshape[1] = csiY->getShape().front();
+        pshape[2] = csiZ->getShape().front();
+        pshape[3] = csiT->getShape().front();
+
+        bool hasOtherDimensions = false;
+        const vector<string> vshape = vconv->getShape();
+        for (vector<string>::const_iterator itS = vshape.begin(); itS != vshape.end(); ++itS) {
+            if (std::find(pshape.begin(), pshape.end(), *itS) != pshape.end())
+                continue;
+            const size_t length = env.inputCDM.getDimension(*itS).getLength();
+            if (length > 1) {
+                hasOtherDimensions = true;
+                LOG4FIMEX(logger, Logger::DEBUG, "vertical converter has dimension " << *itS << " with length > 1");
             }
         }
+        if (hasOtherDimensions) {
+            LOG4FIMEX(logger, Logger::DEBUG, "vertical converter has dimensions with length > 1 other than x,y,z,t, skipped");
+            continue;
+        }
+
+        vc = vconv;
+        dimsizeOld = dimsize;
+        shape4d = pshape;
     }
-    if (!cs) {
+    if (!vc) {
         throw CDMException("no x,y,z,t 4D-coordinate system found");
         return ConverterPtr_v();
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "add4Dpressure using coordsys: " << *cs);
 
-    env.outputCDM->addVariable(CDMVariable(pressureName, CDM_FLOAT, shape));
+    env.outputCDM->addVariable(CDMVariable(pressureName, CDM_FLOAT, shape4d));
     env.outputCDM->addAttribute(pressureName, CDMAttribute(UNITS, "hPa"));
     env.outputCDM->addAttribute(pressureName, CDMAttribute(STANDARD_NAME, AIR_PRESSURE));
 
-    return ConverterPtr_v(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, cs));
+    return ConverterPtr_v(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, vc, shape4d));
 }
 
 } // anonymous namespace

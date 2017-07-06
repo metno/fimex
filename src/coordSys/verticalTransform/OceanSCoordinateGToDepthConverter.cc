@@ -36,7 +36,7 @@
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/vertical_coordinate_transformations.h"
 
-#include "ArrayLoop.h"
+#include "fimex/ArrayLoop.h"
 
 #include <algorithm>
 #include <functional>
@@ -56,18 +56,11 @@ OceanSCoordinateGToDepthConverter::OceanSCoordinateGToDepthConverter(CDMReaderPt
 
 std::vector<std::string> OceanSCoordinateGToDepthConverter::getShape() const
 {
-    // combine shapes of eta(n,j,i) and s(k)
-    std::vector<std::string> sgshape;
-    const std::vector<std::string> shs= reader_->getCDM().getVariable(vars_.s).getShape();
-    if (vars_.eta.empty()) {
-        sgshape = reader_->getCDM().getVariable(vars_.depth).getShape();
-        sgshape.insert(sgshape.end(), shs.begin(), shs.end()); // FIXME this is a crazy hack!
-    } else {
-        sgshape= reader_->getCDM().getVariable(vars_.eta).getShape();
-        sgshape.insert(sgshape.begin() + 2, shs.front()); // FIXME this is a crazy hack!
-        sgshape.insert(sgshape.end(), shs.begin()+1, shs.end());
-    }
-    return sgshape;
+    return ShapeMerger(reader_->getCDM(), cs_)
+            .merge(vars_.depth)
+            .merge(vars_.eta) // empty eta var name handled by ShapeMerger
+            .merge(vars_.s)
+            .shape();
 }
 
 DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) const
@@ -80,44 +73,37 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     DataPtr depth_cData = getSliceData(reader_, sb, vars_.depth_c, "m");
     const double depth_c = depth_cData ? depth_cData->asDouble()[0] : 0;
 
-    const boost::shared_array<double> sValues = getSliceDoubles(reader_, sb, vars_.s, "");
-    const boost::shared_array<double> CValues = getSliceDoubles(reader_, sb, vars_.C, "");
-    const boost::shared_array<double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
+    VarDouble s(reader_,  vars_.s, "", sb);
+    VarDouble c(reader_, vars_.C, "", sb);
+    VarDouble depth(reader_, vars_.depth, "m", sb);
 
-    ArrayDims dimsS = makeArrayDims(adaptSliceBuilder(cdm, vars_.s, sb));
-    ArrayDims dimsC = makeArrayDims(adaptSliceBuilder(cdm, vars_.C, sb));
-    ArrayDims dimsDepth = makeArrayDims(adaptSliceBuilder(cdm, vars_.depth, sb));
-    ArrayDims dimsZ = makeArrayDims(cdm, getShape());
-    ArrayDims dimsEta;
-
-    forceUnLimDimLength1(cdm, dimsS, dimsC, dimsDepth, dimsZ);
+    ArrayDims dimsZ = makeArrayDims(sb);
+    boost::shared_array<double> z_values(new double[dimsZ.volume()]);
 
     enum { S, C, DEPTH, Z, ETA }; // ETA must be last as it is optional
-    ArrayGroup group = ArrayGroup().add(dimsS).add(dimsC).add(dimsDepth).add(dimsZ);
+    ArrayGroup group = ArrayGroup().add(s.dims).add(c.dims).add(depth.dims).add(dimsZ);
 
-    boost::shared_array<double> etaValues;
+    ArrayDims dimsEta;
+    boost::shared_array<double> eta_values;
     if (!vars_.eta.empty()) {
-        etaValues = getSliceDoubles(reader_, sb, vars_.eta, "m");
-
+        eta_values = getSliceDoubles(reader_, sb, vars_.eta, "m");
         dimsEta = makeArrayDims(adaptSliceBuilder(cdm, vars_.eta, sb));
-        forceUnLimDimLength1(cdm, dimsEta);
         group.add(dimsEta);
     }
 
-    boost::shared_array<double> zValues(new double[dimsZ.volume()]);
-
     Loop loop(group);
     do {
-        const double eta = etaValues ? etaValues[loop[ETA]] : 0;
-        func_(group.sharedVolume(), depthValues[loop[DEPTH]], depth_c, eta, &sValues[loop[S]], &CValues[loop[C]], &zValues[loop[Z]]);
+        const double eta = eta_values ? eta_values[loop[ETA]] : 0;
+        func_(group.sharedVolume(), depth.values[loop[DEPTH]], depth_c, eta,
+                &s.values[loop[S]], &c.values[loop[C]], &z_values[loop[Z]]);
     } while (loop.next());
 
     /* z as calculated by formulas is negative down, but we want positive down */
-    std::transform(zValues.get(), zValues.get() + dimsZ.volume(), zValues.get(), std::bind1st(std::multiplies<double>(),-1.));
+    std::transform(z_values.get(), z_values.get() + dimsZ.volume(), z_values.get(), std::bind1st(std::multiplies<double>(),-1.));
 
     // TODO transform invalid -> nan, nan -> bad?
 
-    return createData(dimsZ.volume(), zValues);
+    return createData(dimsZ.volume(), z_values);
 }
 
 std::vector<std::string> OceanSCoordinateGToDepthConverter::getValidityShape(const std::string& verticalDim) const

@@ -1,6 +1,6 @@
 // -*- c++ -*-
 
-#include "ArrayLoop.h"
+#include "fimex/ArrayLoop.h"
 
 #include <algorithm>
 #include <numeric>
