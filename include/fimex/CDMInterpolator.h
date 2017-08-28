@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <map>
+#include "fimex/CDMDataType.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
