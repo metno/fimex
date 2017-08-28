@@ -22,7 +22,7 @@
  */
 
 #include "fimex/NetCDF_CDMWriter.h"
-#include "../config.h"
+#include "fimex_config.h"
 #ifndef HAVE_NETCDF_HDF5_LIB
 #undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
 #endif

@@ -30,7 +30,7 @@
 #include "MutexLock.h"
 #include "fimex/Logger.h"
 
-#include "../config.h"
+#include "fimex_config.h"
 #ifdef HAVE_MPI
 #include "fimex/mifi_mpi.h"
 #endif

@@ -25,7 +25,7 @@
  */
 
 #include "fimex/CDMconstants.h"
-#include "../config.h"
+#include "fimex_config.h"
 #include <vector>
 #include <iterator>
 #include <algorithm>

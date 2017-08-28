@@ -27,9 +27,7 @@
 #ifndef LOG4CPPLOGGER_H_
 #define LOG4CPPLOGGER_H_
 
-#ifdef HAVE_CONFIG_H
-#include "../config.h"
-#endif // HAVE_CONFIG_H
+#include "fimex_config.h"
 
 #ifdef HAVE_LOG4CPP
 #include "fimex/Logger.h"

@@ -1,1 +1,5 @@
-usr/bin/*
+usr/bin/fimex
+usr/bin/fiGrbmlCat
+usr/bin/fiGribCut
+usr/bin/fiIndexGribs
+usr/bin/fiXYcontents

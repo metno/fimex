@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "../../config.h"
+#include "fimex_config.h"
 #include <iostream>
 #include <fstream>
 #include <cctype>
@@ -1144,7 +1144,7 @@ int run(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-        cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "." << mifi_version_status() << ")" << endl;
+        cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "-" << std::hex << mifi_version_status() << ")" << endl;
         return 0;
     }
 

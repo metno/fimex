@@ -26,7 +26,7 @@
  MA  02110-1301, USA
  */
 
-#include "../../config.h"
+#include "fimex_config.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltTypeConversion.h"
 #include "felt/FeltField.h"

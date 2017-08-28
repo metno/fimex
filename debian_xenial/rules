@@ -1,22 +1,7 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
 
-# Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
-
-VERSION = `head -n1 debian/changelog | sed "s/.*(\(.*\)-.*).*/\1/"`
-
-# These are used for cross-compiling and for saving the configure script
-# from having to guess our platform (since we know it already)
-DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
-DEB_BUILD_OPTIONS ?= parallel=2
 
 CFLAGS = -Wall -g
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
@@ -24,111 +9,37 @@ ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 else
 	CFLAGS += -O2 -ftree-vectorize -fno-math-errno
 endif
+# require SSE2 on i386(in preinst) until some autodetect code is written
 ifeq ($(DEB_HOST_ARCH),i386)
-	# require SSE2 on i386(in preinst)
-	# until I've written some autodetect code
 	CFLAGS  += -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno
 endif
 
+%:
+	dh $@ --parallel
 
-config.status: configure
-	dh_testdir
-	# Add here commands to configure the package.
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
-endif
+.PHONY: override_dh_auto_configure
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	    -DBUILD_SHARED_LIBS=BOTH \
+	    -DENABLE_LOG4CPP=YES \
+	    -DENABLE_GRIBAPI=YES \
+	    -DENABLE_FORTRAN=YES \
+	    -DENABLE_WDB=YES \
+	    -DENABLE_FIMEX_OMP=YES \
+
+.PHONY: override_dh_auto_install
+override_dh_auto_install:
+	dh_auto_install
+	cd debian/tmp/usr/bin && for p in *0.23; do ln -s $$p $${p%-0.23}; done
+	cd debian/tmp/usr/share && ln -s fimex-0.23 fimex
+	cd debian/tmp/usr/include && ln -s fimex-0.23/fimex fimex
+
 ifeq ($(DEB_HOST_ARCH),i386)
-	# we need to check for sse2 only on i386, and we only know the
-	# architecture used for building the package during the build
-	cp -f debian/preinst.require-sse2-on-i386 debian/libfimex-$(VERSION)-0.preinst
-	cp -f debian/preinst.require-sse2-on-i386 debian/libfelt-$(VERSION)-0.preinst
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+	true
 endif
-	dh_quilt_patch
-	./configure \
-		--enable-openmp \
-		--enable-log4cpp \
-		--enable-fortran \
-		--with-netcdf \
-		--without-metgm \
-		--with-pq=/usr/include/postgresql,/usr/lib \
-		--with-udunits2 \
-		--with-grib_api \
-		--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
-		--prefix=/usr \
-		--mandir=\$${prefix}/share/man \
-		--infodir=\$${prefix}/share/info \
-		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CFLAGS)"
 
-
-build: build-stamp
-
-build-stamp:  config.status
-	dh_testdir
-
-	# Add here commands to compile the package.
-	$(MAKE)
-	touch $@
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-
-	# Add here commands to clean up after the build process.
-	[ ! -f Makefile ] || $(MAKE) distclean
-	#rm -f config.sub config.guess
-
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-
-	# Add here commands to install the package into debian/tmp
-	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-	# remove dependencies in .la files, required by lintian
-	sed -i "/dependency_libs/ s/'.*'/''/" `find $(CURDIR)/debian/tmp -name '*.la'`
-
-
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installexamples
-	dh_install --sourcedir=debian/tmp
-#	dh_installmenu
-#	dh_installdebconf
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip --dbg-package=fimex-dbg
-	dh_compress
-	dh_fixperms
-#	dh_perl
-#	dh_python
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip --dbg-package=fimex-0.23-dbg

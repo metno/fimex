@@ -1,1 +1,0 @@
-SUBDIRS = fimex nanoflann felt

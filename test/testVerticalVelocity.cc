@@ -24,7 +24,7 @@
  *      Author: heikok
  */
 
-#include "../config.h"
+#include "fimex_config.h"
 #if 1
 //#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 

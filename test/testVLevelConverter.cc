@@ -23,7 +23,7 @@
  *  Created on: Feb 25, 2015
  */
 
-#include "../config.h"
+#include "fimex_config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN

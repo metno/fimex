@@ -27,7 +27,7 @@
 #include "fimex/Utils.h"
 #include <limits>
 
-#include "../config.h"
+#include "fimex_config.h"
 #ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"

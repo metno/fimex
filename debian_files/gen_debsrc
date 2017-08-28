@@ -24,13 +24,20 @@ fi
 
 test -d "$TARGETDIR" || mkdir -p "$TARGETDIR"
 
-PKG_VERSION=`grep ^PACKAGE_VERSION= configure | sed -e "s/.*='\(.*\)'/\1/"`
-FMX="fimex-${PKG_VERSION}"
-ORIGTAR="$TARGETDIR/fimex_${PKG_VERSION}.orig.tar.gz"
+PKG_VERSION_MAJOR=`awk -- '$1 == "#define" && $2 == "MIFI_VERSION_MAJOR" { print $3 }' include/fimex/CDMconstants.h`
+PKG_VERSION_MINOR=`awk -- '$1 == "#define" && $2 == "MIFI_VERSION_MINOR" { print $3 }' include/fimex/CDMconstants.h`
+PKG_VERSION_PATCH=`awk -- '$1 == "#define" && $2 == "MIFI_VERSION_PATCH" { print $3 }' include/fimex/CDMconstants.h`
+PKG_VERSION_STATUS=`awk -- '$1 == "#define" && $2 == "MIFI_VERSION_STATUS" { s = $3; if (s != "0xF0") { r = substr(s,3,1); v = substr(s,4,1); if (r=="A") { n="alpha" } else if (r=="B") { n="beta" } else if (r=="C") { n="rc" } if (v != "0") { n = n v } print "~" n; } }' include/fimex/CDMconstants.h`
+
+PKG_VERSION="${PKG_VERSION_MAJOR}.${PKG_VERSION_MINOR}"
+PKG_VERSION_FULL="${PKG_VERSION}.${PKG_VERSION_PATCH}${PKG_VERSION_STATUS}"
+FMX="fimex-${PKG_VERSION_FULL}"
+ORIGTAR="$TARGETDIR/fimex-${PKG_VERSION}_${PKG_VERSION_FULL}.orig.tar.gz"
 if test ! -f "$ORIGTAR" ; then
-    ./configure
-    make dist
-    mv -vf "${FMX}.tar.gz" "$ORIGTAR"
+    mkdir "$TARGETDIR/$FMX"
+    git archive --format=tar HEAD | tar xf - -C "$TARGETDIR/$FMX"
+    rm -rf "$TARGETDIR/$FMX"/debian*
+    tar czf "$ORIGTAR" -C "$TARGETDIR" "$FMX"
 fi
 
 
@@ -44,14 +51,14 @@ fi
 
 DCH_VERSION=`dpkg-parsechangelog -l $DEBIANDIST/changelog -S Version`
 case "$DCH_VERSION" in
-    ${PKG_VERSION}-*) echo "debian changelog version ok" ;;
-    *) echo "debian changelog version mismatch, abort" ; exit 1 ;;
+    ${PKG_VERSION_FULL}-*) echo "debian changelog version ok" ;;
+    *) echo "debian changelog version mismatch: dch='${DCH_VERSION}' pkg='${PKG_VERSION_FULL}', abort" ; exit 1 ;;
 esac
 
 
 rm -rf "$TARGETDIR/$FMX"
 tar xzvf "$ORIGTAR" -C "$TARGETDIR"
-if test ! -r "$TARGETDIR/$FMX/configure" ; then
+if test ! -r "$TARGETDIR/$FMX/CMakeLists.txt" ; then
     echo "Error unpacking orig.tar.gz, abort."
     exit 1
 fi
@@ -65,17 +72,23 @@ find "$FMXDEBIAN" -type f -size 0 -exec rm -v '{}' ';'
 
 
 cd "$TARGETDIR/$FMX"
-for f in debian/*0.25.1* ; do
-    mv $f ${f/0.25.1/${PKG_VERSION}}
+#for f in debian/*0.25.1* ; do
+#    mv $f ${f/0.25.1/${PKG_VERSION_FULL}}
+#done
+for f in debian/*0.23* ; do
+    mv $f ${f/0.23/${PKG_VERSION}}
 done
 
 find debian -print | while read f ; do
-    perl -pi -e "s/0\.25\.1/${PKG_VERSION}/g;" $f
+    perl -pi -e "s/0.25.1/${PKG_VERSION_FULL}/g;" $f
+done
+find debian -print | while read f ; do
+    perl -pi -e "s/0.23/${PKG_VERSION}/g;" $f
 done
 
 
 
 ( cd .. && dpkg-source -b "$FMX" )
-CHANGES="../fimex_${DCH_VERSION}_source.changes"
+CHANGES="../fimex-${PKG_VERSION}_${DCH_VERSION}_source.changes"
 dpkg-genchanges -S > "$CHANGES"
 echo "finished dpkg-genchanges -S > $CHANGES"

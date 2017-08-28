@@ -1,0 +1,17 @@
+#ifndef FIMEX_CONFIG_H
+#define FIMEX_CONFIG_H 1
+
+#define HAVE_UDUNITS2_H 1 // required library, always defined
+
+#cmakedefine HAVE_FELT 1
+#cmakedefine HAVE_GRIB_API_H 1
+#cmakedefine HAVE_GRIB_API_THREADSAFE 1
+#cmakedefine HAVE_LIBPQ_FE_H 1
+#cmakedefine HAVE_LOG4CPP 1
+#cmakedefine HAVE_METGM_H 1
+#cmakedefine HAVE_MPI 1
+#cmakedefine HAVE_NETCDF_H 1
+#cmakedefine HAVE_NETCDF_HDF5_LIB 1
+#cmakedefine HAVE_PRORADXML 1
+
+#endif // FIMEX_CONFIG_H

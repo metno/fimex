@@ -1,0 +1,3 @@
+
+FILE(GLOB INCLUDE_nanoflann *.hpp)
+INSTALL(FILES ${INCLUDE_nanoflann} DESTINATION "${FIMEX_INSTALL_INCLUDEDIR}/nanoflann")

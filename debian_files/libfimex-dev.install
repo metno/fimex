@@ -1,5 +1,2 @@
-usr/include/fimex/*
-usr/lib/libfimex.a
-usr/lib/libfimex.so
-usr/lib/libfimex.la
-usr/lib/pkgconfig/*
+usr/include/fimex
+usr/lib/*/pkgconfig/fimex.pc

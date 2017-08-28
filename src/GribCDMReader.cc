@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "../config.h"
+#include "fimex_config.h"
 #include "fimex/CDM.h"
 #include <boost/regex.hpp>
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED

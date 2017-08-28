@@ -38,7 +38,7 @@
 #include <boost/assign.hpp>
 
 
-#include "../config.h"
+#include "fimex_config.h"
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 

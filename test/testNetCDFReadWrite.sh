@@ -8,7 +8,7 @@ if [ ! -f "${srcdir}/flth00.dat" ]; then
    echo "no input data: flth00.dat, skipping test..."
    exit 0;
 fi
-../src/binSrc/fimex test.nc testNcRdWr.nc
+./fimex.sh test.nc testNcRdWr.nc
 if [ $? != 0 ]; then
   echo "failed converting nc to nc"
   rm -f testNcRdWr.nc

@@ -43,6 +43,9 @@
 #  endif
 #endif
 
+#ifndef M_E
+static const double M_E = 2.7182818284590452354; /* e */
+#endif
 
 /**
  * compare two strings

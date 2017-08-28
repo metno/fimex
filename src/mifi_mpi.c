@@ -24,7 +24,7 @@
  *      Author: heikok
  */
 
-#include "../config.h"
+#include "fimex_config.h"
 #ifdef HAVE_MPI
 
 #include "fimex/mifi_mpi.h"

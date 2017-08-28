@@ -24,9 +24,7 @@
 #include "fimex/Logger.h"
 #include "Log4cppLogger.h"
 
-#ifdef HAVE_CONFIG_H
-#include "../config.h"
-#endif // HAVE_CONFIG_H
+#include "fimex_config.h"
 
 #include <boost/make_shared.hpp>
 #include <algorithm>

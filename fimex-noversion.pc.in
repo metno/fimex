@@ -1,0 +1,4 @@
+Name: fimex
+Description: The fimex library
+Version: @FIMEX_VERSION_FULL@
+Requires: fimex@MINUS_FIMEX_VERSION@

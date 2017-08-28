@@ -1,16 +1,16 @@
 #! /bin/sh
 echo "testing conversion Felt to NetCDF"
 echo $0
-srcdir=`dirname $0`
-curdir=`pwd`
-cd $srcdir
+TEST_SRCDIR=`dirname $0`
+TEST_BINDIR=`pwd`
+cd $TEST_SRCDIR
 if [ ! -f flth00.dat ]; then
    echo "no input data: flth00.dat, skipping test..."
    exit 0;
 fi
-file=${curdir}/test.nc
-file2=${curdir}/test2.nc
-${curdir}/../src/binSrc/fimex -c felt2netcdf.cfg --output.file=${file} --output.config=../share/etc/cdmWriterConfigDeprecated.xml
+file=${TEST_BINDIR}/test.nc
+file2=${TEST_BINDIR}/test2.nc
+"${TEST_BINDIR}/fimex.sh" -c felt2netcdf.cfg --output.file=${file} --output.config=../share/etc/cdmWriterConfigDeprecated.xml
 if [ $? != 0 ]; then
   echo "failed converting felt to nc"
   exit 1
@@ -19,7 +19,7 @@ if [ ! -f ${file} ]; then
   echo "failed find nc-outputfile"
   exit 1
 fi
-${curdir}/../src/binSrc/fimex -c felt2netcdf.cfg --output.file=${file2} --output.config=../share/etc/cdmWriterConfig.xml
+"${TEST_BINDIR}/fimex.sh" -c felt2netcdf.cfg --output.file=${file2} --output.config=../share/etc/cdmWriterConfig.xml
 if [ $? != 0 ]; then
   echo "failed converting felt to nc with ncml"
   exit 1

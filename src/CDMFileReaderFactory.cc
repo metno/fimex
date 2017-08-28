@@ -30,7 +30,7 @@
 #include <boost/regex.hpp>
 #include <cctype>
 #include <algorithm>
-#include "../config.h"
+#include "fimex_config.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"
@@ -166,7 +166,8 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
     }
 }
 
-boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
+boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
+                                                          const std::vector<std::string> & args)
 {
     switch (fileType) {
 #ifdef HAVE_FELT

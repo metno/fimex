@@ -40,7 +40,7 @@ namespace MetNoFimex
 namespace wdb
 {
 
-const std::string GlobalWdbConfiguration::defaultConfigFile_ = PKGDATADIR"/wdb_config.xml";
+const std::string GlobalWdbConfiguration::defaultConfigFile_ = PKGDATADIR "/wdb_config.xml";
 
 GlobalWdbConfiguration::GlobalWdbConfiguration(const XMLInput& configXML)
 {
