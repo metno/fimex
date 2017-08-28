@@ -50,6 +50,28 @@ int round(double num);
  */
 std::string trim(const std::string& str);
 
+template<class T>
+struct DefaultFormatter {
+    void operator()(std::ostream& out, const T& t) const
+      { out << t; }
+};
+
+template<class InputIterator, class Formatter>
+std::string join_formatted(InputIterator start, InputIterator end, const Formatter& fmt, const std::string& delim = ",")
+{
+    if (start == end)
+        return "";
+    std::ostringstream buffer;
+    InputIterator current = start++;
+    while (start != end) {
+        fmt(buffer, *current);
+        buffer << delim;
+        current = start++;
+    }
+    fmt(buffer, *current);
+    return buffer.str();
+}
+
 /**
  * Join values from an iterator to a string, using delimiter as separator.
  *
@@ -58,17 +80,9 @@ std::string trim(const std::string& str);
  * @param delim separator, default to ","
  */
 template<class InputIterator>
-std::string join(InputIterator start, InputIterator end, std::string delim = ",")
+std::string join(InputIterator start, InputIterator end, const std::string& delim = ",")
 {
-    if (start == end) return "";
-    std::ostringstream buffer;
-    InputIterator current = start++;
-    while (start != end) {
-        buffer << *current << delim;
-        current = start++;
-    }
-    buffer << *current;
-    return buffer.str();
+    return join_formatted(start, end, DefaultFormatter<typename std::iterator_traits<InputIterator>::value_type>(), delim);
 }
 
 /**

@@ -92,7 +92,7 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
         }
         attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
 
-        // standard_paralll or scale_factor
+        // standard_parallel or scale_factor
         if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
             double latOfProjOrigin = string2type<double>(what[1].str());
             attrs.push_back(CDMAttribute("latitude_of_projection_origin", latOfProjOrigin));

@@ -29,6 +29,7 @@
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include "boost/regex.hpp"
@@ -157,6 +158,16 @@ std::string ProjectionImpl::getProj4EarthString() const
     return out.str();
 }
 
+namespace {
+
+/** Insert doubles with max precision into an std::ostream. */
+template<class T>
+struct MaxPrecisionFormatter {
+    void operator()(std::ostream& out, const T& v) const
+      { out << std::setprecision(std::numeric_limits<T>::digits10 + 1) << v; }
+};
+
+} // namespace
 
 bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName) const
 {
@@ -168,7 +179,8 @@ bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::st
             return true;
         } else if (found->getData()->size() > 0) {
             boost::shared_array<double> d = found->getData()->asDouble();
-            outStream << replaceName << join(&d[0], &d[0] + found->getData()->size(), ",");
+            outStream << replaceName << join_formatted(&d[0], &d[0]+found->getData()->size(),
+                    MaxPrecisionFormatter<double>(), ",");
             return true;
         }
     }
