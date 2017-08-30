@@ -1,4 +1,6 @@
 
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/mod")
+
 SET(libfimexf_SOURCES
   fimex.f90
   fimex2d.F90
