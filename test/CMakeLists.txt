@@ -135,6 +135,7 @@ IF(ENABLE_WDB)
 ENDIF()
 
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
+CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 
 FOREACH(T ${CC_TESTS})
   ADD_EXECUTABLE(${T} "${T}.cc")

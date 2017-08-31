@@ -9,7 +9,7 @@ if [ ! -f test.grb1 ]; then
    exit 0;
 fi
 rm -f test.grb1.grbml
-../src/binSrc/fiIndexGribs -i test.grb1
+./fiIndexGribs.sh -i test.grb1
 if [ $? != 0 ]; then
   echo "failed writing test.grb1.grbml"
   exit 1
@@ -20,7 +20,7 @@ if [ ! -f test.grb1.grbml ]; then
 fi
 
 rm -f test.grb1.grbml
-../src/binSrc/fiIndexGribs -i test.grb1 --extraKey=localDefinitionNumber
+./fiIndexGribs.sh -i test.grb1 --extraKey=localDefinitionNumber
 if [ $? != 0 ]; then
   echo "failed writing test.grb1.grbml with extraKey"
   exit 1
@@ -37,7 +37,7 @@ else
 fi
 
 rm -f test.grib1.grbml2
-../src/binSrc/fiIndexGribs -f -i test.grb1 --readerConfig="${TEST_SRCDIR}/cdmGribReaderConfig_newEarth.xml" -a test.grb1.grbml2
+./fiIndexGribs.sh -f -i test.grb1 --readerConfig="${TEST_SRCDIR}/cdmGribReaderConfig_newEarth.xml" -a test.grb1.grbml2
 if [ $? != 0 ]; then
   echo "failed writing test.grb1.grbml2 with readerConfig"
   exit 1
