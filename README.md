@@ -88,31 +88,35 @@ like these might be used
     curl https://wiki.met.no/_media/fimex/flth00.dat.gz | gunzip > $SRC/test/flth00.dat
     make -C $BLD  test
 
-USAGE EXAMPLE
--------------
-Converting a model output from felt to NetCDF
+## Usage Example
 
-a) get an overview of times, layers and grid used in the felt-file
-b) group the parameters so that all parameters within an group use the
-   same grid, times and the same layers (its possible to have a file
-   with both sigma and pressure layers, but then all sigma-variables
-   should have the same number of sigma layers and all pressure-variables
-   should have the same number of pressure layers. Surface only variable,
-   usually sigma=1000 felt variables, are layer-group of their own)
-c) create a felt2nc_variables.xml file for each variable group.
-   Copy parameters from existing examples, or lookup variable and parameter
-   names in the CF standard name documentation.
-   If you have to generate several groups, it might be useful to
-   split the file into axes, global attributes and variables, see i.e.
-   damocles_felt2nc_variables.xml
-   If you have two paramters which map to the same standard_name, i.e. make
-   sure to give them different variable names if they are in the same group
-   Adjust the datatype according to your data. float will always work fine,
-   use short if you know, that the variable even fits as 4-dimensional data
-   into shorts. Use eventually a cdmWriterConfig.xml to process data as float
-   and write the data as short.
-d) validate the felt2nc_variables.xml file, i.e. with
-	xmllint --xinclude --postvalid --noout ../../share/etc/felt2nc_variables.xml
-e) adjust the projection and area you want to extract in fimex_example.cfg (or
-   use command line arguments to fimex)
-d) run 'fimex -c fimex_example.cfg'
+Converting a model output from felt to NetCDF:
+
+ 1. Get an overview of times, layers and grid used in the felt-file.
+ 2. Group the parameters so that all parameters within an group use the
+    same grid, times and the same layers (its possible to have a file
+    with both sigma and pressure layers, but then all sigma-variables
+    should have the same number of sigma layers and all pressure-variables
+    should have the same number of pressure layers. Surface only variables,
+    usually sigma=1000 felt variables, are a layer-group of their own).
+ 3. Create a `felt2nc_variables.xml` file for each variable group.
+    Copy parameters from existing examples, or lookup variable and parameter
+    names in the CF standard name documentation.
+    If you have to generate several groups, it might be useful to
+    split the file into axes, global attributes and variables, see, e.g.,
+    `damocles_felt2nc_variables.xml`.
+    If you have two parameters which map to the same `standard_name`, make
+    sure to give them different variable names if they are in the same group
+    Adjust the datatype according to your data. float will always work fine,
+    use short if you know that the variable even fits as 4-dimensional data
+    into shorts. Use eventually a `cdmWriterConfig.xml` to process data as float
+    and write the data as short.
+ 4. Validate the `felt2nc_variables.xml file` with, e.g.,
+
+        xmllint --xinclude --postvalid --noout ../../share/etc/felt2nc_variables.xml
+
+ 5. Adjust the projection and area you want to extract in `fimex_example.cfg` (or
+    use command line arguments to fimex)
+ 6. Run
+
+        fimex -c fimex_example.cfg
