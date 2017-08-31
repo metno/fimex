@@ -136,6 +136,7 @@ ENDIF()
 
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
+CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
 
 FOREACH(T ${CC_TESTS})
   ADD_EXECUTABLE(${T} "${T}.cc")

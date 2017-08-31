@@ -2,7 +2,7 @@
 <cdmQualityConfig>
 
 <variable name="salt">
-   <status_flag_variable name="mask_rho" file="@top_srcdir@/test/testQEmask_mask.nc">
+   <status_flag_variable name="mask_rho" file="@CMAKE_CURRENT_SOURCE_DIR@/testQEmask_mask.nc">
       <allowed_values>1</allowed_values>
    </status_flag_variable>
 </variable>
