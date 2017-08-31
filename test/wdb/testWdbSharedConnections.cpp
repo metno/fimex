@@ -53,7 +53,7 @@ using namespace MetNoFimex;
 
 int main(int argc, char* argv[])
 {
-    boost::shared_ptr<CDMReader> r1 = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile("../../share/etc/wdb_config.xml"));
+    boost::shared_ptr<CDMReader> r1 = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile(TOP_SRCDIR "/share/etc/wdb_config.xml"));
     DataPtr x = r1->getData("time");
     if (x->size() > 0) {
         clog << "1. connection successfully established" << endl;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    boost::shared_ptr<CDMReader> r2 = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile("../../share/etc/wdb_config.xml"));
+    boost::shared_ptr<CDMReader> r2 = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile(TOP_SRCDIR "/share/etc/wdb_config.xml"));
     x = r2->getData("time");
     if (x->size() > 0) {
         clog << "2. connection successfully established" << endl;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     long long startTime = time(0);
     size_t startI = 0;
     for (size_t i = 0; i < MAX_CONN; ++i) {
-        boost::shared_ptr<CDMReader> r = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile("../../share/etc/wdb_config.xml"));
+        boost::shared_ptr<CDMReader> r = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile(TOP_SRCDIR "/share/etc/wdb_config.xml"));
         DataPtr x = r->getData("time");
         if (x->size() == 0) {
             cerr << "error after " << i << ". connection";
