@@ -41,7 +41,7 @@ These commands illustrate how fimex might be compiled:
     cd $BLD
     cmake -G"$GENERATOR" \
         -DBUILD_SHARED_LIBS=ON \
-        -DENABLE_GRIBAPI=YES -DGRIBAPI_INSTALL_DIR=/path/to/grib_api \
+        -DENABLE_GRIBAPI=YES -Dgrib_api_DIR=/path/to/grib_api \
         -DENABLE_THIS=YES \
         -DENABLE_THAT=NO \
         -DCMAKE_INSTALL_PREFIX="$INS" \
