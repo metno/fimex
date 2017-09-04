@@ -9,10 +9,12 @@ FIMEX_VERSION_DEFINES(FIMEX "include/fimex/CDMconstants.h")
 
 
 SET(FIMEX_PC_REQUIRES "libxml-2.0>=2.6.0")
-SET(FIMEX_PC_REQUIRES_PRIVATE "udunits>=2")
 
-FIMEX_FIND_PROJ(PROJ_PC PROJ_LIB PROJ_INC_DIR)
-LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${PROJ_PC})
+FIMEX_FIND_PACKAGE("udunits2" "udunits>=2" "udunits2" "udunits2.h")
+LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${udunits2_PC})
+
+FIMEX_FIND_PACKAGE("proj" "proj" "proj" "proj_api.h")
+LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${proj_PC})
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 
@@ -63,23 +65,11 @@ ELSEIF(ENABLE_ECCODES)
     SET(HAVE_GRIB_API_THREADSAFE 1)
   ENDIF()
 ELSEIF(ENABLE_GRIBAPI)
-  FIND_PATH(GRIBAPI_INC_DIR
-    grib_api.h
-    HINTS "${GRIBAPI_INSTALL_DIR}/include" "${GRIBAPI_INCLUDE_DIR}"
-    )
-
-  FIND_LIBRARY(GRIBAPI_LIB
-    NAMES grib_api
-    HINTS "${GRIBAPI_INSTALL_DIR}/lib" "${GRIBAPI_LIB_DIR}"
-    )
-
-  IF((GRIBAPI_INC_DIR) AND (GRIBAPI_LIB))
-    MESSAGE(STATUS "grib_api include: '${GRIBAPI_INC_DIR}'  library: '${GRIBAPI_LIB}'")
-  ELSE()
-    MESSAGE(FATAL_ERROR "Requested grib_api include/library not found")
+  FIMEX_FIND_PACKAGE("grib_api" "" "grib_api" "grib_api.h")
+  OPTION(ENABLE_GRIBAPIPTHREAD "Use GribAPI library with pthread support" ON)
+  IF(ENABLE_GRIBAPIPTHREAD)
+    SET(HAVE_GRIB_API_THREADSAFE 1)
   ENDIF()
-
-  OPTION(ENABLE_GRIBAPIPThread "Use GribAPI library with pthread support" ON)
 ENDIF()
 
 OPTION(ENABLE_WDB "Use wdb" OFF)
@@ -133,9 +123,9 @@ SET(FIMEX_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}${pc_fimex_includedir}"
 SET(FIMEX_PC "fimex${MINUS_FIMEX_VERSION}.pc")
 FIMEX_GEN_PKGCONFIG(fimex.pc.in "${FIMEX_PC}"
   "${FIMEX_PC_REQUIRES}"
-  "${PROJ_LIB}"
+  "${udunits2_LIB};${proj_LIB};${grib_api_LIB}"
   "${CMAKE_INSTALL_LIBDIR}"
-  "${FIMEX_INSTALL_INCLUDEDIR};${PROJ_INC_DIR}"
+  "${FIMEX_INSTALL_INCLUDEDIR};${udunits2_INC_DIR};${proj_INC_DIR};${grib_api_INC_DIR}"
 )
 INSTALL(FILES "${CMAKE_BINARY_DIR}/${FIMEX_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 

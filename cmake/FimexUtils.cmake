@@ -131,7 +131,6 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions)
     INSTALL(TARGETS ${shared_lib}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
-    MESSAGE(STATUS "added shared lib ${shared_lib}")
   ENDIF()
 
   IF((NOT (BUILD_SHARED_LIBS)) OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
@@ -151,7 +150,6 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions)
     INSTALL(TARGETS ${static_lib}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
-    MESSAGE(STATUS "added static lib ${static_lib}")
   ENDIF()
 ENDFUNCTION()
 
@@ -169,26 +167,33 @@ FUNCTION(CHECK_NETCDF_HAS_HDF5 found)
 ENDFUNCTION()
 
 
-FUNCTION(FIMEX_FIND_PROJ proj_pc proj_lib proj_inc_dir)
-  PKG_CHECK_MODULES(p_pc QUIET "proj")
+FUNCTION(FIMEX_FIND_PACKAGE name
+    pkg_pc
+    pkg_libname
+    pkg_hdr
+    )
+
+  UNSET(p_pc_FOUND CACHE)
+
+  IF(pkg_pc)
+    PKG_CHECK_MODULES(p_pc QUIET "${pkg_pc}")
+  ENDIF()
   IF(p_pc_FOUND)
-    MESSAGE(STATUS "Found proj pkg-config")
-    SET(${proj_pc} "proj" PARENT_SCOPE)
+    MESSAGE(STATUS "Found ${name}: pkg-config '${pkg_pc}'")
+    SET(${name}_PC ${pkg_pc} PARENT_SCOPE)
   ELSE()
-    FIND_PATH(p_inc_dir
-      proj_api.h
-      HINTS "${PROJ_INSTALL_DIR}/include" "${PROJ_INCLUDE_DIR}"
+    FIND_PATH(${name}_INC_DIR
+      ${pkg_hdr}
+      HINTS "${${name}_INCLUDE_DIR}" "${${name}_DIR}/include"
     )
-    FIND_LIBRARY(p_lib
-      NAMES "proj"
-      HINTS "${PROJ_INSTALL_DIR}/lib" "${PROJ_LIB_DIR}"
+    FIND_LIBRARY(${name}_LIB
+      NAMES ${pkg_libname}
+      HINTS "${${name}_LIB_DIR}" "${${name}_DIR}/lib"
     )
-    IF((p_inc_dir) AND (p_lib))
-      MESSAGE(STATUS "Found proj include: '${p_inc_dir}'  library: '${p_lib}'")
-      SET(${proj_lib}     ${p_lib}     PARENT_SCOPE)
-      SET(${proj_inc_dir} ${p_inc_dir} PARENT_SCOPE)
+    IF((${name}_INC_DIR) AND (${name}_LIB))
+      MESSAGE(STATUS "Found ${name}: include: '${${name}_INC_DIR}/${pkg_hdr}'  library: '${${name}_LIB}'")
     ELSE()
-      MESSAGE(FATAL_ERROR "Required proj include/library not found")
+      MESSAGE(FATAL_ERROR "Required ${name} include/library not found")
     ENDIF()
   ENDIF()
 ENDFUNCTION()

@@ -4,10 +4,11 @@ SET(libfimex_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${PC_INCLUDE_DIRS}
-  ${PROJ_INC_DIR}
-  ${Boost_INCLUDE_DIRS}
-  ${GRIBAPI_INC_DIR}
+  ${udunits2_INC_DIR}
+  ${proj_INC_DIR}
+  ${grib_api_INC_DIR}
   ${ECCODES_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 SET(libfimex_COMPILE_DEFINITIONS
   ${PC_CFLAGS_OTHER}
@@ -178,9 +179,6 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
 
   IF(ENABLE_GRIBAPI)
     INCLUDE_DIRECTORIES(${GRIBAPI_INC_DIR})
-    IF(ENABLE_GRIBAPIPThread)
-      SET(HAVE_GRIB_API_THREADSAFE 1)
-    ENDIF()
   ENDIF()
 
   SET(libfimex_grib_SOURCES
@@ -329,11 +327,12 @@ SET(libfimex_ALL_SOURCES
 )
 
 SET(libfimex_LIBS
-  ${eccodes_LIB}
-  ${GRIBAPI_LIB}
   ${FELT_LIBRARY}
   ${PC_LIBRARIES}
-  ${PROJ_LIB}
+  ${udunits2_LIB}
+  ${proj_LIB}
+  ${grib_api_LIB}
+  ${eccodes_LIB}
   ${Boost_LIBRARIES}
 )
 

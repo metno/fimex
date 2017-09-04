@@ -23,7 +23,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- \
 	    -DBUILD_SHARED_LIBS=BOTH \
 	    -DENABLE_LOG4CPP=YES \
-	    -DENABLE_GRIBAPI=YES -DGRIBAPI_INSTALL_DIR=/opt/grib_api-1.13.0 \
+	    -DENABLE_GRIBAPI=YES -Dgrib_api_DIR=/opt/grib_api-1.13.0 \
 	    -DENABLE_FORTRAN=YES \
 	    -DENABLE_PRORADXML=YES \
 	    -DENABLE_METGM=YES \

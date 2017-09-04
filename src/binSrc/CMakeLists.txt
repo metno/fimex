@@ -15,7 +15,9 @@ ENDFUNCTION()
 SET(LIBRARIES_A
   libfimex
   ${PC_LIBRARIES}
-  ${PROJ_LIB}
+  ${udunits2_LIB}
+  ${proj_LIB}
+  ${grib_api_LIB}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   )
 SET(LIBRARIES_B
