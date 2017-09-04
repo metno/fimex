@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_update )
         return;
     }
 
-    const string fileName("test_netcdfrw.nc");
+    const string fileName("test_update.nc");
     {
         const string topSrcDir(TOP_SRCDIR);
         const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
         return;
     }
 
-    const string fileName("test_netcdfrw.nc");
+    const string fileName("test_scaled.nc");
     {
         const string topSrcDir(TOP_SRCDIR);
         const string origFileName(topSrcDir+"/test/test_merge_inner.nc");

@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
     }
     BOOST_CHECK(found > 100); // at least 100 cells above 2000m
 
-    NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
+    NetCDF_CDMWriter(interpolator, "test_interpolator.nc");
     BOOST_CHECK(true);
 }
 
@@ -205,32 +205,6 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
     BOOST_CHECK(true);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_interpolator2)
-{
-    string topSrcDir(TOP_SRCDIR);
-    string grdFile("/disk1/opdata/hirlam20/grdn06.dat");
-    ifstream inputFile(grdFile.c_str());
-    if (inputFile.is_open()) {
-        inputFile.close();
-        boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-        boost::shared_ptr<CDMInterpolator> interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
-        vector<double> xAxis, yAxis;
-        xAxis = vector<double>();
-        yAxis = vector<double>();
-        for (int i = -114; i < 114; i++) {
-            xAxis.push_back(i * 50000);
-        }
-        for (int i = -147; i < 48; i++) {
-            yAxis.push_back(i * 50000);
-        }
-        interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-        BOOST_CHECK(true);
-        NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
-        BOOST_CHECK(true);
-    }
-}
-
 BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
 {
     string topSrcDir(TOP_SRCDIR);
@@ -246,7 +220,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
     BOOST_CHECK(true);
     BOOST_CHECK(interpolator->getDataSlice("x")->size() == 297);
     BOOST_CHECK(interpolator->getDataSlice("y")->size() == 286);
-//    NetCDF_CDMWriter(interpolator, "testInterpolator3.nc");
+//    NetCDF_CDMWriter(interpolator, "test_interpolatorRelative.nc");
 //    BOOST_CHECK(true);
 }
 

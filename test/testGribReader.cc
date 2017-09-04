@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
     BOOST_CHECK(20 == dataS->size());
 
-    NetCDF_CDMWriter(grbReader, "testGribRead.nc");
+    NetCDF_CDMWriter(grbReader, "test_read_grb1.nc");
     BOOST_CHECK(true); // and it is even writeable
 
 }

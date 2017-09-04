@@ -50,14 +50,7 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
 		return;
 	}
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	NetCDF_CDMWriter(feltReader, "test.nc");
-	string testFile2("/disk1/opdata/hirlam20/grdn06.dat");
-	ifstream grdFile(testFile2.c_str());
-	if (grdFile.is_open()) {
-		grdFile.close();
-        feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(testFile2, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-		NetCDF_CDMWriter(feltReader, "test2.nc");
-	}
+	NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
 }
 
 BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
@@ -69,7 +62,7 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 		return;
 	}
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
+	NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
 	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
 	BOOST_CHECK(writer.getVariableName("x") == "x_c");

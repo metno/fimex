@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
     boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
 
 #ifdef HAVE_NETCDF_H
-    string outputFile("testQualityExtractor.nc");
+    string outputFile("test_qualityExtract_convert.nc");
     NetCDF_CDMWriter(qe, outputFile);
     BOOST_CHECK(std::ifstream(outputFile.c_str()).is_open());
 #else

@@ -42,12 +42,18 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Logger.h"
 
+#include <boost/filesystem/operations.hpp>
+
 using namespace std;
 using namespace MetNoFimex;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 {
     //defaultLogLevel(Logger::DEBUG);
+    const string outputName = "test_timeInterpolator.nc";
+    fs::remove(outputName);
+
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/flth00.dat");
     if (!ifstream(fileName.c_str())) {
@@ -65,11 +71,11 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     string airTemp = "air_temperature";
     BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
     BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);
-    NetCDF_CDMWriter(timeInterpol, "test4.nc");
+    NetCDF_CDMWriter(timeInterpol, outputName);
     BOOST_CHECK(true);
 
     // check that the correct data is written
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader("test4.nc"));
+    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(outputName));
     DataPtr ncTimes = ncReader->getData("time");
     BOOST_CHECK_EQUAL(ncTimes->size(), 5);
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
@@ -81,6 +87,9 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 
 BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
 {
+    const string outputName = "test_timeInterpolatorRelative.nc";
+    fs::remove(outputName);
+
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/flth00.dat");
     if (!ifstream(fileName.c_str())) {
@@ -98,11 +107,11 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     string airTemp = "air_temperature";
     BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
     BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);
-    NetCDF_CDMWriter(timeInterpol, "test4.nc");
+    NetCDF_CDMWriter(timeInterpol, outputName);
     BOOST_CHECK(true);
 
     // check that the correct data is written
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader("test4.nc"));
+    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(outputName));
     DataPtr ncTimes = ncReader->getData("time");
     BOOST_CHECK_EQUAL(ncTimes->size(), 21);
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();

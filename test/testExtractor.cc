@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(extract->getData("precipitation_amount")->size() == 50*50*12);
     BOOST_CHECK(extract->getData("air_temperature")->size() == 50*50*12);
     boost::shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
-    NetCDF_CDMWriter(extract, "test3.nc");
+    NetCDF_CDMWriter(extract, "test_extract_1.nc");
     BOOST_CHECK(true);
 
     // test chunked reading
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
         BOOST_CHECK(precData1[mifi_3d_array_position(0,6,t,50,50,12)] == precData2[mifi_3d_array_position(0,3,t,2,4,12)]);
         BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(1,3,t,2,4,12)]);
     }
-    NetCDF_CDMWriter(extract, "test4.nc");
+    NetCDF_CDMWriter(extract, "test_extract_2.nc");
     BOOST_CHECK(true);
 
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     extract->reduceVerticalAxis("", -0.1, -0.05);
     extract->reduceTime(FimexTime(2006,1,1), FimexTime(2006,1,2)); // time out of range
     BOOST_CHECK(extract->getData("time")->size() == 0);
-    NetCDF_CDMWriter(extract, "test_0time.nc");
+    NetCDF_CDMWriter(extract, "test_extract_0time.nc");
     BOOST_CHECK(true);
 
     // test selectVariable
