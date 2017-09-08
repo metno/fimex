@@ -1701,7 +1701,7 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
             sum[j*nx+i] = zs[j*nx+i]*g;
         }
     }
-    for (size_t k = nz-1; k <= 0; k--) {
+    for (int k = nz-1; k >= 0; k--) {
         for (size_t j = 0; j < ny; j++) {
             for (size_t i = 0; i < nx; i++) {
                 size_t ij = i+nx*j;
@@ -1738,7 +1738,7 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
                 double w1 = R*t[ijk]
                              * (dlnp[ijk]*sum[ij] + alfa[ijk]*div)
                              / dp[ijk];
-                double w2 =   rhx[ij] * rdx_2 * (z[ijk+i]  - z[ijk-1])
+                double w2 =   rhx[ij] * rdx_2 * (z[ijk+1]  - z[ijk-1])
                             + rhy[ij] * rdy_2 * (z[ijk+nx] - z[ijk-nx]);
                 w[ijk] = (w1+w2) / g;
                 sum[ij] = sum[ij] + div;
