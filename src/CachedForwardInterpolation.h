@@ -44,7 +44,7 @@ private:
     size_t inY;
     size_t outX;
     size_t outY;
-    float (*aggrFunc)(const std::vector<float>& vec);
+    float (*aggrFunc)(std::vector<float>& vec);
     bool undefAggr;
 
 public:

@@ -35,7 +35,7 @@ using namespace std;
 namespace MetNoFimex
 {
 
-float aggrSum(const vector<float>& vec) {
+float aggrSum(vector<float>& vec) {
 #if 0
     for (vector<float>::const_iterator vit = vec.begin(); vit != vec.end(); ++vit)
         cerr << *vit << " ";
@@ -43,23 +43,18 @@ float aggrSum(const vector<float>& vec) {
 #endif
     return accumulate(vec.begin(), vec.end(), 0.f);
 }
-float aggrMean(const vector<float>& vec) {
-    if (vec.size() > 0) {
-        return aggrSum(vec)/vec.size();
-    } else {
-        return MIFI_UNDEFINED_F;
-    }
+float aggrMean(vector<float>& vec) {
+    return aggrSum(vec)/vec.size();
 }
-float aggrMedian(const vector<float>& vec) {
-    vector<float> vecCopy = vec;
-    nth_element(vecCopy.begin(), vecCopy.begin()+vecCopy.size()/2, vecCopy.end());
-    float median = vecCopy[vecCopy.size()/2];
+float aggrMedian(vector<float>& vec) {
+    nth_element(vec.begin(), vec.begin()+vec.size()/2, vec.end());
+    float median = vec[vec.size()/2];
     return median;
 }
-float aggrMax(const vector<float>& vec) {
+float aggrMax(vector<float>& vec) {
     return *(max_element(vec.begin(), vec.end()));
 }
-float aggrMin(const vector<float>& vec) {
+float aggrMin(vector<float>& vec) {
     return *(min_element(vec.begin(), vec.end()));
 }
 
@@ -100,10 +95,10 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
     size_t inZ = size / (inX*inY);
     newSize = outLayerSize*inZ;
     boost::shared_array<float> outData(new float[newSize]);
+    boost::shared_array< vector<float> > tempOut(new vector<float>[outLayerSize]);
     float *inDataIt = &inData[0];
-    // foreach value in inData, add to closes position in outData
+    // foreach value in inData, add to closest position in outData
     for (size_t z = 0; z < inZ; ++z) {
-        boost::shared_array<vector<float> > tempOut(new vector<float>[outLayerSize]);
         for (size_t y = 0; y < inY; ++y) {
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
@@ -123,12 +118,13 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
         vector<float> *tempOutIt = &tempOut[0];
         float* outDataIt = &outData[z*outLayerSize];
         for (size_t i = 0; i < outLayerSize; i++) {
-            vector<float> vals = *tempOutIt++;
+            vector<float>& vals = *tempOutIt++;
             if (vals.empty()) {
                 *outDataIt++ = MIFI_UNDEFINED_F;
             } else {
                 *outDataIt++ = aggrFunc(vals);
             }
+            vals.clear();
         }
     }
     return outData;
