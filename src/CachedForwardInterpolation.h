@@ -38,8 +38,8 @@ class CachedForwardInterpolation : public CachedInterpolationInterface
 {
 private:
 //    All defined in CachedInterpolation
-    std::vector<double> pointsOnXAxis; // x*inX+y maps to x in out
-    std::vector<double> pointsOnYAxis; // x*inX+y maps to y in out
+    std::vector<int> pointsOnXAxis; // x*inX+y maps to x in out
+    std::vector<int> pointsOnYAxis; // x*inX+y maps to y in out
     size_t inX;
     size_t inY;
     size_t outX;
@@ -48,8 +48,9 @@ private:
     bool undefAggr;
 
 public:
-    CachedForwardInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
-    virtual ~CachedForwardInterpolation() {}
+    CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType,
+                               const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis,
+                               size_t inX, size_t inY, size_t outX, size_t outY);
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
     virtual size_t getInX() const {return inX;}
     virtual size_t getInY() const {return inY;}

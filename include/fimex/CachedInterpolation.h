@@ -125,8 +125,10 @@ public:
      * @param outX size of new X axis
      * @param outY size of new Y axis
      */
-    CachedInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
-    virtual ~CachedInterpolation() {}
+    CachedInterpolation(const std::string &xDimName, const std::string &yDimName, int funcType,
+                        const std::vector<double> &pointsOnXAxis, const std::vector<double> &pointsOnYAxis,
+                        size_t inX, size_t inY, size_t outX, size_t outY);
+
     /**
      * Actually interpolate the data. The data will be interpolated as floats internally.
      *

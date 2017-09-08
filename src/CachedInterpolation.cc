@@ -90,8 +90,21 @@ DataPtr CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMRea
 }
 
 
-CachedInterpolation::CachedInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
-: CachedInterpolationInterface(xDimName, yDimName), pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY) {
+CachedInterpolation::CachedInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType,
+                                         const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis,
+                                         size_t inX, size_t inY, size_t outX, size_t outY)
+  : CachedInterpolationInterface(xDimName, yDimName)
+  , pointsOnXAxis(pointsOnXAxis)
+  , pointsOnYAxis(pointsOnYAxis)
+  , inX(inX)
+  , inY(inY)
+  , outX(outX)
+  , outY(outY)
+{
+    // we do not round pointsOnXYAxis values here:
+    // * mifi_get_values_bilinear_f and mifi_get_values_bicubic_f use floor/fraction
+    // * mifi_get_values_f uses lround
+
     switch (funcType) {
     case MIFI_INTERPOL_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
     case MIFI_INTERPOL_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;

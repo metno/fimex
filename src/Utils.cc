@@ -43,6 +43,15 @@ int round(double num) {
     return static_cast<int>(num < 0.0 ? std::ceil(num - 0.5) : std::floor(num + 0.5));
 }
 
+int RoundAndClamp::operator()(double d) const
+{
+  int r = lround(d);
+  if (r>=mini && r<=maxi)
+    return r;
+  else
+    return invalid;
+}
+
 std::string trim(const std::string& str) {
     int pos1 = str.find_first_not_of(" ");
     int pos2 = str.find_last_not_of(" ");

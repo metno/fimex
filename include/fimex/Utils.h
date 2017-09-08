@@ -44,6 +44,16 @@ namespace MetNoFimex
  */
 int round(double num);
 
+/** Round a double to integer, and if the value is outside a range, replace with an "invalid" value.
+ */
+struct RoundAndClamp {
+  int mini, maxi, invalid;
+
+  RoundAndClamp(int vb, int ve, int inv)
+    : mini(vb), maxi(ve), invalid(inv) { }
+  int operator()(double d) const;
+};
+
 /**
  * Remove leading and trailing spaces.
  * @param str string to trim

@@ -64,9 +64,20 @@ float aggrMin(const vector<float>& vec) {
 }
 
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
-CachedForwardInterpolation::CachedForwardInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
-: CachedInterpolationInterface(xDimName, yDimName), pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY)
+CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType,
+                                                       const std::vector<double>& pOnX, const std::vector<double>& pOnY,
+                                                       size_t inX, size_t inY, size_t outX, size_t outY)
+  : CachedInterpolationInterface(xDimName, yDimName)
+  , inX(inX)
+  , inY(inY)
+  , outX(outX)
+  , outY(outY)
 {
+    pointsOnXAxis.reserve(pOnX.size());
+    pointsOnYAxis.reserve(pOnY.size());
+    std::transform(pOnX.begin(), pOnX.end(), std::back_inserter(pointsOnXAxis), RoundAndClamp(0, outX-1, -1));
+    std::transform(pOnY.begin(), pOnY.end(), std::back_inserter(pointsOnYAxis), RoundAndClamp(0, outY-1, -1));
+
     undefAggr = false;
     switch (funcType) {
     case MIFI_INTERPOL_FORWARD_SUM: aggrFunc = aggrSum; break;
@@ -85,7 +96,6 @@ CachedForwardInterpolation::CachedForwardInterpolation(std::string xDimName, std
 
 boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
 {
-
     size_t outLayerSize = outX*outY;
     size_t inZ = size / (inX*inY);
     newSize = outLayerSize*inZ;
@@ -98,10 +108,10 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
                 if (undefAggr || !mifi_isnan(val)) {
-                    int xOutPos = MetNoFimex::round(pointsOnXAxis[y*inX+x]);
-                    if (xOutPos >= 0 && xOutPos < static_cast<int>(outX)) {
-                        int yOutPos = MetNoFimex::round(pointsOnYAxis[y*inX+x]);
-                        if (yOutPos >= 0 && yOutPos < static_cast<int>(outY)) {
+                    int xOutPos = pointsOnXAxis[y*inX+x];
+                    if (xOutPos >= 0) {
+                        int yOutPos = pointsOnYAxis[y*inX+x];
+                        if (yOutPos >= 0) {
                             tempOut[yOutPos*outX + xOutPos].push_back(val);
                         }
                     }
