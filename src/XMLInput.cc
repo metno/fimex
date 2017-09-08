@@ -38,9 +38,4 @@ boost::shared_ptr<XMLDoc> XMLInputString::getXMLDoc() const {
     return XMLDoc::fromString(content_, url_);
 }
 
-boost::shared_ptr<XMLDoc> XMLInputURL::getXMLDoc() const {
-    return XMLDoc::fromURL(url_);
-}
-
-
 }

@@ -93,16 +93,6 @@ public:
     virtual std::string id() const {return content_.substr(0,((content_.size() > 100) ? 100 : content_.size()));}
 };
 
-class XMLInputURL : public XMLInput
-{
-private:
-    std::string url_;
-public:
-    XMLInputURL(const std::string& url) : url_(url) {}
-    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const;
-    virtual std::string id() const {return url_;}
-};
-
 class XMLInputDoc : public XMLInput
 {
 private:
@@ -114,7 +104,6 @@ public:
     virtual std::string id() const {return id_;}
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* XMLINPUT_H_ */

@@ -90,7 +90,6 @@ public:
 
     static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
     static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer, const std::string& url = "");
-    static boost::shared_ptr<XMLDoc> fromURL(const std::string& url);
 
 private:
         /**

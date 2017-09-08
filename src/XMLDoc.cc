@@ -103,12 +103,6 @@ boost::shared_ptr<XMLDoc> XMLDoc::fromString(const std::string& buffer, const st
     return pdoc;
 }
 
-boost::shared_ptr<XMLDoc> XMLDoc::fromURL(const std::string& url)
-{
-    return fromURL(url);
-}
-
-
 void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href)
 {
     /* do register namespace */
