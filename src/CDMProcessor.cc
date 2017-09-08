@@ -277,8 +277,8 @@ void CDMProcessor::addVerticalVelocity()
     boost::shared_array<double> lonlon;
     boost::shared_array<double> latlat;
     if (cdm_->getVariable(lon).getShape().size() == 1) {
-        lonlon = boost::shared_array<double>(new double[nx*ny]());
-        latlat = boost::shared_array<double>(new double[nx*ny]());
+        lonlon = boost::shared_array<double>(new double[nx*ny]);
+        latlat = boost::shared_array<double>(new double[nx*ny]);
         boost::shared_array<double> lat = latVals->asDouble();
         boost::shared_array<double> lon = lonVals->asDouble();
         assert(lonVals->size() == nx);
@@ -294,8 +294,8 @@ void CDMProcessor::addVerticalVelocity()
         latlat = latVals->asDouble();
     }
 
-    boost::shared_array<float> gridDistX(new float[nx*ny]());
-    boost::shared_array<float> gridDistY(new float[nx*ny]());
+    boost::shared_array<float> gridDistX(new float[nx*ny]);
+    boost::shared_array<float> gridDistY(new float[nx*ny]);
     if (MIFI_OK != mifi_griddistance(nx, ny, lonlon.get(), latlat.get(), gridDistX.get(), gridDistY.get())) {
         throw CDMException("addVerticalVelocity: cannot calculate griddistance");
     }
@@ -519,7 +519,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
 
         // output
-        boost::shared_array<float> w(new float[nx*ny*nz]());
+        boost::shared_array<float> w(new float[nx*ny*nz]);
         if (MIFI_OK != mifi_compute_vertical_velocity(nx, ny, nz, p_->vvComp.dx, p_->vvComp.dy, p_->vvComp.gridDistX.get(), p_->vvComp.gridDistY.get(),
                                                       apD->asDouble().get(), bD->asDouble().get(), zsD->asFloat().get(), psD->asFloat().get(),
                                                       uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()))

@@ -1584,7 +1584,7 @@ int mifi_griddistance(size_t nx, size_t ny, const double* lonVals, const double*
             gridDistX[p] = gridDistX[p-1];
             gridDistY[p] = gridDistY[p-1];
         }
-        // last row
+        // last row, overwriting corner
         for (size_t i = 0; i < nx; i++) {
             size_t p = (ny-1)*nx + i;
             gridDistX[p] = gridDistX[p-ny];
@@ -1671,23 +1671,23 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
 
     for (size_t j = 0; j < ny; ++j) {
         for (size_t i = 0; i < nx; ++i) {
-            dp[j*nx + i]   = da+db*ps[i+j*nx];
-            dlnp[j*nx + i] = 0.;
-            alfa[j*nx + i] = ln2;
+            size_t ij = i+nx*j;
+            dp[ij]   = da+db*ps[ij];
+            dlnp[ij] = 0.;
+            alfa[ij] = ln2;
         }
     }
     for (size_t k = 1; k < nz; k++) {
-        da = ah[k+1]- ah[k];
-        db = bh[k+1]- bh[k];
         if (MIFI_DEBUG)
-            fprintf(stderr, "k = %lu, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
+            fprintf(stderr, "k = %lu, ah = %f, bh= %f\n", k, ah[k], bh[k]);
         for (size_t j = 0; j < ny; ++j) {
             for (size_t i = 0; i < nx; ++i) {
-                double pm = ah[k]   + bh[k]*ps[i+j*nx];
-                double pp = ah[k+1] + bh[k+1]*ps[i+j*nx];
-                dp[i+nx*(j+ny*k)]   = da + db*ps[i+j*nx];
-                dlnp[i+nx*(j+ny*k)] = log(pp/pm);
-                alfa[i+nx*(j+ny*k)] = 1.-pm*dlnp[i+nx*(j+ny*k)]/dp[i+nx*(j+ny*k)];
+                size_t ij = i+j*nx, ijk = ij + nx*ny*k;
+                double pm = ah[k]   + bh[k]  *ps[ij];
+                double pp = ah[k+1] + bh[k+1]*ps[ij];
+                dp[ijk]   = pp - pm;
+                dlnp[ijk] = log(pp/pm);
+                alfa[ijk] = 1.-pm*dlnp[ijk]/dp[ijk];
             }
         }
     }
@@ -1698,14 +1698,14 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         fprintf(stderr, "vertical integration of hydrostatic equation\n");
     for (size_t j = 0; j < ny; j++) {
         for (size_t i = 0; i < nx; i++) {
-            sum[j*nx+i] = zs[j*nx+i]*g;
+            size_t ij = i+nx*j;
+            sum[ij] = zs[ij]*g;
         }
     }
     for (int k = nz-1; k >= 0; k--) {
         for (size_t j = 0; j < ny; j++) {
             for (size_t i = 0; i < nx; i++) {
-                size_t ij = i+nx*j;
-                size_t ijk = i+nx*(j+k*ny);
+                size_t ij = i+nx*j, ijk = ij + nx*ny*k;
                 double rt = R*t[ijk];
                 z[ijk] = sum[ij] + rt*alfa[ijk];
                 sum[ij] += rt*dlnp[ijk];
@@ -1717,22 +1717,22 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         fprintf(stderr, "vertical integral of divergence, compute w\n");
     for (size_t j = 0; j < ny; j++) {
         for (size_t i = 0; i < nx; i++) {
-             sum[i+nx*j]=0.;
+            size_t ij = i+nx*j;
+            sum[ij] = 0;
+            w[ij] = 0;
         }
     }
     for (size_t k = 1; k < nz; k++) {
         for (size_t j = 0; j < ny; j++) {
             for (size_t i = 0; i < nx; i++) {
-                size_t ij = i+nx*j;
-                size_t ijk = i+nx*(j+ny*k);
+                size_t ij = i+nx*j, ijk = ij + nx*ny*k;
                 uu[ij] = mapRatioY[ij] * u[ijk]*dp[ijk];
                 vv[ij] = mapRatioX[ij] * v[ijk]*dp[ijk];
             }
         }
         for (size_t j = 1; j < ny-1; j++) {
             for (size_t i = 1; i < nx-1; i++) {
-                size_t ij = i+nx*j;
-                size_t ijk = i+nx*(j+ny*k);
+                size_t ij = i+nx*j, ijk = ij + nx*ny*k;
                 double div = rhxy[ij]*(  rdx_2 * (uu[ij+1]  - uu[ij-1])
                                        + rdy_2 * (vv[ij+nx] - vv[ij-nx]));
                 double w1 = R*t[ijk]
@@ -1745,12 +1745,16 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
             }
         }
         for (size_t i = 1; i < nx-1; i++) {
-            w[i+nx*(0+ny*k)] = w[i+nx*(1+ny*k)];
-            w[i+nx*(ny-1+ny*k)] = w[i+nx*(ny-2 + ny*k)];
+            size_t i0k = i+nx*(0+ny*k), i1k = i0k + nx;
+            size_t im1k = i+nx*(ny-1+ny*k), im2k = im1k - nx;
+            w[i0k] = w[i1k];
+            w[im1k] = w[im2k];
         }
         for (size_t j = 0; j < ny; j++) {
-            w[0+nx*(j+ny*k)] = w[1+nx*(j+ny*k)];
-            w[nx-1+nx*(j+ny*k)] = w[nx-2+nx*(j+ny*k)];
+            size_t j0k = nx*(j+ny*k), j1k = j0k + 1;
+            size_t jm1k = nx-1+nx*(j+ny*k), jm2k = jm1k - 1;
+            w[j0k] = w[j1k];
+            w[jm1k] = w[jm2k];
         }
     }
     free(mapRatioX);
