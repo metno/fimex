@@ -112,7 +112,7 @@ FUNCTION(FIMEX_HEADERS headers sources source_suffix header_suffix)
 ENDFUNCTION()
 
 
-FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions)
+FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
   IF(BUILD_SHARED_LIBS OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
     SET(shared_lib lib${name})
     ADD_LIBRARY(${shared_lib} SHARED ${sources})
@@ -122,6 +122,9 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions)
     ENDIF()
     IF(definitions)
       TARGET_COMPILE_DEFINITIONS(${shared_lib} PUBLIC ${definitions})
+    ENDIF()
+    IF(options)
+      TARGET_COMPILE_OPTIONS(${shared_lib} PUBLIC ${options})
     ENDIF()
     SET_TARGET_PROPERTIES(${shared_lib} PROPERTIES
       VERSION ${lib_version}
