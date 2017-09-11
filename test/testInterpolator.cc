@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     vector<double> xAxis, yAxis;
     for (int i = 0; i < 10; i++) {
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader(new NetCDF_CDMReader(fileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     {
         vector<double> xAxis, yAxis;
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
     //interpolator->getCDM().toXMLStream(cerr);
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
     const CDM cdm = reader->getCDM();
     if (cdm.hasVariable("x_wind")) {
         CDMVariable var = cdm.getVariable("x_wind");
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_template)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, templateFileName);
     BOOST_CHECK(true);
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
     BOOST_CHECK(true);
@@ -325,8 +325,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
-    boost::shared_ptr<CDMReader> ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
+    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
     BOOST_CHECK(true);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(feltReader));
     vector<string> x(1, "x_wind_10m");
     vector<string> y(1, "y_wind_10m");
@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
          ;
 
     for (size_t k = 0; k < 2; ++k) {
-        boost::shared_ptr<CDMReader> reader;
+        CDMReader_p reader;
         string fileName(topSrcDir+"/test/data/north.nc");
         double xWind = 0;
         double yWind = 1;
@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
             continue;
         }
         try {
-            reader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+            reader = CDMReader_p(new NetCDF_CDMReader(fileName));
         } catch (CDMException& ex) {
             // ignore, most likely nc4 not readable
             continue;
@@ -546,7 +546,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
 
     vector<CrossSectionDefinition> vc;

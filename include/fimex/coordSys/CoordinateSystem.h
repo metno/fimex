@@ -52,7 +52,7 @@ struct CoordSysImpl;
  * @headerfile fimex/coordSys/CoordinateSystem.h
  */
 /**
- * CoordinateSystems are usually created using the listCoordinateSystems(boost::shared_ptr<CDMReader>) function, see example there.
+ * CoordinateSystems are usually created using the listCoordinateSystems(CDMReader_p) function, see example there.
  *
  * To investigate the coordinate systems of a file, use {\em fimex --printCS}.
  */
@@ -73,7 +73,7 @@ public:
     typedef std::vector<ConstAxisPtr> ConstAxisList;
 
     /**
-     * CoordinateSystems are usually created within the listCoordinateSystems(boost::shared_ptr<CDMReader>) funcion.
+     * CoordinateSystems are usually created within the listCoordinateSystems(CDMReader_p) funcion.
      */
     CoordinateSystem();
     explicit CoordinateSystem(const std::string& conventionName);
@@ -251,16 +251,16 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
  * won't overwrite any existing spatial vector properties
  * @param reader
  */
-void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader);
+void enhanceVectorProperties(CDMReader_p reader);
 
 /**
  * fetch all coordinate system from a MetNoFimex::CDM
- * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
+ * @deprecated call listCoordinateSystems(CDMReader_p reader) instead
  */
 MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm));
 /**
  * fetch all coordinate system from a MetNoFimex::CDM
- * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
+ * @deprecated call listCoordinateSystems(CDMReader_p reader) instead
  */
 MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
 
@@ -277,7 +277,7 @@ MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoor
  *        which might interfere when changing dimensions
  * @return number of horizontal coordinate systems found, i.e. systems.size()
  */
-int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string,
+int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader, std::map<std::string,
         boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
 
 /**

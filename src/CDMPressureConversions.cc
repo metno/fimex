@@ -136,13 +136,13 @@ Converter::~Converter()
 
 struct ConverterFactory {
     struct Environment {
-        CDMReaderPtr inputReader;
+        CDMReader_p inputReader;
         const CDM& inputCDM;
         const CoordSysPtr_v inputCoordSys;
 
         boost::shared_ptr<CDM> outputCDM;
 
-        Environment(CDMReaderPtr inReader, boost::shared_ptr<CDM> outCDM)
+        Environment(CDMReader_p inReader, boost::shared_ptr<CDM> outCDM)
             : inputReader(inReader), inputCDM(inputReader->getCDM()), inputCoordSys(listCoordinateSystems(inputReader)), outputCDM(outCDM) { }
     };
 
@@ -212,13 +212,13 @@ std::string deriveVariableName(const ConverterFactory::Operation& oper, const st
 
 class ThetaTemperatureConverter : public Converter {
 public:
-    ThetaTemperatureConverter(const std::string& temperature, CDMReaderPtr reader, CoordSysPtr cs, const std::string& theta)
+    ThetaTemperatureConverter(const std::string& temperature, CDMReader_p reader, CoordSysPtr cs, const std::string& theta)
         : Converter(temperature), reader_(reader), cs_(cs), theta_(theta) { }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
-    CDMReaderPtr reader_;
+    CDMReader_p reader_;
     CoordSysPtr cs_;
     const std::string& theta_;
 };
@@ -298,13 +298,13 @@ ConverterPtr_v ThetaTemperatureConverterFactory::createConverter(Environment& en
 
 class HumidityConverter : public Converter {
 public:
-    HumidityConverter(const std::string& relative, CDMReaderPtr reader, CoordSysPtr cs, const std::string& specific, const std::string& temperature)
+    HumidityConverter(const std::string& relative, CDMReader_p reader, CoordSysPtr cs, const std::string& specific, const std::string& temperature)
         : Converter(relative), reader_(reader), cs_(cs), specific_(specific), temperature_(temperature) { }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
-    CDMReaderPtr reader_;
+    CDMReader_p reader_;
     CoordSysPtr cs_;
     std::string specific_;
     std::string temperature_;
@@ -402,13 +402,13 @@ ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const
 
 class OmegaVerticalConverter : public Converter {
 public:
-    OmegaVerticalConverter(const std::string& vwind, CDMReaderPtr reader, CoordSysPtr cs, const std::string& omega, const std::string& temperature)
+    OmegaVerticalConverter(const std::string& vwind, CDMReader_p reader, CoordSysPtr cs, const std::string& omega, const std::string& temperature)
         : Converter(vwind), reader_(reader), cs_(cs), omega_(omega), temperature_(temperature) { }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
-    CDMReaderPtr reader_;
+    CDMReader_p reader_;
     CoordSysPtr cs_;
     std::string omega_;
     std::string temperature_;
@@ -484,14 +484,14 @@ ConverterPtr_v OmegaVerticalConverterFactory::createConverter(Environment& env, 
 
 class AddPressure4DConverter : public Converter {
 public:
-    AddPressure4DConverter(const std::string& pressure4d, CDMReaderPtr reader,
+    AddPressure4DConverter(const std::string& pressure4d, CDMReader_p reader,
                            VerticalConverterPtr vc, const std::vector<std::string>& shape4d)
         : Converter(pressure4d), reader_(reader), vc_(vc), shape4d_(shape4d) { }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
-    CDMReaderPtr reader_;
+    CDMReader_p reader_;
     VerticalConverterPtr vc_;
     std::vector<std::string> shape4d_;
 };
@@ -617,7 +617,7 @@ void initfactories() {
 } // namespace
 
 
-CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations)
+CDMPressureConversions::CDMPressureConversions(CDMReader_p dataReader, std::vector<std::string> operations)
     : dataReader_(dataReader), p_(new CDMPressureConversionsImpl())
 {
     initfactories();

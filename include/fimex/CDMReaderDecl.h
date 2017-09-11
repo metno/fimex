@@ -1,7 +1,7 @@
 /*
- * Fimex, Pressure.cc
+ * Fimex
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2017, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -19,19 +19,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
- *
- *  Created on: Aug 8, 2013
- *      Author: heikok
  */
 
-#include "fimex/coordSys/verticalTransform/Pressure.h"
-#include "fimex/coordSys/verticalTransform/IdentityConverter.h"
+#ifndef CDMREADERDECL_H_
+#define CDMREADERDECL_H_
 
-namespace MetNoFimex {
+#include <boost/shared_ptr.hpp>
 
-VerticalConverterPtr Pressure::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+namespace MetNoFimex
 {
-    return IdentityConverter::createConverterForVarName(reader, cs, pressure, "hPa");
+/* forward declarations */
+class CDMReader;
+typedef boost::shared_ptr<CDMReader> CDMReader_p;
 }
 
-} // namespace MetNoFimex
+#endif /*CDMREADERDECL_H_ */

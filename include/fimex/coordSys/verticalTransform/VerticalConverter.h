@@ -2,6 +2,7 @@
 #define VERTICALCONVERTER_H
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
 
 #include <boost/shared_array.hpp>
@@ -12,13 +13,11 @@ namespace MetNoFimex {
 
 // forward decl.
 
-class CDMReader;
 class CoordinateSystem;
 class SliceBuilder;
 
 class VerticalConverter : boost::noncopyable {
 public:
-    typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
     virtual ~VerticalConverter();
@@ -45,14 +44,14 @@ typedef boost::shared_ptr<VerticalConverter> VerticalConverterPtr;
 
 class BasicVerticalConverter : public VerticalConverter {
 public:
-    BasicVerticalConverter(CDMReaderPtr reader, CoordSysPtr cs)
+    BasicVerticalConverter(CDMReader_p reader, CoordSysPtr cs)
         : reader_(reader), cs_(cs) { }
 
     DataPtr getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const;
     std::vector<std::string> getValidityShape(const std::string& verticalDim) const;
 
 protected:
-    CDMReaderPtr reader_;
+    CDMReader_p reader_;
     CoordSysPtr cs_;
 };
 

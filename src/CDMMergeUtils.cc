@@ -14,7 +14,7 @@ static LoggerPtr logger(getLogger("fimex.CDMMergeUtils"));
 
 using namespace std;
 
-values_v getAxisValues(const CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr axis, const string& unit)
+values_v getAxisValues(const CDMReader_p reader, CoordinateSystem::ConstAxisPtr axis, const string& unit)
 {
     const CDM& cdm = reader->getCDM();
     const string &name = axis->getName();
@@ -33,7 +33,7 @@ values_v getAxisValues(const CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr
     return values_v(array.get(), array.get() + axisData->size());
 }
 
-static int axisLength(CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr ax)
+static int axisLength(CDMReader_p reader, CoordinateSystem::ConstAxisPtr ax)
 {
     if (ax.get() == 0)
         return -2;
@@ -43,7 +43,7 @@ static int axisLength(CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr ax)
     return dim.getLength();
 }
 
-bool checkSingleAxisCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT,
+bool checkSingleAxisCompatibility(CDMReader_p readerB, CDMReader_p readerT,
         CoordinateSystem::ConstAxisPtr axB, CoordinateSystem::ConstAxisPtr axT,
         const char* messageLabel)
 {
@@ -65,7 +65,7 @@ bool checkSingleAxisCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT,
     return true;
 }
 
-bool checkAxesCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT, CoordinateSystemPtr csB, CoordinateSystemPtr csT)
+bool checkAxesCompatibility(CDMReader_p readerB, CDMReader_p readerT, CoordinateSystemPtr csB, CoordinateSystemPtr csT)
 {
     const int N = 5;
     const CoordinateAxis::AxisType types[N] = {
@@ -130,7 +130,7 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
         return false;                                                   \
     } while(false)
 
-bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
+bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
         const CoordinateSystemPtr_v& allCsB, const CoordinateSystemPtr_v& allCsT,
         const string& varName)
 {
@@ -210,7 +210,7 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
     return true;
 }
 
-CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpolationMethod,
+CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod,
         CDMInterpolatorPtr& interpolatedO, string& nameX, string& nameY, bool keepAllOuter)
 {
     const CDM& cdmIC = readerI->getCDM();

@@ -34,7 +34,7 @@
 namespace MetNoFimex
 {
 
-C_CDMReader::C_CDMReader(boost::shared_ptr<CDMReader> dataReader)
+C_CDMReader::C_CDMReader(CDMReader_p dataReader)
 : dataReader_(dataReader)
 {
     *cdm_ = dataReader_->getCDM();

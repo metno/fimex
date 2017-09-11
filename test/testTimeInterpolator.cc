@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
     timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
     DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     BOOST_CHECK(true);
 
     // check that the correct data is written
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(outputName));
+    CDMReader_p ncReader(new NetCDF_CDMReader(outputName));
     DataPtr ncTimes = ncReader->getData("time");
     BOOST_CHECK_EQUAL(ncTimes->size(), 5);
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
     timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
     DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     BOOST_CHECK(true);
 
     // check that the correct data is written
-    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(outputName));
+    CDMReader_p ncReader(new NetCDF_CDMReader(outputName));
     DataPtr ncTimes = ncReader->getData("time");
     BOOST_CHECK_EQUAL(ncTimes->size(), 21);
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();

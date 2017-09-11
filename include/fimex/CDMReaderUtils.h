@@ -46,7 +46,7 @@ namespace MetNoFimex
 
 /**
  * avoid deletion of the shared_ptr or shared_array when used as
- * boost::shared_ptr<CDMReader>(this, null_deleter())
+ * boost::shared_ptr<T>(this, null_deleter())
  * @param r
  */
 struct null_deleter
@@ -62,7 +62,7 @@ struct null_deleter
  * @throw CDMException if eithern no reference time has been found, or if more than 1 different reference
  *        times have been found
  */
-boost::posix_time::ptime getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader);
+boost::posix_time::ptime getUniqueForecastReferenceTime(CDMReader_p reader);
 
 /**
  * This is the same function as CDMReader::getScaledDataSliceInUnit, but it converts
@@ -74,7 +74,7 @@ boost::posix_time::ptime getUniqueForecastReferenceTime(boost::shared_ptr<CDMRea
  * @param unLimDimPos
  * @return
  */
-std::vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const std::string& var, const std::string& unit, int unLimDimPos);
+std::vector<double> getDataSliceInUnit(CDMReader_p reader, const std::string& var, const std::string& unit, int unLimDimPos);
 
 /**
  * return estimated size of CDM-data in bytes
@@ -105,7 +105,7 @@ std::string findUniqueDimVarName(const CDM& cdm, std::string baseVar);
 /**
  * generate projection coordinates if they don't exist for a coordinate system
  */
-void generateProjectionCoordinates(boost::shared_ptr<CDMReader>& reader);
+void generateProjectionCoordinates(CDMReader_p reader);
 
 }
 #endif /* CDMREADERUTILS_H_ */

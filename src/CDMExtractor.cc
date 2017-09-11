@@ -42,7 +42,7 @@ namespace MetNoFimex
 
 static LoggerPtr logger(getLogger("fimex.CDMExtractor"));
 
-CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
+CDMExtractor::CDMExtractor(CDMReader_p datareader)
 : dataReader_(datareader)
 {
     *cdm_ = dataReader_->getCDM();
@@ -54,7 +54,7 @@ CDMExtractor::~CDMExtractor()
 
 // join SliceBuilder request and build a big dataPtr
 // the slices need to come in a logical order of the data
-DataPtr joinSlices(boost::shared_ptr<CDMReader> reader, std::string varName, const std::vector<SliceBuilder>& slices)
+DataPtr joinSlices(CDMReader_p reader, std::string varName, const std::vector<SliceBuilder>& slices)
 {
     const CDMVariable& var = reader->getCDM().getVariable(varName);
     // handle trivial cases

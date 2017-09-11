@@ -35,7 +35,7 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTagForWriting(const CDMReader_p pCdmReader,
                                                                                  const CDMVariable* pVariable) {
 
         boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);

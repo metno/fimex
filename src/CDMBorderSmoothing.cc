@@ -45,8 +45,8 @@ static LoggerPtr logger(getLogger("fimex.CDMBorderSmoothing"));
 // ========================================================================
 
 struct CDMBorderSmoothingPrivate {
-    CDMReaderPtr readerI;
-    CDMReaderPtr readerO;
+    CDMReader_p readerI;
+    CDMReader_p readerO;
     CDMInterpolatorPtr interpolatedO;
 
     string nameX, nameY;
@@ -60,7 +60,7 @@ struct CDMBorderSmoothingPrivate {
 
 // ========================================================================
 
-CDMBorderSmoothing::CDMBorderSmoothing(CDMReaderPtr inner, CDMReaderPtr outer, int grim)
+CDMBorderSmoothing::CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer, int grim)
     : p(new CDMBorderSmoothingPrivate)
 {
     p->readerI = inner;

@@ -62,7 +62,7 @@ public:
     virtual ~UnScale() {}
 };
 
-GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
+GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile), gribVersion(gribVersion), configFile(configFile), xmlConfig(new XMLDoc(configFile))
 {
     logger = getLogger("fimex.GribApi_CDMWriter");

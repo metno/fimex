@@ -19,7 +19,7 @@ public:
      * @param ny y-size of ps
      * @param nt t-size of ps
      */
-    SigmaToPressureConverter(CDMReaderPtr reader, CoordSysPtr cs, const std::string& sigma, const std::string& ptop, const std::string& ps)
+    SigmaToPressureConverter(CDMReader_p reader, CoordSysPtr cs, const std::string& sigma, const std::string& ptop, const std::string& ps)
         : BasicVerticalConverter(reader, cs), sigma_(sigma), ptop_(ptop), ps_(ps) {}
 
     std::vector<std::string> getShape() const;

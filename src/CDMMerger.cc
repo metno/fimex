@@ -55,8 +55,8 @@ static LoggerPtr logger(getLogger("fimex.CDMMerger"));
 // ========================================================================
 
 struct CDMMergerPrivate {
-    CDMReaderPtr readerI;
-    CDMReaderPtr readerO;
+    CDMReader_p readerI;
+    CDMReader_p readerO;
 
     CDMInterpolatorPtr interpolatedOT;  //! outer interpolated to target grid
     CDMBorderSmoothingPtr readerSmooth; //! smoothed (inner+outer) on inner grid
@@ -76,7 +76,7 @@ struct CDMMergerPrivate {
 
 // ========================================================================
 
-CDMMerger::CDMMerger(CDMReaderPtr inner, CDMReaderPtr outer)
+CDMMerger::CDMMerger(CDMReader_p inner, CDMReader_p outer)
     : p(new CDMMergerPrivate)
 {
     p->readerI = inner;

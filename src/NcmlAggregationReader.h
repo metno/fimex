@@ -56,10 +56,10 @@ public:
     virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 private:
     // main data-reader
-    boost::shared_ptr<CDMReader> gDataReader_;
+    CDMReader_p gDataReader_;
     std::string aggType_;
     // the readers_ as ordered in the aggregation
-    std::vector<std::pair<std::string, boost::shared_ptr<CDMReader> > > readers_;
+    std::vector<std::pair<std::string, CDMReader_p> > readers_;
     // udim -> readerId,udimPos, joinExiting mapping of this udim to the readers_(i) udim (j)
     std::vector<std::pair<std::size_t, std::size_t> > readerUdimPos_;
     // varName -> readerId, union mapping of varName to readers_(i)

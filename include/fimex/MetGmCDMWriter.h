@@ -36,7 +36,7 @@ namespace MetNoFimex {
     class MetGmCDMWriter : public CDMWriter
     {
     public:
-            MetGmCDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile = std::string());
+            MetGmCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile = std::string());
             ~MetGmCDMWriter();
 
     protected:

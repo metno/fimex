@@ -36,6 +36,7 @@
 #include "fimex/Data.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include "fimex_config.h"
 
@@ -91,7 +92,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
                 // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
                 file = boost::regex_replace(file, boost::regex("^dods:"), "http:", boost::format_first_only);
                 LOG4FIMEX(logger, Logger::DEBUG, "reading netcdf-file:  ");
-                gDataReader_ = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(file));
+                gDataReader_ = boost::make_shared<NetCDF_CDMReader>(file);
             } else
 #endif // HAVE_NETCDF_H
             {
@@ -112,7 +113,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             // open <netcdf /> tags recursively
             string id = ncml.id() +":netcdf:" + type2string(i);
             string current = doc->toString(nodesNc->nodeTab[i]);
-            readers_.push_back(make_pair(id, boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputString(current, id)))));
+            readers_.push_back(make_pair(id, boost::make_shared<NcmlCDMReader>(XMLInputString(current, id))));
         }
 
         aggType_ = getXmlProp(nodes->nodeTab[0], "type");
@@ -291,7 +292,7 @@ DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, size_t u
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
             return gDataReader_->getDataSlice(varName, unLimDimPos);
         } else {
-            pair<string, boost::shared_ptr<CDMReader> >& r = readers_.at(varReader_[varName]);
+            pair<string, CDMReader_p>& r = readers_.at(varReader_[varName]);
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << r.first);
             return r.second->getDataSlice(varName, unLimDimPos);
         }
@@ -350,7 +351,7 @@ DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, const Sl
             DataPtr retData = createData(variable.getDataType(), unLimSliceSize*unLimDimSize, cdm_->getFillValue(varName));
             for (size_t i = 0; i < unLimDimSize; ++i) {
                 LOG4FIMEX(logger, Logger::DEBUG, "fetching data from " << readers_.at(readerUdimPos_.at(unLimDimStart+i).first).first << " at uDimPos " << readerUdimPos_.at(unLimDimStart+i).second);
-                boost::shared_ptr<CDMReader> reader = readers_.at(readerUdimPos_.at(i+unLimDimStart).first).second;
+                CDMReader_p reader = readers_.at(readerUdimPos_.at(i+unLimDimStart).first).second;
                 SliceBuilder sbi(reader->getCDM(), varName);
                 for (size_t j = 0; j < dimNames.size(); ++j) {
                     if (dimNames.at(j) == unLimDim) {
@@ -375,7 +376,7 @@ DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, const Sl
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
             return gDataReader_->getDataSlice(varName, sb);
         } else {
-            pair<string, boost::shared_ptr<CDMReader> >& r = readers_.at(varReader_[varName]);
+            pair<string, CDMReader_p>& r = readers_.at(varReader_[varName]);
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << r.first);
             return r.second->getDataSlice(varName, sb);
         }

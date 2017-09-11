@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_joinExisting )
         BOOST_CHECK(false);
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
     BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
     BOOST_CHECK(reader->getDataSlice("multi", 3)->asShort()[1] == -4);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
         BOOST_CHECK(false);
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
     BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( test_aggNothing )
         BOOST_CHECK(false);
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
     }
     // suppress ERROR: file unreadable
     defaultLogLevel(Logger::FATAL);
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     defaultLogLevel(Logger::INFO);
     BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( test_union )
         BOOST_CHECK(false);
         return;
     }
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().hasVariable("b"));
     BOOST_CHECK(reader->getCDM().hasVariable("extra"));

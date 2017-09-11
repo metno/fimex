@@ -60,7 +60,7 @@ boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForReading
     return gp1;
 }
 
-boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader)
+boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader)
 {
     boost::shared_ptr<MetGmGroup1Ptr> gp1 =
             boost::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr);

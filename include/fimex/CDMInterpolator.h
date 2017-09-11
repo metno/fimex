@@ -137,7 +137,7 @@ private:
      */
     bool allXYSpatialVectorsHaveSameHorizontalId(std::string horizontalId, std::string& exampleVar1, std::string& exampleVar2) const;
 public:
-    CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
+    CDMInterpolator(CDMReader_p dataReader);
     virtual ~CDMInterpolator();
     using CDMReader::getDataSlice;
     /**

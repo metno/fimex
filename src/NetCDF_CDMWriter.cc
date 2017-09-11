@@ -38,6 +38,7 @@ extern "C" {
 #endif
 
 #include <iostream>
+#include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>
 #include <numeric>
@@ -107,7 +108,7 @@ void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
         throw CDMException("no root element (/cdm_ncwriter_config) in " + filename);
 }
 
-NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
+NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile), ncFile(std::auto_ptr<Nc>(new Nc()))
 {
     std::auto_ptr<XMLDoc> doc;
@@ -170,7 +171,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
         if (size > 0) {
             std::string configFile = getXmlProp(nodes->nodeTab[0], "filename");
             LOG4FIMEX(logger, Logger::DEBUG, "configuring CDMWriter with ncml config file: " << configFile);
-            cdmReader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(cdmReader, XMLInputFile(configFile)));
+            cdmReader = boost::make_shared<NcmlCDMReader>(cdmReader, XMLInputFile(configFile));
         }
     }
     cdm = cdmReader->getCDM();

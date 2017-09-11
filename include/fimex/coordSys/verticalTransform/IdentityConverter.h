@@ -12,10 +12,10 @@ namespace MetNoFimex {
  */
 class IdentityConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverterForStandardName(CDMReaderPtr reader, CoordSysPtr cs, const std::string& stdName, const std::string& unit);
-    static VerticalConverterPtr createConverterForVarName(CDMReaderPtr reader, CoordSysPtr cs, const std::string& varName, const std::string& unit);
+    static VerticalConverterPtr createConverterForStandardName(CDMReader_p reader, CoordSysPtr cs, const std::string& stdName, const std::string& unit);
+    static VerticalConverterPtr createConverterForVarName(CDMReader_p reader, CoordSysPtr cs, const std::string& varName, const std::string& unit);
 
-    IdentityConverter(CDMReaderPtr reader, CoordSysPtr cs, const std::string& varName, const std::string& unit)
+    IdentityConverter(CDMReader_p reader, CoordSysPtr cs, const std::string& varName, const std::string& unit)
         : BasicVerticalConverter(reader, cs), varName_(varName), varUnit_(unit) {}
 
     std::vector<std::string> getShape() const;

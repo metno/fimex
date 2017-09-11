@@ -56,6 +56,7 @@
 #endif
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
+#include <boost/make_shared.hpp>
 
 namespace MetNoFimex {
 
@@ -136,7 +137,7 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
     return MIFI_FILETYPE_UNKNOWN;
 }
 
-boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
+CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
 {
     XMLInputFile configXML(configFile);
     return create(fileType, fileName, configXML, args);
@@ -166,7 +167,7 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
     }
 }
 
-boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
+CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
                                                           const std::vector<std::string> & args)
 {
     switch (fileType) {
@@ -175,7 +176,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         if (configXML.isEmpty()) {
             throw CDMException("config file required for felt-files");
         }
-        return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configXML));
+        return boost::make_shared<FeltCDMReader2>(fileName, configXML);
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
     case MIFI_FILETYPE_GRBML: {
@@ -185,7 +186,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grbml-files");
         }
-        return boost::shared_ptr<CDMReader>(new GribCDMReader(fileName, configXML, members));
+        return boost::make_shared<GribCDMReader>(fileName, configXML, members);
     }
     case MIFI_FILETYPE_GRIB: {
         std::vector<std::string> files;
@@ -202,12 +203,12 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grib-files");
         }
-        return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configXML, members));
+        return boost::make_shared<GribCDMReader>(files, configXML, members);
     }
 #endif
 #ifdef HAVE_NETCDF_H
     case MIFI_FILETYPE_NETCDF: {
-        boost::shared_ptr<CDMReader> reader;
+        CDMReader_p reader;
         // scanfiles by a glob
         std::string globStr("glob:");
         if (fileName.find(globStr) == 0) { // starts with glob:
@@ -222,12 +223,12 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
                 ncml << "<netcdf location=\"" << files.at(i) << "\" />";
             }
             ncml << "</aggregation></netcdf>";
-            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputString(ncml.str())));
+            reader = boost::make_shared<NcmlCDMReader>(XMLInputString(ncml.str()));
         } else {
-            reader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName, false));
+            reader = boost::make_shared<NetCDF_CDMReader>(fileName, false);
         }
         if (!configXML.isEmpty()) {
-            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, configXML));
+            reader = boost::make_shared<NcmlCDMReader>(reader, configXML);
         }
         return reader;
     }
@@ -235,37 +236,37 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         if (!configXML.isEmpty()) {
             throw CDMException("Cannot open writeable NetCDF file with Ncml config: " + configXML.id());
         }
-        return boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName, true));
+        return boost::make_shared<NetCDF_CDMReader>(fileName, true);
     }
 #endif
 #ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
-        return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configXML));
+        return boost::make_shared<MetGmCDMReader>(fileName, configXML);
     }
 #endif
 #ifdef HAVE_PRORADXML
     case MIFI_FILETYPE_PRORAD: {
-        return boost::shared_ptr<CDMReader>(new ProradXMLCDMReader(fileName));
+        return boost::make_shared<ProradXMLCDMReader>(fileName);
     }
 #endif
 #ifdef HAVE_LIBPQ_FE_H
     case MIFI_FILETYPE_WDB: {
-        return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, configXML));
+        return boost::make_shared<WdbCDMReader>(fileName, configXML);
     }
 #endif
     case MIFI_FILETYPE_NCML:
-        return boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputFile(fileName)));
+        return boost::make_shared<NcmlCDMReader>(XMLInputFile(fileName));
     default: throw CDMException("Unknown fileType: " + type2string(fileType) + " for file: "+fileName);
     }
 }
 
-boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
+CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
 {
     int fileType = mifi_get_filetype(fileTypeName.c_str());
     return create(fileType, fileName, configFile, args);
 }
 
-boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
+CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
 {
     int fileType = mifi_get_filetype(fileTypeName.c_str());
     return create(fileType, fileName, configXML, args);

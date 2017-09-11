@@ -42,7 +42,7 @@ namespace MetNoFimex
 class CDMExtractor : public MetNoFimex::CDMReader
 {
 private:
-    boost::shared_ptr<CDMReader> dataReader_;
+    CDMReader_p dataReader_;
     typedef std::map<std::string, std::vector<size_t> > DimSlicesMap;
     DimSlicesMap dimSlices_;
     /**
@@ -61,7 +61,7 @@ private:
     CDMExtractor();
 
 public:
-    CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
+    CDMExtractor(CDMReader_p dataReader);
     virtual ~CDMExtractor();
 
 //    using CDMReader::getDataSlice;

@@ -369,7 +369,7 @@ void CoordinateSystem::addDependencyVariable(std::string varName)
     pimpl_->dependencyVars_.insert(varName);
 }
 
-int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader,
+int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
         std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems,
         std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
 {
@@ -496,7 +496,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     return coordSystems;
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDMReader_p reader)
 {
     // the return value
     vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
@@ -523,7 +523,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
     return coordSystems;
 }
 
-void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+void enhanceVectorProperties(CDMReader_p reader)
 {
     const builders_t builders = createBuilders();
 

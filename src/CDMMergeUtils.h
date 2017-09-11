@@ -21,7 +21,6 @@ namespace MetNoFimex {
 //namespace CDMMergeUtils {
 
 typedef boost::shared_ptr<CDMInterpolator> CDMInterpolatorPtr;
-typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
 typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystemPtr;
 typedef boost::shared_ptr<const Projection> ProjectionPtr;
 
@@ -49,13 +48,13 @@ struct equal_float : public std::unary_function<bool, float>
 
 void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys);
 
-bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
+bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
         const CoordinateSystemPtr_v& allCsB, const CoordinateSystemPtr_v& allCsT,
         const std::string& varName);
 
-values_v getAxisValues(const CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr axis, const std::string& unit);
+values_v getAxisValues(const CDMReader_p reader, CoordinateSystem::ConstAxisPtr axis, const std::string& unit);
 
-CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpolationMethod,
+CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod,
         CDMInterpolatorPtr& interpolatedO, std::string& nameX, std::string& nameY, bool keepAllOuter = false);
 
 //} // namespace CDMMergeUtils

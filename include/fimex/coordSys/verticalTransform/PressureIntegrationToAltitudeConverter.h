@@ -11,12 +11,12 @@ namespace MetNoFimex {
  */
 class PressureIntegrationToAltitudeConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr pressure);
+    static VerticalConverterPtr createConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure);
 
     /**
      * @param presConv another ToVLevelConverter converting to pressure
      */
-    PressureIntegrationToAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr pressure,
+    PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure,
         const std::string& air_temperature, const std::string& specific_humidity,
         const std::string& surface_air_pressure, const std::string& surface_geopotential);
 

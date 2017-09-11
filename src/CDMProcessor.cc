@@ -81,7 +81,7 @@ struct VerticalVelocityComps {
 };
 
 struct CDMProcessorImpl {
-    boost::shared_ptr<CDMReader> dataReader;
+    CDMReader_p dataReader;
     set<string> deaccumulateVars;
     set<string> accumulateVars;
     // variable -> <counterPart, horizontalId>
@@ -96,7 +96,7 @@ struct CDMProcessorImpl {
     VerticalVelocityComps vvComp;
 };
 
-CachedVectorReprojectionPtr makeCachedVectorReprojection(boost::shared_ptr<CDMReader> dataReader,
+CachedVectorReprojectionPtr makeCachedVectorReprojection(CDMReader_p dataReader,
                                                          CoordSysPtr cs, bool toLatLon)
 {
     assert(cs->hasProjection());
@@ -144,7 +144,7 @@ CachedVectorReprojectionPtr makeCachedVectorReprojection(boost::shared_ptr<CDMRe
     return CachedVectorReprojectionPtr(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
 }
 
-CDMProcessor::CDMProcessor(boost::shared_ptr<CDMReader> dataReader)
+CDMProcessor::CDMProcessor(CDMReader_p dataReader)
 : p_(new CDMProcessorImpl())
 {
     p_->dataReader = dataReader;
@@ -339,7 +339,7 @@ void CDMProcessor::deAccumulate(const std::string& varName)
 
 void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
     // find all vectors and rotate them to lat/lon (or x/y)
-    enhanceVectorProperties(boost::shared_ptr<CDMReader>(this, null_deleter()));
+    enhanceVectorProperties(CDMReader_p(this, null_deleter()));
     vector<string> varNameX, varNameY, standardNameX, standardNameY;
     string type = toLatLon ? "x" : "lon";
     string rot = toLatLon ? "LATLON_ROTATED_" : "GRID_ROTATED_";
@@ -495,7 +495,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice for '" << varName << "' at " << unLimDimPos);
     DataPtr data;
     if (varName == "upward_air_velocity_ml" && p_->vvComp.xWind != "") {
-        boost::shared_ptr<CDMReader> reader = p_->dataReader;
+        CDMReader_p reader = p_->dataReader;
         size_t nx = p_->vvComp.nx;
         size_t ny = p_->vvComp.ny;
         size_t nz = p_->vvComp.nz;

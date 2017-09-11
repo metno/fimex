@@ -34,7 +34,7 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr HybridSigmaPressure2::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr HybridSigmaPressure2::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     return HybridSigmaToPressureConverter::createConverter(reader, cs, a, b, p0, ps);
 }

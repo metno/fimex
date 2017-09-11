@@ -44,11 +44,11 @@ typedef boost::shared_ptr<ConverterSrc> ConverterSrcPtr;
 class ConverterSrc
 {
 public:
-    ConverterSrc(boost::shared_ptr<CDMReader> reader) : reader_(reader) {}
+    ConverterSrc(CDMReader_p reader) : reader_(reader) {}
     ~ConverterSrc() {}
-    boost::shared_ptr<CDMReader> getReader() {return reader_;}
+    CDMReader_p getReader() {return reader_;}
 private:
-    boost::shared_ptr<CDMReader> reader_;
+    CDMReader_p reader_;
 };
 
 } /* namespace MetNoFimex */

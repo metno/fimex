@@ -28,6 +28,7 @@
 #include <numeric>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/version.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -79,7 +80,7 @@ using namespace MetNoFimex;
 
 static LoggerPtr logger = getLogger("fimex");
 static po::options_description config_file_options;
-static boost::shared_ptr<CDMReader> applyFimexStreamTasks(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader);
+static CDMReader_p applyFimexStreamTasks(po::variables_map& vm, CDMReader_p dataReader);
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -101,7 +102,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;
 }
 
-static void printReaderStatements(const string& readerName, const po::variables_map& vm, boost::shared_ptr<CDMReader> reader)
+static void printReaderStatements(const string& readerName, const po::variables_map& vm, CDMReader_p reader)
 {
     if (vm.count(readerName+".printNcML")) {
         cout << readerName << " as NcML:" << endl;
@@ -317,9 +318,9 @@ static string getType(const string& io, po::variables_map& vm) {
     return type;
 }
 
-static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, const string& io="input") {
+static CDMReader_p getCDMFileReader(po::variables_map& vm, const string& io="input") {
     string type = getType(io, vm);
-    boost::shared_ptr<CDMReader> returnPtr;
+    CDMReader_p returnPtr;
     if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2") {
         string config(PKGDATADIR);
         config += "/felt2nc_variables.xml";
@@ -395,14 +396,14 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
     return method;
 }
 
-static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader) {
     if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") ||
             vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction") ||
             vm.count("process.addVerticalVelocity"))) {
         LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
         return dataReader;
     }
-    boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
+    boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(dataReader));
     if (vm.count("process.deaccumulateVariable")) {
         vector<string> vars = vm["process.deaccumulateVariable"].as<vector<string> >();
         for (size_t i = 0; i < vars.size(); i++) {
@@ -458,7 +459,7 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
     return processor;
 }
 
-static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader) {
     if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.pickDimension.name") || vm.count("extract.removeVariable") ||
            vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
            vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit") ||
@@ -467,7 +468,7 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
         LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
         return dataReader;
     }
-    boost::shared_ptr<CDMExtractor> extractor(new CDMExtractor(boost::shared_ptr<CDMReader>(dataReader)));
+    boost::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
     if (vm.count("extract.reduceDimension.name")) {
         vector<string> vars = vm["extract.reduceDimension.name"].as<vector<string> >();
         vector<int> startPos;
@@ -567,35 +568,35 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
     }
     printReaderStatements("extract", vm, extractor);
 
-    return boost::shared_ptr<CDMReader>(extractor);
+    return CDMReader_p(extractor);
 }
 
-static boost::shared_ptr<CDMReader> getCDMQualityExtractor(string version, po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMQualityExtractor(string version, po::variables_map& vm, CDMReader_p dataReader) {
     string autoConf, config;
     if (vm.count("qualityExtract"+version+".autoConfigString")) autoConf = vm["qualityExtract"+version+".autoConfigString"].as<string>();
     if (vm.count("qualityExtract"+version+".config")) config = vm["qualityExtract"+version+".config"].as<string>();
     if (autoConf != "" || config != "") {
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
-        dataReader = boost::shared_ptr<CDMReader>(new CDMQualityExtractor(boost::shared_ptr<CDMReader>(dataReader), autoConf, config));
+        dataReader = boost::make_shared<CDMQualityExtractor>(dataReader, autoConf, config);
     }
     printReaderStatements("qualityExtract"+version, vm, dataReader);
     return dataReader;
 }
 
 
-static boost::shared_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMTimeInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
     if (! vm.count("timeInterpolate.timeSpec")) {
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << vm["timeInterpolate.timeSpec"].as<string>());
-    boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
+    boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(dataReader));
     timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
     printReaderStatements("timeInterpolate", vm, timeInterpolator);
 
-    return boost::shared_ptr<CDMReader>(timeInterpolator);
+    return CDMReader_p(timeInterpolator);
 }
 
-static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMVerticalInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
     if (vm.count("verticalInterpolate.dataConversion")) {
         vector<string> operations = vm["verticalInterpolate.dataConversion"].as<vector<string> >();
         boost::shared_ptr<CDMPressureConversions> pressConv;
@@ -619,14 +620,14 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
     vector<double> level2;
     if (vm.count("verticalInterpolate.level2"))
         level2 = tokenizeDotted<double>(vm["verticalInterpolate.level2"].as<string>(),",");
-    boost::shared_ptr<CDMVerticalInterpolator> vInterpolator(new CDMVerticalInterpolator(boost::shared_ptr<CDMReader>(dataReader),
+    boost::shared_ptr<CDMVerticalInterpolator> vInterpolator(new CDMVerticalInterpolator(dataReader,
                                                                                          vm["verticalInterpolate.type"].as<string>(),
                                                                                          vm["verticalInterpolate.method"].as<string>(),
                                                                                          level1,
                                                                                          level2));
     printReaderStatements("verticalInterpolate", vm, vInterpolator);
 
-    return boost::shared_ptr<CDMReader>(vInterpolator);
+    return vInterpolator;
 }
 
 static boost::shared_ptr<InterpolatorProcess2d> parseProcess(std::string procString, std::string logProcess)
@@ -657,9 +658,9 @@ static boost::shared_ptr<InterpolatorProcess2d> parseProcess(std::string procStr
      }
      throw CDMException("undefined interpolate."+logProcess+": " + procString);
 }
-static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
 
-    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(dataReader));
     if (vm.count("interpolate.latitudeName")) {
         interpolator->setLatitudeName(vm["interpolate.latitudeName"].as<string>());
     }
@@ -755,26 +756,26 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 
     printReaderStatements("interpolate", vm, interpolator);
 
-    return boost::shared_ptr<CDMReader>(interpolator);
+    return CDMReader_p(interpolator);
 }
 
-static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getNcmlCDMReader(po::variables_map& vm, CDMReader_p dataReader) {
     if (! vm.count("ncml.config")) {
         return dataReader;
     }
-    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),XMLInputFile(vm["ncml.config"].as<string>())));
+    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(dataReader,XMLInputFile(vm["ncml.config"].as<string>())));
     printReaderStatements("ncml", vm, ncmlReader);
 
-    return boost::shared_ptr<CDMReader>(ncmlReader);
+    return CDMReader_p(ncmlReader);
 }
 
-static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static CDMReader_p getCDMMerger(po::variables_map& vm, CDMReader_p dataReader) {
 
     if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
                     or vm.count("merge.smoothing") or vm.count("merge.method")))
         return dataReader;
 
-    boost::shared_ptr<CDMReader> readerI = getCDMFileReader(vm, "merge.inner");
+    CDMReader_p readerI = getCDMFileReader(vm, "merge.inner");
     if( not readerI )
         throw CDMException("could not create reader for inner in merge");
     if (vm.count("merge.inner.cfg")) {
@@ -838,7 +839,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
     return merger;
 }
 
-boost::shared_ptr<CDMReader> applyFimexStreamTasks(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+CDMReader_p applyFimexStreamTasks(po::variables_map& vm, CDMReader_p dataReader) {
     dataReader = getCDMProcessor(vm, dataReader);
     dataReader = getCDMQualityExtractor("", vm, dataReader);
     dataReader = getCDMExtractor(vm, dataReader);
@@ -851,13 +852,11 @@ boost::shared_ptr<CDMReader> applyFimexStreamTasks(po::variables_map& vm, boost:
     return dataReader;
 }
 
-static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
+static void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm) {
     if (!(vm.count("output.fillFile"))) {
         return;
     }
     string type = getType("output", vm);
-    // boost::shared_ptr to shared_ptr
-    boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 #ifdef HAVE_NETCDF_H
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
         LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << vm["output.fillFile"].as<string>() << " without config");
@@ -866,16 +865,15 @@ static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_
         if (vm.count("output.config")) {
             config = vm["output.config"].as<string>();
         }
-        FillWriter(sharedDataReader, readerWriter, config);
+        FillWriter(dataReader, readerWriter, config);
         return;
     }
 #endif
     LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
-    return;
 }
 
 
-static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
+static void writeCDM(CDMReader_p dataReader, po::variables_map& vm) {
     printReaderStatements("output", vm, dataReader);
     if (!vm.count("output.file")) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
@@ -883,7 +881,7 @@ static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map&
     }
     string type = getType("output", vm);
     // boost::shared_ptr to shared_ptr
-    boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
+    CDMReader_p sharedDataReader(dataReader);
 #ifdef HAVE_NETCDF_H
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
         int version = 3;
@@ -1185,7 +1183,7 @@ int run(int argc, char* args[])
         return 1;
     }
 
-    boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+    CDMReader_p dataReader = getCDMFileReader(vm);
     dataReader = applyFimexStreamTasks(vm, dataReader);
     fillWriteCDM(dataReader, vm);
     writeCDM(dataReader, vm);

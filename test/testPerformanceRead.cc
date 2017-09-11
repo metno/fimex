@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     using namespace MetNoFimex;
     string fileName("/opdata/arome_norway25/AROME_Norway25_00.nc");
     //string fileName("/disk1/Fimex/AROME_Norway25_00_d1.nc");
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
 
     boost::shared_ptr<Data> data;
     for (int i = 0; i < 67; ++i) {

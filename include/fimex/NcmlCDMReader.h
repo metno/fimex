@@ -108,7 +108,7 @@ public:
      * @param configXML ncml-file with location set
      * @throw CDMException
      */
-    NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML);
+    NcmlCDMReader(CDMReader_p dataReader, const XMLInput& configXML);
     virtual ~NcmlCDMReader();
     /**
      * reading the data from the required source
@@ -145,7 +145,7 @@ private:
     std::string configId;
     boost::shared_ptr<XMLDoc> doc;
     std::auto_ptr<MutexType> mutex_;
-    boost::shared_ptr<CDMReader> dataReader;
+    CDMReader_p dataReader;
     /*
      * maps containing the changes. The key will reflect
      * this CDM, while the value references to dataReader->cdm

@@ -28,20 +28,19 @@
 #ifndef METGM_TIMETAG_H
 #define METGM_TIMETAG_H
 
+#include "fimex/CDMReaderDecl.h"
+
 // boost
-//
 #include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 // standard
-//
 #include <vector>
 
 namespace MetNoFimex {
 
 #define ANALYSIS_DATE_TIME "metgm_analysis_date_time"
 
-    class CDMReader;
     class CDMVariable;
     class MetGmGroup1Ptr;
     class MetGmGroup3Ptr;
@@ -49,9 +48,9 @@ namespace MetNoFimex {
     class MetGmTimeTag {
     public:
 
-        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagGlobal(const boost::shared_ptr<CDMReader> pCdmReader);
+        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagGlobal(const CDMReader_p pCdmReader);
 
-        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagForWriting(const CDMReader_p pCdmReader,
                                                                             const CDMVariable* pVariable);
 
         static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagForReading(const boost::shared_ptr<MetGmGroup1Ptr> pGroup1,
@@ -69,17 +68,17 @@ namespace MetNoFimex {
 
         inline MetGmTimeTag() : analysis_t(0), start_t(0), dT_(0), nT_(0) { }
 
-        void extractAnalysisDateTime(const boost::shared_ptr<CDMReader> pCdmReader);
+        void extractAnalysisDateTime(const CDMReader_p pCdmReader);
 
         bool hasNegativeTimePoints();
 
         bool hasNonEquidistantTimePoints();
 
-        void extractTimePoints(const boost::shared_ptr<CDMReader> pCdmReader);
+        void extractTimePoints(const CDMReader_p pCdmReader);
 
         void extractStartDateTime();
 
-        void init(const boost::shared_ptr<CDMReader> pCdmReader);
+        void init(const CDMReader_p pCdmReader);
 
         time_t              analysis_t;
         time_t              start_t;

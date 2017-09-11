@@ -39,8 +39,8 @@ namespace MetNoFimex {
 // ========================================================================
 
 struct CDMOverlayPrivate {
-    CDMReaderPtr readerB;
-    CDMReaderPtr readerT;
+    CDMReader_p readerB;
+    CDMReader_p readerT;
     CDMInterpolatorPtr interpolatedB;
 
     CDM init(int gridInterpolationMethod, bool keepOuterVariables);
@@ -49,7 +49,7 @@ struct CDMOverlayPrivate {
 // ========================================================================
 
 // base == big, top == small
-CDMOverlay::CDMOverlay(CDMReaderPtr base, CDMReaderPtr top, int grim, bool keepOuterVariables)
+CDMOverlay::CDMOverlay(CDMReader_p base, CDMReader_p top, int grim, bool keepOuterVariables)
     : p(new CDMOverlayPrivate)
 {
     p->readerB = base;

@@ -47,7 +47,7 @@ public:
      * @param configFile xml-configuration
      * @param version netcdf version, can be 3 or 4; 4 requires compilation against netcdf-4.0 or higher
      */
-    NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
+    NetCDF_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
     virtual ~NetCDF_CDMWriter();
     /**
      * @warning only public for testing

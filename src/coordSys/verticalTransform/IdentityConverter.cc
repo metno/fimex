@@ -13,13 +13,13 @@ namespace MetNoFimex {
 static LoggerPtr logger = getLogger("fimex.IdentityConverter");
 
 // static method
-VerticalConverterPtr IdentityConverter::createConverterForStandardName(CDMReaderPtr reader, CoordSysPtr cs, const std::string& stdName, const std::string& unit)
+VerticalConverterPtr IdentityConverter::createConverterForStandardName(CDMReader_p reader, CoordSysPtr cs, const std::string& stdName, const std::string& unit)
 {
     return createConverterForVarName(reader, cs, findVariableWithCS(reader->getCDM(), cs, stdName), unit);
 }
 
 // static method
-VerticalConverterPtr IdentityConverter::createConverterForVarName(CDMReaderPtr reader, CoordSysPtr cs, const std::string& varName, const std::string& unit)
+VerticalConverterPtr IdentityConverter::createConverterForVarName(CDMReader_p reader, CoordSysPtr cs, const std::string& varName, const std::string& unit)
 {
     if (!varName.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "createConverterForVarName '" << varName << "'");

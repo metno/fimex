@@ -41,7 +41,7 @@ namespace MetNoFimex {
   * @headerfile fimex/mifi_cdm_reader.h
   */
 /**
- * wrapper class for boost::shared_ptr<CDMReader>, mainly for usage by
+ * wrapper class for CDMReader_p, mainly for usage by
  * C/C++ wrapper
  */
 class mifi_cdm_reader {

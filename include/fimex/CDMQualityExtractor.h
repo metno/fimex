@@ -65,7 +65,7 @@ public:
      * might be overwritten by the config-file. If empty, no quality extraction on the basis of CF-1.4 will be used.
      * @param configFile filename of a cdmQualityConfig.xml file. If empty, no quality-file will be used.
      */
-    CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString="", std::string configFile="");
+    CDMQualityExtractor(CDMReader_p dataReader, std::string autoConfString="", std::string configFile="");
     virtual ~CDMQualityExtractor() {};
     using CDMReader::getDataSlice;
     /**
@@ -85,7 +85,7 @@ public:
      */
     const std::map<std::string, std::vector<double> >& getVariableValues() const {return variableValues;}
 private:
-    const boost::shared_ptr<CDMReader> dataReader;
+    const CDMReader_p dataReader;
     /* map of variableName to the variable which contains the flags */
     std::map<std::string, std::string> statusVariable;
     /*
@@ -105,7 +105,7 @@ private:
     /*
      * map of the variableName to the reader used for getting values of the statusVariable.
      */
-    std::map<std::string, boost::shared_ptr<CDMReader> > statusReaders;
+    std::map<std::string, CDMReader_p> statusReaders;
 };
 
 }

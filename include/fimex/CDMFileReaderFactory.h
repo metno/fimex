@@ -33,12 +33,10 @@
 #include "fimex/XMLInput.h"
 #include "fimex/deprecated.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/CDMReaderDecl.h"
 
 namespace MetNoFimex
 {
-
-// forward decl.
-class CDMReader;
 
 /**
  * @headerfile fimex/CDMFileReaderFactory.h
@@ -77,12 +75,12 @@ public:
      * @throws CDMException if type not compiled in, or creation fails
      * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
-    static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
+    static CDMReader_p create(int fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
     /**
      * @brief same as the other create(), but with a fileType string
      * @deprecated use create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
-    static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
+    static CDMReader_p create(const std::string& fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
     /**
      * @brief Factory for CDMReader of input-files
      *
@@ -98,11 +96,11 @@ public:
      * @throws CDMException if type not compiled in, or creation fails
      * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
-    static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
+    static CDMReader_p create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
     /**
      * @brief same as the other create(), but with a fileType string
      */
-    static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
+    static CDMReader_p create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
 
     /**
      * @brief parse special arguments for grib-files

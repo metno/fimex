@@ -71,7 +71,7 @@ namespace MetNoFimex
 using namespace std;
 
 struct CDMInterpolatorInternals {
-    boost::shared_ptr<CDMReader> dataReader;
+    CDMReader_p dataReader;
     double maxDistance; // negative = undefined
     std::string latitudeName;
     std::string longitudeName;
@@ -93,7 +93,7 @@ typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
 static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
 
-CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
+CDMInterpolator::CDMInterpolator(CDMReader_p dataReader)
 : p_(new CDMInterpolatorInternals())
 {
     p_->dataReader = dataReader;

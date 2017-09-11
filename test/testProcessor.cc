@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/coordTest.nc");
 
-    boost::shared_ptr<CDMReader> nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+    CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
     double t0 = 1179309600.;
     {
         boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( test_rotate )
         string topSrcDir(TOP_SRCDIR);
         string fileName(topSrcDir+"/test/coordTest.nc");
 
-        boost::shared_ptr<CDMReader> nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+        CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
         boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->rotateAllVectorsToLatLon(true);
         const CDMAttribute& attrx = proc->getCDM().getAttribute("x_wind_10m", "standard_name");

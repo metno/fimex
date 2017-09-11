@@ -95,7 +95,7 @@ void mifi_free_slicebuilder(mifi_slicebuilder* sb)
 mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile)
 {
     try {
-            boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create(file_type, std::string(filename), XMLInputFile(configFile));
+            CDMReader_p reader = CDMFileReaderFactory::create(file_type, std::string(filename), XMLInputFile(configFile));
             return new mifi_cdm_reader(reader);
         } catch (exception& ex) {
             LOG4FIMEX(logger, Logger::WARN, "error in reader: " << ex.what());
@@ -219,7 +219,7 @@ mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader)
 int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, doubleDatasliceCallbackPtr callback)
 {
     try {
-        boost::shared_ptr<CDMReader> reader = c_reader->reader_;
+        CDMReader_p reader = c_reader->reader_;
         C_CDMReader* cReaderPtr = dynamic_cast<C_CDMReader*>(reader.get());
         cReaderPtr->setDoubleCallbackFunction(string(varName), callback);
         return 0;

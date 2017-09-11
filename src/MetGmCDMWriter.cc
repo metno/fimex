@@ -33,7 +33,7 @@ namespace MetNoFimex {
 
     MetGmCDMWriter::MetGmCDMWriter
             (
-                const boost::shared_ptr<CDMReader> cdmReader,
+                const CDMReader_p cdmReader,
                 const std::string& outputFile,
                 const std::string& configFile
             ) : CDMWriter(cdmReader, outputFile)

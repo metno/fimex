@@ -29,7 +29,7 @@
 namespace MetNoFimex
 {
 
-GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile)
+GribApiCDMWriter::GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile)
 {
 	if (gribVersion == 1) {

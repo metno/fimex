@@ -11,7 +11,7 @@ namespace MetNoFimex {
  */
 class HybridSigmaApToPressureConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs,
+    static VerticalConverterPtr createConverter(CDMReader_p reader, CoordSysPtr cs,
         const std::string& ap, const std::string& b, const std::string& ps, const std::string& p0 = std::string());
 
     /**
@@ -20,7 +20,7 @@ public:
      * @param ps array of size nx*ny*nt containing the surface-pressure
      * @param p0 reference-pressure in hPa
      */
-    HybridSigmaApToPressureConverter(CDMReaderPtr reader, CoordSysPtr cs, const std::string& ap, const std::string& b,
+    HybridSigmaApToPressureConverter(CDMReader_p reader, CoordSysPtr cs, const std::string& ap, const std::string& b,
             const std::string& ps, const std::string& p0)
         : BasicVerticalConverter(reader, cs), ap_(ap), b_(b), ps_(ps), p0_(p0) { }
 

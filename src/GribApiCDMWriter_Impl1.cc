@@ -35,7 +35,7 @@
 namespace MetNoFimex
 {
 
-GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
+GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
 : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
 {
     logger = getLogger("fimex.GribApi_CDMWriter.Impl1");

@@ -18,7 +18,7 @@ namespace MetNoFimex {
 
 static LoggerPtr logger = getLogger("fimex.AltitudeHeightConverter");
 
-VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReaderPtr reader,
+VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReader_p reader,
         CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, bool addTopography)
 {
     using namespace std;
@@ -44,7 +44,7 @@ VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReaderPtr reade
     return boost::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVars[0], addTopography);
 }
 
-AltitudeHeightConverter::AltitudeHeightConverter(CDMReaderPtr reader, CoordSysPtr cs,
+AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordSysPtr cs,
         VerticalConverterPtr altitudeOrHeight, const std::string& topography, bool addTopography)
     : BasicVerticalConverter(reader, cs)
     , altitudeOrHeight_(altitudeOrHeight)

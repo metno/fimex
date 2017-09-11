@@ -82,7 +82,7 @@ static bool putVarData(CDMDataType dt, DataPtr data) {
     return true;
 }
 
-Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
+Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile)
 : CDMWriter(cdmReader, outputFile)
 {
     const CDM& cdm = cdmReader->getCDM();

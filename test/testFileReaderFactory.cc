@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( test_fileDetection )
         BOOST_CHECK(CDMFileReaderFactory::detectFileType(feltFile) == MIFI_FILETYPE_FELT);
     }
     if (fimexHas(MIFI_FILETYPE_NETCDF)) {
-        boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordTest.nc");
+        CDMReader_p reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordTest.nc");
         BOOST_CHECK(reader.get() != 0);
 #ifdef HAVE_NETCDF_H
         BOOST_CHECK(dynamic_cast<NetCDF_CDMReader*>(reader.get()) != 0);

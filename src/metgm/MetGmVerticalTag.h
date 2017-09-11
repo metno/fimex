@@ -28,15 +28,15 @@
 #ifndef METGM_VERTICALTAG_H
 #define METGM_VERTICALTAG_H
 
+#include "fimex/CDMReaderDecl.h"
+
 // boost
-//
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include "fimex/DataDecl.h"
 
 namespace MetNoFimex {
 
-    class CDMReader;
     class CDMVariable;
     class MetGmFileHandlePtr;
     class MetGmHandlePtr;
@@ -46,7 +46,7 @@ namespace MetNoFimex {
     class MetGmVerticalTag {
     public:
 
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(const CDMReader_p pCdmReader,
                                                                                     const CDMVariable* pVar);
 
         static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,

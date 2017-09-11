@@ -50,7 +50,7 @@ public:
      *
      * @warn remember to call run to actually do something
      */
-    GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
+    GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
     virtual ~GribApiCDMWriter_ImplAbstract();
     /**
      * @brief actually write the data

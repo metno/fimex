@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_update )
         rw->putDataSlice("ga_2t_1", 0, write1);
     }
     {
-        boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+        CDMReader_p r = CDMReader_p(new NetCDF_CDMReader(fileName));
         BOOST_CHECK(r.get() != 0);
 
         read2 = r->getDataSlice("ga_2t_1", 0);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
         rw->putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, write1);
     }
     {
-        boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+        CDMReader_p r = CDMReader_p(new NetCDF_CDMReader(fileName));
         BOOST_CHECK(r.get() != 0);
 
         read2 = r->getScaledDataSlice("ga_2t_1", 0);

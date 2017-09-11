@@ -79,7 +79,7 @@ public:
 
 public:
     //! Smooth transition to 'outer' from inner's data. Returns data on inner grid.
-    CDMBorderSmoothing(boost::shared_ptr<CDMReader> inner, boost::shared_ptr<CDMReader> outer,
+    CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer,
             int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR);
 
     //! Change the smooting function factory.

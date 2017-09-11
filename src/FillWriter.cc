@@ -66,7 +66,7 @@ static std::string findFirstUnusableDimension(const std::set<std::string>& unusa
     return "";
 }
 
-FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
+FillWriter::FillWriter(CDMReader_p in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
 {
     using namespace std;
 

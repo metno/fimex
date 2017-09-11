@@ -9,7 +9,7 @@
 namespace MetNoFimex {
 
 // static method
-boost::shared_ptr<VerticalConverter> GeopotentialToAltitudeConverter::createConverter(CDMReaderPtr reader, CoordSysPtr cs)
+boost::shared_ptr<VerticalConverter> GeopotentialToAltitudeConverter::createConverter(CDMReader_p reader, CoordSysPtr cs)
 {
     const std::string geopotential_height = findVariableWithCS(reader->getCDM(), cs, "geopotential_height");
     if (geopotential_height.empty())

@@ -51,7 +51,7 @@ using namespace MetNoFimex;
 BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
 {
     string topSrcDir(TOP_SRCDIR);
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
     if (reader.get() == 0) return; // no support for netcdf4
 
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
 BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
 {
     string topSrcDir(TOP_SRCDIR);
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
     if (reader.get() == 0) return; // no support for netcdf4
 
     boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));

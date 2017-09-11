@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 
     string outputFile("test.grb1");
     fs::remove(outputFile.c_str());
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 
     string outputFile("test.grb1");
     GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     string outputFile("test.grb2");
     GribApiCDMWriter(feltReader, outputFile, 2, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
     fs::path out( outputFile );

@@ -46,7 +46,7 @@ using namespace std;
 //void noDelete(CDMReader* r) {}
 
 boost::posix_time::ptime
-getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
+getUniqueForecastReferenceTime(CDMReader_p reader)
 {
     const CDM& cdm = reader->getCDM();
     // try CF-1.x forecast_reference_time
@@ -84,7 +84,7 @@ getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
     return *(refTimes.begin());
 }
 
-vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const string& var, const string& unit, int unLimDimPos)
+vector<double> getDataSliceInUnit(CDMReader_p reader, const string& var, const string& unit, int unLimDimPos)
 {
     DataPtr data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
     boost::shared_array<double> array = data->asDouble();
@@ -185,7 +185,7 @@ struct CoordsInformation {
     boost::shared_ptr<const Projection> proj;
 };
 
-void generateProjectionCoordinates(boost::shared_ptr<CDMReader>& reader)
+void generateProjectionCoordinates(CDMReader_p reader)
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     typedef vector<CoordSysPtr> CoordSysVec;

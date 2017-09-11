@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 		// no testfile, skip test
 		return;
 	}
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
 #ifdef TEST_DEBUG
 	defaultLogLevel(Logger::DEBUG);
 #endif
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
 
 #ifdef HAVE_NETCDF_H
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
         cerr << "input files not found, skipping test (" << fileNameD << ',' << fileNameM << ',' << fileNameX << ')' << endl;
         return;
     }
-    boost::shared_ptr<CDMReader> readerD = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameD);
+    CDMReader_p readerD = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameD);
     boost::shared_ptr<CDMQualityExtractor> mask = boost::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
     DataPtr sliceM = mask->getDataSlice("salt", 0);

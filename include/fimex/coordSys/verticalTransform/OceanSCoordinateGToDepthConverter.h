@@ -48,7 +48,7 @@ public:
      * @param nx,ny,nk,nt array sizes
      * @param func either mifi_ocean_s_g1_z() or mifi_ocean_s_g2_z()
      */
-    OceanSCoordinateGToDepthConverter(CDMReaderPtr reader, CoordSysPtr cs, const OceanSGVars& vars, heightconversion_t func);
+    OceanSCoordinateGToDepthConverter(CDMReader_p reader, CoordSysPtr cs, const OceanSGVars& vars, heightconversion_t func);
 
     std::vector<std::string> getShape() const;
     DataPtr getDataSlice(const SliceBuilder& sb) const;

@@ -36,7 +36,7 @@ class GribApiCDMWriter : public CDMWriter
 {
 
 public:
-	GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile);
+	GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile);
 	virtual ~GribApiCDMWriter();
 private:
 };

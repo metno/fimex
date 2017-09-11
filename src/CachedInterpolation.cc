@@ -41,7 +41,7 @@ namespace MetNoFimex
 
 static LoggerPtr logger = getLogger("fimex.CachedInterpolation");
 
-DataPtr CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDimPos) const
+DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, const std::string& varName, size_t unLimDimPos) const
 {
     DataPtr data;
     if (reducedDomain().get() != 0) {
@@ -64,7 +64,7 @@ DataPtr CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMRea
     return data;
 }
 
-DataPtr CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const
+DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb) const
 {
     DataPtr data;
     LOG4FIMEX(logger, Logger::DEBUG, "creating a slicebuilder for '"<< varName << "'" );

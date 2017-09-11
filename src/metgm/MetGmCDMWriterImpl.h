@@ -73,7 +73,7 @@ namespace MetNoFimex {
          */
         explicit MetGmCDMWriterImpl
                 (
-                        boost::shared_ptr<CDMReader> cdmReader,
+                        CDMReader_p cdmReader,
                         const std::string& outputFile,
                         const std::string& configFile
                 );
@@ -100,7 +100,7 @@ namespace MetNoFimex {
 
     protected:
 
-        explicit MetGmCDMWriterImpl(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile);
+        explicit MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile);
 
         void configure(const std::auto_ptr<XMLDoc>& doc);
 

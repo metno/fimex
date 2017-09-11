@@ -31,7 +31,7 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr LnPressure::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr LnPressure::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     return boost::make_shared<LnPressureToPressureConverter>(reader, cs, lev, p0);
 }

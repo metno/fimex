@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
     //string fileName("/opdata/arome_norway25/AROME_Norway25_00.nc");
     string fileName("/disk1/Fimex/wrfout_d01_2012-12-04_00:00:00.nc");
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
 
 	vector<double> lonVals(1, 90.);
 	vector<double> latVals(1, 23.);

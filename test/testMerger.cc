@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_merger )
     BOOST_CHECK(ifstream(fileNameInner.c_str()));
     BOOST_CHECK(ifstream(fileNameOuter.c_str()));
 
-    boost::shared_ptr<CDMReader> readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
+    CDMReader_p readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
         readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
 
     boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, readerO);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_merge_target )
     BOOST_CHECK(ifstream(fileNameB.c_str()));
     BOOST_CHECK(ifstream(fileNameT.c_str()));
 
-    boost::shared_ptr<CDMReader> readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
+    CDMReader_p readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
         readerT = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameT);
 
     boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerB, readerT);

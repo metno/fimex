@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader(new NetCDF_CDMReader(fileName));
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE( test_vTrans )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader(new NetCDF_CDMReader(fileName));
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);

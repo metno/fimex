@@ -444,7 +444,7 @@ namespace MetNoFimex {
 
     MetGmCDMWriterImpl::MetGmCDMWriterImpl
             (
-                    boost::shared_ptr<CDMReader> cdmReader,
+                    CDMReader_p cdmReader,
                     const std::string& outputFile,
                     const std::string& configFile
                     )
@@ -467,7 +467,7 @@ namespace MetNoFimex {
         init();
     }
 
-    MetGmCDMWriterImpl::MetGmCDMWriterImpl(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
+    MetGmCDMWriterImpl::MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile)
         : CDMWriter(cdmReader, outputFile)
     { }
 

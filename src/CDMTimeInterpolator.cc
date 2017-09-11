@@ -65,7 +65,7 @@ static std::string getTimeAxis(const CoordSysList& cs, const std::string& varNam
     return (axis.get() == 0) ? "" : axis->getName();
 }
 
-CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
+CDMTimeInterpolator::CDMTimeInterpolator(CDMReader_p dataReader)
    : dataReader_(dataReader)
 {
     coordSystems_ = listCoordinateSystems(dataReader_);

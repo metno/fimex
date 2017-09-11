@@ -214,7 +214,7 @@ void MetGmGroup5Ptr::toFimexLayout()
     data_.swap(dataT);
 }
 
-boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader,
                                                                                  const CDMVariable* pVariable,
                                                                                  const boost::shared_ptr<MetGmGroup3Ptr> pg3,
                                                                                  const std::string& fillValue,
@@ -580,7 +580,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         return  boost::shared_array<float>();
     }
 
-    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader,
                                                                                            const CDMVariable* pVariable,
                                                                                            const boost::shared_ptr<MetGmGroup3Ptr> pg3)
     {

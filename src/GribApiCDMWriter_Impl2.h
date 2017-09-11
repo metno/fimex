@@ -36,7 +36,7 @@ namespace MetNoFimex
 class GribApiCDMWriter_Impl2: public MetNoFimex::GribApiCDMWriter_ImplAbstract
 {
 public:
-	GribApiCDMWriter_Impl2(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
+        GribApiCDMWriter_Impl2(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
 	virtual ~GribApiCDMWriter_Impl2();
 
 	virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException);

@@ -66,7 +66,7 @@ bool WRFCoordSysBuilder::isMine(const CDM& cdm)
     return true;
 }
 
-void WRFCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+void WRFCoordSysBuilder::enhanceVectorProperties(CDMReader_p reader)
 {
     CDM& cdm = reader->getInternalCDM();
     std::vector<std::pair<std::string, std::string> > xy_vectors;
@@ -96,7 +96,7 @@ static double findAttributeDouble(const CDM& cdm, std::string attName)
 }
 
 // function for compatibility between the old (only CDM) and new (only CDMReader) interface
-static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinateSystems(CDM& cdm, boost::shared_ptr<CDMReader> reader)
+static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinateSystems(CDM& cdm, CDMReader_p reader)
 {
     assert(reader.get() != 0);
     // reader might be 0
@@ -469,7 +469,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
 {
 #if 0
     // this will cause a failed assert(reader != 0)
-    return wrfListCoordinateSystems(cdm, boost::shared_ptr<CDMReader>());
+    return wrfListCoordinateSystems(cdm, CDMReader_p());
 #else
     LOG4FIMEX(logger, Logger::ERROR,
             "cannot list WRF coordinate systems from a CDM, please pass a CDMReader");
@@ -477,7 +477,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
 #endif
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
 {
     return wrfListCoordinateSystems(reader->getInternalCDM(), reader);
 }

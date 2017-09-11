@@ -24,6 +24,8 @@
 #ifndef METGM_TAGS_H
 #define METGM_TAGS_H
 
+#include "fimex/CDMReaderDecl.h"
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -33,7 +35,6 @@
 
 namespace MetNoFimex {
 
-    class CDMReader;
     class CDMVariable;
     class MetGmHDTag;
     class MetGmHandlePtr;
@@ -48,7 +49,7 @@ namespace MetNoFimex {
 
     class MetGmTags {
     public:
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForWriting(const CDMReader_p pCdmReader,
                                                                       const CDMVariable* pVariable,
                                                                       const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                       const unsigned short p_id,
@@ -64,7 +65,7 @@ namespace MetNoFimex {
                                                                             const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
                                                                             const boost::shared_ptr<MetGmVerticalTag> vTag);
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedWriting(const CDMReader_p pCdmReader,
                                                                             const CDMVariable* pVariable,
                                                                             const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                             const unsigned short p_id);

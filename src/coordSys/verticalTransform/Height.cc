@@ -31,7 +31,7 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr Height::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr Height::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
 //    DataPtr h = reader->getScaledDataSliceInUnit(height, "m", unLimDimPos);
 //    boost::shared_array<double> ha = h->asDouble();
@@ -40,12 +40,12 @@ VerticalConverterPtr Height::getPressureConverter(CDMReaderPtr reader, CoordSysP
     return VerticalConverterPtr();
 }
 
-VerticalConverterPtr Height::getHeightConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr Height::getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     return IdentityConverter::createConverterForVarName(reader, cs, height, "m");
 }
 
-VerticalConverterPtr Height::getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr Height::getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     if (VerticalConverterPtr height = getHeightConverter(reader, cs))
         return AltitudeHeightConverter::createToAltitudeConverter(reader, cs, height);

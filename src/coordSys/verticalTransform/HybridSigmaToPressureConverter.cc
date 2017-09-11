@@ -16,7 +16,7 @@ namespace MetNoFimex {
 using std::vector;
 
 // static method
-VerticalConverterPtr HybridSigmaToPressureConverter::createConverter(CDMReaderPtr reader, CoordSysPtr cs,
+VerticalConverterPtr HybridSigmaToPressureConverter::createConverter(CDMReader_p reader, CoordSysPtr cs,
     const std::string& a, const std::string& b, const std::string& ps, const std::string& p0)
 {
     return boost::make_shared<HybridSigmaToPressureConverter>(reader, cs, a, b, ps, p0);

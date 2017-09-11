@@ -17,7 +17,7 @@ static LoggerPtr logger = getLogger("fimex.ToVLevelConverterAdapter");
 
 static const size_t NOTSET = ~0ul;
 
-ToVLevelConverterAdapter::ToVLevelConverterAdapter(boost::shared_ptr<CDMReader> reader, boost::shared_ptr<const CoordinateSystem> cs,
+ToVLevelConverterAdapter::ToVLevelConverterAdapter(CDMReader_p reader, boost::shared_ptr<const CoordinateSystem> cs,
                                                    VerticalConverterPtr converter, size_t unLimDimPos)
     : reader_(reader)
     , converter_(converter)

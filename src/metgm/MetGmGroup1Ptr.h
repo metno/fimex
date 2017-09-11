@@ -47,7 +47,7 @@
         public:
 
             static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle);
-            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader);
+            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader);
 
             std::string dataTypeAsString();
             unsigned int dataType()     { return dataType_; }

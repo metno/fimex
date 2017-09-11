@@ -69,7 +69,7 @@ public:
     virtual bool isComplete() const {return a != "" && b != "" && ps != "" && p0 != "";}
 
 protected:
-    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
+    VerticalConverterPtr getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */

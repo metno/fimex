@@ -224,18 +224,18 @@ SliceBuilder adaptSliceBuilder(const CDM& cdm, VerticalConverterPtr converter, c
     return sbCon;
 }
 
-DataPtr getSliceData(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
+DataPtr getSliceData(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
 {
     const SliceBuilder sbVar = adaptSliceBuilder(reader->getCDM(), varName, sbOrig);
     return reader->getScaledDataSliceInUnit(varName, unit, sbVar);
 }
 
-boost::shared_array<float> getSliceFloats(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
+boost::shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
 {
     return getSliceData(reader, sbOrig, varName, unit)->asFloat();
 }
 
-boost::shared_array<double> getSliceDoubles(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
+boost::shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
 {
     return getSliceData(reader, sbOrig, varName, unit)->asDouble();
 }
@@ -335,7 +335,7 @@ ArrayDims makeArrayDims(const SliceBuilder& sb)
     return ArrayDims(dimNames, dimSizes);
 }
 
-VerticalConverterPtr verticalConverter(boost::shared_ptr<const CoordinateSystem> cs, boost::shared_ptr<CDMReader> reader, int verticalType)
+VerticalConverterPtr verticalConverter(boost::shared_ptr<const CoordinateSystem> cs, CDMReader_p reader, int verticalType)
 {
     if (VerticalConverterPtr converter = cs->getVerticalTransformation()->getConverter(reader, cs, verticalType))
         return converter;
@@ -350,7 +350,7 @@ DataPtr verticalData4D(VerticalConverterPtr converter, const CDM& cdm, size_t un
     return converter->getDataSlice(sb);
 }
 
-DataPtr verticalData4D(boost::shared_ptr<const CoordinateSystem> cs, boost::shared_ptr<CDMReader> reader, size_t unLimDimPos, int verticalType)
+DataPtr verticalData4D(boost::shared_ptr<const CoordinateSystem> cs, CDMReader_p reader, size_t unLimDimPos, int verticalType)
 {
     return verticalData4D(verticalConverter(cs, reader, verticalType), reader->getCDM(), unLimDimPos);
 }
@@ -369,39 +369,39 @@ DataPtr checkData(DataPtr data, size_t expected, const std::string& what)
     return checkSize(data, expected, what);
 }
 
-Var::Var(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+Var::Var(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
     : sb(adaptSliceBuilder(reader->getCDM(), varName, sbOrig))
     , dims(makeArrayDims(sb))
     , data(getSliceData(reader, sb, varName, unit))
 {
 }
 
-Var::Var(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+Var::Var(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
     : sb(adaptSliceBuilder(reader->getCDM(), converter, sbOrig))
     , dims(makeArrayDims(sb))
     , data(converter->getDataSlice(sb))
 {
 }
 
-VarFloat::VarFloat(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+VarFloat::VarFloat(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
     : Var(reader, varName, unit, sbOrig)
     , values(data ? data->asFloat() : boost::shared_array<float>())
 {
 }
 
-VarFloat::VarFloat(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+VarFloat::VarFloat(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
     , values(data ? data->asFloat() : boost::shared_array<float>())
 {
 }
 
-VarDouble::VarDouble(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
+VarDouble::VarDouble(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
     : Var(reader, varName, unit, sbOrig)
     , values(data ? data->asDouble() : boost::shared_array<double>())
 {
 }
 
-VarDouble::VarDouble(CDMReaderPtr reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+VarDouble::VarDouble(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
     , values(data ? data->asDouble() : boost::shared_array<double>())
 {

@@ -13,13 +13,13 @@ namespace MetNoFimex {
 static LoggerPtr logger = getLogger("fimex.PressureToStandardAltitudeConverter");
 
 // static method
-VerticalConverterPtr PressureToStandardAltitudeConverter::createConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr pressure)
+VerticalConverterPtr PressureToStandardAltitudeConverter::createConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure)
 {
     LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate altitude levels");
     return boost::make_shared<PressureToStandardAltitudeConverter>(reader, cs, pressure);
 }
 
-PressureToStandardAltitudeConverter::PressureToStandardAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr pressure)
+PressureToStandardAltitudeConverter::PressureToStandardAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure)
     : BasicVerticalConverter(reader, cs)
     , pressure_(pressure)
 {

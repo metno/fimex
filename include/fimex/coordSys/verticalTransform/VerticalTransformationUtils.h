@@ -1,6 +1,7 @@
 #ifndef VERTICALTRANSFORMATIONUTILS_H
 #define VERTICALTRANSFORMATIONUTILS_H
 
+#include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
 
 #include <fimex/SliceBuilder.h>
@@ -17,10 +18,8 @@
 namespace MetNoFimex {
 
 class CDM;
-class CDMReader;
 class VerticalConverter;
 
-typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
 void removeDimsWithLength1(const CDM& cdm, std::vector<std::string>& dims);
@@ -66,9 +65,9 @@ private:
 SliceBuilder adaptSliceBuilder(const CDM& cdm, const std::string& varName, const SliceBuilder& sbOrig);
 SliceBuilder adaptSliceBuilder(const CDM& cdm, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sb);
 
-DataPtr getSliceData(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
-boost::shared_array<float> getSliceFloats(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
-boost::shared_array<double> getSliceDoubles(CDMReaderPtr reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
+DataPtr getSliceData(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
+boost::shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
+boost::shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
 
 std::vector<size_t> getDimSizes(const CDM& cdm, const std::vector<std::string>& dimNames);
 
@@ -89,16 +88,16 @@ ArrayDims makeArrayDims(const CDM& cdm, const std::string& varName);
 ArrayDims makeArrayDims(const CDM& cdm, boost::shared_ptr<VerticalConverter> converter);
 ArrayDims makeArrayDims(const SliceBuilder& sb);
 
-boost::shared_ptr<VerticalConverter> verticalConverter(CoordSysPtr cs, CDMReaderPtr reader, int verticalType);
+boost::shared_ptr<VerticalConverter> verticalConverter(CoordSysPtr cs, CDMReader_p reader, int verticalType);
 DataPtr verticalData4D(boost::shared_ptr<VerticalConverter> converter, const CDM& cdm, size_t unLimDimPos);
-DataPtr verticalData4D(CoordSysPtr cs, CDMReaderPtr reader, size_t unLimDimPos, int verticalType);
+DataPtr verticalData4D(CoordSysPtr cs, CDMReader_p reader, size_t unLimDimPos, int verticalType);
 
 DataPtr checkSize(DataPtr data, size_t expected, const std::string& what);
 DataPtr checkData(DataPtr data, size_t expected, const std::string& what);
 
 struct Var {
-    Var(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
-    Var(CDMReaderPtr reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
+    Var(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
+    Var(CDMReader_p reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
 
     const SliceBuilder sb;
     ArrayDims dims;
@@ -106,15 +105,15 @@ struct Var {
 };
 
 struct VarFloat : public Var {
-    VarFloat(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
-    VarFloat(CDMReaderPtr reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
+    VarFloat(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
+    VarFloat(CDMReader_p reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
 
     boost::shared_array<float> values;
 };
 
 struct VarDouble : public Var {
-    VarDouble(CDMReaderPtr reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
-    VarDouble(CDMReaderPtr reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
+    VarDouble(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
+    VarDouble(CDMReader_p reader, boost::shared_ptr<VerticalConverter> converter, const SliceBuilder& sbOrig);
 
     boost::shared_array<double> values;
 };

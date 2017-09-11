@@ -11,9 +11,9 @@ namespace MetNoFimex {
  */
 class GeopotentialToAltitudeConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs);
+    static VerticalConverterPtr createConverter(CDMReader_p reader, CoordSysPtr cs);
 
-    GeopotentialToAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs, const std::string& geopotential_height)
+    GeopotentialToAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, const std::string& geopotential_height)
         : BasicVerticalConverter(reader, cs), geopotential_height_(geopotential_height) { }
 
     std::vector<std::string> getShape() const;

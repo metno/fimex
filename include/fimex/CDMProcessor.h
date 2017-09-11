@@ -46,7 +46,7 @@ struct CDMProcessorImpl;
 class CDMProcessor: public MetNoFimex::CDMReader
 {
 public:
-    CDMProcessor(boost::shared_ptr<CDMReader> dataReader);
+    CDMProcessor(CDMReader_p dataReader);
     virtual ~CDMProcessor();
     /**
      * add vertical velocity to this CDM, using continuity equation on model-levels

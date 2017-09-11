@@ -13,7 +13,7 @@ class VerticalConverter;
 
 class ToVLevelConverterAdapter : public ToVLevelConverter {
 public:
-    ToVLevelConverterAdapter(boost::shared_ptr<CDMReader> reader, boost::shared_ptr<const CoordinateSystem> cs,
+    ToVLevelConverterAdapter(CDMReader_p reader, boost::shared_ptr<const CoordinateSystem> cs,
                              VerticalConverterPtr converter, size_t unLimDimPos);
     virtual std::vector<double> operator()(size_t x, size_t y, size_t t);
     virtual bool isValid(double val, size_t x, size_t y, size_t t);
@@ -22,7 +22,7 @@ private:
     SliceBuilder prepareSliceBuilder(size_t x, size_t y, size_t t) const;
 
 private:
-    boost::shared_ptr<CDMReader> reader_;
+    CDMReader_p reader_;
     VerticalConverterPtr converter_;
     std::string varGeoX_, varGeoY_, varTime_;
     size_t unlimitedTimePos_;

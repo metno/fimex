@@ -228,7 +228,7 @@ static string getPtrName(const boost::shared_ptr<const CDMNamedEntity>& ptr)
     return ptr->getName();
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
 {
     return listCoordinateSystems(reader->getInternalCDM());
 }
@@ -548,7 +548,7 @@ static void enhanceVectors(CDM& cdm, const std::string& xsn, const std::string& 
     }
 }
 
-void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+void CF1_xCoordSysBuilder::enhanceVectorProperties(CDMReader_p reader)
 {
     CDM& cdm = reader->getInternalCDM();
 

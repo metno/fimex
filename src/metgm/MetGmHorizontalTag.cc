@@ -32,7 +32,7 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable)
+    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
     {
         if(!pVariable)
             throw CDMException("pVar is null");
@@ -75,7 +75,7 @@ namespace MetNoFimex {
         return XTag;
     }
 
-    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable)
+    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
     {
         if(!pVariable)
             throw CDMException("pVar is null");

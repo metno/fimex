@@ -37,12 +37,12 @@ namespace MetNoFimex
 class CDMWriter
 {
 public:
-    CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
+    CDMWriter(CDMReader_p cdmReader, const std::string& outputFile)
     : cdmReader(cdmReader), outputFile(outputFile) {}
     virtual ~CDMWriter() {}
 
 protected:
-    boost::shared_ptr<CDMReader> cdmReader;
+    CDMReader_p cdmReader;
     const std::string outputFile;
 };
 

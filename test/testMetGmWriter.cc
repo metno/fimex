@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
     defaultLogLevel(Logger::INFO);
 
     // create reader that reads ncSource
-    boost::shared_ptr<CDMReader> netcdfReader(new NetCDF_CDMReader(ncSource));
+    CDMReader_p netcdfReader(new NetCDF_CDMReader(ncSource));
     BOOST_CHECK(true); // made it so far
 
     // use the metgm writer to create mgm file based on nc source
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
     BOOST_CHECK(true); // made it so far
 
     // create metgm reader to read newly writen mgm file
-    boost::shared_ptr<CDMReader> mgmReader(new MetGmCDMReader(mgmFile, XMLInputFile(topSrcDir + "/share/etc/cdmMetGmReaderConfig.xml")));
+    CDMReader_p mgmReader(new MetGmCDMReader(mgmFile, XMLInputFile(topSrcDir + "/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
 
     // from metgm reader write again to nc file and compare:

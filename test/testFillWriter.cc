@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
     std::ofstream  dst(outFile.c_str());
     dst << src.rdbuf();
 
-    boost::shared_ptr<CDMReader> in(new NetCDF_CDMReader(inFillName));
+    CDMReader_p in(new NetCDF_CDMReader(inFillName));
     boost::shared_ptr<CDMReaderWriter> out(new NetCDF_CDMReader(outFile, true));
 
     // sanity check before test
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
     std::ofstream  dst(outFile.c_str());
     dst << src.rdbuf();
 
-    boost::shared_ptr<CDMReader> in(new NetCDF_CDMReader(inFillName));
+    CDMReader_p in(new NetCDF_CDMReader(inFillName));
     boost::shared_ptr<CDMReaderWriter> out(new NetCDF_CDMReader(outFile, true));
     FillWriter(in, out, topSrcDir+"/test/fillWriterConfig.xml");
     out.reset((NetCDF_CDMReader*)0); // make sure to close the writer before re-reading it

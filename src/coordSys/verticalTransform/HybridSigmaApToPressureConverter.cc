@@ -22,7 +22,7 @@ static LoggerPtr logger = getLogger("fimex.HybridSigmaApToPressureConverter");
 using std::vector;
 
 // static method
-VerticalConverterPtr HybridSigmaApToPressureConverter::createConverter(CDMReaderPtr reader, CoordSysPtr cs,
+VerticalConverterPtr HybridSigmaApToPressureConverter::createConverter(CDMReader_p reader, CoordSysPtr cs,
     const std::string& ap, const std::string& b, const std::string& ps, const std::string& p0)
 {
     return boost::make_shared<HybridSigmaApToPressureConverter>(reader, cs, ap, b, ps, p0);

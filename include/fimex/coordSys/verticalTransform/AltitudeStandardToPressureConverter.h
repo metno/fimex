@@ -10,12 +10,12 @@ namespace MetNoFimex {
  */
 class AltitudeStandardToPressureConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr altitude);
+    static VerticalConverterPtr createConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr altitude);
 
     /**
      * @param altitude given in m
      */
-    AltitudeStandardToPressureConverter(CDMReaderPtr reader, CoordSysPtr cs, const VerticalConverterPtr& altitude);
+    AltitudeStandardToPressureConverter(CDMReader_p reader, CoordSysPtr cs, const VerticalConverterPtr& altitude);
 
     std::vector<std::string> getShape() const;
     DataPtr getDataSlice(const SliceBuilder& sb) const;

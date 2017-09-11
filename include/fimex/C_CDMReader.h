@@ -46,13 +46,13 @@ namespace MetNoFimex
 class C_CDMReader: public CDMReader
 {
 public:
-    C_CDMReader(boost::shared_ptr<CDMReader> dataReader);
+    C_CDMReader(CDMReader_p dataReader);
     virtual ~C_CDMReader();
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual void setDoubleCallbackFunction(const std::string& varName, doubleDatasliceCallbackPtr callback);
 private:
-    boost::shared_ptr<CDMReader> dataReader_;
+    CDMReader_p dataReader_;
     std::map<std::string, doubleDatasliceCallbackPtr> doubleCallbacks_;
 
 };

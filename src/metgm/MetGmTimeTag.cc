@@ -50,7 +50,7 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const boost::shared_ptr<CDMReader> pCdmReader)
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDMReader_p pCdmReader)
 {
     if(!pCdmReader.get())
         throw CDMException("createMetGmTimeTag: pCdmReader is null");
@@ -68,7 +68,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const boo
     return TTag;
 }
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable)
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
 {
     boost::shared_ptr<MetGmTimeTag> TTag;
 
@@ -153,7 +153,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const
     return TTag;
 }
 
-    void MetGmTimeTag::extractAnalysisDateTime(const boost::shared_ptr<CDMReader> pCdmReader)
+    void MetGmTimeTag::extractAnalysisDateTime(const CDMReader_p pCdmReader)
     {
         const CDM& cdmRef = pCdmReader->getCDM();
         CDMAttribute metgmAnalysisDateTimeAttribute;
@@ -194,7 +194,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const
         return adjDiff.size() != 1;
     }
 
-    void MetGmTimeTag::extractTimePoints(const boost::shared_ptr<CDMReader> pCdmReader)
+    void MetGmTimeTag::extractTimePoints(const CDMReader_p pCdmReader)
     {
         const CDM& cdmRef = pCdmReader->getCDM();
         const CDMVariable& tVar = cdmRef.getVariable("time");
@@ -224,7 +224,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const
         start_t = points_.at(0);
     }
 
-    void MetGmTimeTag::init(const boost::shared_ptr<CDMReader> pCdmReader)
+    void MetGmTimeTag::init(const CDMReader_p pCdmReader)
     {
         const CDM& cdmRef = pCdmReader->getCDM();
         const CDMDimension& tDim = cdmRef.getDimension("time");

@@ -60,7 +60,7 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTagForWriting(const CDMReader_p pCdmReader,
                                                                                 const CDMVariable* pVariable);
 
         static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,

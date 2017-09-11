@@ -56,13 +56,11 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
         return;
     }
 
-    typedef boost::shared_ptr<CDMReader> CDMReader_p;
-    typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystem_p;
     typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
     typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
-    CoordinateSystem_p cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
     BOOST_REQUIRE(cs);
 
     VerticalTransformation_cp vt = cs->getVerticalTransformation();
@@ -137,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
         return;
     }
 
-    boost::shared_ptr<CDMReader> ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
 
     std::vector<double> vi_level1, vi_level2;
     vi_level1.push_back(1000);

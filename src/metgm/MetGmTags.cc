@@ -44,7 +44,7 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_p pCdmReader,
                                                                       const CDMVariable* pVariable,
                                                                       const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                       const unsigned short p_id,
@@ -85,7 +85,7 @@ namespace MetNoFimex {
         return tags;
     }
 
-    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedWriting(const CDMReader_p pCdmReader,
                                                                             const CDMVariable* pVariable,
                                                                             const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                             const unsigned short p_id)

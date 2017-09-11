@@ -40,6 +40,7 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
 namespace MetNoFimex
@@ -56,7 +57,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 #ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
 
-    dataReader = boost::shared_ptr<CDMReader>(new NcmlAggregationReader(configXML));
+    dataReader = boost::make_shared<NcmlAggregationReader>(configXML);
 #if 0
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -68,7 +69,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
         ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
         // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
         ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
-        dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
+        dataReader = boost::make_shared<NetCDF_CDMReader>(ncFile);
     }
 #endif
     init();
@@ -79,7 +80,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 #endif
 }
 
-NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML)
+NcmlCDMReader::NcmlCDMReader(CDMReader_p dataReader, const XMLInput& configXML)
     : configId(configXML.id())
     , mutex_(new MutexType())
     , dataReader(dataReader)

@@ -51,13 +51,13 @@ std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransforma
     return out;
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReaderPtr reader, int verticalType, size_t unLimDimPos,
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
         CoordSysPtr cs, size_t /*nx*/, size_t /*ny*/, size_t /*nz*/, size_t /*nt*/) const
 {
     return getConverter(reader, verticalType, unLimDimPos, cs);
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReaderPtr reader, int verticalType, size_t unLimDimPos,
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
         CoordSysPtr cs) const
 {
     if (VerticalConverterPtr c = getConverter(reader, cs, verticalType))
@@ -66,7 +66,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMRea
         return boost::shared_ptr<ToVLevelConverter>();
 }
 
-VerticalConverterPtr VerticalTransformation::getConverter(CDMReaderPtr reader, CoordSysPtr cs, int verticalType) const
+VerticalConverterPtr VerticalTransformation::getConverter(CDMReader_p reader, CoordSysPtr cs, int verticalType) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getConverter vt=" << verticalType);
     switch (verticalType) {
@@ -78,7 +78,7 @@ VerticalConverterPtr VerticalTransformation::getConverter(CDMReaderPtr reader, C
     }
 }
 
-VerticalConverterPtr VerticalTransformation::getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr VerticalTransformation::getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     // try geopotential_height or fall back to pressure
 
@@ -96,7 +96,7 @@ VerticalConverterPtr VerticalTransformation::getAltitudeConverter(CDMReaderPtr r
     return PressureToStandardAltitudeConverter::createConverter(reader, cs, pressure);
 }
 
-VerticalConverterPtr VerticalTransformation::getHeightConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr VerticalTransformation::getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     if (VerticalConverterPtr altitude = getAltitudeConverter(reader, cs))
         return AltitudeHeightConverter::createToHeightConverter(reader, cs, altitude);
@@ -104,12 +104,12 @@ VerticalConverterPtr VerticalTransformation::getHeightConverter(CDMReaderPtr rea
     return VerticalConverterPtr(); // no converter
 }
 
-VerticalConverterPtr VerticalTransformation::getIdentityPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr VerticalTransformation::getIdentityPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     return IdentityConverter::createConverterForStandardName(reader, cs, "(air_)?pressure", "hPa");
 }
 
-VerticalConverterPtr VerticalTransformation::findPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
+VerticalConverterPtr VerticalTransformation::findPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
 {
     if (VerticalConverterPtr c = getIdentityPressureConverter(reader,cs))
         return c;

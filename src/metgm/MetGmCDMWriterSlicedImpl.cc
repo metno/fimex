@@ -40,7 +40,7 @@
 namespace MetNoFimex {
     MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl
         (
-            boost::shared_ptr<CDMReader> cdmReader,
+            CDMReader_p cdmReader,
             const std::string& outputFile,
             const std::string& configFile
         )

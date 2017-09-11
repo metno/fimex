@@ -36,7 +36,7 @@ namespace MetNoFimex
 class Null_CDMWriter : public CDMWriter
 {
 public:
-	Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile);
+	Null_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile);
 	virtual ~Null_CDMWriter();
 private:
 };

@@ -60,7 +60,7 @@ static void writeUsage(ostream& out, const po::options_description& generic) {
     out << generic << endl;
 }
 
-static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
+static CDMReader_p getCDMFileReader(po::variables_map& vm) {
     string name = vm["input.file"].as<string>();
     string type;
     if (vm.count("input.type")) {
@@ -123,7 +123,7 @@ static map<string, double> calcStats(DataPtr data) {
     return stats;
 }
 
-static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader)
+static void runStats(po::variables_map& vm, CDMReader_p reader)
 {
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
@@ -453,7 +453,7 @@ int run(int argc, char* args[])
         return 1;
     }
 
-    boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+    CDMReader_p dataReader = getCDMFileReader(vm);
     runStats(vm, dataReader);
 
     return 0;

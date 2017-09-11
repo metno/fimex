@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
     boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
     extract->removeVariable("relative_humidity");
     try {

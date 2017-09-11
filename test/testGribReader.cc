@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
+    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     BOOST_CHECK(true); // made it so far
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb2) {
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
+    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(true); // made it so far
     Null_CDMWriter(grbReader, "");

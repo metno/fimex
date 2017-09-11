@@ -65,8 +65,8 @@ namespace MetNoFimex {
     class MetGmHorizontalTag {
     public:
 
-        static boost::shared_ptr<MetGmXTag> createMetGmXTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable);
+        static boost::shared_ptr<MetGmXTag> createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
+        static boost::shared_ptr<MetGmYTag> createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
 
         static boost::shared_ptr<MetGmXTag> createMetGmXTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);
         static boost::shared_ptr<MetGmYTag> createMetGmYTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);

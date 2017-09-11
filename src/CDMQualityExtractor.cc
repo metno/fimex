@@ -45,7 +45,7 @@ namespace MetNoFimex
 
 namespace { // anonymous
 
-boost::shared_ptr<CDMReader> getCDMFileReader(const string& file, string type, const string& config) {
+CDMReader_p getCDMFileReader(const string& file, string type, const string& config) {
     if (type == "") {
         const mifi_filetype typeNo = CDMFileReaderFactory::detectFileType(file);
         if( config == "" )
@@ -119,7 +119,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
     return validVals;
 }
 
-CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString, std::string configFile)
+CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string autoConfString, std::string configFile)
 : dataReader(dataReader)
 {
     *cdm_.get() = dataReader->getCDM();
@@ -191,7 +191,7 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
                 throw CDMException("could not find status_flag_variable has type/config but no filename: " + varName);
             LOG4FIMEX(logger,Logger::DEBUG, "adding (variable,statusVar,use,vals): ("<<varName<<","<<statusVarName<<","<<statusVarUse<<","<<statusVarValues<<")");
             statusVariable[varName] = statusVarName;
-            boost::shared_ptr<CDMReader> sr = dataReader;
+            CDMReader_p sr = dataReader;
             if (statusVarFile != "") {
                 // status var from a different reader
                 sr = getCDMFileReader(statusVarFile, statusVarType, statusVarConfig);
@@ -264,8 +264,8 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
     if (statusVariable.find(varName) != statusVariable.end()) {
         string statusVar = statusVariable[varName];
         DataPtr statusData;
-        const std::map<std::string, boost::shared_ptr<CDMReader> >::iterator sit = statusReaders.find(varName);
-        boost::shared_ptr<CDMReader> readerS = dataReader;
+        const std::map<std::string, CDMReader_p>::iterator sit = statusReaders.find(varName);
+        CDMReader_p readerS = dataReader;
         if( sit != statusReaders.end() ) {
             readerS = sit->second;
             statusData = readerS->getDataSlice(statusVar, unLimDimPos);

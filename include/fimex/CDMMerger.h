@@ -55,7 +55,7 @@ public:
     /**
      * Merge data from inner grid onto refined outer grid.
      */
-    CDMMerger(boost::shared_ptr<CDMReader> inner, boost::shared_ptr<CDMReader> outer);
+    CDMMerger(CDMReader_p inner, CDMReader_p outer);
 
     /** Set the smooting function factory to be used.
      * Must be called before setting target grid.

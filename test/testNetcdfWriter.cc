@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
 		// no testfile, skip test
 		return;
 	}
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
 }
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 		// no testfile, skip test
 		return;
 	}
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
 	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");

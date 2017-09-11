@@ -19,7 +19,7 @@ public:
      * @param p0 reference-pressure in hPa
      * @param lnP The constant pressure levels given as ln(P/P0)
      */
-    LnPressureToPressureConverter(CDMReaderPtr reader, CoordSysPtr cs, const std::string& p0, const std::string& lnP)
+    LnPressureToPressureConverter(CDMReader_p reader, CoordSysPtr cs, const std::string& p0, const std::string& lnP)
         : BasicVerticalConverter(reader, cs), p0_(p0), lnP_(lnP) { }
 
     std::vector<std::string> getShape() const;

@@ -38,9 +38,9 @@ class CDMReader;
  */
 struct CDMReaderVar
 {
-    boost::shared_ptr<CDMReader> reader;
+    CDMReader_p reader;
     std::string varName;
-    CDMReaderVar(boost::shared_ptr<CDMReader> reader, std::string varName) : reader(reader), varName(varName) {}
+    CDMReaderVar(CDMReader_p reader, std::string varName) : reader(reader), varName(varName) {}
     ~CDMReaderVar() {}
 };
 

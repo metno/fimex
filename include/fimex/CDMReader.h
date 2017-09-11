@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include "fimex/DataDecl.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMReaderDecl.h"
 #include "fimex/SliceBuilder.h"
 
 namespace MetNoFimex

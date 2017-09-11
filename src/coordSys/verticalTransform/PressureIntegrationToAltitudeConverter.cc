@@ -19,7 +19,7 @@ namespace MetNoFimex {
 static LoggerPtr logger = getLogger("fimex.PressureIntegrationToAltitudeConverter");
 
 // static method
-VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDMReaderPtr reader,
+VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDMReader_p reader,
         CoordSysPtr cs, VerticalConverterPtr pressure)
 {
     const CDM& rcdm = reader->getCDM();
@@ -54,7 +54,7 @@ VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDM
 }
 
 
-PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr pressure,
+PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure,
     const std::string& air_temperature, const std::string& specific_humidity, const std::string& surface_air_pressure, const std::string& surface_geopotential)
     : BasicVerticalConverter(reader, cs)
     , pressure_(pressure)

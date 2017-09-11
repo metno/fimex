@@ -65,7 +65,7 @@ struct VIntPimpl {
     vector<CoordSysPtr> changeCoordSys;
 };
 
-CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, const string& verticalType, const string& verticalInterpolationMethod,
+CDMVerticalInterpolator::CDMVerticalInterpolator(CDMReader_p dataReader, const string& verticalType, const string& verticalInterpolationMethod,
                                                  const std::vector<double>& level1, const std::vector<double>& level2)
     : dataReader_(dataReader), pimpl_(new VIntPimpl())
 {
