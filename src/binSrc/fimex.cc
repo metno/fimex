@@ -389,7 +389,7 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
         const string& m = vm[key].as<string>();
         method = mifi_string_to_interpolation_method(m.c_str());
         if (method == MIFI_INTERPOL_UNKNOWN) {
-            cerr << "WARNING: unknown " << key << ": " << m << " using nearestneighbor" << endl;
+            LOG4FIMEX(logger, Logger::WARN, "unknown " << key << ": " << m << " using nearestneighbor");
             method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
         }
     }
@@ -428,7 +428,7 @@ static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader
         } else if (vm["process.rotateVector.direction"].as<string>() == "grid") {
             toLatLon = false;
         } else {
-            cerr << "process.rotateVector.direction != 'latlon' or 'grid' : " << vm["process.rotateVector.direction"].as<string>() << " invalid" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.direction != 'latlon' or 'grid' : " << vm["process.rotateVector.direction"].as<string>() << " invalid");
             exit(1);
         }
         if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.y")) {
@@ -445,7 +445,7 @@ static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader
         } else if (vm.count("process.rotateVector.angle")) {
             // do nothing here, but don't abort either (see below)
         } else {
-            cerr << "process.rotateVector.x and process.rotateVector.y, or process.rotateVector.angle not found" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.x and process.rotateVector.y, or process.rotateVector.angle not found");
             exit(1);
         }
         if (vm.count("process.rotateVector.angle")) {
@@ -477,15 +477,15 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
             startPos = vm["extract.reduceDimension.start"].as<vector<int> >();
         }
         if (startPos.size() != vars.size()) {
-            cerr << "extract.reduceDimension.start has not same no. of elements than extract.reduceDimension.name" << endl;
-            cerr << "use start = 0 if you don't want to reduce the start-position" << endl;
+            LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.start has different number of elements than extract.reduceDimension.name; "
+                    "use start = 0 if you don't want to reduce the start-position");
         }
         if (vm.count("extract.reduceDimension.end")) {
             endPos = vm["extract.reduceDimension.end"].as<vector<int> >();
         }
         if (endPos.size() != vars.size()) {
-            cerr << "extract.reduceDimension.end has not same no. of elements than extract.reduceDimension.name" << endl;
-            cerr << "use end = 0 (with start != 0) if you don't want to reduce the end-position" << endl;
+            LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.end has different number of elements than extract.reduceDimension.name; "
+                    "use end = 0 (with start != 0) if you don't want to reduce the end-position");
         }
         for (size_t i = 0; i < vars.size(); ++i) {
             if (startPos.at(i) == 0 && endPos.at(i) == 0) {
@@ -503,7 +503,7 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
             lists = vm["extract.pickDimension.list"].as<vector<string> >();
         }
         if (dims.size() != lists.size()) {
-            cerr << "extract.pickDimension.name has not same no. of elements than extract.pickDimension.list" << endl;
+            LOG4FIMEX(logger, Logger::ERROR, "extract.pickDimension.name has different number of elements than extract.pickDimension.list");
         }
         for (size_t i = 0; i < dims.size(); ++i) {
             vector<int> pos = tokenizeDotted<int>(lists.at(i)); // tokenizeDotted does not work with unsigned values
@@ -514,15 +514,17 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
     if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {
         FimexTime start(FimexTime::min_date_time);
         if (vm.count("extract.reduceTime.start")) {
-            if (! start.parseISO8601(vm["extract.reduceTime.start"].as<string>()) ) {
-                cerr << "cannot parse time " << vm["extract.reduceTime.start"].as<string>() << endl;
+            const string tStart = vm["extract.reduceTime.start"].as<string>();
+            if (!start.parseISO8601(tStart)) {
+                LOG4FIMEX(logger, Logger::FATAL, "cannot parse time '" << tStart << "'");
                 exit(1);
             }
         }
         FimexTime end(FimexTime::max_date_time);
         if (vm.count("extract.reduceTime.end")) {
-            if (! end.parseISO8601(vm["extract.reduceTime.end"].as<string>()) ) {
-                cerr << "cannot parse time " << vm["extract.reduceTime.end"].as<string>() << endl;
+            const string tEnd = vm["extract.reduceTime.end"].as<string>();
+            if (! end.parseISO8601(tEnd) ) {
+                LOG4FIMEX(logger, Logger::FATAL, "cannot parse time '" << tEnd << "'");
                 exit(1);
             }
         }
@@ -530,7 +532,7 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
     }
     if (vm.count("extract.reduceVerticalAxis.unit")) {
         if (!(vm.count("extract.reduceVerticalAxis.start") && vm.count("extract.reduceVerticalAxis.end"))) {
-            cerr << "extract.reduceVerticalAxis requires all 'start','end','unit'" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "extract.reduceVerticalAxis requires all 'start','end','unit'");
             exit(1);
         }
         string unit = vm["extract.reduceVerticalAxis.unit"].as<string>();
@@ -544,7 +546,7 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
         double bbVals[4];
         for (int i = 0; i < 4; i++) {
             if (!vm.count("extract.reduceToBoundingBox."+bb[i])) {
-                cerr << "extract.reduceToBoundingBox." << bb[i] << " missing";
+                LOG4FIMEX(logger, Logger::FATAL, "extract.reduceToBoundingBox." << bb[i] << " missing");
                 exit(1);
             }
             bbVals[i] = vm["extract.reduceToBoundingBox."+bb[i]].as<double>();
@@ -604,7 +606,7 @@ static CDMReader_p getCDMVerticalInterpolator(po::variables_map& vm, CDMReader_p
             pressConv = boost::shared_ptr<CDMPressureConversions>(new CDMPressureConversions(dataReader, operations));
             dataReader = pressConv;
         } catch (CDMException& ex) {
-            LOG4FIMEX(logger, Logger::ERROR, "invalid verticalInterpolate.dataConversion: " + join(operations.begin(), operations.end(), ",") + " " + ex.what());
+            LOG4FIMEX(logger, Logger::FATAL, "invalid verticalInterpolate.dataConversion: " + join(operations.begin(), operations.end(), ",") + " " + ex.what());
             exit(1);
         }
     }
@@ -613,7 +615,7 @@ static CDMReader_p getCDMVerticalInterpolator(po::variables_map& vm, CDMReader_p
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
     if (! (vm.count("verticalInterpolate.method") && vm.count("verticalInterpolate.level1"))) {
-        LOG4FIMEX(logger, Logger::ERROR, "verticalInterpolate needs method and level1");
+        LOG4FIMEX(logger, Logger::FATAL, "verticalInterpolate needs method and level1");
         exit(1);
     }
     vector<double> level1 = tokenizeDotted<double>(vm["verticalInterpolate.level1"].as<string>(),",");
@@ -680,12 +682,12 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
     if (vm.count("interpolate.projString")) {
 
         if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
-                cerr << "ERROR: xAxisUnit and yAxisUnit required" << endl;
+                LOG4FIMEX(logger, Logger::FATAL, "xAxisUnit and yAxisUnit required");
                 exit(1);
         }
 
         if (!(vm.count("interpolate.xAxisValues") && vm.count("interpolate.yAxisValues"))) {
-            cerr << "ERROR: xAxisValues and yAxisValues required" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "xAxisValues and yAxisValues required");
             exit(1);
         }
         if (vm.count("interpolate.distanceOfInterest")) {
@@ -700,15 +702,15 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
         interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
     } else if (vm.count("interpolate.vcrossNames")) {
         if (!vm.count("interpolate.vcrossNoPoints")) {
-            cerr << "ERROR: interpolate.vcrossNames requires vcrossNoPoints, too" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires vcrossNoPoints, too");
             exit(1);
         }
         if (!vm.count("interpolate.longitudeValues")) {
-            cerr << "ERROR: interpolate.vcrossNames requires longitudeValues, too" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires longitudeValues, too");
             exit(1);
         }
         if (!vm.count("interpolate.latitudeValues")) {
-            cerr << "ERROR: interpolate.vcrossNames requires latitudeValues, too" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires latitudeValues, too");
             exit(1);
         }
         vector<string> vNames = tokenize(vm["interpolate.vcrossNames"].as<string>(), ",");
@@ -716,16 +718,16 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
         vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
         vector<double> lonVals = tokenizeDotted<double>(vm["interpolate.longitudeValues"].as<string>());
         if (vNames.size() != pointNo.size()) {
-            cerr << "ERROR: interpolate.vcrossNames and vcrossNoPoints need same size: " << vNames.size() << "!=" << pointNo.size() << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames and vcrossNoPoints need same size: " << vNames.size() << "!=" << pointNo.size());
             exit(1);
         }
         size_t pointSum = std::accumulate(pointNo.begin(),pointNo.end(),0);
         if (pointSum != latVals.size()) {
-            cerr << "ERROR: interpolate.latitudeValues size does not match the sum of vcrossNoPoints: " << latVals.size() << "!=" << pointSum << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.latitudeValues size does not match the sum of vcrossNoPoints: " << latVals.size() << "!=" << pointSum);
             exit(1);
         }
         if (latVals.size() != lonVals.size()) {
-            cerr << "ERROR: interpolate.latitudeValues size does not match longitudeVals size: " << latVals.size() << "!=" << lonVals.size() << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.latitudeValues size does not match longitudeVals size: " << latVals.size() << "!=" << lonVals.size());
             exit(1);
         }
         vector<CrossSectionDefinition> csd;
@@ -742,7 +744,7 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
         interpolator->changeProjectionToCrossSections(method, csd);
     } else if (vm.count("interpolate.latitudeValues")) {
         if (!vm.count("interpolate.longitudeValues")) {
-            cerr << "ERROR: interpolate.latitudeValues requires longitudeValues, too" << endl;
+            LOG4FIMEX(logger, Logger::FATAL, "interpolate.latitudeValues requires longitudeValues, too");
             exit(1);
         }
         vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
@@ -782,7 +784,7 @@ static CDMReader_p getCDMMerger(po::variables_map& vm, CDMReader_p dataReader) {
         po::variables_map mvm;
         ifstream ifs(vm["merge.inner.cfg"].as<string>().c_str());
         if (!ifs) {
-            cerr << "missing merge.inner.cfg file '" << vm["merge.inner.cfg"].as<string>() << "'" << endl;
+            LOG4FIMEX(logger, Logger::ERROR, "missing merge.inner.cfg file '" << vm["merge.inner.cfg"].as<string>() << "'");
         } else {
             po::store(po::parse_config_file(ifs, config_file_options), mvm);
             // apply all fimex processing tasks to the merge.inner stream
@@ -924,7 +926,7 @@ static void writeCDM(CDMReader_p dataReader, po::variables_map& vm) {
         Null_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
         return;
     }
-    cerr << "unable to write type: " << type << endl;
+    LOG4FIMEX(logger, Logger::FATAL, "unable to write type: '" << type << "'");
     exit(1);
 }
 
