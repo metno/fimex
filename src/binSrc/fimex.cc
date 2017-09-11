@@ -1191,14 +1191,32 @@ int run(int argc, char* args[])
     return 0;
 }
 
+namespace {
+
+#ifdef HAVE_MPI
+struct MPI_Init_Finalize {
+  MPI_Init_Finalize(int argc, char* args[])
+  {
+    MPI_Init(&argc, &args);
+    mifi_initialize_mpi(MPI_COMM_WORLD, MPI_INFO_NULL);
+  }
+
+  ~MPI_Init_Finalize()
+  {
+    mifi_free_mpi();
+    MPI_Finalize();
+  }
+};
+#endif
+
+} // namespace
+
 int main(int argc, char* args[])
 {
-
     int retStatus = 0;
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &args);
-    mifi_initialize_mpi(MPI_COMM_WORLD, MPI_INFO_NULL);
+    MPI_Init_Finalize mpi(argc, args);
 #endif
 
     // wrapping main-functions in run to catch all exceptions
@@ -1207,7 +1225,6 @@ int main(int argc, char* args[])
 #else
 #warning Not catching exceptions in main method
 #endif
-
 
         retStatus = run(argc, args);
 
@@ -1220,11 +1237,6 @@ int main(int argc, char* args[])
         retStatus = 1;
     }
 #endif
-#ifdef HAVE_MPI
-    mifi_free_mpi();
-    MPI_Finalize();
-#endif
 
     return retStatus;
 }
-
