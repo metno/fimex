@@ -89,7 +89,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
         case CDM_NAT: return DataPtr(new DataImpl<char>(length));
         default: break;
     }
-    throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));
+    throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
 
 }
 
@@ -116,7 +116,7 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
         case CDM_NAT: return DataPtr(new DataImpl<char>(0));
         default: break;
     }
-    throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));
+    throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
 }
 template<>
 void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {

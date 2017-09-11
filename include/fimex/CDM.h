@@ -68,14 +68,14 @@ public:
      * @param var the variable to add
      * @throw CDMException if var.varName() already exists
      */
-    void addVariable(const CDMVariable& var) throw(CDMException);
+    void addVariable(const CDMVariable& var);
     /**
      * @brief get a reference of a variable
      *
      * @param varName name of the variable
      * @throw CDMException if varName doesn't exist
      */
-    CDMVariable& getVariable(const std::string& varName) throw(CDMException);
+    CDMVariable& getVariable(const std::string& varName);
     /**
      * @brief get a reference of a variable
      *
@@ -84,7 +84,7 @@ public:
      * @param varName name of the variable
      * @throw CDMException if varName doesn't exist
      */
-    const CDMVariable& getVariable(const std::string& varName) const throw(CDMException);
+    const CDMVariable& getVariable(const std::string& varName) const;
     /**
      * @brief test if variable exists
      *
@@ -140,7 +140,7 @@ public:
      *  @param dim the dimension
      *  @throw CDMException if dim-name already exists
      */
-    void addDimension(const CDMDimension& dim) throw(CDMException);
+    void addDimension(const CDMDimension& dim);
     /**
      * check if the dimension exists
      * @param dimName name of the dimension
@@ -153,8 +153,8 @@ public:
      * @param dimName name of the dimension
      * @throw CDMException if dimension doesn't exist
      */
-    CDMDimension& getDimension(const std::string& dimName) throw(CDMException);
-    const CDMDimension& getDimension(const std::string& dimName) const throw(CDMException);
+    CDMDimension& getDimension(const std::string& dimName);
+    const CDMDimension& getDimension(const std::string& dimName) const;
 
     /**
      * @brief test if a dimension is actively in use
@@ -171,7 +171,7 @@ public:
      * @return false if the original name does not exist.
      * @throw CDMException if newName already in use in a variable but for a different dimension
      */
-    bool renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException);
+    bool renameDimension(const std::string& oldName, const std::string& newName);
 
     /**
      * @brief rename a dimension
@@ -181,7 +181,7 @@ public:
      * @return false if the original name does not exist.
      * @throw CDMException if newName already in use and ignoreInUse is false
      */
-    bool renameDimension(const std::string& oldName, const std::string& newName, bool ignoreInUse) throw(CDMException);
+    bool renameDimension(const std::string& oldName, const std::string& newName, bool ignoreInUse);
 
     /**
      * @brief remove a dimension
@@ -191,7 +191,7 @@ public:
      * @return true if dimension existed, false otherwise
      * @throw CDMException if dimension in us in a variable
      */
-    bool removeDimension(const std::string& name) throw(CDMException);
+    bool removeDimension(const std::string& name);
 
     /**
      * @brief remove a dimension
@@ -201,7 +201,7 @@ public:
      * @return true if dimension existed, false otherwise
      * @throw CDMException if dimension in us in a variable unless ignoreInUse is true
      */
-    bool removeDimension(const std::string& name, bool ignoreInUse) throw(CDMException);
+    bool removeDimension(const std::string& name, bool ignoreInUse);
 
     /**
      * @brief retrieve the unlimited dimension
@@ -221,7 +221,7 @@ public:
      * @param attr the CDMAttribute
      * @throw CDMException if varName doesn't exist, or attr.getName() already exists
      */
-    void addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException);
+    void addAttribute(const std::string& varName, const CDMAttribute& attr);
     /**
      * add or replace an attribute of the cdm
      *
@@ -229,7 +229,7 @@ public:
      * @param attr the CDMAttribute
      * @throw CDMException if vaName doesn't exist
      */
-    void addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException);
+    void addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr);
     /**
      * remove an attribute from the cdm
      *
@@ -267,14 +267,14 @@ public:
      * @param attrName name of attribute
      * @throw CDMException if varName attrName combination doesn't exists
      */
-    CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException);
+    CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName);
     /**
      * @brief get a const. attribute
      * @param varName name of variable
      * @param attrName name of attribute
      * @throw CDMException if varName attrName combination doesn't exists
      */
-    const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
+    const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const;
     /**
      * @brief get an attribute without throwing an error
      *
@@ -361,7 +361,7 @@ public:
      * @return true if unique result, false (and print warning) if results are not unique
      * @throw CDMException if no projection with corresponding axes can be found
      */
-    MIFI_DEPRECATED(bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException));
+    MIFI_DEPRECATED(bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const);
 
 
     /**

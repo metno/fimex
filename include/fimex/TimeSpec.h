@@ -83,7 +83,7 @@ public:
      * @param startTime time to start in case of a relativeStart timeSpec
      * @param endTime time to end in case of a relativeStart timeSpec
      */
-    TimeSpec(const std::string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
+    TimeSpec(const std::string& timeSpec, const FimexTime& startTime, const FimexTime& endTime);
     virtual ~TimeSpec() {};
     const std::vector<FimexTime>& getTimeSteps() const {return timeSteps;}
     const std::string& getUnitString() const {return outputUnit;}

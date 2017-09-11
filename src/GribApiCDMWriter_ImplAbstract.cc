@@ -123,7 +123,7 @@ GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 {
 }
 
-void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
+void GribApiCDMWriter_ImplAbstract::run()
 {
     using namespace std;
     using namespace boost::posix_time;
@@ -395,7 +395,7 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const bo
     GRIB_CHECK(grib_set_long(gribHandle.get(), "endStep", endStep), "setting endStep");
 }
 
-std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& varName) throw(CDMException)
+std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getLevels(" << varName << ")" );
     Units units;
@@ -484,7 +484,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
     return levelData;
 }
 
-std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName) throw(CDMException)
+std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
     typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;

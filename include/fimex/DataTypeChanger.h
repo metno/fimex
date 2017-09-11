@@ -70,7 +70,7 @@ public:
     /**
      * convert the data to the new scale/fill/offset
      */
-    DataPtr convertData(DataPtr) const throw(CDMException);
+    DataPtr convertData(DataPtr) const;
     /**
      * return the datatype of the converted data
      */

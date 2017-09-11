@@ -65,7 +65,7 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
  * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */
-int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(CDMException);
+int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
 
 }
 

@@ -231,7 +231,7 @@ struct data_caster<OUT, std::string> {
     template<typename C>
     void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) {
         if (otherFirst > otherSize) {
-            throw(CDMException("data-region-start "+ type2string(otherFirst) + " outside range: "+ type2string(otherSize)));
+            throw CDMException("data-region-start "+ type2string(otherFirst) + " outside range: "+ type2string(otherSize));
         }
         // fixing max range
         otherLast = std::min(otherLast, otherSize);
@@ -243,7 +243,7 @@ struct data_caster<OUT, std::string> {
 // don't implement all possible setValues functions, link-time error
 //	template<typename C>
 //	void DataImpl<C>::setValues(size_t startPos, const Data& data, size_t first, size_t last){
-//		throw(CDMException("setValues not implemented for this datatype"));
+//		throw CDMException("setValues not implemented for this datatype");
 //	}
 
     // declaration of implemented function (in Data.cc)

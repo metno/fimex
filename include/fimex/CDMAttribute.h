@@ -60,9 +60,9 @@ public:
     /// create a attribute with the low level information
     explicit CDMAttribute(std::string name, CDMDataType datatype, DataPtr data);
     /// create a attribute from a string representation
-    explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
+    explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value);
     /// create a attribute with a vector of values in string representation
-    explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException);
+    explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values);
     virtual ~CDMAttribute();
     /// retrieve the name of the attribute
     const std::string& getName() const {return name;}

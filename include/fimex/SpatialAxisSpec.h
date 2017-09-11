@@ -80,7 +80,7 @@ public:
      * Define a spatialAxisSpec. Depending on the axisSpec (relativeStart?), start and end must be given later
      * @param axisSpec string representation as explained above
      */
-    SpatialAxisSpec(const std::string& axisSpec) throw(CDMException) :
+    SpatialAxisSpec(const std::string& axisSpec) :
         axisSpec(axisSpec), startEndInitialized(false), axisInitialized(false) {}
     /**
      * Define a spatialAxisSpec
@@ -88,7 +88,7 @@ public:
      * @param start place of data start, in degree or m
      * @param end place to end, in degree or m
      */
-    SpatialAxisSpec(const std::string& axisSpec, double start, double end) throw(CDMException) :
+    SpatialAxisSpec(const std::string& axisSpec, double start, double end) :
         axisSpec(axisSpec), start(start), end(end), startEndInitialized(true), axisInitialized(false) {}
     virtual ~SpatialAxisSpec() {};
     /**

@@ -53,7 +53,7 @@ extern MutexType& getUnitsMutex() {
 
 static LoggerPtr logger = getLogger("fimex.Units");
 
-void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitException)
+void handleUdUnitError(int unitErrCode, const std::string& message)
 {
     switch (unitErrCode) {
 #ifdef HAVE_UDUNITS2_H
@@ -186,7 +186,7 @@ Units& Units::operator=(const Units& rhs)
 Units::~Units()
 {}
 
-bool Units::unload(bool force) throw(UnitException)
+bool Units::unload(bool force)
 {
     bool retVal = false;
     ScopedCritical lock(unitsMutex);

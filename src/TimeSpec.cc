@@ -94,7 +94,7 @@ string timeString2timeUnitString(string timeString, const TimeUnit& tu) {
     return join(times.begin(), times.end(), ",");
 }
 
-TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
+TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const FimexTime& endTime)
 	: outputUnit("seconds since 1970-01-01 00:00:00")
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "getting timespec of " << timeSpec);

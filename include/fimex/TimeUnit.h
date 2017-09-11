@@ -123,7 +123,7 @@ private:
 
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime);
-FimexTime string2FimexTime(const std::string& str) throw(CDMException);
+FimexTime string2FimexTime(const std::string& str);
 
 /**
  * TimeUnit calculates times from a time given in a unit as
@@ -143,8 +143,8 @@ class TimeUnit
     double epochSlope;
 public:
     /// initialize a timeUnit with a unit string
-    TimeUnit() throw(CDMException);
-    TimeUnit(const std::string& timeUnitString) throw(CDMException);
+    TimeUnit();
+    TimeUnit(const std::string& timeUnitString);
     virtual ~TimeUnit();
     /// calculate the epochSeconds for a time in the current unit
     double unitTime2epochSeconds(double unitTime) const;
@@ -153,15 +153,15 @@ public:
     /// calculate the time in the current unit from the epoch
     double epochSeconds2unitTime(double epochSeconds) const;
     /// calculate the time in a calendar form
-    FimexTime unitTime2fimexTime(double unitTime) const throw(CDMException);
+    FimexTime unitTime2fimexTime(double unitTime) const;
     /// calculate the time in the current unit from the calendar form
-    double fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException);
+    double fimexTime2unitTime(const FimexTime& fiTime) const;
     /// same as #fimexTime2unitTime but copying fiTime instead of referencing, needed for i.e. bind1st(mem_fun())
-    double fimexTime2unitTimeX(FimexTime fiTime) const throw(CDMException) { return fimexTime2unitTime(fiTime); }
+    double fimexTime2unitTimeX(FimexTime fiTime) const { return fimexTime2unitTime(fiTime); }
     /// calculate the unitTime from a boost::posix_time
-    double posixTime2unitTime(boost::posix_time::ptime poTime) const throw(CDMException);
+    double posixTime2unitTime(boost::posix_time::ptime poTime) const;
 private:
-    void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00") throw(CDMException);
+    void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00");
 };
 
 }

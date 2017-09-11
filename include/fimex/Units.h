@@ -101,7 +101,7 @@ public:
      * @return true if unloaded, false if there are still some objects using the
      * internal data-structure.
      */
-    static bool unload(bool force = false) throw(UnitException);
+    static bool unload(bool force = false);
 private:
     /**
      * expose the internals of the implementation as a void*
@@ -112,7 +112,7 @@ private:
     const void* exposeInternals() const;
 };
 
-void handleUdUnitError(int unitErrCode, const std::string& message = "") throw(UnitException);
+void handleUdUnitError(int unitErrCode, const std::string& message = "");
 
 }
 

@@ -45,7 +45,7 @@ GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
 {
 }
 
-void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double levelValue) throw(CDMException)
+void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double levelValue)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << levelValue << ")" );
     xmlNodePtr node = getNodePtr(varName, levelValue);
@@ -59,7 +59,7 @@ void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double lev
     setNodesAttributes("g1attribute", node);
 }
 
-void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDMException)
+void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "setProjection(" << varName << ")");
     const CDM& cdm = cdmReader->getCDM();

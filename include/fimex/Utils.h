@@ -302,7 +302,7 @@ epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time);
  * @param delimiter optional delimiter, defaults to ,
  */
 template<typename T>
-std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimiter = ",") throw(CDMException)
+std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimiter = ",")
 {
     std::vector<std::string> tokens = tokenize(str, delimiter);
     std::vector<T> vals;

@@ -69,7 +69,7 @@ public:
      *
      * @warning the values will be converted in place
      */
-    virtual void convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException);
+    virtual void convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const;
     /**
      * convert two vectors of values in the projection to latitude and longitude
      * in degree. The earth ellipsoid will be the same as the input.
@@ -79,7 +79,7 @@ public:
      *
      * @warning the values will be converted in place
      */
-    virtual void convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException);
+    virtual void convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const;
     /**
      * get a string representation
      * @note this should be implemented as unique as possible, i.e.

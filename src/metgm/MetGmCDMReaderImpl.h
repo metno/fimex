@@ -44,7 +44,7 @@ namespace MetNoFimex {
         explicit MetGmCDMReaderImpl(const std::string& metgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm);
         ~MetGmCDMReaderImpl();
 
-        void init(const XMLInput& configXML) throw(CDMException);
+        void init(const XMLInput& configXML);
         bool deinit();
 
         int getPidForMetgmName(const std::string& metgm_name);

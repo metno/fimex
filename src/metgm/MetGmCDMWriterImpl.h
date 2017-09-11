@@ -96,7 +96,7 @@ namespace MetNoFimex {
          * @param attName original attribute name (before config: newname)
          * @return an attribute contained in the writers attribute, possibly added by config
          */
-        const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
+        const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
 
     protected:
 

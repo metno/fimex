@@ -97,7 +97,7 @@ CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, DataPtr data)
 {
 }
 
-CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException)
+CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value)
 : name(name)
 {
     this->datatype = string2datatype(datatype);
@@ -106,7 +106,7 @@ CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype,
     initDataByArray(vals);
 }
 
-CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException)
+CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values)
 : name(name), datatype(datatype)
 {
     initDataByArray(values);

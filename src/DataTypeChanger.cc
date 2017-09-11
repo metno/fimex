@@ -46,7 +46,7 @@ DataTypeChanger::~DataTypeChanger()
 {
 }
 
-DataPtr DataTypeChanger::convertData(DataPtr data) const throw(CDMException)
+DataPtr DataTypeChanger::convertData(DataPtr data) const
 {
 	if (newType == CDM_NAT) {
 		return data; // null - initialization, do nothing

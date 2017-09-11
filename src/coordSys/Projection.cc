@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& out, const Projection& proj)
     return out;
 }
 
-void Projection::convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException)
+void Projection::convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const
 {
     // check input
     if (xVals.size() == 0) return;
@@ -108,7 +108,7 @@ void Projection::convertToLonLat(std::vector<double>& xVals, std::vector<double>
                    std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
 
 }
-void Projection::convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException)
+void Projection::convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const
 {
     // check input
     if (xVals.size() == 0) return;

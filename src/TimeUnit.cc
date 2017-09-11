@@ -162,7 +162,7 @@ std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
     return out;
 }
 
-FimexTime string2FimexTime(const std::string& str) throw(CDMException)
+FimexTime string2FimexTime(const std::string& str)
 {
     FimexTime ft;
     if (!ft.parseISO8601(str)) {
@@ -181,7 +181,7 @@ void void_ut_free(void* ptr) {
 #endif
 }
 
-void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
+void TimeUnit::init(const std::string& timeUnitString)
 {
     if (!units.isTime(timeUnitString)) {
         throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
@@ -198,11 +198,11 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
     }
 }
 
-TimeUnit::TimeUnit() throw(CDMException)
+TimeUnit::TimeUnit()
 {
     init();
 }
-TimeUnit::TimeUnit(const std::string& timeUnit) throw(CDMException)
+TimeUnit::TimeUnit(const std::string& timeUnit)
 {
     init(timeUnit);
 }
@@ -219,7 +219,7 @@ double TimeUnit::epochSeconds2unitTime(double epochSeconds) const
 {
     return (epochSeconds - epochOffset) / epochSlope;
 }
-FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException)
+FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
 {
     FimexTime fiTime;
     float second;
@@ -272,7 +272,7 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
     return boost::posix_time::ptime(boost::gregorian::date(year,month,mday), boost::posix_time::time_duration(hour, minute, (int) second));
 }
 
-double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
+double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
 {
     float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
     double unitTime;
@@ -293,7 +293,7 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMExce
     return unitTime;
 }
 
-double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const throw(CDMException)
+double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const
 {
     boost::gregorian::date pDate = pTime.date();
     boost::posix_time::time_duration pTimeDur = pTime.time_of_day();

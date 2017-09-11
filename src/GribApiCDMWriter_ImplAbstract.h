@@ -58,7 +58,7 @@ public:
      * The run function has be to called after construction the object to
      * actually fetch and write the data.
      */
-    void run() throw(CDMException);
+    void run();
 protected:
     /**
      * add the global attributes from the config to the default grib-handle
@@ -78,8 +78,8 @@ protected:
      * @param varName
      * @throw CDMException if parameters cannot be set
      */
-    virtual void setProjection(const std::string& varName) throw(CDMException) = 0;
-    virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException) = 0;
+    virtual void setProjection(const std::string& varName) = 0;
+    virtual void setParameter(const std::string& varName, double levelValue) = 0;
     virtual void setTime(const std::string& varName, const boost::posix_time::ptime& rTime, const FimexTime& vTime, const std::string& stepUnit);
     virtual void setLevel(const std::string& varName, double levelValue) = 0;
     /**
@@ -87,12 +87,12 @@ protected:
      * assign at least 1 level, give it a default value if none is found in the cdm
      *
      */
-    virtual std::vector<double> getLevels(const std::string& varName) throw(CDMException);
+    virtual std::vector<double> getLevels(const std::string& varName);
     /**
      * get the times from the cdm as FimexTime (including unit)
      * assign at least 1 time, give it a default value if none is found in the cdm
      */
-    virtual std::vector<FimexTime> getTimes(const std::string& varName) throw(CDMException);
+    virtual std::vector<FimexTime> getTimes(const std::string& varName);
     /**
      * add the missing value to the gribHandle, rescale the data if needed
      * and change the datatype if needed, change the missingValue of the data if need

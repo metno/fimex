@@ -232,7 +232,7 @@ int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair leve
      int fieldGridType = field->gridType();
      fieldGridType = (fieldGridType >= 1000) ? (fieldGridType / 1000) : fieldGridType;
      if (getGridType() != fieldGridType)
-         throw(Felt_File_Error("gridType changes from "+type2string(getGridType()) +" to " + type2string(fieldGridType) + " in parameter " + getName()));
+         throw Felt_File_Error("gridType changes from "+type2string(getGridType()) +" to " + type2string(fieldGridType) + " in parameter " + getName());
 
     // set the output data
     field->grid(gridOut);
@@ -243,7 +243,7 @@ int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair leve
     for (int i = 0; i < 6; i++) {
         // allow params to differ by a delta (optional)
         if (newParams[i] != defaultParams[i] && std::fabs(newParams[i]-defaultParams[i]) > gridParameterDelta[i]) {
-            throw(Felt_File_Error("cannot change gridParameters within a file for " + getName() + " gridParameter (c-counting) " + type2string(i) + ": " + type2string(defaultParams[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-defaultParams[i])+")"));
+            throw Felt_File_Error("cannot change gridParameters within a file for " + getName() + " gridParameter (c-counting) " + type2string(i) + ": " + type2string(defaultParams[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-defaultParams[i])+")");
         }
     }
     return field->scaleFactor();

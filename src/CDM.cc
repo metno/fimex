@@ -161,7 +161,7 @@ CDM& CDM::operator=(const CDM& rhs)
     return *this;
 }
 
-void CDM::addVariable(const CDMVariable& var) throw(CDMException)
+void CDM::addVariable(const CDMVariable& var)
 {
     // TODO: check var.dims for existence!!!
     pimpl_->coordsInitialized = false;
@@ -176,7 +176,7 @@ bool CDM::hasVariable(const std::string& varName) const
     return (find_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(varName)) != pimpl_->variables.end());
 }
 
-const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException)
+const CDMVariable& CDM::getVariable(const std::string& varName) const
 {
     VarVec::const_iterator varPos = find_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(varName));
     if (varPos != pimpl_->variables.end()) {
@@ -185,7 +185,7 @@ const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDME
         throw CDMException("cannot find variable: '" + varName + "'");
     }
 }
-CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException)
+CDMVariable& CDM::getVariable(const std::string& varName)
 {
     // call constant version and cast
     return const_cast<CDMVariable&>(
@@ -285,7 +285,7 @@ void CDM::removeVariable(const std::string& variableName)
 }
 
 
-void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
+void CDM::addDimension(const CDMDimension& dim)
 {
     pimpl_->coordsInitialized = false;
     if (!hasDimension(dim.getName())) {
@@ -300,7 +300,7 @@ bool CDM::hasDimension(const std::string& dimName) const
     return (find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), CDMNameEqual(dimName)) != pimpl_->dimensions.end());
 }
 
-const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CDMException)
+const CDMDimension& CDM::getDimension(const std::string& dimName) const
 {
     DimVec::const_iterator dimIt = find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), CDMNameEqual(dimName));
     if (dimIt != pimpl_->dimensions.end()) {
@@ -310,7 +310,7 @@ const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CD
     }
 }
 
-CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException)
+CDMDimension& CDM::getDimension(const std::string& dimName)
 {
     return const_cast<CDMDimension&>(
             static_cast<const CDM&>(*this).getDimension(dimName)
@@ -329,12 +329,12 @@ bool CDM::testDimensionInUse(const std::string& name) const
     return inUse;
 }
 
-bool CDM::renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException)
+bool CDM::renameDimension(const std::string& oldName, const std::string& newName)
 {
     return renameDimension(oldName, newName, false);
 }
 
-bool CDM::renameDimension(const std::string& oldName, const std::string& newName, bool ignoreInUse) throw(CDMException)
+bool CDM::renameDimension(const std::string& oldName, const std::string& newName, bool ignoreInUse)
 {
     pimpl_->coordsInitialized = false;
     if (!hasDimension(oldName)) return false;
@@ -362,12 +362,12 @@ bool CDM::renameDimension(const std::string& oldName, const std::string& newName
     return true;
 }
 
-bool CDM::removeDimension(const std::string& name) throw(CDMException)
+bool CDM::removeDimension(const std::string& name)
 {
     return removeDimension(name, false);
 }
 
-bool CDM::removeDimension(const std::string& name, bool ignoreInUse) throw(CDMException)
+bool CDM::removeDimension(const std::string& name, bool ignoreInUse)
 {
     bool didErase = false;
     if (!ignoreInUse && testDimensionInUse(name)) {
@@ -406,7 +406,7 @@ bool CDM::hasUnlimitedDim(const CDMVariable& var) const
 }
 
 
-void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
+void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr)
 {
     pimpl_->coordsInitialized = false;
     if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
@@ -421,7 +421,7 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
     }
 }
 
-void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
+void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr)
 {
     pimpl_->coordsInitialized = false;
     if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
@@ -443,7 +443,7 @@ void CDM::removeAttribute(const std::string& varName, const std::string& attrNam
 }
 
 
-const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
+const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const
 {
     StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
     if (varIt == pimpl_->attributes.end())
@@ -456,7 +456,7 @@ const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::str
     return *attrIt;
 }
 
-CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException)
+CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName)
 {
     return const_cast<CDMAttribute&>(
             static_cast<const CDM&>(*this).getAttribute(varName, attrName)
@@ -616,7 +616,7 @@ const CDM::StrAttrVecMap& CDM::getAttributes() const
 }
 
 
-bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException)
+bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const
 {
     bool retVal = true;
     projectionName = "latitude_longitude"; // default

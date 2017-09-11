@@ -321,7 +321,7 @@ int Felt_File2::getGridType() const
             if (otherGridType != gridType) {
                 ostringstream oss;
                 oss << "gridType changes from: " << gridType << " to " << otherGridType << " between parameter " << feltArrayMap_.begin()->first << " and " << it->first;
-                throw(Felt_File_Error(oss.str()));
+                throw Felt_File_Error(oss.str());
             }
         }
 
@@ -336,7 +336,7 @@ boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() cons
     if (feltArrayMap_.size() > 0) {
         return fait->second->getGridDefinition();
     } else {
-        throw(Felt_File_Error("cannot read gridParameters: no Felt_Array2 available"));
+        throw Felt_File_Error("cannot read gridParameters: no Felt_Array2 available");
     }
 }
 

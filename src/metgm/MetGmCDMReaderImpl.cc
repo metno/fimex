@@ -171,7 +171,7 @@ namespace MetNoFimex {
         }
     }
 
-    void MetGmCDMReaderImpl::init(const XMLInput& configXML) throw(CDMException)
+    void MetGmCDMReaderImpl::init(const XMLInput& configXML)
     {
         boost::shared_ptr<XMLDoc> xmlDoc = configXML.getXMLDoc();
         configure(xmlDoc);

@@ -42,7 +42,7 @@ struct grib_handle;
 /**
  * runtime-exception checker for grib_check
  */
-void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error);
+void mifi_grib_check(int error, const char* msg, int line, const char* file);
 
 
 namespace MetNoFimex

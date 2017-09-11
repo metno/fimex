@@ -29,7 +29,7 @@
 #include <sstream>
 #include <grib_api.h>
 
-void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error)
+void mifi_grib_check(int error, const char* msg, int line, const char* file)
 {
     if (error) {
         const char* errMsg = grib_get_error_message(error);

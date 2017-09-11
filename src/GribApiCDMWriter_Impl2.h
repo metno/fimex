@@ -39,8 +39,8 @@ public:
         GribApiCDMWriter_Impl2(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
 	virtual ~GribApiCDMWriter_Impl2();
 
-	virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException);
-	virtual void setProjection(const std::string& varName) throw(CDMException);
+	virtual void setParameter(const std::string& varName, double levelValue);
+	virtual void setProjection(const std::string& varName);
 	virtual void setLevel(const std::string& varName, double levelValue);
 	virtual DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData);
 
