@@ -152,6 +152,7 @@ void LoggerClass::reset()
 
 Logger::Logger(const std::string& className)
     : className_(className)
+    , pimpl_(0)
 {
 }
 
@@ -167,10 +168,10 @@ LoggerImpl* Logger::impl()
 #pragma omp critical (MIFI_LOGGER)
     {
 #endif
-    if (pimpl_.get() == 0) {
-        pimpl_.reset(getLoggerClass()->loggerFor(this, className_));
+    if (!pimpl_) {
+        pimpl_ = getLoggerClass()->loggerFor(this, className_);
     }
-    i = pimpl_.get();
+    i = pimpl_ ;
 #ifdef _OPENMP
     }
 #endif
@@ -183,9 +184,10 @@ void Logger::reset()
 #pragma omp critical (MIFI_LOGGER)
     {
 #endif
-        if (pimpl_.get() != 0) {
+        if (pimpl_) {
             getLoggerClass()->forget(this);
-            pimpl_.reset(0);
+            delete pimpl_;
+            pimpl_ = 0;
         }
 #ifdef _OPENMP
     }

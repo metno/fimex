@@ -50,11 +50,7 @@ class Logger
 {
 private:
     std::string className_;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    std::auto_ptr<LoggerImpl> pimpl_; // lazy initialized member
-#pragma GCC diagnostic pop
+    LoggerImpl* pimpl_; // lazy initialized member
     LoggerImpl* impl();
 
 public:
