@@ -59,7 +59,6 @@
 /* currently no factory for writer */
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIB_API_H
 #include "fimex/GribApiCDMWriter.h"
@@ -78,11 +77,14 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace MetNoFimex;
 
-static LoggerPtr logger = getLogger("fimex");
-static po::options_description config_file_options;
-static CDMReader_p applyFimexStreamTasks(po::variables_map& vm, CDMReader_p dataReader);
+namespace {
 
-static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
+LoggerPtr logger = getLogger("fimex");
+po::options_description config_file_options;
+CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader);
+
+void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config)
+{
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
     out << "             [--output.file FILENAME | --output.fillFile [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
@@ -102,39 +104,9 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;
 }
 
-static void printReaderStatements(const string& readerName, const po::variables_map& vm, CDMReader_p reader)
-{
-    if (vm.count(readerName+".printNcML")) {
-        cout << readerName << " as NcML:" << endl;
-        if (vm[readerName+".printNcML"].as<string>() == "-") {
-            reader->getCDM().toXMLStream(cout);
-            cout << endl;
-        } else {
-            ofstream file;
-            file.open(vm[readerName+".printNcML"].as<string>().c_str(), ios::out);
-            if (file.is_open()) {
-                reader->getCDM().toXMLStream(file);
-                file.close();
-            } else {
-                throw CDMException("cannot write ncml-file: " + vm[readerName+".printNcML"].as<string>());
-            }
-        }
-    }
-    if (vm.count(readerName+".printCS")) {
-        cout << readerName + " CoordinateSystems: ";
-        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader);
-        cout << csVec.size() << ": ";
-        cout << joinPtr(csVec.begin(), csVec.end(), " | ");
-        cout << endl;
-    }
-    if (vm.count(readerName+".printSize")) {
-        cout << readerName << " size: ~" << ceil(estimateCDMDataSize(reader->getCDM())/1024./1024.) << "MB";
-        cout << endl;
-    }
-}
-
 template<typename T>
-static void writeOption(ostream& out, const string& var, const po::variables_map& vm) {
+void writeOption(ostream& out, const string& var, const po::variables_map& vm)
+{
     if (vm.count(var)) {
         out << var << ": ";
 #if defined(__GNUC__) && __GNUC__ < 4
@@ -147,14 +119,16 @@ static void writeOption(ostream& out, const string& var, const po::variables_map
     }
 }
 
-void writeOptionAny(ostream& out, const string& var, const po::variables_map& vm) {
+void writeOptionAny(ostream& out, const string& var, const po::variables_map& vm)
+{
     // variables without real value, just set or unset
     if (vm.count(var)) {
         out << var  << endl;
     }
 }
 
-static void writeVectorOptionString(ostream& out, const string& var, const po::variables_map& vm) {
+void writeVectorOptionString(ostream& out, const string& var, const po::variables_map& vm)
+{
     if (vm.count(var)) {
         vector<string> vals = vm[var].as<vector<string> >();
         typedef vector<string>::iterator VIT;
@@ -163,7 +137,9 @@ static void writeVectorOptionString(ostream& out, const string& var, const po::v
         }
     }
 }
-static void writeVectorOptionInt(ostream& out, const string& var, const po::variables_map& vm) {
+
+void writeVectorOptionInt(ostream& out, const string& var, const po::variables_map& vm)
+{
     if (vm.count(var)) {
         vector<int> vals = vm[var].as<vector<int> >();
         typedef vector<int>::iterator VIT;
@@ -173,9 +149,8 @@ static void writeVectorOptionInt(ostream& out, const string& var, const po::vari
     }
 }
 
-
-
-static void writeOptions(ostream& out, const po::variables_map& vm) {
+void writeOptions(ostream& out, const po::variables_map& vm)
+{
     out << "Currently active options: " << endl;
     writeOptionAny(out, "help", vm);
     writeOptionAny(out, "version", vm);
@@ -296,7 +271,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionAny(out, "ncml.printSize", vm);
 }
 
-static string getType(const string& io, po::variables_map& vm) {
+string getType(const string& io, const po::variables_map& vm)
+{
     string type;
     if (vm.count(io+".type")) {
         type = vm[io+".type"].as<string>();
@@ -318,74 +294,136 @@ static string getType(const string& io, po::variables_map& vm) {
     return type;
 }
 
-static CDMReader_p getCDMFileReader(po::variables_map& vm, const string& io="input") {
-    string type = getType(io, vm);
-    CDMReader_p returnPtr;
-    if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2") {
-        string config(PKGDATADIR);
-        config += "/felt2nc_variables.xml";
-        if (vm.count(io+".config")) {
-            config = vm[io+".config"].as<string>();
-        }
-        // use FELT library for all flt2 files, and for flt files if LIBMIC not available
-        LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm[io+".file"].as<string>() << " with config " << config);
-        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm[io+".file"].as<string>(), config);
-    }
-    if (type == "grb" || type == "grib" ||
-            type == "grb1" || type == "grib1" ||
-                type == "grb2" || type == "grib2") {
-        std::string config;
-        if (vm.count(io+".config")) {
-            config = vm[io+".config"].as<string>();
-        }
-        std::vector<std::string> optional;
-        if (vm.count(io+".optional")) {
-            optional = vm[io+".optional"].as<vector<string> >();
-        }
-        LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm[io+".file"].as<string>() << " with config " << config);
-        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm[io+".file"].as<string>(), config, optional);
-    }
-    if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-        if (vm.count(io+".config")) {
-            std::string config = vm[io+".config"].as<string>();
-            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm[io+".file"].as<string>() << " without config and applying ncml config");
-            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm[io+".file"].as<string>(), config);
-        } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm[io+".file"].as<string>() << " without config");
-            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm[io+".file"].as<string>());
-        }
-    }
+std::string getFile(const string& io, const po::variables_map& vm)
+{
+  return vm[io + ".file"].as<string>();
+}
 
-    if (returnPtr.get() == 0) {
-        // cover all other types as defined in CDMConstants/CDMFileReaderFactory
-        int maxId = mifi_get_max_filetype_number();
-        for (int i = 0; i <= maxId; i++) {
-            const char* iType= mifi_get_filetype_name(i);
-            if (type == iType) {
-                string config;
-                if (vm.count(io+".config")) {
-                    config = vm[io+".config"].as<string>();
-                }
-                LOG4FIMEX(logger, Logger::DEBUG, "reading file via "<<type<<" file '" << vm[io+".file"].as<string>() << "' with config '" << config << "'");
-                returnPtr = CDMFileReaderFactory::create(type, vm[io+".file"].as<string>(), config);
+template<typename T>
+T getOption(const string& key, const po::variables_map& vm)
+{
+  if (vm.count(key))
+    return vm[key].as<T>();
+  else
+    return T();
+}
+
+template<typename T>
+bool getOption(const string& key, const po::variables_map& vm, T& t)
+{
+  if (!vm.count(key))
+    return false;
+  t = vm[key].as<T>();
+  return true;
+}
+
+std::string getString(const string& key, const po::variables_map& vm)
+{
+  return getOption<string>(key, vm);
+}
+
+std::string getConfig(const string& io, const po::variables_map& vm)
+{
+  return getString(io+".config", vm);
+}
+
+bool isFeltType(const string& type)
+{
+  return (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2");
+}
+
+bool isGrib2Type(const string& type)
+{
+  return (type == "grb2" || type == "grib2");
+}
+
+bool isGribType(const string& type)
+{
+  return (type == "grb" || type == "grib" ||
+        type == "grb1" || type == "grib1" ||
+        isGrib2Type(type));
+}
+
+bool isNetCDF4Type(const string& type)
+{
+  return (type == "nc4");
+}
+
+bool isNetCDFType(const string& type)
+{
+  return (type == "nc" || type == "cdf" || type == "netcdf" || isNetCDF4Type(type));
+}
+
+void printReaderStatements(const string& readerName, const po::variables_map& vm, CDMReader_p reader)
+{
+    string ncmlout;
+    if (getOption(readerName+".printNcML", vm, ncmlout)) {
+        cout << readerName << " as NcML:" << endl;
+        if (ncmlout == "-") {
+            reader->getCDM().toXMLStream(cout);
+            cout << endl;
+        } else {
+            ofstream file;
+            file.open(ncmlout.c_str(), ios::out);
+            if (file.is_open()) {
+                reader->getCDM().toXMLStream(file);
+                file.close();
+            } else {
+                throw CDMException("cannot write ncml-file: '" + ncmlout + "'");
             }
         }
     }
-
-    if (returnPtr.get() == 0) {
-        LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
-        exit(1);
-    } else {
-        printReaderStatements(io, vm, returnPtr);
+    if (vm.count(readerName+".printCS")) {
+        cout << readerName + " CoordinateSystems: ";
+        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader);
+        cout << csVec.size() << ": ";
+        cout << joinPtr(csVec.begin(), csVec.end(), " | ");
+        cout << endl;
     }
-
-    return returnPtr;
+    if (vm.count(readerName+".printSize")) {
+        cout << readerName << " size: ~" << ceil(estimateCDMDataSize(reader->getCDM())/1024./1024.) << "MB";
+        cout << endl;
+    }
 }
 
-static int getInterpolationMethod(po::variables_map& vm, const string& key) {
+const string FELT_VARIABLES = (string(PKGDATADIR) + "/felt2nc_variables.xml");
 
+CDMReader_p getCDMFileReader(const po::variables_map& vm, const string& io="input")
+{
+    const string type = getType(io, vm);
+    const std::string fileName = getFile(io, vm);
+    string config = getConfig(io, vm);
+    std::vector<std::string> optional;
+
+    int filetype = MIFI_FILETYPE_UNKNOWN;
+    if (isFeltType(type)) {
+      filetype = MIFI_FILETYPE_FELT;
+      if (config.empty())
+        config = FELT_VARIABLES;
+    } else if (isGribType(type)) {
+      filetype = MIFI_FILETYPE_GRIB;
+      optional = getOption< vector<string> >(io+".optional", vm);
+    } else if (isNetCDFType(type)) {
+      filetype = MIFI_FILETYPE_NETCDF;
+    } else {
+      filetype = mifi_get_filetype(type.c_str());
+    }
+
+    LOG4FIMEX(logger, Logger::DEBUG, "reading file of type '" << mifi_get_filetype_name(filetype)
+              << "' file '" << fileName << "' with config '" << config << "'");
+    if (CDMReader_p reader = CDMFileReaderFactory::create(filetype, fileName, config, optional)) {
+      printReaderStatements(io, vm, reader);
+      return reader;
+    }
+
+    LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
+    exit(1);
+}
+
+int getInterpolationMethod(const po::variables_map& vm, const string& key)
+{
     int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-    if( vm.count(key) ) {
+    if (vm.count(key)) {
         const string& m = vm[key].as<string>();
         method = mifi_string_to_interpolation_method(m.c_str());
         if (method == MIFI_INTERPOL_UNKNOWN) {
@@ -396,10 +434,12 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
     return method;
 }
 
-static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader) {
+CDMReader_p getCDMProcessor(const po::variables_map& vm, CDMReader_p dataReader)
+{
     if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") ||
             vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction") ||
-            vm.count("process.addVerticalVelocity"))) {
+            vm.count("process.addVerticalVelocity")))
+    {
         LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
         return dataReader;
     }
@@ -423,22 +463,20 @@ static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader
     }
     if (vm.count("process.rotateVector.direction")) {
         bool toLatLon = true;
-        if (vm["process.rotateVector.direction"].as<string>() == "latlon") {
+        const string direction = vm["process.rotateVector.direction"].as<string>();
+        if (direction == "latlon") {
             toLatLon = true;
-        } else if (vm["process.rotateVector.direction"].as<string>() == "grid") {
+        } else if (direction == "grid") {
             toLatLon = false;
         } else {
-            LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.direction != 'latlon' or 'grid' : " << vm["process.rotateVector.direction"].as<string>() << " invalid");
+            LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.direction != 'latlon' or 'grid' : " << direction << " invalid");
             exit(1);
         }
         if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.y")) {
             vector<string> xvars = vm["process.rotateVector.x"].as<vector<string> >();
             vector<string> yvars = vm["process.rotateVector.y"].as<vector<string> >();
-            vector<string> stdX, stdY;
-            if (vm.count("process.rotateVector.stdNameX"))
-                stdX = vm["process.rotateVector.stdNameX"].as<vector<string> >();
-            if (vm.count("process.rotateVector.stdNameY"))
-                stdY = vm["process.rotateVector.stdNameY"].as<vector<string> >();
+            vector<string> stdX = getOption< vector<string> >("process.rotateVector.stdNameX", vm);
+            vector<string> stdY = getOption< vector<string> >("process.rotateVector.stdNameY", vm);
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
         } else if (vm.count("process.rotateVector.all")) {
             processor->rotateAllVectorsToLatLon(toLatLon);
@@ -459,33 +497,29 @@ static CDMReader_p getCDMProcessor(po::variables_map& vm, CDMReader_p dataReader
     return processor;
 }
 
-static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader) {
+CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
+{
     if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.pickDimension.name") || vm.count("extract.removeVariable") ||
            vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
            vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit") ||
            vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
-           vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east"))) {
+           vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east")))
+    {
         LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
         return dataReader;
     }
     boost::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
     if (vm.count("extract.reduceDimension.name")) {
         vector<string> vars = vm["extract.reduceDimension.name"].as<vector<string> >();
-        vector<int> startPos;
-        vector<int> endPos;
-        if (vm.count("extract.reduceDimension.start")) {
-            startPos = vm["extract.reduceDimension.start"].as<vector<int> >();
-        }
+        vector<int> startPos = getOption< vector<int> >("extract.reduceDimension.start", vm);
+        vector<int> endPos = getOption< vector<int> >("extract.reduceDimension.end", vm);
         if (startPos.size() != vars.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.start has different number of elements than extract.reduceDimension.name; "
-                    "use start = 0 if you don't want to reduce the start-position");
-        }
-        if (vm.count("extract.reduceDimension.end")) {
-            endPos = vm["extract.reduceDimension.end"].as<vector<int> >();
+                                             "use start = 0 if you don't want to reduce the start-position");
         }
         if (endPos.size() != vars.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.end has different number of elements than extract.reduceDimension.name; "
-                    "use end = 0 (with start != 0) if you don't want to reduce the end-position");
+                                             "use end = 0 (with start != 0) if you don't want to reduce the end-position");
         }
         for (size_t i = 0; i < vars.size(); ++i) {
             if (startPos.at(i) == 0 && endPos.at(i) == 0) {
@@ -498,10 +532,7 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
     }
     if (vm.count("extract.pickDimension.name")) {
         vector<string> dims = vm["extract.pickDimension.name"].as<vector<string> >();
-        vector<string> lists;
-        if (vm.count("extract.pickDimension.list")) {
-            lists = vm["extract.pickDimension.list"].as<vector<string> >();
-        }
+        vector<string> lists = getOption< vector<string> >("extract.pickDimension.list", vm);
         if (dims.size() != lists.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.pickDimension.name has different number of elements than extract.pickDimension.list");
         }
@@ -556,83 +587,79 @@ static CDMReader_p getCDMExtractor(po::variables_map& vm, CDMReader_p dataReader
     }
     if (vm.count("extract.selectVariables")) {
         vector<string> vars = vm["extract.selectVariables"].as<vector<string> >();
-        if (vm.count("extract.selectVariables.noAuxiliary")) {
-            extractor->selectVariables(set<string>(vars.begin(), vars.end()), false);
-        } else {
-            extractor->selectVariables(set<string>(vars.begin(), vars.end()), true);
-        }
+        bool addAuxiliaryVariables = !vm.count("extract.selectVariables.noAuxiliary");
+        extractor->selectVariables(set<string>(vars.begin(), vars.end()), addAuxiliaryVariables);
     }
-    if (vm.count("extract.removeVariable")) {
-        vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
-        for (vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-            extractor->removeVariable(*it);
-        }
+
+    vector<string> vars = getOption< vector<string> >("extract.removeVariable", vm);
+    for (vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+      extractor->removeVariable(*it);
     }
     printReaderStatements("extract", vm, extractor);
 
-    return CDMReader_p(extractor);
+    return extractor;
 }
 
-static CDMReader_p getCDMQualityExtractor(string version, po::variables_map& vm, CDMReader_p dataReader) {
-    string autoConf, config;
-    if (vm.count("qualityExtract"+version+".autoConfigString")) autoConf = vm["qualityExtract"+version+".autoConfigString"].as<string>();
-    if (vm.count("qualityExtract"+version+".config")) config = vm["qualityExtract"+version+".config"].as<string>();
+CDMReader_p getCDMQualityExtractor(const string& version, const po::variables_map& vm, CDMReader_p dataReader)
+{
+    const string io = "qualityExtract"+version, autoConfKey = io +".autoConfigString";
+    string autoConf;
+    if (vm.count(autoConfKey))
+      autoConf = vm[autoConfKey].as<string>();
+    const string config = getConfig(io, vm);
     if (autoConf != "" || config != "") {
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
         dataReader = boost::make_shared<CDMQualityExtractor>(dataReader, autoConf, config);
     }
-    printReaderStatements("qualityExtract"+version, vm, dataReader);
+    printReaderStatements(io, vm, dataReader);
     return dataReader;
 }
 
-
-static CDMReader_p getCDMTimeInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
-    if (! vm.count("timeInterpolate.timeSpec")) {
+CDMReader_p getCDMTimeInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+{
+    string timeSpec;
+    if (!getOption("timeInterpolate.timeSpec", vm, timeSpec)) {
         return dataReader;
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << vm["timeInterpolate.timeSpec"].as<string>());
+    LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << timeSpec);
     boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(dataReader));
-    timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
+    timeInterpolator->changeTimeAxis(timeSpec);
     printReaderStatements("timeInterpolate", vm, timeInterpolator);
 
-    return CDMReader_p(timeInterpolator);
+    return timeInterpolator;
 }
 
-static CDMReader_p getCDMVerticalInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
-    if (vm.count("verticalInterpolate.dataConversion")) {
-        vector<string> operations = vm["verticalInterpolate.dataConversion"].as<vector<string> >();
-        boost::shared_ptr<CDMPressureConversions> pressConv;
+CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+{
+    vector<string> operations;
+    if (getOption("verticalInterpolate.dataConversion", vm, operations)) {
         try {
-            pressConv = boost::shared_ptr<CDMPressureConversions>(new CDMPressureConversions(dataReader, operations));
-            dataReader = pressConv;
+            dataReader = boost::make_shared<CDMPressureConversions>(dataReader, operations);
         } catch (CDMException& ex) {
             LOG4FIMEX(logger, Logger::FATAL, "invalid verticalInterpolate.dataConversion: " + join(operations.begin(), operations.end(), ",") + " " + ex.what());
             exit(1);
         }
     }
-    if (! vm.count("verticalInterpolate.type")) {
+    string vtype;
+    if (!getOption("verticalInterpolate.type", vm, vtype)) {
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
-    if (! (vm.count("verticalInterpolate.method") && vm.count("verticalInterpolate.level1"))) {
+    string vmethod, level1_text;
+    if (!(getOption("verticalInterpolate.method", vm, vmethod) && getOption("verticalInterpolate.level1", vm, level1_text))) {
         LOG4FIMEX(logger, Logger::FATAL, "verticalInterpolate needs method and level1");
         exit(1);
     }
-    vector<double> level1 = tokenizeDotted<double>(vm["verticalInterpolate.level1"].as<string>(),",");
+    vector<double> level1 = tokenizeDotted<double>(level1_text,",");
     vector<double> level2;
     if (vm.count("verticalInterpolate.level2"))
         level2 = tokenizeDotted<double>(vm["verticalInterpolate.level2"].as<string>(),",");
-    boost::shared_ptr<CDMVerticalInterpolator> vInterpolator(new CDMVerticalInterpolator(dataReader,
-                                                                                         vm["verticalInterpolate.type"].as<string>(),
-                                                                                         vm["verticalInterpolate.method"].as<string>(),
-                                                                                         level1,
-                                                                                         level2));
-    printReaderStatements("verticalInterpolate", vm, vInterpolator);
-
-    return vInterpolator;
+    dataReader = boost::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod, level1, level2);
+    printReaderStatements("verticalInterpolate", vm, dataReader);
+    return dataReader;
 }
 
-static boost::shared_ptr<InterpolatorProcess2d> parseProcess(std::string procString, std::string logProcess)
+boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
 {
     boost::smatch what;
      if (boost::regex_match(procString, what, boost::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
@@ -640,53 +667,55 @@ static boost::shared_ptr<InterpolatorProcess2d> parseProcess(std::string procStr
          double cor = string2type<double>(what[2]);
          size_t maxLoop = string2type<size_t>(what[3]);
          LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
-         return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorFill2d(critx,cor,maxLoop));
+         return boost::make_shared<InterpolatorFill2d>(critx,cor,maxLoop);
      } else if (boost::regex_match(procString, what, boost::regex("\\s*creepfill2d\\((.+)\\).*"))) {
          vector<string> vals = tokenize(what[1], ",");
          if (vals.size() == 2) {
              unsigned short repeat = string2type<unsigned short>(vals.at(0));
              char setWeight = string2type<char>(vals.at(1));
              LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfill2d("<<repeat<<","<<setWeight<<")");
-             return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFill2d(repeat, setWeight));
+             return boost::make_shared<InterpolatorCreepFill2d>(repeat, setWeight);
          } else if (vals.size() == 3) {
              unsigned short repeat = string2type<unsigned short>(vals.at(0));
              char setWeight = string2type<char>(vals.at(1));
              float defVal = string2type<float>(vals.at(2));
              LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfillval2d("<<repeat<<","<<setWeight<<","<<defVal<<")");
-             return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFillVal2d(repeat, setWeight,defVal));
+             return boost::make_shared<InterpolatorCreepFillVal2d>(repeat, setWeight,defVal);
          } else {
              throw CDMException("creepfill requires two or three arguments, got " + what[1]);
          }
      }
      throw CDMException("undefined interpolate."+logProcess+": " + procString);
 }
-static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataReader) {
 
+CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+{
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(dataReader));
-    if (vm.count("interpolate.latitudeName")) {
-        interpolator->setLatitudeName(vm["interpolate.latitudeName"].as<string>());
+    string value;
+    if (getOption("interpolate.latitudeName", vm, value)) {
+        interpolator->setLatitudeName(value);
     }
-    if (vm.count("interpolate.longitudeName")) {
-        interpolator->setLongitudeName(vm["interpolate.longitudeName"].as<string>());
+    if (getOption("interpolate.longitudeName", vm, value)) {
+        interpolator->setLongitudeName(value);
     }
 
-    if (vm.count("interpolate.preprocess")) {
-        interpolator->addPreprocess(parseProcess(vm["interpolate.preprocess"].as<string>(), "preprocess"));
+    if (getOption("interpolate.preprocess", vm, value)) {
+        interpolator->addPreprocess(parseProcess(value, "preprocess"));
     }
-    if (vm.count("interpolate.postprocess")) {
-        interpolator->addPostprocess(parseProcess(vm["interpolate.postprocess"].as<string>(), "postprocess"));
+    if (getOption("interpolate.postprocess", vm, value)) {
+        interpolator->addPostprocess(parseProcess(value, "postprocess"));
     }
 
     int method = getInterpolationMethod(vm, "interpolate.method");
 
-    if (vm.count("interpolate.projString")) {
-
-        if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
-                LOG4FIMEX(logger, Logger::FATAL, "xAxisUnit and yAxisUnit required");
-                exit(1);
+    string proj4;
+    if (getOption("interpolate.projString", vm, proj4)) {
+        string xAxisUnit, yAxisUnit, xAxisValues, yAxisValues;
+        if (!(getOption("interpolate.xAxisUnit", vm, xAxisUnit) && getOption("interpolate.yAxisUnit", vm, yAxisUnit))) {
+            LOG4FIMEX(logger, Logger::FATAL, "xAxisUnit and yAxisUnit required");
+            exit(1);
         }
-
-        if (!(vm.count("interpolate.xAxisValues") && vm.count("interpolate.yAxisValues"))) {
+        if (!(getOption("interpolate.xAxisValues", vm, xAxisValues) && getOption("interpolate.yAxisValues", vm, yAxisValues))) {
             LOG4FIMEX(logger, Logger::FATAL, "xAxisValues and yAxisValues required");
             exit(1);
         }
@@ -694,10 +723,8 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
             interpolator->setDistanceOfInterest(vm["interpolate.distanceOfInterest"].as<double>());
         }
 
-        interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(),
-                                               vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(),
-                                               vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>(),
-                                               vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
+        interpolator->changeProjection(method, proj4, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit,
+                                       vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
     } else if (vm.count("interpolate.template")) {
         interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
     } else if (vm.count("interpolate.vcrossNames")) {
@@ -755,24 +782,22 @@ static CDMReader_p getCDMInterpolator(po::variables_map& vm, CDMReader_p dataRea
         return dataReader;
     }
 
-
     printReaderStatements("interpolate", vm, interpolator);
-
-    return CDMReader_p(interpolator);
+    return interpolator;
 }
 
-static CDMReader_p getNcmlCDMReader(po::variables_map& vm, CDMReader_p dataReader) {
-    if (! vm.count("ncml.config")) {
-        return dataReader;
+CDMReader_p getNcmlCDMReader(const po::variables_map& vm, CDMReader_p dataReader)
+{
+    const string config = getConfig("ncml", vm);
+    if (!config.empty()) {
+      dataReader = boost::make_shared<NcmlCDMReader>(dataReader, XMLInputFile(config));
+      printReaderStatements("ncml", vm, dataReader);
     }
-    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(dataReader,XMLInputFile(vm["ncml.config"].as<string>())));
-    printReaderStatements("ncml", vm, ncmlReader);
-
-    return CDMReader_p(ncmlReader);
+    return dataReader;
 }
 
-static CDMReader_p getCDMMerger(po::variables_map& vm, CDMReader_p dataReader) {
-
+CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
+{
     if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
                     or vm.count("merge.smoothing") or vm.count("merge.method")))
         return dataReader;
@@ -841,7 +866,8 @@ static CDMReader_p getCDMMerger(po::variables_map& vm, CDMReader_p dataReader) {
     return merger;
 }
 
-CDMReader_p applyFimexStreamTasks(po::variables_map& vm, CDMReader_p dataReader) {
+CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader)
+{
     dataReader = getCDMProcessor(vm, dataReader);
     dataReader = getCDMQualityExtractor("", vm, dataReader);
     dataReader = getCDMExtractor(vm, dataReader);
@@ -854,76 +880,75 @@ CDMReader_p applyFimexStreamTasks(po::variables_map& vm, CDMReader_p dataReader)
     return dataReader;
 }
 
-static void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm) {
-    if (!(vm.count("output.fillFile"))) {
+void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm)
+{
+    string fillFile;
+    if (!getOption("output.fillFile", vm, fillFile)) {
         return;
     }
     string type = getType("output", vm);
 #ifdef HAVE_NETCDF_H
-    if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-        LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << vm["output.fillFile"].as<string>() << " without config");
-        boost::shared_ptr<CDMReaderWriter> readerWriter = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(vm["output.fillFile"].as<string>(), true));
-        std::string config;
-        if (vm.count("output.config")) {
-            config = vm["output.config"].as<string>();
+    if (isNetCDFType(type)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << fillFile << " without NetCDF config");
+        CDMReader_p writer = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW, fillFile);
+        if (boost::shared_ptr<CDMReaderWriter> readerWriter = boost::dynamic_pointer_cast<CDMReaderWriter>(writer)) {
+          const string config = getConfig("output", vm);
+          FillWriter(dataReader, readerWriter, config);
+          return;
+        } else {
+          LOG4FIMEX(logger, Logger::FATAL, "cannot create writer for '" << fillFile << "'");
+          exit(1);
         }
-        FillWriter(dataReader, readerWriter, config);
-        return;
     }
 #endif
     LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
 }
 
-
-static void writeCDM(CDMReader_p dataReader, po::variables_map& vm) {
+void writeCDM(CDMReader_p dataReader, const po::variables_map& vm)
+{
     printReaderStatements("output", vm, dataReader);
     if (!vm.count("output.file")) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
     }
-    string type = getType("output", vm);
-    // boost::shared_ptr to shared_ptr
-    CDMReader_p sharedDataReader(dataReader);
+    const string fileName = getFile("output", vm);
+    const string type = getType("output", vm);
+    const string config = getConfig("output", vm);
 #ifdef HAVE_NETCDF_H
-    if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-        int version = 3;
-        if (type == "nc4") version = 4;
-        if (vm.count("output.config")) {
-            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
-            NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>(), version);
+    if (isNetCDFType(type)) {
+        const int version = isNetCDF4Type(type) ? 4 : 3;
+        if (!config.empty()) {
+            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << fileName << " with config " << config);
         } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " without config");
-            NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), "", version);
+            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << fileName << " without config");
         }
+        NetCDF_CDMWriter(dataReader, fileName, config, version);
         return;
     }
 #endif
 #ifdef HAVE_GRIB_API_H
-    if (type == "grb" || type == "grib" ||
-            type == "grb1" || type == "grib1" ||
-            type == "grb2" || type == "grib2") {
-        int gribVersion = 1;
-        if (type == "grb2" || type == "grib2") {
-            gribVersion = 2;
-        }
-        LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
-        if (!vm.count("output.config")) throw CDMException("Cannot write grib-file without config");
-        GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), gribVersion, vm["output.config"].as<string>());
+    if (isGribType(type)) {
+        const int gribVersion = isGrib2Type(type) ? 2 : 1;
+        LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << fileName << " with config " << config);
+        if (config.empty())
+          throw CDMException("Cannot write grib-file without config");
+        GribApiCDMWriter(dataReader, fileName, gribVersion, config);
         return;
     }
 #endif
 #ifdef HAVE_METGM_H
     if (type == "metgm") {
-        LOG4FIMEX(logger, Logger::DEBUG, "writing metgm-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
-        if (!vm.count("output.config")) throw CDMException("Cannot write metgm-file without config");
-        MetGmCDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>());
+        LOG4FIMEX(logger, Logger::DEBUG, "writing metgm-file " << fileName << " with config " << config);
+        if (config.empty())
+          throw CDMException("Cannot write metgm-file without config");
+        MetGmCDMWriter(dataReader, fileName, config);
         return;
     }
 #endif
 
     if (type == "null") {
         LOG4FIMEX(logger, Logger::DEBUG, "emulating writing without file without config");
-        Null_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
+        Null_CDMWriter(dataReader, fileName);
         return;
     }
     LOG4FIMEX(logger, Logger::FATAL, "unable to write type: '" << type << "'");
@@ -1192,8 +1217,6 @@ int run(int argc, char* args[])
 
     return 0;
 }
-
-namespace {
 
 #ifdef HAVE_MPI
 struct MPI_Init_Finalize {
