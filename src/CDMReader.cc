@@ -47,11 +47,11 @@ CDM& CDMReader::getInternalCDM()
     return const_cast<CDM&>(getCDM());
 }
 
-std::vector<std::size_t> CDMReader::getDims(std::string varName)
+std::vector<std::size_t> CDMReader::getDims(const std::string& varName)
 {
     std::vector<std::size_t> dims;
     const CDMVariable& variable = getCDM().getVariable(varName);
-    std::vector<std::string> shape = variable.getShape();
+    const std::vector<std::string>& shape = variable.getShape();
     for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
         const CDMDimension& dim = getCDM().getDimension(*dimIt);
         dims.push_back(dim.getLength());
@@ -59,11 +59,11 @@ std::vector<std::size_t> CDMReader::getDims(std::string varName)
     return dims;
 }
 
-std::vector<std::size_t> CDMReader::getDimsSlice(std::string varName)
+std::vector<std::size_t> CDMReader::getDimsSlice(const std::string& varName)
 {
     std::vector<std::size_t> dims;
     const CDMVariable& variable = getCDM().getVariable(varName);
-    std::vector<std::string> shape = variable.getShape();
+    const std::vector<std::string>& shape = variable.getShape();
     for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
         const CDMDimension& dim = getCDM().getDimension(*dimIt);
         if (!dim.isUnlimited()) {
@@ -72,7 +72,6 @@ std::vector<std::size_t> CDMReader::getDimsSlice(std::string varName)
     }
     return dims;
 }
-
 
 DataPtr CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
@@ -202,8 +201,6 @@ DataPtr CDMReader::scaleDataToUnitOf(const std::string& varName, DataPtr data, c
     }
     return scaleDataOf(varName, data, uc);
 }
-
-
 
 DataPtr CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos)
 {

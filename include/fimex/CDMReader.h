@@ -83,7 +83,7 @@ public:
      * @param varName the variables name
      * @return a vector with the dimension sizes usable with MetNoFimex::Index
      */
-    virtual std::vector<std::size_t> getDims(std::string varName);
+    virtual std::vector<std::size_t> getDims(const std::string& varName);
     /**
      * @brief Read the sizes of the dimensions belonging to a variable slice.
      *
@@ -102,7 +102,7 @@ public:
      * @param varName the variables name
      * @return a vector with the dimension sizes usable with MetNoFimex::Index
      */
-    virtual std::vector<std::size_t> getDimsSlice(std::string varName);
+    virtual std::vector<std::size_t> getDimsSlice(const std::string& varName);
     /**
      * @brief data-reading function to be called from the CDMWriter
      *
