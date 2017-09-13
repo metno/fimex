@@ -46,6 +46,8 @@ protected:
     const std::string outputFile;
 };
 
+typedef boost::shared_ptr<CDMWriter> CDMWriter_p;
+
 } // namespace
 
 #endif /*CDMWRITER_H_*/
