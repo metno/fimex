@@ -113,7 +113,14 @@ public:
 
 };
 
-}
+bool isFeltType(const std::string& type);
+bool isGrib2Type(const std::string& type);
+bool isGribType(const std::string& type);
+bool isNetCDF4Type(const std::string& type);
+bool isNetCDFType(const std::string& type);
 
+void createWriter(CDMReader_p input, const std::string& fileType, const std::string& fileName,
+                  const std::string& configFile);
+}
 
 #endif /* CDMFILEREADERFACTORY_H_ */

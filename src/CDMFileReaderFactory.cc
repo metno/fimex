@@ -33,23 +33,29 @@
 #include "fimex_config.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMWriter.h"
 #include "fimex/Utils.h"
+
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/Null_CDMWriter.h"
 #ifdef HAVE_FELT
 #include "FeltCDMReader2.h"
 #endif
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
+#include "fimex/NetCDF_CDMWriter.h"
 #endif
 #ifdef HAVE_GRIB_API_H
 #include "fimex/GribCDMReader.h"
+#include "fimex/GribApiCDMWriter.h"
 #endif
 #ifdef HAVE_LIBPQ_FE_H
 #include "fimex/WdbCDMReader.h"
 #endif
 #ifdef HAVE_METGM_H
 #include "fimex/MetGmCDMReader.h"
+#include "fimex/MetGmCDMWriter.h"
 #endif
 #ifdef HAVE_PRORADXML
 #include "ProradXMLCDMReader.h"
@@ -79,6 +85,33 @@ static bool detectNetCDF(const char* magic) {
 
 static bool detectXML(const char* magic) {
     return boost::regex_match(magic, boost::regex("\\s*<\\?xml\\s.*"));
+}
+
+bool isFeltType(const std::string& type)
+{
+  return (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2");
+}
+
+bool isGrib2Type(const std::string& type)
+{
+  return (type == "grb2" || type == "grib2");
+}
+
+bool isGribType(const std::string& type)
+{
+  return (type == "grb" || type == "grib" ||
+        type == "grb1" || type == "grib1" ||
+        isGrib2Type(type));
+}
+
+bool isNetCDF4Type(const std::string& type)
+{
+  return (type == "nc4");
+}
+
+bool isNetCDFType(const std::string& type)
+{
+  return (type == "nc" || type == "cdf" || type == "netcdf" || isNetCDF4Type(type));
 }
 
 mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
@@ -117,15 +150,13 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
 
     // detection by appendix
     if (type != "") {
-        if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2")
+        if (isFeltType(type))
             return MIFI_FILETYPE_FELT;
-        if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4")
+        if (isNetCDFType(type))
             return MIFI_FILETYPE_NETCDF;
         if (type == "ncml")
             return MIFI_FILETYPE_NCML;
-        if (type == "grb" || type == "grib" ||
-                type == "grb1" || type == "grib1" ||
-                    type == "grb2" || type == "grib2")
+        if (isGribType(type))
             return MIFI_FILETYPE_GRIB;
         if (type == "metgm")
             return MIFI_FILETYPE_METGM;
@@ -168,7 +199,7 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
 }
 
 CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
-                                                          const std::vector<std::string> & args)
+                                         const std::vector<std::string> & args)
 {
     switch (fileType) {
 #ifdef HAVE_FELT
@@ -272,5 +303,36 @@ CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const 
     return create(fileType, fileName, configXML, args);
 }
 
+void createWriter(CDMReader_p input, const std::string& fileType, const std::string& fileName,
+                  const std::string& configFile)
+{
+#ifdef HAVE_NETCDF_H
+  if (isNetCDFType(fileType)) {
+    const int version = isNetCDF4Type(fileType) ? 4 : 3;
+    NetCDF_CDMWriter(input, fileName, configFile, version);
+    return;
+  }
+#endif
+#ifdef HAVE_GRIB_API_H
+  if (isGribType(fileType)) {
+    const int gribVersion = isGrib2Type(fileType) ? 2 : 1;
+    GribApiCDMWriter(input, fileName, gribVersion, configFile);
+    return;
+  }
+#endif
+#ifdef HAVE_METGM_H
+  if (fileType == "metgm") {
+    MetGmCDMWriter(input, fileName, configFile);
+    return;
+  }
+#endif
+
+  if (fileType == "null") {
+    Null_CDMWriter(input, fileName);
+    return;
+  }
+
+  throw CDMException("unable to write type: '" + fileType + "'");
+}
 
 }

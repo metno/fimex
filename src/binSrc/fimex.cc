@@ -56,16 +56,6 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/NcmlCDMReader.h"
-/* currently no factory for writer */
-#ifdef HAVE_NETCDF_H
-#include "fimex/NetCDF_CDMWriter.h"
-#endif
-#ifdef HAVE_GRIB_API_H
-#include "fimex/GribApiCDMWriter.h"
-#endif
-#ifdef HAVE_METGM_H
-#include "fimex/MetGmCDMWriter.h"
-#endif
 #ifdef HAVE_LOG4CPP
 #include "log4cpp/PropertyConfigurator.hh"
 #endif
@@ -325,33 +315,6 @@ std::string getString(const string& key, const po::variables_map& vm)
 std::string getConfig(const string& io, const po::variables_map& vm)
 {
   return getString(io+".config", vm);
-}
-
-bool isFeltType(const string& type)
-{
-  return (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2");
-}
-
-bool isGrib2Type(const string& type)
-{
-  return (type == "grb2" || type == "grib2");
-}
-
-bool isGribType(const string& type)
-{
-  return (type == "grb" || type == "grib" ||
-        type == "grb1" || type == "grib1" ||
-        isGrib2Type(type));
-}
-
-bool isNetCDF4Type(const string& type)
-{
-  return (type == "nc4");
-}
-
-bool isNetCDFType(const string& type)
-{
-  return (type == "nc" || type == "cdf" || type == "netcdf" || isNetCDF4Type(type));
 }
 
 void printReaderStatements(const string& readerName, const po::variables_map& vm, CDMReader_p reader)
@@ -907,52 +870,22 @@ void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm)
 void writeCDM(CDMReader_p dataReader, const po::variables_map& vm)
 {
     printReaderStatements("output", vm, dataReader);
-    if (!vm.count("output.file")) {
+    string fileName;
+    if (!getOption("output.file", vm, fileName)) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
     }
-    const string fileName = getFile("output", vm);
     const string type = getType("output", vm);
     const string config = getConfig("output", vm);
-#ifdef HAVE_NETCDF_H
-    if (isNetCDFType(type)) {
-        const int version = isNetCDF4Type(type) ? 4 : 3;
-        if (!config.empty()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << fileName << " with config " << config);
-        } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << fileName << " without config");
-        }
-        NetCDF_CDMWriter(dataReader, fileName, config, version);
-        return;
+    try {
+      createWriter(dataReader, type, fileName, config);
+    } catch (CDMException& ex) {
+      LOG4FIMEX(logger, Logger::FATAL, "CDMException while writing: " << ex.what());
+      exit(1);
+    } catch (exception& ex) {
+      LOG4FIMEX(logger, Logger::FATAL, "exception while writing: " << ex.what());
+      exit(1);
     }
-#endif
-#ifdef HAVE_GRIB_API_H
-    if (isGribType(type)) {
-        const int gribVersion = isGrib2Type(type) ? 2 : 1;
-        LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << fileName << " with config " << config);
-        if (config.empty())
-          throw CDMException("Cannot write grib-file without config");
-        GribApiCDMWriter(dataReader, fileName, gribVersion, config);
-        return;
-    }
-#endif
-#ifdef HAVE_METGM_H
-    if (type == "metgm") {
-        LOG4FIMEX(logger, Logger::DEBUG, "writing metgm-file " << fileName << " with config " << config);
-        if (config.empty())
-          throw CDMException("Cannot write metgm-file without config");
-        MetGmCDMWriter(dataReader, fileName, config);
-        return;
-    }
-#endif
-
-    if (type == "null") {
-        LOG4FIMEX(logger, Logger::DEBUG, "emulating writing without file without config");
-        Null_CDMWriter(dataReader, fileName);
-        return;
-    }
-    LOG4FIMEX(logger, Logger::FATAL, "unable to write type: '" << type << "'");
-    exit(1);
 }
 
 
