@@ -111,6 +111,11 @@ public:
      */
     static void parseGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files);
 
+    static CDMReaderWriter_p createReaderWriter(int fileType, const std::string & fileName, const XMLInput& configXML,
+                                                const std::vector<std::string> & args = std::vector<std::string>());
+
+    static CDMReaderWriter_p createReaderWriter(int fileType, const std::string & fileName, const std::string& configFile = std::string(),
+                                                const std::vector<std::string> & args = std::vector<std::string>());
 };
 
 bool isFeltType(const std::string& type);

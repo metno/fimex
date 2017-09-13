@@ -198,9 +198,36 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
     }
 }
 
+CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(int fileType, const std::string & fileName, const XMLInput& configXML,
+                                                           const std::vector<std::string> & args)
+{
+    switch (fileType) {
+  #ifdef HAVE_NETCDF_H
+    case (MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW): {
+        if (!configXML.isEmpty()) {
+            throw CDMException("Cannot open writeable NetCDF file with Ncml config: " + configXML.id());
+        }
+        return boost::make_shared<NetCDF_CDMReader>(fileName, true);
+    }
+  #endif
+    default:
+      throw CDMException("File type: " + type2string(fileType) + " not supported for read-write of file: '" + fileName + "'");
+    }
+}
+
+CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(int fileType, const std::string & fileName, const std::string& configFile,
+                                                           const std::vector<std::string> & args)
+{
+    XMLInputFile configXML(configFile);
+    return createReaderWriter(fileType, fileName, configXML, args);
+}
+
 CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
                                          const std::vector<std::string> & args)
 {
+    if ((fileType &MIFI_FILETYPE_RW) != 0)
+        return createReaderWriter(fileType, fileName, configXML, args);
+
     switch (fileType) {
 #ifdef HAVE_FELT
     case MIFI_FILETYPE_FELT:
@@ -262,12 +289,6 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
             reader = boost::make_shared<NcmlCDMReader>(reader, configXML);
         }
         return reader;
-    }
-    case (MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW): {
-        if (!configXML.isEmpty()) {
-            throw CDMException("Cannot open writeable NetCDF file with Ncml config: " + configXML.id());
-        }
-        return boost::make_shared<NetCDF_CDMReader>(fileName, true);
     }
 #endif
 #ifdef HAVE_METGM_H

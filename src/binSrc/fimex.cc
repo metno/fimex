@@ -853,15 +853,10 @@ void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm)
 #ifdef HAVE_NETCDF_H
     if (isNetCDFType(type)) {
         LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << fillFile << " without NetCDF config");
-        CDMReader_p writer = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW, fillFile);
-        if (boost::shared_ptr<CDMReaderWriter> readerWriter = boost::dynamic_pointer_cast<CDMReaderWriter>(writer)) {
-          const string config = getConfig("output", vm);
-          FillWriter(dataReader, readerWriter, config);
-          return;
-        } else {
-          LOG4FIMEX(logger, Logger::FATAL, "cannot create writer for '" << fillFile << "'");
-          exit(1);
-        }
+        CDMReaderWriter_p rw = CDMFileReaderFactory::createReaderWriter(MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW, fillFile);
+        const string config = getConfig("output", vm);
+        FillWriter(dataReader, rw, config);
+        return;
     }
 #endif
     LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
