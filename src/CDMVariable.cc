@@ -38,12 +38,10 @@ CDMVariable::~CDMVariable()
 {
 }
 
-bool CDMVariable::checkDimension(const std::string& dimension) const {
-	const std::vector<std::string>& shape = getShape();
-	if (std::find(shape.begin(), shape.end(), dimension) != shape.end()) {
-		return true;
-	}
-	return false;
+bool CDMVariable::checkDimension(const std::string& dimension) const
+{
+    const std::vector<std::string>& shape = getShape();
+    return (std::find(shape.begin(), shape.end(), dimension) != shape.end());
 }
 
 void CDMVariable::setAsSpatialVector(const std::string& counterpart, const std::string& direction) {
