@@ -412,7 +412,6 @@ void NcmlCDMReader::initDimensionUnlimited()
             if (isUnlimited == "true") {
                 if (!dim.isUnlimited()) {
                     cdm_->getDimension(name).setUnlimited(1);
-                    unlimitedDimensionChanges[name] = orgName;
                     // prefetch the data of that variable
                     if (cdm_->hasVariable(name)) {
                         CDMVariable& var = cdm_->getVariable(name);
@@ -422,7 +421,6 @@ void NcmlCDMReader::initDimensionUnlimited()
                     }
                 }
             } else if (isUnlimited == "false") {
-                unlimitedDimensionChanges[name] = orgName;
                 cdm_->getDimension(name).setUnlimited(0);
             } else {
                 string warning = "NcML: unlimited of dimension of " + name + " must be 'true' or 'false' but is: " + isUnlimited;
@@ -478,60 +476,12 @@ void NcmlCDMReader::initAttributeNameChange()
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    ScopedCritical sc(*mutex_);
-    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,unlimDimPos): (" << varName << ", " << unLimDimPos << ")");
-    // return unchanged data from this CDM
-    const CDMVariable& variable = cdm_->getVariable(varName);
-    if (variable.hasData()) {
-        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
-        return getDataSliceFromMemory(variable, unLimDimPos);
+    SliceBuilder sb(*cdm_, varName);
+    if (const CDMDimension* unlimDim = cdm_->getUnlimitedDim()) {
+        if (cdm_->getVariable(varName).checkDimension(unlimDim->getName()))
+            sb.setStartAndSize(unlimDim->getName(), unLimDimPos, 1);
     }
-    if (dataReader.get() == 0) {
-        return createData(CDM_NAT, 0);
-    }
-
-    // find the original name, to fetch the data from the dataReader
-    map<string, string>::iterator vit = variableNameChanges.find(varName);
-    const std::string& orgVarName = (vit != variableNameChanges.end()) ? vit->second : varName;
-
-    DataPtr data;
-    const CDM& orgCDM = dataReader->getCDM();
-    const CDMDimension* orgUnlimDim = orgCDM.getUnlimitedDim();
-    const CDMDimension* unlimDim = cdm_->getUnlimitedDim();
-    string unlimDimNm = (unlimDim != 0) ? unlimDim->getName() : "";
-    const vector<string>& shape = cdm_->getVariable(varName).getShape();
-    if (!unlimitedDimensionChanges.empty()
-            && find(shape.begin(), shape.end(), unlimitedDimensionChanges.begin()->first) != shape.end())
-    {
-        // not working for several unlimited dimensions yet
-        const std::string& orgUnlimDim = unlimitedDimensionChanges[unlimDimNm];
-        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim '" << orgUnlimDim << "'");
-        SliceBuilder sb(dataReader->getCDM(), orgVarName);
-        vector<string> dimNames = sb.getDimensionNames();
-        if (find(dimNames.begin(), dimNames.end(), orgUnlimDim) != dimNames.end()) {
-            sb.setStartAndSize(orgUnlimDim, unLimDimPos, 1);
-        }
-        //
-        const vector<size_t>& sizes = sb.getDimensionSizes();
-        if (find(sizes.begin(), sizes.end(), 0) == sizes.end()) {
-            data = dataReader->getDataSlice(orgVarName, sb);
-        } else {
-            // one dimension has size 0 -> 0 length data
-            data = createData(dataReader->getCDM().getVariable(varName).getDataType(), 0); // no data type conversion necessary
-        }
-    } else {
-        // check if extended unlimited dimension slice
-        if ((orgUnlimDim != 0) &&
-                (orgCDM.getVariable(orgVarName).checkDimension(orgUnlimDim->getName())) &&
-                (orgUnlimDim->getLength() <= unLimDimPos)) {
-            LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
-            return createData(cdm_->getVariable(varName).getDataType(), 0); // no data type conversion necessary
-        } else {
-            // get data as usual
-            data = dataReader->getDataSlice(orgVarName, unLimDimPos);
-        }
-    }
-    return applyVariableTypeChange(data, varName, orgVarName);
+    return getDataSlice(varName, sb);
 }
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -567,6 +517,8 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
             if (find(shape.begin(), shape.end(), newDim) != shape.end()) {
                 size_t strt, sz;
                 sb.getStartAndSize(newDim, strt, sz);
+                if (strt + sz > dataReader->getCDM().getDimension(orgDim).getLength())
+                    return createData(variable.getDataType(), 0);
                 orgSb.setStartAndSize(orgDim, strt, sz);
             }
         }
