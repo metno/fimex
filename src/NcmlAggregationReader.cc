@@ -30,8 +30,6 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/CDMFileReaderFactory.h"
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include <libxml/tree.h>
@@ -49,13 +47,12 @@ namespace {
 LoggerPtr logger = getLogger("fimex.NcmlAggregationReader");
 }
 
-void getFileTypeConfig(const string& location, string& file, string& type, string& config)
+static void getFileTypeConfig(const string& location, string& file, string& type, string& config)
 {
     vector<string> locations = tokenize(location, " ");
     file = (locations.size() > 0) ? locations.at(0) : "";
-    type = (locations.size() > 1) ? locations.at(1) : "";
+    type = (locations.size() > 1) ? locations.at(1) : "netcdf";
     config = (locations.size() > 2) ? locations.at(2) : "";
-    return;
 }
 
 NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
@@ -86,19 +83,15 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL->nodeTab[0], "location"), file, type, config);
 #ifdef HAVE_NETCDF_H
-            if (type == "" || type == "netcdf" || type == "nc" || type == "nc4") {
+            if (type == "netcdf" || type == "nc" || type == "nc4") {
                 // remove file: URL-prefix
                 file = boost::regex_replace(file, boost::regex("^file:"), "", boost::format_first_only);
                 // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
                 file = boost::regex_replace(file, boost::regex("^dods:"), "http:", boost::format_first_only);
-                LOG4FIMEX(logger, Logger::DEBUG, "reading netcdf-file:  ");
-                gDataReader_ = boost::make_shared<NetCDF_CDMReader>(file);
-            } else
-#endif // HAVE_NETCDF_H
-            {
-                LOG4FIMEX(logger, Logger::DEBUG, "reading file:  "<< file << ", " << type << ", " << config);
-                gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             }
+#endif // HAVE_NETCDF_H
+            LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
+            gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             *(this->cdm_) = gDataReader_->getCDM();
         }
     } else {
@@ -124,7 +117,6 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         for (int i = 0; i < sizeScan; i++) {
             string dir, type, config;
             getFileTypeConfig(getXmlProp(nodesScan->nodeTab[i], "location"), dir, type, config);
-            if (type == "") type = "netcdf";
             string suffix = getXmlProp(nodesScan->nodeTab[i], "suffix");
             string regExp;
             if (suffix != "") {

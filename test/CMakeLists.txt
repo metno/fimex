@@ -41,6 +41,7 @@ IF(ENABLE_FELT)
     testFeltReadNetCDFWrite.sh
     testNetCDFReadWrite.sh
     testNcmlRead.sh
+    test_ncmlagg_with_config.sh
     )
 ENDIF(ENABLE_FELT)
 

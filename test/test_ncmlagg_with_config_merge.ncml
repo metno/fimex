@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- same as above, but with scan -->
+<aggregation type="joinExisting">
+ <netcdf location="test_ncmlagg_with_config_ens01.nc netcdf test_ncmlagg_with_config_notime.ncml" >
+   <dimension name="ensemble_member" length="1" isUnlimited="true" />
+   <variable name="ensemble_member" shape="ensemble_member" type="int">
+     <attribute name="standard_name" value="realization" type="String" />
+     <values>1</values>
+   </variable>
+   <variable name="u10" type="float"  shape="lon lat lev time ensemble_member" />
+   <variable name="v10" type="float"  shape="lon lat lev time ensemble_member" />
+ </netcdf>
+ <netcdf location="test_ncmlagg_with_config_ens02.nc netcdf test_ncmlagg_with_config_notime.ncml" >
+   <dimension name="ensemble_member" length="1" isUnlimited="true" />
+   <variable name="ensemble_member" shape="ensemble_member" type="int">
+     <attribute name="standard_name" value="realization" type="String" />
+       <values>2</values>
+   </variable>
+   <variable name="u10" type="float"  shape="lon lat lev time ensemble_member" />
+   <variable name="v10" type="float"  shape="lon lat lev time ensemble_member" />
+ </netcdf>
+
+</aggregation>
+</netcdf>
