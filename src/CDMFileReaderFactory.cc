@@ -87,6 +87,14 @@ static bool detectXML(const char* magic) {
     return boost::regex_match(magic, boost::regex("\\s*<\\?xml\\s.*"));
 }
 
+static int detectFileTypeFromNameOrFile(const std::string & fileTypeName, const std::string& fileName)
+{
+    int fileType = mifi_get_filetype(fileTypeName.c_str());
+    if (fileType == MIFI_FILETYPE_UNKNOWN)
+        fileType = CDMFileReaderFactory::detectFileType(fileName);
+    return fileType;
+}
+
 bool isFeltType(const std::string& type)
 {
   return (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2");
@@ -314,13 +322,13 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
 
 CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
 {
-    int fileType = mifi_get_filetype(fileTypeName.c_str());
+    int fileType = detectFileTypeFromNameOrFile(fileTypeName, fileName);
     return create(fileType, fileName, configFile, args);
 }
 
 CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
 {
-    int fileType = mifi_get_filetype(fileTypeName.c_str());
+    int fileType = detectFileTypeFromNameOrFile(fileTypeName, fileName);
     return create(fileType, fileName, configXML, args);
 }
 
