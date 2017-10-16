@@ -4,9 +4,11 @@ SET(libfimex_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${PC_INCLUDE_DIRS}
-  ${udunits2_INC_DIR}
-  ${proj_INC_DIR}
   ${grib_api_INC_DIR}
+  ${libxml2_INC_DIR}
+  ${netcdf_INC_DIR}
+  ${proj_INC_DIR}
+  ${udunits2_INC_DIR}
   ${ECCODES_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
@@ -331,9 +333,11 @@ SET(libfimex_ALL_SOURCES
 SET(libfimex_LIBS
   ${FELT_LIBRARY}
   ${PC_LIBRARIES}
-  ${udunits2_LIB}
-  ${proj_LIB}
   ${grib_api_LIB}
+  ${libxml2_LIB}
+  ${netcdf_LIB}
+  ${proj_LIB}
+  ${udunits2_LIB}
   ${eccodes_LIB}
   ${Boost_LIBRARIES}
 )

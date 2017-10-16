@@ -7,8 +7,8 @@ INCLUDE(FimexUtils)
 FIMEX_CMAKE_SETUP()
 FIMEX_VERSION_DEFINES(FIMEX "include/fimex/CDMconstants.h")
 
-
-SET(FIMEX_PC_REQUIRES "libxml-2.0>=2.6.0")
+FIMEX_FIND_PACKAGE("libxml2" "libxml-2.0>=2.6.0" "xml2" "libxml/xmlversion.h")
+LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${libxml2_PC})
 
 FIMEX_FIND_PACKAGE("udunits2" "udunits>=2" "udunits2" "udunits2.h")
 LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${udunits2_PC})
@@ -48,7 +48,8 @@ ENDIF()
 
 OPTION(ENABLE_NETCDF "Use NetCDF" ON)
 IF(ENABLE_NETCDF)
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE netcdf)
+  FIMEX_FIND_PACKAGE("netcdf" "netcdf" "netcdf" "netcdf.h")
+  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${netcdf_PC})
 ENDIF()
 
 OPTION(ENABLE_FELT "Use Felt library" ON)
