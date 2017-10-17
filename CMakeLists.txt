@@ -124,7 +124,7 @@ SET(FIMEX_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}${pc_fimex_includedir}"
 SET(FIMEX_PC "fimex${MINUS_FIMEX_VERSION}.pc")
 FIMEX_GEN_PKGCONFIG(fimex.pc.in "${FIMEX_PC}"
   "${FIMEX_PC_REQUIRES}"
-  "${udunits2_LIB};${proj_LIB};${grib_api_LIB}"
+  "${grib_api_LIB};${libxml2_LIB};${netcdf_LIB};${proj_LIB};${udunits2_LIB};${eccodes_LIB}"
   "${CMAKE_INSTALL_LIBDIR}"
   "${FIMEX_INSTALL_INCLUDEDIR};${udunits2_INC_DIR};${proj_INC_DIR};${grib_api_INC_DIR}"
 )
