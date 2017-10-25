@@ -10,16 +10,21 @@ Fimex requires at least the following libraries to be installed for
 compilation
 
  * c99/c++ compiler
- * libxml2 >= 2.5.0
- * boost library >= 1.33
+ * libxml2 >= 2.6.0
+ * boost library
+   * tested with 1.54, 1.58, and a few other versions
  * proj-4 >= 4.4.9
  * udunits2 (>= 2.1.9)
 
 To configure the different file formats it requires:
 
  * NetCDF (netcdf > 3.5)
- * Grib_API (grib_api > 1.4)
+ * Grib_API (grib_api > 1.4) or ecCodes
 
+To build the python interface, it requires:
+
+ * python development files (>= 3.4)
+ * python numpy development files
 
 ## Installation
 

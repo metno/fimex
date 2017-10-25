@@ -18,6 +18,8 @@ LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${proj_PC})
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 
+OPTION(ENABLE_PYTHON "Use python" ON)
+
 FIND_PACKAGE(Boost REQUIRED COMPONENTS
   date_time
   filesystem
@@ -25,7 +27,7 @@ FIND_PACKAGE(Boost REQUIRED COMPONENTS
   program_options
   regex system
   unit_test_framework
-  )
+)
 
 OPTION(ENABLE_MPI "Use MPI" OFF)
 IF(ENABLE_MPI)
@@ -136,6 +138,9 @@ ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 IF(ENABLE_FORTRAN)
   ADD_SUBDIRECTORY(modules/F90)
+ENDIF()
+IF(ENABLE_PYTHON)
+  ADD_SUBDIRECTORY(modules/python)
 ENDIF()
 ADD_SUBDIRECTORY(test)
 ADD_SUBDIRECTORY(share/etc)
