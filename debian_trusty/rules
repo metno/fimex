@@ -17,15 +17,19 @@ endif
 %:
 	dh $@ --parallel
 
+# cmake on trusty does not find trusty's python3, see
+# https://bugs.launchpad.net/ubuntu/+source/cmake/+bug/1323559/comments/2
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
 	dh_auto_configure -- \
+	    -DPython_ADDITIONAL_VERSIONS=3.4 \
 	    -DBUILD_SHARED_LIBS=BOTH \
 	    -DENABLE_LOG4CPP=YES \
 	    -DENABLE_GRIBAPI=YES \
 	    -DENABLE_FORTRAN=YES \
 	    -DENABLE_WDB=YES \
 	    -DENABLE_FIMEX_OMP=YES \
+	    -DENABLE_PYTHON=YES
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:
