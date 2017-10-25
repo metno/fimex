@@ -29,6 +29,19 @@ class TestReader(unittest.TestCase):
         r_vars = r_cdm.getVariableNames()
         self.assertTrue('surface_geopotential' in r_vars)
 
+    def test_Attributes(self):
+        test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
+        r = pyfimex0.createFileReader('netcdf', test_ncfile)
+        r_cdm = r.getCDM()
+
+        self.assertTrue('long_name' in r_cdm.getAttributeNames('x_wind_10m'))
+        r_att = r_cdm.getAttribute('x_wind_10m', 'long_name')
+        self.assertEqual("Zonal 10 metre wind (U10M)", r_att.getStringValue())
+
+        self.assertTrue('title' in r_cdm.getGlobalAttributeNames())
+        r_gatt = r_cdm.getGlobalAttribute('title')
+        self.assertEqual("MEPS 2.5km", r_gatt.getStringValue())
+
 
 if __name__ == '__main__':
     unittest.main()

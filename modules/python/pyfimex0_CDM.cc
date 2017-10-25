@@ -29,6 +29,7 @@
 #endif // HAVE_CONFIG_H
 
 #include "fimex/CDM.h"
+#include "fimex/Data.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -40,14 +41,27 @@ namespace bp = boost::python;
 
 namespace {
 
-const CDMVariable& CDM__getVariable(const CDM& cdm, const std::string& varName)
+bp::list CDM__getAttributeNames(const CDM& cdm, const std::string& varName)
 {
-    return cdm.getVariable(varName);
+    const std::vector<CDMAttribute>& atts = cdm.getAttributes(varName);
+    bp::list names;
+    for (size_t i=0; i<atts.size(); ++i)
+        names.append(atts[i].getName());
+    return names;
 }
-const CDMDimension& CDM__getDimension(const CDM& cdm, const std::string& dimName)
+bp::list CDM__getGlobalAttributeNames(const CDM& cdm)
 {
-    return cdm.getDimension(dimName);
+    return CDM__getAttributeNames(cdm, CDM::globalAttributeNS());
 }
+const CDMAttribute& CDM__getAttribute(const CDM& cdm, const std::string& varName, const std::string& attrName)
+{
+    return cdm.getAttribute(varName, attrName);
+}
+const CDMAttribute& CDM__getGlobalAttribute(const CDM& cdm, const std::string& attrName)
+{
+    return cdm.getAttribute(CDM::globalAttributeNS(), attrName);
+}
+
 bp::list CDM__getVariableNames(const CDM& cdm)
 {
     const CDM::VarVec& vars = cdm.getVariables();
@@ -56,6 +70,11 @@ bp::list CDM__getVariableNames(const CDM& cdm)
         names.append(vars[i].getName());
     return names;
 }
+const CDMVariable& CDM__getVariable(const CDM& cdm, const std::string& varName)
+{
+    return cdm.getVariable(varName);
+}
+
 bp::list CDM__getDimensionNames(const CDM& cdm)
 {
     const CDM::DimVec& dims = cdm.getDimensions();
@@ -64,11 +83,21 @@ bp::list CDM__getDimensionNames(const CDM& cdm)
         names.append(dims[i].getName());
     return names;
 }
+const CDMDimension& CDM__getDimension(const CDM& cdm, const std::string& dimName)
+{
+    return cdm.getDimension(dimName);
+}
 
 } // namespace
 
 void pyfimex0_CDM()
 {
+    bp::class_<CDMAttribute, boost::noncopyable>("_CDMAttribute", bp::no_init)
+            .def("getName", &CDMDimension::getName, bp::return_value_policy<bp::copy_const_reference>())
+            .def("getData", &CDMAttribute::getData)
+            .def("getStringValue", &CDMAttribute::getStringValue);
+            ;
+
     bp::class_<CDMDimension, boost::noncopyable>("_CDMDimension", bp::no_init)
             .def("getName", &CDMDimension::getName, bp::return_value_policy<bp::copy_const_reference>())
             .def("getLength", &CDMDimension::getLength)
@@ -79,9 +108,13 @@ void pyfimex0_CDM()
             ;
 
     bp::class_<CDM, boost::noncopyable>("_CDM", bp::no_init)
-            .def("getVariable", CDM__getVariable, bp::return_internal_reference<1>())
-            .def("getDimension", CDM__getDimension, bp::return_internal_reference<1>())
             .def("getVariableNames", CDM__getVariableNames)
+            .def("getVariable", CDM__getVariable, bp::return_internal_reference<1>())
+            .def("getAttributeNames", CDM__getAttributeNames)
+            .def("getAttribute", CDM__getAttribute, bp::return_internal_reference<1>())
+            .def("getGlobalAttributeNames", CDM__getGlobalAttributeNames)
+            .def("getGlobalAttribute", CDM__getGlobalAttribute, bp::return_internal_reference<1>())
+            .def("getDimension", CDM__getDimension, bp::return_internal_reference<1>())
             .def("getDimensionNames", CDM__getDimensionNames)
             .def("hasDimension", &CDM::hasDimension)
             ;
