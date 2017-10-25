@@ -54,6 +54,10 @@ BOOST_AUTO_TEST_CASE(test_scaleValue)
 
 BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
 {
+    vector<int> pos = tokenizeDotted<int>("12");
+    BOOST_REQUIRE_EQUAL(1, pos.size());
+    BOOST_CHECK_EQUAL(pos[0], 12);
+
     string dotted = "1.2,2.4,...,6";
     vector<float> tokens = tokenizeDotted<float>(dotted);
     BOOST_CHECK_EQUAL(5, tokens.size());
