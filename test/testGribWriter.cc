@@ -28,8 +28,6 @@
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
-#include <iostream>
-#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "FeltCDMReader2.h"
@@ -45,44 +43,39 @@ using namespace MetNoFelt;
 using namespace MetNoFimex;
 namespace fs = boost::filesystem;
 
+#include "testinghelpers.h"
+
 BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
 
-    string outputFile("test.grb1");
+    const string outputFile("test_append.grb1");
     fs::remove(outputFile.c_str());
-    GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/test/cdmGribWriterConfig_append.xml");
+    GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
     fs::path out( outputFile );
     BOOST_CHECK(fs::exists(out));
     BOOST_CHECK(fs::file_size(out) > 5000000);
 
-    size_t size = fs::file_size(out);
-    GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/test/cdmGribWriterConfig_append.xml");
+    const size_t size = fs::file_size(out);
+    GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
     BOOST_CHECK(fs::exists(out));
     BOOST_CHECK(fs::file_size(out) == 2*size);
     fs::remove(outputFile.c_str());
-
 }
 
 
 BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
 
-    string outputFile("test.grb1");
-    GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
+    const string outputFile("test.grb1");
+    GribApiCDMWriter(feltReader, outputFile, 1, pathShareEtc("cdmGribWriterConfig.xml"));
     fs::path out( outputFile );
     BOOST_CHECK(fs::exists(out));
     BOOST_CHECK(fs::file_size(out) > 5000000);
@@ -90,15 +83,12 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 
 BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-    string outputFile("test.grb2");
-    GribApiCDMWriter(feltReader, outputFile, 2, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    const string outputFile("test.grb2");
+    GribApiCDMWriter(feltReader, outputFile, 2, pathShareEtc("cdmGribWriterConfig.xml"));
     fs::path out( outputFile );
     BOOST_CHECK(fs::exists(out));
     BOOST_CHECK(fs::file_size(out) > 5000000);

@@ -212,7 +212,7 @@ int testCReader(const char* feltFile, const char* configFile) {
 
     if (mifi_netcdf_writer(cReader, "test_c_reader.nc",0,3) != 0) {
         retVal++;
-        fprintf(stderr, "error in writing netcdf-file test.nc\n");
+        fprintf(stderr, "error in writing netcdf-file test_c_reader.nc\n");
     }
 
     mifi_free_cdm_reader(cReader);
@@ -322,8 +322,8 @@ int main(int argc, char* argv[])
 
     // setup
     char* feltFile = (char*) calloc(1024, sizeof(char));
-    strcat(feltFile, TOP_SRCDIR);
-    strcat(feltFile, "/test/flth00.dat");
+    strcat(feltFile, TEST_EXTRADATA_DIR);
+    strcat(feltFile, "/flth00.dat");
     char* configFile = (char*) calloc(1024, sizeof(char));
     strcat(configFile, TOP_SRCDIR);
     strcat(configFile, "/share/etc/felt2nc_variables.xml");

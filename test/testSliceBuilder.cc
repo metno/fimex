@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/CDM.h"
 #include <fimex/SliceBuilder.h>
 
@@ -91,7 +89,6 @@ BOOST_AUTO_TEST_CASE( test_slicebuilder )
     // cerr << "unset dimensionNames: " << sb.getUnsetDimensionNames().size() << endl;
     BOOST_CHECK(sb.getUnsetDimensionNames().size() == 1);
     BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "dim2");
-
 }
 
 #else

@@ -30,8 +30,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMExtractor.h"
@@ -39,19 +37,17 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_extract )
 {
-    //defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
     extract->removeVariable("relative_humidity");
     try {
@@ -213,9 +209,6 @@ BOOST_AUTO_TEST_CASE( test_extract )
     extract->selectVariables(variables);
     BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
-
-
-
 }
 
 #else

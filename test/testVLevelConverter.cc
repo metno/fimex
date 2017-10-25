@@ -32,8 +32,6 @@
 #include <boost/test/floating_point_comparison.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <fstream>
-
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
@@ -45,16 +43,13 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 
+#include "testinghelpers.h"
+
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE(test_pressure_integrator)
 {
-    std::string topSrcDir(TOP_SRCDIR);
-    std::string fileName(topSrcDir+"/test/testdata_arome_vc.nc");
-    if (!std::ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const std::string fileName = pathTest("testdata_arome_vc.nc");
 
     typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
     typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
@@ -92,10 +87,10 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
 
         const std::vector<std::string> shape_ac = altivc->getShape();
         BOOST_REQUIRE(4 == shape_ac.size());
-        BOOST_CHECK("x" == shape_ac[0]);
-        BOOST_CHECK("y" == shape_ac[1]);
-        BOOST_CHECK("hybrid" == shape_ac[2]);
-        BOOST_CHECK("time" == shape_ac[3]);
+        BOOST_CHECK_EQUAL("x", shape_ac[0]);
+        BOOST_CHECK_EQUAL("y", shape_ac[1]);
+        BOOST_CHECK_EQUAL("hybrid", shape_ac[2]);
+        BOOST_CHECK_EQUAL("time", shape_ac[3]);
 
         SliceBuilder sb = createSliceBuilder(reader->getCDM(), altivc);
         sb.setStartAndSize("x", 1, 1);
@@ -114,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
             sb.setStartAndSize("hybrid", 63, 2);
             DataPtr vd = altivc->getDataSlice(sb);
             BOOST_REQUIRE(vd);
-            BOOST_REQUIRE(2 == vd->size());
+            BOOST_REQUIRE_EQUAL(2, vd->size());
             boost::shared_array<float> va = vd->asFloat();
             BOOST_REQUIRE(va);
             BOOST_CHECK_CLOSE(198, va[0], 1);
@@ -128,13 +123,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
  */
 BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
 {
-    std::string topSrcDir(TOP_SRCDIR);
-    std::string fileName(topSrcDir+"/test/testdata_arome_vc.nc");
-    if (!std::ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-
+    const std::string fileName = pathTest("testdata_arome_vc.nc");
     CDMReader_p ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
 
     std::vector<double> vi_level1, vi_level2;
@@ -159,10 +148,10 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
 
     const std::vector<std::string> shape_ac = altivc->getShape();
     BOOST_REQUIRE(4 == shape_ac.size());
-    BOOST_CHECK("x" == shape_ac[0]);
-    BOOST_CHECK("y" == shape_ac[1]);
-    BOOST_CHECK("pressure" == shape_ac[2]);
-    BOOST_CHECK("time" == shape_ac[3]);
+    BOOST_CHECK_EQUAL("x", shape_ac[0]);
+    BOOST_CHECK_EQUAL("y",shape_ac[1]);
+    BOOST_CHECK_EQUAL("pressure", shape_ac[2]);
+    BOOST_CHECK_EQUAL("time", shape_ac[3]);
 
     SliceBuilder sb = createSliceBuilder(reader->getCDM(), altivc);
     sb.setStartAndSize("x", 0, 2);
@@ -171,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     sb.setStartAndSize("time", 0, 1);
     DataPtr vd = altivc->getDataSlice(sb);
     BOOST_REQUIRE(vd);
-    BOOST_REQUIRE(6 == vd->size());
+    BOOST_REQUIRE_EQUAL(6, vd->size());
     boost::shared_array<float> va = vd->asFloat();
     BOOST_REQUIRE(va);
     BOOST_CHECK_CLOSE(12.1, va[0], 1);
@@ -187,4 +176,3 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
 int main(int argc, char* args[]) {
 }
 #endif
-

@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/Data.h"
@@ -43,19 +41,15 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_ncmlRead )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordTest.nc");
-    string ncmlName(topSrcDir+"/test/test.ncml");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("coordTest.nc"), ncmlName = pathTest("test.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
     BOOST_CHECK(true);
     DataPtr data = reader->getDataSlice("sea_surface_temperature", 1);
@@ -96,7 +90,6 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     sb.setStartAndSize("time", 1, 1);
     dataSlice = reader->getDataSlice("new_var", sb);
     BOOST_CHECK(dataSlice->size() == 0);
-
 }
 
 #else
@@ -104,7 +97,3 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
 int main(int argc, char* args[]) {
 }
 #endif
-
-
-
-

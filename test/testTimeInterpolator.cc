@@ -33,8 +33,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "FeltCDMReader2.h"
 #include "fimex/Data.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -43,6 +41,8 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Logger.h"
 
 #include <boost/filesystem/operations.hpp>
+
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -54,13 +54,10 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     const string outputName = "test_timeInterpolator.nc";
     fs::remove(outputName);
 
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
     timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
     DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -81,8 +78,6 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
     BOOST_CHECK_EQUAL(ncTimeAry[0], 10);
     BOOST_CHECK_EQUAL(ncTimeAry[4], 10+12);
-
-
 }
 
 BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
@@ -90,13 +85,10 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     const string outputName = "test_timeInterpolatorRelative.nc";
     fs::remove(outputName);
 
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
     timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
     DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -117,10 +109,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
     BOOST_CHECK_EQUAL(ncTimeAry[0], -2);
     BOOST_CHECK_EQUAL(ncTimeAry[4], 10);
-
-
 }
-
 
 #else
 // no boost testframework

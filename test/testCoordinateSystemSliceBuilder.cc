@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -44,10 +42,11 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
+#include "testinghelpers.h"
+
 BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
 {
-    string topSrcDir(TOP_SRCDIR);
-    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordTest.nc");
+    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordTest.nc"));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
@@ -71,8 +70,7 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
 
 BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
 {
-    string topSrcDir(TOP_SRCDIR);
-    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordRefTimeTest.nc");
+    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordRefTimeTest.nc"));
     BOOST_CHECK(reader.get() != 0);
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);

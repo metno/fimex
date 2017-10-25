@@ -67,6 +67,18 @@ Felt_File2::Felt_File2(const string& filename)
     init();
 }
 
+Felt_File2::Felt_File2(const string& filename, const string& filenameSetup)
+    : filename_(filename)
+{
+    std::ifstream setupFile(filenameSetup.c_str());
+    if (setupFile.is_open()) {
+        setupFile.close();
+        feltParameters_ = FeltParameters(filenameSetup);
+    }
+    // else default constructor
+    init();
+}
+
 Felt_File2::Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options)
 : filename_(filename)
 {

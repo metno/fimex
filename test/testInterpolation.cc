@@ -44,8 +44,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-using boost::unit_test_framework::test_suite;
+#include "testinghelpers.h"
 
+using boost::unit_test_framework::test_suite;
+using MetNoFimex::pathTest;
 
 BOOST_AUTO_TEST_CASE( test_mifi_points2position )
 {
@@ -91,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 {
-    float infield[4] = {1., 2., 2., 1+sqrt(2.)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
+    float infield[4] = {1., 2., 2., 1+std::sqrt(2.0f)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
     float outvalues[1];
 
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
@@ -324,8 +326,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 
     // reading the data
     // i j country-id
-    std::string topSrcDir(TOP_SRCDIR);
-    std::ifstream datafile (std::string(topSrcDir+"/test/inData.txt").c_str(), std::ios::in);
+    std::ifstream datafile (pathTest("inData.txt").c_str(), std::ios::in);
     if (datafile.is_open()) {
         datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
         int line = 0;
@@ -665,4 +666,3 @@ BOOST_AUTO_TEST_CASE( test_Utils )
 int main(int argc, char* args[]) {
 }
 #endif
-

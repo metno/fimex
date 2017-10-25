@@ -28,8 +28,6 @@
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
-#include <iostream>
-#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -45,23 +43,23 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_read_grb1) {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName("test.grb1");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+BOOST_AUTO_TEST_CASE(test_read_grb1)
+{
+    if (!hasTestExtra())
         return;
-    }
+    const string fileName = require("test.grb1"); // this is written by testGribWriter.cc
+
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
+    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathTest("cdmGribReaderConfig_newEarth.xml"))));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
-    BOOST_CHECK(true); // made it so far
     DataPtr data = grbReader->getDataSlice("x_wind_10m", 0);
     boost::shared_array<float> dataFlt = data->asFloat();
     for (int i = 85*229+50; i < 85*229+150; i++) {
@@ -77,7 +75,9 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     BOOST_CHECK(fabs(attr.getData()->asFloat()[0] - 6372000) < 1);
     // the following test has a tendency to fail when not all tests are run in correct order
     // a remaining grbml-file uses the wrong earth radius
-    BOOST_CHECK(fabs(grbReader->getData("x")->asFloat()[0] - -5719440) < 1);
+    const float ac_x0 = grbReader->getData("x")->asFloat()[0], ex_x0 = -5719440,
+            diff_x0 = std::abs(ac_x0 - ex_x0);
+    BOOST_CHECK_MESSAGE(diff_x0 < 1, "x_0 expected " << ex_x0 << " got " << ac_x0 << " difference " << diff_x0);
 
 
     // slicebuilder
@@ -91,31 +91,27 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     sb.setStartAndSize("y", 2, 2);
     vector<size_t> dimStart = sb.getDimensionStartPositions();
     DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
-    BOOST_CHECK(20 == dataS->size());
+    BOOST_CHECK_EQUAL(20, dataS->size());
 
     NetCDF_CDMWriter(grbReader, "test_read_grb1.nc");
     BOOST_CHECK(true); // and it is even writeable
-
 }
 
-BOOST_AUTO_TEST_CASE(test_read_grb2) {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName("test.grb2");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+BOOST_AUTO_TEST_CASE(test_read_grb2)
+{
+    if (!hasTestExtra())
         return;
-    }
+    const string fileName = require("test.grb2"); // this is written by testGribWriter.cc
+
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
+    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml"))));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(true); // made it so far
     Null_CDMWriter(grbReader, "");
     BOOST_CHECK(true); // and it is even writeable
-
 }
-
 
 #else
 // no boost testframework

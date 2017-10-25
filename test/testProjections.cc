@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 #include <proj_api.h>
@@ -56,7 +54,6 @@ BOOST_AUTO_TEST_CASE( test_projection )
     // generate another projection
     boost::shared_ptr<Projection> projs2 = Projection::create(attrs);
     BOOST_CHECK((projs2->getName() == "stereographic") || (projs2->getName() == "polar_stereographic"));
-
 }
 
 BOOST_AUTO_TEST_CASE( test_projection_oblique_mercator )
@@ -70,7 +67,6 @@ BOOST_AUTO_TEST_CASE( test_projection_oblique_mercator )
     // generate another projection
     boost::shared_ptr<Projection> projs2_omerc = Projection::create(attrs_omerc);
     BOOST_CHECK(projs2_omerc->getName() == "oblique_mercator");
-
 }
 
 BOOST_AUTO_TEST_CASE( test_projection_geostationary )

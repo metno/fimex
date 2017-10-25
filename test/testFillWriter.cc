@@ -37,30 +37,17 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_fillWriter )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordRefTimeTest.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    string inFillName(topSrcDir+"/test/fillIn2.nc");
-    if (!ifstream(inFillName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    // copy the input
-    std::ifstream  src(fileName.c_str());
-    string outFile = "fillOut.nc";
-    std::ofstream  dst(outFile.c_str());
-    dst << src.rdbuf();
+    const string fileName = pathTest("coordRefTimeTest.nc");
+    const string inFillName = pathTest("fillIn2.nc");
+    const string outFile = "fillOut.nc";
+    copyFile(fileName, outFile);
 
     CDMReader_p in(new NetCDF_CDMReader(inFillName));
     boost::shared_ptr<CDMReaderWriter> out(new NetCDF_CDMReader(outFile, true));
@@ -86,42 +73,23 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
     BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",0)->asInt()[11*11*2] == -32767); // first number, 3rd level
     BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4] == -32767); // last level, last number, first offsetTime
     BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4*2 - 1] == -32767); // last level, last number
-
-    BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordRefTimeTest.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    string inFillName(topSrcDir+"/test/fillIn3.nc");
-    if (!ifstream(inFillName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    // copy the input
-    std::ifstream  src(fileName.c_str());
-    string outFile = "fillOut.nc";
-    std::ofstream  dst(outFile.c_str());
-    dst << src.rdbuf();
+    const string fileName = pathTest("coordRefTimeTest.nc");
+    const string inFillName = pathTest("fillIn3.nc");
+    const string outFile = "fillOut.nc";
+    copyFile(fileName, outFile);
 
     CDMReader_p in(new NetCDF_CDMReader(inFillName));
     boost::shared_ptr<CDMReaderWriter> out(new NetCDF_CDMReader(outFile, true));
-    FillWriter(in, out, topSrcDir+"/test/fillWriterConfig.xml");
+    FillWriter(in, out, pathTest("fillWriterConfig.xml"));
     out.reset((NetCDF_CDMReader*)0); // make sure to close the writer before re-reading it
     out.reset(new NetCDF_CDMReader(outFile));
 
     BOOST_CHECK(out->getData("longitude")->asFloat()[2*11]+13 < 1e-5);
     BOOST_CHECK(out->getData("latitude")->asFloat()[2*11]-28 < 1e-5);
-
-
-
-    BOOST_CHECK(true);
-
 }
 
 #else
@@ -129,7 +97,3 @@ BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
 int main(int argc, char* args[]) {
 }
 #endif
-
-
-
-

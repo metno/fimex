@@ -40,18 +40,16 @@ using boost::unit_test_framework::test_suite;
 #include <boost/make_shared.hpp>
 
 #include <iostream>
-#include <fstream>
 #include <numeric>
+
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_merger )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileNameInner(topSrcDir+"/test/test_merge_inner.nc"), fileNameOuter(topSrcDir+"/test/test_merge_outer.nc");
-    BOOST_CHECK(ifstream(fileNameInner.c_str()));
-    BOOST_CHECK(ifstream(fileNameOuter.c_str()));
+    const string fileNameInner = pathTest("test_merge_inner.nc"), fileNameOuter = pathTest("test_merge_outer.nc");
 
     CDMReader_p readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
         readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
@@ -84,10 +82,7 @@ BOOST_AUTO_TEST_CASE( test_merger )
 
 BOOST_AUTO_TEST_CASE( test_merge_target )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileNameB(topSrcDir+"/test/merge_target_base.nc"), fileNameT(topSrcDir+"/test/merge_target_top.nc");
-    BOOST_CHECK(ifstream(fileNameB.c_str()));
-    BOOST_CHECK(ifstream(fileNameT.c_str()));
+    const string fileNameB = pathTest("merge_target_base.nc"), fileNameT = pathTest("merge_target_top.nc");
 
     CDMReader_p readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
         readerT = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameT);

@@ -33,8 +33,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include <boost/algorithm/minmax_element.hpp>
 #include "fimex/interpolation.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -45,13 +43,14 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
 {
-    string topSrcDir(TOP_SRCDIR);
-    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
 
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
@@ -129,8 +128,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
 
 BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
 {
-    string topSrcDir(TOP_SRCDIR);
-    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
 
     boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
@@ -169,12 +167,8 @@ BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
     }
 }
 
-
 #else
 // no boost testframework
 int main(int argc, char* args[]) {
 }
 #endif
-
-
-

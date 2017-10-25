@@ -36,12 +36,12 @@
 
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/Utils.h"
 
 using namespace std;
 using namespace MetNoFimex;
+
+#include "testinghelpers.h"
 
 BOOST_AUTO_TEST_CASE(test_scaleValue)
 {
@@ -89,7 +89,6 @@ BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
     string dotted6 = "20,10,...,-35";
     vector<double> tokens6 = tokenizeDotted<double>(dotted6);
     BOOST_CHECK_EQUAL(7, tokens6.size());
-
 }
 
 BOOST_AUTO_TEST_CASE(test_find_closest_distinct_elements)
@@ -135,37 +134,34 @@ BOOST_AUTO_TEST_CASE(test_find_closest_distinct_elements)
     p = find_closest_neighbor_distinct_elements(&ary[0], &ary[0]+8, 5);
     BOOST_CHECK_EQUAL(p.first, 7);
     BOOST_CHECK_EQUAL(p.second, 3);
-
 }
 
 BOOST_AUTO_TEST_CASE(test_scanFiles)
 {
-    string topSrcDir(TOP_SRCDIR);
     vector<string> files;
-    scanFiles(files, topSrcDir, -1, boost::regex(".*stUti.?.?\\.cc"), true);
+    scanFiles(files, topSrcDir(), -1, boost::regex(".*stUti.?.?\\.cc"), true);
     BOOST_CHECK_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
     files.clear();
-    scanFiles(files, topSrcDir, -1, boost::regex(".*stUti.?.?\\.cc"), false);
+    scanFiles(files, topSrcDir(), -1, boost::regex(".*stUti.?.?\\.cc"), false);
     BOOST_CHECK_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(test_globFiles)
 {
-    string topSrcDir(TOP_SRCDIR);
     vector<string> files;
-    string glob = topSrcDir + "/" + "**stUti??.cc";
+    string glob = topSrcDir() + "/**stUti??.cc";
     globFiles(files, glob);
     BOOST_CHECK_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
     files.clear();
-    string glob2 = topSrcDir + "/test/*stUti??.cc";
+
+    string glob2 = topSrcDir() + "/test/*stUti??.cc";
     globFiles(files, glob2);
     BOOST_CHECK_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
 }
-
 
 #else
 // no boost testframework

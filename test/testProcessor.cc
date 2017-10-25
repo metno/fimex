@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMconstants.h"
@@ -43,15 +41,15 @@ using boost::unit_test_framework::test_suite;
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_accumulate )
 {
 //    defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordTest.nc");
-
+    const string fileName = pathTest("coordTest.nc");
     CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
     double t0 = 1179309600.;
     {
@@ -65,7 +63,6 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
         BOOST_CHECK_CLOSE(time[2], 3600., 1e-5);
         BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
     }
-
     {
         boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->accumulate("time");
@@ -76,14 +73,12 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
         BOOST_CHECK_CLOSE(time[2], time[1] + t0+2*3600., 1e-5);
         BOOST_CHECK_CLOSE(time[3], time[2] + t0+3*3600., 1e-5);
     }
-
 }
 
 BOOST_AUTO_TEST_CASE( test_rotate )
 {
     //    defaultLogLevel(Logger::DEBUG);
-        string topSrcDir(TOP_SRCDIR);
-        string fileName(topSrcDir+"/test/coordTest.nc");
+        const string fileName = pathTest("coordTest.nc");
 
         CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
         boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
@@ -109,7 +104,3 @@ BOOST_AUTO_TEST_CASE( test_rotate )
 int main(int argc, char* args[]) {
 }
 #endif
-
-
-
-

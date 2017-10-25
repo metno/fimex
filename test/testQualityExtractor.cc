@@ -33,8 +33,6 @@ using boost::unit_test_framework::test_suite;
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
 
-#include <iostream>
-#include <fstream>
 #ifdef HAVE_FELT
 #include "FeltCDMReader2.h"
 #endif
@@ -51,6 +49,8 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/mifi_constants.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -58,17 +58,14 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_qualityExtract )
 {
-	string topSrcDir(TOP_SRCDIR);
-	string fileName(topSrcDir+"/test/flth00.dat");
-	if (!ifstream(fileName.c_str())) {
-		// no testfile, skip test
-		return;
-	}
-	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+        if (!hasTestExtra())
+            return;
+        const string fileName = pathTestExtra("flth00.dat");
+	CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
 #ifdef TEST_DEBUG
 	defaultLogLevel(Logger::DEBUG);
 #endif
-	boost::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
+	boost::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
 
 	map<string, string> statusVariables = extract->getStatusVariable();
 	map<string, string> variableFlags = extract->getVariableFlags();
@@ -101,24 +98,20 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 
 BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-    boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
 
 #ifdef HAVE_NETCDF_H
     string outputFile("test_qualityExtract_convert.nc");
     NetCDF_CDMWriter(qe, outputFile);
-    BOOST_CHECK(std::ifstream(outputFile.c_str()).is_open());
+    BOOST_CHECK(exists(outputFile));
 #else
     Null_CDMWriter(qe, "");
     BOOST_CHECK(true);
 #endif /* NETCDF */
-    BOOST_CHECK(true);
 }
 
 
@@ -126,14 +119,10 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
 BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
 {
 #ifdef HAVE_NETCDF_H
-    const string topSrcDir(TOP_SRCDIR);
-    const string fileNameD = topSrcDir+"/test/testQEmask_data.nc", fileNameX = "testQEmask.xml";
-    const string fileNameM = topSrcDir+"/test/testQEmask_mask.nc";
-    if (not ifstream(fileNameD.c_str()) or not ifstream(fileNameM.c_str()) or not ifstream(fileNameX.c_str())) {
-        // no testfile, skip test
-        cerr << "input files not found, skipping test (" << fileNameD << ',' << fileNameM << ',' << fileNameX << ')' << endl;
-        return;
-    }
+    const string fileNameD = pathTest("testQEmask_data.nc");
+    const string fileNameX = require("testQEmask.xml");
+    const string fileNameM = pathTest("testQEmask_mask.nc");
+
     CDMReader_p readerD = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameD);
     boost::shared_ptr<CDMQualityExtractor> mask = boost::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
@@ -150,6 +139,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
     BOOST_CHECK(true);
 #endif /* HAVE_NETCDF_H */
 }
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

@@ -33,9 +33,6 @@
 #include <boost/test/floating_point_comparison.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
-
 #include "fimex/vertical_coordinate_transformations.h"
 
 using namespace std;
@@ -61,7 +58,6 @@ BOOST_AUTO_TEST_CASE( test_atmosphere_sigma_pressure )
     mifi_atmosphere_sigma_pressure(n, pTop, pSurf, sigma, pOut);
     for (size_t i = 0; i < n; ++i)
         BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
-
 }
 
 BOOST_AUTO_TEST_CASE( test_atmosphere_hybrid_sigma_pressure )
@@ -99,10 +95,8 @@ BOOST_AUTO_TEST_CASE( test_atmosphere_hybrid_sigma_pressure )
         BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
 }
 
-
 #else
 // no boost testframework
 int main(int argc, char* args[]) {
 }
 #endif
-

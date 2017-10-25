@@ -33,8 +33,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/Utils.h"
 #include "fimex/SpatialAxisSpec.h"
 
@@ -65,7 +63,6 @@ BOOST_AUTO_TEST_CASE( test_SpatialAxisSpec )
 	//	cerr << "i: " << relVals[i] << endl;
 	BOOST_CHECK(relVals[0] == 0);
 	BOOST_CHECK(relVals[5] == 250000);
-
 }
 
 #else
@@ -73,4 +70,3 @@ BOOST_AUTO_TEST_CASE( test_SpatialAxisSpec )
 int main(int argc, char* args[]) {
 }
 #endif
-

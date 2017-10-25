@@ -25,8 +25,6 @@
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
-#include <iostream>
-#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include "FeltCDMReader2.h"
 
@@ -37,52 +35,45 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
 {
-	string topSrcDir(TOP_SRCDIR);
-	string fileName(topSrcDir+"/test/flth00.dat");
-	if (!ifstream(fileName.c_str())) {
-		// no testfile, skip test
-		return;
-	}
-	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
+    if (!hasTestExtra())
+        return;
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
 }
 
 BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 {
-	string topSrcDir(TOP_SRCDIR);
-	string fileName(topSrcDir+"/test/flth00.dat");
-	if (!ifstream(fileName.c_str())) {
-		// no testfile, skip test
-		return;
-	}
-	CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
-	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
-	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
-	BOOST_CHECK(writer.getVariableName("x") == "x_c");
-	BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
-	bool exceptionThrown = false;
-	try {
-	    writer.getAttribute(CDM::globalAttributeNS(), "comment");
-	} catch (exception& ex) {
-		exceptionThrown = true;
-	}
-	BOOST_CHECK(exceptionThrown == true);
+    if (!hasTestExtra())
+        return;
+    const string fileName = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", pathShareEtc("cdmWriterConfigDeprecated.xml"));
+    BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
+    BOOST_CHECK(writer.getDimensionName("x") == "x_c");
+    BOOST_CHECK(writer.getVariableName("x") == "x_c");
+    BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
 
-	exceptionThrown = false;
-	try {
-		writer.getAttribute("surface_snow_thickness", "long_name");
-	} catch (CDMException& ex) {
-		exceptionThrown = true;
-	}
-	BOOST_CHECK(exceptionThrown);
-
+    try {
+        const std::string att = "comment";
+        writer.getAttribute(CDM::globalAttributeNS(), att);
+        BOOST_FAIL("global attribute '" << att << "' does not exist, expected exception");
+    } catch (exception& ex) {
+    }
+    try {
+        const std::string var = "surface_snow_thickness", att = "long_name";
+        writer.getAttribute(var, att);
+        BOOST_FAIL("variable '" << var << "' has no attribute '" << att << "', expected exception");
+    } catch (CDMException& ex) {
+    }
 }
 
 #else

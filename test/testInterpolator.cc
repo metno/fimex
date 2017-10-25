@@ -30,9 +30,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
-
 #include <boost/foreach.hpp>
 
 #include "FeltCDMReader2.h"
@@ -47,6 +44,8 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -54,14 +53,11 @@ static int DEBUG = 0;
 
 BOOST_AUTO_TEST_CASE(test_interpolator)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
@@ -89,14 +85,11 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 
 BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
@@ -121,12 +114,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
 BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/satellite_cma.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("satellite_cma.nc");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     vector<double> xAxis, yAxis;
@@ -150,12 +138,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
 BOOST_AUTO_TEST_CASE(test_interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/twoCoordsTest.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("twoCoordsTest.nc");
     CDMReader_p reader(new NetCDF_CDMReader(fileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     {
@@ -207,13 +190,10 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
 
 BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
     //interpolator->getCDM().toXMLStream(cerr);
@@ -226,13 +206,8 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
 
 BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordTest.nc");
-    string ncmlName(topSrcDir+"/test/test.ncml");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("coordTest.nc");
+    const string ncmlName = pathTest("test.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
     const CDM cdm = reader->getCDM();
     if (cdm.hasVariable("x_wind")) {
@@ -253,17 +228,8 @@ BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
 
 BOOST_AUTO_TEST_CASE(test_interpolator_template)
 {
-    string topSrcDir(TOP_SRCDIR);
-    string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
-    if (!ifstream(ncFileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    string templateFileName(topSrcDir+"/test/template_noaa17.nc");
-    if (!ifstream(templateFileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
+    const string templateFileName(pathTest("template_noaa17.nc"));
     CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, templateFileName);
@@ -288,12 +254,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
     vector<double> latVals(&lat[0], &lat[0]+10);
     vector<double> lonVals(&lon[0], &lon[0]+10);
 
-    string topSrcDir(TOP_SRCDIR);
-    string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
-    if (!ifstream(ncFileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
@@ -318,13 +279,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
     vector<double> latVals(&lat[0], &lat[0]+1);
     vector<double> lonVals(&lon[0], &lon[0]+1);
 
-    string topSrcDir(TOP_SRCDIR);
-    string ncmlFileName(topSrcDir+"/test/c11.ncml");
-    string ncFileName(topSrcDir+"/test/c11.nc");
-    if (!ifstream(ncFileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string ncmlFileName = pathTest("c11.ncml");
+    const string ncFileName = pathTest("c11.nc");
     CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     CDMReader_p ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
@@ -345,14 +301,11 @@ BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
 
 BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/flth00.dat");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
+    if (!hasTestExtra())
         return;
-    }
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(feltReader));
     vector<string> x(1, "x_wind_10m");
     vector<string> y(1, "y_wind_10m");
@@ -453,8 +406,6 @@ public:
 
 BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 {
-    string topSrcDir(TOP_SRCDIR);
-
     TestMany<IP> tests;
     tests(IP("+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
              "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
@@ -484,17 +435,13 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 
     for (size_t k = 0; k < 2; ++k) {
         CDMReader_p reader;
-        string fileName(topSrcDir+"/test/data/north.nc");
+        string fileName = pathTest("data/north.nc");
         double xWind = 0;
         double yWind = 1;
         if (k == 1) {
-            fileName = topSrcDir+"/test/data/east.nc";
+            fileName = pathTest("data/east.nc");
             xWind = 1;
             yWind = 0;
-        }
-        if (!ifstream(fileName.c_str())) {
-            // no testfile, skip test
-            continue;
         }
         try {
             reader = CDMReader_p(new NetCDF_CDMReader(fileName));
@@ -522,15 +469,11 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 
             for (size_t i = 0; i < dxwind->size(); ++i) {
                 if (!(mifi_isnan(xwind[i]) || (mifi_isnan(ywind[i])))) {
-                    if ((fabs(xWind - xwind[i]) >= ip.delta)
-                            || (fabs(yWind - ywind[i]) >= ip.delta)) {
-                        cerr << "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:("
-                                << xWind << "," << yWind << ") -> " << i << ": ("
-                                << xwind[i] << "," << ywind[i] << "): "
-                                << ip.proj << endl;
-                    }
-                    BOOST_CHECK(fabs(xWind - xwind[i]) < ip.delta);
-                    BOOST_CHECK(fabs(yWind - ywind[i]) < ip.delta);
+                    BOOST_CHECK_MESSAGE((std::abs(xWind - xwind[i]) < ip.delta)
+                                     && (std::abs(yWind - ywind[i]) < ip.delta),
+                        "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:("
+                        << xWind << "," << yWind << ") -> " << i << ": ("
+                        << xwind[i] << "," << ywind[i] << "): " << ip.proj);
                 }
             }
         }
@@ -540,12 +483,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    string topSrcDir(TOP_SRCDIR);
-    string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
-    if (!ifstream(ncFileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
     CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
 

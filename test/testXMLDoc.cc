@@ -35,13 +35,14 @@ using boost::unit_test_framework::test_suite;
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_xmlDoc )
 {
-    string topSrcDir(TOP_SRCDIR);
-    XMLDoc doc(topSrcDir+"/test/testXMLDoc.xml");
+    XMLDoc doc(pathTest("testXMLDoc.xml"));
     {
         XPathObjPtr xpathObj = doc.getXPathObject("/cdmQualityConfig");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -71,7 +72,6 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
         string values = getXmlContent(xpathObj->nodesetval->nodeTab[0]);
         BOOST_CHECK("1,2,...,6" == values);
     }
-
 }
 
 #else

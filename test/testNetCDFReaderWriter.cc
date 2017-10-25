@@ -32,7 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <fstream>
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
@@ -40,6 +39,9 @@ using boost::unit_test_framework::test_suite;
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
 #endif
+
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -51,15 +53,7 @@ BOOST_AUTO_TEST_CASE( test_update )
     }
 
     const string fileName("test_update.nc");
-    {
-        const string topSrcDir(TOP_SRCDIR);
-        const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
-        ifstream orig(origFileName.c_str());
-        BOOST_CHECK(orig);
-        ofstream copy(fileName.c_str());
-        copy << orig.rdbuf();
-        BOOST_CHECK(copy);
-    }
+    copyFile(pathTest("test_merge_inner.nc"), fileName);
 
     const double diff = 10.0, scale = 1.2;
     DataPtr read1, read2;
@@ -102,15 +96,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
     }
 
     const string fileName("test_scaled.nc");
-    {
-        const string topSrcDir(TOP_SRCDIR);
-        const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
-        ifstream orig(origFileName.c_str());
-        BOOST_CHECK(orig);
-        ofstream copy(fileName.c_str());
-        copy << orig.rdbuf();
-        BOOST_CHECK(copy);
-    }
+    copyFile(pathTest("test_merge_inner.nc"), fileName);
 
     const double addF = 1.0, addK = addF * 5.0/9.0;
     DataPtr read1, read2;
@@ -154,4 +140,3 @@ BOOST_AUTO_TEST_CASE( test_scaled )
 int main(int argc, char* args[]) {
 }
 #endif
-

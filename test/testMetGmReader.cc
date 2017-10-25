@@ -28,8 +28,6 @@
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
-#include <iostream>
-#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -51,19 +49,16 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE(test_read_sample_ed1) {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/sample_ed1.gm");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("sample_ed1.gm");
 
     defaultLogLevel(Logger::INFO);
-    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
+    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
     BOOST_CHECK(true); // made it so far
 #ifdef HAVE_NETCDF_H
     NetCDF_CDMWriter(metgmReaderEd1, "testMetgmReadEd1.nc");
@@ -71,19 +66,13 @@ BOOST_AUTO_TEST_CASE(test_read_sample_ed1) {
 #endif
     Null_CDMWriter(metgmReaderEd1, "");
     BOOST_CHECK(true); // and it is even writeable
-
 }
 
 BOOST_AUTO_TEST_CASE(test_read_metgm2) {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/sample_ed2.gm");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("sample_ed2.gm");
 
     defaultLogLevel(Logger::INFO);
-    CDMReader_p metgmReaderEd2(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
+    CDMReader_p metgmReaderEd2(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
     BOOST_CHECK(true); // made it so far
 #ifdef HAVE_NETCDF_H
     NetCDF_CDMWriter(metgmReaderEd2, "testMetgmReadEd2.nc");
@@ -91,14 +80,12 @@ BOOST_AUTO_TEST_CASE(test_read_metgm2) {
 #endif
     Null_CDMWriter(metgmReaderEd2, "");
     BOOST_CHECK(true); // and it is even writeable
-
 }
 
 BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/sample_ed1.gm");
-    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
+    const string fileName = pathTest("sample_ed1.gm");
+    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(metgmReaderEd1);
     const CDM& cdm = metgmReaderEd1->getCDM();

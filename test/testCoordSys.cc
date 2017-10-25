@@ -32,8 +32,6 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include <numeric>
 
 #include "fimex/NetCDF_CDMReader.h"
@@ -43,17 +41,14 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_coordSys )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/coordTest.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("coordTest.nc");
     CDMReader_p reader(new NetCDF_CDMReader(fileName));
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
@@ -65,8 +60,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     string altitude = "altitude";
     vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(altitude));
     if (varSysIt == coordSys.end()) {
-        cerr << "no coordinate system found for " << altitude << endl;
-        BOOST_CHECK(false);
+        BOOST_FAIL("no coordinate system found for '" << altitude << "'");
         return;
     }
     BOOST_CHECK((*varSysIt)->getConventionName() == "CF-1.X");
@@ -116,8 +110,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
 
         // fetch the data
         DataPtr data = reader->getDataSlice(altitude, sb);
-        BOOST_CHECK(data->size() == 11*5*2); // x=11,y=5, v=none, t = 2
-
+        BOOST_CHECK_EQUAL(data->size(), 11*5*2); // x=11,y=5, v=none, t = 2
 
         // get the proj-string for which-ever reason:
         // may return "" if no projection found
@@ -125,32 +118,30 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         //string projStr = (*varSysIt)->getProjString();
 
     } else {
-        BOOST_CHECK(false); // not simpleSpatialGrid
+        BOOST_FAIL("not a simple spatial grid");
     }
 
     // slice check, varName is 4d sequence, starting at 0
     string varName("cloud_area_fraction_in_atmosphere_layer");
     varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt == coordSys.end()) {
-        cerr << "no coordinate system found for " << varName << endl;
-        BOOST_CHECK(false);
-        return;
+        BOOST_FAIL("no coordinate system found for '" << varName << "'");
     }
     if (!(*varSysIt)->isSimpleSpatialGridded()) {
-        BOOST_CHECK(false);
+        BOOST_FAIL("cs not a simple spatial grid");
     }
     const CoordinateSystem& cs = **varSysIt;
     DataPtr allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
     size_t n = 11 * 11 * 4 * 4;
-    BOOST_CHECK(allData->size() == n);
+    BOOST_REQUIRE_EQUAL(allData->size(), n);
     boost::shared_array<short> all = allData->asShort();
-    BOOST_CHECK(accumulate(all.get(), all.get()+n, 0UL) == static_cast<size_t>(n*(n-1)/2)); // gauss computation of sum of sequence
+    BOOST_CHECK_EQUAL(accumulate(all.get(), all.get()+n, 0UL),static_cast<size_t>(n*(n-1)/2)); // gauss computation of sum of sequence
 
     // check accessor function
     string timeAxis = reader->getCDM().getTimeAxis("cloud_area_fraction_in_atmosphere_layer");
-    BOOST_CHECK(timeAxis == "time");
+    BOOST_CHECK_EQUAL(timeAxis, "time");
     timeAxis = reader->getCDM().getTimeAxis("time");
-    BOOST_CHECK(timeAxis == "time");
+    BOOST_CHECK_EQUAL(timeAxis, "time");
 
     SliceBuilder sb(cdm, varName);
     // last slice
@@ -159,16 +150,16 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     // generic slice reader
     DataPtr sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     size_t s = 11*11;
-    BOOST_CHECK(sData->size() == s);
+    BOOST_CHECK_EQUAL(sData->size(), s);
     boost::shared_array<short> slice = sData->asShort();
-    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0UL) == static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
+    BOOST_CHECK_EQUAL(accumulate(slice.get(), slice.get()+s, 0UL), static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
 
     // native slice reader
     sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     s = 11*11;
-    BOOST_CHECK(sData->size() == s);
+    BOOST_CHECK_EQUAL(sData->size(), s);
     slice = sData->asShort();
-    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0UL) == static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
+    BOOST_CHECK_EQUAL(accumulate(slice.get(), slice.get()+s, 0UL), static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
 
     // vertical slice, general reader
     sb.setStartAndSize(cs.getGeoXAxis(), 1, 1);
@@ -177,10 +168,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     sb.setStartAndSize(cs.getTimeAxis(), 2, 1);
     sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     slice = sData->asShort();
-    BOOST_CHECK(sData->size() == 4);
+    BOOST_REQUIRE_EQUAL(sData->size(), 4);
     short firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s)));
+        BOOST_CHECK_EQUAL(slice[i], static_cast<short>(firstVal+(i*s)));
     }
 
     // general time slice
@@ -190,10 +181,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     sb.setStartAndSize(cs.getTimeAxis(), 0, 4);
     sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     slice = sData->asShort();
-    BOOST_CHECK(sData->size() == 4);
+    BOOST_REQUIRE_EQUAL(sData->size(), 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s*4)));
+        BOOST_CHECK_EQUAL(slice[i], static_cast<short>(firstVal+(i*s*4)));
     }
 
     // vertical slice, native reader
@@ -203,10 +194,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     sb.setStartAndSize(cs.getTimeAxis(), 2, 1);
     sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     slice = sData->asShort();
-    BOOST_CHECK(sData->size() == 4);
+    BOOST_REQUIRE_EQUAL(sData->size(), 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s)));
+        BOOST_CHECK_EQUAL(slice[i], static_cast<short>(firstVal+(i*s)));
     }
 
     // native time slice
@@ -216,26 +207,20 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     sb.setStartAndSize(cs.getTimeAxis(), 0, 4);
     sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     slice = sData->asShort();
-    BOOST_CHECK(sData->size() == 4);
+    BOOST_REQUIRE_EQUAL(sData->size(), 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s*4)));
+        BOOST_CHECK_EQUAL(slice[i], static_cast<short>(firstVal+(i*s*4)));
     }
 
     // check reference time
     boost::posix_time::ptime refTime = getUniqueForecastReferenceTime(reader);
     BOOST_CHECK(refTime == boost::posix_time::ptime(boost::gregorian::date(2000,1,1), boost::posix_time::time_duration(10,0,0)));
-
 }
 
 BOOST_AUTO_TEST_CASE( test_vTrans )
 {
-    string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/verticalOceanSG2.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
+    const string fileName = pathTest("verticalOceanSG2.nc");
     CDMReader_p reader(new NetCDF_CDMReader(fileName));
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
@@ -257,4 +242,3 @@ BOOST_AUTO_TEST_CASE( test_vTrans )
 int main(int argc, char* args[]) {
 }
 #endif
-

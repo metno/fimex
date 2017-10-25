@@ -35,14 +35,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include <unistd.h>
-#include <iostream>
-#include <fstream>
+
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -53,21 +54,20 @@ struct TestConfig {
     TestConfig();
     ~TestConfig();
 };
+
 TestConfig::TestConfig()
 {
-    string topSrcDir(TOP_SRCDIR);
     char* cwd = getcwd(oldDir, sizeof(oldDir));
     assert(cwd == oldDir);
-    if (chdir((topSrcDir+"/test/data").c_str()) != 0) {
-        std::cerr << "cannot go to: " << (topSrcDir+"/test/data") << endl;
-        BOOST_CHECK(false);
+    const string test_data = pathTest("data");
+    if (chdir(test_data.c_str()) != 0) {
+        BOOST_FAIL("cannot chdir to '" << test_data << "'");
     }
 }
 TestConfig::~TestConfig()
 {
     if (chdir(oldDir) != 0) {
-        std::cerr << "cannot go to: " << oldDir << endl;
-        BOOST_CHECK(false);
+        BOOST_FAIL("cannot chdir to '" << oldDir << "'");
     }
 }
 } // namespace
@@ -77,12 +77,7 @@ BOOST_FIXTURE_TEST_SUITE(suite, TestConfig);
 BOOST_AUTO_TEST_CASE( test_joinExisting )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string ncmlName("joinExistingAgg.ncml");
-    if (!ifstream(ncmlName.c_str())) {
-        // no testfile
-        BOOST_CHECK(false);
-        return;
-    }
+    const string ncmlName = require("joinExistingAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
     BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
@@ -95,20 +90,12 @@ BOOST_AUTO_TEST_CASE( test_joinExisting )
     sb = SliceBuilder(reader->getCDM(), "unlim");
     sb.setStartAndSize("unlim", 3, 1);
     BOOST_CHECK(reader->getDataSlice("unlim", sb)->asShort()[0] == 4);
-
-    BOOST_CHECK(true);
-
 }
 
 BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string ncmlName("joinExistingAggSuffix.ncml");
-    if (!ifstream(ncmlName.c_str())) {
-        // no testfile
-        BOOST_CHECK(false);
-        return;
-    }
+    const string ncmlName = require("joinExistingAggSuffix.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
@@ -119,27 +106,16 @@ BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
 BOOST_AUTO_TEST_CASE( test_aggNothing )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string ncmlName("aggNothing.ncml");
-    if (!ifstream(ncmlName.c_str())) {
-        // no testfile
-        BOOST_CHECK(false);
-        return;
-    }
+    const string ncmlName = require("aggNothing.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
-
 }
 
 BOOST_AUTO_TEST_CASE( test_aggWrong )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string ncmlName("aggWrong.ncml");
-    if (!ifstream(ncmlName.c_str())) {
-        // no testfile
-        BOOST_CHECK(false);
-        return;
-    }
+    const string ncmlName = require("aggWrong.ncml");
     // suppress ERROR: file unreadable
     defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
@@ -152,12 +128,7 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
 BOOST_AUTO_TEST_CASE( test_union )
 {
     //defaultLogLevel(Logger::DEBUG);
-    string ncmlName("unionAgg.ncml");
-    if (!ifstream(ncmlName.c_str())) {
-        // no testfile
-        BOOST_CHECK(false);
-        return;
-    }
+    const string ncmlName = require("unionAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     BOOST_CHECK(true);
     BOOST_CHECK(reader->getCDM().hasVariable("b"));
@@ -172,7 +143,6 @@ BOOST_AUTO_TEST_CASE( test_union )
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 1, 1);
     BOOST_CHECK(reader->getDataSlice("multi", sb)->asShort()[1] == -2);
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

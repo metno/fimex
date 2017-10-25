@@ -32,13 +32,14 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include <iostream>
-#include <fstream>
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
 #endif
+
+#include "testinghelpers.h"
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -57,21 +58,19 @@ BOOST_AUTO_TEST_CASE( test_CDMconstants )
 
 BOOST_AUTO_TEST_CASE( test_fileDetection )
 {
-    string topSrcDir(TOP_SRCDIR);
-    BOOST_CHECK(CDMFileReaderFactory::detectFileType(topSrcDir + "/test/coordTest.nc") == MIFI_FILETYPE_NETCDF);
-    std::string feltFile(topSrcDir + "/test/flth00.dat");
-    if (ifstream(feltFile.c_str())) {
+    const string fileName = pathTest("coordTest.nc");
+    BOOST_CHECK(CDMFileReaderFactory::detectFileType(fileName) == MIFI_FILETYPE_NETCDF);
+    if (hasTestExtra()) {
+        const std::string feltFile = pathTestExtra("flth00.dat");
         BOOST_CHECK(CDMFileReaderFactory::detectFileType(feltFile) == MIFI_FILETYPE_FELT);
     }
     if (fimexHas(MIFI_FILETYPE_NETCDF)) {
-        CDMReader_p reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordTest.nc");
+        CDMReader_p reader = CDMFileReaderFactory::create("netcdf", fileName);
         BOOST_CHECK(reader.get() != 0);
 #ifdef HAVE_NETCDF_H
         BOOST_CHECK(dynamic_cast<NetCDF_CDMReader*>(reader.get()) != 0);
 #endif
-
     }
-    BOOST_CHECK(true);
 }
 
 #else
@@ -79,4 +78,3 @@ BOOST_AUTO_TEST_CASE( test_fileDetection )
 int main(int argc, char* args[]) {
 }
 #endif
-
