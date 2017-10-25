@@ -27,7 +27,6 @@
 #include "fimex/interpolation.h"
 
 #include <cmath>
-#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -56,6 +55,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_points2position )
     }
 }
 
+
 BOOST_AUTO_TEST_CASE( test_mifi_points2position_reverse )
 {
     double axis[5] = {5., 4., 3., 2., 1.};
@@ -72,6 +72,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_points2position_reverse )
     }
 }
 
+
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
 {
     float infield[4] = {1., 2., 1., 2.}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
@@ -81,6 +82,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
     // std::cerr << outvalues[0] << std::endl;
     BOOST_CHECK(std::fabs(outvalues[0] - 1.) < 1e-10);
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 {
@@ -112,6 +114,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
     mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
     BOOST_CHECK(mifi_isnanf(outvalues[0]));
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 {
@@ -153,8 +156,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
     BOOST_CHECK(mifi_isnanf(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 1, 2.5, 4, 4, 1);
     BOOST_CHECK(mifi_isnanf(outvalues[0]));
-
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_f )
 {
@@ -182,6 +185,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_f )
     }
 }
 
+
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_d )
 {
     const int nr = 4;
@@ -207,6 +211,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_d )
         BOOST_CHECK_CLOSE(outfield[i], infieldA[i]+2*(infieldB[i]-infieldA[i]), 1e-5);
     }
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
 {
@@ -234,6 +239,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
     BOOST_CHECK_CLOSE(outfield[0], 912.781f, 1e-3);
 }
 
+
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
 {
     const int nr = 1;
@@ -258,6 +264,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 800.);
     BOOST_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
 {
@@ -314,84 +321,81 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     // reading the data
     // i j country-id
     std::ifstream datafile (pathTest("inData.txt").c_str(), std::ios::in);
-    if (datafile.is_open()) {
-        datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
-        int line = 0;
-        while (true) {
-            ++line;
-            int x, y;
-            float country;
-            try {
-                datafile >> x;
-                datafile >> y;
-                datafile >> country;
-                inArray[mifi_3d_array_position(x-1,y-1,0,iSize,jSize,zSize)] = country;
-            } catch (std::ifstream::failure& fail) {
-                if (datafile.eof()) {
-                    break;
-                } else {
-                    std::cerr << "Exception in line: " << line << "\t" << x << " " << y << " " << country << std::endl;
-                    assert(false);
-                }
-            }
+    BOOST_REQUIRE(datafile.is_open());
+    datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
+    int line = 0;
+    while (true) {
+        ++line;
+        int x, y;
+        float country;
+        try {
+            datafile >> x;
+            datafile >> y;
+            datafile >> country;
+            inArray[mifi_3d_array_position(x-1,y-1,0,iSize,jSize,zSize)] = country;
+        } catch (std::exception& fail) {
+            BOOST_REQUIRE_MESSAGE(datafile.eof(), "Exception '" << fail.what()
+                                  << "' in line: " << line <<
+                                  " with x=" << x << " y=" << y << " country=" << country);
+            break;
         }
-        datafile.close();
-    } else {
-        std::cerr << "inData.txt: no such file" << std::endl;
-        assert(false);
     }
-    assert(std::fabs(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
+    datafile.close();
+    BOOST_REQUIRE(std::fabs(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
 
-    //std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
-    BOOST_CHECK(
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR,
-                       emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                       latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-    == MIFI_OK);
+    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR,
+                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
+                == MIFI_OK);
     // -25 43 32 (long, lat, val)
     BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
-    //std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-    //std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
+#if 0
+    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " "
+              << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+    std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
+#endif
 
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    BOOST_CHECK(
-    mifi_interpolate_f(MIFI_INTERPOL_BILINEAR,
-                       emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                       latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-    == MIFI_OK);
+    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BILINEAR,
+                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
+                == MIFI_OK);
     // -25 43 32 (long, lat, val)
     BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
-    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-
+#if 0
+    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
+              << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
     std::ofstream bilinearOut("bilinearOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bilinearOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
         }
     }
-
+#endif
 
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    BOOST_CHECK(
-    mifi_interpolate_f(MIFI_INTERPOL_BICUBIC,
-                       emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                       latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-    == MIFI_OK);
+    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BICUBIC,
+                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
+                == MIFI_OK);
     // -25 43 32 (long, lat, val)
     BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
-    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-
+#if 0
+    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
+              << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
     std::ofstream bicubicOut("bicubicOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bicubicOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
         }
     }
+#endif
 }
+
 
 BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 {
@@ -420,8 +424,14 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
     float vOut[5*5];
     float uRot[5*5];
     float vRot[5*5];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis,
+                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis,
+                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
@@ -430,7 +440,10 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
             //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1);
+    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
+                                   emepProj2.c_str(), uOut, vOut, emepIOutAxis,
+                                   emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                                   5, 5, 1);
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
 //            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
@@ -470,8 +483,14 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
     float vOut[5*5];
     float uRot[5*5];
     float vRot[5*5];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis,
+                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis,
+                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
@@ -480,7 +499,10 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
             //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1);
+    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
+                                   emepProj2.c_str(), uOut, vOut, emepIOutAxis,
+                                   emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                                   5, 5, 1);
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
@@ -527,8 +549,16 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
     float vOut[4*4];
     float uRot[4*4];
     float vRot[4*4];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       4, 4, 1, latlongProj.c_str(), uOut,
+                       longitudeAxis, latitudeAxis,
+                       MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
+                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
+                       4, 4, 1, latlongProj.c_str(), vOut,
+                       longitudeAxis, latitudeAxis,
+                       MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -537,7 +567,10 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
             vRot[j*4+i] = vOut[j*4+i];
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), latlongProj.c_str(), uOut, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1);
+    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
+                                   latlongProj.c_str(), uOut, vOut,
+                                   longitudeAxis, latitudeAxis,
+                                   MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1);
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -591,23 +624,30 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
         exit(1);
     }
     // calculate the positions in the original proj.
-    int errcode = mifi_get_vector_reproject_matrix_field(emepProj.c_str(), latlongProj.c_str(), in_x_field, in_y_field, ox, oy, matrix);
+    int errcode = mifi_get_vector_reproject_matrix_field(emepProj.c_str(),
+        latlongProj.c_str(), in_x_field, in_y_field, ox, oy, matrix);
     BOOST_CHECK(errcode == MIFI_OK);
 
     mifi_vector_reproject_direction_by_matrix_f(MIFI_VECTOR_KEEP_SIZE, matrix, angles, ox, oy, oz);
+#if 0
     for (int i = 0; i < ox; ++i) {
         for (int j = 0; j < oy; ++j) {
-            // std::cerr << "("<<i<<","<<j<<") = ("<<(xOut[oy*j+i]*RAD_TO_DEG)<<","<<(yOut[oy*j+i]*RAD_TO_DEG)<<") -> " << angles[oy*j+i] << std::endl;
+            std::cerr << "(" << i << "," << j << ") = ("
+                      <<(xOut[oy*j+i]*RAD_TO_DEG) <<"," << (yOut[oy*j+i]*RAD_TO_DEG)
+                      << ") -> " << angles[oy*j+i] << std::endl;
         }
     }
+#endif
     BOOST_CHECK_CLOSE(315, angles[0 + oy*0], 1);
     BOOST_CHECK_CLOSE(270, angles[0 + oy*2], 1);
     BOOST_CHECK_CLOSE(225, angles[0 + oy*4], 1);
     float out = angles[2 + oy*0];
-    if (out > 300) out -= 360;
+    if (out > 300)
+        out -= 360;
     BOOST_CHECK_CLOSE(10, 10+out, 1);
     out = angles[2 + oy*1];
-    if (out > 300) out -= 360;
+    if (out > 300)
+        out -= 360;
     BOOST_CHECK_CLOSE(10, 10+out, 1);
     BOOST_CHECK_CLOSE(180, angles[2 + oy*3], 1);
     BOOST_CHECK_CLOSE(180, angles[2 + oy*4], 1);
@@ -618,7 +658,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
 }
 
 
-
 BOOST_AUTO_TEST_CASE( test_Utils )
 {
     std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
@@ -626,7 +665,9 @@ BOOST_AUTO_TEST_CASE( test_Utils )
     for (std::vector<MetNoFimex::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
         if (it->getName() == "grid_mapping_name") {
             found--;
+#if 0
             std::cerr << it->getStringValue() << ":" << std::endl;
+#endif
             BOOST_CHECK((it->getStringValue() == "stereographic") || (it->getStringValue() == "polar_stereographic"));
         }
         if (it->getName() == "scale_factor_at_projection_origin") {
