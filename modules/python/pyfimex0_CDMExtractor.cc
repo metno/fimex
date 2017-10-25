@@ -67,31 +67,46 @@ void reduceDimension_2(MetNoFimex::CDMExtractor_p e, const std::string& dimName,
     e->reduceDimension(dimName, start, length);
 }
 
+void selectVariables_2(MetNoFimex::CDMExtractor_p e, const bp::object variables, bool addAuxiliary)
+{
+  const std::set<std::string> vars = to_std_container< std::set<std::string> >(variables);
+  e->selectVariables(vars, addAuxiliary);
+}
+
+void selectVariables_1(MetNoFimex::CDMExtractor_p e, const bp::object variables)
+{
+  selectVariables_2(e, variables, true);
+}
+
 } // namespace
 
 void pyfimex0_CDMExtractor()
 {
     bp::class_<CDMExtractor, bp::bases<CDMReader>, boost::noncopyable>("_CDMExtractor", bp::no_init)
-            .def("reduceDimension", reduceDimension_1,
-                 "Reduce a dimension\n\n"
-                 ":param dimName: dimension to change\n"
-                 ":param slices: iterable specifying slices to pick\n")
-            .def("reduceDimension", reduceDimension_2,
-                 "Reduce a dimension\n\n"
-                 ":param dimName: dimension to change\n"
-                 ":param start: start-position\n"
-                 ":param length: size of the reduced dimension\n")
-            .def("reduceDimensionStartEnd", reduceDimensionStartEnd,
-                 "Reduce a dimension\n\n"
-                 ":param dimName: dimension to change\n"
-                 ":param start: start-position\n"
-                 ":param end: end-position, 0 means full size, negative values start from end\n")
-            .def("reduceLatLonBoundingBox", &CDMExtractor::reduceLatLonBoundingBox,
-                 "Tries to reduce the horizontal layer to the latitude-longitude bounding box given in degrees -90..90 and -180..180.\n\n"
-                 ":param south: southern border\n"
-                 ":param north: northern border\n"
-                 ":param west: western border\n"
-                 ":param east: eastern border")
+        .def("reduceDimension", reduceDimension_1,
+             "Reduce a dimension\n\n"
+             ":param dimName: dimension to change\n"
+             ":param slices: iterable specifying slices to pick\n")
+        .def("reduceDimension", reduceDimension_2,
+             "Reduce a dimension\n\n"
+             ":param dimName: dimension to change\n"
+             ":param start: start-position\n"
+             ":param length: size of the reduced dimension\n")
+        .def("reduceDimensionStartEnd", reduceDimensionStartEnd,
+             "Reduce a dimension\n\n"
+             ":param dimName: dimension to change\n"
+             ":param start: start-position\n"
+             ":param end: end-position, 0 means full size, negative values start from end\n")
+        .def("reduceLatLonBoundingBox", &CDMExtractor::reduceLatLonBoundingBox,
+             "Tries to reduce the horizontal layer to the latitude-longitude bounding box given in degrees -90..90 and -180..180.\n\n"
+             ":param south: southern border\n"
+             ":param north: northern border\n"
+             ":param west: western border\n"
+             ":param east: eastern border")
+        .def("selectVariables", selectVariables_1,
+             "Remove all variables except the ones selected plus some"
+             " auxiliary variables needed by the selected variables\n\n"
+             ":param variables: iterable specifying variables to select\n")
             ;
     bp::register_ptr_to_python<CDMExtractor_p>();
 

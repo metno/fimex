@@ -31,5 +31,20 @@ class TestExtractor(unittest.TestCase):
         del extra
         del r
 
+    def test_selectVariables(self):
+        test_ncfile = os.path.join(test_srcdir, 'erai.sfc.40N.0.75d.200301011200.nc')
+        r = pyfimex0.createFileReader('netcdf', test_ncfile)
+
+        extra = pyfimex0.createExtractor(r)
+        extra.selectVariables(['x_wind_10m', 'x_wind_10m'])
+
+        e_cdm = extra.getCDM()
+        e_vars = e_cdm.getVariableNames()
+        self.assertTrue('specific_humidity_ml' not in e_vars)
+
+        del extra
+        del r
+
+
 if __name__ == '__main__':
     unittest.main()
