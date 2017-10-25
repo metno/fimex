@@ -21,14 +21,8 @@
  * USA.
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <boost/foreach.hpp>
 
@@ -44,12 +38,10 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-#include "testinghelpers.h"
-
 using namespace std;
 using namespace MetNoFimex;
 
-static int DEBUG = 0;
+static const int DEBUG = 0;
 
 BOOST_AUTO_TEST_CASE(test_interpolator)
 {
@@ -505,8 +497,4 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
     BOOST_CHECK(interpolator->getCDM().getDimension("x").getLength() >  5);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

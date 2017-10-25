@@ -21,14 +21,8 @@
  * USA.
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
@@ -48,8 +42,6 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
 #include "fimex/mifi_constants.h"
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -140,8 +132,4 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
 #endif /* HAVE_NETCDF_H */
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

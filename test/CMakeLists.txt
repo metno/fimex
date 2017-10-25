@@ -10,6 +10,10 @@ IF (NOT TEST_EXTRADATA_DIR)
 ENDIF ()
 MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
+IF (NOT (EXISTS "${TEST_EXTRADATA_DIR}/flth00.dat"))
+  MESSAGE (STATUS "No extra data for tests in '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
+ENDIF ()
+
 SET(CC_TESTS
   testInterpolation
   testVerticalCoordinates
@@ -153,6 +157,9 @@ CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
 ADD_LIBRARY(testinghelpers STATIC
   testinghelpers.cc
   testinghelpers.h
+)
+TARGET_INCLUDE_DIRECTORIES(testinghelpers PRIVATE
+  "${CMAKE_BINARY_DIR}/src" # for fimex_config.h
 )
 TARGET_COMPILE_DEFINITIONS(testinghelpers PRIVATE
   -DTOP_SRCDIR="${CMAKE_SOURCE_DIR}"

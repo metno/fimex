@@ -21,9 +21,8 @@
  * USA.
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/interpolation.h"
 
@@ -37,14 +36,6 @@
 
 // definitions from proj_api.h
 #define RAD_TO_DEG      57.29577951308232
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-
-#include "testinghelpers.h"
 
 using boost::unit_test_framework::test_suite;
 using MetNoFimex::pathTest;
@@ -120,7 +111,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
     BOOST_CHECK(mifi_isnanf(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
     BOOST_CHECK(mifi_isnanf(outvalues[0]));
-
 }
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
@@ -218,7 +208,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_d )
     }
 }
 
-
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
 {
     const int nr = 1;
@@ -270,8 +259,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
     BOOST_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
 
-
-
 BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
@@ -283,8 +270,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
     double outY[9];
     BOOST_CHECK(MIFI_OK == mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
     for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++) BOOST_CHECK((RAD_TO_DEG * outY[j+3*i]) > 89);
-
+        for (int j = 0; j < 3; j++)
+            BOOST_CHECK((RAD_TO_DEG * outY[j+3*i]) > 89);
 }
 
 BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
@@ -628,8 +615,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
     BOOST_CHECK_CLOSE(45, angles[4 + oy*0], 1);
     BOOST_CHECK_CLOSE(90, angles[4 + oy*2], 1);
     BOOST_CHECK_CLOSE(135, angles[4 + oy*4], 1);
-
-    BOOST_CHECK(true);
 }
 
 
@@ -660,9 +645,4 @@ BOOST_AUTO_TEST_CASE( test_Utils )
     BOOST_CHECK(found == 0);
 }
 
-
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

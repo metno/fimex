@@ -24,26 +24,18 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "FeltCDMReader2.h"
 #include "fimex/GribApiCDMWriter.h"
 
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
-
 using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
 namespace fs = boost::filesystem;
-
-#include "testinghelpers.h"
 
 BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
 {
@@ -94,8 +86,4 @@ BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
     BOOST_CHECK(fs::file_size(out) > 5000000);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

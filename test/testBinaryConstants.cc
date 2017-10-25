@@ -24,16 +24,9 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
-
-#include <iostream>
 #include "fimex/binaryConstants.h"
 
 BOOST_AUTO_TEST_CASE(test_binaryConstants) {
@@ -41,13 +34,7 @@ BOOST_AUTO_TEST_CASE(test_binaryConstants) {
     BOOST_CHECK(1 == binary<01>::value);
     BOOST_CHECK(64 == binary<01000000>::value);
     BOOST_CHECK(64 != binary< 1000000>::value); // remember to take octal values
-    // std::cerr << binary<01000000000000000000000ULL>::value;
     BOOST_CHECK(2097152 == binary<01000000000000000000000ULL>::value); // large value
 }
 
-
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

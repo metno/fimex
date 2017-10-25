@@ -21,19 +21,11 @@
  * USA.
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
-
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDM.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-#include <iostream>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -171,7 +163,6 @@ BOOST_AUTO_TEST_CASE( test_dimension)
     BOOST_CHECK(!cdm.testDimensionInUse(dim2Str));
     BOOST_CHECK(cdm.removeDimension(dim2Str));
     BOOST_CHECK(!cdm.removeDimension(dim2Str));
-
 }
 
 BOOST_AUTO_TEST_CASE( test_constructor )
@@ -203,10 +194,6 @@ BOOST_AUTO_TEST_CASE( test_constructor )
     cdm3.addDimension(CDMDimension("xxx2",1));
     BOOST_CHECK(! cdm.hasDimension("xxx2"));
     BOOST_CHECK(cdm3.hasDimension("xxx2"));
-
-
-
-
 }
 
 BOOST_AUTO_TEST_CASE( test_coordinateSystem)
@@ -290,11 +277,6 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
     BOOST_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
     BOOST_CHECK(latRetVal == lat);
     BOOST_CHECK(lonRetVal == lon);
-
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

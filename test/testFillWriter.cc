@@ -24,20 +24,13 @@
  *      Author: heikok
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/FillWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -92,8 +85,4 @@ BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
     BOOST_CHECK(out->getData("latitude")->asFloat()[2*11]-28 < 1e-5);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

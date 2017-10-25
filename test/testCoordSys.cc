@@ -24,13 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include <numeric>
 
@@ -40,8 +35,6 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -237,8 +230,4 @@ BOOST_AUTO_TEST_CASE( test_vTrans )
     BOOST_CHECK(osg2 != 0);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

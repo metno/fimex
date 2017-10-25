@@ -24,13 +24,8 @@
  *      Author: Alexander Bürger
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
@@ -39,8 +34,6 @@ using boost::unit_test_framework::test_suite;
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
 #endif
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -135,8 +128,4 @@ BOOST_AUTO_TEST_CASE( test_scaled )
     }
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

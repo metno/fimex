@@ -21,14 +21,8 @@
  * USA.
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -36,8 +30,6 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -211,8 +203,4 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

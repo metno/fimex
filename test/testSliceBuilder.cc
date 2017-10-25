@@ -24,13 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include "fimex/CDM.h"
 #include <fimex/SliceBuilder.h>
@@ -91,8 +86,4 @@ BOOST_AUTO_TEST_CASE( test_slicebuilder )
     BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "dim2");
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

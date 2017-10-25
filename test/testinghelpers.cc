@@ -1,4 +1,6 @@
 
+// prevent #include <boost/test/unit_test.hpp> from testinghelpers.h here
+#define FIMEX_TESTINGHELPERS_NO_BOOST
 #include "testinghelpers.h"
 
 #include <stdexcept>
@@ -62,3 +64,9 @@ void copyFile(const std::string& from, const std::string& to)
 }
 
 } // namespace MetNoFimex
+
+#ifndef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+// no / old boost testframework
+int main(int argc, char* args[]) {
+}
+#endif // !HAVE_BOOST_UNIT_TEST_FRAMEWORK

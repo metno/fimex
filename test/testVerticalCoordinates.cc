@@ -24,14 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include "fimex/vertical_coordinate_transformations.h"
 
@@ -95,8 +89,4 @@ BOOST_AUTO_TEST_CASE( test_atmosphere_hybrid_sigma_pressure )
         BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

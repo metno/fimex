@@ -23,14 +23,8 @@
  *  Created on: Feb 25, 2015
  */
 
-#include "fimex_config.h"
+#include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-using boost::unit_test_framework::test_suite;
 
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -42,8 +36,6 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
-
-#include "testinghelpers.h"
 
 using namespace MetNoFimex;
 
@@ -171,8 +163,4 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     BOOST_CHECK_CLOSE(5000, va[5], 1);
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

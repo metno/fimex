@@ -3,7 +3,6 @@
 
 // required libraries, always defined
 #define HAVE_UDUNITS2_H 1
-#define HAVE_BOOST_UNIT_TEST_FRAMEWORK 1
 
 // defined if configured
 #cmakedefine HAVE_FELT 1
@@ -16,5 +15,8 @@
 #cmakedefine HAVE_NETCDF_H 1
 #cmakedefine HAVE_NETCDF_HDF5_LIB 1
 #cmakedefine HAVE_PRORADXML 1
+
+// defined if boost version >= 1.34.0
+#cmakedefine HAVE_BOOST_UNIT_TEST_FRAMEWORK 1
 
 #endif // FIMEX_CONFIG_H

@@ -24,15 +24,9 @@
  *      Author: heikok
  */
 
-#include "fimex_config.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-
 #define BOOST_TEST_MODULE fimex
-
-#include <boost/test/unit_test.hpp>
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <unistd.h>
 
@@ -42,8 +36,6 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -147,8 +139,4 @@ BOOST_AUTO_TEST_CASE( test_union )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

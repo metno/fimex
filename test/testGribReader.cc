@@ -24,9 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
-#include <boost/version.hpp>
-#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
+#include "testinghelpers.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -37,13 +36,6 @@
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
-
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-using boost::unit_test_framework::test_suite;
-
-#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -113,8 +105,4 @@ BOOST_AUTO_TEST_CASE(test_read_grb2)
     BOOST_CHECK(true); // and it is even writeable
 }
 
-#else
-// no boost testframework
-int main(int argc, char* args[]) {
-}
-#endif
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
