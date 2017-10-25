@@ -7,6 +7,13 @@ test_srcdir = os.path.join(os.path.dirname(__file__), "..", "..", "test")
 
 class TestReader(unittest.TestCase):
 
+    def test_MifiVersion(self):
+        mv = pyfimex0.mifi_version()
+        self.assertEqual(4, len(mv))
+        major, minor, patch, status = mv
+        self.assertTrue(type(major) is int)
+        self.assertTrue(minor > 0)
+
     def test_OpenAndInspect(self):
         test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
         r = pyfimex0.createFileReader('netcdf', test_ncfile)

@@ -83,17 +83,20 @@ INSTALL(TARGETS pyfimex0
 )
 
 SET(pyfimex0_TESTS
-  test_pyfimex0
-  test_pyfimex0_extractor
-  test_pyfimex0_interpolator
-  test_pyfimex0_netcdf_cdmwriter
+  test_pyfimex0.py
+  test_pyfimex0_extractor.py
+  test_pyfimex0_interpolator.py
+  test_pyfimex0_netcdf_cdmwriter.py
   )
 
 FOREACH(T ${pyfimex0_TESTS})
   ADD_TEST(NAME ${T}
-    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${T}.py"
+    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${T}"
     )
 ENDFOREACH()
 SET_TESTS_PROPERTIES(${pyfimex0_TESTS}
   PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
   )
+
+# dummy target to tell IDEs that these files are part of the project
+ADD_CUSTOM_TARGET(dummy_testfiles SOURCES ${pyfimex0_TESTS})

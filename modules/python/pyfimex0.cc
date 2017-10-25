@@ -24,6 +24,12 @@
  *      Author: Alexander Bürger
  */
 
+#ifdef HAVE_CONFIG_H
+#include "../config.h"
+#endif // HAVE_CONFIG_H
+
+#include "fimex/CDMconstants.h"
+
 #include <boost/python.hpp>
 
 namespace bp = boost::python;
@@ -38,6 +44,16 @@ void pyfimex0_CDMReader();
 void pyfimex0_CDMWriter();
 void pyfimex0_NetCDF_CDMWriter();
 
+namespace {
+bp::object mifi_version()
+{
+    return bp::make_tuple(mifi_version_major(),
+                          mifi_version_minor(),
+                          mifi_version_patch(),
+                          mifi_version_status());
+}
+} // namespace
+
 BOOST_PYTHON_MODULE(pyfimex0)
 {
     pyfimex0_numpy();
@@ -49,4 +65,6 @@ BOOST_PYTHON_MODULE(pyfimex0)
     pyfimex0_CDMInterpolator();
     pyfimex0_CDMExtractor();
     pyfimex0_NetCDF_CDMWriter();
+
+    bp::def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
 }
