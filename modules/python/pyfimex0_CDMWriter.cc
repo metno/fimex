@@ -1,5 +1,5 @@
 /*
- * Fimex, pyfimex0.cc
+ * Fimex, pyfimex0_CDMWriter.cc
  *
  * (C) Copyright 2017, met.no
  *
@@ -24,29 +24,36 @@
  *      Author: Alexander Bürger
  */
 
+#include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMWriter.h"
+
 #include <boost/python.hpp>
 
+using namespace MetNoFimex;
 namespace bp = boost::python;
 
-void pyfimex0_logging();
-void pyfimex0_numpy(); // in pyfimex0_Data.cc
-void pyfimex0_Data();
-void pyfimex0_CDM();
-void pyfimex0_CDMInterpolator();
-void pyfimex0_CDMExtractor();
-void pyfimex0_CDMReader();
-void pyfimex0_CDMWriter();
-void pyfimex0_NetCDF_CDMWriter();
+namespace {
 
-BOOST_PYTHON_MODULE(pyfimex0)
+// wrappers for default arguments
+void createFileWriter4(CDMReader_p reader, const std::string& fileType, const std::string& fileName, const std::string& configFile)
 {
-    pyfimex0_numpy();
-    pyfimex0_logging();
-    pyfimex0_Data();
-    pyfimex0_CDM();
-    pyfimex0_CDMReader();
-    pyfimex0_CDMWriter();
-    pyfimex0_CDMInterpolator();
-    pyfimex0_CDMExtractor();
-    pyfimex0_NetCDF_CDMWriter();
+    createWriter(reader, fileType, fileName, configFile);
+}
+
+void createFileWriter3(CDMReader_p reader, const std::string& fileType, const std::string& fileName)
+{
+    createFileWriter4(reader, fileType, fileName, std::string());
+}
+
+} // namespace
+
+void pyfimex0_CDMWriter()
+{
+    bp::class_<CDMWriter, boost::noncopyable>("_CDMWriter", bp::no_init)
+            ;
+    bp::register_ptr_to_python<CDMWriter_p>();
+
+    bp::def("createFileWriter", createFileWriter4);
+    bp::def("createFileWriter", createFileWriter3);
 }

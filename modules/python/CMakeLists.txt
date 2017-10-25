@@ -45,10 +45,12 @@ INCLUDE_DIRECTORIES(
 SET(pyfimex0_SOURCES
   pyfimex0_logging.cc
   pyfimex0_CDM.cc
-  pyfimex0_CDMReader.cc
   pyfimex0_CDMInterpolator.cc
   pyfimex0_CDMExtractor.cc
+  pyfimex0_CDMReader.cc
+  pyfimex0_CDMWriter.cc
   pyfimex0_Data.cc
+  pyfimex0_NetCDF_CDMWriter.cc
   pyfimex0.cc
 )
 
@@ -84,6 +86,7 @@ SET(pyfimex0_TESTS
   test_pyfimex0
   test_pyfimex0_extractor
   test_pyfimex0_interpolator
+  test_pyfimex0_netcdf_cdmwriter
   )
 
 FOREACH(T ${pyfimex0_TESTS})
