@@ -28,10 +28,12 @@
 #include "../config.h"
 #endif // HAVE_CONFIG_H
 
+#include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/enum.hpp>
 #include <boost/python/handle.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/object.hpp>
@@ -146,9 +148,25 @@ void pyfimex0_numpy()
 
 void pyfimex0_Data()
 {
-    bp::class_<Data, boost::noncopyable>("_Data", bp::no_init)
+  bp::enum_<CDMDataType>("CDMDataType")
+      .value("NAT", CDM_NAT)
+      .value("CHAR", CDM_CHAR)
+      .value("SHORT", CDM_SHORT)
+      .value("INT", CDM_INT)
+      .value("FLOAT", CDM_FLOAT)
+      .value("DOUBLE", CDM_DOUBLE)
+      .value("STRING", CDM_STRING)
+      .value("UCHAR", CDM_UCHAR)
+      .value("USHORT", CDM_USHORT)
+      .value("UINT", CDM_UINT)
+      .value("INT64", CDM_INT64)
+      .value("UINT64", CDM_UINT64)
+      .value("STRINGS", CDM_STRINGS)
+      ;
+
+  bp::class_<Data, boost::noncopyable>("_Data", bp::no_init)
             .def("size", &Data::size)
             .def("values", Data_values)
             ;
-    bp::register_ptr_to_python<DataPtr>();
+  bp::register_ptr_to_python<DataPtr>();
 }
