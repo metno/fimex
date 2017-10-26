@@ -31,7 +31,7 @@
 
 #include "fimex/CDMconstants.h"
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #  if  __GNUC_PREREQ(6,0)
 // bug fixed
 #  else
