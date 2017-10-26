@@ -12,7 +12,7 @@ compilation
  * c99/c++ compiler
  * libxml2 >= 2.6.0
  * boost library
-   * tested with 1.54, 1.58, and a few other versions
+   * tested with 1.48, 1.54, 1.58, and a few other versions
  * proj-4 >= 4.4.9
  * udunits2 (>= 2.1.9)
 

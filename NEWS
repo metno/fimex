@@ -1,6 +1,9 @@
-  * 2016-10-16? fimex-0.65.0
+  * 2017-10-26 fimex-0.65.0
     * round to nearest when converting floating point to integer
-
+    * python interface for a few functions
+    * allow extra test data (flth00.dat) to reside outside source directory
+    * bugfixes
+  * fimex-0.63.2 ... fimex-0.64.0
   * 2016-06-16 fimex-0.63.1
     * no code changes
     * bugfixes for parallel build

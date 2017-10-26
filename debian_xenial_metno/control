@@ -50,6 +50,15 @@ Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
 
+Package: libfimex-dev
+Section: libdevel
+Architecture: i386 amd64 ia64 powerpc
+Depends: ${misc:Depends},
+ libfimex-0.23-dev (= ${binary:Version})
+Description: library for geo-spatial gridded data
+ Provides an unversioned "fimex" pkg-config file forwarding to the current
+ libfimex version.
+
 Package: libfimex-0.23-0
 Section: libs
 Architecture: i386 amd64 ia64 powerpc
