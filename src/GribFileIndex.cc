@@ -883,22 +883,23 @@ static const xmlChar* xmlCast(const std::string& msg)
     return reinterpret_cast<const xmlChar*> (msg.c_str());
 }
 
-const long GribFileMessage::getEdition() const
+long GribFileMessage::getEdition() const
 {
     return edition_;
 }
-
 
 const std::string& GribFileMessage::getFileURL() const
 {
     return fileURL_;
 }
-const off_t GribFileMessage::getFilePosition() const
+
+off_t GribFileMessage::getFilePosition() const
 {
     return filePos_;
 }
+
 /// messages number within a multi-message
-const size_t GribFileMessage::getMessageNumber() const
+size_t GribFileMessage::getMessageNumber() const
 {
     return msgPos_;
 }

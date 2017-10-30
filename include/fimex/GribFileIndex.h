@@ -65,11 +65,11 @@ public:
     /// give a xml-string representation
     std::string toString() const;
     /// accessors
-    const long getEdition() const;
+    long getEdition() const;
     const std::string& getFileURL() const;
-    const off_t getFilePosition() const;
+    off_t getFilePosition() const;
     /// messages number within a multi-message
-    const size_t getMessageNumber() const;
+    size_t getMessageNumber() const;
     const std::string& getName() const;
     const std::string& getShortName() const;
     boost::posix_time::ptime getValidTime() const;
