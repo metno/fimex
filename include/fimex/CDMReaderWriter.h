@@ -47,7 +47,7 @@ public:
 
     /**
      * @brief flush data to disc
-     */;
+     */
     virtual void sync() = 0;
 
     /**
