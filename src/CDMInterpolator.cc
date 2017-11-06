@@ -657,9 +657,9 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            // get lat / lon info
            std::string tmplLatName;
            std::string tmplLonName;
-           MetNoFimex::CDMAttribute coordsAtt;
 
            if(!tmplCdmRef.getLatitudeLongitude(tmplRefVarName, tmplLatName, tmplLonName)) {
+               MetNoFimex::CDMAttribute coordsAtt;
                if(tmplCdmRef.getAttribute(tmplRefVarName, "coordinates", coordsAtt)) {
                    std::vector<std::string> coords;
                    boost::split(coords, coordsAtt.getStringValue(), boost::is_any_of(" "));
@@ -679,10 +679,8 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            DataPtr tmplLatVals = tmplReader->getScaledData(tmplLatName);
            DataPtr tmplLonVals = tmplReader->getScaledData(tmplLonName);
            // get X / Y info
-           std::string tmplXName;
-           std::string tmplYName;
-           tmplXName = tmplCdmRef.getHorizontalXAxis(tmplRefVarName);
-           tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
+           std::string tmplXName = tmplCdmRef.getHorizontalXAxis(tmplRefVarName);
+           std::string tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
            DataPtr tmplXData = tmplReader->getScaledData(tmplXName);
            DataPtr tmplYData = tmplReader->getScaledData(tmplYName);
            boost::shared_array<double> tmplXArray = tmplXData->asDouble();
@@ -1790,7 +1788,9 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         mifi_points2position(&latY[0], tmplLatVals->size(), orgYAxisArray.get(), def.yAxisData->size(), miupYAxis);
         mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
 
-        LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
+        LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") "
+                  << def.xAxisData->size() << "x" << def.yAxisData->size()
+                  << " => " << out_x_axis.size() << "x" << out_y_axis.size());
         boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(def.xAxisName, def.yAxisName, method,
                                         lonX,
                                         latY,
