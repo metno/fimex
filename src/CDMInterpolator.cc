@@ -676,15 +676,15 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            if(tmplLatName.empty())
                tmplLatName = "latitude";
 
-           DataPtr tmplLatVals = tmplReader->getData(tmplLatName);
-           DataPtr tmplLonVals = tmplReader->getData(tmplLonName);
+           DataPtr tmplLatVals = tmplReader->getScaledData(tmplLatName);
+           DataPtr tmplLonVals = tmplReader->getScaledData(tmplLonName);
            // get X / Y info
            std::string tmplXName;
            std::string tmplYName;
            tmplXName = tmplCdmRef.getHorizontalXAxis(tmplRefVarName);
            tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
-           DataPtr tmplXData = tmplReader->getData(tmplXName);
-           DataPtr tmplYData = tmplReader->getData(tmplYName);
+           DataPtr tmplXData = tmplReader->getScaledData(tmplXName);
+           DataPtr tmplYData = tmplReader->getScaledData(tmplYName);
            boost::shared_array<double> tmplXArray = tmplXData->asDouble();
            boost::shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
