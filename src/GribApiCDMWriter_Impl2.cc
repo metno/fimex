@@ -32,6 +32,19 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
+namespace {
+double clamp_lon(double lon)
+{
+    while (lon < 0) {
+        lon += 360;
+    }
+    while (lon > 360) {
+        lon -= 360;
+    }
+    return lon;
+}
+} // namespace
+
 namespace MetNoFimex
 {
 
@@ -116,6 +129,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
                     orientationOfTheGridInDegrees = ait->getData()->asDouble()[0];
                 }
             }
+            orientationOfTheGridInDegrees = clamp_lon(orientationOfTheGridInDegrees);
             std::string polar_stereographic("polar_stereographic");
             size_t ps_size = polar_stereographic.size();
             GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", polar_stereographic.c_str(), &ps_size), "");
@@ -130,11 +144,9 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "DyInMetres", (yArray[1] - yArray[0])),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                double lon = cdmReader->getData(longitude)->asDouble()[0];
-                while (lon < 0) {
-                    lon += 360;
-                }
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asDouble()[0]),"");
+                double lon = clamp_lon(cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]);
+                double lat = cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0];
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", lat),"");
                 GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon),"");
             } else {
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
@@ -156,18 +168,12 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
                 }
                 const boost::shared_array<double> longs = lonData->asDouble();
                 const boost::shared_array<double> lats = latData->asDouble();
-               di = longs[1] - longs[0];
+                di = longs[1] - longs[0];
                 dj = lats[1] - lats[0];
                 lat0 = lats[0];
                 latX = lats[nj-1];
-                lon0 = longs[0];
-                lonX = longs[ni-1];
-                while (lon0 < 0) {
-                    lon0 += 360;
-                }
-                while (lonX < 0) {
-                    lonX += 360;
-                }
+                lon0 = clamp_lon(longs[0]);
+                lonX = clamp_lon(longs[ni-1]);
             } else {
                 throw CDMException("could not find latitude/longitude for varName: " + varName);
             }
@@ -204,7 +210,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             size_t ni = rLonData->size();
             size_t nj = rLatData->size();
             if (ni < 2 || nj < 2) {
-                throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+                throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: ("
+                                   + type2string(ni) + "," + type2string(nj) + ")");
             }
             double di, dj, rlon0, rlat0, rlonX, rlatX;
             const boost::shared_array<double> rlongs = rLonData->asDouble();
@@ -213,19 +220,15 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             dj = rlats[1] - rlats[0];
             rlat0 = rlats[0];
             rlatX = rlats[nj-1];
-            rlon0 = rlongs[0];
-            rlonX = rlongs[ni-1];
-            while (rlon0 < 0) {
-                rlon0 += 360;
-            }
-            while (rlonX < 0) {
-                rlonX += 360;
-            }
+            rlon0 = clamp_lon(rlongs[0]);
+            rlonX = clamp_lon(rlongs[ni-1]);
             CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_longitude"));
-            if (ait == projAttrs.end()) throw CDMException("grid_north_pole_longitude not found for projection " + proj->toString());
+            if (ait == projAttrs.end())
+                throw CDMException("grid_north_pole_longitude not found for projection " + proj->toString());
             double northPoleLon = ait->getData()->asDouble()[0];
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_latitude"));
-            if (ait == projAttrs.end()) throw CDMException("grid_north_pole_latitude not found for projection " + proj->toString());
+            if (ait == projAttrs.end())
+                throw CDMException("grid_north_pole_latitude not found for projection " + proj->toString());
             double northPoleLat = ait->getData()->asDouble()[0];
 
             double southPoleLat = -1 * northPoleLat;
@@ -233,10 +236,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
                 southPoleLat += 180;
             }
 
-            double southPoleLon = northPoleLon - 180;
-            while (southPoleLon < 0) {
-                southPoleLon += 360;
-            }
+            double southPoleLon = clamp_lon(northPoleLon - 180);
 
             std::string typeOfGrid("rotated_ll");
             // TODO: this seems still to be inperfect, more tests required
@@ -285,7 +285,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             }
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("longitude_of_central_meridian"));
             if (ait != projAttrs.end()) {
-                lonV = ait->getData()->asDouble()[0];
+                lonV = clamp_lon(ait->getData()->asDouble()[0]);
             }
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("latitude_of_projection_origin"));
             if (ait != projAttrs.end()) {
@@ -294,7 +294,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             }
             const DataPtr xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");
             const DataPtr yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
-            if (xData->size() < 2 || yData->size() < 2) throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
+            if (xData->size() < 2 || yData->size() < 2)
+                throw CDMException(varName + " variable has too small x-y dimensions, not a grid for GRIB");
             boost::shared_array<double> xArray = xData->asDouble();
             double dx = xArray[1] - xArray[0];
             boost::shared_array<double> yArray = yData->asDouble();
@@ -315,8 +316,10 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "LoVInDegrees", lonV),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]),"");
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]),"");
+                const double lat_1st = cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0];
+                const double lon_1st = clamp_lon(cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]);
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", lat_1st),"");
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon_1st),"");
             } else {
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
             }
