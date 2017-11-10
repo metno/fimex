@@ -131,7 +131,7 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
     SET_TARGET_PROPERTIES(${shared_lib} PROPERTIES
       VERSION ${lib_version}
       SOVERSION ${lib_soversion}
-      OUTPUT_NAME "${name}-${FIMEX_LIBNAME_VERSION}"
+      OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
       )
     INSTALL(TARGETS ${shared_lib}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -150,7 +150,7 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
       TARGET_COMPILE_DEFINITIONS(${static_lib} PUBLIC ${definitions})
     ENDIF()
     SET_TARGET_PROPERTIES(${static_lib} PROPERTIES
-      OUTPUT_NAME "${name}-${FIMEX_LIBNAME_VERSION}"
+      OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
       )
     INSTALL(TARGETS ${static_lib}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
