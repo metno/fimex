@@ -155,30 +155,26 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
         } else if (projection == "latitude_longitude") {
             LOG4FIMEX(logger, Logger::INFO, "latlong projection for" << varName);
-            size_t ni, nj;
-            double di, dj, lon0, lat0, lonX, latX;
             std::string latitude, longitude;
-            if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                DataPtr lonData = cdmReader->getScaledDataInUnit(longitude, "degree");
-                DataPtr latData = cdmReader->getScaledDataInUnit(latitude, "degree");
-                ni = lonData->size();
-                nj = latData->size();
-                if (ni < 2 || nj < 2) {
-                    throw CDMException("longitude, latitude for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
-                }
-                const boost::shared_array<double> longs = lonData->asDouble();
-                const boost::shared_array<double> lats = latData->asDouble();
-                di = longs[1] - longs[0];
-                dj = lats[1] - lats[0];
-                lat0 = lats[0];
-                latX = lats[nj-1];
-                lon0 = clamp_lon(longs[0]);
-                lonX = clamp_lon(longs[ni-1]);
-            } else {
+            if (!cdm.getLatitudeLongitude(varName, latitude, longitude))
                 throw CDMException("could not find latitude/longitude for varName: " + varName);
+            DataPtr lonData = cdmReader->getScaledDataInUnit(longitude, "degree");
+            DataPtr latData = cdmReader->getScaledDataInUnit(latitude, "degree");
+            const size_t ni = lonData->size();
+            const size_t nj = latData->size();
+            if (ni < 2 || nj < 2) {
+                throw CDMException("longitude, latitude for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
             }
-            std::string typeOfGrid("regular_ll");
+            const boost::shared_array<double> longs = lonData->asDouble();
+            const boost::shared_array<double> lats = latData->asDouble();
+            const double di = longs[1] - longs[0];
+            const double dj = lats[1] - lats[0];
+            const double lat0 = lats[0];
+            const double latX = lats[nj-1];
+            const double lon0 = clamp_lon(longs[0]);
+            const double lonX = clamp_lon(longs[ni-1]);
             // TODO: untested
+            const std::string typeOfGrid("regular_ll");
             size_t tog_size = typeOfGrid.size();
             GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAParallel", ni),"");
@@ -187,8 +183,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", fabs(dj)),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", lat0),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon0),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", lat0),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", lon0),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", latX),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", lonX),"");
             if (dj < 0) {
                 // reading north -> south
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
