@@ -37,11 +37,22 @@ namespace bp = boost::python;
 namespace {
 
 // wrapper for overload
-DataPtr getDataSlice2(CDMReader_p reader, const std::string& varName, size_t unLimDimPos)
+DataPtr CDMReader__getDataSlice2(CDMReader_p reader, const std::string& varName, size_t unLimDimPos)
 {
     return reader->getDataSlice(varName, unLimDimPos);
 }
 
+// wrapper for overload
+DataPtr CDMReader__getScaledDataSlice2(CDMReader_p reader, const std::string& varName, size_t unLimDimPos)
+{
+    return reader->getScaledDataSlice(varName, unLimDimPos);
+}
+
+// wrapper for overload
+DataPtr CDMReader__getScaledDataSliceInUnit2(CDMReader_p reader, const std::string& varName, const std::string& unit, size_t unLimDimPos)
+{
+    return reader->getScaledDataSliceInUnit(varName, unit, unLimDimPos);
+}
 
 // wrappers for default arguments
 CDMReader_p createFileReader4(const std::string& fileType, const std::string& fileName,
@@ -64,7 +75,9 @@ CDMReader_p createFileReader2(const std::string& fileType, const std::string& fi
 void pyfimex0_CDMReader()
 {
     bp::class_<CDMReader, boost::noncopyable>("_CDMReader", bp::no_init)
-            .def("getDataSlice", getDataSlice2)
+            .def("getDataSlice", CDMReader__getDataSlice2)
+            .def("getScaledDataSlice", CDMReader__getScaledDataSlice2)
+            .def("getScaledDataSliceInUnit", CDMReader__getScaledDataSliceInUnit2)
             .def("getCDM", &CDMReader::getCDM, bp::return_internal_reference<1>())
             ;
     bp::register_ptr_to_python<CDMReader_p>();

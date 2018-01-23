@@ -20,6 +20,10 @@ class TestReader(unittest.TestCase):
 
         self.assertTrue(type(r.getDataSlice('hybrid',0).values()[0]) is numpy.float64)
 
+        self.assertEqual(r.getDataSlice('upward_air_velocity_ml',0).values()[0], 305)
+        self.assertAlmostEqual(r.getScaledDataSlice('upward_air_velocity_ml',0).values()[0], 0.0305)
+        self.assertAlmostEqual(r.getScaledDataSliceInUnit('upward_air_velocity_ml','mm/s',0).values()[0], 30.5)
+
         r_cdm = r.getCDM()
 
         v_xwind10m = r_cdm.getVariable('x_wind_10m')
