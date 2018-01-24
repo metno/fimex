@@ -47,6 +47,19 @@ CDMExtractor_p createExtractor(CDMReader_p reader)
     return boost::make_shared<CDMExtractor>(reader);
 }
 
+void reduceTimeStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& tStart, const std::string& tEnd)
+{
+    FimexTime start(FimexTime::min_date_time);
+    if (!start.parseISO8601(tStart))
+        throw CDMException("cannot parse time '" + tStart + "'");
+
+    FimexTime end(FimexTime::max_date_time);
+    if (!end.parseISO8601(tEnd))
+        throw CDMException("cannot parse time '" + tEnd + "'");
+
+    e->reduceTime(start, end);
+}
+
 void reduceDimensionStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& dimName, size_t start, long long end)
 {
     e->reduceDimensionStartEnd(dimName, start, end);
@@ -93,6 +106,10 @@ void pyfimex0_CDMExtractor()
              ":param dimName: dimension to change\n"
              ":param start: start-position\n"
              ":param end: end-position, 0 means full size, negative values start from end\n")
+        .def("reduceTimeStartEnd", reduceTimeStartEnd,
+             "Reduce time dimension\n\n"
+             ":param tStart: start time as ISO8601 string\n"
+             ":param tEnd: end time as ISO8601 string\n")
         .def("reduceLatLonBoundingBox", &CDMExtractor::reduceLatLonBoundingBox,
              "Tries to reduce the horizontal layer to the latitude-longitude bounding box given in degrees -90..90 and -180..180.\n\n"
              ":param south: southern border\n"

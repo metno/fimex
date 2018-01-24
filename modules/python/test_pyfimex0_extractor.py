@@ -21,6 +21,19 @@ class TestExtractor(unittest.TestCase):
         del r
 
 
+    def test_reduceTimeIso8601(self):
+        test_ncfile = os.path.join(test_srcdir, 'erai.sfc.40N.0.75d.200301011200.nc')
+        r = pyfimex0.createFileReader('netcdf', test_ncfile)
+
+        extra = pyfimex0.createExtractor(r)
+        extra.reduceTimeStartEnd('2017-05-22T06:00:00', '2017-05-22T07:00:00')
+
+        with self.assertRaises(Exception):
+            extra.reduceTimeStartEnd('ooops', '2017-05-22T07:00:00')
+
+        del extra
+        del r
+
     def test_reduceLatLonBoundingBox(self):
         test_ncfile = os.path.join(test_srcdir, 'erai.sfc.40N.0.75d.200301011200.nc')
         r = pyfimex0.createFileReader('netcdf', test_ncfile)
