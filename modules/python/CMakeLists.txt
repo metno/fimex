@@ -49,6 +49,7 @@ SET(pyfimex0_SOURCES
   pyfimex0_CDMExtractor.cc
   pyfimex0_CDMReader.cc
   pyfimex0_CDMWriter.cc
+  pyfimex0_CoordinateSystem.cc
   pyfimex0_Data.cc
   pyfimex0_NetCDF_CDMWriter.cc
   pyfimex0.cc
@@ -84,6 +85,7 @@ INSTALL(TARGETS pyfimex0
 
 SET(pyfimex0_TESTS
   test_pyfimex0.py
+  test_pyfimex0_coordinatesystem.py
   test_pyfimex0_extractor.py
   test_pyfimex0_interpolator.py
   test_pyfimex0_netcdf_cdmwriter.py

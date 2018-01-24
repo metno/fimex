@@ -42,6 +42,7 @@ void pyfimex0_CDMInterpolator();
 void pyfimex0_CDMExtractor();
 void pyfimex0_CDMReader();
 void pyfimex0_CDMWriter();
+void pyfimex0_CoordinateSystem();
 void pyfimex0_NetCDF_CDMWriter();
 
 namespace {
@@ -64,6 +65,7 @@ BOOST_PYTHON_MODULE(pyfimex0)
     pyfimex0_CDMWriter();
     pyfimex0_CDMInterpolator();
     pyfimex0_CDMExtractor();
+    pyfimex0_CoordinateSystem();
     pyfimex0_NetCDF_CDMWriter();
 
     bp::def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
