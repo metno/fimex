@@ -24,6 +24,8 @@ class TestReader(unittest.TestCase):
         self.assertAlmostEqual(r.getScaledDataSlice('upward_air_velocity_ml',0).values()[0], 0.0305)
         self.assertAlmostEqual(r.getScaledDataSliceInUnit('upward_air_velocity_ml','mm/s',0).values()[0], 30.5)
 
+        self.assertTrue(numpy.isnan(r.getScaledDataSlice('upward_air_velocity_ml',1).values()[-1]))
+
         r_cdm = r.getCDM()
 
 
