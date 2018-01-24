@@ -88,6 +88,14 @@ const CDMDimension& CDM__getDimension(const CDM& cdm, const std::string& dimName
     return cdm.getDimension(dimName);
 }
 
+bp::list CDMVariable__getShape(const CDMVariable& var)
+{
+    const std::vector<std::string>& shape = var.getShape();
+    bp::list py_shape;
+    for (size_t i=0; i<shape.size(); ++i)
+        py_shape.append(shape[i]);
+    return py_shape;
+}
 } // namespace
 
 void pyfimex0_CDM()
@@ -105,6 +113,7 @@ void pyfimex0_CDM()
 
     bp::class_<CDMVariable, boost::noncopyable>("_CDMVariable", bp::no_init)
             .def("getName", &CDMVariable::getName, bp::return_value_policy<bp::copy_const_reference>())
+            .def("getShape", CDMVariable__getShape)
             ;
 
     bp::class_<CDM, boost::noncopyable>("_CDM", bp::no_init)

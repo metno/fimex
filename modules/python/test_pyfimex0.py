@@ -26,9 +26,6 @@ class TestReader(unittest.TestCase):
 
         r_cdm = r.getCDM()
 
-        v_xwind10m = r_cdm.getVariable('x_wind_10m')
-        v_xwind10m_name = v_xwind10m.getName()
-        self.assertEqual('x_wind_10m', v_xwind10m_name)
 
         d_ens = r_cdm.getDimension('ensemble_member')
         d_ens_len = d_ens.getLength()
@@ -53,6 +50,16 @@ class TestReader(unittest.TestCase):
         r_gatt = r_cdm.getGlobalAttribute('title')
         self.assertEqual("MEPS 2.5km", r_gatt.getStringValue())
 
+    def test_Variable(self):
+        test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
+        r = pyfimex0.createFileReader('netcdf', test_ncfile)
+        r_cdm = r.getCDM()
+
+        v_xwind10m = r_cdm.getVariable('x_wind_10m')
+        v_xwind10m_name = v_xwind10m.getName()
+        self.assertEqual('x_wind_10m', v_xwind10m_name)
+
+        self.assertEqual(['x', 'y', 'ensemble_member', 'height7', 'time'], v_xwind10m.getShape()) ;
 
 if __name__ == '__main__':
     unittest.main()
