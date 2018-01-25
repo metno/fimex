@@ -38,11 +38,25 @@
 #include <boost/python/list.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/version.hpp>
 
 using namespace MetNoFimex;
 namespace bp = boost::python;
 
 namespace {
+
+template<class T>
+void register_ptr_from_python()
+{
+#if BOOST_VERSION >= 106300
+    // boost 1.63 has an extra template parameter specifying the
+    // shared_ptr type (std::shared_ptr or boost::shared_ptr) and
+    // this template parameter has no default value
+    bp::converter::shared_ptr_from_python<T, boost::shared_ptr>();
+#else
+    bp::converter::shared_ptr_from_python<T>();
+#endif
+}
 
 typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystem_cp;
 typedef boost::shared_ptr<CoordinateSystem> CoordinateSystem_p;
@@ -96,7 +110,7 @@ void pyfimex0_CoordinateSystem()
     bp::class_<CoordinateAxis, bp::bases<CDMVariable>, CoordinateAxis_p, boost::noncopyable>("_CoordinateAxis", bp::no_init)
             ;
     bp::register_ptr_to_python<CoordinateAxis_cp>();
-    bp::converter::shared_ptr_from_python<const CoordinateAxis>();
+    register_ptr_from_python<const CoordinateAxis>();
 
     bp::class_<CoordinateSystem, CoordinateSystem_p, boost::noncopyable>("_CoordinateSystem", bp::no_init)
             .def("id", &CoordinateSystem::id)
@@ -104,7 +118,7 @@ void pyfimex0_CoordinateSystem()
             .def("findAxisOfType", &CoordinateSyste__findAxisOfType2)
             ;
     bp::register_ptr_to_python<CoordinateSystem_cp>();
-    bp::converter::shared_ptr_from_python<const CoordinateSystem>();
+    register_ptr_from_python<const CoordinateSystem>();
 
     bp::def("listCoordinateSystems", listCoordinateSystems1);
     bp::def("findCompleteCoordinateSystemFor", findCompleteCoordinateSystemFor1);
