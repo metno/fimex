@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMFileReaderFactory.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2018, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *

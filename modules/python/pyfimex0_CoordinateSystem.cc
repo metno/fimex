@@ -1,7 +1,7 @@
 /*
- * Fimex, pyfimex0_CDM.cc
+ * Fimex, pyfimex0_CoordinateSystem.cc
  *
- * (C) Copyright 2017, met.no
+ * (C) Copyright 2018, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
