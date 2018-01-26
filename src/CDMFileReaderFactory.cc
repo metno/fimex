@@ -230,6 +230,13 @@ CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(int fileType, const s
     return createReaderWriter(fileType, fileName, configXML, args);
 }
 
+CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const std::string& configFile,
+                                                           const std::vector<std::string>& args)
+{
+    int fileType = detectFileTypeFromNameOrFile(fileTypeName, fileName);
+    return createReaderWriter(fileType | MIFI_FILETYPE_RW, fileName, configFile, args);
+}
+
 CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML,
                                          const std::vector<std::string> & args)
 {

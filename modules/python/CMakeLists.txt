@@ -48,6 +48,7 @@ SET(pyfimex0_SOURCES
   pyfimex0_CDMInterpolator.cc
   pyfimex0_CDMExtractor.cc
   pyfimex0_CDMReader.cc
+  pyfimex0_CDMReaderWriter.cc
   pyfimex0_CDMWriter.cc
   pyfimex0_CoordinateSystem.cc
   pyfimex0_Data.cc
@@ -89,6 +90,7 @@ SET(pyfimex0_TESTS
   test_pyfimex0_extractor.py
   test_pyfimex0_interpolator.py
   test_pyfimex0_netcdf_cdmwriter.py
+  test_pyfimex0_netcdf_cdmreaderwriter.py
   )
 
 FOREACH(T ${pyfimex0_TESTS})

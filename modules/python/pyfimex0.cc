@@ -41,6 +41,7 @@ void pyfimex0_CDM();
 void pyfimex0_CDMInterpolator();
 void pyfimex0_CDMExtractor();
 void pyfimex0_CDMReader();
+void pyfimex0_CDMReaderWriter();
 void pyfimex0_CDMWriter();
 void pyfimex0_CoordinateSystem();
 void pyfimex0_NetCDF_CDMWriter();
@@ -62,6 +63,7 @@ BOOST_PYTHON_MODULE(pyfimex0)
     pyfimex0_Data();
     pyfimex0_CDM();
     pyfimex0_CDMReader();
+    pyfimex0_CDMReaderWriter();
     pyfimex0_CDMWriter();
     pyfimex0_CDMInterpolator();
     pyfimex0_CDMExtractor();

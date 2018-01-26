@@ -116,6 +116,9 @@ public:
 
     static CDMReaderWriter_p createReaderWriter(int fileType, const std::string & fileName, const std::string& configFile = std::string(),
                                                 const std::vector<std::string> & args = std::vector<std::string>());
+
+    static CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = std::string(),
+                                                const std::vector<std::string>& args = std::vector<std::string>());
 };
 
 bool isFeltType(const std::string& type);

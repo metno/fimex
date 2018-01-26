@@ -38,6 +38,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/stl_iterator.hpp>
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/ndarrayobject.h> // ensure you include this header
@@ -122,7 +123,34 @@ bp::object Data_values(DataPtr data)
     case CDM_STRINGS:
         return wrap(data->asStrings(), data->size());
     default:
-        return bp::object();
+        throw CDMException("datatype not supported in pyfimex0");
+    }
+}
+
+template <typename T> DataPtr unwrap(const bp::object& values)
+{
+    const size_t length = bp::len(values);
+    boost::shared_array<T> array(new T[length]);
+    typedef boost::python::stl_input_iterator<T> I;
+    std::copy(I(values), I(), &array[0]);
+    return createData(length, array);
+}
+
+DataPtr Data_create(CDMDataType dataType, bp::object values)
+{
+    switch (dataType) {
+    case CDM_SHORT:
+        return unwrap<short>(values);
+    case CDM_INT:
+        return unwrap<int>(values);
+    case CDM_FLOAT:
+        return unwrap<float>(values);
+    case CDM_DOUBLE:
+        return unwrap<double>(values);
+    case CDM_STRINGS:
+        return unwrap<std::string>(values);
+    default:
+        throw CDMException("datatype not supported in pyfimex0");
     }
 }
 
@@ -169,4 +197,6 @@ void pyfimex0_Data()
             .def("values", Data_values)
             ;
   bp::register_ptr_to_python<DataPtr>();
+
+  bp::def("createData", Data_create);
 }
