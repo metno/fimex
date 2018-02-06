@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<aggregation type="joinExisting">    
+  <netcdf location="joinExistingAgg1.nc nc changeUnlim.ncml" >
+    <variable name="notlimited" type="int">
+      <values>0</values>
+    </variable>
+  </netcdf>
+
+  <netcdf location="joinExistingAgg3.nc nc changeUnlim.ncml" >
+    <variable name="notlimited" type="int">
+      <values>2</values>
+    </variable>
+  </netcdf>
+
+  <netcdf location="joinExistingAgg4.nc nc changeUnlim.ncml" >
+    <variable name="notlimited" type="int">
+      <values>3</values>
+    </variable>
+  </netcdf>
+</aggregation>
+
+</netcdf>

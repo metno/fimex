@@ -36,6 +36,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/NetCDF_CDMWriter.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -114,6 +115,20 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
     BOOST_CHECK(true);
     defaultLogLevel(Logger::INFO);
     BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE( test_aggNewDim )
+{
+    const string ncmlName = require("aggNewDim.ncml");
+    defaultLogLevel(Logger::FATAL);
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
+
+    NetCDF_CDMWriter(reader, test_output, "", 4); // does not work for netcdf-3
+    BOOST_CHECK(true);
+
+    CDMReader_p reader2(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, test_output));
+    BOOST_CHECK(reader->getDataSlice("notlimited", 2)->asInt()[0] == 3);
 }
 
 

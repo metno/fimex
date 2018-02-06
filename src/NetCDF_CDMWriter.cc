@@ -59,8 +59,9 @@ extern "C" {
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
+namespace {
 
+LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 
 int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
@@ -99,6 +100,14 @@ int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
     return retVal;
 }
 
+int ncDimId(int ncId, const CDMDimension* unLimDim)
+{
+    int unLimDimId = -1;
+    if (unLimDim)
+        ncCheck(nc_inq_dimid(ncId, unLimDim->getName().c_str(), &unLimDimId));
+    return unLimDimId;
+}
+
 void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 {
     XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
@@ -107,6 +116,8 @@ void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
     if (size == 0)
         throw CDMException("no root element (/cdm_ncwriter_config) in " + filename);
 }
+
+} // namespace
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile), ncFile(std::auto_ptr<Nc>(new Nc()))
@@ -600,12 +611,13 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
     const CDMDimension* unLimDim = cdm.getUnlimitedDim();
-    long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
+    const int unLimDimId = ncDimId(ncFile->ncId, unLimDim);
+    const long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600)) // openmp gives currently segfaults with intel compilers < 16.
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap, maxUnLim)
+#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
     {
 #pragma omp single
         {
@@ -684,9 +696,12 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     ncCheck(nc_inq_vardimid(ncFile->ncId, varId, &dimIds[0]));
                     size_t count[dimLen];
                     size_t start[dimLen];
+                    int unLimDimIdx = -1;
                     for (int i = 0; i < dimLen; ++i) {
                         start[i] = 0;
                         ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
+                        if (dimIds[i] == unLimDimId)
+                            unLimDimIdx = i;
                     }
                     LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dimIds[0], &dimIds[0]+dimLen));
                     if (unLimDimPos == -1) {
@@ -727,7 +742,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #endif
 #endif
                     } else {
-                        if (cdm.hasUnlimitedDim(cdmVar)) {
+                        if (cdm.hasUnlimitedDim(cdmVar) && unLimDimIdx >= 0) {
                             // variables with unlimited dimension
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
@@ -748,10 +763,9 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                                     size_t size = (dimLen == 0) ? 1 : std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
                                     data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
                                 }
-                                // unlim-dim is in position 0
                                 if (data->size() > 0) {
-                                    count[0] = 1;
-                                    start[0] = unLimDimPos;
+                                    count[unLimDimIdx] = 1;
+                                    start[unLimDimIdx] = unLimDimPos;
                                     try {
                                         ScopedCritical ncLock(Nc::getMutex());
                                         LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName << "("<< unLimDimPos << ")");
