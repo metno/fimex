@@ -317,6 +317,7 @@ DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, const Sl
     if (aggType_ == "joinExisting") {
         if (cdm_->hasUnlimitedDim(variable)) {
             // merge along the unlim-slices
+            // this only works if the unlim dim is the highest (as in netcdf-3)
             string unLimDim = cdm_->getUnlimitedDim()->getName();
             vector<string> dimNames = sb.getDimensionNames();
             vector<size_t> dimStart = sb.getDimensionStartPositions();

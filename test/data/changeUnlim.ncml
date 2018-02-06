@@ -9,5 +9,5 @@
     <values>0</values>
   </variable>
 
-  <variable name="multi" shape="notlimited unlim a" />
+  <variable name="multi" shape="a unlim notlimited" />
 </netcdf>

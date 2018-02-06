@@ -131,6 +131,20 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim )
     BOOST_CHECK(reader->getDataSlice("notlimited", 2)->asInt()[0] == 3);
 }
 
+BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
+{
+    const string ncmlName = require("aggNewDim.ncml");
+    defaultLogLevel(Logger::FATAL);
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    const std::string test_output = std::string(oldDir) + "/test_aggNewDim2.nc";
+
+    SliceBuilder sb(reader->getCDM(), "multi");
+    sb.setStartAndSize("notlimited", 2, 1);
+    const boost::shared_array<int> values = reader->getDataSlice("multi", sb)->asInt();
+    BOOST_CHECK_EQUAL(values[0],  4);
+    BOOST_CHECK_EQUAL(values[1], -4);
+}
+
 
 BOOST_AUTO_TEST_CASE( test_union )
 {
