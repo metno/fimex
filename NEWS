@@ -1,3 +1,8 @@
+  * 2018-02-05 fimex-0.66.0
+    * python interface for a few more functions
+    * if compiling commandline utility without version number, also
+      omit the version number from shared libraries' name
+    * bugfixes
   * 2017-10-26 fimex-0.65.0
     * round to nearest when converting floating point to integer
     * python interface for a few functions
