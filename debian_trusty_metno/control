@@ -144,6 +144,9 @@ Architecture: i386 amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version})
+Provides: python3-pyfimex0
+Conflicts: python3-pyfimex0,
+ python3-pyfimex0-0.65
 Description: python3 interface to libfimex
  Python3 interface to library for File Interpolations, Manipulations
  and EXtraction of gridded geo-spatial data.
