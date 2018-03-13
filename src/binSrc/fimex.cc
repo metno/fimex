@@ -991,8 +991,10 @@ int run(int argc, char* args[])
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
         ("interpolate.postprocess", po::value<string>(), "add a 2d postprocess after the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
-        ("interpolate.latitudeValues", po::value<string>(), "string with latitude values in degree, i.e. 60.5,70,90")
-        ("interpolate.longitudeValues", po::value<string>(), "string with longitude values in degree, i.e. -10.5,-10.5,29.5")
+        ("interpolate.latitudeValues", po::value<string>(), "latitude values, in degrees north, of a list of points to interpolate to, e.g. 60.5,70,90"
+                                                            " (use with 'longitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)")
+        ("interpolate.longitudeValues", po::value<string>(), "longitude values, in degrees east, of a list of points to interpolate to, e.g. -10.5,-10.5,29.5"
+                                                             " (use with 'latitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)")
         ("interpolate.vcrossNames", po::value<string>(), "string with comma-separated names for vertical cross sections")
         ("interpolate.vcrossNoPoints", po::value<string>(), "string with comma-separated number of lat/lon values for each vertical cross sections")
         ("interpolate.template", po::value<string>(), "netcdf file containing lat/lon list used in interpolation")
