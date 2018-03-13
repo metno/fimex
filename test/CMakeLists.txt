@@ -110,6 +110,8 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
     ${GRIBAPI_MI_TESTS}
     ${GRIBAPI_NC_TESTS}
     )
+  CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
+  ADD_TEST(NAME testGrib2SomeUndefined.sh COMMAND testGrib2SomeUndefined.sh)
 ENDIF()
 
 IF((ENABLE_FELT) AND (ENABLE_NETCDF) AND ((ENABLE_GRIBAPI) OR (ENABLE_ECCODES)))

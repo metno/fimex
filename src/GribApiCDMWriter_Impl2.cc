@@ -393,7 +393,7 @@ DataPtr GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(const std::string&
     double outFillValue = inFillValue;
     // missingValue will not be encoded in message, but in a separate bitmap
     GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "bitMapIndicator", 1), "setting bitmap");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "bitmapPresent", 1), "setting bitmap");
 
     double scale = cdm.getScaleFactor(varName);
     double offset = cdm.getAddOffset(varName);

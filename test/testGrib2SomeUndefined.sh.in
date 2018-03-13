@@ -1,0 +1,40 @@
+#! /bin/sh
+
+set -e
+
+GRIB_API_DIR="@grib_api_DIR@"
+if test -d "@grib_api_DIR@/bin"; then
+    export PATH="@grib_api_DIR@/bin:$PATH"
+fi
+if test -d "@eccodes_BASE_DIR@/bin"; then
+    export PATH="@eccodes_BASE_DIR@/bin:$PATH"
+fi
+
+TEST="test writing grib2 with undefined values"
+if command -v grib_get_data > /dev/null; then
+    echo "running $TEST"
+else
+    echo "grib_get_data not found, skipping $TEST"
+    exit 0
+fi
+
+DATA="@CMAKE_CURRENT_SOURCE_DIR@/testdata-grib2-some-undefined"
+DATA_NC="${DATA}.nc"
+DATA_G2="${DATA}.grib2"
+
+./fimex.sh --input.file "${DATA_NC}" \
+           --output.file "${DATA_G2}" \
+           --output.type grib2 \
+           --output.config "@CMAKE_SOURCE_DIR@/share/etc/cdmGribWriterConfig.xml"
+FI_EXIT="$?"
+
+command grib_get_data "${DATA_G2}" 1>/dev/null
+GG_EXIT="$?"
+
+rm -f "${DATA_G2}"
+if [ "$FI_EXIT" != 0 -o "$GG_EXIT" != 0 ]; then
+  echo "failed $TEST"
+  exit 1
+fi
+echo "success"
+exit 0
