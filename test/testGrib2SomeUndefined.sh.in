@@ -18,9 +18,9 @@ else
     exit 0
 fi
 
-DATA="@CMAKE_CURRENT_SOURCE_DIR@/testdata-grib2-some-undefined"
-DATA_NC="${DATA}.nc"
-DATA_G2="${DATA}.grib2"
+DATA="testdata-grib2-some-undefined"
+DATA_NC="@CMAKE_CURRENT_SOURCE_DIR@/${DATA}.nc"
+DATA_G2="@CMAKE_CURRENT_BINARY_DIR@/${DATA}.grib2"
 
 ./fimex.sh --input.file "${DATA_NC}" \
            --output.file "${DATA_G2}" \
