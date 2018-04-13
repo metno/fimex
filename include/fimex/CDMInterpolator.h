@@ -191,8 +191,20 @@ public:
      *
      */
     virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
+
     /**
-     * @brief change the (main) projection of the dataReaders cdm to this new projection
+     * @brief change the (main) projection of the dataReaders cdm to new projection from netcdf template file
+     *
+     * Opens the NetCDF file and calls changeProjection(int, CDMReader_p, const std::string&).
+     * The reference variable in the file must be called "referenceVariable".
+     *
+     * @param method Interpolation method; passed on unchanged
+     * @param netcdf_template_file input-string for netcf template filename
+     */
+    virtual void changeProjection(int method, const std::string& netcdf_template_file);
+
+    /**
+     * @brief change the (main) projection of the dataReaders cdm to new projection from other reader
      *
      * Interpolate/extract latitude/longitude values from regularly gridded
      * input to latitude/longitude values given from a netcdf CF-template . The
@@ -201,10 +213,11 @@ public:
      * @verbinclude ../share/etc/template4interpolation.cdl
      *
      * @param method Interpolation method, only nearestneighbor, bilinear and bicubic supported
-     * @param netcdf_template_file input-string for netcf template filename
-     *
+     * @param tmplReader reader for template
+     * @param tmplRefVarName name of reference variable in template
      */
-    virtual void changeProjection(int method, const std::string& netcdf_template_file);
+    virtual void changeProjection(int method, CDMReader_p tmplReader, const std::string& tmplRefVarName);
+
     /**
      * @brief extract/interpolate a list of lat/lon points
      *
@@ -296,7 +309,6 @@ extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData,
  */
 extern DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue);
 
-
-}
+} // namespace MetNoFimex
 
 #endif /*CDMINTERPOLATOR_H_*/

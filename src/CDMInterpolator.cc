@@ -54,8 +54,9 @@
 
 // boost
 //
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 
 // standard
 #include <functional>
@@ -70,13 +71,16 @@ namespace MetNoFimex
 {
 using namespace std;
 
+typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+typedef boost::shared_ptr<InterpolatorProcess2d> InterpolatorProcess2d_p;
+
 struct CDMInterpolatorInternals {
     CDMReader_p dataReader;
     double maxDistance; // negative = undefined
     std::string latitudeName;
     std::string longitudeName;
-    std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
-    std::vector<boost::shared_ptr<InterpolatorProcess2d> > postprocesses;
+    std::vector<InterpolatorProcess2d_p> preprocesses;
+    std::vector<InterpolatorProcess2d_p> postprocesses;
     // variableName, horizontalId
     std::map<std::string, std::string> projectionVariables;
     // horizontalId, cachedInterpolation
@@ -87,11 +91,10 @@ struct CDMInterpolatorInternals {
     cachedVectorReprojection_t cachedVectorReprojection;
 };
 
+namespace {
 const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
-
-typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-
-static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
+LoggerPtr logger = getLogger("fimex.CDMInterpolator");
+} // namespace
 
 CDMInterpolator::CDMInterpolator(CDMReader_p dataReader)
 : p_(new CDMInterpolatorInternals())
@@ -119,8 +122,9 @@ DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> 
     DataPtr d = createData(size, iData);
     return d->convertDataType(MIFI_UNDEFINED_F, 1., 0., newType, badValue, 1., 0.);
 }
+
+namespace {
 /**
- *
  * run all processes 2d-slice by 2d-slice on the array of size
  *
  * @param processes list of processes
@@ -129,7 +133,7 @@ DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> 
  * @param nx size in x-direction
  * @param ny size in y-direction
  */
-static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > processes, float* array, size_t size, size_t nx, size_t ny)
+void processArray_(vector<InterpolatorProcess2d_p> processes, float* array, size_t size, size_t nx, size_t ny)
 {
     if (processes.size() == 0) return; // nothing to do
 
@@ -153,6 +157,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
 #endif
     return;
 }
+} // namespace
 
 DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
@@ -320,8 +325,9 @@ double CDMInterpolator::getMaxDistanceOfInterest(const vector<double>& out_x_axi
     return maxDist;
 }
 
-
-static string getProjectionName(const string& proj_input) {
+namespace {
+string getProjectionName(const string& proj_input)
+{
     // get the new projection
     std::string newProj;
     boost::smatch what;
@@ -334,6 +340,7 @@ static string getProjectionName(const string& proj_input) {
     if (newProj == "latlon" || newProj == "latlong" || newProj == "lonlat" || newProj == "longlat") return "latlong";
     return newProj;
 }
+} // namespace
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& out_x_axis_type, const string& out_y_axis_type)
 {
@@ -633,6 +640,17 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
         LOG4FIMEX(logger, Logger::WARN, "changeProjection, netcdf_template_file: not found" );
         return;
     }
+    CDMReader_p tmplReader(new NetCDF_CDMReader(netcdf_template_file));
+    changeProjection(method, tmplReader, "referenceVariable");
+#else
+    LOG4FIMEX(logger, Logger::ERROR, "fimex not compiled with netcdf-support, can't change projection by netcdf-template");
+    return;
+#endif
+}
+
+void CDMInterpolator::changeProjection(int method, CDMReader_p tmplReader, const std::string& tmplRefVarName)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "changing projection to template");
 
     *cdm_ = p_->dataReader->getCDM(); // reset previous changes
     p_->projectionVariables.clear();  // reset variables
@@ -644,15 +662,10 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
         case MIFI_INTERPOL_BILINEAR:
         case MIFI_INTERPOL_BICUBIC:
         {
-           // compile template CDM modell from netcdf_template_file
-           boost::shared_ptr<NetCDF_CDMReader> tmplReader(new NetCDF_CDMReader(netcdf_template_file));
-
+           // compile template CDM modell
            const CDM& tmplCdmRef = tmplReader->getCDM();
-
-           const std::string tmplRefVarName("referenceVariable");
-
            if (! tmplCdmRef.hasVariable(tmplRefVarName))
-               throw CDMException(netcdf_template_file + " does not contain reference Variable "+ tmplRefVarName);
+               throw CDMException("template reader CDM does not contain reference Variable '" + tmplRefVarName + "'");
 
            // get lat / lon info
            std::string tmplLatName;
@@ -687,18 +700,10 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            boost::shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
-           std::string proj4string(LAT_LON_PROJSTR);
 
-           changeProjectionByProjectionParametersToLatLonTemplate(method,
-                                                                  proj4string,
-                                                                  tmplXAxisVec,
-                                                                  tmplYAxisVec,
-                                                                  tmplCdmRef.getUnits(tmplXName),
-                                                                  tmplCdmRef.getUnits(tmplYName),
-                                                                  tmplCdmRef.getVariable(tmplXName).getDataType(),
-                                                                  tmplCdmRef.getVariable(tmplYName).getDataType(),
-                                                                  tmplLatVals,
-                                                                  tmplLonVals);
+           changeProjectionByProjectionParametersToLatLonTemplate(method, LAT_LON_PROJSTR, tmplXAxisVec, tmplYAxisVec, tmplCdmRef.getUnits(tmplXName),
+                                                                  tmplCdmRef.getUnits(tmplYName), tmplCdmRef.getVariable(tmplXName).getDataType(),
+                                                                  tmplCdmRef.getVariable(tmplYName).getDataType(), tmplLatVals, tmplLonVals);
            break;
         }
         case MIFI_INTERPOL_COORD_NN:
@@ -713,10 +718,6 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
         default:
             throw CDMException("unknown projection method: " + type2string(method));
     }
-#else
-    LOG4FIMEX(logger, Logger::ERROR, "fimex not compiled with netcdf-support, can't change projection by netcdf-template" );
-    return;
-#endif
 }
 
 map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjectionVars(bool withProjection)
@@ -727,7 +728,6 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
     }
 
     typedef map<string, CoordSysPtr> CoordSysMap;
-    typedef vector<CoordSysPtr> CoordSysVec;
     CoordSysMap coordSysMap;
     p_->projectionVariables.clear();
     vector<string> incompatibleVariables;
@@ -739,15 +739,19 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
         LOG4FIMEX(logger, Logger::WARN, "removing variable " << *iv << " since it is not compatible with the reprojected coordinates");
         cdm_->removeVariable(*iv);
     }
-    vector<string> pVars;
-    for (map<string, string>::iterator pvi = p_->projectionVariables.begin(); pvi != p_->projectionVariables.end(); ++pvi) {
-        pVars.push_back(pvi->first);
+    if (logger->isEnabledFor(Logger::DEBUG)) {
+        vector<string> pVars;
+        pVars.reserve(p_->projectionVariables.size());
+        for (map<string, string>::iterator pvi = p_->projectionVariables.begin(); pvi != p_->projectionVariables.end(); ++pvi) {
+            pVars.push_back(pvi->first);
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "projection variables: " << join(pVars.begin(), pVars.end(), ","));
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "projection variables: " << join(pVars.begin(), pVars.end(), ","));
 
     return coordSysMap;
 }
 
+namespace {
 /**
  * make changes in the CDM structure to reflect the new projection (attributes, coordinates, projection-variable, dimensions)
  *
@@ -757,7 +761,9 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
  * @param orgXAxis
  * @param orgYAxis
  */
-static void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordSysPtr>& csMap, map<string, string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType xAxisType, CDMDataType yAxisType, const string& longitudeName, const string& latitudeName)
+void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordSysPtr>& csMap, map<string, string>& projectionVariables,
+               const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit,
+               CDMDataType xAxisType, CDMDataType yAxisType, const string& longitudeName, const string& latitudeName)
 {
     string newProj = getProjectionName(proj_input);
     string newXAxis;
@@ -1231,6 +1237,7 @@ static void lonLatVals2Matrix(boost::shared_array<double>& lonVals, boost::share
     lonVals = matrixLonVals;
     latVals = matrixLatVals;
 }
+} // namespace
 
 void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
@@ -1318,12 +1325,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::make_shared<CachedForwardInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
+                                                                                              orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
     }
-
 }
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
@@ -1404,7 +1411,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         }
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached coordinate interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::make_shared<CachedInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
+                                                                                       orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible? to interpolate with coordinate-interpolation");
@@ -1468,7 +1476,9 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+        boost::shared_ptr<CachedInterpolation> ci =
+            boost::make_shared<CachedInterpolation>(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis,
+                                                    orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
         std::string testVar1, testVar2;
         if (allXYSpatialVectorsHaveSameHorizontalId(csIt->first, testVar1, testVar2)) {
             ci->createReducedDomain(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName());
@@ -1486,24 +1496,16 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
             mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
-            p_->cachedVectorReprojection[csIt->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size()));
-
+            p_->cachedVectorReprojection[csIt->first] =
+                boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());
         }
     }
 }
 
-static void changeCDMToLatLonTemplate(CDM& cdm,
-                                      const string& tmpl_proj_input,
-                                      const map<string, CoordSysPtr>& csMap,
-                                      map<string, string>& projectionVariables,
-                                      const vector<double>& out_x_axis,
-                                      const vector<double>& out_y_axis,
-                                      const string& out_x_axis_unit,
-                                      const string& out_y_axis_unit,
-                                      CDMDataType xAxisType,
-                                      CDMDataType yAxisType,
-                                      DataPtr tmplLatVals,
-                                      DataPtr tmplLonVals)
+namespace {
+void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const map<string, CoordSysPtr>& csMap, map<string, string>& projectionVariables,
+                               const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit,
+                               CDMDataType xAxisType, CDMDataType yAxisType, DataPtr tmplLatVals, DataPtr tmplLonVals)
 {
     string newProj = getProjectionName(tmpl_proj_input);
 
@@ -1699,6 +1701,7 @@ struct CSGridDefinition {
     DataPtr xAxisData;
     DataPtr yAxisData;
 };
+} // namespace
 
 void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int method,
                                                                              const string& tmpl_proj_input,
@@ -1791,13 +1794,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") "
                   << def.xAxisData->size() << "x" << def.yAxisData->size()
                   << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(def.xAxisName, def.yAxisName, method,
-                                        lonX,
-                                        latY,
-                                        def.xAxisData->size(),
-                                        def.yAxisData->size(),
-                                        out_x_axis.size(),
-                                        out_y_axis.size()));
+        boost::shared_ptr<CachedInterpolation> ci = boost::make_shared<CachedInterpolation>(
+            def.xAxisName, def.yAxisName, method, lonX, latY, def.xAxisData->size(), def.yAxisData->size(), out_x_axis.size(), out_y_axis.size());
         std::string testVar1, testVar2;
         if (allXYSpatialVectorsHaveSameHorizontalId(csi->first, testVar1, testVar2)) {
             ci->createReducedDomain(def.xAxisName, def.yAxisName);
@@ -1823,7 +1821,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
             mifi_get_vector_reproject_matrix_points(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4,
                     csi->second->getProjection()->isDegree() ? 0 : 1,
                     &lonX[0], &latY[0], outSize, matrix.get());
-            p_->cachedVectorReprojection[csi->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1));
+            p_->cachedVectorReprojection[csi->first] = boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1);
 
         }
     }
@@ -1885,17 +1883,16 @@ bool CDMInterpolator::hasXYSpatialVectors() const
     return retVal;
 }
 
-void CDMInterpolator::addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process)
+void CDMInterpolator::addPreprocess(InterpolatorProcess2d_p process)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation preprocess");
     p_->preprocesses.push_back(process);
 }
 
-void CDMInterpolator::addPostprocess(boost::shared_ptr<InterpolatorProcess2d> process)
+void CDMInterpolator::addPostprocess(InterpolatorProcess2d_p process)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation postprocess");
     p_->postprocesses.push_back(process);
 }
 
-
-}
+} // namespace MetNoFimex
