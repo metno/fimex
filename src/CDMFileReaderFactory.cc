@@ -209,6 +209,7 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
 CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(int fileType, const std::string & fileName, const XMLInput& configXML,
                                                            const std::vector<std::string> & args)
 {
+    fileType |= MIFI_FILETYPE_RW;
     switch (fileType) {
   #ifdef HAVE_NETCDF_H
     case (MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW): {

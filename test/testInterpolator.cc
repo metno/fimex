@@ -27,7 +27,6 @@
 #include <boost/foreach.hpp>
 
 #include "FeltCDMReader2.h"
-#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -131,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
-    CDMReader_p reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     {
         vector<double> xAxis, yAxis;
@@ -222,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_template)
 {
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     const string templateFileName(pathTest("template_noaa17.nc"));
-    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, templateFileName);
     BOOST_CHECK(true);
@@ -247,7 +246,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
     vector<double> lonVals(&lon[0], &lon[0]+10);
 
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
-    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
     BOOST_CHECK(true);
@@ -273,7 +272,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
 
     const string ncmlFileName = pathTest("c11.ncml");
     const string ncFileName = pathTest("c11.nc");
-    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
     CDMReader_p ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
@@ -436,7 +435,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
             yWind = 0;
         }
         try {
-            reader = CDMReader_p(new NetCDF_CDMReader(fileName));
+            reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
         } catch (CDMException& ex) {
             // ignore, most likely nc4 not readable
             continue;
@@ -476,7 +475,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
-    CDMReader_p ncReader(new NetCDF_CDMReader(ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
 
     vector<CrossSectionDefinition> vc;

@@ -27,15 +27,15 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/shared_ptr.hpp>
-#include <vector>
-
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/MetGmCDMReader.h"
 #include "fimex/MetGmCDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
+
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
     defaultLogLevel(Logger::INFO);
 
     // create reader that reads ncSource
-    CDMReader_p netcdfReader(new NetCDF_CDMReader(ncSource));
+    CDMReader_p netcdfReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncSource);
     BOOST_CHECK(true); // made it so far
 
     // use the metgm writer to create mgm file based on nc source

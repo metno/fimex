@@ -30,6 +30,7 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
 #ifdef HAVE_NETCDF_H
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
 #endif
 

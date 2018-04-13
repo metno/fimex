@@ -29,7 +29,7 @@
 
 #include <numeric>
 
-#include "fimex/NetCDF_CDMReader.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/OceanSG2.h"
 #include "fimex/CDMReaderUtils.h"
@@ -42,7 +42,7 @@ using namespace MetNoFimex;
 BOOST_AUTO_TEST_CASE( test_coordSys )
 {
     const string fileName = pathTest("coordTest.nc");
-    CDMReader_p reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
 BOOST_AUTO_TEST_CASE( test_vTrans )
 {
     const string fileName = pathTest("verticalOceanSG2.nc");
-    CDMReader_p reader(new NetCDF_CDMReader(fileName));
+    CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
