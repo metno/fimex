@@ -459,36 +459,29 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                             if (terms["ap"] == "") {
                                 if (!isCSForTerm(cdm, cs, terms["a"]))
                                     continue;
-                                cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                        new HybridSigmaPressure2(terms["a"], terms["b"],terms["ps"],terms["p0"])));
+                                cs.setVerticalTransformation(boost::make_shared<HybridSigmaPressure2>(terms["a"], terms["b"], terms["ps"], terms["p0"]));
                             } else {
                                 if (!isCSForTerm(cdm, cs, terms["ap"]))
                                     continue;
-                                cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                        new HybridSigmaPressure1(terms["ap"], terms["b"],terms["ps"],terms["p0"])));
+                                cs.setVerticalTransformation(boost::make_shared<HybridSigmaPressure1>(terms["ap"], terms["b"], terms["ps"], terms["p0"]));
                             }
-                        } else if (standardNameValue == "atmosphere_ln_pressure_coordinate") {
+                        } else if (standardNameValue == LnPressure::NAME()) {
                             if (!(isCSForTerm(cdm, cs, terms["lev"]) && isCSForTerm(cdm, cs, terms["p0"])))
                                 continue;
-                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                    new LnPressure(terms["lev"], terms["p0"])));
-                        } else if (standardNameValue == "atmosphere_sigma_coordinate") {
+                            cs.setVerticalTransformation(boost::make_shared<LnPressure>(terms["lev"], terms["p0"]));
+                        } else if (standardNameValue == AtmosphereSigma::NAME()) {
                             if (!(isCSForTerm(cdm, cs, terms["sigma"]) && isCSForTerm(cdm, cs, terms["ptop"]) && isCSForTerm(cdm, cs, terms["ps"])))
                                 continue;
-                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                    new AtmosphereSigma(terms["sigma"],terms["ptop"],terms["ps"])));
-                        } else if (standardNameValue == "ocean_s_coordinate_g1") {
+                            cs.setVerticalTransformation(boost::make_shared<AtmosphereSigma>(terms["sigma"], terms["ptop"], terms["ps"]));
+                        } else if (standardNameValue == OceanSG1::NAME() || standardNameValue == OceanSG2::NAME()) {
                             if (!(isCSForTerm(cdm, cs, terms["s"]) && isCSForTerm(cdm, cs, terms["C"]) && isCSForTerm(cdm, cs, terms["depth"])
                                   && isCSForTerm(cdm, cs, terms["depth_c"]) && isCSForTerm(cdm, cs, terms["eta"])))
                                 continue;
-                            cs.setVerticalTransformation(boost::make_shared<OceanSG1>(
-                                    OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
-                        } else if (standardNameValue == "ocean_s_coordinate_g2") {
-                            if (!(isCSForTerm(cdm, cs, terms["s"]) && isCSForTerm(cdm, cs, terms["C"]) && isCSForTerm(cdm, cs, terms["depth"])
-                                  && isCSForTerm(cdm, cs, terms["depth_c"]) && isCSForTerm(cdm, cs, terms["eta"])))
-                                continue;
-                            cs.setVerticalTransformation(boost::make_shared<OceanSG2>(
-                                    OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
+                            const OceanSGVars vars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"]);
+                            if (standardNameValue == OceanSG1::NAME())
+                                cs.setVerticalTransformation(boost::make_shared<OceanSG1>(vars));
+                            else // if (standardNameValue == OceanSG2::NAME())
+                                cs.setVerticalTransformation(boost::make_shared<OceanSG2>(vars));
                         } else {
                             LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }
