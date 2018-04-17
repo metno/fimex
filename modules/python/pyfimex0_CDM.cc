@@ -109,6 +109,7 @@ void pyfimex0_CDM()
     bp::class_<CDMDimension, boost::noncopyable>("_CDMDimension", bp::no_init)
             .def("getName", &CDMDimension::getName, bp::return_value_policy<bp::copy_const_reference>())
             .def("getLength", &CDMDimension::getLength)
+            .def("isUnlimited", &CDMDimension::isUnlimited)
             ;
 
     bp::class_<CDMVariable, boost::noncopyable>("_CDMVariable", bp::no_init)

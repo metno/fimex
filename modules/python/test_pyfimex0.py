@@ -60,6 +60,10 @@ class TestReader(unittest.TestCase):
         d_ens = r_cdm.getDimension('ensemble_member')
         d_ens_len = d_ens.getLength()
         self.assertEqual(3, d_ens_len)
+        self.assertFalse(d_ens.isUnlimited())
+
+        d_time = r_cdm.getDimension('time')
+        self.assertTrue(d_time.isUnlimited())
 
         r_dims = r_cdm.getDimensionNames()
         self.assertTrue('time' in r_dims)
