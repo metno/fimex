@@ -79,7 +79,7 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
     // gamma
     double gamma = 0.;
     if (boost::regex_search(proj4Str, what, boost::regex("\\+gamma=(\\S+)"))) {
-        gammma = string2type<double>(what[1].str());
+        gamma = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("gamma", gamma));
 
