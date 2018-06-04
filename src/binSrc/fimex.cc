@@ -73,6 +73,8 @@ LoggerPtr logger = getLogger("fimex");
 po::options_description config_file_options;
 CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader);
 
+typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
+
 void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config)
 {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -651,9 +653,9 @@ boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, 
      throw CDMException("undefined interpolate."+logProcess+": " + procString);
 }
 
-CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+CDMInterpolator_p createCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
 {
-    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(dataReader));
+    CDMInterpolator_p interpolator = boost::make_shared<CDMInterpolator>(dataReader);
     string value;
     if (getOption("interpolate.latitudeName", vm, value)) {
         interpolator->setLatitudeName(value);
@@ -668,7 +670,12 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
     if (getOption("interpolate.postprocess", vm, value)) {
         interpolator->addPostprocess(parseProcess(value, "postprocess"));
     }
+    return interpolator;
+}
 
+CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+{
+    CDMInterpolator_p interpolator;
     int method = getInterpolationMethod(vm, "interpolate.method");
 
     string proj4;
@@ -682,13 +689,14 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
             LOG4FIMEX(logger, Logger::FATAL, "xAxisValues and yAxisValues required");
             exit(1);
         }
+        interpolator = createCDMInterpolator(vm, dataReader);
         if (vm.count("interpolate.distanceOfInterest")) {
             interpolator->setDistanceOfInterest(vm["interpolate.distanceOfInterest"].as<double>());
         }
-
         interpolator->changeProjection(method, proj4, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit,
                                        vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
     } else if (vm.count("interpolate.template")) {
+        interpolator = createCDMInterpolator(vm, dataReader);
         interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
     } else if (vm.count("interpolate.vcrossNames")) {
         if (!vm.count("interpolate.vcrossNoPoints")) {
@@ -731,6 +739,7 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
             csd.push_back(CrossSectionDefinition(vNames.at(i), lonLatVals));
             llPos += points;
         }
+        interpolator = createCDMInterpolator(vm, dataReader);
         interpolator->changeProjectionToCrossSections(method, csd);
     } else if (vm.count("interpolate.latitudeValues")) {
         if (!vm.count("interpolate.longitudeValues")) {
@@ -739,6 +748,7 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
         }
         vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
         vector<double> lonVals = tokenizeDotted<double>(vm["interpolate.longitudeValues"].as<string>());
+        interpolator = createCDMInterpolator(vm, dataReader);
         interpolator->changeProjection(method, lonVals, latVals);
     } else {
         LOG4FIMEX(logger, Logger::DEBUG, "interpolate.projString, interpolate.template or interpolate.latitudeValues not found, no interpolation used");
