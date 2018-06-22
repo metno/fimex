@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
 fi
 
 EXP_NC=${TEST_SRCDIR}/testdata_conversion_ex.nc
-if "${TEST_SRCDIR}/nccmp.sh" "$EXP_NC" "$OUT_NC" ; then
+if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else

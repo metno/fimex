@@ -152,6 +152,19 @@ IF(ENABLE_WDB)
   ADD_TEST(NAME wdbTest COMMAND wdbTest)
 ENDIF()
 
+IF (ENABLE_NETCDF)
+  FIND_PROGRAM(NCDUMP_PROGRAM
+    NAMES ncdump
+    HINTS "${PC_netcdf_PREFIX}/bin" "${netcdf_DIR}/bin"
+  )
+  IF (NCDUMP_PROGRAM)
+    MESSAGE (STATUS "Found ncdump: ${NCDUMP_PROGRAM}")
+  ELSE ()
+    MESSAGE (STATUS "Found no ncdump, trying without absolute path")
+    SET(NCDUMP_PROGRAM "ncdump")
+  ENDIF()
+ENDIF()
+CONFIGURE_FILE(nccmp.sh.in nccmp.sh @ONLY)
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)

@@ -18,7 +18,7 @@ if cmp --quiet "$NC1" "$NC2"; then
     exit 0
 fi
 
-NCDUMP=ncdump # debian: netcdf-bin
+NCDUMP=@NCDUMP_PROGRAM@
 MD5SUM=md5sum # debian: package coreutils
 
 if ! $NCDUMP 2> /dev/null; then

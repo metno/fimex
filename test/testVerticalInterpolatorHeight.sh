@@ -14,7 +14,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 EXP_NC="${TEST_SRCDIR}/verticalPressureHeight.nc"
-if "${TEST_SRCDIR}/nccmp.sh" "$EXP_NC" "$OUT_NC" ; then
+if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else

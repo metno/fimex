@@ -1,5 +1,4 @@
 #! /bin/sh
-srcdir=`dirname $0`
 echo "testing conversion NetCDF to NetCDF"
 
 if test -n "$TEST_EXTRADATA_DIR"; then
@@ -26,7 +25,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-if "${srcdir}/nccmp.sh" "${FILE1}" testNcRdWr.nc ; then
+if ./nccmp.sh "${FILE1}" testNcRdWr.nc ; then
   echo "success"
   E=0
 else
