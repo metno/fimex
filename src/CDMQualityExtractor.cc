@@ -243,7 +243,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
     DataPtr data = dataReader->getDataSlice(varName, unLimDimPos);
     // test if variable has quality assignment
     if (statusVariable.find(varName) != statusVariable.end()) {
-        string statusVar = statusVariable[varName];
+        const string& statusVar = statusVariable[varName];
         DataPtr statusData;
         const std::map<std::string, CDMReader_p>::iterator sit = statusReaders.find(varName);
         CDMReader_p readerS = dataReader;
@@ -286,7 +286,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                 useVals = variableValues[varName];
                 sort(useVals.begin(), useVals.end());
             } else if (variableFlags.find(varName) != variableFlags.end()) {
-                string flag = variableFlags[varName];
+                const string& flag = variableFlags[varName];
                 double statusFill = cdmS.getFillValue(statusVar);
                 double minFlag = MIFI_UNDEFINED_D;
                 double maxFlag = MIFI_UNDEFINED_D;
