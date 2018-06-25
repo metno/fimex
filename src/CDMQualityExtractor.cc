@@ -43,25 +43,6 @@ using namespace std;
 namespace MetNoFimex
 {
 
-namespace { // anonymous
-
-CDMReader_p getCDMFileReader(const string& file, string type, const string& config) {
-    if (type == "") {
-        const mifi_filetype typeNo = CDMFileReaderFactory::detectFileType(file);
-        if( config == "" )
-            return CDMFileReaderFactory::create(typeNo, file);
-        else
-            return CDMFileReaderFactory::create(typeNo, file, config);
-    } else {
-        if( config == "" )
-            return CDMFileReaderFactory::create(type, file);
-        else
-            return CDMFileReaderFactory::create(type, file, config);
-    }
-}
-
-} // anonymous namespace
-
 static LoggerPtr logger = getLogger("fimex.CDMQualityExtractor");
 
 /**
@@ -194,7 +175,7 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
             CDMReader_p sr = dataReader;
             if (statusVarFile != "") {
                 // status var from a different reader
-                sr = getCDMFileReader(statusVarFile, statusVarType, statusVarConfig);
+                sr = CDMFileReaderFactory::create(statusVarType, statusVarFile, statusVarConfig);
                 statusReaders[varName] = sr;
             }
             // simple check if shapes are compatible
