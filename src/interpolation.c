@@ -1037,7 +1037,7 @@ int mifi_get_values_nearest_f(const float* infieldA, const float* infieldB, floa
 //b = o(a)
 static void mifi_get_values_linear_f_simple_(const float* infieldA, const float* infieldB, float* outfield, const size_t n, float f)
 {
-    int i = 0;
+    size_t i = 0;
     while (n > i++) {
         float iA = *infieldA++;
         float iB = *infieldB++;
@@ -1071,7 +1071,7 @@ int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, dou
         // avoid numerical side-effects, like 0*nan = nan
         memcpy(outfield, infieldB, n * sizeof(double));
     } else {
-        int i = 0;
+        size_t i = 0;
         while (n > i++) {
             double iA = *infieldA++;
             double iB = *infieldB++;
@@ -1094,7 +1094,7 @@ static int mifi_get_values_linear_conf_extrapol_f(float leftLimit, float rightLi
     } else if ((f >= leftLimit) && (f <= rightLimit)) {
         mifi_get_values_linear_f_simple_(infieldA, infieldB, outfield, n, f);
     } else {
-        int i = 0;
+        size_t i = 0;
         while (n > i++) {
             float* o = outfield++; // position!
             *o = MIFI_UNDEFINED_F;
@@ -1109,7 +1109,7 @@ int mifi_get_values_linear_weak_extrapol_f(const float* infieldA, const float* i
 }
 int mifi_get_values_linear_no_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
-    return mifi_get_values_linear_conf_extrapol_f(0., 2., infieldA, infieldB, outfield, n, a, b, x);
+    return mifi_get_values_linear_conf_extrapol_f(0., 1., infieldA, infieldB, outfield, n, a, b, x);
 }
 
 int mifi_get_values_linear_const_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)

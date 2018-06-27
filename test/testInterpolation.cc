@@ -39,6 +39,13 @@
 using boost::unit_test_framework::test_suite;
 using MetNoFimex::pathTest;
 
+namespace {
+inline bool near(float a, float b, float eps)
+{
+    return std::fabs(a - b) < eps;
+}
+} // namespace
+
 BOOST_AUTO_TEST_CASE( test_mifi_points2position )
 {
     double axis[5] = {1., 2., 3., 4., 5.};
@@ -46,12 +53,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_points2position )
     double apoints[5] = {-4., 4., 0.3, 1., 5.}; // results
     mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
     for (int i = 0; i < 5; ++i) {
-        //BOOST_CHECK_CLOSE not implemented in FC5 boost
-        //BOOST_CHECK_CLOSE(apoints[i], points[i], /* tolerance */ 1e-10);
-
-        double res = std::fabs(apoints[i] - points[i]);
-        //std::cerr << apoints[i] << "-" << points[i] << "=" << res << std::endl;
-        BOOST_CHECK((res < 1e-10));
+        BOOST_CHECK(near(apoints[i], points[i], 1e-10));
     }
 }
 
@@ -63,12 +65,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_points2position_reverse )
     double apoints[5] = {8., 0., 3.7, 3., -1.}; // results
     mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
     for (int i = 0; i < 5; ++i) {
-        //BOOST_CHECK_CLOSE not implemented in FC5 boost
-        //BOOST_CHECK_CLOSE(apoints[i], points[i], /* tolerance */ 1e-10);
-
-        double res = std::fabs(apoints[i] - points[i]);
-        //std::cerr << apoints[i] << "-" << points[i] << "=" << res << std::endl;
-        BOOST_CHECK((res < 1e-10));
+        BOOST_CHECK(near(apoints[i], points[i], 1e-10));
     }
 }
 
@@ -79,8 +76,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
     float outvalues[1];
 
     mifi_get_values_f(infield, outvalues, 0.3, 0.3, 2, 2, 1);
-    // std::cerr << outvalues[0] << std::endl;
-    BOOST_CHECK(std::fabs(outvalues[0] - 1.) < 1e-10);
+    BOOST_CHECK(near(outvalues[0], 1, 1e-10));
 }
 
 
@@ -90,15 +86,15 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
     float outvalues[1];
 
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
-    BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-6);
+    BOOST_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0.0001, 2, 2, 1);
     //std::cerr << outvalues[0] << std::endl;
-    BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-4);
+    BOOST_CHECK(near(outvalues[0], 1.3, 1e-4));
     mifi_get_values_bilinear_f(infield, outvalues, 0., 0.3, 2, 2, 1);
-    BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-6);
+    BOOST_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
     //std::cerr << outvalues[0] << std::endl;
-    BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-4);
+    BOOST_CHECK(near(outvalues[0], 1.3, 1e-4));
 
     // check for border values / nan
     mifi_get_values_bilinear_f(infield, outvalues, 0, 0, 2, 2, 1);
@@ -341,14 +337,14 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
         }
     }
     datafile.close();
-    BOOST_REQUIRE(std::fabs(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
+    BOOST_REQUIRE(near(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)], 4, 1e-5));
 
     BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR,
                                    emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
                                    latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
                 == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
+    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " "
               << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -363,7 +359,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
                                    latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
                 == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
+    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
               << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -383,7 +379,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
                                    latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
                 == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
+    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
               << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -672,18 +668,66 @@ BOOST_AUTO_TEST_CASE( test_Utils )
         }
         if (it->getName() == "scale_factor_at_projection_origin") {
             found--;
-            BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - 0.93301) < 0.00001);
+            BOOST_CHECK(near(it->getData()->asDouble()[0], 0.93301, 0.00001));
         }
         if ((it->getName() == "longitude_of_projection_origin") || (it->getName() == "straight_vertical_longitude_from_pole")) {
             found--;
-            BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - -32.) < 0.00001);
+            BOOST_CHECK(near(it->getData()->asDouble()[0], -32, 0.00001));
         }
         if (it->getName() == "latitude_of_projection_origin") {
             found--;
-            BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - 90.) < 0.00001);
+            BOOST_CHECK(near(it->getData()->asDouble()[0], 90, 0.00001));
         }
     }
     BOOST_CHECK(found == 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_linear_no_extrapol)
+{
+    const float in0 = 200, in1 = 300;
+    const double a = 2, b = 3;
+    float out = 12345;
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(std::isnan(out));
+}
+
+BOOST_AUTO_TEST_CASE(test_linear_const_extrapol)
+{
+    const float in0 = 200, in1 = 300;
+    const double a = 2, b = 3;
+    float out = 12345;
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(near(out, 200, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 200, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 300, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(near(out, 300, 0.01));
+}
+
+BOOST_AUTO_TEST_CASE(test_linear_weak_extrapol)
+{
+    const float in0 = 200, in1 = 300;
+    const double a = 2, b = 3;
+    float out = 12345;
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 150, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 350, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(std::isnan(out));
+}
+
+BOOST_AUTO_TEST_CASE(test_linear)
+{
+    const float in0 = 200, in1 = 300;
+    const double a = 2, b = 3;
+    float out = 12345;
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(near(out,  50, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 150, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 350, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(near(out, 450, 0.01));
 }
 
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
