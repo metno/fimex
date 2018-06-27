@@ -25,6 +25,7 @@
  */
 
 #include "fimex/CDMVerticalInterpolator.h"
+
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
 #include "fimex/CDM.h"
@@ -318,13 +319,18 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
                 const leap_iterator<const float*> vertical0(&verticalValues[loop[VERTICAL]], iverticalZdelta);
                 const leap_iterator<const float*> vertical1 = vertical0 + nzi;
                 const pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(vertical0, vertical1, verticalOut);
-
-                const size_t idataZ0  = loop[IN] + idataZdelta * pos.first;
-                const size_t idataZ1  = loop[IN] + idataZdelta * pos.second;
-                const float valueI0 = iData[idataZ0], valueI1 = iData[idataZ1];
-                const float verticalI0 = *(vertical0 + pos.first), verticalI1 = *(vertical0 + pos.second);
-                intFunc(&valueI0, &valueI1, interpolated, 1, verticalI0, verticalI1, verticalOut);
+                if (pos.first != pos.second) {
+                    const size_t idataZ0  = loop[IN] + idataZdelta * pos.first;
+                    const size_t idataZ1  = loop[IN] + idataZdelta * pos.second;
+                    const float valueI0 = iData[idataZ0], valueI1 = iData[idataZ1];
+                    const float verticalI0 = *(vertical0 + pos.first), verticalI1 = *(vertical0 + pos.second);
+                    intFunc(&valueI0, &valueI1, interpolated, 1, verticalI0, verticalI1, verticalOut);
+                } else {
+                    // find_closest_neighbor_distinct_elements failed
+                    *interpolated = MIFI_UNDEFINED_F;
+                }
             } else {
+                // not a valid x-y-z position
                 *interpolated = MIFI_UNDEFINED_F;
             }
         } while (loop.next());

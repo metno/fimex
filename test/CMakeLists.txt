@@ -91,7 +91,6 @@ IF(ENABLE_NETCDF)
     testVerticalInterpolator2.sh
     testVerticalInterpolator3.sh
     testVerticalInterpolator4.sh
-    testVerticalInterpolatorHeight.sh
     testVerticalInterpolatorAltitude.sh
     testVerticalInterpolatorConversion.sh
     testVerticalInterpolatorOceanSG2ToDepth.sh
@@ -200,7 +199,9 @@ ENDFOREACH()
 FOREACH(T ${SH_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")
   SET_TESTS_PROPERTIES(${T}
-    PROPERTIES ENVIRONMENT "TEST_EXTRADATA_DIR=${TEST_EXTRADATA_DIR}"
+    PROPERTIES
+    ENVIRONMENT "TEST_EXTRADATA_DIR=${TEST_EXTRADATA_DIR}"
+    DEPENDS fimex
   )
 ENDFOREACH()
 

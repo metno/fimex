@@ -2,10 +2,11 @@
 
 #include "fimex/CDM.h"
 #include "fimex/CDMReader.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 
 #include "fimex/ArrayLoop.h"
 
@@ -34,14 +35,28 @@ VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReader_p reader
     map<string, string> attrs;
     attrs["standard_name"] = "(surface_geopotential|surface_altitude|altitude|geopotential_height|geopotential)";
 
-    vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
-    if (topoVars.empty()) {
+    std::string topoVar;
+    const vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
+    std::vector<CoordSysPtr> allCS = listCoordinateSystems(reader);
+    for (vector<string>::const_iterator it = topoVars.begin(); it != topoVars.end(); ++it) {
+        if (CoordSysPtr topoCS = findCompleteCoordinateSystemFor(allCS, *it)) {
+            if (CoordinateSystem::ConstAxisPtr zax = topoCS->getGeoZAxis()) {
+                if (reader->getCDM().getDimension(zax->getShape().front()).getLength() != 1) {
+                    LOG4FIMEX(logger, Logger::INFO, "topo var '" << *it << "' has z axis '" << zax->getName() << "' with length != 1, skipping");
+                    continue;
+                }
+            }
+            topoVar = *it;
+            break;
+        }
+    }
+    if (topoVar.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "no topography/altitude found to retrieve height");
         return boost::shared_ptr<AltitudeHeightConverter>();
     }
 
-    LOG4FIMEX(logger, Logger::INFO, "using altitude "<<topoVars[0]<<" to retrieve height");
-    return boost::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVars[0], addTopography);
+    LOG4FIMEX(logger, Logger::INFO, "using altitude " << topoVar << " to retrieve height");
+    return boost::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
 }
 
 AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordSysPtr cs,
