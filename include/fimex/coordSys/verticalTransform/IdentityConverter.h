@@ -1,5 +1,5 @@
-#ifndef GEOPOTENTIALTOALTITUDECONVERTER_H
-#define GEOPOTENTIALTOALTITUDECONVERTER_H
+#ifndef IDENTITYCONVERTER_H
+#define IDENTITYCONVERTER_H
 
 #include "fimex/coordSys/verticalTransform/VerticalConverter.h"
 #include <string>
@@ -28,4 +28,4 @@ private:
 
 } // namespace MetNoFimex
 
-#endif // GEOPOTENTIALTOALTITUDECONVERTER_H
+#endif // IDENTITYCONVERTER_H
