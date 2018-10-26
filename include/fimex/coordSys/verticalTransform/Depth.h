@@ -1,7 +1,7 @@
 /*
- * Fimex, OceanSG1.h
+ * Fimex, Depth.h
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2018, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -19,64 +19,46 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
- *
- *  Created on: Aug 6, 2013
- *      Author: heikok
  */
 
-#ifndef OCEANSG1_H_
-#define OCEANSG1_H_
+#ifndef DEPTH_H_
+#define DEPTH_H_
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
-#include "fimex/coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.h"
 
 namespace MetNoFimex
 {
-/**
- * @headerfile fimex/coordSys/verticalTransform/OceanSG1.h
- */
 
 /**
- * ocean_s_coordinate_g2 is defined by the same set of parameters, just
- * the conversion function is different.
+ * @headerfile fimex/coordSys/verticalTransform/Depth.h
  */
-class OceanSG1 : public VerticalTransformation
+class Depth : public VerticalTransformation
 {
-protected:
-    OceanSCoordinateGToDepthConverter::heightconversion_t heightConversionFunction;
-
 public:
-    const OceanSGVars vars;
-
-    /**
-     * Initialize OceanSG1 with formula as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
-     *
-     * @param s fractional vertical stretching coordinate sigma(k)
-     * @param C free surface C(x,y,t)
-     * @param depth unperturbed ocean-depth depth(x,y)
-     * @param depth_c critical depth, usually min(depth(x,y))
-     * @param eta time-varying free surface eta(x,y,z) (often also called zeta)
-     */
-    OceanSG1(const OceanSGVars& vars);
-
+    /// name of the depth variable
+    const std::string depth;
+    Depth(const std::string& depth) : depth(depth) {}
+    virtual ~Depth() {}
     /**
      * static NAME constant
-     * @return ocean_s_coordinate_g1
+     * @return depth
      */
-    static const std::string NAME() {return "ocean_s_coordinate_g1";}
+    static const std::string NAME() {return "depth";}
     /**
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
     virtual int getPreferredVerticalType() const { return MIFI_VINT_DEPTH; }
-    virtual std::string getParameterString() const { return "s="+vars.s+",C="+vars.C+",depth="+vars.depth+",depth_c="+vars.depth_c+",eta="+vars.eta; }
-    virtual bool isComplete() const { return vars.isComplete(); }
+    virtual std::string getParameterString() const { return "d="+depth; }
+    virtual bool isComplete() const {return !depth.empty();}
 
 protected:
     VerticalConverterPtr getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    VerticalConverterPtr getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const;
     VerticalConverterPtr getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const;
     VerticalConverterPtr getDepthConverter(CDMReader_p reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */
-#endif /* OCEANSG1_H_ */
+
+#endif /* DEPTH_H_ */

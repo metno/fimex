@@ -103,6 +103,7 @@ void pyfimex0_CoordinateSystem()
             .value("Lat", CoordinateAxis::Lat)
             .value("Pressure", CoordinateAxis::Pressure)
             .value("Height", CoordinateAxis::Height)
+            .value("Dpeth", CoordinateAxis::Depth)
             .value("ReferenceTime", CoordinateAxis::ReferenceTime)
             .value("Realization", CoordinateAxis::Realization)
             ;

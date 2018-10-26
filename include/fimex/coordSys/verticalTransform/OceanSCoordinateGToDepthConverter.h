@@ -53,8 +53,10 @@ public:
     std::vector<std::string> getShape() const;
     DataPtr getDataSlice(const SliceBuilder& sb) const;
 
-    std::vector<std::string> getValidityShape(const std::string& verticalDim) const;
-    DataPtr getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const;
+    std::vector<std::string> getValidityMaxShape() const;
+    DataPtr getValidityMax(const SliceBuilder& sb) const;
+    std::vector<std::string> getValidityMinShape() const;
+    DataPtr getValidityMin(const SliceBuilder& sb) const;
 
 private:
     const OceanSGVars vars_;

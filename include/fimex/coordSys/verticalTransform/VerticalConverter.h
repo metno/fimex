@@ -28,15 +28,21 @@ public:
     virtual DataPtr getDataSlice(const SliceBuilder& sb) const = 0;
 
     /** The VLevelConverter usually knows about validity of vertical values at a certain position.
-     *  This function returns bool data (as unsigned char) indicating if the slice index can be valid.
-     *  The vertical dimension of sb will be replaced by a dimension of verticalValues.size().
+     *  This function returns the maximum valid value, e.g. surface pressure for pressure.
      *  If null is returned, everyting is valid.
      */
-    virtual DataPtr getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const = 0;
+    virtual DataPtr getValidityMax(const SliceBuilder& sb) const = 0;
+
+    /** The VLevelConverter usually knows about validity of vertical values at a certain position.
+     *  This function returns the minimum valid value, e.g. 0 for pressure.
+     *  If null is returned, everyting is valid.
+     */
+    virtual DataPtr getValidityMin(const SliceBuilder& sb) const = 0;
 
     /** Return the shape of the validity data.
      */
-    virtual std::vector<std::string> getValidityShape(const std::string& verticalDim) const = 0;
+    virtual std::vector<std::string> getValidityMaxShape() const = 0;
+    virtual std::vector<std::string> getValidityMinShape() const = 0;
 };
 
 typedef boost::shared_ptr<VerticalConverter> VerticalConverterPtr;
@@ -47,8 +53,10 @@ public:
     BasicVerticalConverter(CDMReader_p reader, CoordSysPtr cs)
         : reader_(reader), cs_(cs) { }
 
-    DataPtr getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const;
-    std::vector<std::string> getValidityShape(const std::string& verticalDim) const;
+    DataPtr getValidityMax(const SliceBuilder& sb) const;
+    DataPtr getValidityMin(const SliceBuilder& sb) const;
+    std::vector<std::string> getValidityMaxShape() const;
+    std::vector<std::string> getValidityMinShape() const;
 
 protected:
     CDMReader_p reader_;

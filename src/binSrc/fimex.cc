@@ -224,9 +224,11 @@ void writeOptions(ostream& out, const po::variables_map& vm)
     writeOptionAny(out, "interpolate.printCS", vm);
     writeOptionAny(out, "interpolate.printSize", vm);
     writeOption<string>(out, "verticalInterpolate.method", vm);
+    writeOption<bool>(out, "verticalInterpolate.ignoreValidityMin", vm);
+    writeOption<bool>(out, "verticalInterpolate.ignoreValidityMax", vm);
     writeOption<string>(out, "verticalInterpolate.type", vm);
+    writeOption<string>(out, "verticalInterpolate.templateVar", vm);
     writeOption<string>(out, "verticalInterpolate.level1", vm);
-    writeOption<string>(out, "verticalInterpolate.level2", vm);
     writeVectorOptionString(out, "verticalInterpolate.dataConversion", vm);
     writeOption<string>(out, "verticalInterpolate.printNcML", vm);
     writeOptionAny(out, "verticalInterpolate.printCS", vm);
@@ -605,23 +607,38 @@ CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p 
             exit(1);
         }
     }
-    string vtype;
-    if (!getOption("verticalInterpolate.type", vm, vtype)) {
+    string vtype, vmethod;
+    if (!getOption("verticalInterpolate.type", vm, vtype) || !getOption("verticalInterpolate.method", vm, vmethod)) {
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
-    string vmethod, level1_text;
-    if (!(getOption("verticalInterpolate.method", vm, vmethod) && getOption("verticalInterpolate.level1", vm, level1_text))) {
-        LOG4FIMEX(logger, Logger::FATAL, "verticalInterpolate needs method and level1");
-        exit(1);
+    boost::shared_ptr<CDMVerticalInterpolator> verticalReader = boost::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod);
+    string template_var;
+    if (getOption("verticalInterpolate.templateVar", vm, template_var)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate to template var");
+        verticalReader->interpolateByTemplateVariable(template_var);
+    } else {
+        string level1_text, level2_text;
+        if (!getOption("verticalInterpolate.level1", vm, level1_text)) {
+            LOG4FIMEX(logger, Logger::FATAL, "verticalInterpolate needs level1");
+            exit(1);
+        }
+        vector<double> level1 = tokenizeDotted<double>(level1_text,",");
+        if (getOption("verticalInterpolate.level2", vm, level2_text)) {
+            LOG4FIMEX(logger, Logger::WARN, "verticalInterpolate level2 ignored");
+        }
+        verticalReader->interpolateToFixed(level1);
     }
-    vector<double> level1 = tokenizeDotted<double>(level1_text,",");
-    vector<double> level2;
-    if (vm.count("verticalInterpolate.level2"))
-        level2 = tokenizeDotted<double>(vm["verticalInterpolate.level2"].as<string>(),",");
-    dataReader = boost::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod, level1, level2);
-    printReaderStatements("verticalInterpolate", vm, dataReader);
-    return dataReader;
+    bool ignoreValidityMin;
+    if (getOption("verticalInterpolate.ignoreValidityMin", vm, ignoreValidityMin)) {
+        verticalReader->ignoreValidityMin(ignoreValidityMin);
+    }
+    bool ignoreValidityMax;
+    if (getOption("verticalInterpolate.ignoreValidityMax", vm, ignoreValidityMax)) {
+        verticalReader->ignoreValidityMax(ignoreValidityMax);
+    }
+    printReaderStatements("verticalInterpolate", vm, verticalReader);
+    return verticalReader;
 }
 
 boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
@@ -1040,7 +1057,10 @@ int run(int argc, char* args[])
         ("merge.printSize", "print size estimate")
 
         ("verticalInterpolate.type", po::value<string>(), "pressure, height (above ground) or depth")
+        ("verticalInterpolate.ignoreValidityMin", po::value<bool>(), "ignore minimum value from vertical transformation (e.g. ocean surface)")
+        ("verticalInterpolate.ignoreValidityMax", po::value<bool>(), "ignore maximum value from vertical transformation (e.g. ocean bathymetry)")
         ("verticalInterpolate.method", po::value<string>(), "linear, linear_weak_extra, linear_no_extra, linear_const_extra, log, loglog or nearestneighbor interpolation")
+        ("verticalInterpolate.templateVar", po::value<string>(), "specification template variable for interpolation to fixed or hybrid levels")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T, omega2vwind or add4Dpressure")

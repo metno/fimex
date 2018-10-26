@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+  <dimension name="k_reduced" length="20" isUnlimited="false" />
+
+  <variable name="to_hybrid_template" shape="Xc Yc k_reduced time" type="int">
+    <attribute name="coordinates" value="longitude latitude" />
+  </variable>
+
+  <variable name="k_reduced" shape="k_reduced" type="double" >
+    <attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" />
+    <attribute name="long_name" value="atmosphere_sigma_coordinate" />
+    <attribute name="positive" value="up" />
+    <attribute name="formula_terms" value="ap: ap_reduced b: b_reduced ps: air_pressure" />
+    <values>
+      0.01 0.0715 0.1354 0.2013 0.2682 0.3356 0.4023 0.4678 0.5311 0.5916 0.6487
+      0.7018 0.7507 0.7951 0.8351 0.8709 0.9029 0.9314 0.9572 0.9812
+    </values>
+  </variable>
+
+  <variable name="ap_reduced" shape="k_reduced" type="double" >
+    <attribute name="units" value="Pa" />
+    <values>
+      1000 7090 12950 18100 22190 25040 26550 26750 25750 23730 
+      20920 17570 13980 10420 7150 4380 2270 880 170 0
+    </values>
+  </variable>
+
+  <variable name="b_reduced" shape="k_reduced" type="double" >
+    <values>
+      0 0.0006 0.0059 0.0203 0.0463 0.0852 0.1368 0.2003 0.2736 
+      0.3543 0.4395 0.5261 0.6109 0.6909 0.7636 0.8271 0.8802 0.9226 
+      0.9555 0.9812
+    </values>
+  </variable>
+
+</netcdf>

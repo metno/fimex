@@ -332,16 +332,24 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 printf("  ");
                 for (long i = dimNames.size()-1; i >= 0; i--) {
                     switch (axisTypes.at(i)) {
-                    case CoordinateAxis::Time: printf("t=%ld(%.1f) ", pos.at(i), tArray[pos.at(i)]); break;
+                    case CoordinateAxis::Time:
+                        printf("t=%ld(%.1f) ", pos.at(i), tArray[pos.at(i)]);
+                        break;
                     case CoordinateAxis::GeoZ:
                     case CoordinateAxis::Pressure:
-                    case CoordinateAxis::Height: printf("k=%ld(%.1f) ", pos.at(i), zArray[pos.at(i)]); break;
+                    case CoordinateAxis::Height:
+                    case CoordinateAxis::Depth:
+                        printf("k=%ld(%.1f) ", pos.at(i), zArray[pos.at(i)]);
+                        break;
                     case CoordinateAxis::GeoX:
                     case CoordinateAxis::GeoY:
                     case CoordinateAxis::Lon:
-                    case CoordinateAxis::Lat: break; // do nothing on horizontal
+                    case CoordinateAxis::Lat:
+                        break; // do nothing on horizontal
                     case CoordinateAxis::Undefined:
-                    default: printf("%10s=%.1f ", dimNames.at(i).c_str(), dimData[dimNames.at(i)]->asFloat()[pos.at(i)]); break;
+                    default:
+                        printf("%10s=%.1f ", dimNames.at(i).c_str(), dimData[dimNames.at(i)]->asFloat()[pos.at(i)]);
+                        break;
                     }
                 }
                 // fetch the data

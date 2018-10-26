@@ -37,6 +37,8 @@
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 
+#include <boost/make_shared.hpp>
+
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE(test_pressure_integrator)
@@ -118,15 +120,15 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     const std::string fileName = pathTest("testdata_arome_vc.nc");
     CDMReader_p ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
 
-    std::vector<double> vi_level1, vi_level2;
+    std::vector<double> vi_level1;
     vi_level1.push_back(1000);
     vi_level1.push_back(850);
     vi_level1.push_back(500);
     vi_level1.push_back(300);
     vi_level1.push_back(100);
     vi_level1.push_back(50);
-    boost::shared_ptr<CDMVerticalInterpolator> reader
-            (new CDMVerticalInterpolator(ncreader, "pressure", "log", vi_level1, vi_level2));
+    boost::shared_ptr<CDMVerticalInterpolator> reader = boost::make_shared<CDMVerticalInterpolator>(ncreader, "pressure", "log");
+    reader->interpolateToFixed(vi_level1);
 
     boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor
             (MetNoFimex::listCoordinateSystems(reader), "air_temperature_ml");

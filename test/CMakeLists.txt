@@ -89,11 +89,14 @@ IF(ENABLE_NETCDF)
     testInterpolation2DataFillValue.sh
     testVerticalInterpolatorPressureToPressure.sh
     testVerticalInterpolatorSigmaHybridToPressure.sh
+    testVerticalInterpolatorSigmaHybridFromPressure.sh
+    testVerticalInterpolatorSigmaHybridReduced.sh
     testVerticalInterpolatorAltitudeToHeight.sh
     testVerticalInterpolatorEnsembleSigmaHybridToPressure.sh
     testVerticalInterpolatorAltitude.sh
     testVerticalInterpolatorConversion.sh
     testVerticalInterpolatorOceanSG2ToDepth.sh
+    testVerticalInterpolatorOceanSG2FromDepth.sh
     testQualityExtractorFimex.sh
     testMerger.sh
     testMergerTarget.sh

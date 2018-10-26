@@ -7,14 +7,24 @@ VerticalConverter::~VerticalConverter()
 {
 }
 
-DataPtr BasicVerticalConverter::getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const
+DataPtr BasicVerticalConverter::getValidityMax(const SliceBuilder&) const
 {
     return DataPtr();
 }
 
-std::vector<std::string> BasicVerticalConverter::getValidityShape(const std::string& verticalDim) const
+DataPtr BasicVerticalConverter::getValidityMin(const SliceBuilder&) const
 {
-    return std::vector<std::string>(1, verticalDim);
+    return DataPtr();
+}
+
+std::vector<std::string> BasicVerticalConverter::getValidityMaxShape() const
+{
+    return std::vector<std::string>();
+}
+
+std::vector<std::string> BasicVerticalConverter::getValidityMinShape() const
+{
+    return std::vector<std::string>();
 }
 
 } // namespace MetNoFimex

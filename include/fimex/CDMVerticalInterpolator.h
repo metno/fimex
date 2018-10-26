@@ -68,8 +68,15 @@ public:
      * @param level1 the new vertical levels, for 'pressure', that is pressure in hPa
      * @param level2 only required for hybrid levels, not yet supported
      */
-    CDMVerticalInterpolator(CDMReader_p dataReader, const std::string& verticalType, const std::string& verticalInterpolationMethod, const std::vector<double>& level1, const std::vector<double>& level2);
-    virtual ~CDMVerticalInterpolator();
+    CDMVerticalInterpolator(CDMReader_p dataReader, const std::string& verticalType, const std::string& verticalInterpolationMethod);
+    ~CDMVerticalInterpolator();
+
+    void ignoreValidityMin(bool ignore);
+    void ignoreValidityMax(bool ignore);
+
+    void interpolateToFixed(const std::vector<double>& level1);
+    void interpolateByTemplateVariable(const std::string& tv);
+
     using CDMReader::getDataSlice;
     /**
      * retrieve data from the underlying dataReader and interpolate the values to the new vertical levels

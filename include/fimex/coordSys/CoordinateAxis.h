@@ -48,6 +48,7 @@ public:
         Lat,
         Pressure,
         Height,
+        Depth,
         ReferenceTime,
         Realization
     };
@@ -61,6 +62,7 @@ public:
         case Lat: return "Lat";
         case Pressure: return "Pressure";
         case Height: return "Height";
+        case Depth: return "Depth";
         case ReferenceTime: return "ReferenceTime";
         case Realization: return "Realization";
         default: return "Undefined";

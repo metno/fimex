@@ -106,41 +106,28 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     return createData(dimsZ.volume(), z_values);
 }
 
-std::vector<std::string> OceanSCoordinateGToDepthConverter::getValidityShape(const std::string& verticalDim) const
+std::vector<std::string> OceanSCoordinateGToDepthConverter::getValidityMaxShape() const
 {
-    const CDM& cdm = reader_->getCDM();
-    std::vector<std::string> shd = cdm.getVariable(vars_.depth).getShape();
-    std::replace(shd.begin(), shd.end(), cs_->getGeoZAxis()->getName(), verticalDim);
-    if (std::find(shd.begin(), shd.end(), verticalDim) == shd.end())
-        shd.push_back(verticalDim);
-    return shd;
+    return reader_->getCDM().getVariable(vars_.depth).getShape();
 }
 
-DataPtr OceanSCoordinateGToDepthConverter::getValiditySlice(const SliceBuilder& sb, const std::vector<double>& verticalValues) const
+DataPtr OceanSCoordinateGToDepthConverter::getValidityMax(const SliceBuilder& sb) const
 {
-    const CDM& cdm = reader_->getCDM();
-    const std::string& verticalDim = cs_->getGeoZAxis()->getName();
+    return BasicVerticalConverter::getValidityMin(sb);
+}
 
-    const boost::shared_array<double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
-    ArrayDims dimsDepth = makeArrayDims(adaptSliceBuilder(cdm, vars_.depth, sb));
+std::vector<std::string> OceanSCoordinateGToDepthConverter::getValidityMinShape() const
+{
+    if (!vars_.eta.empty())
+        return reader_->getCDM().getVariable(vars_.eta).getShape();
+    return BasicVerticalConverter::getValidityMinShape();
+}
 
-    ArrayDims dimsValid = makeArrayDims(cdm, getValidityShape(verticalDim));
-    dimsValid.set_length(verticalDim, verticalValues.size());
-
-    ArrayDims dimsVertical = ArrayDims().add(verticalDim, verticalValues.size());
-
-    enum { DEPTH, VERTICAL, VALID };
-    ArrayGroup group = ArrayGroup().add(dimsDepth).add(dimsVertical).add(dimsValid);
-    group.minimizeShared(0);
-
-    boost::shared_array<unsigned char> validValues(new unsigned char[dimsValid.volume()]);
-
-    Loop loop(group);
-    do {
-        validValues[loop[VALID]] = (depthValues[loop[DEPTH]] >= verticalValues[loop[VERTICAL]]) ? 1 : 0;
-    } while (loop.next());
-
-    return createData(dimsValid.volume(), validValues);
+DataPtr OceanSCoordinateGToDepthConverter::getValidityMin(const SliceBuilder& sb) const
+{
+    if (!vars_.eta.empty())
+        return getSliceData(reader_, sb, vars_.eta, "m");
+    return BasicVerticalConverter::getValidityMin(sb);
 }
 
 } // namespace MetNoFimex

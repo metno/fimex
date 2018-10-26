@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+  <variable name="to_hybrid_template" shape="xi_rho eta_rho s_rho ocean_time" type="int">
+    <attribute name="coordinates" value="lon_rho lat_rho ocean_time" />
+  </variable>
+
+  <variable name="s_rho" shape="s_rho" type="double" >
+    <attribute name="long_name" value="S-coordinate at RHO-points" />
+    <attribute name="valid_min" type="double" value="-1" />
+    <attribute name="valid_max" type="double" value="0" />
+    <attribute name="positive" value="up" />
+    <attribute name="standard_name" value="ocean_s_coordinate_g2" />
+    <attribute name="formula_terms" value="s: s_rho C: Cs_r eta: zeta depth: h depth_c: hc" />
+    <attribute name="field" value="s_rho, scalar" />
+    <values>
+      -0.985714285714286 -0.957142857142857 -0.928571428571428 -0.9 
+      -0.871428571428571 -0.842857142857143 -0.814285714285714 
+      -0.785714285714286 -0.757142857142857 -0.728571428571429 -0.7 
+      -0.671428571428571 -0.642857142857143 -0.614285714285714 
+      -0.585714285714286 -0.557142857142857 -0.528571428571429 -0.5 
+      -0.471428571428571 -0.442857142857143 -0.414285714285714 
+      -0.385714285714286 -0.357142857142857 -0.328571428571429 -0.3 
+      -0.271428571428571 -0.242857142857143 -0.214285714285714 
+      -0.185714285714286 -0.157142857142857 -0.128571428571429 -0.1 
+      -0.0714285714285714 -0.0428571428571429 -0.0142857142857143
+    </values>
+  </variable>
+</netcdf>

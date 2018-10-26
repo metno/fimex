@@ -134,6 +134,14 @@ protected:
      */
     virtual VerticalConverterPtr getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const;
 
+    /**
+     * Default implementation: No conversion.
+     * @param reader
+     * @param cs
+     * @return
+     */
+    virtual VerticalConverterPtr getDepthConverter(CDMReader_p reader, CoordSysPtr cs) const;
+
 private:
     VerticalConverterPtr getIdentityPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
     VerticalConverterPtr findPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;

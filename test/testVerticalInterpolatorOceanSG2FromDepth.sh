@@ -1,20 +1,21 @@
 #! /bin/sh
-echo "testing conversion of ocean_s_g2 to depth"
+echo "testing conversion of depth to ocean_s_g2"
 TEST_SRCDIR=$(dirname $0)
 OUT_NC="out$$.nc"
 ./fimex.sh \
-    --input.file=${TEST_SRCDIR}/verticalOceanSG2.nc \
+    --input.file=${TEST_SRCDIR}/verticalOceanSG2_depth.nc \
+    --input.config "${TEST_SRCDIR}/verticalOceanSG2_tohybrid.ncml" \
     --verticalInterpolate.type=depth \
     --verticalInterpolate.ignoreValidityMin=true \
     --verticalInterpolate.method=linear \
-    --verticalInterpolate.level1=0,3,10,15,25,50,75,100,150,200,250,300,500,700,1000,2000,3000 \
+    --verticalInterpolate.templateVar to_hybrid_template \
     --output.file="$OUT_NC"
 if [ $? != 0 ]; then
-  echo "failed converting ocean_s_g2 to depth"
+  echo "failed converting depth to ocean_s_g2"
   rm -f "$OUT_NC"
   exit 1
 fi
-EXP_NC="${TEST_SRCDIR}/verticalOceanSG2_depth.nc"
+EXP_NC="${TEST_SRCDIR}/verticalOceanSG2_tohybrid.nc"
 if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0

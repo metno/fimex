@@ -295,6 +295,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoZAxis() const
     vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoZ);
     types.push_back(CoordinateAxis::Height);
+    types.push_back(CoordinateAxis::Depth);
     types.push_back(CoordinateAxis::Pressure);
     return findAxisOfType(types);
 }

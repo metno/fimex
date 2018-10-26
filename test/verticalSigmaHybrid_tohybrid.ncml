@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+  <variable name="to_hybrid_template" shape="Xc Yc k time" type="int">
+    <attribute name="coordinates" value="longitude latitude" />
+  </variable>
+
+  <variable name="k" shape="k" type="double" >
+    <attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" />
+    <attribute name="long_name" value="atmosphere_sigma_coordinate" />
+    <attribute name="positive" value="up" />
+    <attribute name="formula_terms" value="ap: ap b: b ps: air_pressure" />
+    <values>
+      0.01 0.0302 0.0506 0.0715 0.0925 0.1138 0.1354 0.1571 0.1791
+      0.2013 0.2235 0.2458 0.2682 0.2907 0.3132 0.3356 0.3579 0.3801
+      0.4023 0.4244 0.4462 0.4678 0.4892 0.5103 0.5311 0.5516 0.5719
+      0.5916 0.6111 0.6301 0.6487 0.6669 0.6846 0.7018 0.7186 0.7349
+      0.7507 0.766 0.7808 0.7951 0.809 0.8223 0.8351 0.8475 0.8595
+      0.8709 0.882 0.8927 0.9029 0.9128 0.9223 0.9314 0.9403 0.9489
+      0.9572 0.9654 0.9733 0.9812 0.9888 0.9963
+    </values>
+  </variable>
+</netcdf>

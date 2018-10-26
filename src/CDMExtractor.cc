@@ -430,6 +430,7 @@ void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal,
     std::vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoZ);
     types.push_back(CoordinateAxis::Height);
+    types.push_back(CoordinateAxis::Depth);
     types.push_back(CoordinateAxis::Pressure);
     reduceAxes(types, units, startVal, endVal);
 }

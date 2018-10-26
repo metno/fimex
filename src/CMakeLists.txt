@@ -102,6 +102,7 @@ SET(libfimex_SOURCES
   coordSys/verticalTransform/AltitudeHeightConverter.cc
   coordSys/verticalTransform/AltitudeStandardToPressureConverter.cc
   coordSys/verticalTransform/AtmosphereSigma.cc
+  coordSys/verticalTransform/Depth.cc
   coordSys/verticalTransform/GeopotentialToAltitudeConverter.cc
   coordSys/verticalTransform/Height.cc
   coordSys/verticalTransform/HybridSigmaApToPressureConverter.cc

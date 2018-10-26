@@ -63,8 +63,9 @@ bool ToVLevelConverterAdapter::isValid(double val, size_t x, size_t y, size_t t)
 {
     const SliceBuilder sb = prepareSliceBuilder(x, y, t);
 
-    DataPtr data = converter_->getValiditySlice(sb, std::vector<double>(1, val));
-    return data->getLongLong(0) != 0;
+    DataPtr dataMax = converter_->getValidityMax(sb);
+    DataPtr dataMin = converter_->getValidityMin(sb);
+    return ((!dataMax || val <= dataMax->getDouble(0)) && (!dataMin || val >= dataMin->getDouble(0)));
 }
 
 SliceBuilder ToVLevelConverterAdapter::prepareSliceBuilder(size_t x, size_t y, size_t t) const

@@ -67,16 +67,17 @@ bool checkSingleAxisCompatibility(CDMReader_p readerB, CDMReader_p readerT,
 
 bool checkAxesCompatibility(CDMReader_p readerB, CDMReader_p readerT, CoordinateSystemPtr csB, CoordinateSystemPtr csT)
 {
-    const int N = 5;
+    const int N = 6;
     const CoordinateAxis::AxisType types[N] = {
         CoordinateAxis::GeoZ,
         CoordinateAxis::Time,
         CoordinateAxis::Pressure,
         CoordinateAxis::Height,
+        CoordinateAxis::Depth,
         CoordinateAxis::ReferenceTime
     };
     const char* labels[N] = {
-        "z", "time", "pressure", "height", "reference time"
+        "z", "time", "pressure", "height", "depth", "reference time"
     };
     for(int i=0; i<N; ++i) {
         if (not checkSingleAxisCompatibility(readerB, readerT, csB->findAxisOfType(types[i]), csT->findAxisOfType(types[i]), labels[i])) {

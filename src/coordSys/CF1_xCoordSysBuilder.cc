@@ -36,6 +36,7 @@
 #include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
 #include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
+#include <fimex/coordSys/verticalTransform/Depth.h>
 #include <fimex/coordSys/verticalTransform/Height.h>
 #include <fimex/coordSys/verticalTransform/HybridSigmaPressure1.h>
 #include <fimex/coordSys/verticalTransform/HybridSigmaPressure2.h>
@@ -184,10 +185,11 @@ static CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& v
 
     // test 'positive' attribute
     if (cdm.getAttribute(varName, "positive", attr)) {
+        const bool is_up = attr.getStringValue() == "up";
         if (cdm.getAttribute(varName, "units", attr)) {
             string unit = attr.getStringValue();
             if (uc.areConvertible("m", unit)) {
-                return CoordinateAxis::Height;
+                return is_up ? CoordinateAxis::Height : CoordinateAxis::Depth;
             } else {
                 return CoordinateAxis::GeoZ;
             }
@@ -418,10 +420,15 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         CoordinateSystem::ConstAxisPtr zAxis = cs.getGeoZAxis();
         if (zAxis.get() != 0) {
             if (cdm.hasVariable(zAxis->getName())) {
+                LOG4FIMEX(logger, Logger::DEBUG, "z axis '" << zAxis->getName() << "' has type " << zAxis->getAxisTypeStr());
                 switch (zAxis->getAxisType()) {
                 case CoordinateAxis::Height:
                     cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                         new Height(zAxis->getName())));
+                    break;
+                case CoordinateAxis::Depth:
+                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                        new Depth(zAxis->getName())));
                     break;
                 case CoordinateAxis::Pressure:
                     cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(

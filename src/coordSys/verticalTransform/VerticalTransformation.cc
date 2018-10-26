@@ -73,7 +73,7 @@ VerticalConverterPtr VerticalTransformation::getConverter(CDMReader_p reader, Co
     case MIFI_VINT_PRESSURE: return findPressureConverter(reader, cs);
     case MIFI_VINT_HEIGHT: return  getHeightConverter(reader, cs);
     case MIFI_VINT_ALTITUDE: return getAltitudeConverter(reader, cs);
-    case MIFI_VINT_DEPTH: return getAltitudeConverter(reader, cs);
+    case MIFI_VINT_DEPTH: return getDepthConverter(reader, cs);
     default: throw CDMException("unknown vertical type");
     }
 }
@@ -101,6 +101,11 @@ VerticalConverterPtr VerticalTransformation::getHeightConverter(CDMReader_p read
     if (VerticalConverterPtr altitude = getAltitudeConverter(reader, cs))
         return AltitudeHeightConverter::createToHeightConverter(reader, cs, altitude);
 
+    return VerticalConverterPtr(); // no converter
+}
+
+VerticalConverterPtr VerticalTransformation::getDepthConverter(CDMReader_p, CoordSysPtr) const
+{
     return VerticalConverterPtr(); // no converter
 }
 

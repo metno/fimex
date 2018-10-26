@@ -337,10 +337,11 @@ ArrayDims makeArrayDims(const SliceBuilder& sb)
 
 VerticalConverterPtr verticalConverter(boost::shared_ptr<const CoordinateSystem> cs, CDMReader_p reader, int verticalType)
 {
-    if (VerticalConverterPtr converter = cs->getVerticalTransformation()->getConverter(reader, cs, verticalType))
-        return converter;
-    else
-        throw CDMException("no vertical transformation found");
+    if (boost::shared_ptr<const VerticalTransformation> vt = cs->getVerticalTransformation()) {
+        if (VerticalConverterPtr converter = vt->getConverter(reader, cs, verticalType))
+            return converter;
+    }
+    throw CDMException("no vertical transformation found: " + cs->id());
 }
 
 DataPtr verticalData4D(VerticalConverterPtr converter, const CDM& cdm, size_t unLimDimPos)
