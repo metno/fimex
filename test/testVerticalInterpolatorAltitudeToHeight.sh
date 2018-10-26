@@ -1,5 +1,6 @@
 #! /bin/sh
-echo "testing interpolation to altitude"
+TEST="interpolation height to altitude"
+echo "testing $TEST"
 TEST_SRCDIR=$(dirname $0)
 OUT_NC="out$$.nc"
 ./fimex.sh \
@@ -9,7 +10,7 @@ OUT_NC="out$$.nc"
     --input.file=${TEST_SRCDIR}/testdata_altitude_height_in.nc \
     --output.file="$OUT_NC" --output.type=nc4
 if [ $? != 0 ]; then
-  echo "failed interpolation to altitude"
+  echo "failed $TEST"
   rm -f "$OUT_NC"
   exit 1
 fi
@@ -19,7 +20,7 @@ if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else
-  echo "failed diff interpolation to altitude"
+  echo "failed diff for $TEST"
   E=1
 fi
 rm -f "$OUT_NC"

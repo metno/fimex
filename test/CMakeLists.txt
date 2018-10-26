@@ -87,10 +87,10 @@ IF(ENABLE_NETCDF)
     testCharNc.sh
     testInterpolatorFill.sh
     testInterpolation2DataFillValue.sh
-    testVerticalInterpolator.sh
-    testVerticalInterpolator2.sh
-    testVerticalInterpolator3.sh
-    testVerticalInterpolator4.sh
+    testVerticalInterpolatorPressureToPressure.sh
+    testVerticalInterpolatorSigmaHybridToPressure.sh
+    testVerticalInterpolatorAltitudeToHeight.sh
+    testVerticalInterpolatorEnsembleSigmaHybridToPressure.sh
     testVerticalInterpolatorAltitude.sh
     testVerticalInterpolatorConversion.sh
     testVerticalInterpolatorOceanSG2ToDepth.sh
