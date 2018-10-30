@@ -146,3 +146,25 @@ Conflicts: python3-pyfimex0,
 Description: python3 interface to libfimex
  Python3 interface to library for File Interpolations, Manipulations
  and EXtraction of gridded geo-spatial data.
+
+Package: fimex-bin
+Section: science
+Architecture: all
+Depends: ${misc:Depends},
+ fimex-0.23-bin (= ${binary:Version})
+Description: command line utility for geo-spatial gridded data
+ The program fimex is a program for File Interpolations, Manipulations and
+ EXtraction of gridded geo-spatial data.
+ .
+ This package contains unversioned symlinks to the versioned fimex binaries.
+
+Package: fimex-share
+Section: science
+Architecture: all
+Depends: ${misc:Depends},
+ fimex-0.23-share (= ${binary:Version})
+Description: shared files required for fimex-bin and libfimex
+ The program fimex is a program for File Interpolations, Manipulations and
+ EXtraction of gridded geo-spatial data.
+ .
+ This package contains an unversioned symlink to the versioned fimex shared files.
