@@ -1,3 +1,6 @@
+  * 2018-02-05 fimex-0.67.0
+    * vertical interpolation to hybrid axis
+    * bugfixes
   * 2018-02-05 fimex-0.66.0
     * python interface for a few more functions
     * if compiling commandline utility without version number, also

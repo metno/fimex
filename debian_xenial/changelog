@@ -1,3 +1,9 @@
+fimex-0.67 (0.67.0-1xenial1) xenial; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 29 Oct 2018 08:00:08 +0100
+
 fimex-0.66 (0.66.0-2xenial1) xenial; urgency=low
 
   * pyfimex0 Provides and Conflicts
