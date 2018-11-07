@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim )
     BOOST_CHECK(true);
 
     CDMReader_p reader2(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, test_output));
-    BOOST_CHECK(reader->getDataSlice("notlimited", 2)->asInt()[0] == 3);
+    BOOST_CHECK(reader2->getDataSlice("notlimited", 2)->asInt()[0] == 3);
 }
 
 BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
