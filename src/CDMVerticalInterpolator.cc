@@ -121,7 +121,6 @@ struct VIntPimpl {
     int verticalType;
     mifi_vertical_interpol_method verticalInterpolationMethod;
     vector<double> level1;
-    vector<double> level2;
     // name of the generated vertical axis
     string vAxis;
     // variable-names with vertical information to change
