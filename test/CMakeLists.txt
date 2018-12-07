@@ -119,6 +119,7 @@ ENDIF()
 IF((ENABLE_FELT) AND (ENABLE_NETCDF) AND ((ENABLE_GRIBAPI) OR (ENABLE_ECCODES)))
   LIST(APPEND SH_TESTS
     testFiIndexGribs.sh
+    testFiGrbmlCat.sh
     )
 ENDIF()
 
@@ -169,6 +170,7 @@ ENDIF()
 CONFIGURE_FILE(nccmp.sh.in nccmp.sh @ONLY)
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
+CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
 
 ADD_LIBRARY(testinghelpers STATIC
@@ -210,6 +212,9 @@ ENDFOREACH()
 
 IF(ENABLE_FELT AND ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
   SET_TESTS_PROPERTIES(testGribReader testFiIndexGribs.sh
+    PROPERTIES DEPENDS testGribWriter
+  )
+  SET_TESTS_PROPERTIES(testGribReader testFiGrbmlCat.sh
     PROPERTIES DEPENDS testGribWriter
   )
 ENDIF()

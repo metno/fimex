@@ -1,0 +1,4 @@
+#!/bin/sh
+
+TEST_BINDIR=`dirname $0`
+exec "$TEST_BINDIR/../src/binSrc/fiGrbmlCat@MINUS_FIMEX_VERSION@" "$@"
