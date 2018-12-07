@@ -127,7 +127,6 @@ void grbmlExtract(const string& fileName, ostream& os)
             }
             ret = xmlTextReaderRead(reader);
         }
-        os << "</gribFileIndex>" << endl;
         if (ret != 0) {
             cerr <<  fileName << ": failed to parse" << endl;
         }
@@ -169,7 +168,10 @@ main(int argc, char* args[])
 
     if (vm.count("inputFile") > 0) {
         vector<string> files = vm["inputFile"].as<vector<string> >();
-        for (size_t i = 0; i < files.size(); ++i) grbmlExtract(files[i], outStream);
+        for (size_t i = 0; i < files.size(); ++i)
+            grbmlExtract(files[i], outStream);
+        if (!first)
+            outStream << "</gribFileIndex>" << endl;
     } else {
         writeUsage(cerr, options);
         return 1;
