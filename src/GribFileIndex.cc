@@ -440,9 +440,6 @@ GribFileMessage::GribFileMessage(
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
-    msgLength = 1024;
-    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
-    stepType_ = std::string(msg);
     // ensemble
     int gribError = grib_get_long(gh.get(), "numberOfForecastsInEnsemble", &totalNumberOfEnsembles_);
     switch (gribError) {
@@ -592,7 +589,6 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             dataDate_ = string2type<long>(getXmlProp(lNode, "dataDate"));
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
             stepUnits_ = getXmlProp(lNode, "stepUnits");
-            stepType_ = getXmlProp(lNode, "stepType");
             timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, "timeRangeIndicator"));
             stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
             stepEnd_ = string2type<long>(getXmlProp(lNode, "stepEnd"));
@@ -758,7 +754,7 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                     } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepUnits"))) {
                         stepUnits_ = string(reinterpret_cast<const char*>(value));
                     } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepType"))) {
-                        stepType_ = string(reinterpret_cast<const char*>(value));
+                        // ignore
                     } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("timeRangeIndicator"))) {
                         timeRangeIndicator_ = atol(reinterpret_cast<const char*>(value));
                     } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepStart"))) {
@@ -1099,8 +1095,6 @@ string GribFileMessage::toString() const
                 xmlCast(type2string(dataTime_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepUnits"),
                 xmlCast(stepUnits_)));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepType"),
-                xmlCast(stepType_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("timeRangeIndicator"),
                 xmlCast(type2string(timeRangeIndicator_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepStart"),
