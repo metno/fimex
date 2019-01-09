@@ -24,6 +24,7 @@
  *      Author: heikok
  */
 
+#include "fimex/XMLUtils.h"
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -46,8 +47,6 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 
 
 int printNode(xmlTextReaderPtr reader, ostream& os) {
-    const xmlChar* name;
-    const xmlChar* value;
     bool isEmpty = xmlTextReaderIsEmptyElement(reader); // needs to be read before reading attributes!
 
     const xmlChar* nodeName = xmlTextReaderConstName(reader);
@@ -55,9 +54,9 @@ int printNode(xmlTextReaderPtr reader, ostream& os) {
     os << "<" << nodeName;
 
     while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-        name = xmlTextReaderName(reader);
-        value = xmlTextReaderValue(reader);
-        os << " " << name << "=\"" << value << "\"";
+        MetNoFimex::XmlCharPtr name = xmlTextReaderName(reader);
+        MetNoFimex::XmlCharPtr value = xmlTextReaderValue(reader);
+        os << " " << name.to_cc() << "=\"" << value.to_cc() << "\"";
     }
     if (isEmpty) {
         os << " />";
@@ -102,9 +101,9 @@ void grbmlExtract(const string& fileName, ostream& os)
                 if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
                 if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
                     if (first) {
-                        string url = string(reinterpret_cast<const char*>(xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"))));
+                        MetNoFimex::XmlCharPtr url = xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"));
                         os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-                        os << "<gribFileIndex url=\"" << url << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << endl;
+                        os << "<gribFileIndex url=\"" << url.to_cc() << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << endl;
                         first = false;
                     }
                 } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {

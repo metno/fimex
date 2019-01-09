@@ -74,6 +74,7 @@ SET(libfimex_SOURCES
   Utils.cc
   XMLDoc.cc
   XMLInput.cc
+  XMLUtils.cc
 
   coordSys/CoordinateSystem.cc
   coordSys/CoordinateAxis.cc
