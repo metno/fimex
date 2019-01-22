@@ -615,7 +615,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
     const long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600)) // openmp gives currently segfaults with intel compilers < 16.
+#if !defined(__INTEL_COMPILER) // openmp gives currently segfaults with intel compilers
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
     {
@@ -707,7 +707,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     if (unLimDimPos == -1) {
                         if (!cdm.hasUnlimitedDim(cdmVar)) {
                             //variable without unlimited dimension write at -1
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#if !defined(__INTEL_COMPILER)
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi)
                             {
@@ -736,7 +736,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                                     }
                                 }
                             }
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#if !defined(__INTEL_COMPILER)
 #ifdef _OPENMP
                         }
 #endif
@@ -744,7 +744,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     } else {
                         if (cdm.hasUnlimitedDim(cdmVar) && unLimDimIdx >= 0) {
                             // variables with unlimited dimension
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#if !defined(__INTEL_COMPILER)
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi,unLimDimPos)
                             {
@@ -775,7 +775,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                                     }
 
                                 }
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#if !defined(__INTEL_COMPILER)
 #ifdef _OPENMP
                             }
 #endif
@@ -790,7 +790,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                 }
 #endif
             }
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#if !defined(__INTEL_COMPILER)
 #ifdef _OPENMP
         } // single
     } // parallel
