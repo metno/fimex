@@ -238,16 +238,14 @@ void GribCDMReader::initPostIndices()
         }
     }
 
-
-    if (p_->indices.size() != 0) {
+    if (!p_->indices.empty()) {
         // time-dimension needs to be added before global attributes due to replacements
         initAddTimeDimension();
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
-        if (p_->times.size() > 0) {
-            p_->templateReplacementAttributes["MIN_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(p_->times.at(0))));
+        if (!p_->times.empty()) {
+            p_->templateReplacementAttributes["MIN_DATETIME"] = std::make_shared<ReplaceStringTimeObject>(fimexTime2epochTime(p_->times.at(0)));
             p_->templateReplacementAttributes["MAX_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(p_->times.at(p_->times.size() - 1))));
+                std::make_shared<ReplaceStringTimeObject>(fimexTime2epochTime(p_->times.at(p_->times.size() - 1)));
         }
 
         initAddGlobalAttributes();
@@ -461,7 +459,7 @@ void GribCDMReader::initLevels()
             vector<CDMAttribute> levelAttributes;
             if (node != 0) {
                 map<string, std::shared_ptr<ReplaceStringObject>> replacements;
-                replacements["EXT"] = std::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
+                replacements["EXT"] = std::make_shared<ReplaceStringTemplateObject<string>>(myExtension);
                 fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
 
                 // add special attributes for grib1 / grib2

@@ -29,8 +29,7 @@
 
 #include "ReplaceStringObject.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/ReplaceStringTemplateObject.h
@@ -44,15 +43,24 @@ class ReplaceStringTemplateObject: public MetNoFimex::ReplaceStringObject
 {
 public:
     ReplaceStringTemplateObject(T obj) : obj_(obj) {}
-    virtual ~ReplaceStringTemplateObject() {}
-    virtual std::ostream& put(std::ostream& s) const { s << obj_; return s; }
+
+    ~ReplaceStringTemplateObject() {}
+    std::ostream& put(std::ostream& s) const override
+    {
+        s << obj_;
+        return s;
+    }
+
     /// set the formatting string for this object, does nothing
-    virtual void setFormatString(const std::string& format) {}
+    void setFormatString(const std::string& format) override {}
+
     /// set the formatting string and additional options for this object, does nothing
-    virtual void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) {}
+    void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) override {}
+
 private:
     T obj_;
 };
 
-} /* namespace MetNoFimex */
+} // namespace MetNoFimex
+
 #endif /* REPLACESTRINGTEMPLATEOBJECT_H_ */

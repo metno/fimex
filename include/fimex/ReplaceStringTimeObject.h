@@ -33,34 +33,45 @@ namespace MetNoFimex
 /**
  * @headerfile fimex/ReplaceStringTimeObject.h
  */
-class ReplaceStringTimeObject : public MetNoFimex::ReplaceStringObject
+class ReplaceStringTimeObject : public ReplaceStringObject
 {
     std::time_t myTime;
     std::string myFormat;
     std::time_t offset;
 public:
-    ReplaceStringTimeObject() : myTime(0), myFormat(""), offset(0) {}
     /**
      * initialize a ReplaceStringTimeObject with time and string set
      */
-    ReplaceStringTimeObject(std::time_t time, std::string format = "%Y-%m-%d %H:%M:%S%F%Q") : myTime(time), myFormat(format), offset(0) {}
-    virtual ~ReplaceStringTimeObject() {}
+    explicit ReplaceStringTimeObject(std::time_t time, const std::string& format = "%Y-%m-%d %H:%M:%S%F%Q")
+        : myTime(time)
+        , myFormat(format)
+        , offset(0)
+    {
+    }
+
+    ~ReplaceStringTimeObject();
+
     friend std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto);
-    virtual std::ostream& put(std::ostream& s) const { s << *this; return s;}
+    std::ostream& put(std::ostream& s) const override
+    {
+        s << *this;
+        return s;
+    }
+
     /**
      *  set the formatting String for this object
      *
      * @param format: format string of strftime http://www.cplusplus.com/reference/clibrary/ctime/strftime.html
      */
-    virtual void setFormatString(const std::string& format) {myFormat = format;}
+    void setFormatString(const std::string& format) override { myFormat = format; }
+
     /**
      * set the formatting string and additional options for this object
      * options are: 0: offset as in seconds, i.e. +5000, -6000
      */
-    virtual void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options);
-
+    void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*REPLACESTRINGTIMEOBJECT_H_*/

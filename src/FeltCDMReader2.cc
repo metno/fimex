@@ -210,11 +210,8 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
         vector<MetNoFimex::FimexTime> feltTimes = feltfile_->getFeltTimes();
         if (!feltTimes.empty()) {
-            templateReplacementAttributes["MIN_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(feltTimes[0])));
-            size_t lastTime = (feltTimes.size() > 1) ? (feltTimes.size() - 1) : 0;
-            templateReplacementAttributes["MAX_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(feltTimes[lastTime])));
+            templateReplacementAttributes["MIN_DATETIME"] = std::make_shared<ReplaceStringTimeObject>(fimexTime2epochTime(feltTimes[0]));
+            templateReplacementAttributes["MAX_DATETIME"] = std::make_shared<ReplaceStringTimeObject>(fimexTime2epochTime(feltTimes[feltTimes.size() - 1]));
         }
     }
 

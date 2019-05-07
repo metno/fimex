@@ -24,8 +24,9 @@
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/Utils.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
+ReplaceStringTimeObject::~ReplaceStringTimeObject() {}
 
 std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto)
 {
@@ -50,5 +51,4 @@ void ReplaceStringTimeObject::setFormatStringAndOptions(const std::string& forma
 	}
 }
 
-
-}
+} // namespace MetNoFimex
