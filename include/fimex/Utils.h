@@ -371,6 +371,9 @@ std::vector<std::string> tokenize(const std::string& str, const std::string& del
  */
 std::string string2lowerCase(const std::string& str);
 
+bool starts_with(const std::string& txt, const std::string& start);
+bool ends_with(const std::string& txt, const std::string& end);
+
 /**
  * Typesafe varargs implementation, for pre-C11 variadic functions
  */

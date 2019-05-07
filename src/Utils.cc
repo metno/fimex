@@ -91,6 +91,25 @@ std::string string2lowerCase(const std::string& str)
     return s;
 }
 
+static bool startsOrEndsWith(const std::string& txt, const std::string& sub, int startcompare)
+{
+    if (sub.empty())
+        return true;
+    if (txt.size() < sub.size())
+        return false;
+    return txt.compare(startcompare, sub.size(), sub) == 0;
+}
+
+bool starts_with(const std::string& txt, const std::string& start)
+{
+    return startsOrEndsWith(txt, start, 0);
+}
+
+bool ends_with(const std::string& txt, const std::string& end)
+{
+    return startsOrEndsWith(txt, end, ((int)txt.size()) - ((int)end.size()));
+}
+
 template <>
 std::ostream& type2stream<double>(std::ostream& out, double in)
 {

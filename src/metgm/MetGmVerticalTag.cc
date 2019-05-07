@@ -32,17 +32,13 @@
 
 // fimex
 //
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
-#include "fimex/Data.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
-#include "fimex/CDMException.h"
+#include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-
-// boost
-//
-#include <boost/algorithm/string.hpp>
 
 namespace MetNoFimex {
 
@@ -74,7 +70,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWri
                 data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "hPa");
             } else if (zAxis->getAxisType() == CoordinateAxis::Height) {
                 VTag->pr_ = 1; // as default
-                if(boost::algorithm::ends_with(pVariable->getName(), "_MSL")) {
+                if (ends_with(pVariable->getName(), "_MSL")) {
                     VTag->pr_ = 0;
                 }
                 data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "m");

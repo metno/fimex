@@ -171,4 +171,19 @@ BOOST_AUTO_TEST_CASE(test_type2string)
     BOOST_CHECK_EQUAL("fimex", type2string("fimex"));
 }
 
+BOOST_AUTO_TEST_CASE(test_starts_ends_width)
+{
+    BOOST_CHECK(!starts_with("", "fimex"));
+    BOOST_CHECK(!starts_with("fi", "fimex"));
+    BOOST_CHECK(starts_with("fimex", "fim"));
+    BOOST_CHECK(starts_with("fimex", "fimex"));
+    BOOST_CHECK(!starts_with("fimex", "no"));
+
+    BOOST_CHECK(!ends_with("", "fimex"));
+    BOOST_CHECK(!ends_with("ex", "fimex"));
+    BOOST_CHECK(ends_with("fimex", "mex"));
+    BOOST_CHECK(ends_with("fimex", "fimex"));
+    BOOST_CHECK(!ends_with("fimex", "no"));
+}
+
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

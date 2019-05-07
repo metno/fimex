@@ -46,7 +46,6 @@
 
 #include "fimex_config.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/program_options.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -810,7 +809,7 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
 
     if( vm.count("merge.smoothing") ) {
         const string& v = vm["merge.smoothing"].as<string>();
-        if (boost::starts_with(v, "LINEAR")) {
+        if (starts_with(v, "LINEAR")) {
             std::smatch what;
             if (std::regex_match(v, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
                 try {

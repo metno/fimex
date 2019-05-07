@@ -44,14 +44,14 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
-#include "fimex/CDMException.h"
 
 // boost
 //
-#include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 // libxml2
@@ -747,15 +747,15 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
 
                 switch(tags->pr()) {
                 case 0:
-                    if(!boost::algorithm::ends_with(kildeName, "MSL"))
+                    if (!ends_with(kildeName, "MSL"))
                         fixedKildeName.append("_MSL");
                     break;
                 case 1:
-                    if(!boost::algorithm::ends_with(kildeName, "GND"))
+                    if (!ends_with(kildeName, "GND"))
                         fixedKildeName.append("_GND");
                     break;
                 case 2:
-                    if(!boost::algorithm::ends_with(kildeName, "Pa"))
+                    if (!ends_with(kildeName, "Pa"))
                         fixedKildeName.append("_Pa");
                     break;
                 }
