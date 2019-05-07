@@ -34,7 +34,6 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
-#include <iostream>
 #include <regex>
 #include <set>
 
@@ -611,7 +610,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
         projectionName = projs[0];
         if (projs.size() > 1) {
             retVal = false;
-            std::cerr << "found several projections, changing " << projs[0] << std::endl;
+            LOG4FIMEX(logger, Logger::WARN, "found several projections, changing " << projs[0]);
         }
     }
     // detect original projection axes (x,y,lon,lat,rlat,rlon) (via projection_x/y_coordinate, degrees_east/north, grid_longitude/latitude)
@@ -647,8 +646,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
             xAxis = dims[0];
             if (dims.size() > 1) {
                 retVal = false;
-                std::cerr << "found several dimensions with standard_name "
-                        << xStandardName << ", using " << xAxis << std::endl;
+                LOG4FIMEX(logger, Logger::WARN, "found several dimensions with standard_name " << xStandardName << ", using " << xAxis);
             }
         }
         dims = findVariables("standard_name", yStandardName);
@@ -658,8 +656,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
             yAxis = dims[0];
             if (dims.size() > 1) {
                 retVal = false;
-                std::cerr << "found several dimensions with standard_name "
-                        << yStandardName << " using " << yAxis << std::endl;
+                LOG4FIMEX(logger, Logger::WARN, "found several dimensions with standard_name " << yStandardName << " using " << yAxis);
             }
         }
     }
