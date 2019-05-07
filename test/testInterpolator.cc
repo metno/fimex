@@ -37,6 +37,8 @@
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
+#include <iostream>
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -494,6 +496,45 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
     BOOST_CHECK(interpolator->getCDM().hasDimension("nvcross"));
     BOOST_CHECK_EQUAL(interpolator->getCDM().getDimension("nvcross").getLength(), 2);
     BOOST_CHECK(interpolator->getCDM().getDimension("x").getLength() >  5);
+}
+
+namespace {
+std::vector<double> range(double start, double step, double end)
+{
+    std::vector<double> r;
+    for (; step > 0 && start < end + step; start += step)
+        r.push_back(start);
+    return r;
+}
+#include "testInterpolator_forward_ex.cc"
+} // namespace
+
+BOOST_AUTO_TEST_CASE(interpolator_forward)
+{
+    if (DEBUG)
+        defaultLogLevel(Logger::DEBUG);
+    const string ncFileName = pathTest("interpolator_forward_in.nc");
+    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+    interpolator->changeProjection(MIFI_INTERPOL_FORWARD_MEAN, "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                                   range(411386.521566, 50, 413886.672091), range(7539081.567715, 50, 7541081.780868), "m", "m", CDM_DOUBLE, CDM_DOUBLE);
+
+    DataPtr interpolatedData = interpolator->getDataSlice("Amplitude_VV", 0);
+    BOOST_REQUIRE(interpolatedData);
+    BOOST_REQUIRE_EQUAL(interpolator_forward_N, interpolatedData->size());
+    boost::shared_array<unsigned short> interpolatedValues = interpolatedData->asUShort();
+    int bad = 0;
+    for (size_t i = 0; i < interpolator_forward_N; ++i) {
+#if 0
+        BOOST_CHECK_EQUAL(interpolator_forward_ex[i], interpolatedValues[i]);
+#else
+        if (interpolator_forward_ex[i] != interpolatedValues[i]) {
+            std::cout << "i=" << i << " ex=" << interpolator_forward_ex[i] << " ac=" << interpolatedValues[i] << std::endl;
+            bad += 1;
+        }
+#endif
+    }
+    BOOST_CHECK_EQUAL(0, bad);
 }
 
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
