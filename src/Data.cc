@@ -32,11 +32,46 @@ namespace MetNoFimex
 // pure abstract class, impl. required for linker
 Data::~Data() {}
 
+namespace {
+
 template<typename T>
 DataPtr createDataT(size_t length, boost::shared_array<T> array)
 {
-    return DataPtr(new DataImpl<T>(array, length));
+    typedef DataImpl<T> Impl;
+    return boost::make_shared<Impl>(array, length);
 }
+
+template <typename T>
+DataPtr createDataT(size_t length)
+{
+    typedef DataImpl<T> Impl;
+    return boost::make_shared<Impl>(length);
+}
+
+DataPtr createDataPtr_(CDMDataType datatype, size_t length)
+{
+    // clang-format off
+    switch (datatype) {
+    case CDM_DOUBLE:  return createDataT<double>(length);
+    case CDM_FLOAT:   return createDataT<float>(length);
+    case CDM_INT64:   return createDataT<long long>(length);
+    case CDM_INT:     return createDataT<int>(length);
+    case CDM_SHORT:   return createDataT<short>(length);
+    case CDM_STRING:
+    case CDM_CHAR:    return createDataT<char>(length);
+    case CDM_UINT64:  return createDataT<unsigned long long>(length);
+    case CDM_UINT:    return createDataT<unsigned int>(length);
+    case CDM_USHORT:  return createDataT<unsigned short>(length);
+    case CDM_UCHAR:   return createDataT<unsigned char>(length);
+    case CDM_STRINGS: return createDataT<std::string>(length);
+    case CDM_NAT:     return createDataT<char>(length);
+    default: break;
+    }
+    // clang-format on
+    throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
+}
+
+} // namespace
 
 DataPtr createData(size_t length, boost::shared_array<double> array)
 { return createDataT(length, array); }
@@ -71,53 +106,38 @@ DataPtr createData(size_t length, boost::shared_array<unsigned long long> array)
 DataPtr createData(size_t length, boost::shared_array<std::string> array)
 { return createDataT(length, array); }
 
-DataPtr createDataPtr_(CDMDataType datatype, size_t length)
+DataPtr createData(CDMDataType datatype, size_t length, double val)
 {
-    switch (datatype) {
-        case CDM_DOUBLE: return boost::shared_ptr<DataImpl<double> >(new DataImpl<double>(length));
-        case CDM_FLOAT:  return boost::shared_ptr<DataImpl<float> >(new DataImpl<float>(length));
-        case CDM_INT64:  return boost::shared_ptr<DataImpl<long long> >(new DataImpl<long long>(length));
-        case CDM_INT:    return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(length));
-        case CDM_SHORT:  return boost::shared_ptr<DataImpl<short> >(new DataImpl<short>(length));
-        case CDM_STRING:
-        case CDM_CHAR:   return boost::shared_ptr<DataImpl<char> >(new DataImpl<char>(length));
-        case CDM_UINT64: return boost::shared_ptr<DataImpl<unsigned long long> >(new DataImpl<unsigned long long>(length));
-        case CDM_UINT:   return boost::shared_ptr<DataImpl<unsigned int> >(new DataImpl<unsigned int>(length));
-        case CDM_USHORT: return boost::shared_ptr<DataImpl<unsigned short> >(new DataImpl<unsigned short>(length));
-        case CDM_UCHAR:  return boost::shared_ptr<DataImpl<unsigned char> >(new DataImpl<unsigned char>(length));
-        case CDM_STRINGS: return boost::make_shared< DataImpl<std::string> >(length);
-        case CDM_NAT: return DataPtr(new DataImpl<char>(length));
-        default: break;
-    }
-    throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
-
-}
-
-DataPtr createData(CDMDataType datatype, size_t length, double val) {
     DataPtr data = createDataPtr_(datatype, length);
     data->setAllValues(val);
     return data;
 }
 
-DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
+DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)
+{
+    DataPtr d;
+    // clang-format off
     switch (datatype) {
-        case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > mydata(new DataImpl<double>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > mydata(new DataImpl<float>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_INT64:    { boost::shared_ptr<DataImpl<long long> > mydata(new DataImpl<long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_INT:    { boost::shared_ptr<DataImpl<int> > mydata(new DataImpl<int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > mydata(new DataImpl<short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_STRING:
-        case CDM_CHAR:   { boost::shared_ptr<DataImpl<char> > mydata(new DataImpl<char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_UINT64:    { boost::shared_ptr<DataImpl<unsigned long long> > mydata(new DataImpl<unsigned long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_UINT:    { boost::shared_ptr<DataImpl<unsigned int> > mydata(new DataImpl<unsigned int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_USHORT:  { boost::shared_ptr<DataImpl<unsigned short> > mydata(new DataImpl<unsigned short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_UCHAR:   { boost::shared_ptr<DataImpl<unsigned char> > mydata(new DataImpl<unsigned char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_STRINGS: { boost::shared_ptr<DataImpl<std::string> > mydata(new DataImpl<std::string>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_NAT: return DataPtr(new DataImpl<char>(0));
-        default: break;
+    case CDM_DOUBLE:  d = createDataT<double>            (length); break;
+    case CDM_FLOAT:   d = createDataT<float>             (length); break;
+    case CDM_INT64:   d = createDataT<long long>         (length); break;
+    case CDM_INT:     d = createDataT<int>               (length); break;
+    case CDM_SHORT:   d = createDataT<short>             (length); break;
+    case CDM_STRING:
+    case CDM_CHAR:    d = createDataT<char>              (length); break;
+    case CDM_UINT64:  d = createDataT<unsigned long long>(length); break;
+    case CDM_UINT:    d = createDataT<unsigned int>      (length); break;
+    case CDM_USHORT:  d = createDataT<unsigned short>    (length); break;
+    case CDM_UCHAR:   d = createDataT<unsigned char>     (length); break;
+    case CDM_STRINGS: d = createDataT<std::string>       (length); break;
+    case CDM_NAT:     return createDataT<char>(0);
+    default: throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
     }
-    throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
+    // clang-format on
+    d->setValues(0, data, dataStartPos, dataStartPos + length);
+    return d;
 }
+
 template<>
 void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
     copyData(startPos, data.asChar(), data.size(), first, last);

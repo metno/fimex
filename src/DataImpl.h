@@ -307,23 +307,24 @@ namespace MetNoFimex
     template<typename C>
     DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
     {
-        DataPtr data(new DataImpl<char>(0)); // dummy default
+        // clang-format off
         switch (newType) {
-        case CDM_CHAR: data = DataPtr(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_SHORT: data = DataPtr(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_INT: data = DataPtr(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UCHAR: data = DataPtr(new DataImpl<unsigned char>(convertArrayType<unsigned char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_USHORT: data = DataPtr(new DataImpl<unsigned short>(convertArrayType<unsigned short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT: data = DataPtr(new DataImpl<unsigned int>(convertArrayType<unsigned int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_INT64: data = DataPtr(new DataImpl<long long>(convertArrayType<long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT64: data = DataPtr(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_FLOAT: data = DataPtr(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_DOUBLE: data = DataPtr(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_STRING: throw CDMException("cannot convert CDM_STRING datatype"); break;
-        case CDM_STRINGS: throw CDMException("cannot convert CDM_STRINGS datatype"); break;
-        case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
+        case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_SHORT:  return createData(size(), convertArrayType<short>             (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_INT:    return createData(size(), convertArrayType<int>               (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_UCHAR:  return createData(size(), convertArrayType<unsigned char>     (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_USHORT: return createData(size(), convertArrayType<unsigned short>    (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_UINT:   return createData(size(), convertArrayType<unsigned int>      (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_INT64:  return createData(size(), convertArrayType<long long>         (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_UINT64: return createData(size(), convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_FLOAT:  return createData(size(), convertArrayType<float>             (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_DOUBLE: return createData(size(), convertArrayType<double>            (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
+        case CDM_STRING:
+        case CDM_STRINGS:
+        case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
         }
-        return data;
+        // clang-format on
+        throw CDMException("cannot convert unknown datatype");
     }
 
     template<>
@@ -335,23 +336,24 @@ namespace MetNoFimex
     template<typename C>
     DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitsConverter, CDMDataType newType, double newFill, double newScale, double newOffset)
     {
-        DataPtr data(new DataImpl<char>(0)); // dummy default
+        // clang-format off
         switch (newType) {
-        case CDM_CHAR: data = DataPtr(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_SHORT: data = DataPtr(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_INT: data = DataPtr(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_UCHAR: data = DataPtr(new DataImpl<unsigned char>(convertArrayType<unsigned char>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_USHORT: data = DataPtr(new DataImpl<unsigned short>(convertArrayType<unsigned short>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT: data = DataPtr(new DataImpl<unsigned int>(convertArrayType<unsigned int>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_INT64: data = DataPtr(new DataImpl<long long>(convertArrayType<long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT64: data = DataPtr(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_FLOAT: data = DataPtr(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_DOUBLE: data = DataPtr(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset), size())); break;
-        case CDM_STRING: throw CDMException("cannot convert CDM_STRING datatype"); break;
-        case CDM_STRINGS: throw CDMException("cannot convert CDM_STRINGS datatype"); break;
-        case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
+        case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_SHORT:  return createData(size(), convertArrayType<short>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_INT:    return createData(size(), convertArrayType<int>               (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_UCHAR:  return createData(size(), convertArrayType<unsigned char>     (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_USHORT: return createData(size(), convertArrayType<unsigned short>    (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_UINT:   return createData(size(), convertArrayType<unsigned int>      (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_INT64:  return createData(size(), convertArrayType<long long>         (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_UINT64: return createData(size(), convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_FLOAT:  return createData(size(), convertArrayType<float>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_DOUBLE: return createData(size(), convertArrayType<double>            (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+        case CDM_STRING:
+        case CDM_STRINGS:
+        case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
         }
-        return data;
+        // clang-format on
+        throw CDMException("cannot convert unknown datatype");
     }
 
     template<>
