@@ -55,12 +55,13 @@ class CDMReader : boost::noncopyable
 {
 public:
     CDMReader();
-    virtual ~CDMReader() {}
+    virtual ~CDMReader();
 
     /**
      * Retrieve the cdm structure of this reader.
      */
     virtual const CDM& getCDM() const;
+
     /**
      * Retrieve the cdm structure of this reader, non-constant.
      *
@@ -84,25 +85,7 @@ public:
      * @return a vector with the dimension sizes usable with MetNoFimex::Index
      */
     virtual std::vector<std::size_t> getDims(const std::string& varName);
-    /**
-     * @brief Read the sizes of the dimensions belonging to a variable slice.
-     *
-     * Read the dimension-sizes of a variable. This can be used to set the index
-     * of the Data as received with on of the getData() functions, e.g.
-     *
-     * @code
-     *  DataPtr d = reader->getScaledDataSliceInUnit("my_var", "m", 3);
-     *  if (d.size() != 0) {
-     *     d.setDims(reader->getDimsSlice("my_var"));
-     *  }
-     * @endcode
-     *
-     * When using getDataSlice with a MetNoFimex::SliceBuilder, use SliceBuilder::getDimensionSizes().
-     *
-     * @param varName the variables name
-     * @return a vector with the dimension sizes usable with MetNoFimex::Index
-     */
-    virtual std::vector<std::size_t> getDimsSlice(const std::string& varName);
+
     /**
      * @brief data-reading function to be called from the CDMWriter
      *
@@ -156,6 +139,7 @@ public:
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
     virtual DataPtr getScaledDataSlice(const std::string& varName, size_t unLimDimPos);
+
     /**
      * @brief read and scale a dataslice to a known unit
      *
@@ -179,6 +163,7 @@ public:
      * @see getScaledDataSlice(varName, unLimDimPos)
      */
     virtual DataPtr getScaledDataSlice(const std::string& varName, const SliceBuilder& sb);
+
     /**
      * @brief read and scale a dataslice to a set unit
      * @param varName name of the variable to read
@@ -201,6 +186,7 @@ public:
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
     virtual DataPtr getScaledData(const std::string& varName);
+
     /**
      * @brief read and scale the complete data to a set unit
      *
@@ -217,6 +203,7 @@ public:
 
 protected:
     boost::shared_ptr<CDM> cdm_;
+
     /**
      * Read the data from the variable.hasData() and select the correct unLimDimPos.
      * This function should be used internally from getDataSlice.
@@ -228,6 +215,26 @@ protected:
     void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset) const;
 
 private:
+    /**
+     * @brief Read the sizes of the dimensions belonging to a variable slice.
+     *
+     * Read the dimension-sizes of a variable. This can be used to set the index
+     * of the Data as received with on of the getData() functions, e.g.
+     *
+     * @code
+     *  DataPtr d = reader->getScaledDataSliceInUnit("my_var", "m", 3);
+     *  if (d.size() != 0) {
+     *     d.setDims(reader->getDimsSlice("my_var"));
+     *  }
+     * @endcode
+     *
+     * When using getDataSlice with a MetNoFimex::SliceBuilder, use SliceBuilder::getDimensionSizes().
+     *
+     * @param varName the variables name
+     * @return a vector with the dimension sizes usable with MetNoFimex::Index
+     */
+    std::vector<std::size_t> getDimsSlice(const std::string& varName);
+
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, double unitScale = 1., double unitOffset = 0.);
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc);
     DataPtr scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& unit);

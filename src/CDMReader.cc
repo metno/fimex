@@ -37,6 +37,8 @@ CDMReader::CDMReader()
 {
 }
 
+CDMReader::~CDMReader() {}
+
 const CDM& CDMReader::getCDM() const
 {
     return *(cdm_.get());
