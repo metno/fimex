@@ -26,17 +26,14 @@
 
 #include "testinghelpers.h"
 
-#include "fimex/MetGmCDMReader.h"
-#ifdef HAVE_NETCDF_H
-#include "fimex/NetCDF_CDMWriter.h"
-#endif
-#include "fimex/Null_CDMWriter.h"
-#include "fimex/Logger.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
+#include "fimex/XMLInput.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 
 #include <memory>
 #include <vector>
@@ -44,16 +41,19 @@
 using namespace std;
 using namespace MetNoFimex;
 
+#ifdef HAVE_NETCDF_H
+static const std::string writertype = "netcdf";
+#else
+static const std::string writertype = "null";
+#endif
+
 TEST4FIMEX_TEST_CASE(test_read_sample_ed1)
 {
     const string fileName = pathTest("sample_ed1.gm");
 
     defaultLogLevel(Logger::INFO);
-    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
-#ifdef HAVE_NETCDF_H
-    NetCDF_CDMWriter(metgmReaderEd1, "testMetgmReadEd1.nc");
-#endif
-    Null_CDMWriter(metgmReaderEd1, "");
+    CDMReader_p metgmReaderEd1 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
+    CDMFileReaderFactory::createWriter(metgmReaderEd1, writertype, "testMetgmReadEd1.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_read_metgm2)
@@ -61,17 +61,14 @@ TEST4FIMEX_TEST_CASE(test_read_metgm2)
     const string fileName = pathTest("sample_ed2.gm");
 
     defaultLogLevel(Logger::INFO);
-    CDMReader_p metgmReaderEd2(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
-#ifdef HAVE_NETCDF_H
-    NetCDF_CDMWriter(metgmReaderEd2, "testMetgmReadEd2.nc");
-#endif
-    Null_CDMWriter(metgmReaderEd2, "");
+    CDMReader_p metgmReaderEd2 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
+    CDMFileReaderFactory::createWriter(metgmReaderEd2, writertype, "testMetgmReadEd2.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_slicebuilder_metgm1)
 {
     const string fileName = pathTest("sample_ed1.gm");
-    CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
+    CDMReader_p metgmReaderEd1 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(metgmReaderEd1);
     const CDM& cdm = metgmReaderEd1->getCDM();

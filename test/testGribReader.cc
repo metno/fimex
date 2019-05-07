@@ -24,18 +24,21 @@
  *      Author: Heiko Klein
  */
 
-#include "testinghelpers.h"
-
-#include <memory>
-#include <vector>
-
+#include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Data.h"
-#include "fimex/GribCDMReader.h"
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
+#include "fimex/XMLInput.h"
+
+#include "testinghelpers.h"
+
+#include <memory>
+#include <vector>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -46,10 +49,8 @@ TEST4FIMEX_TEST_CASE(test_read_grb1)
         return;
     const string fileName = require("test.grb1"); // this is written by testGribWriter.cc
 
-    vector<string> gribFiles;
-    gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathTest("cdmGribReaderConfig_newEarth.xml"))));
+    CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathTest("cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     TEST4FIMEX_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     DataPtr data = grbReader->getDataSlice("x_wind_10m", 0);
@@ -84,7 +85,7 @@ TEST4FIMEX_TEST_CASE(test_read_grb1)
     DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
     TEST4FIMEX_CHECK_EQ(20, dataS->size());
 
-    NetCDF_CDMWriter(grbReader, "test_read_grb1.nc");
+    CDMFileReaderFactory::createWriter(grbReader, "netcdf", "test_read_grb1.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_read_grb2)
@@ -93,10 +94,7 @@ TEST4FIMEX_TEST_CASE(test_read_grb2)
         return;
     const string fileName = require("test.grb2"); // this is written by testGribWriter.cc
 
-    vector<string> gribFiles;
-    gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml"))));
-    //grbReader->getCDM().toXMLStream(cout);
-    Null_CDMWriter(grbReader, "");
+    CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml")));
+    CDMFileReaderFactory::createWriter(grbReader, "null", "");
 }

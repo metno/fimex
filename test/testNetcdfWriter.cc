@@ -22,15 +22,14 @@
  */
 
 #include "testinghelpers.h"
-#include "FeltCDMReader2.h"
 
 #include "fimex/CDMException.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/NetCDF_CDMWriter.h"
 
 #include <memory>
 
 using namespace std;
-using namespace MetNoFelt;
 using namespace MetNoFimex;
 
 TEST4FIMEX_TEST_CASE(test_feltNetcdfWrite)
@@ -38,10 +37,10 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWrite)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     TEST4FIMEX_REQUIRE(feltReader);
 
-    NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
+    CDMFileReaderFactory::createWriter(feltReader, "netcdf", "test_feltNetcdfWrite.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
@@ -49,7 +48,7 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     TEST4FIMEX_REQUIRE(feltReader);
 
     NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", pathShareEtc("cdmWriterConfigDeprecated.xml"));

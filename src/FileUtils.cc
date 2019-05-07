@@ -226,4 +226,16 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
     scanFiles(files, dir, depth, globReg, false);
 }
 
+std::string getExtension(const std::string& fileName)
+{
+    static const std::regex re_extension(".*\\.(\\w+)$");
+    std::string ext;
+    std::smatch what;
+    if (std::regex_match(fileName, what, re_extension)) {
+        ext = what[1].str();
+        std::transform(ext.begin(), ext.end(), ext.begin(), (int (*)(int))tolower);
+    }
+    return ext;
+}
+
 } // namespace MetNoFimex

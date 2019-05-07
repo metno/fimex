@@ -42,6 +42,7 @@ namespace MetNoFimex {
  *        the complete path (behind dir) will be matched.
  */
 void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const std::regex& regexp, bool matchFileOnly);
+
 /**
  * Similar to scanFiles, but uses glob instead, with * matches everything within a file or directory-name, ? matches exactly one character (not /),
  * and ** match everything even across multiple directories.
@@ -50,6 +51,8 @@ void scanFiles(std::vector<std::string>& files, const std::string& dir, int dept
  * @param glob the file/directory glob to match, glob-wildcards are *, ** and ?
  */
 void globFiles(std::vector<std::string>& files, const std::string& glob);
+
+std::string getExtension(const std::string& fileName);
 
 } // namespace MetNoFimex
 

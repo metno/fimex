@@ -26,7 +26,9 @@
 
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GribCDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GribFileIndex.h"
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
@@ -68,7 +70,7 @@ void indexGrib(const std::string& input, const std::string& append, const std::s
     if (memberOptions.size() > 0) {
         vector<pair<string, string> > memberStrings;
         vector<string> files;
-        MetNoFimex::CDMFileReaderFactory::parseGribArgs(memberOptions, memberStrings, files);
+        MetNoFimex::parseGribArgs(memberOptions, memberStrings, files);
         for (vector<pair<string, string> >::const_iterator memIt = memberStrings.begin(); memIt != memberStrings.end(); ++memIt) {
             members.push_back(make_pair(memIt->first, std::regex(memIt->second)));
         }

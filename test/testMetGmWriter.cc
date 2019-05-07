@@ -25,10 +25,8 @@
  */
 
 #include "testinghelpers.h"
+
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/MetGmCDMWriter.h"
-#include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 
 #include <memory>
@@ -44,17 +42,17 @@ TEST4FIMEX_TEST_CASE(test_write_hirlam12_nc)
     defaultLogLevel(Logger::INFO);
 
     // create reader that reads ncSource
-    CDMReader_p netcdfReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncSource);
+    CDMReader_p netcdfReader = CDMFileReaderFactory::create("netcdf", ncSource);
 
     // use the metgm writer to create mgm file based on nc source
     const std::string mgmFile("hirlam12.mgm");
-    MetGmCDMWriter(netcdfReader, mgmFile, pathShareEtc("cdmMetGmWriterConfig.xml"));
+    MetNoFimex::createWriter(netcdfReader, "metgm", mgmFile, pathShareEtc("cdmMetGmWriterConfig.xml"));
 
     // create metgm reader to read newly writen mgm file
-    CDMReader_p mgmReader = CDMFileReaderFactory::create(MIFI_FILETYPE_METGM, mgmFile, pathShareEtc("cdmMetGmReaderConfig.xml"));
+    CDMReader_p mgmReader = CDMFileReaderFactory::create("metgm", mgmFile, pathShareEtc("cdmMetGmReaderConfig.xml"));
 
     // from metgm reader write again to nc file and compare:
     // hirlam12.nc and hirlam12.mgm.nc
     const std::string newNcFile("hirlam12.mgm.nc");
-    NetCDF_CDMWriter(mgmReader, newNcFile);
+    MetNoFimex::createWriter(mgmReader, "null", newNcFile);
 }

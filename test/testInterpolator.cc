@@ -43,7 +43,7 @@ static CDMReader_p createFeltReader()
     if (!hasTestExtra())
         return CDMReader_p();
     const string flth00_dat = pathTestExtra("flth00.dat");
-    return CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, flth00_dat, pathShareEtc("felt2nc_variables.xml"));
+    return CDMFileReaderFactory::create("felt", flth00_dat, pathShareEtc("felt2nc_variables.xml"));
 }
 
 TEST4FIMEX_TEST_CASE(interpolator)
@@ -109,7 +109,7 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("satellite_cma.nc");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
     vector<double> xAxis, yAxis;
     for (int i = 0; i < 10; i++) {
@@ -134,7 +134,7 @@ TEST4FIMEX_TEST_CASE(test_interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
     {
         vector<double> xAxis, yAxis;
@@ -197,7 +197,7 @@ TEST4FIMEX_TEST_CASE(interpolator_template)
 {
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     const string templateFileName(pathTest("template_noaa17.nc"));
-    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
     TEST4FIMEX_REQUIRE(ncReader);
 
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
@@ -225,7 +225,7 @@ TEST4FIMEX_TEST_CASE(interpolator_latlon)
     vector<double> lonVals(&lon[0], &lon[0]+10);
 
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
-    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
 
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
@@ -251,7 +251,7 @@ TEST4FIMEX_TEST_CASE(interpolator_wrongaxes_latlon)
 
     const string ncmlFileName = pathTest("c11.ncml");
     const string ncFileName = pathTest("c11.nc");
-    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
     CDMReader_p ncmlReader = std::make_shared<NcmlCDMReader>(ncReader, XMLInputFile(ncmlFileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncmlReader);
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
@@ -343,7 +343,7 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
             yWind = 0;
         }
         try {
-            reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+            reader = CDMFileReaderFactory::create("netcdf", fileName);
         } catch (CDMException& ex) {
             // ignore, most likely nc4 not readable
             continue;
@@ -378,7 +378,7 @@ TEST4FIMEX_TEST_CASE(interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
-    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
 
     vector<CrossSectionDefinition> vc;
@@ -414,7 +414,7 @@ TEST4FIMEX_TEST_CASE(interpolator_forward)
     if (DEBUG)
         defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("interpolator_forward_in.nc");
-    CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
+    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
     interpolator->changeProjection(MIFI_INTERPOL_FORWARD_MEAN, "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
                                    range(411386.521566, 50, 413886.672091), range(7539081.567715, 50, 7541081.780868), "m", "m", CDM_DOUBLE, CDM_DOUBLE);

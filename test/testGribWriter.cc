@@ -25,8 +25,10 @@
  */
 
 #include "testinghelpers.h"
-#include "FeltCDMReader2.h"
+
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/GribApiCDMWriter.h"
+
 #include <memory>
 
 using namespace std;
@@ -37,7 +39,7 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Append)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
 
     const string outputFile("test_append.grb1");
     MetNoFimex::remove(outputFile);
@@ -57,7 +59,7 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Write)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
 
     const string outputFile("test.grb1");
     GribApiCDMWriter(feltReader, outputFile, 1, pathShareEtc("cdmGribWriterConfig.xml"));
@@ -70,7 +72,7 @@ TEST4FIMEX_TEST_CASE(test_feltGrib2Write)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     const string outputFile("test.grb2");
     GribApiCDMWriter(feltReader, outputFile, 2, pathShareEtc("cdmGribWriterConfig.xml"));
     TEST4FIMEX_CHECK(MetNoFimex::exists(outputFile));

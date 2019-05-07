@@ -26,18 +26,8 @@
 
 #include "fimex/NcmlCDMReader.h"
 
-#include "MutexLock.h"
-#include "NcmlAggregationReader.h"
-
 #include "fimex/CDMException.h"
 #include "fimex/XMLDoc.h"
-
-#include "fimex_config.h"
-#ifdef HAVE_NETCDF_H
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/NetCDF_CDMReader.h"
-#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#endif
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
@@ -45,6 +35,16 @@
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
+
+#include "fimex_config.h"
+#ifdef HAVE_NETCDF_H
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "fimex/NetCDF_CDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#endif
+
+#include "MutexLock.h"
+#include "NcmlAggregationReader.h"
 
 #include <memory>
 #include <regex>
@@ -63,30 +63,10 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())
     , mutex_(new MutexType())
 {
-#ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
 
     dataReader = std::make_shared<NcmlAggregationReader>(configXML);
-#if 0
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    if (nodes->nodeNr != 1) {
-        LOG4FIMEX(logger, Logger::INFO, "config " << configId << " does not contain location-attribute, only ncml initialization");
-    } else {
-        string ncFile = getXmlProp(nodes->nodeTab[0], "location");
-        // remove file: URL-prefix
-        ncFile = std::regex_replace(ncFile, std::regex("^file:"), "", std::format_first_only);
-        // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
-        ncFile = std::regex_replace(ncFile, std::regex("^dods:"), "http:", std::format_first_only);
-        dataReader = std::make_shared<NetCDF_CDMReader>(ncFile);
-    }
-#endif
     init();
-#else
-    string msg("cannot read data through ncml - no netcdf-support compiled in fimex");
-    LOG4FIMEX(logger, Logger::FATAL, msg);
-    throw CDMException(msg);
-#endif
 }
 
 NcmlCDMReader::NcmlCDMReader(CDMReader_p dataReader, const XMLInput& configXML)

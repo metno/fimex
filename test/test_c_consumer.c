@@ -33,7 +33,7 @@
 int testFeltRead(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
@@ -45,7 +45,7 @@ int testFeltRead(const char* feltFile, const char* configFile) {
 int testFeltVariables(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
@@ -75,7 +75,7 @@ int testFeltVariables(const char* feltFile, const char* configFile) {
 int testFeltData(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
@@ -152,13 +152,13 @@ static const char from_felt_nc[] = "test_c_fromfelt.nc";
 int testFeltReadNetcdfWrite(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
     }
 
-    if (mifi_netcdf_writer(feltReader, from_felt_nc,0,3) != 0) {
+    if (mifi_writer(feltReader, "netcdf", from_felt_nc, 0) != 0) {
         retVal++;
         fprintf(stderr, "error in writing netcdf-file %s\n", from_felt_nc);
     }
@@ -172,13 +172,13 @@ int testNetcdfReadNetcdfWrite()
     int retVal = 0;
     const char w_filename[] = "test_c_NetcdfReadNetcdfWrite.nc";
 
-    mifi_cdm_reader *ncReader = mifi_new_io_reader(MIFI_FILETYPE_NETCDF, from_felt_nc, "");
+    mifi_cdm_reader* ncReader = mifi_new_io_reader("netcdf", from_felt_nc, "");
     if (ncReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading nc-file %s\n", from_felt_nc);
     }
 
-    if (mifi_netcdf_writer(ncReader, w_filename,0,3) != 0) {
+    if (mifi_writer(ncReader, "netcdf", w_filename, 0) != 0) {
         retVal++;
         fprintf(stderr, "error in writing netcdf-file %s\n", w_filename);
     }
@@ -198,7 +198,7 @@ int doubleCallback(mifi_cdm_reader* reader, const char* varName, size_t unLimDim
 int testCReader(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");
@@ -210,7 +210,7 @@ int testCReader(const char* feltFile, const char* configFile) {
         fprintf(stderr, "error in setting a callback");
     }
 
-    if (mifi_netcdf_writer(cReader, "test_c_reader.nc",0,3) != 0) {
+    if (mifi_writer(cReader, "netcdf", "test_c_reader.nc", 0) != 0) {
         retVal++;
         fprintf(stderr, "error in writing netcdf-file test_c_reader.nc\n");
     }
@@ -223,7 +223,7 @@ int testCReader(const char* feltFile, const char* configFile) {
 int testCSliceBuilder(const char* feltFile, const char* configFile) {
     int retVal = 0;
 
-    mifi_cdm_reader *feltReader = mifi_new_io_reader(MIFI_FILETYPE_FELT, feltFile, configFile);
+    mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
         retVal++;
         fprintf(stderr, "error reading felt-file\n");

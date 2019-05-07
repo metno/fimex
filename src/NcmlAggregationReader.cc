@@ -91,14 +91,6 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         } else {
             string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL->nodeTab[0], "location"), file, type, config);
-#ifdef HAVE_NETCDF_H
-            if (type == "netcdf" || type == "nc" || type == "nc4") {
-                // remove file: URL-prefix
-                file = std::regex_replace(file, std::regex("^file:"), "", std::regex_constants::format_first_only);
-                // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
-                file = std::regex_replace(file, std::regex("^dods:"), "http:", std::regex_constants::format_first_only);
-            }
-#endif // HAVE_NETCDF_H
             LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
             gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             *(this->cdm_) = gDataReader_->getCDM();

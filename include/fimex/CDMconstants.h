@@ -148,31 +148,6 @@
 #define MIFI_WGS84_LATLON_PROJ4 "+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs"
 
 /**
- * The #mifi_filetype define the available input and output file-formats.
- * Maximum 1023.
- */
-/* when changing, remember to update CDMconstants.cc#getFileTypeNames,
- * make sure that the maximum number is <= size of filetypes */
-enum mifi_filetype {
-    /**
-     * only filetype < 0
-     */
-    MIFI_FILETYPE_UNKNOWN=-1,
-    MIFI_FILETYPE_FELT,
-    MIFI_FILETYPE_NETCDF,
-    MIFI_FILETYPE_NCML,
-    MIFI_FILETYPE_GRIB,
-    MIFI_FILETYPE_METGM,
-    MIFI_FILETYPE_PRORAD,
-    MIFI_FILETYPE_GRBML,
-    /**
-     * MIFI_FILETYPE_RW is a flag to specify that files should be opened in read-write mode.
-     * Example: MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW
-     */
-    MIFI_FILETYPE_RW=1024
-};
-
-/**
  * default fill values taken from netcdf.h
  */
 #define MIFI_FILL_CHAR    ((signed char)-127)
@@ -216,46 +191,6 @@ extern unsigned int mifi_version_patch();
  * 0xBX = betaX, 0xCX= releaseCandidateX
  */
 extern unsigned int mifi_version_status();
-
-
-/**
- * @brief get the filetype of a filetype name
- * @return one of #mifi_filetype
- */
-extern int mifi_get_filetype(const char* filetypeName);
-
-/**
- * @brief get the filetype-name of a filetype
- * @param filetype one of #mifi_filetype
- */
-extern const char* mifi_get_filetype_name(int filetype);
-
-/**
- * get the maximum number of filetypes, that is , the largest number
- * of valid filetype you can get.
- */
-extern int mifi_get_max_filetype_number();
-
-/**
- * check if fimex is configured with the filetype
- * @param fileType one of the #mifi_filetype define constants
- */
-extern int fimexHas(int fileType);
-/**
- * check if fimex is configured with netcdf-support
- * @deprecated use fimexHas(fileType)
- */
-MIFI_DEPRECATED(int fimexHasNetcdf());
-/**
- * check if fimex is configured with grib_api-support
- * @deprecated use fimexHas(fileType)
- */
-MIFI_DEPRECATED(int fimexHasGribApi());
-/**
- * check if fimex is configured with felt-support
- * @deprecated use fimexHas(fileType)
- */
-MIFI_DEPRECATED(int fimexHasFelt());
 
 #ifdef __cplusplus
 }

@@ -21,15 +21,16 @@
  * USA.
  */
 
-#include "FeltCDMReader2.h"
+#include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/interpolation.h"
+
 #include "testinghelpers.h"
 
 #include "testinghelpers.h"
@@ -42,7 +43,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     std::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
     extract->removeVariable("relative_humidity");
     TEST4FIMEX_CHECK_THROW(extract->getCDM().getVariable("relative_humidity"), CDMException);
@@ -59,7 +60,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 50 * 50 * 12);
     TEST4FIMEX_CHECK_EQ(extract->getData("air_temperature")->size(), 50 * 50 * 12);
     shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
-    NetCDF_CDMWriter(extract, "test_extract_1.nc");
+    CDMFileReaderFactory::createWriter(extract, "netcdf", "test_extract_1.nc");
 
     // test chunked reading
     extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
@@ -85,7 +86,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 6, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 3, t, 2, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 6, t, 50, 50, 12)], precData2[mifi_3d_array_position(1, 3, t, 2, 4, 12)]);
     }
-    NetCDF_CDMWriter(extract, "test_extract_2.nc");
+    CDMFileReaderFactory::createWriter(extract, "netcdf", "test_extract_2.nc");
 
     extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceTime(startTime, endTime); // 12 hours 9..20
@@ -151,7 +152,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     extract->reduceVerticalAxis("", -0.1, -0.05);
     extract->reduceTime(FimexTime(2006,1,1), FimexTime(2006,1,2)); // time out of range
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 0);
-    NetCDF_CDMWriter(extract, "test_extract_0time.nc");
+    CDMFileReaderFactory::createWriter(extract, "netcdf", "test_extract_0time.nc");
 
     // test selectVariable
     extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));

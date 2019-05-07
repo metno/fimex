@@ -402,28 +402,13 @@ CDMReader_p getCDMFileReader(const po::value_set& vm, const string& io = "input"
 {
     const string type = getType(io, vm);
     const std::string fileName = getFile(io, vm);
-    string config = getConfig(io, vm);
-    std::vector<std::string> optional;
+    const string config = getConfig(io, vm);
+    const std::vector<std::string> optional = getOptions<string>(io + ".optional", vm);
 
-    int filetype = MIFI_FILETYPE_UNKNOWN;
-    if (isFeltType(type)) {
-      filetype = MIFI_FILETYPE_FELT;
-      if (config.empty())
-        config = FELT_VARIABLES;
-    } else if (isGribType(type)) {
-      filetype = MIFI_FILETYPE_GRIB;
-      optional = getOptions<string>(io + ".optional", vm);
-    } else if (isNetCDFType(type)) {
-      filetype = MIFI_FILETYPE_NETCDF;
-    } else {
-      filetype = mifi_get_filetype(type.c_str());
-    }
-
-    LOG4FIMEX(logger, Logger::DEBUG, "reading file of type '" << mifi_get_filetype_name(filetype)
-              << "' file '" << fileName << "' with config '" << config << "'");
-    if (CDMReader_p reader = CDMFileReaderFactory::create(filetype, fileName, config, optional)) {
-      printReaderStatements(io, vm, reader);
-      return reader;
+    LOG4FIMEX(logger, Logger::DEBUG, "reading file of type '" << type << "' file '" << fileName << "' with config '" << config << "'");
+    if (CDMReader_p reader = CDMFileReaderFactory::create(type, fileName, config, optional)) {
+        printReaderStatements(io, vm, reader);
+        return reader;
     }
 
     LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
@@ -896,20 +881,14 @@ CDMReader_p applyFimexStreamTasks(const po::value_set& vm, CDMReader_p dataReade
 void fillWriteCDM(CDMReader_p dataReader, po::value_set& vm)
 {
     string fillFile;
-    if (!getOption("output.fillFile", vm, fillFile)) {
+    if (!getOption("output.fillFile", vm, fillFile))
         return;
-    }
-    string type = getType("output", vm);
-#ifdef HAVE_NETCDF_H
-    if (isNetCDFType(type)) {
-        LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << fillFile << " without NetCDF config");
-        CDMReaderWriter_p rw = CDMFileReaderFactory::createReaderWriter(MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW, fillFile);
-        const string config = getConfig("output", vm);
-        FillWriter(dataReader, rw, config);
-        return;
-    }
-#endif
-    LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
+    const string type = getType("output", vm);
+    const string config = getConfig("output", vm);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "filling file " << fillFile << " without config");
+    CDMReaderWriter_p rw = CDMFileReaderFactory::createReaderWriter("nc", fillFile);
+    FillWriter(dataReader, rw, config);
 }
 
 void writeCDM(CDMReader_p dataReader, const po::value_set& vm)

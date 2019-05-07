@@ -27,7 +27,6 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SharedArray.h"
@@ -44,7 +43,7 @@ TEST4FIMEX_TEST_CASE(test_accumulate)
 {
 //    defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc");
-    CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+    CDMReader_p nc = CDMFileReaderFactory::create("netcdf", fileName);
     double t0 = 1179309600.;
     {
         std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
@@ -74,7 +73,7 @@ TEST4FIMEX_TEST_CASE(test_rotate)
     //    defaultLogLevel(Logger::DEBUG);
         const string fileName = pathTest("coordTest.nc");
 
-        CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+        CDMReader_p nc = CDMFileReaderFactory::create("netcdf", fileName);
         std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->rotateAllVectorsToLatLon(true);
         const CDMAttribute& attrx = proc->getCDM().getAttribute("x_wind_10m", "standard_name");
@@ -98,7 +97,7 @@ TEST4FIMEX_TEST_CASE(interpolator_vectorlatlon)
     if (!hasTestExtra())
         return;
     const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, flth00_dat, pathShareEtc("felt2nc_variables.xml"));
+    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", flth00_dat, pathShareEtc("felt2nc_variables.xml"));
     std::shared_ptr<CDMProcessor> processor = std::make_shared<CDMProcessor>(feltReader);
     vector<string> x(1, "x_wind_10m");
     vector<string> y(1, "y_wind_10m");

@@ -31,6 +31,7 @@
 #include "CachedForwardInterpolation.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CachedInterpolation.h"
@@ -44,12 +45,8 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
+
 #include "fimex_config.h"
-#ifdef HAVE_NETCDF_H
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/NetCDF_CDMReader.h"
-#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#endif
 
 #include "nanoflann/nanoflann.hpp"
 
@@ -612,17 +609,8 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
 void CDMInterpolator::changeProjection(int method, const std::string& netcdf_template_file)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "changing projection to template");
-#ifdef HAVE_NETCDF_H
-    if (!std::ifstream(netcdf_template_file.c_str())) {
-        LOG4FIMEX(logger, Logger::WARN, "changeProjection, netcdf_template_file: not found" );
-        return;
-    }
-    CDMReader_p tmplReader(new NetCDF_CDMReader(netcdf_template_file));
+    CDMReader_p tmplReader = CDMFileReaderFactory::create("netcdf", netcdf_template_file);
     changeProjection(method, tmplReader, "referenceVariable");
-#else
-    LOG4FIMEX(logger, Logger::ERROR, "fimex not compiled with netcdf-support, can't change projection by netcdf-template");
-    return;
-#endif
 }
 
 void CDMInterpolator::changeProjection(int method, CDMReader_p tmplReader, const std::string& tmplRefVarName)

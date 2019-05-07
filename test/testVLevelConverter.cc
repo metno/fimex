@@ -47,7 +47,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator)
     typedef std::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
     typedef std::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
     TEST4FIMEX_REQUIRE(cs);
 
@@ -117,7 +117,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
 {
     const std::string fileName = pathTest("testdata_arome_vc.nc");
-    CDMReader_p ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    CDMReader_p ncreader(CDMFileReaderFactory::create("netcdf", fileName));
 
     std::vector<double> vi_level1;
     vi_level1.push_back(1000);

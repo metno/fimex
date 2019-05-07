@@ -41,8 +41,8 @@ TEST4FIMEX_TEST_CASE(test_fillWriter)
     copyFile(fileName, outFile);
 
     {
-        CDMReader_p in = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, inFillName);
-        CDMReaderWriter_p out = CDMFileReaderFactory::createReaderWriter(MIFI_FILETYPE_NETCDF, outFile);
+        CDMReader_p in = CDMFileReaderFactory::create("netcdf", inFillName);
+        CDMReaderWriter_p out = CDMFileReaderFactory::createReaderWriter("netcdf", outFile);
 
         // sanity check before test
         TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("refTime").getLength(), 2);
@@ -55,7 +55,7 @@ TEST4FIMEX_TEST_CASE(test_fillWriter)
     // close the writer before re-reading it
     }
     {
-        CDMReader_p out = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outFile);
+        CDMReader_p out = CDMFileReaderFactory::create("netcdf", outFile);
 
         TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("refTime").getLength(), 3);
         TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("sigma").getLength(), 4);
@@ -78,13 +78,13 @@ TEST4FIMEX_TEST_CASE(test_fillWriterConfig)
     const string outFile = "fillOut.nc";
     copyFile(fileName, outFile);
     {
-        CDMReader_p in = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, inFillName);
-        CDMReaderWriter_p out = CDMFileReaderFactory::createReaderWriter(MIFI_FILETYPE_NETCDF, outFile);
+        CDMReader_p in = CDMFileReaderFactory::create("netcdf", inFillName);
+        CDMReaderWriter_p out = CDMFileReaderFactory::createReaderWriter("netcdf", outFile);
         FillWriter(in, out, pathTest("fillWriterConfig.xml"));
         // close the writer before re-reading it
     }
     {
-        CDMReader_p out = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outFile);
+        CDMReader_p out = CDMFileReaderFactory::create("netcdf", outFile);
         TEST4FIMEX_CHECK(out->getData("longitude")->asFloat()[2 * 11] + 13 < 1e-5);
         TEST4FIMEX_CHECK(out->getData("latitude")->asFloat()[2 * 11] - 28 < 1e-5);
     }

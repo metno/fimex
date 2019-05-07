@@ -25,7 +25,7 @@
  */
 
 #include "testinghelpers.h"
-#include "fimex/CDMconstants.h"
+
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMMerger.h"
 #include "fimex/Data.h"
@@ -40,8 +40,7 @@ TEST4FIMEX_TEST_CASE(test_merger)
 {
     const string fileNameInner = pathTest("test_merge_inner.nc"), fileNameOuter = pathTest("test_merge_outer.nc");
 
-    CDMReader_p readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
-        readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
+    CDMReader_p readerI = CDMFileReaderFactory::create("netcdf", fileNameInner), readerO = CDMFileReaderFactory::create("netcdf", fileNameOuter);
 
     std::shared_ptr<CDMMerger> merger = std::make_shared<CDMMerger>(readerI, readerO);
     merger->setTargetGridFromInner();
@@ -73,8 +72,7 @@ TEST4FIMEX_TEST_CASE(test_merge_target)
 {
     const string fileNameB = pathTest("merge_target_base.nc"), fileNameT = pathTest("merge_target_top.nc");
 
-    CDMReader_p readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
-        readerT = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameT);
+    CDMReader_p readerB = CDMFileReaderFactory::create("netcdf", fileNameB), readerT = CDMFileReaderFactory::create("netcdf", fileNameT);
 
     std::shared_ptr<CDMMerger> merger = std::make_shared<CDMMerger>(readerB, readerT);
     merger->setTargetGrid("+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs",

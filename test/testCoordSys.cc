@@ -42,7 +42,7 @@ using namespace MetNoFimex;
 TEST4FIMEX_TEST_CASE(test_coordSys)
 {
     const string fileName = pathTest("coordTest.nc");
-    CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
@@ -214,7 +214,7 @@ TEST4FIMEX_TEST_CASE(test_coordSys)
 TEST4FIMEX_TEST_CASE(test_vTrans)
 {
     const string fileName = pathTest("verticalOceanSG2.nc");
-    CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+    CDMReader_p reader = CDMFileReaderFactory::create("netcdf", fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);

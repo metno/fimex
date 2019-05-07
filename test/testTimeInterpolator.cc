@@ -25,11 +25,12 @@
  */
 
 #include "testinghelpers.h"
-#include "fimex/Data.h"
+
+#include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMTimeInterpolator.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "fimex/NetCDF_CDMWriter.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -44,7 +45,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolator)
         return;
     {
         const string fileName = pathTestExtra("flth00.dat");
-        CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, fileName, pathShareEtc("felt2nc_variables.xml"));
+        CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
         std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -55,11 +56,11 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolator)
         string airTemp = "air_temperature";
         TEST4FIMEX_CHECK_EQ(feltReader->getCDM().getVariable(airTemp).getName(), airTemp);
         TEST4FIMEX_CHECK_EQ(timeInterpol->getCDM().getVariable(airTemp).getName(), airTemp);
-        NetCDF_CDMWriter(timeInterpol, outputName);
+        MetNoFimex::createWriter(timeInterpol, "netcdf", outputName);
     }
     {
         // check that the correct data is written
-        CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
+        CDMReader_p ncReader = CDMFileReaderFactory::create("netcdf", outputName);
         DataPtr ncTimes = ncReader->getData("time");
         TEST4FIMEX_CHECK_EQ(ncTimes->size(), 5);
         shared_array<float> ncTimeAry = ncTimes->asFloat();
@@ -77,7 +78,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
         return;
     {
         const string fileName = pathTestExtra("flth00.dat");
-        CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, fileName, pathShareEtc("felt2nc_variables.xml"));
+        CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
         std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
@@ -88,15 +89,15 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
         string airTemp = "air_temperature";
         TEST4FIMEX_CHECK_EQ(feltReader->getCDM().getVariable(airTemp).getName(), airTemp);
         TEST4FIMEX_CHECK_EQ(timeInterpol->getCDM().getVariable(airTemp).getName(), airTemp);
-        NetCDF_CDMWriter(timeInterpol, outputName);
+        MetNoFimex::createWriter(timeInterpol, "netcdf", outputName);
     }
     {
     // check that the correct data is written
-        CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
-        DataPtr ncTimes = ncReader->getData("time");
-        TEST4FIMEX_CHECK_EQ(ncTimes->size(), 21);
-        shared_array<float> ncTimeAry = ncTimes->asFloat();
-        TEST4FIMEX_CHECK_EQ(ncTimeAry[0], -2);
-        TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
+    CDMReader_p ncReader = CDMFileReaderFactory::create("netcdf", outputName);
+    DataPtr ncTimes = ncReader->getData("time");
+    TEST4FIMEX_CHECK_EQ(ncTimes->size(), 21);
+    shared_array<float> ncTimeAry = ncTimes->asFloat();
+    TEST4FIMEX_CHECK_EQ(ncTimeAry[0], -2);
+    TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
     }
 }

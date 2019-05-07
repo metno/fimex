@@ -64,42 +64,7 @@ extern void mifi_free_cdm_reader(mifi_cdm_reader* reader);
  * @param configFile configuration file for the felt-file
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  */
-extern mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile);
-
-/**
- * Get a new reader from a felt file.
- * @param filename name of the felt-file
- * @param configFile configuration file for the felt-file
- * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
- * @deprecated use mifi_new_io_reader()
- */
-MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile));
-
-/**
- * Get a new reader from a netcdf file.
- * @param filename name of the netcdf-file
- * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
- * @deprecated use mifi_new_io_reader()
- */
-MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename));
-
-/**
- * Get a new reader from a grib1/2 file.
- * @param filename name of the grib-file
- * @param configFile configuration file for the grib-file
- * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
- * @deprecated use mifi_new_io_reader()
- */
-MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile));
-
-
-/**
- * Get a new reader from a ncml file.
- * @param ncmlFile name of the ncml config file
- * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
- * @deprecated use mifi_new_io_reader()
- */
-MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
+extern mifi_cdm_reader* mifi_new_io_reader(const char* file_type, const char* filename, const char* configFile);
 
 /**
  * Modify a reader using a ncml file.
@@ -109,35 +74,15 @@ MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
  */
 extern mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile);
 
-
-
 /**
  * Write the content of the reader to the filename.
  * @param reader the data source
+ * @param filetype the type of the file to write
  * @param filename the name of the netcdf-file to write
  * @param configFile an optional configFile, use "" or 0 if not needed
- * @param version the version of the netcdf-file. Implemented are 3 or 4.
  * @return 0 on success.
  */
-extern int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
-
-/**
- * Write the content of the reader to the filename as gribfile.
- * @param reader the data source
- * @param filename the name of the grib-file to write
- * @param configFile an optional configFile, use "" or 0 if not needed
- * @param version the version of the grib-edition. Implemented are 1 or 2.
- * @return 0 on success.
- */
-extern int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
-
-
-/**
- * Fetch the whole data belonging to the cdm, but don't write it anywhere.
- * @param reader the data source
- * @return 0 on success.
- */
-extern int mifi_nullcdm_writer(mifi_cdm_reader* reader);
+extern int mifi_writer(mifi_cdm_reader* reader, const char* filetype, const char* filename, const char* configFile);
 
 /**
  * @brief change the projection of the reader to this new projection

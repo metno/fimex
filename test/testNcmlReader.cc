@@ -24,15 +24,15 @@
  *      Author: Heiko Klein
  */
 
-#include "testinghelpers.h"
+#include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/SliceBuilder.h"
-#include "fimex/Data.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
-#include "fimex/CDM.h"
-#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -41,7 +41,7 @@ TEST4FIMEX_TEST_CASE(test_ncmlRead)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc"), ncmlName = pathTest("test.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName, ncmlName));
     DataPtr data = reader->getDataSlice("sea_surface_temperature", 1);
     SliceBuilder sb(reader->getCDM(), "sea_surface_temperature");
     sb.setStartAndSize("time", 1, 1);
@@ -84,7 +84,7 @@ TEST4FIMEX_TEST_CASE(cdm_ncml)
 {
     const string fileName = pathTest("coordTest.nc");
     const string ncmlName = pathTest("test.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName, ncmlName));
     TEST4FIMEX_REQUIRE(reader);
 
     const CDM& cdm = reader->getCDM();

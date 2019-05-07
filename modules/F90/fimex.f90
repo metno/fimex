@@ -102,7 +102,7 @@ MODULE Fimex
       IMPLICIT NONE
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: infile(*)
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: config(*)
-      INTEGER(KIND=C_INT),   INTENT(IN),VALUE :: filetype
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: filetype(*)
       TYPE(C_PTR)                             :: c_mifi_new_io_reader
     END FUNCTION c_mifi_new_io_reader
 
@@ -336,39 +336,15 @@ MODULE Fimex
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE    :: io
     END SUBROUTINE c_mifi_free_cdm_reader
-
-    !> F90-wrapper for mifi_get_filetype()
-    FUNCTION c_mifi_get_filetype(typename) BIND(C,NAME="mifi_get_filetype")
-      USE iso_c_binding, ONLY: C_INT,C_CHAR
-      CHARACTER(KIND=C_CHAR), INTENT(IN)  :: typename(*)
-      INTEGER(KIND=C_INT)                 :: c_mifi_get_filetype
-    END FUNCTION c_mifi_get_filetype
   END INTERFACE
 
   CONTAINS
-
-  !> translate the filetype from string to internal number
-  !! @param filetype_name filetype as "fimex", "netcdf", "grib", ...
-  !! @return integer filetype
-  FUNCTION set_filetype(filetype_name, flag)
-    USE iso_c_binding, ONLY: C_NULL_CHAR
-    IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(IN) :: filetype_name
-    INTEGER                       :: set_filetype
-    INTEGER, OPTIONAL, INTENT(IN) :: flag
-    set_filetype = c_mifi_get_filetype(TRIM(filetype_name)//C_NULL_CHAR);
-    IF (set_filetype < 0) THEN
-      WRITE(*,*) "Filetype not defined: "//TRIM(filetype_name)
-      CALL abort()
-    ENDIF
-    IF (PRESENT(flag)) set_filetype = IOR(set_filetype,flag)
-  END FUNCTION set_filetype
 
   !> Open a new data-soure.
   !! @param this the new FimexIO object.
   !! @param infile filename (or URL) of input
   !! @param config configuration-file, use "" if not applicable
-  !! @param filetype see set_filetype(), to open a file read-writable use IOR(FILETYPE_NETCDF,FILETYPE_RW)
+  !! @param filetype
   !! @param varName optional varname, if used, will call get_dimensions() and return the number of dimensions
   !! @return negative value on error, >= 0 on success, positive number indicate dimensions of varName
   FUNCTION open_file(this, infile,config,filetype,varName)
@@ -377,7 +353,7 @@ MODULE Fimex
     CLASS(FimexIO), INTENT(OUT)           :: this
     CHARACTER(LEN=*),INTENT(IN)          :: infile
     CHARACTER(LEN=*),INTENT(IN)          :: config
-    INTEGER,         INTENT(IN)          :: filetype
+    CHARACTER(LEN=*),INTENT(IN)          :: filetype
     CHARACTER(LEN=*),INTENT(IN),OPTIONAL :: varName
     INTEGER                              :: open_file
 
@@ -385,7 +361,7 @@ MODULE Fimex
     TYPE(C_PTR)                          :: io
 
     IF ( C_ASSOCIATED(this%io) ) CALL c_mifi_free_cdm_reader(this%io)
-    io=c_mifi_new_io_reader(filetype, TRIM(infile)//C_NULL_CHAR,TRIM(config)//C_NULL_CHAR)
+    io=c_mifi_new_io_reader(TRIM(filetype)//C_NULL_CHAR, TRIM(infile)//C_NULL_CHAR,TRIM(config)//C_NULL_CHAR)
     IF ( C_ASSOCIATED(io) ) THEN
       open_file=0
       this%io = io

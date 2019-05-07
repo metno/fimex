@@ -26,29 +26,22 @@
 
 #include "fimex/c_fimex.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/CDMReader.h"
-#include "fimex/CoordinateSystemSliceBuilder.h"
-#include "fimex/XMLInput.h"
-#include "fimex/mifi_cdm_reader.h"
-#include "fimex_config.h"
-#ifdef HAVE_NETCDF_H
-#include "fimex/NetCDF_CDMWriter.h"
-#endif
-#ifdef HAVE_GRIB_API_H
-#include "fimex/GribApiCDMWriter.h"
-#endif
-#include "fimex/CDMDataType.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CDMReaderWriter.h"
 #include "fimex/C_CDMReader.h"
+#include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/XMLInput.h"
+#include "fimex/mifi_cdm_reader.h"
 #include "fimex/mifi_constants.h"
 
 #include <algorithm>
@@ -93,7 +86,7 @@ void mifi_free_slicebuilder(mifi_slicebuilder* sb)
     delete(sb);
 }
 
-mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile)
+mifi_cdm_reader* mifi_new_io_reader(const char* file_type, const char* filename, const char* configFile)
 {
     try {
             CDMReader_p reader = CDMFileReaderFactory::create(file_type, std::string(filename), XMLInputFile(configFile));
@@ -106,23 +99,23 @@ mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const c
 
 mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile)
 {
-    return mifi_new_io_reader(MIFI_FILETYPE_FELT, filename, configFile);
+    return mifi_new_io_reader("felt", filename, configFile);
 }
 
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
-    return mifi_new_io_reader(MIFI_FILETYPE_NETCDF, filename, "");
+    return mifi_new_io_reader("nc", filename, "");
 }
 
 mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile)
 {
-    return mifi_new_io_reader(MIFI_FILETYPE_GRIB, filename, configFile);
+    return mifi_new_io_reader("grib", filename, configFile);
 }
 
 
 mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
 {
-    return mifi_new_io_reader(MIFI_FILETYPE_NCML, ncmlFile, "");
+    return mifi_new_io_reader("ncml", ncmlFile, "");
 }
 
 mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile)
@@ -136,44 +129,16 @@ mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncm
     return 0;
 }
 
-
-#ifdef HAVE_NETCDF_H
-int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
+int mifi_writer(mifi_cdm_reader* reader, const char* filetype, const char* filename, const char* configFile)
 {
     try {
+        string type = (filetype == 0) ? "" : filetype;
         string file = (filename == 0) ? "" : filename;
         string config = (configFile == 0) ? "" : configFile;
-        NetCDF_CDMWriter(reader->reader_, file, config, version);
+        createWriter(reader->reader_, type, file, config);
         return 0;
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in netcdf-cdmwriter: " << ex.what());
-    }
-    return -1;
-}
-#endif
-
-#ifdef HAVE_GRIB_API_H
-int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
-{
-    try {
-        string file = (filename == 0) ? "" : filename;
-        string config = (configFile == 0) ? "" : configFile;
-        GribApiCDMWriter(reader->reader_, file, version, config);
-        return 0;
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in mifi_grib_writer: " << ex.what());
-    }
-    return -1;
-}
-#endif
-
-int mifi_nullcdm_writer(mifi_cdm_reader* reader)
-{
-    try {
-        Null_CDMWriter(reader->reader_,"");
-        return 0;
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in null-cdmwriter: " << ex.what());
     }
     return -1;
 }
@@ -565,5 +530,3 @@ double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const ch
     }
     return retVal;
 }
-
-

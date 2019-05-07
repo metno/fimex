@@ -99,6 +99,8 @@ SET(libfimex_SOURCES
   ${INCF}/GridDefinition.h
   IndexedData.cc
   ${INCF}/IndexedData.h
+  IoFactory.cc
+  ${INCF}/IoFactory.h
   Logger.cc
   ${INCF}/Logger.h
   Log4cppLogger.cc
@@ -106,10 +108,14 @@ SET(libfimex_SOURCES
   MutexLock.h
   NcmlCDMReader.cc
   ${INCF}/NcmlCDMReader.h
+  NcmlIoFactory.cc
+  NcmlIoFactory.h
   NcmlAggregationReader.cc
   NcmlAggregationReader.h
   Null_CDMWriter.cc
   ${INCF}/Null_CDMWriter.h
+  NullIoFactory.cc
+  NullIoFactory.h
   ReplaceStringObject.cc
   ${INCF}/ReplaceStringObject.h
   ReplaceStringTimeObject.cc
@@ -279,6 +285,8 @@ IF(ENABLE_NETCDF)
     ${INCF}/NetCDF_CDMWriter.h
     NetCDF_Utils.cc
     NetCDF_Utils.h
+    NetCDFIoFactory.cc
+    NetCDFIoFactory.h
   )
 ENDIF(ENABLE_NETCDF)
 
@@ -304,6 +312,8 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
     ${INCF}/GribFileIndex.h
     GribUtils.cc
     ${INCF}/GribUtils.h
+    GribIoFactory.cc
+    GribIoFactory.h
     )
 ENDIF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
 
@@ -324,6 +334,9 @@ IF(ENABLE_FELT)
     Felt_File_Error.h
     Felt_File2.h
     FeltParameters.h
+
+    FeltIoFactory.cc
+    FeltIoFactory.h
     )
 
 ENDIF(ENABLE_FELT)
@@ -336,6 +349,8 @@ if(ENABLE_METGM)
     ${INCF}/MetGmCDMWriter.h
     MetGmCDMReader.cc
     ${INCF}/MetGmCDMReader.h
+    MetGmIoFactory.cc
+    MetGmIoFactory.h
 
     metgm/MetGmCDMReaderImpl.cc
     metgm/MetGmCDMReaderImpl.h
@@ -384,6 +399,8 @@ if(ENABLE_PRORADXML)
   SET(libfimex_proradxml_SOURCES
     ProradXMLCDMReader.cc
     ProradXMLCDMReader.h
+    ProradXMLIoFactory.cc
+    ProradXMLIoFactory.h
     )
 ENDIF(ENABLE_PRORADXML)
 

@@ -25,30 +25,23 @@
  */
 
 #include "testinghelpers.h"
-#include "fimex/CDMconstants.h"
+
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMReaderWriter.h"
 #include "fimex/Data.h"
-#ifdef HAVE_NETCDF_H
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/NetCDF_CDMReader.h"
-#endif
 
 using namespace std;
 using namespace MetNoFimex;
 
 TEST4FIMEX_TEST_CASE(test_update)
 {
-    if (not fimexHas(MIFI_FILETYPE_NETCDF)) {
-        // no netcdf support, skip test
-        return;
-    }
-
     const string fileName("test_update.nc");
     copyFile(pathTest("test_merge_inner.nc"), fileName);
 
     const double diff = 10.0, scale = 1.2;
     DataPtr read1, read2;
     {
-        CDMReaderWriter_p rw = std::make_shared<NetCDF_CDMReader>(fileName, true);
+        CDMReaderWriter_p rw = CDMFileReaderFactory::createReaderWriter("netcdf", fileName);
         TEST4FIMEX_CHECK(rw);
 
         read1 = rw->getDataSlice("ga_2t_1", 0);
@@ -62,7 +55,7 @@ TEST4FIMEX_TEST_CASE(test_update)
         rw->putDataSlice("ga_2t_1", 0, write1);
     }
     {
-        CDMReader_p r = CDMReader_p(new NetCDF_CDMReader(fileName));
+        CDMReader_p r = CDMFileReaderFactory::create("netcdf", fileName);
         TEST4FIMEX_CHECK(r);
 
         read2 = r->getDataSlice("ga_2t_1", 0);
@@ -80,18 +73,13 @@ TEST4FIMEX_TEST_CASE(test_update)
 
 TEST4FIMEX_TEST_CASE(test_scaled)
 {
-    if (not fimexHas(MIFI_FILETYPE_NETCDF)) {
-        // no netcdf support, skip test
-        return;
-    }
-
     const string fileName("test_scaled.nc");
     copyFile(pathTest("test_merge_inner.nc"), fileName);
 
     const double addF = 1.0, addK = addF * 5.0/9.0;
     DataPtr read1, read2;
     {
-        CDMReaderWriter_p rw = std::make_shared<NetCDF_CDMReader>(fileName, true);
+        CDMReaderWriter_p rw = CDMFileReaderFactory::createReaderWriter("netcdf", fileName);
         TEST4FIMEX_CHECK(rw);
 
         read1 = rw->getScaledDataSlice("ga_2t_1", 0);
@@ -109,7 +97,7 @@ TEST4FIMEX_TEST_CASE(test_scaled)
         rw->putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, write1);
     }
     {
-        CDMReader_p r = std::make_shared<NetCDF_CDMReader>(fileName);
+        CDMReader_p r = CDMFileReaderFactory::create("netcdf", fileName);
         TEST4FIMEX_CHECK(r);
 
         read2 = r->getScaledDataSlice("ga_2t_1", 0);

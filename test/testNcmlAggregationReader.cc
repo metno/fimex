@@ -68,7 +68,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExisting, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAgg.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_REQUIRE(reader);
     TEST4FIMEX_REQUIRE(reader->getCDM().getUnlimitedDim());
     TEST4FIMEX_CHECK_EQ(reader->getCDM().getUnlimitedDim()->getLength(), 5);
@@ -88,7 +88,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAggSuffix.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const CDMDimension* unlim = reader->getCDM().getUnlimitedDim();
     TEST4FIMEX_REQUIRE(unlim);
     TEST4FIMEX_CHECK_EQ(unlim->getLength(), 5);
@@ -111,7 +111,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNothing, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggNothing.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
 }
 
@@ -121,7 +121,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggWrong, TestConfig)
     const string ncmlName = require("aggWrong.ncml");
     // suppress ERROR: file unreadable
     defaultLogLevel(Logger::FATAL);
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     defaultLogLevel(Logger::INFO);
     TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
 }
@@ -130,11 +130,11 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
     defaultLogLevel(Logger::FATAL);
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
 
     NetCDF_CDMWriter(reader, test_output, "", 4); // does not work for netcdf-3
-    CDMReader_p reader2(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, test_output));
+    CDMReader_p reader2(CDMFileReaderFactory::create("NETCDF", test_output));
     DataPtr slice = reader->getDataSlice("notlimited", 2);
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_GT(slice->size(), 0);
@@ -147,7 +147,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
     defaultLogLevel(Logger::FATAL);
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim2.nc";
 
     SliceBuilder sb(reader->getCDM(), "multi");
@@ -165,7 +165,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_union, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("unionAgg.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_CHECK(reader->getCDM().hasVariable("b"));
     TEST4FIMEX_CHECK(reader->getCDM().hasVariable("extra"));
     TEST4FIMEX_CHECK(reader->getCDM().hasVariable("multi"));

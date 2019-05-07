@@ -92,8 +92,6 @@ CDMReader_p getCDMFileReader(po::value_set& vm)
     string type;
     if (vm.is_set(op_input_type)) {
         type = vm.value(op_input_type);
-    } else {
-        type = mifi_get_filetype_name(CDMFileReaderFactory::detectFileType(name));
     }
     string config;
     if (vm.is_set(op_input_config)) {

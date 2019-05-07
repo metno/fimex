@@ -28,15 +28,13 @@
 #define CDMFILEREADERFACTORY_H_
 
 #include "fimex/CDMReaderDecl.h"
-#include "fimex/CDMconstants.h"
-#include "fimex/XMLInput.h"
-#include "fimex/deprecated.h"
-#include <memory>
+
 #include <string>
 #include <vector>
 
 namespace MetNoFimex
 {
+class XMLInput;
 
 /**
  * @headerfile fimex/CDMFileReaderFactory.h
@@ -48,39 +46,22 @@ class CDMFileReaderFactory
 {
 public:
     /**
-     * @brief detect the filetype of a input-file
-     *
-     * The detectFileType function uses heuristics (appendix, magic characters)
-     * to detect the filetype
-     *
-     * @param fileName input file
-     * @return one of the #mifi_filetype flags
-     *
-     * @throw if file not found
-     */
-    static mifi_filetype detectFileType(const std::string& fileName);
-
-    /**
      * @brief Factory for CDMReader of input-files
      *
      * This function tries to create a reader by filetype #mifi_filetype.
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW.
+     * @param fileTypeName a string describing the filetype
      * @param fileName name of input file (might start with glob: for grib or netcdf, e.g. glob:*.nc (joinExisting aggregation, see NcmlCDMReader.h)
      * @param configFile
      * @param args optional options for the CDMReader, e.g. for grib: additional message files
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
-     * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
-    static CDMReader_p create(int fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
-    /**
-     * @brief same as the other create(), but with a fileType string
-     * @deprecated use create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
-     */
-    static CDMReader_p create(const std::string& fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
+    static CDMReader_p create(const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = "",
+                              const std::vector<std::string>& args = std::vector<std::string>());
+
     /**
      * @brief Factory for CDMReader of input-files
      *
@@ -88,47 +69,32 @@ public:
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW
+     * @param fileTypeName a string describing the filetype
      * @param fileName name of input file (might start with glob: for grib or netcdf, e.g. glob:*.nc (joinExisting aggregation, see NcmlCDMReader.h)
      * @param configXML config source
      * @param args optional options for the CDMReader
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
-     * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
-    static CDMReader_p create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
-    /**
-     * @brief same as the other create(), but with a fileType string
-     */
-    static CDMReader_p create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
-
-    /**
-     * @brief parse special arguments for grib-files
-     *
-     * @param args list of arguments, e.g. combined --input.file --input.optional from fimex command-line
-     * @param members return members as memberName/memberRegexp pairs
-     * @param files retrun all input files
-     */
-    static void parseGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files);
-
-    static CDMReaderWriter_p createReaderWriter(int fileType, const std::string & fileName, const XMLInput& configXML,
-                                                const std::vector<std::string> & args = std::vector<std::string>());
-
-    static CDMReaderWriter_p createReaderWriter(int fileType, const std::string & fileName, const std::string& configFile = std::string(),
-                                                const std::vector<std::string> & args = std::vector<std::string>());
+    static CDMReader_p create(const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML,
+                              const std::vector<std::string>& args = std::vector<std::string>());
 
     static CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = std::string(),
                                                 const std::vector<std::string>& args = std::vector<std::string>());
+
+    static CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
+                                                const std::vector<std::string>& args = std::vector<std::string>());
+
+    static void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = std::string());
 };
 
-bool isFeltType(const std::string& type);
-bool isGrib2Type(const std::string& type);
-bool isGribType(const std::string& type);
-bool isNetCDF4Type(const std::string& type);
-bool isNetCDFType(const std::string& type);
-
-void createWriter(CDMReader_p input, const std::string& fileType, const std::string& fileName,
-                  const std::string& configFile);
+inline void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = std::string())
+{
+    CDMFileReaderFactory::createWriter(input, fileTypeName, fileName, configFile);
 }
+
+void parseGribArgs(const std::vector<std::string>& args, std::vector<std::pair<std::string, std::string>>& members, std::vector<std::string>& files);
+
+} // namespace MetNoFimex
 
 #endif /* CDMFILEREADERFACTORY_H_ */
