@@ -386,19 +386,6 @@ bool ends_with(const std::string& txt, const std::string& end);
 std::string replace_all_copy(const std::string& in, char thys, char that);
 
 /**
- * Typesafe varargs implementation, for pre-C11 variadic functions
- */
-template<typename T>
-struct Varargs {
-    /** container of arguments */
-    std::vector<T> args;
-    /** push_back operator */
-    Varargs& operator()(T arg) {args.push_back(arg); return *this;}
-    Varargs(T arg) : args(1, arg) {}
-};
-
-
-/**
  * normalize Longitude to be within [-180:180]
  * @param in longitude in degree
  * @return longitude in degree within [-180:180]
