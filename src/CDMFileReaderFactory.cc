@@ -59,7 +59,7 @@
 #endif
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -213,7 +213,7 @@ CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(int fileType, const s
         if (!configXML.isEmpty()) {
             throw CDMException("Cannot open writeable NetCDF file with Ncml config: " + configXML.id());
         }
-        return boost::make_shared<NetCDF_CDMReader>(fileName, true);
+        return std::make_shared<NetCDF_CDMReader>(fileName, true);
     }
   #endif
     default:
@@ -247,7 +247,7 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
         if (configXML.isEmpty()) {
             throw CDMException("config file required for felt-files");
         }
-        return boost::make_shared<FeltCDMReader2>(fileName, configXML);
+        return std::make_shared<FeltCDMReader2>(fileName, configXML);
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
     case MIFI_FILETYPE_GRBML: {
@@ -257,7 +257,7 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grbml-files");
         }
-        return boost::make_shared<GribCDMReader>(fileName, configXML, members);
+        return std::make_shared<GribCDMReader>(fileName, configXML, members);
     }
     case MIFI_FILETYPE_GRIB: {
         std::vector<std::string> files;
@@ -274,7 +274,7 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grib-files");
         }
-        return boost::make_shared<GribCDMReader>(files, configXML, members);
+        return std::make_shared<GribCDMReader>(files, configXML, members);
     }
 #endif
 #ifdef HAVE_NETCDF_H
@@ -294,28 +294,28 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
                 ncml << "<netcdf location=\"" << files.at(i) << "\" />";
             }
             ncml << "</aggregation></netcdf>";
-            reader = boost::make_shared<NcmlCDMReader>(XMLInputString(ncml.str()));
+            reader = std::make_shared<NcmlCDMReader>(XMLInputString(ncml.str()));
         } else {
-            reader = boost::make_shared<NetCDF_CDMReader>(fileName, false);
+            reader = std::make_shared<NetCDF_CDMReader>(fileName, false);
         }
         if (!configXML.isEmpty()) {
-            reader = boost::make_shared<NcmlCDMReader>(reader, configXML);
+            reader = std::make_shared<NcmlCDMReader>(reader, configXML);
         }
         return reader;
     }
 #endif
 #ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
-        return boost::make_shared<MetGmCDMReader>(fileName, configXML);
+        return std::make_shared<MetGmCDMReader>(fileName, configXML);
     }
 #endif
 #ifdef HAVE_PRORADXML
     case MIFI_FILETYPE_PRORAD: {
-        return boost::make_shared<ProradXMLCDMReader>(fileName);
+        return std::make_shared<ProradXMLCDMReader>(fileName);
     }
 #endif
     case MIFI_FILETYPE_NCML:
-        return boost::make_shared<NcmlCDMReader>(XMLInputFile(fileName));
+        return std::make_shared<NcmlCDMReader>(XMLInputFile(fileName));
     default: throw CDMException("Unknown fileType: " + type2string(fileType) + " for file: "+fileName);
     }
 }

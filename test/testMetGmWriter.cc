@@ -33,7 +33,7 @@
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 using namespace std;

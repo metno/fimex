@@ -25,10 +25,12 @@
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "FeltCDMReader2.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "Felt_File2.h"
-#include "fimex/Utils.h"
-#include "Felt_File_Error.h"
+#include "CDM_XMLConfigHelper.h"
 #include "Felt_Array2.h"
+#include "Felt_File2.h"
+#include "Felt_File_Error.h"
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "felt/FeltGridDefinition.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/ReplaceStringTimeObject.h"
@@ -36,18 +38,15 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
-#include "CDM_XMLConfigHelper.h"
-#include "felt/FeltGridDefinition.h"
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include <boost/shared_ptr.hpp>
-#include <boost/regex.hpp>
+#include <algorithm>
 #include <boost/bind.hpp>
-#include <sstream>
-#include <iostream>
+#include <boost/regex.hpp>
 #include <cassert>
 #include <cstdlib>
 #include <functional>
-#include <algorithm>
+#include <iostream>
+#include <memory>
+#include <sstream>
 
 namespace MetNoFimex
 {
@@ -133,7 +132,8 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
     }
     return retValues;
 }
-void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
+void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const string& xpathLevelString,
+                                                          const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
     string addAxisXPath(xpathLevelString + "/additional_axis_variable");
     xmlXPathObject_p xpathObj = doc.getXPathObject(addAxisXPath);
@@ -206,14 +206,16 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
     map<string, string> options = initGetOptionsFromXML(*doc);
     // open the feltFile with the desired parameters
     vector<string> knownFeltIds = initGetKnownFeltIdsFromXML(*doc, options);
-    feltfile_ = boost::shared_ptr<MetNoFelt::Felt_File2>(new MetNoFelt::Felt_File2(filename, knownFeltIds, options));
+    feltfile_ = std::shared_ptr<MetNoFelt::Felt_File2>(new MetNoFelt::Felt_File2(filename, knownFeltIds, options));
     {
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
         vector<boost::posix_time::ptime> feltTimes = feltfile_->getFeltTimes();
         if (feltTimes.size() > 0) {
-            templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
+            templateReplacementAttributes["MIN_DATETIME"] =
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
             size_t lastTime = (feltTimes.size() > 1) ? (feltTimes.size() - 1) : 0;
-            templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[lastTime])));
+            templateReplacementAttributes["MAX_DATETIME"] =
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[lastTime])));
         }
     }
 
@@ -383,7 +385,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 
     // add the unique reference time, if exists
     try {
-        boost::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
+        std::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
         if (refTime.get() != 0) {
             // TODO: move reference time name to config
             string referenceTime = "forecast_reference_time";
@@ -469,7 +471,7 @@ map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XML
 
 void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projName, string& coordinates)
 {
-    boost::shared_ptr<felt::FeltGridDefinition> gridDef = feltfile_->getGridDefinition();
+    std::shared_ptr<felt::FeltGridDefinition> gridDef = feltfile_->getGridDefinition();
     string projStr = gridDef->projDefinition();
 
     // get the overruled earthform
@@ -574,8 +576,8 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
 
 void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& projName, const string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const map<short, CDMDimension>& levelDims)
 {
-    vector<boost::shared_ptr<Felt_Array2> > fArrays(feltfile_->listFeltArrays());
-    for (vector<boost::shared_ptr<Felt_Array2> >::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
+    vector<std::shared_ptr<Felt_Array2>> fArrays(feltfile_->listFeltArrays());
+    for (vector<std::shared_ptr<Felt_Array2>>::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
         string xpathString("/cdm_felt_config/variables/parameter[@id='"+(*it)->getName()+"']");
         xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -710,7 +712,7 @@ DataPtr FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) 
     try {
         map<string, string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName());
         if (foundId != varNameFeltIdMap.end()) {
-            boost::shared_ptr<MetNoFelt::Felt_Array2> fa(feltfile_->getFeltArray(foundId->second));
+            std::shared_ptr<MetNoFelt::Felt_Array2> fa(feltfile_->getFeltArray(foundId->second));
 
             // test for availability of the current time in the variable (getSlice will get data for every time)
             vector<boost::posix_time::ptime> faTimes = fa->getTimes();

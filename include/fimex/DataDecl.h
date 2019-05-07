@@ -27,7 +27,7 @@
 #ifndef DATADECL_H_
 #define DATADECL_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex
 {
@@ -40,8 +40,7 @@ namespace MetNoFimex
     /**
      * Pointer to Data, this is the preferred way to access Data
      */
-    typedef boost::shared_ptr<Data> DataPtr;
-
+    typedef std::shared_ptr<Data> DataPtr;
 }
 
 

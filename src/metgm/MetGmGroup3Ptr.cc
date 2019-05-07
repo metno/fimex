@@ -37,16 +37,18 @@
 
 namespace MetNoFimex {
 
-    MetGmGroup3Ptr::MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle)
-        : pHandle_(pHandle), group3_(0)
-    {
-        assert(pHandle_.get());
-        group3_ = mgm_new_group3();
-        assert(group3_);
+MetGmGroup3Ptr::MetGmGroup3Ptr(const std::shared_ptr<MetGmHandlePtr> pHandle)
+    : pHandle_(pHandle)
+    , group3_(0)
+{
+    assert(pHandle_.get());
+    group3_ = mgm_new_group3();
+    assert(group3_);
     }
 
-    MetGmGroup3Ptr::MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id)
-        : pHandle_(pHandle), group3_(0)
+    MetGmGroup3Ptr::MetGmGroup3Ptr(const std::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id)
+        : pHandle_(pHandle)
+        , group3_(0)
     {
         assert(pHandle_.get());
         group3_ = mgm_new_group3();
@@ -54,11 +56,10 @@ namespace MetNoFimex {
         MGM_THROW_ON_ERROR(mgm_set_p_id(group3_, p_id));
     }
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(const boost::shared_ptr<MetGmHandlePtr> pHandle,
-                                                                                     const unsigned short p_id)
+    std::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(const std::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id)
     {
         assert(pHandle.get());
-        boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle, p_id));
+        std::shared_ptr<MetGmGroup3Ptr> gp3 = std::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle, p_id));
         return gp3;
     }
 
@@ -68,15 +69,15 @@ namespace MetNoFimex {
             mgm_free_group3(group3_);
     }
 
-    const boost::shared_ptr<MetGmHandlePtr>& MetGmGroup3Ptr::mgmHandle()
+    const std::shared_ptr<MetGmHandlePtr>& MetGmGroup3Ptr::mgmHandle()
     {
         return pHandle_;
     }
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pHandle)
+    std::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(const std::shared_ptr<MetGmHandlePtr> pHandle)
     {
         assert(pHandle.get());
-        boost::shared_ptr<MetGmGroup3Ptr> pg3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
+        std::shared_ptr<MetGmGroup3Ptr> pg3 = std::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
         mgm_read_group3(*pg3->pHandle_->fileHandle(), *pg3->mgmHandle(), *pg3);
         return pg3;
     }
@@ -206,7 +207,7 @@ namespace MetNoFimex {
         return mgm_set_pz(group3_, pz);
     }
 
-    bool MetGmGroup3Ptr::eq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const
+    bool MetGmGroup3Ptr::eq(std::shared_ptr<MetGmGroup3Ptr>& rhs) const
     {
         if(this == rhs.get()) return true;
 
@@ -227,7 +228,7 @@ namespace MetNoFimex {
             return false;
     }
 
-    bool MetGmGroup3Ptr::neq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const
+    bool MetGmGroup3Ptr::neq(std::shared_ptr<MetGmGroup3Ptr>& rhs) const
     {
         return !(eq(rhs));
     }

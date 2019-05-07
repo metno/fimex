@@ -24,23 +24,22 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/GribFileIndex.h"
-#include "fimex/GribCDMReader.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMconstants.h"
+#include "fimex/GribCDMReader.h"
+#include "fimex/GribFileIndex.h"
+#include "fimex/Logger.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
-#include "fimex/Logger.h"
-#include <grib_api.h>
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#include <boost/shared_ptr.hpp>
-#include <stdexcept>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/program_options.hpp>
+#include <grib_api.h>
 #include <iostream>
-
+#include <memory>
+#include <stdexcept>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;

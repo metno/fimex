@@ -79,158 +79,156 @@ namespace MetNoFimex {
     #define MODEL_TYPE "metgm_model_type"
     #define PRODUCTION_NATION "metgm_production_nation"
 
-    typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
+typedef std::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-    void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
-    {
-        if(!doc.get())
-            throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
+void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
+{
+    if (!doc.get())
+        throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
 
-        const CDM& cdmRef = cdmReader->getCDM();
+    const CDM& cdmRef = cdmReader->getCDM();
 
-        // start metgm_parameter
-        xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter");
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        size_t size = (nodes) ? nodes->nodeNr : 0;
-        for (size_t i = 0; i < size; ++i) {
+    // start metgm_parameter
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    size_t size = (nodes) ? nodes->nodeNr : 0;
+    for (size_t i = 0; i < size; ++i) {
+        xmlNodePtr node = nodes->nodeTab[i];
 
-            xmlNodePtr node = nodes->nodeTab[i];
+        std::string metgmName = getXmlProp(node, "name");
+        if (metgmName.empty()) {
+            continue;
+        }
 
-            std::string metgmName = getXmlProp(node, "name");
-            if(metgmName.empty()) {
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"metgm_p_id\"]");
+        std::string str_p_id;
+        short p_id = 0;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            if (str_p_id.empty()) {
                 continue;
             }
+            p_id = boost::lexical_cast<size_t>(str_p_id);
+        } else {
+            continue;
+        }
 
-            xmlXPathObject_p xpathObj =
-                doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"metgm_p_id\"]");
-            std::string str_p_id;
-            short p_id = 0;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                if(str_p_id == std::string("")) {
-                    continue;
-                }
-                p_id = boost::lexical_cast<size_t>(str_p_id);
-            } else {
+        xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"_FillValue\"]");
+        std::string str_FillValue;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        }
+
+        xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"units\"]");
+        std::string str_units;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        }
+
+        xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"standard_name\"]");
+        std::string str_standard_name;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            if (str_standard_name.empty()) {
                 continue;
             }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"_FillValue\"]");
-            std::string str_FillValue;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"units\"]");
-            std::string str_units;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"standard_name\"]");
-            std::string str_standard_name;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                if(str_standard_name.empty()) {
+            // find all variables with given standard_name value
+            std::vector<std::string> varNames = cdmRef.findVariables("standard_name", str_standard_name);
+            for (size_t index = 0; index < varNames.size(); ++index) {
+                std::string varName = varNames[index];
+                if (cdmRef.hasDimension(varName)) {
                     continue;
                 }
-                // find all variables with given standard_name value
-                std::vector<std::string> varNames = cdmRef.findVariables("standard_name", str_standard_name);
-                for(size_t index = 0; index < varNames.size(); ++index) {
-                    std::string varName = varNames[index];
-                    if(cdmRef.hasDimension(varName)) {
+
+                const CDMVariable* pVar = &cdmRef.getVariable(varName);
+
+                if (!str_units.empty() && !cdmRef.getUnits(varName).empty()) {
+                    /* check if dimensions convertible */
+                    Units checker;
+                    if (!checker.areConvertible(str_units, cdmRef.getUnits(varName))) {
                         continue;
                     }
-
-                    const CDMVariable* pVar = &cdmRef.getVariable(varName);
-
-                    if(!str_units.empty() && !cdmRef.getUnits(varName).empty()) {
-                        /* check if dimensions convertible */
-                        Units checker;
-                        if(!checker.areConvertible(str_units, cdmRef.getUnits(varName))) {
-                            continue;
-                        }
-                    }
-
-                    MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
-                    cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
-
-                    if(!str_FillValue.empty())
-                        cfgEntry.fillValue_ = str_FillValue;
-
-                    xmlConfiguration_.insert(cfgEntry);
                 }
 
-            } else {
+                MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
+                cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
+
+                if (!str_FillValue.empty())
+                    cfgEntry.fillValue_ = str_FillValue;
+
+                xmlConfiguration_.insert(cfgEntry);
+            }
+
+        } else {
+            continue;
+        }
+    }
+    // end metgm_parameter
+
+    xpathObj = doc->getXPathObject("/metgm_config/writer/variable");
+    nodes = xpathObj->nodesetval;
+    size = (nodes) ? nodes->nodeNr : 0;
+    for (size_t i = 0; i < size; ++i) {
+
+        xmlNodePtr node = nodes->nodeTab[i];
+
+        std::string kildeName = getXmlProp(node, "name");
+        if (kildeName.empty()) {
+            continue;
+        }
+
+        if (!cdmRef.hasVariable(kildeName)) {
+            continue;
+        }
+
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"metgm_p_id\"]");
+        std::string str_p_id;
+        short p_id = 0;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            if (str_p_id.empty()) {
+                continue;
+            }
+            p_id = boost::lexical_cast<size_t>(str_p_id);
+        } else {
+            continue;
+        }
+
+        xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + kildeName + "\"]/attribute[@name=\"units\"]");
+        std::string str_units;
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        }
+
+        const CDMVariable* pVar = &cdmRef.getVariable(kildeName);
+
+        if (!str_units.empty() && !cdmRef.getUnits(kildeName).empty()) {
+            /* check if dimensions convertible */
+            Units checker;
+            if (!checker.areConvertible(str_units, cdmRef.getUnits(kildeName))) {
                 continue;
             }
         }
-        // end metgm_parameter
 
-        xpathObj = doc->getXPathObject("/metgm_config/writer/variable");
-        nodes = xpathObj->nodesetval;
-        size = (nodes) ? nodes->nodeNr : 0;
-        for (size_t i = 0; i < size; ++i) {
+        MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
 
-            xmlNodePtr node = nodes->nodeTab[i];
-
-            std::string kildeName = getXmlProp(node, "name");
-            if(kildeName.empty()) {
-                continue;
-            }
-
-            if(!cdmRef.hasVariable(kildeName)) {
-                continue;
-            }
-
-            xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"metgm_p_id\"]");
-            std::string str_p_id;
-            short p_id = 0;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                if(str_p_id == std::string("")) {
-                    continue;
-                }
-                p_id = boost::lexical_cast<size_t>(str_p_id);
-            } else {
-                continue;
-            }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
-            std::string str_units;
-            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            const CDMVariable* pVar = &cdmRef.getVariable(kildeName);
-
-            if(!str_units.empty() && !cdmRef.getUnits(kildeName).empty()) {
-                /* check if dimensions convertible */
-                Units checker;
-                if(!checker.areConvertible(str_units, cdmRef.getUnits(kildeName))) {
-                    continue;
-                }
-            }
-
-            MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
-            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                cfgEntry.fillValue_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
-            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                cfgEntry.addOffset_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
-            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                cfgEntry.scaleFactor_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-            }
-
-            xmlConfiguration_.insert(cfgEntry);
+        xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"_FillValue\"]");
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            cfgEntry.fillValue_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
         }
+
+        xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"add_offset\"]");
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            cfgEntry.addOffset_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        }
+
+        xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"scale_factor\"]");
+        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+            cfgEntry.scaleFactor_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        }
+
+        xmlConfiguration_.insert(cfgEntry);
+    }
     }
 
 
@@ -241,7 +239,7 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup1Data()
     {
-        boost::shared_ptr<MetGmGroup1Ptr> pg1 = MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(cdmReader);
+        std::shared_ptr<MetGmGroup1Ptr> pg1 = MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(cdmReader);
 
         MGM_THROW_ON_ERROR(mgm_set_analysis_date_time(*metgmHandle_, pg1->analysisTime()))
 

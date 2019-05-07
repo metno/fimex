@@ -24,12 +24,12 @@
 #ifndef XMLDOCDECL_H_
 #define XMLDOCDECL_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
 class XMLDoc;
-typedef boost::shared_ptr<XMLDoc> XMLDoc_p;
+typedef std::shared_ptr<XMLDoc> XMLDoc_p;
 
 } // namespace MetNoFimex
 

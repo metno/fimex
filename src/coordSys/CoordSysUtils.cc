@@ -29,9 +29,10 @@
 #include "fimex/CDMReader.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
+
+#include <cassert>
 
 namespace MetNoFimex {
 

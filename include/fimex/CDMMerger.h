@@ -108,7 +108,7 @@ private:
     std::unique_ptr<CDMMergerPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMMerger> CDMMerger_p;
+typedef std::shared_ptr<CDMMerger> CDMMerger_p;
 
 } // namespace MetNoFimex
 

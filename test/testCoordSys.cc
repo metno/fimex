@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE( test_vTrans )
     CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     BOOST_CHECK(varSysIt != coordSys.end());
     BOOST_CHECK((*varSysIt)->hasVerticalTransformation());
-    boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
+    std::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
     BOOST_CHECK(vtran.get() != 0);
     BOOST_CHECK_EQUAL(vtran->getName(), OceanSG2::NAME());
     const OceanSG2* osg2 = dynamic_cast<const OceanSG2*>(vtran.get());

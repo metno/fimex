@@ -37,11 +37,11 @@
 
 // boost
 //
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_set.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <memory>
 
 // standard
 //
@@ -120,14 +120,14 @@ namespace MetNoFimex {
         virtual void init();
         virtual void writeGroup5Data(const CDMVariable* pVar);
 
-        typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
+        typedef std::shared_ptr<MetGmTags> MetGmTagsPtr;
 
         std::string                                 configFileName_;
 
-        boost::shared_ptr<MetGmVersion>             metgmVersion_;
-        boost::shared_ptr<MetGmHandlePtr>           metgmHandle_;
-        boost::shared_ptr<MetGmFileHandlePtr>       metgmFileHandle_;
-        boost::shared_ptr<MetGmTimeTag>             metgmTimeTag_;
+        std::shared_ptr<MetGmVersion> metgmVersion_;
+        std::shared_ptr<MetGmHandlePtr> metgmHandle_;
+        std::shared_ptr<MetGmFileHandlePtr> metgmFileHandle_;
+        std::shared_ptr<MetGmTimeTag> metgmTimeTag_;
 
         boost::posix_time::ptime                    analysisTime_;
 

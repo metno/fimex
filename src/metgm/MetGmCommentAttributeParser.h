@@ -35,7 +35,7 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -49,7 +49,7 @@ namespace MetNoFimex {
 
     class MetGmCommentAttributeParser {
     public:
-        static boost::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader);
+        static std::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader);
 
         std::string freeText()         {return freeText_; }
         std::string version()          {return version_; }

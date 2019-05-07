@@ -24,9 +24,10 @@
 #ifndef CDMWRITER_H_
 #define CDMWRITER_H_
 
-#include <string>
-#include <boost/shared_ptr.hpp>
 #include "fimex/CDMReader.h"
+
+#include <memory>
+#include <string>
 
 namespace MetNoFimex
 {
@@ -46,7 +47,7 @@ protected:
     const std::string outputFile;
 };
 
-typedef boost::shared_ptr<CDMWriter> CDMWriter_p;
+typedef std::shared_ptr<CDMWriter> CDMWriter_p;
 
 } // namespace
 

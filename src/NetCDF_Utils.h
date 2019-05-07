@@ -24,10 +24,10 @@
 #ifndef NETCDF_UTILS_H_
 #define NETCDF_UTILS_H_
 
-#include <boost/shared_ptr.hpp>
+#include "MutexLock.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataDecl.h"
-#include "MutexLock.h"
+#include <memory>
 extern "C" {
 #include "netcdf.h"
 }

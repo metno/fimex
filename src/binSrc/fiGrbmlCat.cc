@@ -25,15 +25,15 @@
  */
 
 #include "fimex/XMLUtils.h"
-#include <string>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
 #include <libxml/xmlreader.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/program_options.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
+#include <memory>
+#include <string>
 
 using namespace std;
 namespace po = boost::program_options;
@@ -89,7 +89,7 @@ void grbmlExtract(const string& fileName, ostream& os)
 {
     xmlTextReaderPtr reader = xmlReaderForFile(fileName.c_str(), NULL, 0);
     if (reader != NULL) {
-        boost::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
+        std::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
         const xmlChar* name;
         int ret = xmlTextReaderRead(reader);
         while (ret == 1) {

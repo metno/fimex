@@ -51,12 +51,11 @@ extern "C" {
 
 #include "NetCDF_Utils.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
 #include <functional>
-#include <iostream>
+#include <memory>
 #include <numeric>
 
 #include <libxml/tree.h>
@@ -187,7 +186,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::unique_ptr<XMLDoc>& doc)
         if (size > 0) {
             std::string configFile = getXmlProp(nodes->nodeTab[0], "filename");
             LOG4FIMEX(logger, Logger::DEBUG, "configuring CDMWriter with ncml config file: " << configFile);
-            cdmReader = boost::make_shared<NcmlCDMReader>(cdmReader, XMLInputFile(configFile));
+            cdmReader = std::make_shared<NcmlCDMReader>(cdmReader, XMLInputFile(configFile));
         }
     }
     cdm = cdmReader->getCDM();

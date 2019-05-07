@@ -31,8 +31,8 @@
 #include "fimex/CDMReaderDecl.h"
 
 // boost
-#include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <memory>
 
 // standard
 #include <vector>
@@ -47,14 +47,12 @@ namespace MetNoFimex {
 
     class MetGmTimeTag {
     public:
+        static std::shared_ptr<MetGmTimeTag> createMetGmTimeTagGlobal(const CDMReader_p pCdmReader);
 
-        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagGlobal(const CDMReader_p pCdmReader);
+        static std::shared_ptr<MetGmTimeTag> createMetGmTimeTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
 
-        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagForWriting(const CDMReader_p pCdmReader,
-                                                                            const CDMVariable* pVariable);
-
-        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTagForReading(const boost::shared_ptr<MetGmGroup1Ptr> pGroup1,
-                                                                            const boost::shared_ptr<MetGmGroup3Ptr> pGroup3);
+        static std::shared_ptr<MetGmTimeTag> createMetGmTimeTagForReading(const std::shared_ptr<MetGmGroup1Ptr> pGroup1,
+                                                                          const std::shared_ptr<MetGmGroup3Ptr> pGroup3);
 
         inline unsigned int        nT()           { return nT_; }
         inline time_t              dT()           { return dT_; }

@@ -120,7 +120,7 @@ protected:
     int gribVersion;
     const std::string configFile;
     const XMLDoc_p xmlConfig;
-    boost::shared_ptr<grib_handle> gribHandle;
+    std::shared_ptr<grib_handle> gribHandle;
     Logger_p logger;
 
 private:

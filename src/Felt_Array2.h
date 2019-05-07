@@ -48,17 +48,18 @@ class Felt_Array2
 {
 private:
     // sorted container for level -> field associations
-    typedef map<LevelPair, boost::shared_ptr<felt::FeltField>, LevelPairLess> LevelFieldMap;
+    typedef map<LevelPair, std::shared_ptr<felt::FeltField>, LevelPairLess> LevelFieldMap;
     // container for all available times and levels (ordered by time and level)
     typedef map<boost::posix_time::ptime, LevelFieldMap > TimeLevelFieldMap;
     string feltArrayName_;
-    const boost::shared_ptr<felt::FeltField> defaultField_; // this is also one of the feltFields
+    const std::shared_ptr<felt::FeltField> defaultField_; // this is also one of the feltFields
     string dataType_;
     double fillValue_;
     TimeLevelFieldMap feltFields_; // main storage for all fields with same information
     /** constructor, no sensible default, since one feltField required for most information */
     Felt_Array2();
-    void addField_(const boost::shared_ptr<felt::FeltField> field);
+    void addField_(const std::shared_ptr<felt::FeltField> field);
+
 public:
     /**
      * constructor applying the parameter name and the felt description from the first feltField
@@ -67,13 +68,13 @@ public:
      * \param dataType short|float|double datatype used for autoscaling, getScalingFactor() will be always return 1 for float and double
      * \param fillValue fillValue of the datatype, usually -32767
      */
-    explicit Felt_Array2(const string name, const boost::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue);
+    explicit Felt_Array2(const string name, const std::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue);
     virtual ~Felt_Array2();
     /**
      * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array2
      * the index given here must correspond to the initialization index
      */
-    void addInformationByField(boost::shared_ptr<felt::FeltField> field);
+    void addInformationByField(std::shared_ptr<felt::FeltField> field);
 
     /// get the time/level independent data-header
 //	const boost::array<short, 20>& getDataHeader() const {}
@@ -129,7 +130,7 @@ public:
     int scaleFactor() const;
     /** @return scalingFactor */
     double getScalingFactor() const;
-    boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
+    std::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
     int getGridType() const;
     /** @return true if grid has a time-axis, i.e. not a parameter field **/
     bool hasTime() const;
@@ -137,7 +138,7 @@ public:
      * fetch a field from the felt-array
      * @throw NoSuchField_Felt_File_Error
      */
-    const boost::shared_ptr<felt::FeltField> getField(boost::posix_time::ptime time, LevelPair levelPair) const;
+    const std::shared_ptr<felt::FeltField> getField(boost::posix_time::ptime time, LevelPair levelPair) const;
 };
 
 } // end namespace MetNoFelt

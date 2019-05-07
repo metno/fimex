@@ -27,14 +27,14 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
+#include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMconstants.h"
-#include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <memory>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
     CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
     double t0 = 1179309600.;
     {
-        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->deAccumulate("time");
 
         DataPtr data = proc->getData("time");
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
         BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
     }
     {
-        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->accumulate("time");
         DataPtr data = proc->getData("time");
         boost::shared_array<double> time = data->asDouble();
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( test_rotate )
         const string fileName = pathTest("coordTest.nc");
 
         CDMReader_p nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
-        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->rotateAllVectorsToLatLon(true);
         const CDMAttribute& attrx = proc->getCDM().getAttribute("x_wind_10m", "standard_name");
         BOOST_CHECK_EQUAL(attrx.getStringValue(), "LATLON_ROTATED_x_wind");

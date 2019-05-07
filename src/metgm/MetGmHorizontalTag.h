@@ -44,9 +44,9 @@
 // boost
 //
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/shared_array.hpp>
+#include <memory>
 
 // standard
 //
@@ -64,12 +64,11 @@ namespace MetNoFimex {
 
     class MetGmHorizontalTag {
     public:
+        static std::shared_ptr<MetGmXTag> createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
+        static std::shared_ptr<MetGmYTag> createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
 
-        static boost::shared_ptr<MetGmXTag> createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
-
-        static boost::shared_ptr<MetGmXTag> createMetGmXTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);
+        static std::shared_ptr<MetGmXTag> createMetGmXTagForReading(const std::shared_ptr<MetGmGroup3Ptr> pg3);
+        static std::shared_ptr<MetGmYTag> createMetGmYTagForReading(const std::shared_ptr<MetGmGroup3Ptr> pg3);
 
         inline unsigned int         numberOfPoints()     { return numberOfPoints_; }
         inline double               distance()           { return distance_; }

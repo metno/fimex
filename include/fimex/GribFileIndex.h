@@ -55,7 +55,9 @@ public:
      * @param members list of member-names -> filepath-regexp
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
-    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >(), const std::vector<std::string>& extraKeys=std::vector<std::string>());
+    GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
+                    const std::vector<std::pair<std::string, boost::regex>>& members = std::vector<std::pair<std::string, boost::regex>>(),
+                    const std::vector<std::string>& extraKeys = std::vector<std::string>());
     GribFileMessage(XMLDoc_p, std::string nsPrefix, xmlNodePtr node);
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
     ~GribFileMessage();

@@ -40,8 +40,8 @@
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -60,7 +60,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 #ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
 
-    dataReader = boost::make_shared<NcmlAggregationReader>(configXML);
+    dataReader = std::make_shared<NcmlAggregationReader>(configXML);
 #if 0
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -72,7 +72,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
         ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
         // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
         ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
-        dataReader = boost::make_shared<NetCDF_CDMReader>(ncFile);
+        dataReader = std::make_shared<NetCDF_CDMReader>(ncFile);
     }
 #endif
     init();

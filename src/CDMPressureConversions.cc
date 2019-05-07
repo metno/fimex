@@ -41,7 +41,7 @@
 #include "fimex/Logger.h"
 #include "coordSys/CoordSysUtils.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex
 {
@@ -121,7 +121,7 @@ public:
 private:
     std::string varName_;
 };
-typedef boost::shared_ptr<Converter> Converter_p;
+typedef std::shared_ptr<Converter> Converter_p;
 typedef std::vector<Converter_p> Converter_pv;
 
 Converter::~Converter()
@@ -136,10 +136,15 @@ struct ConverterFactory {
         const CDM& inputCDM;
         const CoordinateSystem_cp_v inputCoordSys;
 
-        boost::shared_ptr<CDM> outputCDM;
+        std::shared_ptr<CDM> outputCDM;
 
-        Environment(CDMReader_p inReader, boost::shared_ptr<CDM> outCDM)
-            : inputReader(inReader), inputCDM(inputReader->getCDM()), inputCoordSys(listCoordinateSystems(inputReader)), outputCDM(outCDM) { }
+        Environment(CDMReader_p inReader, std::shared_ptr<CDM> outCDM)
+            : inputReader(inReader)
+            , inputCDM(inputReader->getCDM())
+            , inputCoordSys(listCoordinateSystems(inputReader))
+            , outputCDM(outCDM)
+        {
+        }
     };
 
     struct Operation {
@@ -158,7 +163,7 @@ struct ConverterFactory {
     virtual int match(const Environment& env, const std::string& conversion) const = 0;
     virtual Converter_pv createConverter(Environment& env, const Operation& oper) const = 0;
 };
-typedef boost::shared_ptr<ConverterFactory> ConverterFactoryPtr;
+typedef std::shared_ptr<ConverterFactory> ConverterFactoryPtr;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -290,7 +295,7 @@ Converter_pv ThetaTemperatureConverterFactory::createConverter(Environment& env,
         env.outputCDM->removeVariable(*itTheta); // why?
 
         LOG4FIMEX(logger, Logger::INFO, "converter from " << *itTheta << " to " << temperature);
-        converters.push_back(boost::make_shared<ThetaTemperatureConverter>(temperature, env.inputReader, cs, *itTheta));
+        converters.push_back(std::make_shared<ThetaTemperatureConverter>(temperature, env.inputReader, cs, *itTheta));
     }
     return converters;
 }
@@ -399,7 +404,7 @@ Converter_pv HumidityConverterFactory::createConverter(Environment& env, const O
         env.outputCDM->addAttribute(relativeHumName, CDMAttribute(VALID_MAX, (short)relative_humidity_scale_factor));
         env.outputCDM->addAttribute(relativeHumName, CDMAttribute(SCALE_FACTOR, 1/relative_humidity_scale_factor));
 
-        converters.push_back(boost::make_shared<HumidityConverter>(relativeHumName, env.inputReader, cs, *itSpecific, *itTemp));
+        converters.push_back(std::make_shared<HumidityConverter>(relativeHumName, env.inputReader, cs, *itSpecific, *itTemp));
     }
     LOG4FIMEX(logger, Logger::INFO, "have " << converters.size() << " converters to " << RELATIVE_HUMIDITY);
     return converters;
@@ -490,7 +495,7 @@ Converter_pv OmegaVerticalConverterFactory::createConverter(Environment& env, co
     }
     env.outputCDM->removeVariable(omega); // why?
 
-    return Converter_pv(1, boost::make_shared<OmegaVerticalConverter>(verticalWindName, env.inputReader, cs, omega, temperature));
+    return Converter_pv(1, std::make_shared<OmegaVerticalConverter>(verticalWindName, env.inputReader, cs, omega, temperature));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -609,7 +614,7 @@ Converter_pv AddPressure4DConverterFactory::createConverter(Environment& env, co
     env.outputCDM->addAttribute(pressureName, CDMAttribute(UNITS, "hPa"));
     env.outputCDM->addAttribute(pressureName, CDMAttribute(STANDARD_NAME, AIR_PRESSURE));
 
-    return Converter_pv(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, vc, shape4d));
+    return Converter_pv(1, std::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, vc, shape4d));
 }
 
 } // anonymous namespace
@@ -624,10 +629,10 @@ std::vector<ConverterFactoryPtr> converterfactories;
 
 void initfactories() {
     if (converterfactories.empty()) {
-        converterfactories.push_back(boost::make_shared<HumidityConverterFactory>());
-        converterfactories.push_back(boost::make_shared<ThetaTemperatureConverterFactory>());
-        converterfactories.push_back(boost::make_shared<OmegaVerticalConverterFactory>());
-        converterfactories.push_back(boost::make_shared<AddPressure4DConverterFactory>());
+        converterfactories.push_back(std::make_shared<HumidityConverterFactory>());
+        converterfactories.push_back(std::make_shared<ThetaTemperatureConverterFactory>());
+        converterfactories.push_back(std::make_shared<OmegaVerticalConverterFactory>());
+        converterfactories.push_back(std::make_shared<AddPressure4DConverterFactory>());
     }
 }
 

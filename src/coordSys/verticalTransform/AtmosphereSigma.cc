@@ -27,13 +27,13 @@
 #include "fimex/coordSys/verticalTransform/AtmosphereSigma.h"
 #include "fimex/coordSys/verticalTransform/SigmaToPressureConverter.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
 VerticalConverter_p AtmosphereSigma::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    return boost::make_shared<SigmaToPressureConverter>(reader, cs, sigma, ps, ptop);
+    return std::make_shared<SigmaToPressureConverter>(reader, cs, sigma, ps, ptop);
 }
 
 } // namespace MetNoFimex

@@ -107,8 +107,7 @@ static void projConvert(const std::string& projStr, double lon, double lat, doub
     y = uv.v;
 }
 
-
-std::string getEarthsOblateFigure(boost::shared_ptr<grib_handle> gh, long factorToM)
+std::string getEarthsOblateFigure(std::shared_ptr<grib_handle> gh, long factorToM)
 {
     long majorFactor, minorFactor;
     double majorValue, minorValue;
@@ -129,14 +128,14 @@ std::string getEarthsOblateFigure(boost::shared_ptr<grib_handle> gh, long factor
     return "+a=" + type2string(majorValue) + " +b=" + type2string(minorValue);
 }
 
-std::string getEarthsSphericalFigure(boost::shared_ptr<grib_handle> gh)
+std::string getEarthsSphericalFigure(std::shared_ptr<grib_handle> gh)
 {
     double radius;
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "radiusInMetres", &radius), 0);
     return "+a=" + type2string(radius) + " +e=0";
 }
 
-std::string getEarthsFigure(long edition, boost::shared_ptr<grib_handle> gh)
+std::string getEarthsFigure(long edition, std::shared_ptr<grib_handle> gh)
 {
     if (earthFigure_ != "") {
         return earthFigure_;
@@ -170,7 +169,7 @@ std::string getEarthsFigure(long edition, boost::shared_ptr<grib_handle> gh)
     return earth;
 }
 
-GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefRegularLL(long edition, std::shared_ptr<grib_handle> gh)
 {
     long sizeX, sizeY, ijDirectionIncrementGiven;
     double startX, startY, incrX, incrY;
@@ -210,7 +209,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
-GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefRotatedLL(long edition, std::shared_ptr<grib_handle> gh)
 {
     long sizeX, sizeY, ijDirectionIncrementGiven;
     double startX, startY, incrX, incrY, latRot, lonRot;
@@ -257,7 +256,7 @@ struct GribMetricDef {
     double startLat;
 };
 
-GribMetricDef getGridDefMetric(long edition, boost::shared_ptr<grib_handle> gh)
+GribMetricDef getGridDefMetric(long edition, std::shared_ptr<grib_handle> gh)
 {
     GribMetricDef gmd;
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &gmd.sizeX), 0);
@@ -277,7 +276,7 @@ GribMetricDef getGridDefMetric(long edition, boost::shared_ptr<grib_handle> gh)
     return gmd;
 }
 
-GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefMercator(long edition, std::shared_ptr<grib_handle> gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
@@ -298,7 +297,7 @@ GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> g
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefLambert(long edition, std::shared_ptr<grib_handle> gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
@@ -325,7 +324,7 @@ GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefPolarStereographic(long edition, std::shared_ptr<grib_handle> gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
@@ -359,13 +358,11 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(
-        boost::shared_ptr<grib_handle> gh,
-        const std::string& fileURL,
-        long filePos, long msgPos,
-        const std::vector<std::pair<std::string, boost::regex> >& members,
-        const std::vector<std::string>& extraKeys)
-: fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
+GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
+                                 const std::vector<std::pair<std::string, boost::regex>>& members, const std::vector<std::string>& extraKeys)
+    : fileURL_(fileURL)
+    , filePos_(filePos)
+    , msgPos_(msgPos)
 {
     if (gh.get() == 0)
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
@@ -1002,13 +999,12 @@ const GridDefinition& GribFileMessage::getGridDefinition() const
 string GribFileMessage::toString() const
 {
 #if defined(LIBXML_WRITER_ENABLED)
-    boost::shared_ptr<xmlBuffer> buffer(xmlBufferCreate(), xmlBufferFree);
+    std::shared_ptr<xmlBuffer> buffer(xmlBufferCreate(), xmlBufferFree);
     if (buffer.get() == 0)
         throw runtime_error("error allocation memory for xmlBuffer");
 
     {
-        boost::shared_ptr<xmlTextWriter> writer(xmlNewTextWriterMemory(buffer.get(), 0),
-                xmlFreeTextWriter);
+        std::shared_ptr<xmlTextWriter> writer(xmlNewTextWriterMemory(buffer.get(), 0), xmlFreeTextWriter);
 
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gribMessage")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("url"),
@@ -1149,7 +1145,7 @@ size_t GribFileMessage::readData(std::vector<double>& data, double missingValue)
     if (fileh == 0) {
         throw runtime_error("cannot open file: " + getFileURL());
     }
-    boost::shared_ptr<FILE> fh(fileh, fclose);
+    std::shared_ptr<FILE> fh(fileh, fclose);
     fseeko(fh.get(), getFilePosition(), SEEK_SET);
 
     // enable multi-messages
@@ -1158,10 +1154,10 @@ size_t GribFileMessage::readData(std::vector<double>& data, double missingValue)
     int err = 0;
     for (size_t i = 0; i < getMessageNumber(); i++) {
         // forward to correct multimessage
-        boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+        std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
     }
     // read the message of interest
-    boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
     size_t size = 0;
     if (gh.get() != 0) {
         if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
@@ -1189,7 +1185,7 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     if (fileh == 0) {
         throw runtime_error("cannot open file: " + url);
     }
-    boost::shared_ptr<FILE> fh(fileh, fclose);
+    std::shared_ptr<FILE> fh(fileh, fclose);
     if (!asimofHeader) {
         fseeko(fh.get(), getFilePosition(), SEEK_SET);
     } else {
@@ -1202,11 +1198,11 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     if (!asimofHeader) {
         for (size_t i = 0; i < getMessageNumber(); i++) {
             // forward to correct multimessage
-            boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+            std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
         }
     }
     // read the message of interest
-    boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
     size_t size = 0;
     if (gh.get() != 0) {
         if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
@@ -1347,7 +1343,7 @@ void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, cons
     if (fileh == 0) {
         throw runtime_error("cannot open file: " + url_);
     }
-    boost::shared_ptr<FILE> fh(fileh, fclose);
+    std::shared_ptr<FILE> fh(fileh, fclose);
     // enable multi-messages
     grib_multi_support_on(0);
     off_t lastPos = static_cast<size_t>(-1);
@@ -1356,7 +1352,7 @@ void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, cons
         // read the next message
         off_t pos = ftello(fh.get());
         int err = 0;
-        boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+        std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
         off_t newPos = ftello(fh.get());
         if (gh.get() != 0) {
             if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
@@ -1413,7 +1409,7 @@ void GribFileIndex::initByXMLReader(const boost::filesystem::path& grbmlFilePath
     LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << fileName);
     xmlTextReaderPtr reader = xmlReaderForFile(fileName.c_str(), NULL, 0);
     if (reader != NULL) {
-        boost::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
+        std::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
         const xmlChar* name;
         int ret = xmlTextReaderRead(reader);
         while (ret == 1) {
@@ -1455,7 +1451,7 @@ void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
     initByXMLReader(grbmlFilePath);
-    XMLDoc_p doc(new XMLDoc(file_string(grbmlFilePath)));
+    XMLDoc_p doc = std::make_shared<XMLDoc>(file_string(grbmlFilePath));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     xmlXPathObject_p xp = doc->getXPathObject("/gfi:gribFileIndex");
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;

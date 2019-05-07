@@ -53,7 +53,7 @@
 
 #include <proj_api.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex
 {
@@ -152,41 +152,41 @@ Projection_p Projection::create(std::vector<CDMAttribute> attrs)
     std::vector<CDMAttribute>::const_iterator projAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
     Projection_p proj;
     if (projAttr == attrs.end()) {
-        proj = boost::make_shared<LatitudeLongitudeProjection>();
+        proj = std::make_shared<LatitudeLongitudeProjection>();
     } else {
         std::string projName(projAttr->getStringValue());
         if (projName == "albers_conical_equal_area") {
-            proj = boost::make_shared<AlbersConicalEqualAreaProjection>();
+            proj = std::make_shared<AlbersConicalEqualAreaProjection>();
         } else if (projName == "azimuthal_equidistant") {
-            proj = boost::make_shared<AzimuthalEquidistantProjection>();
+            proj = std::make_shared<AzimuthalEquidistantProjection>();
         } else if (projName == "geostationary") {
-            proj = boost::make_shared<GeostationaryProjection>();
+            proj = std::make_shared<GeostationaryProjection>();
         } else if (projName == "lambert_azimuthal_equal_area") {
-            proj = boost::make_shared<LambertAzimuthalEqualAreaProjection>();
+            proj = std::make_shared<LambertAzimuthalEqualAreaProjection>();
         } else if (projName == "lambert_conformal_conic") {
-            proj = boost::make_shared<LambertConformalConicProjection>();
+            proj = std::make_shared<LambertConformalConicProjection>();
         } else if (projName == "lambert_cylindrical_equal_area") {
-            proj = boost::make_shared<LambertCylindricalEqualAreaProjection>();
+            proj = std::make_shared<LambertCylindricalEqualAreaProjection>();
         } else if (projName == "latitude_longitude") {
-            proj = boost::make_shared<LatitudeLongitudeProjection>();
+            proj = std::make_shared<LatitudeLongitudeProjection>();
         } else if (projName == "mercator") {
-            proj = boost::make_shared<MercatorProjection>();
+            proj = std::make_shared<MercatorProjection>();
         } else if (projName == "oblique_mercator") {
-            proj = boost::make_shared<ObliqueMercatorProjection>();
+            proj = std::make_shared<ObliqueMercatorProjection>();
         } else if (projName == "orthographic") {
-            proj = boost::make_shared<OrthographicProjection>();
+            proj = std::make_shared<OrthographicProjection>();
         } else if (projName == "polar_stereographic") {
-            proj = boost::make_shared<PolarStereographicProjection>();
+            proj = std::make_shared<PolarStereographicProjection>();
         } else if (projName == "rotated_latitude_longitude") {
-            proj = boost::make_shared<RotatedLatitudeLongitudeProjection>();
+            proj = std::make_shared<RotatedLatitudeLongitudeProjection>();
         } else if (projName == "stereographic") {
-            proj = boost::make_shared<StereographicProjection>();
+            proj = std::make_shared<StereographicProjection>();
         } else if (projName == "transverse_mercator") {
-            proj = boost::make_shared<TransverseMercatorProjection>();
+            proj = std::make_shared<TransverseMercatorProjection>();
         } else if (projName == "vertical_perspective") {
-            proj = boost::make_shared<VerticalPerspectiveProjection>();
+            proj = std::make_shared<VerticalPerspectiveProjection>();
         } else if (projName == "unknown_to_fgdc") {
-            proj = boost::make_shared<UnknownToFgdcProjection>();
+            proj = std::make_shared<UnknownToFgdcProjection>();
         } else {
             throw CDMException("unsupported projection: " + projName);
         }

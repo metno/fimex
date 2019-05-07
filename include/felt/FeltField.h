@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -40,7 +40,7 @@
 namespace felt
 {
 
-typedef boost::shared_ptr<FeltGridDefinition> FeltGridDefinitionPtr;
+typedef std::shared_ptr<FeltGridDefinition> FeltGridDefinitionPtr;
 
 class FeltFile;
 

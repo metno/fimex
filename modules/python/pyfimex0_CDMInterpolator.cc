@@ -28,7 +28,7 @@
 
 #include "pyfimex0_helpers.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -60,7 +60,7 @@ enum InterpolationMethod {
 
 CDMInterpolator_p createInterpolator(CDMReader_p reader)
 {
-    return boost::make_shared<CDMInterpolator>(reader);
+    return std::make_shared<CDMInterpolator>(reader);
 }
 
 // wrapper for overload

@@ -27,9 +27,9 @@
 #ifndef TO_VLEVEL_CONVERTER_H_
 #define TO_VLEVEL_CONVERTER_H_
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <memory>
+#include <vector>
 
 #include "fimex/deprecated.h"
 

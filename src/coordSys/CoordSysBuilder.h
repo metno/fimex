@@ -31,7 +31,7 @@
 #include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/deprecated.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 

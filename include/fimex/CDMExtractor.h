@@ -25,8 +25,8 @@
 #define CDMEXTRACTOR_H_
 
 #include <map>
+#include <memory>
 #include <set>
-#include <boost/shared_ptr.hpp>
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"

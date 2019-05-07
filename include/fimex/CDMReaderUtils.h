@@ -29,7 +29,7 @@
 
 #include "fimex/CDMReader.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace MetNoFimex
@@ -46,7 +46,7 @@ namespace MetNoFimex
 
 /**
  * avoid deletion of the shared_ptr or shared_array when used as
- * boost::shared_ptr<T>(this, null_deleter())
+ * std::shared_ptr<T>(this, null_deleter())
  * @param r
  */
 struct null_deleter

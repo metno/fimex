@@ -32,7 +32,7 @@
 #include "fimex/UnitsConverterDecl.h"
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex
 {
@@ -204,7 +204,7 @@ public:
     virtual DataPtr getScaledDataInUnit(const std::string& varName, const std::string& unit);
 
 protected:
-    boost::shared_ptr<CDM> cdm_;
+    std::shared_ptr<CDM> cdm_;
 
     /**
      * Read the data from the variable.hasData() and select the correct unLimDimPos.

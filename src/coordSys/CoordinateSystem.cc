@@ -37,7 +37,7 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <boost/regex.hpp>
@@ -105,15 +105,15 @@ void removeAxis(CoordinateAxis_cp_v& axes, const std::string& axisname)
     }
 }
 
-typedef boost::shared_ptr<CoordSysBuilder> CoordSysBuilder_p;
+typedef std::shared_ptr<CoordSysBuilder> CoordSysBuilder_p;
 typedef std::vector<CoordSysBuilder_p> CoordSysBuilder_pv;
 
 CoordSysBuilder_pv createBuilders()
 {
     CoordSysBuilder_pv builders;
     // supported conventions, 1st will be used as fallback
-    builders.push_back(boost::make_shared<CF1_xCoordSysBuilder>());
-    builders.push_back(boost::make_shared<WRFCoordSysBuilder>());
+    builders.push_back(std::make_shared<CF1_xCoordSysBuilder>());
+    builders.push_back(std::make_shared<WRFCoordSysBuilder>());
     return builders;
 }
 
@@ -431,7 +431,7 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
 
     // make the coordinateSystems minimal
     for (CoordSysMap::iterator csmi = coordSysMap.begin(); csmi != coordSysMap.end(); ++csmi) {
-        CoordinateSystem_p cs = boost::make_shared<CoordinateSystem>();
+        CoordinateSystem_p cs = std::make_shared<CoordinateSystem>();
         cs->setConventionName(csmi->second->getConventionName());
         cs->setAxis(csmi->second->getGeoXAxis());
         cs->setAxis(csmi->second->getGeoYAxis());

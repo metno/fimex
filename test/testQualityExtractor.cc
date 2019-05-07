@@ -24,8 +24,8 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/make_shared.hpp>
 #include <boost/shared_array.hpp>
+#include <memory>
 
 #ifdef HAVE_FELT
 #include "FeltCDMReader2.h"
@@ -57,11 +57,11 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 #ifdef TEST_DEBUG
 	defaultLogLevel(Logger::DEBUG);
 #endif
-	boost::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
+        std::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
 
-	map<string, string> statusVariables = extract->getStatusVariable();
-	map<string, string> variableFlags = extract->getVariableFlags();
-	map<string, vector<double> > variableValues = extract->getVariableValues();
+        map<string, string> statusVariables = extract->getStatusVariable();
+        map<string, string> variableFlags = extract->getVariableFlags();
+        map<string, vector<double>> variableValues = extract->getVariableValues();
 #ifdef TEST_DEBUG
 	for (map<string, string>::iterator svIt = statusVariables.begin(); svIt != statusVariables.end(); ++svIt) {
 	    string varName = svIt->first;
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
         return;
     const string fileName = pathTestExtra("flth00.dat");
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
-    boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
+    std::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", pathTest("testQualityConfig.xml")));
 
 #ifdef HAVE_NETCDF_H
     string outputFile("test_qualityExtract_convert.nc");
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
     const string fileNameM = pathTest("testQEmask_mask.nc");
 
     CDMReader_p readerD = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameD);
-    boost::shared_ptr<CDMQualityExtractor> mask = boost::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
+    std::shared_ptr<CDMQualityExtractor> mask = std::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
     DataPtr sliceM = mask->getDataSlice("salt", 0);
     BOOST_CHECK( sliceM.get() != 0 );

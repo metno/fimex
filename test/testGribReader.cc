@@ -27,7 +27,7 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 #include "fimex/GribCDMReader.h"

@@ -40,7 +40,6 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
 
 namespace MetNoFimex {
 
@@ -263,7 +262,7 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
             continue;
 
         Projection_cp projI = csI->getProjection();
-        interpolatedO = boost::make_shared<CDMInterpolator>(readerO);
+        interpolatedO = std::make_shared<CDMInterpolator>(readerO);
         nameX = csI->getGeoXAxis()->getName();
         nameY = csI->getGeoYAxis()->getName();
         const string& unitIX = cdmI.getUnits(nameX),

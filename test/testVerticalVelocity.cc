@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
 
-    boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
+    std::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
     proc->addVerticalVelocity();
     BOOST_CHECK(proc->getCDM().hasVariable("upward_air_velocity_ml"));
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(proc);

@@ -36,7 +36,7 @@
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/Logger.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -55,7 +55,7 @@ VerticalConverter_p IdentityConverter::createConverterForVarName(CDMReader_p rea
 {
     if (!varName.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "createConverterForVarName '" << varName << "'");
-        return boost::make_shared<IdentityConverter>(reader, cs, varName, unit);
+        return std::make_shared<IdentityConverter>(reader, cs, varName, unit);
     }
     return VerticalConverter_p();
 }

@@ -47,10 +47,9 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWriting(const CDMReader_p pCdmReader,
-                                                                                       const CDMVariable* pVariable)
+std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
 {
-    boost::shared_ptr<MetGmVerticalTag> VTag;
+    std::shared_ptr<MetGmVerticalTag> VTag;
 
     const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
@@ -61,10 +60,10 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             CoordinateAxis_cp zAxis = cs->getGeoZAxis();
 
             if(!zAxis.get()) {
-                return boost::shared_ptr<MetGmVerticalTag>();
+                return std::shared_ptr<MetGmVerticalTag>();
             }
 
-            VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
+            VTag = std::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
 
             DataPtr data;
 
@@ -97,52 +96,52 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
     return VTag;
 }
 
-    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                                           boost::shared_ptr<MetGmVerticalTag> prevTag)
-    {
-        boost::shared_ptr<MetGmVerticalTag> VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(std::shared_ptr<MetGmGroup3Ptr> pGp3,
+                                                                                     std::shared_ptr<MetGmVerticalTag> prevTag)
+{
+    std::shared_ptr<MetGmVerticalTag> VTag = std::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
 
-        if(pGp3->pz() == 0) {
-            /**
-              * same Z data as in previous parameter do deep copy
-              */
-            if(prevTag.get() == 0 || prevTag->nz() == 0 || prevTag->points().get() == 0)
-                throw CDMException("we have pz = 0 and previous vTag = 0");
-
-            VTag->nz_ = pGp3->nz();
-            VTag->pz_ = pGp3->pz();
-            VTag->pr_ = pGp3->pr();
-
-            // but take the data from prev
-            VTag->points().reset(new float[VTag->nz()]);
-
-            memcpy(VTag->points().get(), prevTag->points().get(), prevTag->nz() * sizeof(float));
-
-            return VTag; // return copy
-        }
-
-        if(pGp3->p_id() == 0) {
-
-            VTag->nz_ = 1;
-            VTag->pr_ = 0;
-            VTag->pz_ = 1;
-
-            VTag->points_.reset(new float[VTag->nz()]);
-            VTag->points_[0] = 0.0;
-
-            MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
-            return VTag;
-        }
+    if (pGp3->pz() == 0) {
+        /**
+         * same Z data as in previous parameter do deep copy
+         */
+        if (prevTag.get() == 0 || prevTag->nz() == 0 || prevTag->points().get() == 0)
+            throw CDMException("we have pz = 0 and previous vTag = 0");
 
         VTag->nz_ = pGp3->nz();
         VTag->pz_ = pGp3->pz();
         VTag->pr_ = pGp3->pr();
 
+        // but take the data from prev
+        VTag->points().reset(new float[VTag->nz()]);
+
+        memcpy(VTag->points().get(), prevTag->points().get(), prevTag->nz() * sizeof(float));
+
+        return VTag; // return copy
+    }
+
+    if (pGp3->p_id() == 0) {
+
+        VTag->nz_ = 1;
+        VTag->pr_ = 0;
+        VTag->pz_ = 1;
+
         VTag->points_.reset(new float[VTag->nz()]);
+        VTag->points_[0] = 0.0;
 
-        MGM_THROW_ON_ERROR(mgm_read_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle(), VTag->points_.get()))
-
+        MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
         return VTag;
+    }
+
+    VTag->nz_ = pGp3->nz();
+    VTag->pz_ = pGp3->pz();
+    VTag->pr_ = pGp3->pr();
+
+    VTag->points_.reset(new float[VTag->nz()]);
+
+    MGM_THROW_ON_ERROR(mgm_read_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle(), VTag->points_.get()))
+
+    return VTag;
     }
 
     bool MetGmVerticalTag::hasNegativePoints() {

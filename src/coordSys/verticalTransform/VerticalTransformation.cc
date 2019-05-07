@@ -37,9 +37,9 @@
 #include "fimex/coordSys/verticalTransform/VerticalConverter.h"
 #include "coordSys/CoordSysUtils.h"
 
-#include <boost/make_shared.hpp>
 #include <iostream>
 #include <map>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -60,7 +60,7 @@ ToVLevelConverter_p VerticalTransformation::getConverter(CDMReader_p reader, int
 ToVLevelConverter_p VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos, CoordinateSystem_cp cs) const
 {
     if (VerticalConverter_p c = getConverter(reader, cs, verticalType))
-        return boost::make_shared<ToVLevelConverterAdapter>(reader, cs, c, unLimDimPos);
+        return std::make_shared<ToVLevelConverterAdapter>(reader, cs, c, unLimDimPos);
     else
         return ToVLevelConverter_p();
 }

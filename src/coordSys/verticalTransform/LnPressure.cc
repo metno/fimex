@@ -27,13 +27,13 @@
 #include "fimex/coordSys/verticalTransform/LnPressure.h"
 #include "fimex/coordSys/verticalTransform/LnPressureToPressureConverter.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
 VerticalConverter_p LnPressure::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    return boost::make_shared<LnPressureToPressureConverter>(reader, cs, lev, p0);
+    return std::make_shared<LnPressureToPressureConverter>(reader, cs, lev, p0);
 }
 
 } // namespace MetNoFimex

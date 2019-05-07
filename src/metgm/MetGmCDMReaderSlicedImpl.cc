@@ -67,17 +67,17 @@
 
 namespace MetNoFimex {
 
-    MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm)
-        : MetGmCDMReaderImpl(cdm)
-    {
-        sourceFileName_ = mgmsource;
-        configId_ = configXML.id();
+MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource, const XMLInput& configXML, const std::shared_ptr<CDM>& cdm)
+    : MetGmCDMReaderImpl(cdm)
+{
+    sourceFileName_ = mgmsource;
+    configId_ = configXML.id();
 
-        try {
-            init(configXML);
-        } catch (std::runtime_error& exp) {
-            throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
-        }
+    try {
+        init(configXML);
+    } catch (std::runtime_error& exp) {
+        throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
+    }
     }
 
     MetGmCDMReaderSlicedImpl::~MetGmCDMReaderSlicedImpl() { }
@@ -236,11 +236,11 @@ namespace MetNoFimex {
 
         pGroup2_ = MetGmGroup2Ptr::createMetGmGroup2PtrForReading(pHandle_);
 
-        boost::shared_ptr<MetGmVerticalTag> prevZTag;
+        std::shared_ptr<MetGmVerticalTag> prevZTag;
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
 
-            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForSlicedReading(pGroup1_, pGroup2_, prevZTag);
+            std::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForSlicedReading(pGroup1_, pGroup2_, prevZTag);
 
             prevZTag = tags->zTag();
 

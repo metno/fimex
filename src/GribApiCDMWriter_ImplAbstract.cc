@@ -84,12 +84,12 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
             FILE* fh = std::fopen(gribTemplate.c_str(), "r");
             if (!fh)
                 throw CDMException("unable to open grib template file '" + gribTemplate + "', error is:" + std::strerror(errno));
-            gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_file(0, fh, &error), grib_handle_delete);
+            gribHandle = std::shared_ptr<grib_handle>(grib_handle_new_from_file(0, fh, &error), grib_handle_delete);
             if (!gribHandle)
                 throw CDMException("unable to create grib handle for template '" + gribTemplate + "'");
         } else {
             const std::string gribTemplate("GRIB" + type2string(gribVersion));
-            gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_samples(0, gribTemplate.c_str()), grib_handle_delete);
+            gribHandle = std::shared_ptr<grib_handle>(grib_handle_new_from_samples(0, gribTemplate.c_str()), grib_handle_delete);
             if (!gribHandle)
                 throw CDMException("unable to create grib handle from samples '" + gribTemplate + "'");
         }

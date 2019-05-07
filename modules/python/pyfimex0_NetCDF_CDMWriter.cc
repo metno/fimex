@@ -28,13 +28,13 @@
 
 #include "pyfimex0_helpers.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <memory>
 
 namespace MetNoFimex {
-typedef boost::shared_ptr<NetCDF_CDMWriter> NetCDF_CDMWriter_p;
+typedef std::shared_ptr<NetCDF_CDMWriter> NetCDF_CDMWriter_p;
 } // namespace MetNoFimex
 
 using namespace MetNoFimex;
@@ -44,7 +44,7 @@ namespace {
 
 NetCDF_CDMWriter_p createNetCDFWriter_4(CDMReader_p reader, const std::string& filename, const std::string& configfile, int version)
 {
-    return boost::make_shared<NetCDF_CDMWriter>(reader, filename, configfile, version);
+    return std::make_shared<NetCDF_CDMWriter>(reader, filename, configfile, version);
 }
 
 NetCDF_CDMWriter_p createNetCDFWriter_3(CDMReader_p reader, const std::string& filename, const std::string& configfile)

@@ -40,7 +40,7 @@
 #include "fimex/Logger.h"
 #include "fimex/vertical_coordinate_transformations.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <vector>
 
@@ -55,7 +55,7 @@ using std::vector;
 VerticalConverter_p HybridSigmaApToPressureConverter::createConverter(CDMReader_p reader, CoordinateSystem_cp cs, const std::string& ap, const std::string& b,
                                                                       const std::string& ps, const std::string& p0)
 {
-    return boost::make_shared<HybridSigmaApToPressureConverter>(reader, cs, ap, b, ps, p0);
+    return std::make_shared<HybridSigmaApToPressureConverter>(reader, cs, ap, b, ps, p0);
 }
 
 std::vector<std::string> HybridSigmaApToPressureConverter::getShape() const

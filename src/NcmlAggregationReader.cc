@@ -25,18 +25,18 @@
  */
 
 #include "NcmlAggregationReader.h"
-#include "fimex/NcmlCDMReader.h"
-#include "fimex/XMLDoc.h"
-#include "fimex/Logger.h"
-#include "fimex/Utils.h"
-#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
+#include "fimex/NcmlCDMReader.h"
+#include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
+#include "fimex_config.h"
+#include <boost/regex.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <boost/make_shared.hpp>
-#include <boost/regex.hpp>
-#include "fimex_config.h"
+#include <memory>
 
 namespace MetNoFimex
 {
@@ -106,7 +106,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             // open <netcdf /> tags recursively
             string id = ncml.id() +":netcdf:" + type2string(i);
             string current = doc->toString(nodesNc->nodeTab[i]);
-            readers_.push_back(make_pair(id, boost::make_shared<NcmlCDMReader>(XMLInputString(current, id))));
+            readers_.push_back(make_pair(id, std::make_shared<NcmlCDMReader>(XMLInputString(current, id))));
         }
 
         aggType_ = getXmlProp(nodes->nodeTab[0], "type");

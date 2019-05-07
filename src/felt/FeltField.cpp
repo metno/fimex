@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -87,15 +87,10 @@ FeltGridDefinitionPtr FeltField::projectionInformation() const
 	int gType = gridType();
 	if ( gType > 999 )
 		gType /= 1000;
-	FeltGridDefinitionPtr ret = FeltGridDefinitionPtr(new FeltGridDefinition(gType,
-														xNum(),
-														yNum(),
-														static_cast<short int>(getGridHeader_()[14]),
-														static_cast<short int>(getGridHeader_()[15]),
-														static_cast<short int>(getGridHeader_()[16]),
-														static_cast<short int>(getGridHeader_()[17]),
-														extraGeometrySpec));
-	return ret;
+        FeltGridDefinitionPtr ret = std::make_shared<FeltGridDefinition>(
+            gType, xNum(), yNum(), static_cast<short int>(getGridHeader_()[14]), static_cast<short int>(getGridHeader_()[15]),
+            static_cast<short int>(getGridHeader_()[16]), static_cast<short int>(getGridHeader_()[17]), extraGeometrySpec);
+        return ret;
 }
 
 

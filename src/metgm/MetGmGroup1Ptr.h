@@ -26,8 +26,8 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <memory>
 
 // standard
 //
@@ -45,9 +45,8 @@
 
         class MetGmGroup1Ptr {
         public:
-
-            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle);
-            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader);
+            static std::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(const std::shared_ptr<MetGmHandlePtr> pMgmHandle);
+            static std::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader);
 
             std::string dataTypeAsString();
             unsigned int dataType()     { return dataType_; }
@@ -62,15 +61,19 @@
             std::string    analysisTimeAsIsoString()                { return boost::posix_time::to_iso_string(analysisTimeAsBoostPosix()); }
             std::string    startTimeAsIsoExtendedString()           { return boost::posix_time::to_iso_extended_string(startTimeAsBoostPosix()); }
             std::string    analysisTimeAsIsoExtendedString()        { return boost::posix_time::to_iso_extended_string(analysisTimeAsBoostPosix()); }
-            const boost::shared_ptr<MetGmHandlePtr>& mgmHandle()    { return this->pHandle_; }
+            const std::shared_ptr<MetGmHandlePtr>& mgmHandle() { return this->pHandle_; }
+
         private:
 
             MetGmGroup1Ptr() { }
-            MetGmGroup1Ptr(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle) : pHandle_(pMgmHandle) { }
+            MetGmGroup1Ptr(const std::shared_ptr<MetGmHandlePtr> pMgmHandle)
+                : pHandle_(pMgmHandle)
+            {
+            }
 
-            boost::shared_ptr<MetGmCommentAttributeParser> parser_;
-            boost::shared_ptr<MetGmTimeTag>                tTag_;
-            const boost::shared_ptr<MetGmHandlePtr>        pHandle_;
+            std::shared_ptr<MetGmCommentAttributeParser> parser_;
+            std::shared_ptr<MetGmTimeTag> tTag_;
+            const std::shared_ptr<MetGmHandlePtr> pHandle_;
 
             std::string  freeText_;
             std::string  modelType_;

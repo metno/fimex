@@ -34,7 +34,7 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -43,17 +43,15 @@ namespace MetNoFimex {
 
     class MetGmGroup3Ptr {
     public:
-
-        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForWriting(const boost::shared_ptr<MetGmHandlePtr> pHandle,
-                                                                                const unsigned short p_id);
-        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pHandle);
+        static std::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForWriting(const std::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id);
+        static std::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForReading(const std::shared_ptr<MetGmHandlePtr> pHandle);
 
         ~MetGmGroup3Ptr();
 
         inline operator mgm_group3* () { return group3_; }
         inline operator const mgm_group3* () const { return group3_; }
 
-        const boost::shared_ptr<MetGmHandlePtr>& mgmHandle();
+        const std::shared_ptr<MetGmHandlePtr>& mgmHandle();
 
         int p_id() const;
         int nz()   const;
@@ -85,14 +83,14 @@ namespace MetNoFimex {
 
         void dump();
 
-        bool eq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const;
-        bool neq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const;
+        bool eq(std::shared_ptr<MetGmGroup3Ptr>& rhs) const;
+        bool neq(std::shared_ptr<MetGmGroup3Ptr>& rhs) const;
 
     private:
-        MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle);
-        MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id);
+        MetGmGroup3Ptr(const std::shared_ptr<MetGmHandlePtr> pHandle);
+        MetGmGroup3Ptr(const std::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id);
 
-        const boost::shared_ptr<MetGmHandlePtr> pHandle_;
+        const std::shared_ptr<MetGmHandlePtr> pHandle_;
 
         mgm_group3* group3_;
     };

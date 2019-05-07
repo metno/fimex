@@ -23,8 +23,10 @@
 
 #ifndef XMLDOC_H_
 #define XMLDOC_H_
-#include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <boost/noncopyable.hpp>
+
+#include <memory>
 #include <string>
 
 //forward decl;
@@ -38,13 +40,12 @@ typedef struct _xmlXPathContext xmlXPathContext;
 typedef xmlNode* xmlNodePtr;
 typedef struct _xmlXPathObject xmlXPathObject;
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-typedef boost::shared_ptr<xmlXPathObject> xmlXPathObject_p;
+typedef std::shared_ptr<xmlXPathObject> xmlXPathObject_p;
 
 class XMLDoc;
-typedef boost::shared_ptr<XMLDoc> XMLDoc_p;
+typedef std::shared_ptr<XMLDoc> XMLDoc_p;
 
 /**
  * @headerfile fimex/XMLDoc.h

@@ -28,7 +28,7 @@
 #include "fimex/vertical_coordinate_transformations.h"
 #include "fimex/CDMException.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -49,7 +49,7 @@ VerticalConverter_p OceanSG1::getAltitudeConverter(CDMReader_p reader, Coordinat
 
 VerticalConverter_p OceanSG1::getDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    return boost::make_shared<OceanSCoordinateGToDepthConverter>(reader, cs, vars, heightConversionFunction);
+    return std::make_shared<OceanSCoordinateGToDepthConverter>(reader, cs, vars, heightConversionFunction);
 }
 
 } // namespace MetNoFimex

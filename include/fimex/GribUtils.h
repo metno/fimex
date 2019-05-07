@@ -28,9 +28,8 @@
 #define GRIBUTILS_H_
 
 #include "fimex/GridDefinition.h"
-#include <boost/shared_ptr.hpp>
-#include <stdexcept>
 
+#include <stdexcept>
 
 // forward declaration
 struct grib_handle;
@@ -53,7 +52,7 @@ namespace MetNoFimex
  * get the orientation of the data
  * @param gh grib-handle
  */
-GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle> gh);
+GridDefinition::Orientation gribGetGridOrientation(std::shared_ptr<grib_handle> gh);
 
 /**
  * convert the stepUnits to seconds, i.e. D (day) = 60*60*24

@@ -45,33 +45,27 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
-// standard
-#include <cstdio>
+#include <memory>
 
 namespace MetNoFimex {
 
     class MetGmGroup5Ptr {
     public:
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader,
-                                                                                const CDMVariable* pVariable,
-                                                                                const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                                const std::string& fillvalue,
-                                                                                const std::string& addOffset = std::string(),
-                                                                                const std::string& scaleFactor = std::string());
+        static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                              const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::string& fillvalue,
+                                                                              const std::string& addOffset = std::string(),
+                                                                              const std::string& scaleFactor = std::string());
 
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                                const boost::shared_ptr<MetGmHDTag>     hdTag);
+        static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                              const std::shared_ptr<MetGmHDTag> hdTag);
 
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                                      const boost::shared_ptr<MetGmHDTag>     hdTag);
+        static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                                    const std::shared_ptr<MetGmHDTag> hdTag);
 
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader,
-                                                                                      const CDMVariable* pVariable,
-                                                                                      const boost::shared_ptr<MetGmGroup3Ptr> gp3
-                                                                                      );
+        static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                                    const std::shared_ptr<MetGmGroup3Ptr> gp3);
 
         void sliceToMetGmLayout(boost::shared_array<float>& slice);
 
@@ -91,14 +85,11 @@ namespace MetNoFimex {
         // reorder z-axis and set fill-values
         void toMetGmLayout();
 
-        explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                const boost::shared_ptr<MetGmHDTag>     hdTag,
-                                const boost::shared_array<float>        data,
-                                const std::string                       fillValue = std::string());
+        explicit MetGmGroup5Ptr(const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::shared_ptr<MetGmHDTag> hdTag, const boost::shared_array<float> data,
+                                const std::string fillValue = std::string());
 
-
-        const boost::shared_ptr<MetGmGroup3Ptr> pGp3_;
-        const boost::shared_ptr<MetGmHDTag>     hdTag_;
+        const std::shared_ptr<MetGmGroup3Ptr> pGp3_;
+        const std::shared_ptr<MetGmHDTag> hdTag_;
 
         long sOffset_;
         long eOffset_;
@@ -106,7 +97,6 @@ namespace MetNoFimex {
         std::string                   fillValue_;
         std::string                   units_;
     };
-
 
 }
 

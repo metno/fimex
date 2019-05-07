@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
         return;
     const string fileName = pathTestExtra("flth00.dat");
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
-    boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
+    std::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
     extract->removeVariable("relative_humidity");
     try {
         extract->getCDM().getVariable("relative_humidity");
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(true);
 
     // test chunked reading
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceTime(startTime, endTime); // 12 hours 9..20
     std::set<size_t> slices;
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     NetCDF_CDMWriter(extract, "test_extract_2.nc");
     BOOST_CHECK(true);
 
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceTime(startTime, endTime); // 12 hours 9..20
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
     extract->reduceDimension("y", slices);
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(true);
 
     // slicebuilder along x
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceTime(startTime, endTime); // 12 hours 9..20
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
     extract->reduceDimension("y", slices);
@@ -154,19 +154,17 @@ BOOST_AUTO_TEST_CASE( test_extract )
     }
     BOOST_CHECK(true);
 
-
-
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time));
     BOOST_CHECK(extract->getData("time")->size() == 61);
 
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     // reduce sigma from 4 to 2
     extract->reduceVerticalAxis("", .5, .85);
     BOOST_CHECK(extract->getData("sigma")->size() == 2);
 
     // reduce time to 0 and sigma to 0
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceVerticalAxis("", -0.1, -0.05);
     extract->reduceTime(FimexTime(2006,1,1), FimexTime(2006,1,2)); // time out of range
     BOOST_CHECK(extract->getData("time")->size() == 0);
@@ -174,7 +172,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(true);
 
     // test selectVariable
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     std::set<std::string> variables;
     variables.insert("time");
     variables.insert("altitude");
@@ -188,7 +186,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
 
     // test reduceLatLonBoundingBox
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceDimension("time", 0, 1);
     extract->reduceLatLonBoundingBox(55.,65., 5, 15);
     //cerr << "sizes: " << extract->getData("x")->size() << " " << extract->getData("y")->size() << endl;
@@ -196,7 +194,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(extract->getData("y")->size() == 24);
 
     // test selection of non existing selectVariable
-    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     variables.insert("not_there");
     extract->selectVariables(variables);
     BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));

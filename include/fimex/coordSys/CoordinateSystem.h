@@ -28,12 +28,12 @@
 #define COORDINATESYSTEM_H_
 
 #include <functional>
-#include <vector>
+#include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <iosfwd>
+#include <vector>
 
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/coordSys/CoordSysDecl.h"

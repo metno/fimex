@@ -37,8 +37,8 @@
 #include "log4cpp/BasicLayout.hh"
 #include "log4cpp/Priority.hh"
 
-#include <boost/shared_ptr.hpp>
 #include "log4cpp/Category.hh"
+#include <memory>
 
 namespace MetNoFimex {
 

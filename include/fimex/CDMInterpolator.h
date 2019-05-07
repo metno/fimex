@@ -85,7 +85,7 @@ public:
       {size_t nChanged; mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);}
 };
 
-typedef boost::shared_ptr<InterpolatorProcess2d> InterpolatorProcess2d_p;
+typedef std::shared_ptr<InterpolatorProcess2d> InterpolatorProcess2d_p;
 
 /**
  * This class is responsible for horizontal reprojections and selection
@@ -309,7 +309,7 @@ extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData,
  */
 extern DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue);
 
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
+typedef std::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 
 } // namespace MetNoFimex
 

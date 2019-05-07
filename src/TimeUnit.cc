@@ -195,10 +195,11 @@ void TimeUnit::init(const std::string& timeUnitString)
         units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
         ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-        pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
+        pUnit = std::shared_ptr<void>(
+            reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
         handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
 #else
-        pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
+        pUnit = std::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
         utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
 #endif
     }
@@ -233,11 +234,9 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
     int year, month, mday, hour, minute;
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-    boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second"),
-                                        ut_free);
+    std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit seconds");
-    boost::shared_ptr<cv_converter> conv(ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime.get()),
-                                         cv_free);
+    std::shared_ptr<cv_converter> conv(ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime.get()), cv_free);
     handleUdUnitError(ut_get_status(), "converting double to calendar");
     double encodedTime = cv_convert_double(conv.get(), unitTime);
     double res, sec;
@@ -263,11 +262,9 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
     int year, month, mday, hour, minute;
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-    boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second"),
-                                        ut_free);
+    std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit second");
-    boost::shared_ptr<cv_converter> conv(ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime.get()),
-                                         cv_free);
+    std::shared_ptr<cv_converter> conv(ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime.get()), cv_free);
     handleUdUnitError(ut_get_status(), "converting double to calendar");
     double encodedTime = cv_convert_double(conv.get(), unitTime);
     double res, sec;
@@ -287,12 +284,10 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
     double unitTime;
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-    boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"),
-                                        ut_free);
+    std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     double encodedTime = ut_encode_time(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second);
     handleUdUnitError(ut_get_status(), "encoding fimexTime");
-    boost::shared_ptr<cv_converter> conv(ut_get_converter(baseTime.get(), reinterpret_cast<ut_unit*>(pUnit.get())),
-                                         cv_free);
+    std::shared_ptr<cv_converter> conv(ut_get_converter(baseTime.get(), reinterpret_cast<ut_unit*>(pUnit.get())), cv_free);
     handleUdUnitError(ut_get_status(), "converter calendar to double");
     unitTime = cv_convert_double(conv.get(), encodedTime);
     handleUdUnitError(ut_get_status(), "converting calendar to double");
@@ -311,13 +306,11 @@ double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const
     float seconds = pTimeDur.seconds() + (pTimeDur.fractional_seconds() * 1. / boost::posix_time::time_duration::ticks_per_second());
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-    boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"),
-                                        ut_free);
+    std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit second");
     double encodedTime = ut_encode_time(pDate.year(), pDate.month(), pDate.day(), pTimeDur.hours(), pTimeDur.minutes(), seconds);
     handleUdUnitError(ut_get_status(), "encoding fimexTime");
-    boost::shared_ptr<cv_converter> conv(ut_get_converter(baseTime.get(), reinterpret_cast<ut_unit*>(pUnit.get())),
-                                         cv_free);
+    std::shared_ptr<cv_converter> conv(ut_get_converter(baseTime.get(), reinterpret_cast<ut_unit*>(pUnit.get())), cv_free);
     handleUdUnitError(ut_get_status(), "converter calendar to double");
     unitTime = cv_convert_double(conv.get(), encodedTime);
     handleUdUnitError(ut_get_status(), "converting calendar to double");

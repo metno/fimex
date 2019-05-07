@@ -50,16 +50,16 @@ void register_ptr_from_python()
 {
 #if BOOST_VERSION >= 106300
     // boost 1.63 has an extra template parameter specifying the
-    // shared_ptr type (std::shared_ptr or boost::shared_ptr) and
+    // shared_ptr type (std::shared_ptr or std::shared_ptr) and
     // this template parameter has no default value
-    bp::converter::shared_ptr_from_python<T, boost::shared_ptr>();
+    bp::converter::shared_ptr_from_python<T, std::shared_ptr>();
 #else
     bp::converter::shared_ptr_from_python<T>();
 #endif
 }
 
-typedef boost::shared_ptr<CoordinateAxis> CoordinateAxis_p;
-typedef boost::shared_ptr<const CoordinateAxis> CoordinateAxis_cp;
+typedef std::shared_ptr<CoordinateAxis> CoordinateAxis_p;
+typedef std::shared_ptr<const CoordinateAxis> CoordinateAxis_cp;
 
 bp::list listCoordinateSystems1(CDMReader_p reader)
 {

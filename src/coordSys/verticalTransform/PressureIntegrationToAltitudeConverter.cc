@@ -42,7 +42,7 @@
 
 #include "fimex/ArrayLoop.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -78,8 +78,8 @@ VerticalConverter_p PressureIntegrationToAltitudeConverter::createConverter(CDMR
         LOG4FIMEX(logger, Logger::DEBUG, "no surface_air_pressure or surface_geopotential");
         return VerticalConverter_p();
     }
-    return boost::make_shared<PressureIntegrationToAltitudeConverter>(reader, cs, pressure,
-        air_temperature, specific_humidity, surface_air_pressure, surface_geopotential);
+    return std::make_shared<PressureIntegrationToAltitudeConverter>(reader, cs, pressure, air_temperature, specific_humidity, surface_air_pressure,
+                                                                    surface_geopotential);
 }
 
 PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure,

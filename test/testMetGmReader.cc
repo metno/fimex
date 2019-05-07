@@ -28,7 +28,7 @@
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 #include "fimex/MetGmCDMReader.h"

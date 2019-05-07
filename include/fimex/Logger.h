@@ -24,10 +24,10 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-#include <boost/shared_ptr.hpp>
 #include <list>
-#include <string>
+#include <memory>
 #include <sstream>
+#include <string>
 
 namespace MetNoFimex {
 
@@ -162,7 +162,7 @@ extern void defaultLogLevel(Logger::LogLevel);
         buffer << message; \
         logger->forcedLog(level, buffer.str(), __FILE__, __LINE__);}}
 
-typedef boost::shared_ptr<Logger> Logger_p;
+typedef std::shared_ptr<Logger> Logger_p;
 
 /**
  * Retrieve a logger for Fimex. It will use loggers in the following order, skipping

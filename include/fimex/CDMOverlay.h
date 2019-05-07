@@ -62,7 +62,7 @@ private:
     std::unique_ptr<CDMOverlayPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMOverlay> CDMOverlay_p;
+typedef std::shared_ptr<CDMOverlay> CDMOverlay_p;
 
 } // namespace MetNoFimex
 

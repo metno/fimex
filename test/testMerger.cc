@@ -32,7 +32,7 @@
 #include "fimex/CDMMerger.h"
 #include "fimex/Data.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 using namespace std;
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( test_merger )
     CDMReader_p readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
         readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
 
-    boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, readerO);
+    std::shared_ptr<CDMMerger> merger = std::make_shared<CDMMerger>(readerI, readerO);
     merger->setTargetGridFromInner();
 
     DataPtr sliceM = merger->getDataSlice("ga_2t_1", 0);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_merge_target )
     CDMReader_p readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
         readerT = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameT);
 
-    boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerB, readerT);
+    std::shared_ptr<CDMMerger> merger = std::make_shared<CDMMerger>(readerB, readerT);
     merger->setTargetGrid("+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs",
             "-1192800,-1192000,...,-1112800", "-1304000,-1303200,...,-1224000", "m", "m", "double", "double");
 

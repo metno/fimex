@@ -40,7 +40,7 @@
 
 #include "fimex/ArrayLoop.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <map>
 #include <vector>
@@ -86,7 +86,7 @@ VerticalConverter_p AltitudeHeightConverter::createConverter(CDMReader_p reader,
     }
 
     LOG4FIMEX(logger, Logger::INFO, "using altitude " << topoVar << " to retrieve height");
-    return boost::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
+    return std::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
 }
 
 AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight,

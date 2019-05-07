@@ -73,7 +73,7 @@ public:
     virtual std::vector<std::string> getValidityMinShape() const = 0;
 };
 
-typedef boost::shared_ptr<VerticalConverter> VerticalConverter_p;
+typedef std::shared_ptr<VerticalConverter> VerticalConverter_p;
 
 class BasicVerticalConverter : public VerticalConverter {
 public:

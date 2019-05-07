@@ -21,41 +21,39 @@
  * USA.
  */
 
+#include "fimex/CDM.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
+#include "fimex/CDMExtractor.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMInterpolator.h"
+#include "fimex/CDMMerger.h"
+#include "fimex/CDMPressureConversions.h"
+#include "fimex/CDMProcessor.h"
+#include "fimex/CDMQualityExtractor.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMReaderUtils.h"
+#include "fimex/CDMTimeInterpolator.h"
+#include "fimex/CDMVerticalInterpolator.h"
+#include "fimex/CDMconstants.h"
+#include "fimex/FillWriter.h"
+#include "fimex/Logger.h"
+#include "fimex/NcmlCDMReader.h"
+#include "fimex/Null_CDMWriter.h"
+#include "fimex/ThreadPool.h"
+#include "fimex/TimeUnit.h"
+#include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex_config.h"
-#include <iostream>
-#include <fstream>
-#include <cctype>
-#include <numeric>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/version.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/shared_ptr.hpp>
-#include "fimex/CDMReader.h"
-#include "fimex/CDM.h"
-#include "fimex/CDMconstants.h"
-#include "fimex/CDMExtractor.h"
-#include "fimex/CDMQualityExtractor.h"
-#include "fimex/CDMInterpolator.h"
-#include "fimex/CDMTimeInterpolator.h"
-#include "fimex/CDMVerticalInterpolator.h"
-#include "fimex/CDMPressureConversions.h"
-#include "fimex/CDMProcessor.h"
-#include "fimex/CDMMerger.h"
-#include "fimex/CDMBorderSmoothing_Linear.h"
-#include "fimex/FillWriter.h"
-#include "fimex/Null_CDMWriter.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/Logger.h"
-#include "fimex/TimeUnit.h"
-#include "fimex/ThreadPool.h"
-#include "fimex/Utils.h"
-#include "fimex/CDMReaderUtils.h"
-#include "fimex/CDMconstants.h"
-#include "fimex/CDMFileReaderFactory.h"
-#include "fimex/NcmlCDMReader.h"
+#include <boost/version.hpp>
+#include <cctype>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <numeric>
 #ifdef HAVE_LOG4CPP
 #include "log4cpp/PropertyConfigurator.hh"
 #endif
@@ -408,7 +406,7 @@ CDMReader_p getCDMProcessor(const po::variables_map& vm, CDMReader_p dataReader)
         LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
         return dataReader;
     }
-    boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(dataReader));
+    std::shared_ptr<CDMProcessor> processor(new CDMProcessor(dataReader));
     if (vm.count("process.deaccumulateVariable")) {
         vector<string> vars = vm["process.deaccumulateVariable"].as<vector<string> >();
         for (size_t i = 0; i < vars.size(); i++) {
@@ -473,7 +471,7 @@ CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
         LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
         return dataReader;
     }
-    boost::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
+    std::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
     if (vm.count("extract.reduceDimension.name")) {
         vector<string> vars = vm["extract.reduceDimension.name"].as<vector<string> >();
         vector<int> startPos = getOption< vector<int> >("extract.reduceDimension.start", vm);
@@ -574,7 +572,7 @@ CDMReader_p getCDMQualityExtractor(const string& version, const po::variables_ma
     const string config = getConfig(io, vm);
     if (autoConf != "" || config != "") {
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
-        dataReader = boost::make_shared<CDMQualityExtractor>(dataReader, autoConf, config);
+        dataReader = std::make_shared<CDMQualityExtractor>(dataReader, autoConf, config);
     }
     printReaderStatements(io, vm, dataReader);
     return dataReader;
@@ -587,7 +585,7 @@ CDMReader_p getCDMTimeInterpolator(const po::variables_map& vm, CDMReader_p data
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << timeSpec);
-    boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(dataReader));
+    std::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(dataReader));
     timeInterpolator->changeTimeAxis(timeSpec);
     printReaderStatements("timeInterpolate", vm, timeInterpolator);
 
@@ -599,7 +597,7 @@ CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p 
     vector<string> operations;
     if (getOption("verticalInterpolate.dataConversion", vm, operations)) {
         try {
-            dataReader = boost::make_shared<CDMPressureConversions>(dataReader, operations);
+            dataReader = std::make_shared<CDMPressureConversions>(dataReader, operations);
         } catch (CDMException& ex) {
             LOG4FIMEX(logger, Logger::FATAL, "invalid verticalInterpolate.dataConversion: " + join(operations.begin(), operations.end(), ",") + " " + ex.what());
             exit(1);
@@ -610,7 +608,7 @@ CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p 
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
-    boost::shared_ptr<CDMVerticalInterpolator> verticalReader = boost::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod);
+    std::shared_ptr<CDMVerticalInterpolator> verticalReader = std::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod);
     string template_var;
     if (getOption("verticalInterpolate.templateVar", vm, template_var)) {
         LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate to template var");
@@ -639,7 +637,7 @@ CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p 
     return verticalReader;
 }
 
-boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
+std::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
 {
     boost::smatch what;
      if (boost::regex_match(procString, what, boost::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
@@ -647,20 +645,20 @@ boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, 
          double cor = string2type<double>(what[2]);
          size_t maxLoop = string2type<size_t>(what[3]);
          LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
-         return boost::make_shared<InterpolatorFill2d>(critx,cor,maxLoop);
+         return std::make_shared<InterpolatorFill2d>(critx, cor, maxLoop);
      } else if (boost::regex_match(procString, what, boost::regex("\\s*creepfill2d\\((.+)\\).*"))) {
          vector<string> vals = tokenize(what[1], ",");
          if (vals.size() == 2) {
              unsigned short repeat = string2type<unsigned short>(vals.at(0));
              char setWeight = string2type<char>(vals.at(1));
              LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfill2d("<<repeat<<","<<setWeight<<")");
-             return boost::make_shared<InterpolatorCreepFill2d>(repeat, setWeight);
+             return std::make_shared<InterpolatorCreepFill2d>(repeat, setWeight);
          } else if (vals.size() == 3) {
              unsigned short repeat = string2type<unsigned short>(vals.at(0));
              char setWeight = string2type<char>(vals.at(1));
              float defVal = string2type<float>(vals.at(2));
              LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfillval2d("<<repeat<<","<<setWeight<<","<<defVal<<")");
-             return boost::make_shared<InterpolatorCreepFillVal2d>(repeat, setWeight,defVal);
+             return std::make_shared<InterpolatorCreepFillVal2d>(repeat, setWeight, defVal);
          } else {
              throw CDMException("creepfill requires two or three arguments, got " + what[1]);
          }
@@ -670,7 +668,7 @@ boost::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, 
 
 CDMInterpolator_p createCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
 {
-    CDMInterpolator_p interpolator = boost::make_shared<CDMInterpolator>(dataReader);
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(dataReader);
     string value;
     if (getOption("interpolate.latitudeName", vm, value)) {
         interpolator->setLatitudeName(value);
@@ -778,8 +776,8 @@ CDMReader_p getNcmlCDMReader(const po::variables_map& vm, CDMReader_p dataReader
 {
     const string config = getConfig("ncml", vm);
     if (!config.empty()) {
-      dataReader = boost::make_shared<NcmlCDMReader>(dataReader, XMLInputFile(config));
-      printReaderStatements("ncml", vm, dataReader);
+        dataReader = std::make_shared<NcmlCDMReader>(dataReader, XMLInputFile(config));
+        printReaderStatements("ncml", vm, dataReader);
     }
     return dataReader;
 }
@@ -805,7 +803,7 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
         }
     }
 
-    boost::shared_ptr<CDMMerger> merger = boost::shared_ptr<CDMMerger>(new CDMMerger(readerI, dataReader));
+    std::shared_ptr<CDMMerger> merger = std::shared_ptr<CDMMerger>(new CDMMerger(readerI, dataReader));
 
     if( vm.count("merge.smoothing") ) {
         const string& v = vm["merge.smoothing"].as<string>();

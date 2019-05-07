@@ -24,9 +24,8 @@
 #ifndef TIMEUNIT_H_
 #define TIMEUNIT_H_
 
-#include "boost/shared_ptr.hpp"
-#include <iosfwd>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iosfwd>
 
 namespace MetNoFimex
 {
@@ -135,7 +134,7 @@ FimexTime string2FimexTime(const std::string& str);
  */
 class TimeUnit
 {
-    boost::shared_ptr<void> pUnit; // pointer to unit implementation
+    std::shared_ptr<void> pUnit; // pointer to unit implementation
     double epochOffset;
     double epochSlope;
 public:

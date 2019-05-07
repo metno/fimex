@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
     //defaultLogLevel(Logger::DEBUG);
 
     Felt_File2 ff(pathTestExtra("flth00.dat"), pathTest("diana.setup"));
-    vector<boost::shared_ptr<Felt_Array2> > vec = ff.listFeltArrays();
+    vector<std::shared_ptr<Felt_Array2>> vec = ff.listFeltArrays();
     Felt_Array2& fa = *(ff.getFeltArray("u10m").get());
     vector<LevelPair> levels = fa.getLevelPairs();
     BOOST_CHECK_EQUAL((fa.getX() * fa.getY()), 44884);

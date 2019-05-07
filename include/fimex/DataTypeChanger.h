@@ -23,9 +23,9 @@
 
 #ifndef DATATYPECHANGER_H_
 #define DATATYPECHANGER_H_
+
 #include "fimex/DataDecl.h"
 #include "fimex/CDMDataType.h"
-#include "boost/shared_ptr.hpp"
 
 namespace MetNoFimex
 {

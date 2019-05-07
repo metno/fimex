@@ -26,7 +26,7 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // standard
 //
@@ -54,7 +54,7 @@ namespace MetNoFimex {
 
     class MetGmGroup2Ptr {
     public:
-        static boost::shared_ptr<MetGmGroup2Ptr> createMetGmGroup2PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pMgmHandle);
+        static std::shared_ptr<MetGmGroup2Ptr> createMetGmGroup2PtrForReading(std::shared_ptr<MetGmHandlePtr>& pMgmHandle);
 
         int totalnp()  { return totalNumberOfParameters_; }
         int ndp() { return numberOfDistinctParameters_; }
@@ -62,7 +62,7 @@ namespace MetNoFimex {
 
         MetGmGroup2Ptr() : totalNumberOfParameters_(-1), numberOfDistinctParameters_(-1) {}
 
-        boost::shared_ptr<MetGmHandlePtr> pHandle_;
+        std::shared_ptr<MetGmHandlePtr> pHandle_;
         int totalNumberOfParameters_;
         int numberOfDistinctParameters_;
 

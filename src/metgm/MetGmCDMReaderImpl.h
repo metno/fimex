@@ -44,14 +44,14 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/member.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/multi_index/composite_key.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <memory>
 
 // standard
 //
@@ -70,8 +70,7 @@ namespace MetNoFimex {
     class MetGmCDMReaderImpl : public CDMReader
     {
     public:
-
-        explicit MetGmCDMReaderImpl(const std::string& metgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm);
+        explicit MetGmCDMReaderImpl(const std::string& metgmsource, const XMLInput& configXML, const std::shared_ptr<CDM>& cdm);
         ~MetGmCDMReaderImpl();
 
         void init(const XMLInput& configXML);
@@ -84,8 +83,7 @@ namespace MetNoFimex {
         virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
     protected:
-
-        explicit MetGmCDMReaderImpl(const boost::shared_ptr<CDM>& cdm);
+        explicit MetGmCDMReaderImpl(const std::shared_ptr<CDM>& cdm);
 
         virtual void configure(const XMLDoc_p& doc);
         virtual void parseMgmFile(const std::string& mgmFileName);
@@ -101,9 +99,9 @@ namespace MetNoFimex {
 
         std::string                            sourceFileName_;
         std::string                            configId_;
-        boost::shared_ptr<MetGmHandlePtr>      pHandle_;
-        boost::shared_ptr<MetGmGroup1Ptr>      pGroup1_;
-        boost::shared_ptr<MetGmGroup2Ptr>      pGroup2_;
+        std::shared_ptr<MetGmHandlePtr> pHandle_;
+        std::shared_ptr<MetGmGroup1Ptr> pGroup1_;
+        std::shared_ptr<MetGmGroup2Ptr> pGroup2_;
 
         xml_configuration xmlConfiguration_;
         cdm_configuration cdmConfiguration_;

@@ -55,10 +55,10 @@ class ProradXMLCDMReader::Impl
 {
 public:
     Impl()
-        : meta(boost::shared_ptr<td_radarprod_meta_st>(new td_radarprod_meta_st, free_td_radarprod_meta_st))
+        : meta(std::shared_ptr<td_radarprod_meta_st>(new td_radarprod_meta_st, free_td_radarprod_meta_st))
     {
     }
-    boost::shared_ptr<td_radarprod_meta_st> meta;
+    std::shared_ptr<td_radarprod_meta_st> meta;
     std::string varNm;
     std::string xname;
     std::string yname;

@@ -36,20 +36,17 @@
     CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
 #endif
 
-
-
-#include <string>
-#include <vector>
-#include <map>
-#include <boost/shared_ptr.hpp>
-#include "fimex/CDMReader.h"
+#include "MutexLock.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Felt_Types.h"
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/XMLInput.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include "MutexLock.h"
-
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace MetNoFelt {
     class Felt_File2; // forward decl.
@@ -72,7 +69,7 @@ public:
 private:
     const std::string filename;
     std::string configId;
-    boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
+    std::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
     MutexType mutex_;
     CDMDimension xDim;
     CDMDimension yDim;
@@ -86,7 +83,7 @@ private:
      *
      * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
      */
-    std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
+    std::map<std::string, std::shared_ptr<ReplaceStringObject>> templateReplacementAttributes;
     void init(const XMLInput& configInput);
     // the following methods are parts of the init function and should not
     // be called from elsewhere
@@ -105,7 +102,8 @@ private:
      * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
      * @param templateReplacements replacements for template parameters
      */
-    void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
+    void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString,
+                                              const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements);
     std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath);
     void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
     void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const std::map<short, CDMDimension>& levelDims);

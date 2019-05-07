@@ -32,27 +32,27 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmGroup2Ptr> MetGmGroup2Ptr::createMetGmGroup2PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pMgmHandle)
-    {
-        boost::shared_ptr<MetGmGroup2Ptr> gp2 = boost::shared_ptr<MetGmGroup2Ptr>(new MetGmGroup2Ptr);
+std::shared_ptr<MetGmGroup2Ptr> MetGmGroup2Ptr::createMetGmGroup2PtrForReading(std::shared_ptr<MetGmHandlePtr>& pMgmHandle)
+{
+    std::shared_ptr<MetGmGroup2Ptr> gp2 = std::shared_ptr<MetGmGroup2Ptr>(new MetGmGroup2Ptr);
 
-        gp2->pHandle_ = pMgmHandle;
-        gp2->totalNumberOfParameters_ = mgm_get_number_of_params(*pMgmHandle);
+    gp2->pHandle_ = pMgmHandle;
+    gp2->totalNumberOfParameters_ = mgm_get_number_of_params(*pMgmHandle);
 
-        if(*pMgmHandle->version() == MGM_Edition2) {
-            gp2->numberOfDistinctParameters_ = mgm_get_number_of_dist_params(*pMgmHandle);
-            for(int index = 0; index < gp2->numberOfDistinctParameters_; ++index) {
-                Group2Entry entry;
+    if (*pMgmHandle->version() == MGM_Edition2) {
+        gp2->numberOfDistinctParameters_ = mgm_get_number_of_dist_params(*pMgmHandle);
+        for (int index = 0; index < gp2->numberOfDistinctParameters_; ++index) {
+            Group2Entry entry;
 
-                entry.pid_ = mgm_get_param_id (*pMgmHandle, index);
-                entry.repeated_ = mgm_get_ndpr (*pMgmHandle, index);
-                entry.hd_ = mgm_get_hd (*pMgmHandle, index);
+            entry.pid_ = mgm_get_param_id(*pMgmHandle, index);
+            entry.repeated_ = mgm_get_ndpr(*pMgmHandle, index);
+            entry.hd_ = mgm_get_hd(*pMgmHandle, index);
 
-                gp2->entries.insert(entry);
-            }
+            gp2->entries.insert(entry);
         }
+    }
 
-        return gp2;
+    return gp2;
     }
 
 }

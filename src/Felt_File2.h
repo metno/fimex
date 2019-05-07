@@ -24,17 +24,17 @@
 #ifndef FELT_FILE2_H_
 #define FELT_FILE2_H_
 
-#include <map>
-#include <vector>
-#include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
+#include "FeltParameters.h"
+#include "Felt_File_Error.h"
+#include "felt/FeltTypes.h"
 #include "fimex/Data.h"
 #include "fimex/Felt_Types.h"
-#include "Felt_File_Error.h"
-#include "FeltParameters.h"
 #include "fimex/Logger.h"
-#include "felt/FeltTypes.h"
+#include <boost/shared_array.hpp>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -80,7 +80,7 @@ public:
     /**
      * \param compName parameter name of felt file as named in diana setup
      */
-    const boost::shared_ptr<Felt_Array2> getFeltArray(const std::string& compName) const;
+    const std::shared_ptr<Felt_Array2> getFeltArray(const std::string& compName) const;
     /// retrieve a data slice
     /**
      * retrieve the data prescaled (if float or double) and replaced with the new fill value
@@ -89,12 +89,12 @@ public:
      * @param time time of slice
      * @param level level of slice
      */
-    MetNoFimex::DataPtr getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
+    MetNoFimex::DataPtr getScaledDataSlice(std::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
 
     /**
      *  retrieve all felt arrays
      */
-    std::vector<boost::shared_ptr<Felt_Array2> > listFeltArrays() const;
+    std::vector<std::shared_ptr<Felt_Array2>> listFeltArrays() const;
 
     /**
      *  Z-axis types and values
@@ -118,33 +118,33 @@ public:
      * @return a unique reference time
      * @throw exception if no unique reference time exists
      */
-    boost::shared_ptr<boost::posix_time::ptime> getUniqueReferenceTime() const;
+    std::shared_ptr<boost::posix_time::ptime> getUniqueReferenceTime() const;
     /// get size in x direction
     int getNX() const;
     /// get size in y direction
     int getNY() const;
     /// get the values of the x axis
-    boost::shared_ptr<MetNoFimex::Data> getXData() const;
+    std::shared_ptr<MetNoFimex::Data> getXData() const;
     /// get the values of the y axis
-    boost::shared_ptr<MetNoFimex::Data> getYData() const;
+    std::shared_ptr<MetNoFimex::Data> getYData() const;
 
     /**
      *  assumes one set of grid-parameters for the whole file, returns parameter between 1 and 6, without extra definition
      */
     int getGridType() const;
     /// assumes one set of grid-parameters for the whole file
-    boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
+    std::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
 
 private:
     std::string filename_;
     std::string globalParameterOptions_;
-    boost::shared_ptr<felt::FeltFile> feltFile_;
-    std::map<std::string, boost::shared_ptr<Felt_Array2> > feltArrayMap_;
+    std::shared_ptr<felt::FeltFile> feltFile_;
+    std::map<std::string, std::shared_ptr<Felt_Array2>> feltArrayMap_;
     FeltParameters feltParameters_;
     std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
     boost::array<float, 6> gridParameterDelta_; // allowed deviation between two grids
 
-    bool findOrCreateFeltArray(const boost::shared_ptr<felt::FeltField>);
+    bool findOrCreateFeltArray(const std::shared_ptr<felt::FeltField>);
     /// add processing options by strings, must be set before setOptions
     void setOptions(const std::map<std::string, std::string>& options);
     /// actually read the data with the parameters from the felt_file, should be called from constructors

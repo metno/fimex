@@ -67,7 +67,7 @@ public:
         size_t sizeX_, sizeY_;
     };
 
-    typedef boost::shared_ptr<Smoothing> Smoothing_p;
+    typedef std::shared_ptr<Smoothing> Smoothing_p;
 
     //! A factory for creating smoothing function objects.
     class SmoothingFactory {
@@ -76,7 +76,7 @@ public:
         virtual Smoothing_p operator()(const std::string& varName) = 0;
     };
 
-    typedef boost::shared_ptr<SmoothingFactory> SmoothingFactory_p;
+    typedef std::shared_ptr<SmoothingFactory> SmoothingFactory_p;
 
 public:
     //! Smooth transition to 'outer' from inner's data. Returns data on inner grid.
@@ -97,7 +97,7 @@ private:
     std::unique_ptr<CDMBorderSmoothingPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothing_p;
+typedef std::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothing_p;
 
 } // namespace MetNoFimex
 

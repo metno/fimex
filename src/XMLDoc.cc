@@ -93,7 +93,7 @@ std::string XMLDoc::toString(const xmlNodePtr node)
 
 XMLDoc_p XMLDoc::fromFile(const std::string& filename)
 {
-    return XMLDoc_p(new XMLDoc(filename));
+    return std::make_shared<XMLDoc>(filename);
 }
 
 XMLDoc_p XMLDoc::fromString(const std::string& buffer, const std::string& url)
@@ -150,7 +150,7 @@ xmlXPathObject_p XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr nod
  * @return a string of the attribute, "" if attribute doesn't exist
  */
 std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
-    boost::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar *>(attrName.c_str())), xmlFree);
+    std::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar*>(attrName.c_str())), xmlFree);
     std::string retVal;
     if (xChar.get() != 0) {
         retVal = std::string(reinterpret_cast<char *>(xChar.get()));
@@ -164,7 +164,7 @@ std::string getXmlName(const xmlNodePtr node) {
 std::string getXmlContent(const xmlNodePtr node)
 {
     if (node == 0) return "";
-    boost::shared_ptr<xmlChar> xChar(xmlNodeGetContent(node), xmlFree);
+    std::shared_ptr<xmlChar> xChar(xmlNodeGetContent(node), xmlFree);
     std::string retVal;
     if (xChar.get() != 0) {
         retVal = std::string(reinterpret_cast<char *>(xChar.get()));

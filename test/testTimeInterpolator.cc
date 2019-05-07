@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     {
         const string fileName = pathTestExtra("flth00.dat");
         CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, fileName, pathShareEtc("felt2nc_variables.xml"));
-        boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
+        std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
         BOOST_CHECK_EQUAL(times->size(), 5);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     {
         const string fileName = pathTestExtra("flth00.dat");
         CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, fileName, pathShareEtc("felt2nc_variables.xml"));
-        boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
+        std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
         BOOST_CHECK_EQUAL(times->size(), 21);

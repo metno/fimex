@@ -38,28 +38,28 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForReading(const std::string& source)
-    {
-        boost::shared_ptr<MetGmHandlePtr> pHandle = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
+std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForReading(const std::string& source)
+{
+    std::shared_ptr<MetGmHandlePtr> pHandle = std::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
 
-        pHandle->pFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForReading((source));
-        if(!(pHandle->pFileHandle_.get()))
-            throw CDMException(std::string("error opening metgm file handle for: ") + source);
+    pHandle->pFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForReading((source));
+    if (!(pHandle->pFileHandle_.get()))
+        throw CDMException(std::string("error opening metgm file handle for: ") + source);
 
-        MGM_THROW_ON_ERROR(mgm_read_header(*pHandle->pFileHandle_, *pHandle));
+    MGM_THROW_ON_ERROR(mgm_read_header(*pHandle->pFileHandle_, *pHandle));
 
-        pHandle->pVersion_ = MetGmVersion::createMetGmVersion(mgm_get_version(*pHandle));
+    pHandle->pVersion_ = MetGmVersion::createMetGmVersion(mgm_get_version(*pHandle));
 
-        return pHandle;
+    return pHandle;
     }
 
-    boost::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForWriting(boost::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
-                                                                                  boost::shared_ptr<MetGmVersion>& pVersion)
+    std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForWriting(std::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
+                                                                                std::shared_ptr<MetGmVersion>& pVersion)
     {
         assert(pFileHandle.get());
         assert(pVersion.get());
 
-        boost::shared_ptr<MetGmHandlePtr> pHandle = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
+        std::shared_ptr<MetGmHandlePtr> pHandle = std::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
 
         assert(pHandle.get());
 

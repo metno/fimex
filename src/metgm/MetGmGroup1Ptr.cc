@@ -45,10 +45,9 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle)
+std::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForReading(const std::shared_ptr<MetGmHandlePtr> pMgmHandle)
 {
-    boost::shared_ptr<MetGmGroup1Ptr> gp1 =
-            boost::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr(pMgmHandle));
+    std::shared_ptr<MetGmGroup1Ptr> gp1 = std::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr(pMgmHandle));
 
     gp1->analysis_t     = mgm_get_analysis_date_time(*pMgmHandle);
     gp1->start_t        = mgm_get_start_date_time(*pMgmHandle);
@@ -60,10 +59,9 @@ boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForReading
     return gp1;
 }
 
-boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader)
+std::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(const CDMReader_p pCdmReader)
 {
-    boost::shared_ptr<MetGmGroup1Ptr> gp1 =
-            boost::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr);
+    std::shared_ptr<MetGmGroup1Ptr> gp1 = std::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr);
 
     const CDM& cdmRef = pCdmReader->getCDM();
 

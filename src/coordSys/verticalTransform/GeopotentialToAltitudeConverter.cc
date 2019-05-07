@@ -34,7 +34,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -44,7 +44,7 @@ VerticalConverter_p GeopotentialToAltitudeConverter::createConverter(CDMReader_p
     const std::string geopotential_height = findVariableWithCS(reader->getCDM(), cs, "geopotential_height");
     if (geopotential_height.empty())
         return VerticalConverter_p();
-    return boost::make_shared<GeopotentialToAltitudeConverter>(reader, cs, geopotential_height);
+    return std::make_shared<GeopotentialToAltitudeConverter>(reader, cs, geopotential_height);
 }
 
 std::vector<std::string> GeopotentialToAltitudeConverter::getShape() const

@@ -41,7 +41,6 @@
 #include "CDMMergeUtils.h"
 
 #include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
 
 // clang-format off
 #define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
@@ -216,15 +215,15 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
         const std::string& tx_unit, const std::string& ty_unit,
         const CDMDataType& tx_type, const CDMDataType& ty_type)
 {
-    readerSmooth = boost::make_shared<CDMBorderSmoothing>(readerI, readerO);
+    readerSmooth = std::make_shared<CDMBorderSmoothing>(readerI, readerO);
     readerSmooth->setSmoothing(smoothingFactory);
     readerSmooth->setUseOuterIfInnerUndefined(useOuterIfInnerUndefined);
 
-    interpolatedST = boost::make_shared<CDMInterpolator>(readerSmooth);
+    interpolatedST = std::make_shared<CDMInterpolator>(readerSmooth);
     interpolatedST->changeProjection(gridInterpolationMethod, proj,
             tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 
-    readerOverlay = boost::make_shared<CDMOverlay>(readerO, interpolatedST, gridInterpolationMethod, keepOuterVariables);
+    readerOverlay = std::make_shared<CDMOverlay>(readerO, interpolatedST, gridInterpolationMethod, keepOuterVariables);
 
     return readerOverlay->getCDM();
 }

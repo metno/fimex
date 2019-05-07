@@ -27,13 +27,13 @@
 #ifndef CDMFILEREADERFACTORY_H_
 #define CDMFILEREADERFACTORY_H_
 
-#include <boost/shared_ptr.hpp>
-#include <vector>
-#include <string>
+#include "fimex/CDMReaderDecl.h"
+#include "fimex/CDMconstants.h"
 #include "fimex/XMLInput.h"
 #include "fimex/deprecated.h"
-#include "fimex/CDMconstants.h"
-#include "fimex/CDMReaderDecl.h"
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace MetNoFimex
 {

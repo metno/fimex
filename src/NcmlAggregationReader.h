@@ -30,9 +30,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/XMLInput.h"
 
-#include <boost/shared_ptr.hpp>
-
-
+#include <memory>
 
 namespace MetNoFimex
 {

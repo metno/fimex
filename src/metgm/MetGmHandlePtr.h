@@ -40,18 +40,16 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
     class MetGmHandlePtr {
     public:
+        static std::shared_ptr<MetGmHandlePtr> createMetGmHandleForReading(const std::string& source);
 
-        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandleForReading(const std::string& source);
-
-        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandleForWriting(boost::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
-                                                                             boost::shared_ptr<MetGmVersion>& pVersion);
-
+        static std::shared_ptr<MetGmHandlePtr> createMetGmHandleForWriting(std::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
+                                                                           std::shared_ptr<MetGmVersion>& pVersion);
 
         ~MetGmHandlePtr();
 
@@ -59,15 +57,15 @@ namespace MetNoFimex {
 
         inline operator mgm_handle* () { return handle_; }
 
-        inline boost::shared_ptr<MetGmFileHandlePtr>& fileHandle() { return pFileHandle_; }
-        inline boost::shared_ptr<MetGmVersion>&       version()    { return pVersion_; }
+        inline std::shared_ptr<MetGmFileHandlePtr>& fileHandle() { return pFileHandle_; }
+        inline std::shared_ptr<MetGmVersion>& version() { return pVersion_; }
 
     private:
 
         explicit MetGmHandlePtr() { handle_ = mgm_new_handle(); }
 
-        boost::shared_ptr<MetGmFileHandlePtr> pFileHandle_;
-        boost::shared_ptr<MetGmVersion>       pVersion_;
+        std::shared_ptr<MetGmFileHandlePtr> pFileHandle_;
+        std::shared_ptr<MetGmVersion> pVersion_;
         mgm_handle* handle_;
     };
 }

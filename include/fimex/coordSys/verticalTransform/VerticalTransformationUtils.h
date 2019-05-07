@@ -39,7 +39,7 @@
 #include <fimex/ArrayLoop.h>
 
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <string>

@@ -96,7 +96,7 @@ public:
 
     DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double);
 
-    DataPtr convertDataType(double, double, double, boost::shared_ptr<UnitsConverter>, CDMDataType newType, double, double, double)
+    DataPtr convertDataType(double, double, double, UnitsConverter_p, CDMDataType newType, double, double, double)
     {
         return convertDataType(0, 0, 0, newType, 0, 0, 0);
     }

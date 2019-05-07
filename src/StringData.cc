@@ -32,8 +32,6 @@
 
 #include "fimex/Utils.h"
 
-#include <boost/make_shared.hpp>
-
 namespace MetNoFimex {
 
 void StringData::setValues(size_t startPos, const Data& data, size_t first, size_t end)
@@ -53,13 +51,13 @@ void StringData::setValues(size_t startPos, const Data& data, size_t first, size
 
 DataPtr StringData::clone() const
 {
-    return boost::make_shared<StringData>(text_);
+    return std::make_shared<StringData>(text_);
 }
 
 DataPtr StringData::convertDataType(double, double, double, CDMDataType newType, double, double, double)
 {
     if (newType == CDM_STRING) {
-        return boost::make_shared<StringData>(text_);
+        return std::make_shared<StringData>(text_);
     } else if (newType == CDM_STRINGS) {
         return createData(1, asStrings());
     } else {

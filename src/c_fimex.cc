@@ -24,15 +24,10 @@
  *      Author: Heiko Klein
  */
 
-#include <cstdlib>
-#include <algorithm>
-#include <vector>
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
 #include "fimex_config.h"
 #include "fimex/CDM.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/shared_array.hpp"
 #include "fimex/CDMReader.h"
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/XMLInput.h"
@@ -54,6 +49,10 @@
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
+
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
 
 using namespace MetNoFimex;
 using namespace std;
@@ -127,7 +126,7 @@ mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
 mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile)
 {
     try {
-        boost::shared_ptr<NcmlCDMReader> ncml_reader(new NcmlCDMReader(reader->reader_, XMLInputFile(ncmlFile)));
+        std::shared_ptr<NcmlCDMReader> ncml_reader(new NcmlCDMReader(reader->reader_, XMLInputFile(ncmlFile)));
         return new mifi_cdm_reader(ncml_reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in ncml_modifier: " << ex.what());
@@ -180,7 +179,7 @@ int mifi_nullcdm_writer(mifi_cdm_reader* reader)
 mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit)
 {
     try {
-        boost::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->reader_));
+        std::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->reader_));
         interpol->changeProjection(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit);
         return new mifi_cdm_reader(interpol);
     } catch (exception& ex) {
@@ -192,7 +191,7 @@ mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, c
 mifi_cdm_reader* mifi_new_lonlat_interpolator(mifi_cdm_reader* reader, int method, int n, const double* lonVals, const double* latVals)
 {
     try {
-        boost::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->reader_));
+        std::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->reader_));
         std::vector<double> lons(lonVals, lonVals+n);
         std::vector<double> lats(latVals, latVals+n);
         interpol->changeProjection(method, lons, lats);
@@ -208,7 +207,7 @@ mifi_cdm_reader* mifi_new_lonlat_interpolator(mifi_cdm_reader* reader, int metho
 mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader)
 {
     try {
-        boost::shared_ptr<C_CDMReader> c_reader(new C_CDMReader(reader->reader_));
+        std::shared_ptr<C_CDMReader> c_reader(new C_CDMReader(reader->reader_));
         return new mifi_cdm_reader(c_reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_c_reader: " << ex.what());
@@ -353,10 +352,10 @@ mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* va
     try {
         CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(reader->csVec_, varName);
         if (cs.get()) {
-            boost::shared_ptr<SliceBuilder> sb(new CoordinateSystemSliceBuilder(reader->reader_->getCDM(), cs));
+            std::shared_ptr<SliceBuilder> sb(new CoordinateSystemSliceBuilder(reader->reader_->getCDM(), cs));
             return new mifi_slicebuilder(sb, cs);
         } else {
-            boost::shared_ptr<SliceBuilder> sb(new SliceBuilder(reader->reader_->getCDM(), varName));
+            std::shared_ptr<SliceBuilder> sb(new SliceBuilder(reader->reader_->getCDM(), varName));
             return new mifi_slicebuilder(sb);
         }
     } catch (exception& ex) {

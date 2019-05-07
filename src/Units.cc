@@ -28,7 +28,7 @@
 #include "fimex/UnitsException.h"
 #include "fimex/Utils.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include "MutexLock.h"
 #include "fimex_config.h"
@@ -219,24 +219,24 @@ UnitsConverter_p Units::getConverter(const std::string& from, const std::string&
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getConverter from '" << from << "' to '" << to << "'");
     if (from == to) {
-        return boost::make_shared<LinearUnitsConverter>(1., 0.);
+        return std::make_shared<LinearUnitsConverter>(1., 0.);
     }
     ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
-    boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
+    std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
     handleUdUnitError(ut_get_status(), "'" + from + "'");
-    boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
+    std::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
     handleUdUnitError(ut_get_status(), "'" + to + "'");
     cv_converter* conv = ut_get_converter(fromUnit.get(), toUnit.get());
     handleUdUnitError(ut_get_status(), "'" + from + "' converted to '" +to + "'");
-    return boost::make_shared<Ud2UnitsConverter>(conv);
+    return std::make_shared<Ud2UnitsConverter>(conv);
 #else
     double slope, offset;
     utUnit fromUnit, toUnit;
     handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
     handleUdUnitError(utScan(to.c_str(), &toUnit), to);
     handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
-    return boost::make_shared<LinearUnitsConverter>(slope, offset);
+    return std::make_shared<LinearUnitsConverter>(slope, offset);
 #endif
 
 }
@@ -248,9 +248,9 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
     ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     try {
-        boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
+        std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), "'" + unit1 + "'");
-        boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
+        std::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), "'" + unit2 + "'");
         areConv = ut_are_convertible(fromUnit.get(), toUnit.get());
     } catch (UnitException& ue) {

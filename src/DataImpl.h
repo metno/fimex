@@ -29,12 +29,11 @@
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -118,7 +117,7 @@ namespace MetNoFimex
         virtual void setValue(size_t pos, double val) {theData[pos] = data_caster<C, double>()(val);}
         virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
         virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, data_caster<C, double>()(val));}
-        virtual DataPtr clone() const {return DataPtr(new DataImpl<C>(*this));}
+        virtual DataPtr clone() const { return DataPtr(new DataImpl<C>(*this)); } // private ctor => no std::make_shared
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
@@ -264,7 +263,7 @@ namespace MetNoFimex
         if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
 
         // get the old and new datacontainer
-        boost::shared_ptr<DataImpl<C> > output(new DataImpl<C>(outputSize));
+        std::shared_ptr<DataImpl<C>> output(new DataImpl<C>(outputSize));
         C* newData = output->theData.get();
         C* oldData = theData.get();
 

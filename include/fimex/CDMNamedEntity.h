@@ -24,9 +24,9 @@
 #ifndef CDMNAMEDENTITY_H_
 #define CDMNAMEDENTITY_H_
 
-#include <string>
 #include <functional>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <string>
 
 namespace MetNoFimex
 {
@@ -70,15 +70,19 @@ private:
 };
 
 /**
- * functor to find a boost::shared_ptr<CDMNamedEntity> equal to the set name using std::string::operator==
+ * functor to find a std::shared_ptr<CDMNamedEntity> equal to the set name using std::string::operator==
  */
-class CDMNameEqualPtr : public std::unary_function<boost::shared_ptr<CDMNamedEntity>, bool>
+class CDMNameEqualPtr : public std::unary_function<std::shared_ptr<CDMNamedEntity>, bool>
 {
 public:
     explicit CDMNameEqualPtr(std::string name) : name(name) {}
-    explicit CDMNameEqualPtr(const boost::shared_ptr<const CDMNamedEntity>& entity) : name(entity->getName()) {}
+    explicit CDMNameEqualPtr(const std::shared_ptr<const CDMNamedEntity>& entity)
+        : name(entity->getName())
+    {
+    }
     ~CDMNameEqualPtr() {}
-    bool operator()(const boost::shared_ptr<const CDMNamedEntity>& e) {return name == e->getName();}
+    bool operator()(const std::shared_ptr<const CDMNamedEntity>& e) { return name == e->getName(); }
+
 private:
     std::string name;
 };

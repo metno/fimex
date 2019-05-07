@@ -30,6 +30,8 @@
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
 
+#include <algorithm>
+
 namespace MetNoFimex
 {
 
@@ -140,7 +142,7 @@ vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes() co
     vector<CoordinateAxis::AxisType> retVal;
     CoordinateAxis_cp_v axes = cs_->getAxes();
     for (vector<string>::iterator it = dimNames.begin(); it != dimNames.end(); ++it) {
-        CoordinateAxis_cp_v::const_iterator axIt = find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
+        CoordinateAxis_cp_v::const_iterator axIt = std::find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
         if (axIt != axes.end()) {
             LOG4FIMEX(logger, Logger::DEBUG, (*axIt)->getAxisType() << CoordinateAxis::type2int((*axIt)->getAxisType()));
             retVal.push_back((*axIt)->getAxisType());

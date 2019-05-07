@@ -60,12 +60,10 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTagForWriting(const CDMReader_p pCdmReader,
-                                                                                const CDMVariable* pVariable);
+        static std::shared_ptr<MetGmHDTag> createMetGmDimensionsTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable);
 
-        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                      const boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                      const boost::shared_ptr<MetGmVerticalTag> vTag);
+        static std::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(const std::shared_ptr<MetGmGroup1Ptr> pGp1, const std::shared_ptr<MetGmGroup3Ptr> pGp3,
+                                                                    const std::shared_ptr<MetGmVerticalTag> vTag);
 
         std::string asString() {
             switch (hd_)
@@ -94,19 +92,19 @@ namespace MetNoFimex {
         size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTTag_.get() ? pTTag_->nT() : 0; }
 
-        boost::shared_ptr<MetGmXTag>&        xTag() { return pXTag_; }
-        boost::shared_ptr<MetGmYTag>&        yTag() { return pYTag_; }
-        boost::shared_ptr<MetGmVerticalTag>& zTag() { return pZTag_; }
-        boost::shared_ptr<MetGmTimeTag>&     tTag() { return pTTag_; }
+        std::shared_ptr<MetGmXTag>& xTag() { return pXTag_; }
+        std::shared_ptr<MetGmYTag>& yTag() { return pYTag_; }
+        std::shared_ptr<MetGmVerticalTag>& zTag() { return pZTag_; }
+        std::shared_ptr<MetGmTimeTag>& tTag() { return pTTag_; }
 
     private:
 
         inline MetGmHDTag() : hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
 
-        boost::shared_ptr<MetGmXTag> pXTag_;
-        boost::shared_ptr<MetGmYTag> pYTag_;
-        boost::shared_ptr<MetGmTimeTag> pTTag_;
-        boost::shared_ptr<MetGmVerticalTag> pZTag_;
+        std::shared_ptr<MetGmXTag> pXTag_;
+        std::shared_ptr<MetGmYTag> pYTag_;
+        std::shared_ptr<MetGmTimeTag> pTTag_;
+        std::shared_ptr<MetGmVerticalTag> pZTag_;
 
         MetGmHD hd_;
 

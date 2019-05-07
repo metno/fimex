@@ -27,10 +27,10 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "FeltCDMReader2.h"
 #include "fimex/GribApiCDMWriter.h"
+#include <boost/filesystem/operations.hpp>
+#include <memory>
 
 using namespace std;
 using namespace MetNoFelt;

@@ -42,7 +42,7 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // standard
 //
@@ -54,13 +54,13 @@ namespace MetNoFimex {
 
     class MetGmVersion {
     public:
-
-        static boost::shared_ptr<MetGmVersion> createMetGmVersion(mgm_version version) {
-            boost::shared_ptr<MetGmVersion> pVersion = boost::shared_ptr<MetGmVersion>(new MetGmVersion(version));
+        static std::shared_ptr<MetGmVersion> createMetGmVersion(mgm_version version)
+        {
+            std::shared_ptr<MetGmVersion> pVersion = std::shared_ptr<MetGmVersion>(new MetGmVersion(version));
             return pVersion;
         }
 
-        static boost::shared_ptr<MetGmVersion> createMetGmVersion(const std::unique_ptr<XMLDoc>& doc)
+        static std::shared_ptr<MetGmVersion> createMetGmVersion(const std::unique_ptr<XMLDoc>& doc)
         {
 
             mgm_version version = MGM_Edition1;
@@ -80,7 +80,7 @@ namespace MetNoFimex {
                     }
                 }
             }
-            return boost::shared_ptr<MetGmVersion>(new MetGmVersion(version));
+            return std::shared_ptr<MetGmVersion>(new MetGmVersion(version));
         }
 
         inline std::string getAsString()

@@ -26,9 +26,9 @@
 
 #include "fimex_config.h"
 
-#include <boost/make_shared.hpp>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -212,7 +212,7 @@ void Logger::forcedLog(LogLevel level, const std::string& message, const char* f
 
 Logger_p getLogger(const std::string& className)
 {
-    return boost::make_shared<Logger>(className);
+    return std::make_shared<Logger>(className);
 }
 
 } // namespace MetNoFimex

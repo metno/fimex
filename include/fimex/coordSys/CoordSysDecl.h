@@ -24,34 +24,34 @@
 #ifndef COORDSYSDECL_H_
 #define COORDSYSDECL_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <vector>
 
 namespace MetNoFimex {
 
 class CoordinateSystem;
-typedef boost::shared_ptr<CoordinateSystem> CoordinateSystem_p;
-typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystem_cp;
+typedef std::shared_ptr<CoordinateSystem> CoordinateSystem_p;
+typedef std::shared_ptr<const CoordinateSystem> CoordinateSystem_cp;
 typedef std::vector<CoordinateSystem_cp> CoordinateSystem_cp_v;
 
 class CoordinateAxis;
-typedef boost::shared_ptr<CoordinateAxis> CoordinateAxis_p;
-typedef boost::shared_ptr<const CoordinateAxis> CoordinateAxis_cp;
+typedef std::shared_ptr<CoordinateAxis> CoordinateAxis_p;
+typedef std::shared_ptr<const CoordinateAxis> CoordinateAxis_cp;
 typedef std::vector<CoordinateAxis_cp> CoordinateAxis_cp_v;
 
 class Projection;
-typedef boost::shared_ptr<Projection> Projection_p;
-typedef boost::shared_ptr<const Projection> Projection_cp;
+typedef std::shared_ptr<Projection> Projection_p;
+typedef std::shared_ptr<const Projection> Projection_cp;
 
 class ToVLevelConverter;
-typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
+typedef std::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
 class VerticalConverter;
-typedef boost::shared_ptr<VerticalConverter> VerticalConverter_p;
+typedef std::shared_ptr<VerticalConverter> VerticalConverter_p;
 
 class VerticalTransformation;
-typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
+typedef std::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
 
 } // namespace MetNoFimex
 

@@ -40,9 +40,9 @@
 // boost
 //
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/shared_array.hpp>
+#include <memory>
 
 // standard
 //
@@ -50,7 +50,7 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDMReader_p pCdmReader)
+std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDMReader_p pCdmReader)
 {
     if(!pCdmReader.get())
         throw CDMException("createMetGmTimeTag: pCdmReader is null");
@@ -60,17 +60,16 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDM
     if( !(cdmRef.hasDimension("time") && cdmRef.hasVariable("time")) )
         throw CDMException("createMetGmTimeTag: cdm model doesn't have the 'time'");
 
-    boost::shared_ptr<MetGmTimeTag> TTag =
-            boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag());
+    std::shared_ptr<MetGmTimeTag> TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag());
 
     TTag->init(pCdmReader);
 
     return TTag;
 }
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
+std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
 {
-    boost::shared_ptr<MetGmTimeTag> TTag;
+    std::shared_ptr<MetGmTimeTag> TTag;
 
     const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
     const CDM& cdmRef = pCdmReader->getCDM();
@@ -82,10 +81,10 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
             CoordinateAxis_cp tAxis = cs->getTimeAxis();
 
             if(!tAxis.get()) {
-                return boost::shared_ptr<MetGmTimeTag>();
+                return std::shared_ptr<MetGmTimeTag>();
             }
 
-            TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
+            TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
 
             if(tAxis->getAxisType() != CoordinateAxis::Time)
                 throw CDMException("time axis not found");
@@ -127,10 +126,10 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
     return TTag;
 }
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const boost::shared_ptr<MetGmGroup1Ptr> pGroup1,
-                                                                           const boost::shared_ptr<MetGmGroup3Ptr> pGroup3)
+std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const std::shared_ptr<MetGmGroup1Ptr> pGroup1,
+                                                                         const std::shared_ptr<MetGmGroup3Ptr> pGroup3)
 {
-    boost::shared_ptr<MetGmTimeTag> TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
+    std::shared_ptr<MetGmTimeTag> TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
     if(pGroup3->p_id() == 0) {
         TTag->dT_ = pGroup3->nt() * pGroup3->dt(); // valid for total duration
         TTag->nT_ = 1;

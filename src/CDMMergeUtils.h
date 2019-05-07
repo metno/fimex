@@ -36,7 +36,7 @@
 #include "fimex/DataDecl.h"
 #include "fimex/coordSys/CoordSysDecl.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <cmath>
@@ -51,7 +51,7 @@ namespace MetNoFimex {
 class CDM;
 
 class CDMInterpolator;
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
+typedef std::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 
 typedef std::vector<double> values_v;
 typedef values_v::iterator values_it;
@@ -80,8 +80,6 @@ values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const s
 
 CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod, CDMInterpolator_p& interpolatedO, std::string& nameX,
                   std::string& nameY, bool keepAllOuter = false);
-
-//} // namespace CDMMergeUtils
 
 } // namespace MetNoFimex
 

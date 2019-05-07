@@ -36,16 +36,16 @@
 //
 #include "fimex/CDMException.h"
 
-// boost
-//
-#include <boost/shared_ptr.hpp>
-
 // standard
 //
-#include <cstdio>
+#include <cassert>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
+#include <memory>
+
 #include <string>
+
 namespace MetNoFimex {
 
     class MetGmFileHandlePtr {
@@ -56,13 +56,15 @@ namespace MetNoFimex {
             READ
         };
 
-        static boost::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForReading(const std::string& name) {
-            boost::shared_ptr<MetGmFileHandlePtr> handle = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, READ));
+        static std::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForReading(const std::string& name)
+        {
+            std::shared_ptr<MetGmFileHandlePtr> handle = std::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, READ));
             return handle;
         }
 
-        static boost::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForWriting(const std::string& name) {
-            boost::shared_ptr<MetGmFileHandlePtr> handle = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, WRITE));
+        static std::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForWriting(const std::string& name)
+        {
+            std::shared_ptr<MetGmFileHandlePtr> handle = std::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, WRITE));
             return handle;
         }
 

@@ -45,7 +45,7 @@ void mifi_grib_check(int error, const char* msg, int line, const char* file)
 
 namespace MetNoFimex {
 
-GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle> gh)
+GridDefinition::Orientation gribGetGridOrientation(std::shared_ptr<grib_handle> gh)
 {
     unsigned long mode = 0;
     long val = 0;

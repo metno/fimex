@@ -24,14 +24,15 @@
 #ifndef CDMATTRIBUTE_H_
 #define CDMATTRIBUTE_H_
 
+#include "fimex/CDMNamedEntity.h"
+
+#include "fimex/CDMDataType.h"
+#include "fimex/DataDecl.h"
+
+#include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
-#include <iosfwd>
-#include <boost/shared_ptr.hpp>
-#include "fimex/DataDecl.h"
-#include "fimex/CDMDataType.h"
-#include "fimex/CDMNamedEntity.h"
-#include "fimex/deprecated.h"
 
 namespace MetNoFimex
 {

@@ -35,15 +35,16 @@
 
 namespace MetNoFimex {
 
-static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
-    for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
+static string replaceTemplateAttribute(string value, const map<string, std::shared_ptr<ReplaceStringObject>> templateReplacements)
+{
+    for (map<string, std::shared_ptr<ReplaceStringObject>>::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
         stringstream outString;
         boost::regex rgx(boost::regex("%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%"));
         string::const_iterator  begin = value.begin(), end = value.end();
         boost::match_results<string::const_iterator> matches;
         while (boost::regex_search(begin, end, matches, rgx)) {
             outString << string(begin, matches[0].first);
-            boost::shared_ptr<ReplaceStringObject> rso = it->second;
+            std::shared_ptr<ReplaceStringObject> rso = it->second;
             string var(matches[1].first, matches[1].second);
             if (matches.size() > 2) {
                 string match2(matches[2].first, matches[2].second);
@@ -68,7 +69,9 @@ static string replaceTemplateAttribute(string value, const map<string, boost::sh
 /**
  * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
  */
-void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) {
+void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
+                                  const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
+{
     if (node == 0) return;
     if ((node->type == XML_ELEMENT_NODE) &&
         (string("attribute") == reinterpret_cast<const char *>(node->name))) {
@@ -92,7 +95,8 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
  * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) which are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */
-int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
+int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes,
+                                   std::vector<CDMAttribute>& varAttributes, const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
     xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;

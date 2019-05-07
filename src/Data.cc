@@ -26,7 +26,7 @@
 #include "DataImpl.h"
 #include "StringData.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -39,14 +39,14 @@ template<typename T>
 DataPtr createDataT(size_t length, boost::shared_array<T> array)
 {
     typedef DataImpl<T> Impl;
-    return boost::make_shared<Impl>(array, length);
+    return std::make_shared<Impl>(array, length);
 }
 
 template <typename T>
 DataPtr createDataT(size_t length)
 {
     typedef DataImpl<T> Impl;
-    return boost::make_shared<Impl>(length);
+    return std::make_shared<Impl>(length);
 }
 
 DataPtr createDataPtr_(CDMDataType datatype, size_t length)
@@ -116,7 +116,7 @@ DataPtr createData(CDMDataType datatype, size_t length, double val)
 
 DataPtr createData(const std::string& value)
 {
-    return boost::make_shared<StringData>(value);
+    return std::make_shared<StringData>(value);
 }
 
 DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)

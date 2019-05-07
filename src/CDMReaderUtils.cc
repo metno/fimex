@@ -25,18 +25,18 @@
  */
 
 #include "fimex/CDMReaderUtils.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/coordSys/Projection.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/Projection.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include <vector>
-#include <set>
 #include <map>
+#include <memory>
+#include <set>
+#include <vector>
 
 namespace MetNoFimex
 {

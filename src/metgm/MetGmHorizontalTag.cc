@@ -32,50 +32,50 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
-    {
-        if(!pVariable)
-            throw CDMException("pVar is null");
+std::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
+{
+    if (!pVariable)
+        throw CDMException("pVar is null");
 
-        if(!pCdmReader.get())
-            throw CDMException("pCdmReader is null");
+    if (!pCdmReader.get())
+        throw CDMException("pCdmReader is null");
 
-        boost::shared_ptr<MetGmXTag> XTag;
+    std::shared_ptr<MetGmXTag> XTag;
 
-        const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
-        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
-        if (cs.get()) {
-            if(cs->isSimpleSpatialGridded()) {
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+    if (cs.get()) {
+        if (cs->isSimpleSpatialGridded()) {
 
-                CoordinateAxis_cp xAxis = cs->getGeoXAxis();
+            CoordinateAxis_cp xAxis = cs->getGeoXAxis();
 
-                if(!xAxis.get()) {
-                    return boost::shared_ptr<MetGmXTag>();
-                }
-
-                XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
-
-                DataPtr data = pCdmReader->getScaledDataInUnit(xAxis->getName(), "degree");
-
-                XTag->numberOfPoints_ = data->size();
-
-                XTag->extractHorizontalPoints(data);
-
-                XTag->center_ = (XTag->horizontalPoints_.at(XTag->horizontalPoints_.size() - 1) + XTag->horizontalPoints_.at(0)) / 2.0;
-
-                XTag->distance_ = XTag->horizontalPoints_.at(1) - XTag->horizontalPoints_.at(0);
-
-                if(XTag->distance_ < 0)
-                    throw CDMException("metgm is not supporting negative distances on longitude axis");
+            if (!xAxis.get()) {
+                return std::shared_ptr<MetGmXTag>();
             }
-        } else {
-        }
 
-        return XTag;
+            XTag = std::shared_ptr<MetGmXTag>(new MetGmXTag);
+
+            DataPtr data = pCdmReader->getScaledDataInUnit(xAxis->getName(), "degree");
+
+            XTag->numberOfPoints_ = data->size();
+
+            XTag->extractHorizontalPoints(data);
+
+            XTag->center_ = (XTag->horizontalPoints_.at(XTag->horizontalPoints_.size() - 1) + XTag->horizontalPoints_.at(0)) / 2.0;
+
+            XTag->distance_ = XTag->horizontalPoints_.at(1) - XTag->horizontalPoints_.at(0);
+
+            if (XTag->distance_ < 0)
+                throw CDMException("metgm is not supporting negative distances on longitude axis");
+        }
+    } else {
     }
 
-    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
+    return XTag;
+    }
+
+    std::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
     {
         if(!pVariable)
             throw CDMException("pVar is null");
@@ -83,7 +83,7 @@ namespace MetNoFimex {
         if(!pCdmReader.get())
             throw CDMException("pCdmReader is null");
 
-        boost::shared_ptr<MetGmYTag> YTag;
+        std::shared_ptr<MetGmYTag> YTag;
 
         const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
@@ -94,10 +94,10 @@ namespace MetNoFimex {
                 CoordinateAxis_cp yAxis = cs->getGeoYAxis();
 
                 if(!yAxis.get()) {
-                    return boost::shared_ptr<MetGmYTag>();
+                    return std::shared_ptr<MetGmYTag>();
                 }
 
-                YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
+                YTag = std::shared_ptr<MetGmYTag>(new MetGmYTag);
 
                 DataPtr data = pCdmReader->getScaledDataInUnit(yAxis->getName(), "degree");
 
@@ -118,9 +118,9 @@ namespace MetNoFimex {
         return YTag;
     }
 
-    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3)
+    std::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTagForReading(const std::shared_ptr<MetGmGroup3Ptr> pg3)
     {
-        boost::shared_ptr<MetGmXTag> XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
+        std::shared_ptr<MetGmXTag> XTag = std::shared_ptr<MetGmXTag>(new MetGmXTag);
 
         XTag->center_         = pg3->cx();
         XTag->distance_       = pg3->dx();
@@ -135,9 +135,9 @@ namespace MetNoFimex {
         return XTag;
     }
 
-    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3)
+    std::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTagForReading(const std::shared_ptr<MetGmGroup3Ptr> pg3)
     {
-        boost::shared_ptr<MetGmYTag> YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
+        std::shared_ptr<MetGmYTag> YTag = std::shared_ptr<MetGmYTag>(new MetGmYTag);
 
         YTag->center_         = pg3->cy();
         YTag->distance_       = pg3->dy();

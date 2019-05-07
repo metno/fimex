@@ -39,8 +39,6 @@
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
 
-#include <boost/make_shared.hpp>
-
 #include <set>
 #include <algorithm>
 #include <functional>
@@ -54,7 +52,7 @@ static Logger_p logger = getLogger("fimex.CDMProcessor");
 
 typedef map<string, CoordinateSystem_cp> CoordSysMap;
 
-typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
+typedef std::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
 
 struct SliceCache {
     string varName;
@@ -144,7 +142,7 @@ CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, 
                 MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, xAxisSize, yAxisSize, matrix.get());
     }
     LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
-    return boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize);
+    return std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize);
 }
 
 CDMProcessor::CDMProcessor(CDMReader_p dataReader)
@@ -178,7 +176,7 @@ void CDMProcessor::addVerticalVelocity()
             if (vtrans->getName() == HybridSigmaPressure1::NAME() && vtrans->isComplete()) {
                 VerticalVelocityComps vvc;
                 vvc.xWind = *xw;
-                boost::shared_ptr<const HybridSigmaPressure1> vt = boost::dynamic_pointer_cast<const HybridSigmaPressure1>(vtrans);
+                std::shared_ptr<const HybridSigmaPressure1> vt = std::dynamic_pointer_cast<const HybridSigmaPressure1>(vtrans);
                 vvc.ap = vt->ap;
                 vvc.ps = vt->ps;
                 vvc.b = vt->b;

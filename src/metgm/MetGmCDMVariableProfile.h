@@ -39,25 +39,28 @@
 
 // boost
 //
-#include <boost/shared_ptr.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
+#include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
+#include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index_container.hpp>
 
 // standard
 //
+#include <memory>
 #include <string>
-
 
 namespace MetNoFimex {
 
     struct MetGmCDMVariableProfile {
 
-        MetGmCDMVariableProfile(short pid, const std::string& cdmName, boost::shared_ptr<MetGmTags> tags)
-            : p_id_(pid), cdmName_(cdmName), pTags_(tags) {}
+        MetGmCDMVariableProfile(short pid, const std::string& cdmName, std::shared_ptr<MetGmTags> tags)
+            : p_id_(pid)
+            , cdmName_(cdmName)
+            , pTags_(tags)
+        {
+        }
 
         bool operator<(const MetGmCDMVariableProfile& profile) const {return cdmName_ < profile.cdmName_;}
 
@@ -71,7 +74,7 @@ namespace MetNoFimex {
         std::string                   addOffset_;
         std::string                   scaleFactor_;
         std::string                   fillValue_;
-        boost::shared_ptr<MetGmTags>  pTags_;
+        std::shared_ptr<MetGmTags> pTags_;
     };
 
     struct cdm_pid_index       {};

@@ -47,9 +47,9 @@ namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute");
 
-boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader) {
-    boost::shared_ptr<MetGmCommentAttributeParser> parser =
-            boost::shared_ptr<MetGmCommentAttributeParser>(new MetGmCommentAttributeParser);
+std::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader)
+{
+    std::shared_ptr<MetGmCommentAttributeParser> parser = std::shared_ptr<MetGmCommentAttributeParser>(new MetGmCommentAttributeParser);
 
     CDMAttribute metgmMetaData; // encoded within comment
     if(pCdmReader->getCDM().getAttribute(pCdmReader->getCDM().globalAttributeNS(), "comment", metgmMetaData)) {

@@ -39,7 +39,7 @@
 #include "fimex/Data.h"
 #include "fimex/vertical_coordinate_transformations.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -49,7 +49,7 @@ using std::vector;
 VerticalConverter_p HybridSigmaToPressureConverter::createConverter(CDMReader_p reader, CoordinateSystem_cp cs, const std::string& a, const std::string& b,
                                                                     const std::string& ps, const std::string& p0)
 {
-    return boost::make_shared<HybridSigmaToPressureConverter>(reader, cs, a, b, ps, p0);
+    return std::make_shared<HybridSigmaToPressureConverter>(reader, cs, a, b, ps, p0);
 }
 
 std::vector<std::string> HybridSigmaToPressureConverter::getShape() const

@@ -81,7 +81,7 @@ DataPtr C_CDMReader::getDataSlice(const std::string & varName, size_t unLimDimPo
     DataPtr data = dataReader_->getScaledDataSlice(varName, unLimDimPos);
 
     // wrap the object as a mifi_cdm_reader for C-usage
-    mifi_cdm_reader reader(boost::shared_ptr<C_CDMReader>(this, noDealloc));
+    mifi_cdm_reader reader(std::shared_ptr<C_CDMReader>(this, noDealloc));
     // get a C-array to the scaled data
     boost::shared_array<double> doubleArray = data->asDouble();
     // call the callback-function

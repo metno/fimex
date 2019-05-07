@@ -55,8 +55,8 @@
 // boost
 //
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 // standard
 #include <functional>
@@ -71,8 +71,8 @@ namespace MetNoFimex
 {
 using namespace std;
 
-typedef boost::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
-typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
+typedef std::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
+typedef std::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
 
 struct CDMInterpolator::Impl
 {
@@ -1325,8 +1325,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::make_shared<CachedForwardInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
-                                                                                              orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
+        p_->cachedInterpolation[csIt->first] = std::make_shared<CachedForwardInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
+                                                                                            orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
@@ -1411,8 +1411,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         }
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached coordinate interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::make_shared<CachedInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
-                                                                                       orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
+        p_->cachedInterpolation[csIt->first] = std::make_shared<CachedInterpolation>(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis,
+                                                                                     orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible? to interpolate with coordinate-interpolation");
@@ -1476,9 +1476,9 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci =
-            boost::make_shared<CachedInterpolation>(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis,
-                                                    orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
+        std::shared_ptr<CachedInterpolation> ci =
+            std::make_shared<CachedInterpolation>(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis,
+                                                  orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
         std::string testVar1, testVar2;
         if (allXYSpatialVectorsHaveSameHorizontalId(csIt->first, testVar1, testVar2)) {
             ci->createReducedDomain(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName());
@@ -1497,7 +1497,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] =
-                boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());
+                std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());
         }
     }
 }
@@ -1793,8 +1793,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") "
                   << def.xAxisData->size() << "x" << def.yAxisData->size()
                   << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci = boost::make_shared<CachedInterpolation>(
-            def.xAxisName, def.yAxisName, method, lonX, latY, def.xAxisData->size(), def.yAxisData->size(), out_x_axis.size(), out_y_axis.size());
+        std::shared_ptr<CachedInterpolation> ci = std::make_shared<CachedInterpolation>(def.xAxisName, def.yAxisName, method, lonX, latY, def.xAxisData->size(),
+                                                                                        def.yAxisData->size(), out_x_axis.size(), out_y_axis.size());
         std::string testVar1, testVar2;
         if (allXYSpatialVectorsHaveSameHorizontalId(csi->first, testVar1, testVar2)) {
             ci->createReducedDomain(def.xAxisName, def.yAxisName);
@@ -1820,8 +1820,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
             mifi_get_vector_reproject_matrix_points(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4,
                     csi->second->getProjection()->isDegree() ? 0 : 1,
                     &lonX[0], &latY[0], outSize, matrix.get());
-            p_->cachedVectorReprojection[csi->first] = boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1);
-
+            p_->cachedVectorReprojection[csi->first] = std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1);
         }
     }
 

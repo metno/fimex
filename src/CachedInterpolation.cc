@@ -185,7 +185,7 @@ void CachedInterpolation::createReducedDomain(std::string xDimName, std::string 
     }
 
     // create the reduced interpolation
-    boost::shared_ptr<ReducedInterpolationDomain> rid(new ReducedInterpolationDomain());
+    std::shared_ptr<ReducedInterpolationDomain> rid(new ReducedInterpolationDomain());
     rid->xDim = xDimName;
     rid->yDim = yDimName;
     rid->xMin = minX;

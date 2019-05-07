@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -31,17 +31,16 @@
 
 #include "FeltConstants.h"
 #include "FeltTypes.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/noncopyable.hpp>
 
-
-#include <iterator>
-#include <vector>
 #include <iosfwd>
+#include <iterator>
+#include <memory>
+#include <vector>
 
 namespace felt
 {
@@ -65,7 +64,7 @@ public:
     boost::posix_time::ptime firstTime() const;
     boost::posix_time::ptime lastTime() const;
 
-    typedef boost::shared_ptr<FeltField> FeltFieldPtr;
+    typedef std::shared_ptr<FeltField> FeltFieldPtr;
 
     typedef std::vector<FeltFieldPtr>::const_iterator iterator;
 //	class iterator;

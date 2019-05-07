@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -85,7 +85,7 @@ FeltFile::FeltFile(const path & file)
     int i = 0;
     while ( fields_.size() < fieldCount )
     {
-        boost::shared_ptr<FeltField> f(new FeltField(*this, i ++));
+        std::shared_ptr<FeltField> f(new FeltField(*this, i++));
         if ( f->valid() )
             fields_.push_back(f);
     }

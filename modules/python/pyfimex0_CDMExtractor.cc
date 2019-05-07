@@ -29,13 +29,13 @@
 
 #include "pyfimex0_helpers.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <memory>
 
 namespace MetNoFimex {
-typedef boost::shared_ptr<CDMExtractor> CDMExtractor_p;
+typedef std::shared_ptr<CDMExtractor> CDMExtractor_p;
 } // namespace MetNoFimex
 
 using namespace MetNoFimex;
@@ -45,7 +45,7 @@ namespace {
 
 CDMExtractor_p createExtractor(CDMReader_p reader)
 {
-    return boost::make_shared<CDMExtractor>(reader);
+    return std::make_shared<CDMExtractor>(reader);
 }
 
 void reduceTimeStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& tStart, const std::string& tEnd)

@@ -40,11 +40,11 @@ using MetNoFimex::type2string;
 
 static MetNoFimex::Logger_p logger = MetNoFimex::getLogger("fimex.Felt_Array2");
 
-Felt_Array2::Felt_Array2(const string name, const boost::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
-: feltArrayName_(name),
-  defaultField_(feltField),
-  dataType_(dataType),
-  fillValue_(fillValue)
+Felt_Array2::Felt_Array2(const string name, const std::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
+    : feltArrayName_(name)
+    , defaultField_(feltField)
+    , dataType_(dataType)
+    , fillValue_(fillValue)
 {
     addField_(defaultField_);
 }
@@ -54,7 +54,7 @@ Felt_Array2::~Felt_Array2()
 }
 
 // add field to feltFields, check first for non-existence
-void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
+void Felt_Array2::addField_(const std::shared_ptr<felt::FeltField> field)
 {
     boost::posix_time::ptime time = field->validTime();
     LevelPair level;
@@ -89,7 +89,7 @@ void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
     }
 }
 
-void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField> field)
+void Felt_Array2::addInformationByField(const std::shared_ptr<felt::FeltField> field)
 {
     if (!field->valid()) {
         // no data, no field
@@ -114,7 +114,7 @@ vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
     refTimes.reserve(feltFields_.size());
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
-            boost::shared_ptr<felt::FeltField> field = lm->second;
+            std::shared_ptr<felt::FeltField> field = lm->second;
             refTimes.push_back(field->referenceTime());
         }
     }
@@ -163,8 +163,7 @@ vector<short> Felt_Array2::getEnsembleMembers() const {
     return vector<short>(ensembleMembers.begin(), ensembleMembers.end());
 }
 
-
-const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const
+const std::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const
 {
     TimeLevelFieldMap::const_iterator tlm;
     if (hasTime()) {
@@ -225,7 +224,7 @@ int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vec
 
 int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta)
 {
-    const boost::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
+    const std::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
 
     // make consistency checks
      int fieldGridType = field->gridType();
@@ -265,8 +264,7 @@ bool Felt_Array2::hasTime() const
     return true;
 }
 
-
-boost::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() const
+std::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() const
 {
     return defaultField_->projectionInformation();
 }

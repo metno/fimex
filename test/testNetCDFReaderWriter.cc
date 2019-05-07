@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_update )
     const double diff = 10.0, scale = 1.2;
     DataPtr read1, read2;
     {
-        boost::shared_ptr<CDMReaderWriter> rw = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
+        std::shared_ptr<CDMReaderWriter> rw = std::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
         BOOST_CHECK(rw.get() != 0);
 
         read1 = rw->getDataSlice("ga_2t_1", 0);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
     const double addF = 1.0, addK = addF * 5.0/9.0;
     DataPtr read1, read2;
     {
-        boost::shared_ptr<CDMReaderWriter> rw = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
+        std::shared_ptr<CDMReaderWriter> rw = std::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
         BOOST_CHECK(rw.get() != 0);
 
         read1 = rw->getScaledDataSlice("ga_2t_1", 0);

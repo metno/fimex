@@ -27,8 +27,8 @@
 #include "fimex/CDMReaderDecl.h"
 
 // boost
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <memory>
 
 // standard
 #include <string>
@@ -49,29 +49,23 @@ namespace MetNoFimex {
 
     class MetGmTags {
     public:
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForWriting(const CDMReader_p pCdmReader,
-                                                                      const CDMVariable* pVariable,
-                                                                      const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
-                                                                      const unsigned short p_id,
-                                                                      const std::string fillValue = std::string(),
-                                                                      const std::string addOffset = std::string(),
-                                                                      const std::string scaleFactor = std::string());
+        static std::shared_ptr<MetGmTags> createMetGmTagsForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                    const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id,
+                                                                    const std::string fillValue = std::string(), const std::string addOffset = std::string(),
+                                                                    const std::string scaleFactor = std::string());
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                      const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
-                                                                      const boost::shared_ptr<MetGmVerticalTag> vTag);
+        static std::shared_ptr<MetGmTags> createMetGmTagsForReading(const std::shared_ptr<MetGmGroup1Ptr> pGp1, const std::shared_ptr<MetGmGroup2Ptr> pGp2,
+                                                                    const std::shared_ptr<MetGmVerticalTag> vTag);
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                            const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
-                                                                            const boost::shared_ptr<MetGmVerticalTag> vTag);
+        static std::shared_ptr<MetGmTags> createMetGmTagsForSlicedReading(const std::shared_ptr<MetGmGroup1Ptr> pGp1,
+                                                                          const std::shared_ptr<MetGmGroup2Ptr> pGp2,
+                                                                          const std::shared_ptr<MetGmVerticalTag> vTag);
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedWriting(const CDMReader_p pCdmReader,
-                                                                            const CDMVariable* pVariable,
-                                                                            const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
-                                                                            const unsigned short p_id);
+        static std::shared_ptr<MetGmTags> createMetGmTagsForSlicedWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                          const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id);
 
-        const boost::shared_ptr<MetGmGroup3Ptr>& gp3()    { return pGp3_; }
-//        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
+        const std::shared_ptr<MetGmGroup3Ptr>& gp3() { return pGp3_; }
+        //        const std::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
 
         const unsigned short p_id()  const;
         const int            pr()    const;
@@ -98,10 +92,10 @@ namespace MetNoFimex {
         const unsigned long sliceDataSize();
         const boost::shared_array<float>& data();
 
-        boost::shared_ptr<MetGmXTag>&        xTag();
-        boost::shared_ptr<MetGmYTag>&        yTag();
-        boost::shared_ptr<MetGmVerticalTag>& zTag();
-        boost::shared_ptr<MetGmTimeTag>&     tTag();
+        std::shared_ptr<MetGmXTag>& xTag();
+        std::shared_ptr<MetGmYTag>& yTag();
+        std::shared_ptr<MetGmVerticalTag>& zTag();
+        std::shared_ptr<MetGmTimeTag>& tTag();
 
         void sliceToMetGmLayout(boost::shared_array<float>& slice);
 
@@ -111,18 +105,18 @@ namespace MetNoFimex {
     private:
         MetGmTags() { }
 
-        MetGmTags(const boost::shared_ptr<MetGmGroup1Ptr> pg1,
-                  const boost::shared_ptr<MetGmGroup2Ptr> pg2)
-            : pGp1_(pg1), pGp2_(pg2)
+        MetGmTags(const std::shared_ptr<MetGmGroup1Ptr> pg1, const std::shared_ptr<MetGmGroup2Ptr> pg2)
+            : pGp1_(pg1)
+            , pGp2_(pg2)
         {
         }
 
-        const boost::shared_ptr<MetGmGroup1Ptr>   pGp1_;
-        const boost::shared_ptr<MetGmGroup2Ptr>   pGp2_;
+        const std::shared_ptr<MetGmGroup1Ptr> pGp1_;
+        const std::shared_ptr<MetGmGroup2Ptr> pGp2_;
 
-        boost::shared_ptr<MetGmGroup3Ptr>   pGp3_;
-        boost::shared_ptr<MetGmGroup5Ptr>   pGp5_;
-        boost::shared_ptr<MetGmHDTag>       dimTag_;
+        std::shared_ptr<MetGmGroup3Ptr> pGp3_;
+        std::shared_ptr<MetGmGroup5Ptr> pGp5_;
+        std::shared_ptr<MetGmHDTag> dimTag_;
     };
 }
 

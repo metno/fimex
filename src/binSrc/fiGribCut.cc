@@ -24,21 +24,21 @@
  *      Author: Heiko Klein
  */
 
-#include <boost/program_options.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <fstream>
-#include <iostream>
-#include <cstdio>
-#include <grib_api.h>
 #include "fimex/CDMconstants.h"
-#include "fimex/Utils.h"
-#include "fimex/GribUtils.h"
 #include "fimex/Data.h"
+#include "fimex/GribUtils.h"
 #include "fimex/ThreadPool.h"
+#include "fimex/Utils.h"
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/program_options.hpp>
+#include <boost/shared_array.hpp>
+#include <cstdio>
+#include <fstream>
+#include <grib_api.h>
+#include <iostream>
+#include <memory>
 
 namespace po = boost::program_options;
 namespace io = boost::iostreams;
@@ -55,7 +55,7 @@ static void writeUsage(ostream& out, const po::options_description& options) {
     out << options << endl;
 }
 
-static bool gribMatchParameters(const boost::shared_ptr<grib_handle>& gh, vector<long> parameters)
+static bool gribMatchParameters(const std::shared_ptr<grib_handle>& gh, vector<long> parameters)
 {
     if (parameters.size() == 0) return true; // all parameters requested
     long param;
@@ -110,9 +110,9 @@ static pair<size_t, size_t> findFirstLastIndex(double start, double incr, size_t
     return make_pair(firstPos, lastPos);
 }
 
-static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<grib_handle>& gh, map<string, double> bb)
+static std::shared_ptr<grib_handle> cutBoundingBox(const std::shared_ptr<grib_handle>& gh, map<string, double> bb)
 {
-    boost::shared_ptr<grib_handle> newGh = gh;
+    std::shared_ptr<grib_handle> newGh = gh;
     if (bb.size() == 4) {
         char msg[1024];
         size_t msgLength = 1024;
@@ -122,7 +122,7 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             throw runtime_error("cannot only attach bounding-box to type regular_ll, got type " + MetNoFimex::type2string(typeOfGrid));
         } else {
             // create a clone of the handle for later modifications
-            newGh = boost::shared_ptr<grib_handle>(grib_handle_clone(gh.get()), grib_handle_delete);
+            newGh = std::shared_ptr<grib_handle>(grib_handle_clone(gh.get()), grib_handle_delete);
             GridDefinition::Orientation orient = MetNoFimex::gribGetGridOrientation(gh);
             if (!(orient == GridDefinition::LeftLowerHorizontal
                   || orient == MetNoFimex::GridDefinition::LeftUpperHorizontal)) {
@@ -207,13 +207,13 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
 }
 
 // work on one grib_hanlde, return number of errors
-static int gribCutHandle(ostream& outStream, const boost::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
+static int gribCutHandle(ostream& outStream, const std::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
 {
     // skip parameters if not matching
     if (!gribMatchParameters(gh, parameters)) return 0;
 
     // test the bounding box
-    boost::shared_ptr<grib_handle> output_gh = cutBoundingBox(gh, bb);
+    std::shared_ptr<grib_handle> output_gh = cutBoundingBox(gh, bb);
 
     // write data to file
     size_t bufferSize;
@@ -229,7 +229,7 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
 {
     int errors = 0;
     for (vector<string>::const_iterator file = inputFiles.begin(); file != inputFiles.end(); ++file) {
-        boost::shared_ptr<FILE> fh(fopen(file->c_str(), "rb"), fclose);
+        std::shared_ptr<FILE> fh(fopen(file->c_str(), "rb"), fclose);
         if (fh.get() == 0) {
             cerr << "cannot open file: " << *file << endl;
             ++errors;
@@ -240,7 +240,7 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
                 // read the messages of interest
                 size_t pos = ftell(fh.get());
                 int err = 0;
-                boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+                std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
                 size_t newPos = ftell(fh.get());
                 if (debug > 0) {
                     cerr << "fetching handle from file " << *file << " from pos " << pos << " to pos " << newPos << endl;

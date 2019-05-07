@@ -36,7 +36,7 @@
 #include "fimex/Logger.h"
 #include "fimex/vertical_coordinate_transformations.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -46,7 +46,7 @@ static Logger_p logger = getLogger("fimex.PressureToStandardAltitudeConverter");
 VerticalConverter_p PressureToStandardAltitudeConverter::createConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure)
 {
     LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate altitude levels");
-    return boost::make_shared<PressureToStandardAltitudeConverter>(reader, cs, pressure);
+    return std::make_shared<PressureToStandardAltitudeConverter>(reader, cs, pressure);
 }
 
 PressureToStandardAltitudeConverter::PressureToStandardAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure)

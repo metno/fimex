@@ -101,7 +101,7 @@ struct GribCDMReader::Impl
      *
      * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
      */
-    map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
+    map<string, std::shared_ptr<ReplaceStringObject>> templateReplacementAttributes;
 };
 
 /**
@@ -244,8 +244,10 @@ void GribCDMReader::initPostIndices()
         initAddTimeDimension();
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
         if (p_->times.size() > 0) {
-            p_->templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(0))));
-            p_->templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(p_->times.size()-1))));
+            p_->templateReplacementAttributes["MIN_DATETIME"] =
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(0))));
+            p_->templateReplacementAttributes["MAX_DATETIME"] =
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(p_->times.size() - 1))));
         }
 
         initAddGlobalAttributes();
@@ -458,8 +460,8 @@ void GribCDMReader::initLevels()
             // add attributes
             vector<CDMAttribute> levelAttributes;
             if (node != 0) {
-                map<string, boost::shared_ptr<ReplaceStringObject> > replacements;
-                replacements["EXT"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
+                map<string, std::shared_ptr<ReplaceStringObject>> replacements;
+                replacements["EXT"] = std::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
                 fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
 
                 // add special attributes for grib1 / grib2
@@ -922,7 +924,6 @@ void GribCDMReader::initAddProjection()
     if (replaceEarthString != "") {
         LOG4FIMEX(logger, Logger::DEBUG,"overruling earth-parametes with " << replaceEarthString);
     }
-
 
     // gridDefinition -> gridType
     map<GridDefinition, string> gridDefs;

@@ -24,16 +24,16 @@
 #ifndef CDMREADERDECL_H_
 #define CDMREADERDECL_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex
 {
 /* forward declarations */
 class CDMReader;
-typedef boost::shared_ptr<CDMReader> CDMReader_p;
+typedef std::shared_ptr<CDMReader> CDMReader_p;
 
 class CDMReaderWriter;
-typedef boost::shared_ptr<CDMReaderWriter> CDMReaderWriter_p;
+typedef std::shared_ptr<CDMReaderWriter> CDMReaderWriter_p;
 }
 
 #endif /*CDMREADERDECL_H_ */

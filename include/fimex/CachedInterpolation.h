@@ -95,7 +95,7 @@ private:
      * allow fetching of a reduced interpolation domain, i.e. to work with a much smaller amount of input data
      * @return a 0-pointer unless a internal function to reduce the domain has been run, e.g. CachedInterpolation::createReducedDomain()
      */
-    virtual boost::shared_ptr<ReducedInterpolationDomain> reducedDomain() const {return boost::shared_ptr<ReducedInterpolationDomain>();}
+    virtual std::shared_ptr<ReducedInterpolationDomain> reducedDomain() const { return std::shared_ptr<ReducedInterpolationDomain>(); }
 };
 
 /**
@@ -111,7 +111,7 @@ private:
     size_t inY;
     size_t outX;
     size_t outY;
-    boost::shared_ptr<ReducedInterpolationDomain> reducedDomain_;
+    std::shared_ptr<ReducedInterpolationDomain> reducedDomain_;
     int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
     /**
@@ -151,7 +151,7 @@ public:
      * @return y-size of the output data
      */
     virtual size_t getOutY() const {return outY;}
-    virtual boost::shared_ptr<ReducedInterpolationDomain> reducedDomain() const {return reducedDomain_;}
+    virtual std::shared_ptr<ReducedInterpolationDomain> reducedDomain() const { return reducedDomain_; }
     /**
      * Create a reduced domain for later generation of a slicebuild to read a smaller domain.
      * It should be run immediately after creating the CachedInterpolation.

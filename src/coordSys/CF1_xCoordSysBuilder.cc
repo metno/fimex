@@ -44,8 +44,8 @@
 #include <fimex/coordSys/verticalTransform/OceanSG2.h>
 #include <fimex/coordSys/verticalTransform/Pressure.h>
 
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 #include <set>
 
@@ -227,8 +227,7 @@ static CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& v
     return CoordinateAxis::Undefined;
 }
 
-
-static string getPtrName(const boost::shared_ptr<const CDMNamedEntity>& ptr)
+static string getPtrName(const std::shared_ptr<const CDMNamedEntity>& ptr)
 {
     return ptr->getName();
 }
@@ -281,11 +280,11 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
         // create CoordinateAxis
         for (set<string>::iterator coord = tmpCoordinateAxes.begin(); coord != tmpCoordinateAxes.end(); ++coord) {
             if (cdm.hasVariable(*coord)) {
-                coordinateAxes[*coord] = boost::make_shared<CoordinateAxis>(cdm.getVariable(*coord));
+                coordinateAxes[*coord] = std::make_shared<CoordinateAxis>(cdm.getVariable(*coord));
             } else {
                 // add a dimension without a variable with a 'virtual' variable
                 vector<string> shape(1, *coord);
-                coordinateAxes[*coord] = boost::make_shared<CoordinateAxis>(CDMVariable(*coord, CDM_INT, shape));
+                coordinateAxes[*coord] = std::make_shared<CoordinateAxis>(CDMVariable(*coord, CDM_INT, shape));
             }
         }
     }
@@ -316,7 +315,7 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
                 set<string> axes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 set<string> coords = getCoordinateNamesCF1_x(cdm, *varIt);
                 if (axes.size()) {
-                    CoordinateSystem_p cs = boost::make_shared<CoordinateSystem>("CF-1.X");
+                    CoordinateSystem_p cs = std::make_shared<CoordinateSystem>("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
                         map<string, CoordinateAxis_p>::iterator foundAxis = coordinateAxes.find(*axis);
                         if (foundAxis != coordinateAxes.end()) {
@@ -424,13 +423,13 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
                 LOG4FIMEX(logger, Logger::DEBUG, "z axis '" << zAxis->getName() << "' has type " << zAxis->getAxisTypeStr());
                 switch (zAxis->getAxisType()) {
                 case CoordinateAxis::Height:
-                    cs->setVerticalTransformation(boost::make_shared<Height>(zAxis->getName()));
+                    cs->setVerticalTransformation(std::make_shared<Height>(zAxis->getName()));
                     break;
                 case CoordinateAxis::Depth:
-                    cs->setVerticalTransformation(boost::make_shared<Depth>(zAxis->getName()));
+                    cs->setVerticalTransformation(std::make_shared<Depth>(zAxis->getName()));
                     break;
                 case CoordinateAxis::Pressure:
-                    cs->setVerticalTransformation(boost::make_shared<Pressure>(zAxis->getName()));
+                    cs->setVerticalTransformation(std::make_shared<Pressure>(zAxis->getName()));
                     break;
                 default:
                     CDMAttribute formula;
@@ -464,29 +463,29 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
                             if (terms["ap"] == "") {
                                 if (!isCSForTerm(cdm, *cs, terms["a"]))
                                     continue;
-                                cs->setVerticalTransformation(boost::make_shared<HybridSigmaPressure2>(terms["a"], terms["b"], terms["ps"], terms["p0"]));
+                                cs->setVerticalTransformation(std::make_shared<HybridSigmaPressure2>(terms["a"], terms["b"], terms["ps"], terms["p0"]));
                             } else {
                                 if (!isCSForTerm(cdm, *cs, terms["ap"]))
                                     continue;
-                                cs->setVerticalTransformation(boost::make_shared<HybridSigmaPressure1>(terms["ap"], terms["b"], terms["ps"], terms["p0"]));
+                                cs->setVerticalTransformation(std::make_shared<HybridSigmaPressure1>(terms["ap"], terms["b"], terms["ps"], terms["p0"]));
                             }
                         } else if (standardNameValue == LnPressure::NAME()) {
                             if (!(isCSForTerm(cdm, *cs, terms["lev"]) && isCSForTerm(cdm, *cs, terms["p0"])))
                                 continue;
-                            cs->setVerticalTransformation(boost::make_shared<LnPressure>(terms["lev"], terms["p0"]));
+                            cs->setVerticalTransformation(std::make_shared<LnPressure>(terms["lev"], terms["p0"]));
                         } else if (standardNameValue == AtmosphereSigma::NAME()) {
                             if (!(isCSForTerm(cdm, *cs, terms["sigma"]) && isCSForTerm(cdm, *cs, terms["ptop"]) && isCSForTerm(cdm, *cs, terms["ps"])))
                                 continue;
-                            cs->setVerticalTransformation(boost::make_shared<AtmosphereSigma>(terms["sigma"], terms["ptop"], terms["ps"]));
+                            cs->setVerticalTransformation(std::make_shared<AtmosphereSigma>(terms["sigma"], terms["ptop"], terms["ps"]));
                         } else if (standardNameValue == OceanSG1::NAME() || standardNameValue == OceanSG2::NAME()) {
                             if (!(isCSForTerm(cdm, *cs, terms["s"]) && isCSForTerm(cdm, *cs, terms["C"]) && isCSForTerm(cdm, *cs, terms["depth"]) &&
                                   isCSForTerm(cdm, *cs, terms["depth_c"]) && isCSForTerm(cdm, *cs, terms["eta"])))
                                 continue;
                             const OceanSGVars vars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"]);
                             if (standardNameValue == OceanSG1::NAME())
-                                cs->setVerticalTransformation(boost::make_shared<OceanSG1>(vars));
+                                cs->setVerticalTransformation(std::make_shared<OceanSG1>(vars));
                             else // if (standardNameValue == OceanSG2::NAME())
-                                cs->setVerticalTransformation(boost::make_shared<OceanSG2>(vars));
+                                cs->setVerticalTransformation(std::make_shared<OceanSG2>(vars));
                         } else {
                             LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }

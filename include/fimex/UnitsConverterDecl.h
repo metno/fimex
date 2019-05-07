@@ -23,12 +23,12 @@
 #ifndef UNITSCONVERTERDECL_H_
 #define UNITSCONVERTERDECL_H_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
 class UnitsConverter;
-typedef boost::shared_ptr<UnitsConverter> UnitsConverter_p;
+typedef std::shared_ptr<UnitsConverter> UnitsConverter_p;
 
 } /* namespace MetNoFimex */
 

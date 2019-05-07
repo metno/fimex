@@ -45,7 +45,8 @@
 using namespace MetNoFimex;
 using namespace std;
 
-DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<CDMReader> reader, const string& parName, const string& parUnit, const vector<SliceBuilder>& slices)
+DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, std::shared_ptr<CDMReader> reader, const string& parName, const string& parUnit,
+                                         const vector<SliceBuilder>& slices)
 {
     vector<size_t> sliceLengths(slices.size(), 1);
     for (int i = 0; i < slices.size(); i++) {
@@ -119,8 +120,7 @@ DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<CDMR
 
 
 int main(int argc, char* args[]) {
-    boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", "/opdata/arome2_5_main/AROME_MetCoOp_00_fp.nc");
-    //boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", "/disk1/myopdata/arome_norway25/arome_norway_default2_5km_20140617_09.nc");
+    std::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", "/opdata/arome2_5_main/AROME_MetCoOp_00_fp.nc");
     const CDM& cdm = reader->getCDM();
 
     string parName = "air_temperature_2m";

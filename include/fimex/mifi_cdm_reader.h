@@ -55,13 +55,16 @@ public:
  */
 class mifi_slicebuilder {
 public:
-    mifi_slicebuilder(boost::shared_ptr<MetNoFimex::SliceBuilder> sb, MetNoFimex::CoordinateSystem_cp cs)
+    mifi_slicebuilder(std::shared_ptr<MetNoFimex::SliceBuilder> sb, MetNoFimex::CoordinateSystem_cp cs)
         : sb_(sb)
         , cs_(cs)
     {
     }
-    mifi_slicebuilder(boost::shared_ptr<MetNoFimex::SliceBuilder> sb) : sb_(sb) {}
-    boost::shared_ptr<MetNoFimex::SliceBuilder> sb_;
+    mifi_slicebuilder(std::shared_ptr<MetNoFimex::SliceBuilder> sb)
+        : sb_(sb)
+    {
+    }
+    std::shared_ptr<MetNoFimex::SliceBuilder> sb_;
     MetNoFimex::CoordinateSystem_cp cs_;
 };
 

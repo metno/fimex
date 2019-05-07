@@ -31,9 +31,9 @@
 #include "fimex/CDMReaderDecl.h"
 
 // boost
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
 #include "fimex/DataDecl.h"
+#include <boost/shared_array.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -45,12 +45,9 @@ namespace MetNoFimex {
 
     class MetGmVerticalTag {
     public:
+        static std::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVar);
 
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(const CDMReader_p pCdmReader,
-                                                                                    const CDMVariable* pVar);
-
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                                    boost::shared_ptr<MetGmVerticalTag> vTag);
+        static std::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(std::shared_ptr<MetGmGroup3Ptr> pGp3, std::shared_ptr<MetGmVerticalTag> vTag);
 
         inline unsigned int                nz()       { return nz_; }
         inline unsigned int                pr()       { return pr_;}

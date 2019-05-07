@@ -27,17 +27,16 @@
 #ifndef CDM_XMLCONFIGHELPER_H_
 #define CDM_XMLCONFIGHELPER_H_
 
-#include <boost/shared_ptr.hpp>
-
-#include <libxml/xinclude.h>
 #include <libxml/tree.h>
+#include <libxml/xinclude.h>
 #include <libxml/xpath.h>
 
 #include <map>
+#include <memory>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 // forward decl.
 class ReplaceStringObject;
 class CDMAttribute;
@@ -54,7 +53,8 @@ using namespace std;
 /**
  * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
  */
-void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
+void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
+                                  const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements);
 
 /**
  * read a xml-node retrieved by the xpathString and extract the nodes attributes and all <attributes> sub-elements with name, value and type
@@ -66,8 +66,9 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
  * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */
-int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
+int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes,
+                                   std::vector<CDMAttribute>& varAttributes, const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements);
 
-}
+} // namespace MetNoFimex
 
 #endif /* CDM_XMLCONFIGHELPER_H_ */

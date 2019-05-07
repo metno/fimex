@@ -137,7 +137,7 @@ private:
     VerticalConverter_p findPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 };
 
-typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
+typedef std::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
 
 std::ostream& operator<<(std::ostream& out, const VerticalTransformation& vt);
 

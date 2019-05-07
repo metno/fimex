@@ -45,16 +45,13 @@
 
 namespace MetNoFimex {
 
-MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                               const boost::shared_ptr<MetGmHDTag>     hdTag,
-                               const boost::shared_array<float>        data,
-                               const std::string                       fillValue)
-        : pGp3_(gp3),
-          hdTag_(hdTag),
-          data_(data),
-          fillValue_(fillValue)
-    {
-
+MetGmGroup5Ptr::MetGmGroup5Ptr(const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::shared_ptr<MetGmHDTag> hdTag, const boost::shared_array<float> data,
+                               const std::string fillValue)
+    : pGp3_(gp3)
+    , hdTag_(hdTag)
+    , data_(data)
+    , fillValue_(fillValue)
+{
     }
 
 
@@ -215,15 +212,11 @@ void MetGmGroup5Ptr::toFimexLayout()
     data_.swap(dataT);
 }
 
-boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader,
-                                                                                 const CDMVariable* pVariable,
-                                                                                 const boost::shared_ptr<MetGmGroup3Ptr> pg3,
-                                                                                 const std::string& fillValue,
-                                                                                 const std::string& addOffset,
-                                                                                 const std::string& scaleFactor)
+std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                               const std::shared_ptr<MetGmGroup3Ptr> pg3, const std::string& fillValue,
+                                                                               const std::string& addOffset, const std::string& scaleFactor)
 {
-    boost::shared_ptr<MetGmHDTag> hdtag =
-            MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
+    std::shared_ptr<MetGmHDTag> hdtag = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
 
     switch(hdtag->asShort()) {
         case MetGmHDTag::HD_2D:
@@ -262,12 +255,12 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     msg.append(cdmRef.getUnits(varName)).append(" to ").append(mgmUnits).append(" for variable ").append(varName).append(" -- excluding");
                     MGM_MESSAGE_POINT(msg)
                     boost::shared_array<float> empty;
-                    return boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(pg3, hdtag, empty));
+                    return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, empty));
                 }
 
                 DataPtr raw_data  = pCdmReader->getScaledDataInUnit(varName, mgmUnits);
 
-                boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asFloat()));
+                std::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asFloat()));
 
                 /*
                  *     reindex data - all slices
@@ -289,70 +282,66 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
     }
 
-    return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(), fillValue));
+    return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(), fillValue));
 }
 
-    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                                     const boost::shared_ptr<MetGmHDTag>     hdTag)
-    {
-        switch(hdTag->asShort()) {
-            case MetGmHDTag::HD_2D:
-            case MetGmHDTag::HD_2D_T:
-            case MetGmHDTag::HD_3D_T:
-                {
-                    boost::shared_array<float> data(new float[hdTag->totalSize()]);
+std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                               const std::shared_ptr<MetGmHDTag> hdTag)
+{
+    switch (hdTag->asShort()) {
+    case MetGmHDTag::HD_2D:
+    case MetGmHDTag::HD_2D_T:
+    case MetGmHDTag::HD_3D_T: {
+        boost::shared_array<float> data(new float[hdTag->totalSize()]);
 
-                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, data));
+        std::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, data));
 
-                    gp5->sOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
-                    MGM_THROW_ON_ERROR(mgm_read_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle(), data.get()))
-                    gp5->eOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
+        gp5->sOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
+        MGM_THROW_ON_ERROR(mgm_read_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle(), data.get()))
+        gp5->eOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
 
-                    MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp3->p_id(), *gp3->mgmHandle()->version()))
+        MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp3->p_id(), *gp3->mgmHandle()->version()))
 
-                    /*
-                     *           reindex data
-                     *     METGM               Fimex
-                     * (z, x, y, slice) -> (x, y, z, slice)
-                     */
-                    gp5->toFimexLayout();
-                    return gp5;
-                }
-                break;
-            case MetGmHDTag::HD_0D:
-            case MetGmHDTag::HD_0D_T:
-            case MetGmHDTag::HD_1D:
-            case MetGmHDTag::HD_1D_T:
-            case MetGmHDTag::HD_3D:
-            default:
-                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
-                                   + hdTag->asString()
-                                   + " for p_id ="
-                                   + boost::lexical_cast<std::string>(gp3->p_id()));
-        }
-
-        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
+        /*
+         *           reindex data
+         *     METGM               Fimex
+         * (z, x, y, slice) -> (x, y, z, slice)
+         */
+        gp5->toFimexLayout();
+        return gp5;
+    } break;
+    case MetGmHDTag::HD_0D:
+    case MetGmHDTag::HD_0D_T:
+    case MetGmHDTag::HD_1D:
+    case MetGmHDTag::HD_1D_T:
+    case MetGmHDTag::HD_3D:
+    default:
+        throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdTag->asString() +
+                           " for p_id =" + boost::lexical_cast<std::string>(gp3->p_id()));
     }
 
-    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                                           const boost::shared_ptr<MetGmHDTag>     hdTag)
+    return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
+    }
+
+    std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                                         const std::shared_ptr<MetGmHDTag> hdTag)
     {
         switch(hdTag->asShort()) {
             case MetGmHDTag::HD_2D:
             case MetGmHDTag::HD_2D_T:
             case MetGmHDTag::HD_3D_T:
                 {
-                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
+                std::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
 
-                    /**
-                      * must skip data to keep METGM C API lib satisifed
-                      */
+                /**
+                 * must skip data to keep METGM C API lib satisifed
+                 */
 
-                    gp5->sOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
-                    MGM_THROW_ON_ERROR(mgm_skip_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle()))
-                    gp5->eOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
+                gp5->sOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
+                MGM_THROW_ON_ERROR(mgm_skip_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle()))
+                gp5->eOffset_ = ftell(gp3->mgmHandle()->fileHandle()->handle());
 
-                    return  gp5;
+                return gp5;
                 }
                 break;
             case MetGmHDTag::HD_0D:
@@ -367,7 +356,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                    + boost::lexical_cast<std::string>(gp3->p_id()));
         }
 
-        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
+        return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
     }
 
     /*
@@ -581,12 +570,10 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         return  boost::shared_array<float>();
     }
 
-    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader,
-                                                                                           const CDMVariable* pVariable,
-                                                                                           const boost::shared_ptr<MetGmGroup3Ptr> pg3)
+    std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
+                                                                                         const std::shared_ptr<MetGmGroup3Ptr> pg3)
     {
-        boost::shared_ptr<MetGmHDTag> hdtag =
-                MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
+        std::shared_ptr<MetGmHDTag> hdtag = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
 
         std::string mgmUnits;
 
@@ -625,13 +612,13 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                         std::string msg(" can't convert from ");
                         msg.append(cdmRef.getUnits(varName)).append(" to ").append(mgmUnits).append(" for variable ").append(varName).append(" -- excluding");
                         MGM_MESSAGE_POINT(msg)
-//                        boost::shared_array<float> empty;
-//                        boost::shared_ptr<MetGmGroup5Ptr> mgm5group(new MetGmGroup5Ptr(pg3, hdtag, empty));
-//                        return mgm5group;
-                          return boost::shared_ptr<MetGmGroup5Ptr>();
+                        //                        boost::shared_array<float> empty;
+                        //                        std::shared_ptr<MetGmGroup5Ptr> mgm5group(new MetGmGroup5Ptr(pg3, hdtag, empty));
+                        //                        return mgm5group;
+                        return std::shared_ptr<MetGmGroup5Ptr>();
                     }
 
-                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
+                    std::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
                     gp5->units_ = mgmUnits;
 
                     return gp5;
@@ -646,7 +633,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
         }
 
-        return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
+        return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
     }
 
     /*
