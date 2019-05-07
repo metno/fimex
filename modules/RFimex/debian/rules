@@ -1,5 +1,0 @@
-#!/usr/bin/make -f
-# 							-*- makefile -*-
-
-debRreposname = metno
-include /usr/share/R/debian/r-cran.mk

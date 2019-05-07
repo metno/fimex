@@ -1,9 +1,0 @@
-Package: RFimex
-Type: Package
-Title: R interface for Fimex
-Version: 0.05
-Date: 2015-02-26
-Author: Heiko Klein
-Maintainer: Heiko Klein <Heiko.Klein@met.no>
-Description: R interface for Fimex, a library to read and manipulate gridded data
-License: LGPL (>= 2.0, < 3)

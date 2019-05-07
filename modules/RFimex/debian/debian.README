@@ -1,7 +1,0 @@
-To update the package:
-  * update VERSION in DESCRIPTION file
-  * update version in configure.ac and run autoconf
-  * update version in debian/changelog
-
-  run
-  debuild -i -us -uc -b
