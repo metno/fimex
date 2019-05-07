@@ -663,6 +663,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 
     return retVal;
 }
+
 void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim)
 {
     generateProjectionCoordinates(Projection::create(getAttributes(projectionVariable)), xDim, yDim, lonDim, latDim);
@@ -727,32 +728,6 @@ void CDM::generateProjectionCoordinates(boost::shared_ptr<const Projection> proj
     addAttribute(latVar.getName(),CDMAttribute("units", "degree_north"));
     addAttribute(latVar.getName(),CDMAttribute("long_name", "latitude"));
     addAttribute(latVar.getName(),CDMAttribute("standard_name", "latitude"));
-}
-
-
-CDM::AttrVec CDM::getProjection(std::string varName) const
-{
-    CDM::AttrVec retVal;
-    const AttrVec& attributes = getAttributes(varName);
-    AttrVec::const_iterator ait = find_if(attributes.begin(), attributes.end(), CDMNameEqual("grid_mapping"));
-    if (ait != attributes.end()) {
-        std::string gridMapping = ait->getData()->asString();
-        retVal = getAttributes(gridMapping);
-    } else {
-        // no projection, maybe longitude latitude?
-        const std::vector<std::string>& shape = getVariable(varName).getShape();
-
-        if (find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this)) != shape.end()) {
-            if (find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this)) != shape.end()) {
-                // longitude and latitude found
-                // using CF-1.2 draft attribute for declaration of sphere
-                retVal.push_back(CDMAttribute("grid_mapping_name", "latitude_longitude"));
-                retVal.push_back(CDMAttribute("semi_major_axis", MIFI_EARTH_RADIUS_M));
-                retVal.push_back(CDMAttribute("inverse_flattening", 0));
-            }
-        }
-    }
-    return retVal;
 }
 
 boost::shared_ptr<const Projection> CDM::getProjectionOf(std::string varName) const

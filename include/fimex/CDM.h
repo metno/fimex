@@ -350,6 +350,7 @@ public:
      *
      */
     MIFI_DEPRECATED(void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim);)
+
     /**
      * @brief extract the names of the projection-variable and the corresponding projection-axes
      *
@@ -363,15 +364,6 @@ public:
      */
     MIFI_DEPRECATED(bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const);
 
-
-    /**
-     * @brief get the projection attributes (as of CF-1.0) of a variable
-     *
-     * @param varName name of variable
-     * @return vector of attributes of the projection, an empty vector if no projection found
-     * @deprecated use the getProjectionOf() method
-     */
-    MIFI_DEPRECATED(AttrVec getProjection(std::string varName) const);
     /**
      * @brief get the projection of a variable
      *
