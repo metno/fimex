@@ -341,6 +341,7 @@ if(ENABLE_METGM)
     metgm/MetGmCDMReaderImpl.h
     metgm/MetGmCDMReaderSlicedImpl.cc
     metgm/MetGmCDMReaderSlicedImpl.h
+    metgm/MetGmCDMVariableProfile.cc
     metgm/MetGmCDMVariableProfile.h
     metgm/MetGmCDMWriterImpl.cc
     metgm/MetGmCDMWriterImpl.h
@@ -348,6 +349,7 @@ if(ENABLE_METGM)
     metgm/MetGmCDMWriterSlicedImpl.h
     metgm/MetGmCommentAttributeParser.cc
     metgm/MetGmCommentAttributeParser.h
+    metgm/MetGmConfigurationMappings.cc
     metgm/MetGmConfigurationMappings.h
     metgm/MetGmDimensionsTag.cc
     metgm/MetGmDimensionsTag.h

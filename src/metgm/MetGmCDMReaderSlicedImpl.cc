@@ -81,10 +81,7 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 
     void MetGmCDMReaderSlicedImpl::addVariables()
     {
-        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
-        for(cdmNameView::iterator nIt = nameView.begin(); nIt != nameView.end(); ++nIt)
-        {
-            MetGmCDMVariableProfile profile = *nIt;
+        for (const MetGmCDMVariableProfile profile : cdmConfiguration_) {
 
             int p_id = profile.p_id_;
 
@@ -147,15 +144,10 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
         if(variable.hasData()) {
             return getDataSliceFromMemory(variable, unLimDimPos);
         } else {
-            cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
-            cdmNameView::iterator it = nameView.find(varName);
-
-            if(it == nameView.end())
-                return DataPtr();
-
-            MetGmCDMVariableProfile profile = *it;
-            DataPtr data = createData(profile.pTags_->sliceDataSize(), profile.pTags_->readDataSlices(unLimDimPos + 1, 1));
-
+            DataPtr data;
+            cdm_configuration::iterator it = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(varName));
+            if (it != cdmConfiguration_.end())
+                data = createData(it->pTags_->sliceDataSize(), it->pTags_->readDataSlices(unLimDimPos + 1, 1));
             return data;
         }
     }
@@ -238,38 +230,26 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 
             prevZTag = tags->zTag();
 
-            xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
-
             std::string kildeName;
             std::string standardName;
             std::string addOffset;
             std::string scaleFactor;
             std::string strUnit(mgm_get_param_unit(tags->p_id(), *pHandle_));
             std::string fillValue;
-            if(pidView.count(tags->p_id()) == 0) {
 
-            } else if(pidView.count(tags->p_id()) == 1) {
-                MetGmConfigurationMappings entry = *(pidView.find(tags->p_id()));
-                kildeName = entry.cdmName_;
-                standardName = entry.standardName_;
-                fillValue = entry.fillValue_;
-                addOffset = entry.addOffset_;
-                scaleFactor = entry.scaleFactor_;
-//                if(!entry.units_.empty())
-//                    strUnit = entry.units_;
-            } else {
-                xmlPidView::iterator ic0, ic1;
-                std::tie(ic0, ic1) = pidView.equal_range(tags->p_id());
-                for(; ic0 != ic1; ++ic0) {
-                    if(!ic0->units_.empty() && ic0->units_ == strUnit) {
-                        kildeName = ic0->cdmName_;
-//                        strUnit = ic0->units_;
-                        standardName = ic0->standardName_;
-                        fillValue = ic0->fillValue_;
-                        addOffset = ic0->addOffset_;
-                        scaleFactor = ic0->scaleFactor_;
-                        break;
-                    }
+            const MetGmConfigurationMappingsEqPId byPId(tags->p_id());
+            xml_configuration::const_iterator pIt = std::find_if(xmlConfiguration_.begin(), xmlConfiguration_.end(), byPId), nIt;
+            for (; pIt != xmlConfiguration_.end(); pIt = nIt) {
+                nIt = pIt;
+                nIt = std::find_if(++nIt, xmlConfiguration_.end(), byPId);
+                if (nIt == xmlConfiguration_.end() || (!pIt->units_.empty() && pIt->units_ == strUnit)) {
+                    kildeName = pIt->cdmName_;
+                    // strUnit = pIt->units_;
+                    standardName = pIt->standardName_;
+                    fillValue = pIt->fillValue_;
+                    addOffset = pIt->addOffset_;
+                    scaleFactor = pIt->scaleFactor_;
+                    break;
                 }
             }
 
@@ -299,7 +279,6 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
                 profile.addOffset_ = addOffset;
                 profile.scaleFactor_ = scaleFactor;
                 cdmConfiguration_.insert(profile);
-
             }
         }
     }

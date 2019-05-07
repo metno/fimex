@@ -37,18 +37,10 @@
 //
 #include "fimex/CDMVariable.h"
 
-// boost
-//
-#include <boost/multi_index/composite_key.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index_container.hpp>
-
 // standard
 //
 #include <memory>
+#include <set>
 #include <string>
 
 namespace MetNoFimex {
@@ -77,25 +69,36 @@ namespace MetNoFimex {
         std::shared_ptr<MetGmTags> pTags_;
     };
 
-    struct cdm_pid_index       {};
-    struct cdm_name_index      {};
-    struct cdm_hd_index        {};
+    typedef std::set<MetGmCDMVariableProfile> cdm_configuration;
 
-    typedef boost::multi_index::multi_index_container<
-        MetGmCDMVariableProfile,
-        boost::multi_index::indexed_by<
-            boost::multi_index::ordered_unique<boost::multi_index::identity<MetGmCDMVariableProfile>>,
-            boost::multi_index::ordered_non_unique<boost::multi_index::tag<cdm_pid_index>,
-                                                   boost::multi_index::member<MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::p_id_>>,
-            boost::multi_index::hashed_unique<boost::multi_index::tag<cdm_name_index>,
-                                              boost::multi_index::member<MetGmCDMVariableProfile, std::string, &MetGmCDMVariableProfile::cdmName_>>,
-            boost::multi_index::ordered_non_unique<boost::multi_index::tag<cdm_hd_index>,
-                                                   boost::multi_index::const_mem_fun<MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::hd>,
-                                                   std::greater<short>>>>
-        cdm_configuration;
+    struct MetGmCDMVariableProfileByPId
+    {
+        bool operator()(const MetGmCDMVariableProfile& a, const MetGmCDMVariableProfile& b) const { return a.p_id_ < b.p_id_; }
+        bool operator()(cdm_configuration::const_iterator a, cdm_configuration::const_iterator b) const { return this->operator()(*a, *b); }
+    };
 
-    typedef cdm_configuration::index<cdm_pid_index>::type       cdmPidView;
-    typedef cdm_configuration::index<cdm_name_index>::type      cdmNameView;
-}
+    struct MetGmCDMVariableProfileEqPId
+    {
+        short p_id_;
+        MetGmCDMVariableProfileEqPId(short p_id)
+            : p_id_(p_id)
+        {
+        }
+        bool operator()(const MetGmCDMVariableProfile& a) const { return a.p_id_ == p_id_; }
+    };
+
+    struct MetGmCDMVariableProfileEqName
+    {
+        const std::string& cdmName_;
+        MetGmCDMVariableProfileEqName(const std::string& cdmName)
+            : cdmName_(cdmName)
+        {
+        }
+        bool operator()(const MetGmCDMVariableProfile& a) const { return a.cdmName_ == cdmName_; }
+    };
+
+    std::vector<cdm_configuration::iterator> sorted_by_pid(cdm_configuration& xc);
+
+    } // namespace MetNoFimex
 
 #endif // METGM_CDMVARIABLEPROFILE_H

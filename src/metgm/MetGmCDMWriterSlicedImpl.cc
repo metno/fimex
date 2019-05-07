@@ -67,15 +67,12 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterSlicedImpl::init()
     {
-        xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
-        for(xmlPidView::const_iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
-
-            MetGmConfigurationMappings entry = *pIt;
+        for (xml_configuration::const_iterator pIt : sorted_by_pid(xmlConfiguration_)) {
+            const MetGmConfigurationMappings& entry = *pIt;
 
             MetGmTagsPtr tags;
 
-            cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-            if(nameView.find(entry.cdmName_) != nameView.end()) {
+            if (std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(entry.cdmName_)) != cdmConfiguration_.end()) {
                 throw CDMException("hmmm... the variable should not be found in cdm profile map");
             }
 
@@ -112,9 +109,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterSlicedImpl::writeGroup5Data(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-
-        MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
+        const MetGmCDMVariableProfile& profile =
+            *std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()));
 
         assert(profile.pTags_.get());
 

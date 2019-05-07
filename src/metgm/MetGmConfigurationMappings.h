@@ -33,19 +33,10 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-
-// boost
-//
-#include <boost/multi_index/composite_key.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index_container.hpp>
-#include <memory>
-
 // standard
 //
+#include <memory>
+#include <set>
 #include <string>
 
 namespace MetNoFimex {
@@ -65,31 +56,26 @@ namespace MetNoFimex {
         MetGmConfigurationMappings(short p_id, const std::string name) : p_id_(p_id), cdmName_(name) { }
     };
 
-    struct xml_pid_index {};
-    struct xml_name_index {};
+    typedef std::set<MetGmConfigurationMappings> xml_configuration;
 
-    typedef boost::multi_index::multi_index_container<
-      MetGmConfigurationMappings,
-      boost::multi_index::indexed_by<
-        boost::multi_index::ordered_unique<
-          boost::multi_index::identity<MetGmConfigurationMappings>
-        >,
-        boost::multi_index::ordered_non_unique<
-          boost::multi_index::tag<xml_pid_index>,
-          boost::multi_index::member<
-            MetGmConfigurationMappings, short, &MetGmConfigurationMappings::p_id_
-          >
-        >,
-        boost::multi_index::hashed_unique<
-          boost::multi_index::tag<xml_name_index>,
-            boost::multi_index::member<
-              MetGmConfigurationMappings, std::string, &MetGmConfigurationMappings::cdmName_ >
-        >
-      >
-    > xml_configuration;
+    struct MetGmConfigurationMappingsByPId
+    {
+        bool operator()(const MetGmConfigurationMappings& a, const MetGmConfigurationMappings& b) const { return a.p_id_ < b.p_id_; }
+        bool operator()(xml_configuration::const_iterator a, xml_configuration::const_iterator b) const { return this->operator()(*a, *b); }
+    };
 
-    typedef xml_configuration::index<xml_pid_index>::type    xmlPidView;
-    typedef xml_configuration::index<xml_name_index>::type   xmlNameView;
-}
+    struct MetGmConfigurationMappingsEqPId
+    {
+        short p_id_;
+        MetGmConfigurationMappingsEqPId(short p_id)
+            : p_id_(p_id)
+        {
+        }
+        bool operator()(const MetGmConfigurationMappings& a) const { return a.p_id_ == p_id_; }
+    };
+
+    std::vector<xml_configuration::const_iterator> sorted_by_pid(const xml_configuration& xc);
+
+} // namespace MetNoFimex
 
 #endif

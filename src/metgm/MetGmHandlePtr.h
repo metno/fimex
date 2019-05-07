@@ -38,8 +38,6 @@
 //
 #include "metgm.h"
 
-// boost
-//
 #include <memory>
 
 namespace MetNoFimex {

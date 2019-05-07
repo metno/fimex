@@ -255,40 +255,32 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup2Data()
     {
-        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
-        short np = nameView.size();
+        const short np = cdmConfiguration_.size();
 
         MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, np))
 
         if(*metgmVersion_ == MGM_Edition2) {
 
-            cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
-
             std::set<short> uniquePid;
-
-            for(cdmPidView::const_iterator cit = pidView.begin(); cit != pidView.end(); ++cit) {
-                uniquePid.insert(cit->p_id_);
-            }
-
-            std::unique_copy(uniquePid.begin(), uniquePid.end(), std::inserter(uniquePid, uniquePid.begin()));
+            for (const MetGmCDMVariableProfile& profile : cdmConfiguration_)
+                uniquePid.insert(profile.p_id_);
 
             const short ndp = uniquePid.size();
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
             size_t index = 0;
-            for(std::set<short>::const_iterator cit = uniquePid.begin(); cit != uniquePid.end(); ++cit) {
+            for (const short p_id : uniquePid) {
 
                 ++index;
 
-                cdmPidView::const_iterator pIt = pidView.find(*cit);
-                if(pIt == pidView.end())
-                    continue;
+                const MetGmCDMVariableProfileEqPId byPId(p_id);
+                cdm_configuration::const_iterator pIt = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), byPId), nIt = pIt;
+                size_t ndpr = 1;
+                while ((nIt = std::find_if(++nIt, cdmConfiguration_.end(), byPId)) != cdmConfiguration_.end())
+                    ndpr += 1;
 
-                const MetGmCDMVariableProfile& profile = *pIt;
-                const size_t ndpr = pidView.count(profile.p_id_);
-
-                MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, profile.p_id_))
+                MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, p_id))
                 MGM_THROW_ON_ERROR(mgm_set_ndpr(*metgmHandle_, index, ndpr))
 
                 /**
@@ -296,7 +288,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
                   *
                   * the HD value should be highest for given parameter
                   */
-                MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, profile.hd()))
+                MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, pIt->hd()))
             }
         }
     }
@@ -308,8 +300,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup3TimeAxis(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
+        const MetGmTagsPtr& tags = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()))->pTags_;
 
         if(tags->tTag().get()) {
             MGM_THROW_ON_ERROR(tags->set_nt(tags->tTag()->nT()))
@@ -322,8 +313,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
+        const MetGmTagsPtr& tags = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()))->pTags_;
 
         // x
         MGM_THROW_ON_ERROR(tags->set_dx(tags->xTag()->dx()));
@@ -337,8 +327,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup3VerticalAxis(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
+        const MetGmTagsPtr& tags = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()))->pTags_;
 
         if(tags->zTag().get()) {
             MGM_THROW_ON_ERROR(tags->set_nz(tags->zTag()->nz()));
@@ -353,23 +342,21 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup3Data(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-
         writeGroup3TimeAxis(pVar);
 
         writeGroup3HorizontalAxis(pVar);
 
         writeGroup3VerticalAxis(pVar);
 
-        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp3())));
+        cdm_configuration::iterator it = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()));
+        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(it)->pTags_->gp3()));
     }
 
     void MetGmCDMWriterImpl::writeGroup4Data(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-
-        if(nameView.find(pVar->getName())->pTags_->zTag().get()) {
-            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, nameView.find(pVar->getName())->pTags_->zTag()->points().get()));
+        const MetGmTagsPtr& tags = std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()))->pTags_;
+        if (tags->zTag()) {
+            MGM_THROW_ON_ERROR(mgm_write_group4(*metgmFileHandle_, *metgmHandle_, tags->zTag()->points().get()));
         } else {
             /* no z profile for variable */
             float f = 0;
@@ -380,24 +367,20 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
     void MetGmCDMWriterImpl::writeGroup5Data(const CDMVariable* pVar)
     {
-        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-
-        MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
+        const MetGmCDMVariableProfile& profile =
+            *std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()));
 
         MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, profile.pTags_->data().get()));
     }
 
     void MetGmCDMWriterImpl::init()
     {
-        xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
-        for(xmlPidView::const_iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
-
-            MetGmConfigurationMappings entry = *pIt;
+        for (xml_configuration::const_iterator pIt : sorted_by_pid(xmlConfiguration_)) {
+            const MetGmConfigurationMappings& entry = *pIt;
 
             MetGmTagsPtr tags;
 
-            cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
-            if(nameView.find(entry.cdmName_) != nameView.end()) {
+            if (std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(entry.cdmName_)) != cdmConfiguration_.end()) {
                 throw CDMException("hmmm... the variable should not be found in cdm profile map");
             }
 

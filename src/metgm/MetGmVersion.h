@@ -40,12 +40,9 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-// boost
-//
-#include <memory>
-
 // standard
 //
+#include <memory>
 #include <string>
 
 namespace MetNoFimex {
