@@ -84,6 +84,9 @@ BOOST_AUTO_TEST_CASE(test_attribute_types)
     std::vector<std::string> v_1_2;
     v_1_2.push_back("1");
     v_1_2.push_back("2");
+    std::vector<std::string> v_123_234;
+    v_123_234.push_back("123");
+    v_123_234.push_back("234");
 
     {
         const CDMAttribute a("att", CDM_CHAR, v_1_2);
@@ -92,8 +95,8 @@ BOOST_AUTO_TEST_CASE(test_attribute_types)
         BOOST_REQUIRE(d);
         BOOST_CHECK_EQUAL(2, d->size());
         const boost::shared_array<char> v = d->asChar();
-        BOOST_CHECK_EQUAL('1', v[0]);
-        BOOST_CHECK_EQUAL('2', v[1]);
+        BOOST_CHECK_EQUAL(1, v[0]);
+        BOOST_CHECK_EQUAL(2, v[1]);
     }
     {
         const CDMAttribute a("att", CDM_DOUBLE, v_1_2);
@@ -107,9 +110,9 @@ BOOST_AUTO_TEST_CASE(test_attribute_types)
         BOOST_CHECK_EQUAL("1 2", a.getStringValue());
     }
     {
-        const CDMAttribute a("att", "char", "A");
+        const CDMAttribute a("att", "char", "65");
         BOOST_CHECK_EQUAL(CDM_CHAR, a.getDataType());
-        BOOST_CHECK_EQUAL("A", a.getStringValue());
+        BOOST_CHECK_EQUAL("65", a.getStringValue());
         BOOST_CHECK_EQUAL(65, a.getData()->getDouble(0));
     }
     {
@@ -122,6 +125,16 @@ BOOST_AUTO_TEST_CASE(test_attribute_types)
         const CDMAttribute a_string("att", "string", "hello");
         BOOST_CHECK_EQUAL(CDM_STRING, a_string.getDataType());
         BOOST_CHECK_EQUAL("hello", a_string.getStringValue());
+    }
+    {
+        const CDMAttribute a("u", CDM_USHORT, v_123_234);
+        BOOST_CHECK_EQUAL(2, a.getData()->size());
+        BOOST_CHECK_EQUAL("123 234", a.getStringValue());
+    }
+    {
+        const CDMAttribute a("u", CDM_UCHAR, v_123_234);
+        BOOST_CHECK_EQUAL(2, a.getData()->size());
+        BOOST_CHECK_EQUAL("123 234", a.getStringValue());
     }
 }
 

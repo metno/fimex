@@ -42,27 +42,77 @@ namespace MetNoFimex
 /**
  * convert a type (i.e. int, float) to string representation
  */
-template<typename T>
-std::string type2string(T in) {
-    std::ostringstream buffer;
-    buffer << in;
-    return buffer.str();
+template <typename T>
+std::ostream& type2stream(std::ostream& out, T in)
+{
+    out << in;
+    return out;
+}
+
+//! specialization for high prececision
+template <>
+std::ostream& type2stream<double>(std::ostream& out, double in);
+
+//! convert char from digits
+template <>
+inline std::ostream& type2stream<char>(std::ostream& out, char in)
+{
+    return type2stream(out, static_cast<int>(in));
+}
+
+//! convert unsigned char from digits
+template <>
+inline std::ostream& type2stream<unsigned char>(std::ostream& out, unsigned char in)
+{
+    return type2stream(out, static_cast<unsigned int>(in));
 }
 
 /**
- * specialization for high prececision
+ * convert a type (i.e. int, float) to string representation
  */
-template<>
-std::string type2string<double>(double in);
+template <typename T>
+std::string type2string(T in)
+{
+    std::ostringstream buffer;
+    type2stream(buffer, in);
+    return buffer.str();
+}
 
+//! no conversion for std::string
+template <>
+inline std::string type2string<std::string>(std::string in)
+{
+    return in;
+}
 
-template<typename T>
-T string2type(std::string s) {
+template <typename T>
+T string2type(const std::string& s)
+{
     T retVal;
-    std::stringstream buffer;
-    buffer << s;
+    std::istringstream buffer(s);
     buffer >> retVal;
     return retVal;
+}
+
+//! convert char to digits, not bytes
+template <>
+inline char string2type(const std::string& s)
+{
+    return static_cast<char>(string2type<int>(s));
+}
+
+//! convert unsigned char to digits, not bytes
+template <>
+inline unsigned char string2type(const std::string& s)
+{
+    return static_cast<unsigned char>(string2type<unsigned int>(s));
+}
+
+//! no conversion for std::string
+template <>
+inline std::string string2type<std::string>(const std::string& s)
+{
+    return s;
 }
 
 /**

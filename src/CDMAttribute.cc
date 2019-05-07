@@ -150,13 +150,12 @@ CDMAttribute::~CDMAttribute()
 
 const std::string CDMAttribute::getStringValue() const
 {
-    if (data.get() != 0) {
-        if ((data->getDataType() == CDM_STRING) || (data->getDataType() == CDM_CHAR))
-            return data->asString();
-        else
-            return data->asString(" ");
-    } else
-        return "";
+    if (!data)
+        return std::string();
+    if (data->getDataType() == CDM_STRING)
+        return data->asString(" ");
+    else
+        return data->asString(" ");
 }
 
 CDMDataType CDMAttribute::getDataType() const

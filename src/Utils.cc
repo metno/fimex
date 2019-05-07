@@ -72,15 +72,13 @@ std::string string2lowerCase(const std::string& str)
     return s;
 }
 
-/**
- * specialization for high prececision
- */
-template<>
-std::string type2string<double>(double in)
+template <>
+std::ostream& type2stream<double>(std::ostream& out, double in)
 {
     std::ostringstream buffer;
-    buffer << std::setprecision(24) << in;
-    return buffer.str();
+    buffer << std::setprecision(std::numeric_limits<double>::digits10 + 1) << in;
+    out << buffer.str();
+    return out;
 }
 
 // internal implementation of scanFiles

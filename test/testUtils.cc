@@ -153,4 +153,15 @@ BOOST_AUTO_TEST_CASE(test_globFiles)
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
 }
 
+BOOST_AUTO_TEST_CASE(test_type2string)
+{
+    BOOST_CHECK_EQUAL("123", type2string((char)123));
+    BOOST_CHECK_EQUAL("234", type2string((unsigned char)234));
+
+    BOOST_CHECK_EQUAL("12345", type2string((short)12345));
+    BOOST_CHECK_EQUAL("34567", type2string((unsigned short)34567));
+
+    BOOST_CHECK_EQUAL("fimex", type2string("fimex"));
+}
+
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

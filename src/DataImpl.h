@@ -161,12 +161,10 @@ namespace MetNoFimex
 
     template<typename C>
     void DataImpl<C>::toStream(std::ostream& os, std::string separator) const {
-        if (length > 0) {
-            for (size_t i = 0; i < (length-1); i++) {
-                os << theData[i] << separator;
-            }
-            // last element without separator
-            os << theData[length-1];
+        for (size_t i = 0; i < length; i++) {
+            if (i != 0)
+                os << separator;
+            type2stream(os, theData[i]);
         }
     }
 
