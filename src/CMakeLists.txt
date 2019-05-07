@@ -147,19 +147,6 @@ SET(libfimex_SOURCES
   coordSys/WRFCoordSysBuilder.h
 )
 
-# not functional yet
-## LIST(APPEND libfimex_SOURCES
-##   convert/Converter.cc
-##   convert/ConverterSrc.cc
-##   convert/ConverterImpl.cc
-##   convert/RelativeToSpecificHumidityConverter.cc
-##   convert/CDMReaderVar.h
-##   convert/Converter.h
-##   convert/ConverterSrc.h
-##   convert/ConverterImpl.h
-##   convert/RelativeToSpecificHumidityConverter.h
-##   )
-
 IF(ENABLE_LOG4CPP)
   SET(HAVE_LOG4CPP 1)
 ENDIF()
