@@ -48,7 +48,7 @@ extern "C" {
 namespace MetNoFimex
 {
 /// only use for internals, exported from Units.cc
-extern MutexType& getUnitsMutex();
+extern OmpMutex& getUnitsMutex();
 
 static void void_ut_free(void* ptr)
 {
@@ -68,7 +68,7 @@ void TimeUnit::init(const std::string& timeUnitString)
         throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
     } else {
         units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
-        ScopedCritical lock(getUnitsMutex());
+        OmpScopedLock lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
         pUnit = std::shared_ptr<void>(
             reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
@@ -109,7 +109,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
     FimexTime fiTime;
     float second;
     int year, month, mday, hour, minute;
-    ScopedCritical lock(getUnitsMutex());
+    OmpScopedLock lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit seconds");
@@ -138,7 +138,7 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
     Units units; // unit initialization
     float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
     double unitTime;
-    ScopedCritical lock(getUnitsMutex());
+    OmpScopedLock lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     double encodedTime = ut_encode_time(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second);

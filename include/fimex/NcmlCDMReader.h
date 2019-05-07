@@ -37,7 +37,6 @@
 namespace MetNoFimex
 {
 /* forward declarations */
-class MutexType;
 class XMLInput;
 
 /**
@@ -145,7 +144,6 @@ private:
 
     std::string configId;
     XMLDoc_p doc;
-    std::unique_ptr<MutexType> mutex_;
     CDMReader_p dataReader;
 
     /*

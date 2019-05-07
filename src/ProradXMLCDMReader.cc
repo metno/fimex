@@ -36,7 +36,6 @@
 
 #include "MutexLock.h"
 
-
 #include <proradxmlrw.h>
 #include <prorad-radarprod.h>
 
@@ -46,11 +45,16 @@
 #include <string>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-static MutexType mutex;
-static Logger_p logger = getLogger("fimex.ProradXMLCDMReader");
+namespace {
+
+const std::string LON("lon"), LAT("lat");
+
+OmpMutex mutex;
+Logger_p logger = getLogger("fimex.ProradXMLCDMReader");
+
+} // namespace
 
 class ProradXMLCDMReader::Impl
 {
@@ -237,7 +241,6 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
 ProradXMLCDMReader::~ProradXMLCDMReader() {}
 
 #define PRGETDATAFLAG(XXX, YYY) if (varName.find(std::string("_") + XXX +"_radar") != std::string::npos) { \
-    td_cartesian_st* cartesian = pimpl_->meta->cartesian_st; \
     shared_array<char> d(new char[cartesian->buffer_size]()); \
     for (size_t i = 0; i < cartesian->buffer_size; ++i) { \
         d[i] = cartesian->flags[i].YYY ; \
@@ -247,17 +250,20 @@ ProradXMLCDMReader::~ProradXMLCDMReader() {}
 
 DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    ScopedCritical sc(mutex);
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,unlimDimPos): (" << varName << ", " << unLimDimPos << ")");
+
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
         LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
+
     if (varName == "lat" || varName == "lon") {
+        OmpScopedLock sc(mutex);
+
         // generate lat/lon data
-        std::vector<std::string> shape = variable.getShape();
+        const std::vector<std::string>& shape = variable.getShape();
         CDM newCdm(*cdm_);
         newCdm.removeVariable("lat");
         newCdm.removeVariable("lon");
@@ -269,6 +275,7 @@ DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLi
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
 
+    const td_cartesian_st* cartesian = pimpl_->meta->cartesian_st;
     PRGETDATAFLAG("nodata", is_nodata)
     PRGETDATAFLAG("lowele", is_lowele)
     PRGETDATAFLAG("highele", is_highele)
@@ -280,19 +287,16 @@ DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLi
     PRGETDATAFLAG("block_percent", block_percent)
     PRGETDATAFLAG("clutter_probability", clutter_probability)
     if (varName.find("status_flag_radar") != std::string::npos) {
-        td_cartesian_st* cartesian = pimpl_->meta->cartesian_st;
         shared_array<char> d(new char[cartesian->buffer_size]());
         for (size_t i = 0; i < cartesian->buffer_size; ++i) {
-            td_flags_st flag = cartesian->flags[i];
-            d[i] = flag.is_nodata | (flag.is_lowele << 1) | (flag.is_highele << 2) |
-                    (flag.is_blocked << 3) |
-                    (flag.is_seaclutter << 4) | (flag.is_groundclutter << 5) | (flag.is_otherclutter << 6);
+            const td_flags_st& flag = cartesian->flags[i];
+            d[i] = flag.is_nodata | (flag.is_lowele << 1) | (flag.is_highele << 2) | (flag.is_blocked << 3) | (flag.is_seaclutter << 4) |
+                   (flag.is_groundclutter << 5) | (flag.is_otherclutter << 6);
         }
         return createData(cartesian->buffer_size, d);
     }
 
     return createData(CDM_NAT, 0);
 }
-
 
 } /* namespace MetNoFimex */

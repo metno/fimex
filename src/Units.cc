@@ -50,8 +50,9 @@ namespace MetNoFimex
 static ut_system* utSystem;
 #endif
 
-static MutexType unitsMutex;
-extern MutexType& getUnitsMutex() {
+static OmpMutex unitsMutex;
+extern OmpMutex& getUnitsMutex()
+{
     return unitsMutex;
 }
 
@@ -189,7 +190,7 @@ public:
 
 Units::Units()
 {
-    ScopedCritical lock(unitsMutex);
+    OmpScopedLock lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     if (utSystem == 0) {
         ut_set_error_message_handler(&ut_ignore);
@@ -217,8 +218,8 @@ Units::~Units()
 bool Units::unload(bool force)
 {
     bool retVal = false;
-    ScopedCritical lock(unitsMutex);
     if (force) {
+        OmpScopedLock lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
         ut_free_system(utSystem);
 #else
@@ -244,7 +245,7 @@ UnitsConverter_p Units::getConverter(const std::string& from, const std::string&
     if (from == to) {
         return std::make_shared<LinearUnitsConverter>(1., 0.);
     }
-    ScopedCritical lock(unitsMutex);
+    OmpScopedLock lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
     handleUdUnitError(ut_get_status(), "'" + from + "'");
@@ -268,9 +269,9 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
     int areConv = 0;
-    ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     try {
+        OmpScopedLock lock(unitsMutex);
         std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), "'" + unit1 + "'");
         std::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
@@ -280,6 +281,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
 #else
+    ScopedLock lock(unitsMutex);
     utUnit fromUnit, toUnit;
     double slope, offset;
     handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
@@ -300,7 +302,7 @@ bool Units::isTime(const std::string& timeUnit) const
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
 #else
     bool isTime = false;
-    ScopedCritical lock(unitsMutex);
+    class ScopedCritical lock(unitsMutex);
     utUnit unit;
     handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
     isTime = (utIsTime(&unit) != 0);

@@ -78,7 +78,7 @@ struct GribCDMReader::Impl
     XMLDoc_p doc;
     map<int, vector<xmlNodePtr> > nodeIdx1;
     map<int, vector<xmlNodePtr> > nodeIdx2;
-    MutexType mutex;
+    OmpMutex mutex;
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     string ensembleDimName;
@@ -1310,7 +1310,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
             gridData.resize(maxXySize); // make sure the gridData is always large enough
             {
 #ifndef HAVE_GRIB_API_THREADSAFE
-                class ScopedCritical lock(p_->mutex);
+                OmpScopedLock lock(p_->mutex);
 #endif
                 dataRead = gfmIt->readData(gridData, missingValue);
             }

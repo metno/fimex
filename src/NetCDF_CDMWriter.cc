@@ -23,21 +23,6 @@
 
 #include "fimex/NetCDF_CDMWriter.h"
 
-#include "fimex_config.h"
-#ifndef HAVE_NETCDF_HDF5_LIB
-#undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
-#endif
-#ifdef HAVE_MPI
-#include "fimex/mifi_mpi.h"
-extern "C" {
-#include "netcdf_par.h"
-}
-#else
-extern "C" {
-#include "netcdf.h"
-}
-#endif
-
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
@@ -107,7 +92,7 @@ int ncDimId(int ncId, const CDMDimension* unLimDim)
 {
     int unLimDimId = -1;
     if (unLimDim)
-        ncCheck(nc_inq_dimid(ncId, unLimDim->getName().c_str(), &unLimDimId));
+        NCMUTEX_LOCKED(ncCheck(nc_inq_dimid(ncId, unLimDim->getName().c_str(), &unLimDimId)));
     return unLimDimId;
 }
 
@@ -136,15 +121,16 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& output
 #ifdef HAVE_MPI
     if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
         LOG4FIMEX(logger, Logger::DEBUG, "opening parallel nc-file: " << ncFile->filename);
-        ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId), "creating "+ncFile->filename);
+        NCMUTEX_LOCKED(ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId),
+                               "creating " + ncFile->filename));
     } else
 #endif
     {
-        ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
+        NCMUTEX_LOCKED(ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating " + ncFile->filename));
     }
     ncFile->isOpen = true;
 
-    ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format));
+    NCMUTEX_LOCKED(ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format)));
 #ifdef NC_NETCDF4
     if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
         if ((ncVersion & NC_CLASSIC_MODEL) != 0)
@@ -159,7 +145,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& output
     if (ncFile->format < 3) {
         // using nofill for netcdf3 (2times io) -- does not affect netcdf4
         int oldFill;
-        nc_set_fill(ncFile->ncId, NC_NOFILL, &oldFill);
+        NCMUTEX_LOCKED(nc_set_fill(ncFile->ncId, NC_NOFILL, &oldFill));
     }
     initNcmlReader(doc);
     cdm = cdmReader->getCDM();
@@ -418,7 +404,7 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions()
         // NcDim is organized by NcFile, no need to clean
         // change the name written to the file according to getDimensionName
         int dimId;
-        ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(dim.getName()).c_str(), length, &dimId));
+        NCMUTEX_LOCKED(ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(dim.getName()).c_str(), length, &dimId)));
         ncDimMap[dim.getName()] = dimId;
         LOG4FIMEX(logger, Logger::DEBUG, "DimId of " << dim.getName() << " = " << dimId);
     }
@@ -446,7 +432,8 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
         }
         int varId;
         LOG4FIMEX(logger, Logger::DEBUG, "defining variable " << var.getName() << " with shape '" << join(shape.begin(), shape.end()) << "' = " <<join(&ncshape[0], &ncshape[0]+shape.size()));
-        ncCheck(nc_def_var(ncFile->ncId, getVariableName(var.getName()).c_str(), cdmDataType2ncType(datatype), shape.size(), &ncshape[0], &varId));
+        NCMUTEX_LOCKED(
+            ncCheck(nc_def_var(ncFile->ncId, getVariableName(var.getName()).c_str(), cdmDataType2ncType(datatype), shape.size(), &ncshape[0], &varId)));
         ncVarMap[var.getName()] = varId;
 #ifdef NC_NETCDF4
         // set compression
@@ -499,11 +486,11 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                     }
                     if (chunkSize > 0) {
                         LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
-                        ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
+                        NCMUTEX_LOCKED(ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get())));
                     }
                     // start compression
                     LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression << " and shuffle=" << shuffle);
-                    ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression));
+                    NCMUTEX_LOCKED(ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression)));
                 }
             }
         }
@@ -514,6 +501,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
 
 void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap)
 {
+    OmpScopedLock lock(Nc::getMutex());
     for (const auto& nmsp_att : cdm.getAttributes()) {
         int varId;
         if (nmsp_att.first == CDM::globalAttributeNS()) {
@@ -666,7 +654,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
             const int varId = ncVarMap.find(varName)->second;
 #ifdef HAVE_MPI
             if (using_mpi) {
-                ncCheck(nc_var_par_access(ncFile->ncId, varId, NC_INDEPENDENT));
+                NCMUTEX_LOCKED(ncCheck(nc_var_par_access(ncFile->ncId, varId, NC_INDEPENDENT)));
                 if (!sliceAlongUnlimited) { // MPI-slices along unlimited dimension
                     // only work on variables which belong to this mpi-process (modulo-base along variable-ids)
                     if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
@@ -684,13 +672,12 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
             std::unique_ptr<size_t[]> start;
             int unLimDimIdx = -1;
             {
-                ScopedCritical ncLock(Nc::getMutex());
+                OmpScopedLock ncLock(Nc::getMutex());
 
                 ncCheck(nc_inq_varndims(ncFile->ncId, varId, &n_dims));
 
                 dim_ids.reset(new int[n_dims]);
                 ncCheck(nc_inq_vardimid(ncFile->ncId, varId, dim_ids.get()));
-                LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dim_ids[0], &dim_ids[0] + n_dims));
 
                 start.reset(new size_t[n_dims]);
                 count.reset(new size_t[n_dims]);
@@ -704,6 +691,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                     count[i] = dim_len;
                 }
             }
+            LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dim_ids[0], &dim_ids[0] + n_dims));
+
             const bool no_unlim = (unLimDimPos == -1 && unLimDimIdx == -1 && !cdm.hasUnlimitedDim(cdmVar));
             const bool with_unlim = (unLimDimPos != -1 && unLimDimIdx >= 0 && cdm.hasUnlimitedDim(cdmVar));
             DataPtr data;
@@ -732,8 +721,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                 LOG4FIMEX(logger, Logger::DEBUG,
                           "dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims) << " count=" << join(&count[0], &count[0] + n_dims));
                 try {
-                    class ScopedCritical ncLock(Nc::getMutex());
                     LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
+                    class OmpScopedLock ncLock(Nc::getMutex());
                     ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), n_dims, start.get(), count.get());
                 } catch (CDMException& ex) {
                     throw CDMException(ex.what() + std::string(" while writing var ") + varName);
@@ -742,8 +731,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
         }
 #ifndef HAVE_MPI
         if (unLimDimPos >= 0) {
-            class ScopedCritical ncLock(Nc::getMutex());
-            ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
+            NCMUTEX_LOCKED(ncCheck(nc_sync(ncFile->ncId))); // sync every 'time/unlimited' step (does not work with MPI)
         }
 #endif
     }
@@ -755,8 +743,9 @@ void NetCDF_CDMWriter::init()
     const NcDimIdMap ncDimIdMap = defineDimensions();
     const NcVarIdMap ncVarIdMap = defineVariables(ncDimIdMap);
     writeAttributes(ncVarIdMap);
+    NCMUTEX_LOCKED(ncCheck(nc_enddef(ncFile->ncId)));
+
     // write data
-    ncCheck(nc_enddef(ncFile->ncId));
     writeData(ncVarIdMap);
 }
 

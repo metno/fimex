@@ -33,22 +33,22 @@
 
 namespace MetNoFimex {
 
-    static MutexType mutex;
+static OmpMutex mutex;
 
-    MetGmCDMReader::MetGmCDMReader(const std::string& metgmsource, const XMLInput& configXML)
-    {
-        try {
-            d_ptr.reset(new MetGmCDMReaderSlicedImpl(metgmsource, configXML, cdm_));
-        } catch (std::runtime_error& exp) {
-            throw CDMException(std::string("METGM_CDMReader error: ") + exp.what());
-        }
+MetGmCDMReader::MetGmCDMReader(const std::string& metgmsource, const XMLInput& configXML)
+{
+    try {
+        d_ptr.reset(new MetGmCDMReaderSlicedImpl(metgmsource, configXML, cdm_));
+    } catch (std::runtime_error& exp) {
+        throw CDMException(std::string("METGM_CDMReader error: ") + exp.what());
+    }
     }
 
     MetGmCDMReader::~MetGmCDMReader() { }
 
     DataPtr MetGmCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
-        ScopedCritical lock(mutex);
+        OmpScopedLock lock(mutex);
         return d_ptr->getDataSlice(varName, unLimDimPos);
     }
 

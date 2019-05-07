@@ -61,7 +61,6 @@ static Logger_p logger = getLogger("fimex.NcmlCDMReader");
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())
-    , mutex_(new MutexType())
 {
     setConfigDoc(configXML);
 
@@ -71,7 +70,6 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 
 NcmlCDMReader::NcmlCDMReader(CDMReader_p dataReader, const XMLInput& configXML)
     : configId(configXML.id())
-    , mutex_(new MutexType())
     , dataReader(dataReader)
 {
     setConfigDoc(configXML);
@@ -475,20 +473,13 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
-    ScopedCritical sc(*mutex_);
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", " << sb << ")");
+
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
         LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
-        DataPtr data = variable.getData();
-        if (data->size() == 0) {
-            return data;
-        } else {
-            return variable.getData()->slice(sb.getMaxDimensionSizes(),
-                                             sb.getDimensionStartPositions(),
-                                             sb.getDimensionSizes());
-        }
+        return getDataSliceFromMemory(variable, sb);
     }
 
     // find the original name, to fetch the data from the dataReader
@@ -499,8 +490,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
     {
         const vector<string> shape = sb.getDimensionNames();
         const vector<string> orgShape = orgSb.getDimensionNames();
-        for (size_t i = 0; i < orgShape.size(); ++i) {
-            const std::string& orgDim = orgShape[i];
+        for (const std::string& orgDim : orgShape) {
             std::map<std::string, std::string>::const_iterator itChanged = dimensionNameChanges.find(orgDim);
             const std::string& newDim = (itChanged != dimensionNameChanges.end()) ? itChanged->second : orgDim;
             if (find(shape.begin(), shape.end(), newDim) != shape.end()) {

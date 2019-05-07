@@ -71,7 +71,7 @@ private:
     const std::string filename;
     std::string configId;
     std::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
-    MutexType mutex_;
+    OmpMutex mutex_;
     CDMDimension xDim;
     CDMDimension yDim;
     std::map<std::string, std::string> varNameFeltIdMap;

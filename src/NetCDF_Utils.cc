@@ -39,12 +39,11 @@ extern "C" {
 #undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
 #endif
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.NetCDF_Utils");
 // hdf5 lib is usually not thread-safe, so reading from one file and writing to another fails
-static MutexType ncMutex;
+static OmpMutex ncMutex;
 
 namespace {
 
@@ -90,9 +89,10 @@ Nc::Nc()
 Nc::~Nc()
 {
     if (isOpen) {
-       const int status = nc_close(ncId);
-       if (status != NC_NOERR) {
-           LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
+        int status;
+        NCMUTEX_LOCKED(status = nc_close(ncId));
+        if (status != NC_NOERR) {
+            LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
        } else {
            LOG4FIMEX(logger, Logger::DEBUG, "close NetCDF file '" << filename << "'");
        }
@@ -101,16 +101,20 @@ Nc::~Nc()
 
 void Nc::reopen_if_forked()
 {
-    if (pid != getpid()) {
+    pid_t this_pid = getpid();
+    if (pid != this_pid) {
+        pid = this_pid;
+        LOG4FIMEX(logger, Logger::DEBUG, "reopening file " << filename << " after fork to " << pid << " '" << ncId << "' ");
+
+        OmpScopedLock lock(ncMutex);
         // reopen file so file descriptions (e.g. offset) are not shared
         ncCheck(nc_close(ncId), "closing parent filehandle");
-        pid = getpid();
         ncCheck(nc_open(filename.c_str(), NC_NOWRITE, &ncId), "re-opening '"+filename+"' after fork");
-        LOG4FIMEX(logger, Logger::DEBUG, "reopening file " << filename << " after fork to " << pid << " '" << ncId << "' ");
     }
 }
 
-MutexType& Nc::getMutex() {
+OmpMutex& Nc::getMutex()
+{
     return ncMutex;
 }
 
@@ -402,4 +406,4 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
     }
 }
 
-}
+} // namespace MetNoFimex

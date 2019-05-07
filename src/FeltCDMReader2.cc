@@ -772,14 +772,12 @@ DataPtr FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) 
                 }
                 // read the slice
                 DataPtr levelData;
-                {
-                    ScopedCritical lock(mutex_);
-                    // level-data might be undefined, create a undefined slice then
-                    try {
-                        levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
-                    } catch (NoSuchField_Felt_File_Error nsfe) {
-                        levelData = createData(variable.getDataType(), xDim*yDim, cdm_->getFillValue(varName));
-                    }
+                // level-data might be undefined, create a undefined slice then
+                try {
+                    OmpScopedLock lock(mutex_);
+                    levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
+                } catch (NoSuchField_Felt_File_Error nsfe) {
+                    levelData = createData(variable.getDataType(), xDim * yDim, cdm_->getFillValue(varName));
                 }
                 assert(levelData->size() == (xDim*yDim));
                 data->setValues(dataCurrentPos, *levelData, 0, levelData->size());

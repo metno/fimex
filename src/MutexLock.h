@@ -29,55 +29,88 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#define IF_OPENMP(x) x
-#else
-#define IF_OPENMP(x)
 #endif
 
-namespace MetNoFimex
+namespace MetNoFimex {
+
+class OmpMutex
 {
-
-struct MutexType
-{
-    MutexType(const MutexType&) = delete;
-    MutexType& operator=(const MutexType&) = delete;
-
-    MutexType() { IF_OPENMP(omp_init_lock(&lock_)); }
-    ~MutexType() { IF_OPENMP(omp_destroy_lock(&lock_)); }
-    void lock() { IF_OPENMP(omp_set_lock(&lock_)); }
-    void unlock() { IF_OPENMP(omp_unset_lock(&lock_)); }
-
 public:
+    OmpMutex()
+    {
+#ifdef _OPENMP
+        omp_init_lock(&lock_);
+#endif
+    }
+
+    ~OmpMutex()
+    {
+#ifdef _OPENMP
+        omp_destroy_lock(&lock_);
+#endif
+    }
+
+    OmpMutex(const OmpMutex&) = delete;
+    OmpMutex& operator=(const OmpMutex&) = delete;
+
+    void lock()
+    {
+#ifdef _OPENMP
+        omp_set_lock(&lock_);
+#pragma omp flush
+#endif
+    }
+
+    void unlock()
+    {
+#ifdef _OPENMP
+#pragma omp flush
+        omp_unset_lock(&lock_);
+#endif
+    }
+
+private:
 #ifdef _OPENMP
     omp_lock_t lock_;
 #endif
 };
 
 /* An exception-safe scoped lock-keeper. */
-class ScopedCritical
+class OmpScopedLock
 {
 public:
-    explicit ScopedCritical(MutexType& m) : mut(m) {
+    OmpScopedLock(OmpMutex& m)
+        : mut(m)
+    {
         mut.lock();
-#ifdef _OPENMP
-#pragma omp flush
-#endif
     }
-    ScopedCritical(const ScopedCritical&) = delete;
-    ScopedCritical& operator=(const ScopedCritical&) = delete;
+    ~OmpScopedLock() { mut.unlock(); }
 
-    ~ScopedCritical() {
-#ifdef _OPENMP
-#pragma omp flush
-#endif
-        mut.unlock();
-    }
+    OmpScopedLock(const OmpScopedLock&) = delete;
+    OmpScopedLock& operator=(const OmpScopedLock&) = delete;
 
 private:
-    MutexType& mut;
+    OmpMutex& mut;
 };
 
-#undef IF_OPENMP
+/* An exception-safe scoped lock-unlocker. */
+class OmpScopedUnlock
+{
+public:
+    OmpScopedUnlock(OmpMutex& m)
+        : mut(m)
+    {
+        mut.unlock();
+    }
+    ~OmpScopedUnlock() { mut.lock(); }
 
-} // namespace
+    OmpScopedUnlock(const OmpScopedUnlock&) = delete;
+    OmpScopedUnlock& operator=(const OmpScopedUnlock&) = delete;
+
+private:
+    OmpMutex& mut;
+};
+
+} // namespace MetNoFimex
+
 #endif /* MUTEXLOCK_H_ */

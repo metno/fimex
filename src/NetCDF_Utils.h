@@ -24,25 +24,44 @@
 #ifndef NETCDF_UTILS_H_
 #define NETCDF_UTILS_H_
 
-#include "MutexLock.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataDecl.h"
+
+#include "MutexLock.h"
+
 #include <memory>
+
+#include "fimex_config.h"
+#ifndef HAVE_NETCDF_HDF5_LIB
+#undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
+#endif            // HAVE_NETCDF_HDF5_LIB
+#ifdef HAVE_MPI
+#include "fimex/mifi_mpi.h"
+extern "C" {
+#include "netcdf_par.h"
+}
+#else // !HAVE_MPI
 extern "C" {
 #include "netcdf.h"
 }
+#endif // !HAVE_MPI
+
 #include "unistd.h"
 
+#define NCMUTEX_LOCKED(x)                                                                                                                                      \
+    do {                                                                                                                                                       \
+        OmpScopedLock lock(Nc::getMutex());                                                                                                                    \
+        x;                                                                                                                                                     \
+    } while (0)
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /// storage class for netcdf-file pointer
 class Nc {
 public:
     Nc();
     ~Nc();
-    static MutexType& getMutex(); // lock against common reading/writing in nc4
+    static OmpMutex& getMutex(); // lock against common reading/writing in nc4
     std::string filename;
     int ncId;
     int format;
@@ -52,8 +71,6 @@ public:
     bool supports_nc_string() const
       { return format == NC_FORMAT_NETCDF4; }
 };
-
-
 
 
 /**
