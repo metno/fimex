@@ -19,6 +19,7 @@
     * support inline xml config (config "filename" starting with "<xml? ")
     * extended python binding, possible to implement a CDMReader in python
     * shorter code sections with mutex locks
+    * generate CMake config files
   * 2019-01-09 fimex-0.67.2
     * ignore GRIB stepType
     * fix some memory leaks when using xmlTextReader

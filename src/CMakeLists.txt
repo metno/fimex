@@ -1,8 +1,5 @@
 
 SET(libfimex_INCLUDE_DIRECTORIES
-  "${CMAKE_SOURCE_DIR}/include"
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}
   ${PC_INCLUDE_DIRS}
   ${grib_api_INC_DIR}
   ${libxml2_INC_DIR}

@@ -173,6 +173,43 @@ FIMEX_GEN_PKGCONFIG(fimex.pc.in "${FIMEX_PC}"
 )
 INSTALL(FILES "${CMAKE_BINARY_DIR}/${FIMEX_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
+SET(FIMEX_VERSION_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/fimex${MINUS_FIMEX_VERSION}")
+
+INSTALL (
+  EXPORT fimex
+  DESTINATION "${FIMEX_VERSION_CMAKE_DIR}"
+  FILE "fimex${MINUS_FIMEX_VERSION}-targets.cmake"
+)
+
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+  "${CMAKE_CURRENT_BINARY_DIR}/fimex${MINUS_FIMEX_VERSION}-config-version.cmake"
+  VERSION
+  "${FIMEX_VERSION_MAJOR}.${FIMEX_VERSION_MINOR}.${FIMEX_VERSION_PATCH}"
+  COMPATIBILITY
+  SameMajorVersion
+)
+
+CONFIGURE_FILE("fimex-config.cmake.in" "fimex${MINUS_FIMEX_VERSION}-config.cmake" @ONLY)
+
+INSTALL(
+  FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/fimex${MINUS_FIMEX_VERSION}-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/fimex${MINUS_FIMEX_VERSION}-config-version.cmake"
+  DESTINATION "${FIMEX_VERSION_CMAKE_DIR}"
+)
+
+IF(ENABLE_FIMEX_VERSIONNUMBERED)
+  SET(FIMEX_NOVERSION_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/fimex")
+  CONFIGURE_FILE("fimex-noversion-config.cmake.in" "fimex-config.cmake" @ONLY)
+  CONFIGURE_FILE("fimex-noversion-config-version.cmake.in" "fimex-config-version.cmake" @ONLY)
+  INSTALL(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/fimex-config.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/fimex-config-version.cmake"
+    DESTINATION "${FIMEX_NOVERSION_CMAKE_DIR}"
+  )
+ENDIF()
+
 ENABLE_TESTING()
 
 ADD_SUBDIRECTORY(include)

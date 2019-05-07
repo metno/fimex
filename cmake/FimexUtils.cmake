@@ -43,6 +43,7 @@ MACRO(FIMEX_CMAKE_SETUP)
     SET(CMAKE_C_STANDARD 99)
   ENDIF()
 
+  INCLUDE(CMakePackageConfigHelpers)
   INCLUDE(GNUInstallDirs)
   INCLUDE(FindPkgConfig)
 
@@ -147,10 +148,16 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
   IF(BUILD_SHARED_LIBS OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
     SET(shared_lib lib${name})
     ADD_LIBRARY(${shared_lib} SHARED ${sources})
-    TARGET_LINK_LIBRARIES(${shared_lib} ${libs})
-    IF(includes)
-      TARGET_INCLUDE_DIRECTORIES(${shared_lib} PUBLIC ${includes})
-    ENDIF()
+    TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${libs})
+    TARGET_INCLUDE_DIRECTORIES(${shared_lib}
+      PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
+      PRIVATE
+      ${includes}
+      )
     IF(definitions)
       TARGET_COMPILE_DEFINITIONS(${shared_lib} PUBLIC ${definitions})
     ENDIF()
@@ -163,6 +170,7 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
       OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
       )
     INSTALL(TARGETS ${shared_lib}
+      EXPORT fimex
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
   ENDIF()
@@ -171,10 +179,16 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
     SET(static_lib lib${name}-static)
     SET(lib${name}_STATICLIBS ${libs})
     ADD_LIBRARY(${static_lib} STATIC ${sources})
-    TARGET_LINK_LIBRARIES(${static_lib} ${libs})
-    IF(includes)
-      TARGET_INCLUDE_DIRECTORIES(${static_lib} PUBLIC ${includes})
-    ENDIF()
+    TARGET_LINK_LIBRARIES(${static_lib} PRIVATE ${libs})
+    TARGET_INCLUDE_DIRECTORIES(${static_lib}
+      PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
+      PRIVATE
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${includes}
+      )
     IF(definitions)
       TARGET_COMPILE_DEFINITIONS(${static_lib} PUBLIC ${definitions})
     ENDIF()
