@@ -51,11 +51,10 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
     : ncFile(new Nc())
 {
     ScopedCritical lock(Nc::getMutex());
-    char* fimexSlotsChar = getenv("FIMEX_CHUNK_CACHE_SLOTS");
     size_t fimexSlots = 521;
-    if (fimexSlots == 0) fimexSlots = string2type<size_t>(fimexSlotsChar);
-    char* fimexCache = getenv("FIMEX_CHUNK_CACHE_SIZE");
-    if (fimexCache != 0) {
+    if (char* fimexSlotsChar = getenv("FIMEX_CHUNK_CACHE_SLOTS"))
+        fimexSlots = string2type<size_t>(fimexSlotsChar);
+    if (char* fimexCache = getenv("FIMEX_CHUNK_CACHE_SIZE")) {
         size_t cacheSize = string2type<size_t>(fimexCache);
         cacheSize /= fimexSlots;
         LOG4FIMEX(logger, Logger::DEBUG, "setting chunk cache to "<< fimexSlots << " slots of size " << (long)(cacheSize/1024/1024) << "MB");
