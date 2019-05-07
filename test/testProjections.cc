@@ -25,10 +25,11 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
+
+#include <algorithm>
+
 #include <proj_api.h>
 
 using namespace std;
@@ -38,48 +39,48 @@ namespace {
 const string projLonLat = "+proj=lonlat +ellps=sphere +a=6371000 +e=0";
 } // namespace
 
-BOOST_AUTO_TEST_CASE( test_projection )
+TEST4FIMEX_TEST_CASE(test_projection)
 {
     string proj4stere = "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=6371000 +e=0";
     Projection_p projs = Projection::createByProj4(proj4stere);
-    BOOST_CHECK((projs->getName() == "stereographic") || (projs->getName() == "polar_stereographic"));
-    BOOST_CHECK(projs->isDegree() == false);
+    TEST4FIMEX_CHECK((projs->getName() == "stereographic") || (projs->getName() == "polar_stereographic"));
+    TEST4FIMEX_CHECK(projs->isDegree() == false);
 
     std::vector<CDMAttribute> attrs = projs->getParameters();
     // generate another projection
     Projection_p projs2 = Projection::create(attrs);
-    BOOST_CHECK((projs2->getName() == "stereographic") || (projs2->getName() == "polar_stereographic"));
+    TEST4FIMEX_CHECK((projs2->getName() == "stereographic") || (projs2->getName() == "polar_stereographic"));
 }
 
-BOOST_AUTO_TEST_CASE( test_projection_oblique_mercator )
+TEST4FIMEX_TEST_CASE(test_projection_oblique_mercator)
 {
     string proj4omerc="+proj=omerc +lonc=5.34065 +lat_0=60.742 +alpha=19.0198 +no_rot   +a=6.37814e+06  +b=6.35675e+06 +no_defs +x_0=-3.86098e+06 +y_0=1.5594e+06";
     Projection_p projs_omerc = Projection::createByProj4(proj4omerc);
-    BOOST_CHECK(projs_omerc->getName() == "oblique_mercator");
-    BOOST_CHECK(projs_omerc->isDegree() == false);
+    TEST4FIMEX_CHECK_EQ(projs_omerc->getName(), "oblique_mercator");
+    TEST4FIMEX_CHECK_EQ(projs_omerc->isDegree(), false);
 
     std::vector<CDMAttribute> attrs_omerc = projs_omerc->getParameters();
     // generate another projection
     Projection_p projs2_omerc = Projection::create(attrs_omerc);
-    BOOST_CHECK(projs2_omerc->getName() == "oblique_mercator");
+    TEST4FIMEX_CHECK_EQ(projs2_omerc->getName(), "oblique_mercator");
 }
 
-BOOST_AUTO_TEST_CASE( test_projection_geostationary )
+TEST4FIMEX_TEST_CASE(test_projection_geostationary)
 {
     string proj4geos="+proj=geos +lon_0=0 +h=3.57858e+07  +a=6.37817e+06  +b=6.35658e+06 +no_defs +x_0=-2.2098e+06 +y_0=-3.50297e+06";
     Projection_p projs_geos = Projection::createByProj4(proj4geos);
-    BOOST_CHECK(projs_geos->getName() == "geostationary");
-    BOOST_CHECK(projs_geos->isDegree() == false);
+    TEST4FIMEX_CHECK_EQ(projs_geos->getName(), "geostationary");
+    TEST4FIMEX_CHECK_EQ(projs_geos->isDegree(), false);
 
     std::vector<CDMAttribute> attrs_geos = projs_geos->getParameters();
     // generate another projection
     Projection_p projs2_geos = Projection::create(attrs_geos);
-    BOOST_CHECK(projs2_geos->getName() == "geostationary");
+    TEST4FIMEX_CHECK_EQ(projs2_geos->getName(), "geostationary");
 }
 
 // TODO: test other projections
 
-BOOST_AUTO_TEST_CASE( test_conversion )
+TEST4FIMEX_TEST_CASE(test_conversion)
 {
     string proj4stere = "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=6371000 +e=0";
     Projection_p projs = Projection::createByProj4(proj4stere);
@@ -108,20 +109,20 @@ BOOST_AUTO_TEST_CASE( test_conversion )
     projs->convertToLonLat(lonValsConv, latValsConv);
 
     for (size_t i = 0; i < lonValsConv.size(); ++i) {
-        BOOST_CHECK((latValsConv[i] <= 90.001) && (latValsConv[i] >= -90.001));
-        BOOST_CHECK((lonValsConv[i] <= 180.001) && (lonValsConv[i] >= -180.001));
-        BOOST_CHECK(fabs(lonValsConv[i] - lonVals[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv[i] - latVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK((latValsConv[i] <= 90.001) && (latValsConv[i] >= -90.001));
+        TEST4FIMEX_CHECK((lonValsConv[i] <= 180.001) && (lonValsConv[i] >= -180.001));
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - lonVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - latVals[i]) < 1e-5);
     }
 
     projs->convertFromLonLat(lonValsConv, latValsConv);
     for (size_t i = 0; i < lonValsConv.size(); ++i) {
-        BOOST_CHECK(fabs(lonValsConv[i] - xVals[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv[i] - yVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - xVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - yVals[i]) < 1e-5);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_conversion_oblique_mercator )
+TEST4FIMEX_TEST_CASE(test_conversion_oblique_mercator)
 {
     string proj4omerc="+proj=omerc +lonc=5.34065 +lat_0=60.742 +alpha=19.0198 +no_rot   +a=6.37814e+06  +b=6.35675e+06 +no_defs +x_0=-3.86098e+06 +y_0=1.5594e+06";
     Projection_p projom = Projection::createByProj4(proj4omerc);
@@ -150,20 +151,20 @@ BOOST_AUTO_TEST_CASE( test_conversion_oblique_mercator )
     projom->convertToLonLat(lonValsConv_omerc, latValsConv_omerc);
 
     for (size_t i = 0; i < lonValsConv_omerc.size(); ++i) {
-        BOOST_CHECK((latValsConv_omerc[i] <= 90.001) && (latValsConv_omerc[i] >= -90.001));
-        BOOST_CHECK((lonValsConv_omerc[i] <= 180.001) && (lonValsConv_omerc[i] >= -180.001));
-        BOOST_CHECK(fabs(lonValsConv_omerc[i] - lonVals_omerc[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv_omerc[i] - latVals_omerc[i]) < 1e-5);
+        TEST4FIMEX_CHECK((latValsConv_omerc[i] <= 90.001) && (latValsConv_omerc[i] >= -90.001));
+        TEST4FIMEX_CHECK((lonValsConv_omerc[i] <= 180.001) && (lonValsConv_omerc[i] >= -180.001));
+        TEST4FIMEX_CHECK(fabs(lonValsConv_omerc[i] - lonVals_omerc[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv_omerc[i] - latVals_omerc[i]) < 1e-5);
     }
 
     projom->convertFromLonLat(lonValsConv_omerc, latValsConv_omerc);
     for (size_t i = 0; i < lonValsConv_omerc.size(); ++i) {
-        BOOST_CHECK(fabs(lonValsConv_omerc[i] - xVals[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv_omerc[i] - yVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(lonValsConv_omerc[i] - xVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv_omerc[i] - yVals[i]) < 1e-5);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_conversion_geostationary )
+TEST4FIMEX_TEST_CASE(test_conversion_geostationary)
 {
     string proj4geos="+proj=geos +lon_0=0 +h=3.57858e+07  +a=6.37817e+06  +b=6.35658e+06 +no_defs +x_0=-2.2098e+06 +y_0=-3.50297e+06";
     Projection_p projs_geos = Projection::createByProj4(proj4geos);
@@ -192,17 +193,15 @@ BOOST_AUTO_TEST_CASE( test_conversion_geostationary )
     projs_geos->convertToLonLat(lonValsConv_geos, latValsConv_geos);
 
     for (size_t i = 0; i < lonValsConv_geos.size(); ++i) {
-        BOOST_CHECK((latValsConv_geos[i] <= 90.001) && (latValsConv_geos[i] >= -90.001));
-        BOOST_CHECK((lonValsConv_geos[i] <= 180.001) && (lonValsConv_geos[i] >= -180.001));
-        BOOST_CHECK(fabs(lonValsConv_geos[i] - lonVals_geos[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv_geos[i] - latVals_geos[i]) < 1e-5);
+        TEST4FIMEX_CHECK((latValsConv_geos[i] <= 90.001) && (latValsConv_geos[i] >= -90.001));
+        TEST4FIMEX_CHECK((lonValsConv_geos[i] <= 180.001) && (lonValsConv_geos[i] >= -180.001));
+        TEST4FIMEX_CHECK(fabs(lonValsConv_geos[i] - lonVals_geos[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv_geos[i] - latVals_geos[i]) < 1e-5);
     }
 
     projs_geos->convertFromLonLat(lonValsConv_geos, latValsConv_geos);
     for (size_t i = 0; i < lonValsConv_geos.size(); ++i) {
-        BOOST_CHECK(fabs(lonValsConv_geos[i] - xVals[i]) < 1e-5);
-        BOOST_CHECK(fabs(latValsConv_geos[i] - yVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(lonValsConv_geos[i] - xVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv_geos[i] - yVals[i]) < 1e-5);
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

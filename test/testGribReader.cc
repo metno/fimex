@@ -25,7 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <memory>
 #include <vector>
@@ -40,7 +39,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_read_grb1)
+TEST4FIMEX_TEST_CASE(test_read_grb1)
 {
     if (!hasTestExtra())
         return;
@@ -51,31 +50,30 @@ BOOST_AUTO_TEST_CASE(test_read_grb1)
     defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathTest("cdmGribReaderConfig_newEarth.xml"))));
     //grbReader->getCDM().toXMLStream(cout);
-    BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
+    TEST4FIMEX_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     DataPtr data = grbReader->getDataSlice("x_wind_10m", 0);
     boost::shared_array<float> dataFlt = data->asFloat();
     for (int i = 85*229+50; i < 85*229+150; i++) {
         // check data-range
-        BOOST_CHECK(fabs(dataFlt[i]) < 15);
+        TEST4FIMEX_CHECK(fabs(dataFlt[i]) < 15);
         // check data-precision (0.1 according to setup-file)
-        BOOST_CHECK(1e-5 > fabs(10*dataFlt[i] - MetNoFimex::round(10*dataFlt[i])));
+        TEST4FIMEX_CHECK(1e-5 > fabs(10 * dataFlt[i] - MetNoFimex::round(10 * dataFlt[i])));
     }
 
     // check grib has new earth-radius
     CDMAttribute attr;
-    BOOST_CHECK(grbReader->getCDM().getAttribute("projection_polar_stereographic", "earth_radius", attr));
-    BOOST_CHECK(fabs(attr.getData()->asFloat()[0] - 6372000) < 1);
+    TEST4FIMEX_CHECK(grbReader->getCDM().getAttribute("projection_polar_stereographic", "earth_radius", attr));
+    TEST4FIMEX_CHECK(fabs(attr.getData()->asFloat()[0] - 6372000) < 1);
     // the following test has a tendency to fail when not all tests are run in correct order
     // a remaining grbml-file uses the wrong earth radius
     const float ac_x0 = grbReader->getData("x")->asFloat()[0], ex_x0 = -5719440,
             diff_x0 = std::abs(ac_x0 - ex_x0);
-    BOOST_CHECK_MESSAGE(diff_x0 < 1, "x_0 expected " << ex_x0 << " got " << ac_x0 << " difference " << diff_x0);
-
+    TEST4FIMEX_CHECK_MESSAGE(diff_x0 < 1, "x_0 expected " << ex_x0 << " got " << ac_x0 << " difference " << diff_x0);
 
     // slicebuilder
     SliceBuilder sbX(grbReader->getCDM(), "x");
     sbX.setStartAndSize("x", 4, 10);
-    BOOST_CHECK(grbReader->getDataSlice("x", sbX)->size() == 10);
+    TEST4FIMEX_CHECK_EQ(grbReader->getDataSlice("x", sbX)->size(), 10);
 
     SliceBuilder sb(grbReader->getCDM(), "x_wind_10m");
     sb.setStartAndSize("time", 0, 1);
@@ -83,13 +81,12 @@ BOOST_AUTO_TEST_CASE(test_read_grb1)
     sb.setStartAndSize("y", 2, 2);
     vector<size_t> dimStart = sb.getDimensionStartPositions();
     DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
-    BOOST_CHECK_EQUAL(20, dataS->size());
+    TEST4FIMEX_CHECK_EQ(20, dataS->size());
 
     NetCDF_CDMWriter(grbReader, "test_read_grb1.nc");
-    BOOST_CHECK(true); // and it is even writeable
 }
 
-BOOST_AUTO_TEST_CASE(test_read_grb2)
+TEST4FIMEX_TEST_CASE(test_read_grb2)
 {
     if (!hasTestExtra())
         return;
@@ -100,9 +97,5 @@ BOOST_AUTO_TEST_CASE(test_read_grb2)
     defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader(new GribCDMReader(gribFiles, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml"))));
     //grbReader->getCDM().toXMLStream(cout);
-    BOOST_CHECK(true); // made it so far
     Null_CDMWriter(grbReader, "");
-    BOOST_CHECK(true); // and it is even writeable
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

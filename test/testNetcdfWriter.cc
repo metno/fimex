@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "FeltCDMReader2.h"
 
 #include "fimex/CDMException.h"
@@ -35,39 +33,34 @@ using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
+TEST4FIMEX_TEST_CASE(test_feltNetcdfWrite)
 {
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    TEST4FIMEX_REQUIRE(feltReader);
+
     NetCDF_CDMWriter(feltReader, "test_feltNetcdfWrite.nc");
 }
 
-BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
+TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
 {
     if (!hasTestExtra())
         return;
     const string fileName = pathTestExtra("flth00.dat");
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
+    TEST4FIMEX_REQUIRE(feltReader);
+
     NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", pathShareEtc("cdmWriterConfigDeprecated.xml"));
-    BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
-    BOOST_CHECK(writer.getDimensionName("x") == "x_c");
-    BOOST_CHECK(writer.getVariableName("x") == "x_c");
-    BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
+    TEST4FIMEX_CHECK_EQ(writer.getVariableName("sea_level_pressure"), "sea_pressure");
+    TEST4FIMEX_CHECK_EQ(writer.getDimensionName("x"), "x_c");
+    TEST4FIMEX_CHECK_EQ(writer.getVariableName("x"), "x_c");
+    TEST4FIMEX_CHECK_EQ(writer.getAttribute("air_temperature", "standard_name").getStringValue(), "temperature");
 
-    try {
-        const std::string att = "comment";
-        writer.getAttribute(CDM::globalAttributeNS(), att);
-        BOOST_FAIL("global attribute '" << att << "' does not exist, expected exception");
-    } catch (exception& ex) {
-    }
-    try {
-        const std::string var = "surface_snow_thickness", att = "long_name";
-        writer.getAttribute(var, att);
-        BOOST_FAIL("variable '" << var << "' has no attribute '" << att << "', expected exception");
-    } catch (CDMException& ex) {
-    }
+    TEST4FIMEX_CHECK_THROW(writer.getAttribute(CDM::globalAttributeNS(), "comment"), CDMException);
+    // "global attribute '" << att << "' does not exist, expected exception");
+
+    TEST4FIMEX_CHECK_THROW(writer.getAttribute("surface_snow_thickness", "long_name"), CDMException);
+    // "variable '" << var << "' has no attribute '" << att << "', expected exception");
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

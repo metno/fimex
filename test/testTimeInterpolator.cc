@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/Data.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMTimeInterpolator.h"
@@ -36,7 +34,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_timeInterpolator )
+TEST4FIMEX_TEST_CASE(test_timeInterpolator)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string outputName = "test_timeInterpolator.nc";
@@ -50,28 +48,27 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
         std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
-        BOOST_CHECK_EQUAL(times->size(), 5);
+        TEST4FIMEX_CHECK_EQ(times->size(), 5);
         boost::shared_array<float> timeAry = times->asFloat();
-        BOOST_CHECK_EQUAL(timeAry[0], 10);
-        BOOST_CHECK_EQUAL(timeAry[4], 10+12);
+        TEST4FIMEX_CHECK_EQ(timeAry[0], 10);
+        TEST4FIMEX_CHECK_EQ(timeAry[4], 10 + 12);
         string airTemp = "air_temperature";
-        BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
-        BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);
+        TEST4FIMEX_CHECK_EQ(feltReader->getCDM().getVariable(airTemp).getName(), airTemp);
+        TEST4FIMEX_CHECK_EQ(timeInterpol->getCDM().getVariable(airTemp).getName(), airTemp);
         NetCDF_CDMWriter(timeInterpol, outputName);
-        BOOST_CHECK(true);
     }
     {
         // check that the correct data is written
         CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
         DataPtr ncTimes = ncReader->getData("time");
-        BOOST_CHECK_EQUAL(ncTimes->size(), 5);
+        TEST4FIMEX_CHECK_EQ(ncTimes->size(), 5);
         boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
-        BOOST_CHECK_EQUAL(ncTimeAry[0], 10);
-        BOOST_CHECK_EQUAL(ncTimeAry[4], 10+12);
+        TEST4FIMEX_CHECK_EQ(ncTimeAry[0], 10);
+        TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10 + 12);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
+TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
 {
     const string outputName = "test_timeInterpolatorRelative.nc";
     MetNoFimex::remove(outputName);
@@ -84,25 +81,22 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
         std::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
         timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
-        BOOST_CHECK_EQUAL(times->size(), 21);
+        TEST4FIMEX_CHECK_EQ(times->size(), 21);
         boost::shared_array<float> timeAry = times->asFloat();
-        BOOST_CHECK_EQUAL(timeAry[0], -2);
-        BOOST_CHECK_EQUAL(timeAry[4], 10);
+        TEST4FIMEX_CHECK_EQ(timeAry[0], -2);
+        TEST4FIMEX_CHECK_EQ(timeAry[4], 10);
         string airTemp = "air_temperature";
-        BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
-        BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);
+        TEST4FIMEX_CHECK_EQ(feltReader->getCDM().getVariable(airTemp).getName(), airTemp);
+        TEST4FIMEX_CHECK_EQ(timeInterpol->getCDM().getVariable(airTemp).getName(), airTemp);
         NetCDF_CDMWriter(timeInterpol, outputName);
-        BOOST_CHECK(true);
     }
     {
     // check that the correct data is written
         CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
         DataPtr ncTimes = ncReader->getData("time");
-        BOOST_CHECK_EQUAL(ncTimes->size(), 21);
+        TEST4FIMEX_CHECK_EQ(ncTimes->size(), 21);
         boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
-        BOOST_CHECK_EQUAL(ncTimeAry[0], -2);
-        BOOST_CHECK_EQUAL(ncTimeAry[4], 10);
+        TEST4FIMEX_CHECK_EQ(ncTimeAry[0], -2);
+        TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -25,15 +25,13 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/Utils.h"
 #include "fimex/SpatialAxisSpec.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_SpatialAxisSpec )
+TEST4FIMEX_TEST_CASE(test_SpatialAxisSpec)
 {
 	string axisSpec("-450000,-400000,...,50000");
 	double start = 30000;
@@ -42,21 +40,19 @@ BOOST_AUTO_TEST_CASE( test_SpatialAxisSpec )
 	SpatialAxisSpec sas(axisSpec, start, end);
 	const vector<double>& vals = sas.getAxisSteps();
 //	cerr << vals.size() << endl;
-	BOOST_CHECK(vals.size() == 11);
-//	for (size_t i = 0; i < vals.size(); ++i)
-//		cerr << "i: " << vals[i] << endl;
-	BOOST_CHECK(vals[0] == -450000);
-	BOOST_CHECK(vals[10] == 50000);
+        TEST4FIMEX_CHECK_EQ(vals.size(), 11);
+        //	for (size_t i = 0; i < vals.size(); ++i)
+        //		cerr << "i: " << vals[i] << endl;
+        TEST4FIMEX_CHECK_EQ(vals[0], -450000);
+        TEST4FIMEX_CHECK_EQ(vals[10], 50000);
 
-	string relAxisSpec("0,50000,...,x,x+50000;relativeStart=0");
+        string relAxisSpec("0,50000,...,x,x+50000;relativeStart=0");
 	SpatialAxisSpec relSas(relAxisSpec, start, end);
 	const vector<double>& relVals = relSas.getAxisSteps();
 	//cerr << relVals.size() << endl;
-	BOOST_CHECK(relVals.size() == 6);
-	//for (size_t i = 0; i < relVals.size(); ++i)
+        TEST4FIMEX_CHECK_EQ(relVals.size(), 6);
+        //for (size_t i = 0; i < relVals.size(); ++i)
 	//	cerr << "i: " << relVals[i] << endl;
-	BOOST_CHECK(relVals[0] == 0);
-	BOOST_CHECK(relVals[5] == 250000);
+        TEST4FIMEX_CHECK_EQ(relVals[0], 0);
+        TEST4FIMEX_CHECK_EQ(relVals[5], 250000);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

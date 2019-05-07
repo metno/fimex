@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
 #ifdef HAVE_NETCDF_H
@@ -37,34 +35,32 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_CDMconstants )
+TEST4FIMEX_TEST_CASE(test_CDMconstants)
 {
     string nc(mifi_get_filetype_name(MIFI_FILETYPE_NETCDF));
-    BOOST_CHECK(nc == "netcdf");
+    TEST4FIMEX_CHECK_EQ(nc, "netcdf");
     int nc_id = mifi_get_filetype(nc.c_str());
-    BOOST_CHECK(nc_id == MIFI_FILETYPE_NETCDF);
+    TEST4FIMEX_CHECK_EQ(nc_id, MIFI_FILETYPE_NETCDF);
 #ifdef HAVE_NETCDF_H
-    BOOST_CHECK(fimexHas(MIFI_FILETYPE_NETCDF));
+    TEST4FIMEX_CHECK(fimexHas(MIFI_FILETYPE_NETCDF));
 #else
-    BOOST_CHECK(fimexHas(MIFI_FILETYPE_NETCDF) == 0);
+    TEST4FIMEX_CHECK_EQ(fimexHas(MIFI_FILETYPE_NETCDF), 0);
 #endif
 }
 
-BOOST_AUTO_TEST_CASE( test_fileDetection )
+TEST4FIMEX_TEST_CASE(test_fileDetection)
 {
     const string fileName = pathTest("coordTest.nc");
-    BOOST_CHECK(CDMFileReaderFactory::detectFileType(fileName) == MIFI_FILETYPE_NETCDF);
+    TEST4FIMEX_CHECK_EQ(CDMFileReaderFactory::detectFileType(fileName), MIFI_FILETYPE_NETCDF);
     if (hasTestExtra()) {
         const std::string feltFile = pathTestExtra("flth00.dat");
-        BOOST_CHECK(CDMFileReaderFactory::detectFileType(feltFile) == MIFI_FILETYPE_FELT);
+        TEST4FIMEX_CHECK_EQ(CDMFileReaderFactory::detectFileType(feltFile), MIFI_FILETYPE_FELT);
     }
     if (fimexHas(MIFI_FILETYPE_NETCDF)) {
         CDMReader_p reader = CDMFileReaderFactory::create("netcdf", fileName);
-        BOOST_CHECK(reader.get() != 0);
+        TEST4FIMEX_CHECK(reader);
 #ifdef HAVE_NETCDF_H
-        BOOST_CHECK(dynamic_cast<NetCDF_CDMReader*>(reader.get()) != 0);
+        TEST4FIMEX_CHECK(std::dynamic_pointer_cast<NetCDF_CDMReader>(reader));
 #endif
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

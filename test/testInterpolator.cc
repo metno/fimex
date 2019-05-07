@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
@@ -42,7 +40,7 @@ using namespace MetNoFimex;
 
 static const int DEBUG = 0;
 
-BOOST_AUTO_TEST_CASE(test_interpolator)
+TEST4FIMEX_TEST_CASE(test_interpolator)
 {
     if (!hasTestExtra())
         return;
@@ -59,7 +57,6 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
     //interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
     //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
     //interpolator->getCDM().toXMLStream(cerr);
-    BOOST_CHECK(true);
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
@@ -68,13 +65,12 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
             found++;
         }
     }
-    BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+    TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 
     NetCDF_CDMWriter(interpolator, "test_interpolator.nc");
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
+TEST4FIMEX_TEST_CASE(test_interpolatorKDTree)
 {
     if (!hasTestExtra())
         return;
@@ -88,7 +84,6 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
         yAxis.push_back(i * 50000);
     }
     interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-    BOOST_CHECK(true);
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
@@ -97,12 +92,10 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
             found++;
         }
     }
-    BOOST_CHECK(found > 100); // at least 100 cells above 2000m
-    BOOST_CHECK(true);
+    TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 }
 
-
-BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
+TEST4FIMEX_TEST_CASE(test_interpolatorSatellite)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("satellite_cma.nc");
@@ -114,19 +107,14 @@ BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
         yAxis.push_back(-106 + i * 0.1);
     }
     interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=latlon +R="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "degrees_east", "degrees_north", CDM_DOUBLE, CDM_DOUBLE);
-    BOOST_CHECK(true);
     DataPtr cmaData = interpolator->getDataSlice("cma", 0);
     boost::shared_array<double> cmaArray = cmaData->asDouble();
-    BOOST_CHECK(true);
     SliceBuilder cmaSb(interpolator->getCDM(), "cma");
     DataPtr cmaData2 = interpolator->getDataSlice("cma", cmaSb);
-    BOOST_CHECK(cmaData2->size() == cmaData->size());
-
-    BOOST_CHECK(true);
+    TEST4FIMEX_CHECK_EQ(cmaData2->size(), cmaData->size());
 }
 
-
-BOOST_AUTO_TEST_CASE(test_interpolator2coords)
+TEST4FIMEX_TEST_CASE(test_interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
@@ -141,7 +129,6 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
         interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
         //NetCDF_CDMWriter(interpolator, "test2coordsNNKDInterpolator.nc");
     }
-    BOOST_CHECK(true);
     {
         DataPtr temp2Data = interpolator->getDataSlice("temp2");
         boost::shared_array<double> tmpArray = temp2Data->asDouble();
@@ -151,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
                 found++;
             }
         }
-        BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+        TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
     }
 
     interpolator = std::shared_ptr<CDMInterpolator>(new CDMInterpolator(reader));
@@ -164,7 +151,6 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
         interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
         //NetCDF_CDMWriter(interpolator, "test2nearestneighborInterpolator.nc");
     }
-    BOOST_CHECK(true);
     {
         int found = 0;
         DataPtr temp2Data = interpolator->getDataSlice("temp2");
@@ -174,12 +160,11 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
                 found++;
             }
         }
-        BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+        TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
     }
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
+TEST4FIMEX_TEST_CASE(test_interpolatorRelative)
 {
     if (!hasTestExtra())
         return;
@@ -188,57 +173,54 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
     std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
     //interpolator->getCDM().toXMLStream(cerr);
-    BOOST_CHECK(true);
-    BOOST_CHECK(interpolator->getDataSlice("x")->size() == 297);
-    BOOST_CHECK(interpolator->getDataSlice("y")->size() == 286);
-//    NetCDF_CDMWriter(interpolator, "test_interpolatorRelative.nc");
-//    BOOST_CHECK(true);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("x")->size(), 297);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("y")->size(), 286);
+    //    NetCDF_CDMWriter(interpolator, "test_interpolatorRelative.nc");
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
+TEST4FIMEX_TEST_CASE(test_interpolatorNcml)
 {
     const string fileName = pathTest("coordTest.nc");
     const string ncmlName = pathTest("test.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
-    const CDM cdm = reader->getCDM();
-    if (cdm.hasVariable("x_wind")) {
-        CDMVariable var = cdm.getVariable("x_wind");
-        BOOST_CHECK(var.isSpatialVector());
-        BOOST_CHECK(var.getSpatialVectorCounterpart() == "y_wind");
-    } else {
-        BOOST_CHECK(false);
-    }
-    if (cdm.hasVariable("y_wind")) {
-        CDMVariable var = cdm.getVariable("y_wind");
-        BOOST_CHECK(var.isSpatialVector());
-        BOOST_CHECK(var.getSpatialVectorCounterpart() == "x_wind");
-    } else {
-        BOOST_CHECK(false);
-    }
+    TEST4FIMEX_REQUIRE(reader);
+
+    const CDM& cdm = reader->getCDM();
+
+    TEST4FIMEX_REQUIRE(cdm.hasVariable("x_wind"));
+    CDMVariable var = cdm.getVariable("x_wind");
+    TEST4FIMEX_CHECK(var.isSpatialVector());
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "y_wind");
+
+    TEST4FIMEX_REQUIRE(cdm.hasVariable("y_wind"));
+    var = cdm.getVariable("y_wind");
+    TEST4FIMEX_CHECK(var.isSpatialVector());
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "x_wind");
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolator_template)
+TEST4FIMEX_TEST_CASE(test_interpolator_template)
 {
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     const string templateFileName(pathTest("template_noaa17.nc"));
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+    TEST4FIMEX_REQUIRE(ncReader);
+
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
     interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, templateFileName);
-    BOOST_CHECK(true);
-    BOOST_CHECK(interpolator->getDataSlice("x")->size() == 29);
-    BOOST_CHECK(interpolator->getDataSlice("y")->size() == 31);
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == 29*31);
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
-    BOOST_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
+
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("x")->size(), 29);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("y")->size(), 31);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), 29 * 31);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
+    TEST4FIMEX_REQUIRE(interpolator->getCDM().hasVariable("ga_skt"));
     DataPtr data = interpolator->getData("ga_skt");
     boost::shared_array<double> array = data->asDouble();
     for (size_t i = 0; i < 7; ++i) { // only first 7 datapoints are defined
-        BOOST_CHECK( (!mifi_isnan(array[i])) && (array[i] < 280) && (array[i] > 270));
+        TEST4FIMEX_CHECK((!mifi_isnan(array[i])) && (array[i] < 280) && (array[i] > 270));
     }
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
+TEST4FIMEX_TEST_CASE(test_interpolator_latlon)
 {
     double lat[] = {59.109, 59.052, 58.994, 58.934, 58.874, 58.812, 58.749, 58.685, 58.62, 64.};
     double lon[] = {4.965, 5.13, 5.296, 5.465, 5.637, 5.81, 5.986, 6.164001, 6.344, 3.};
@@ -249,21 +231,19 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
     std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
-    BOOST_CHECK(true);
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == lonVals.size());
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
-    BOOST_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), lonVals.size());
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
+    TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
     DataPtr data = interpolator->getData("ga_skt");
     boost::shared_array<double> array = data->asDouble();
-    BOOST_CHECK( (!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
+    TEST4FIMEX_CHECK((!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
     for (size_t i = 0; i < data->size(); ++i) {
-        BOOST_CHECK( (!mifi_isnan(array[i])) && (array[i] < 281.1) && (array[i] > 266));
+        TEST4FIMEX_CHECK((!mifi_isnan(array[i])) && (array[i] < 281.1) && (array[i] > 266));
     }
     //interpolator->getCDM().toXMLStream(cout);
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
+TEST4FIMEX_TEST_CASE(test_interpolator_wrongaxes_latlon)
 {
     double lat[] = {60.0};
     double lon[] = {10.0};
@@ -276,21 +256,18 @@ BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
     CDMReader_p ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
     std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
-    BOOST_CHECK(true);
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == lonVals.size());
-    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
-    BOOST_CHECK(interpolator->getCDM().hasVariable("x_wind_pl"));
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), lonVals.size());
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
+    TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("x_wind_pl"));
     DataPtr data = interpolator->getData("x_wind_pl");
     boost::shared_array<double> array = data->asDouble();
     for (size_t i = 0; i < data->size(); ++i) {
-        BOOST_CHECK( (!mifi_isnan(array[i])));
+        TEST4FIMEX_CHECK((!mifi_isnan(array[i])));
     }
     //interpolator->getCDM().toXMLStream(cout);
-    BOOST_CHECK(true);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
+TEST4FIMEX_TEST_CASE(test_interpolator_vectorlatlon)
 {
     if (!hasTestExtra())
         return;
@@ -315,8 +292,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
         for (size_t i = 0; i < xDataOrg->size(); i++) {
             // no change in x
-            BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-2);
-            BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], 1e-2);
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-2);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], 1e-2);
         }
     }
     {
@@ -330,8 +307,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
         for (size_t i = 0; i < xDataOrg->size(); i++) {
-            BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], -1.*(yDataRot->asFloat())[i], 1e-1);
-            BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-1);
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], -1. * (yDataRot->asFloat())[i], 1e-1);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-1);
         }
     }
     {
@@ -346,9 +323,9 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
         for (size_t i = 0; i < xDataOrg->size(); i++) {
             float error = ((xDataOrg->asFloat())[i] < 1) ? 50 : 3;
-            BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], error);
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], error);
             error = ((yDataOrg->asFloat())[i] < 1) ? 50 : 3;
-            BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
         }
     }
     {
@@ -363,9 +340,9 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
         for (size_t i = 0; i < xDataOrg->size(); i++) {
             float error = ((xDataOrg->asFloat())[i] < 1) ? 1 : .1;
-            BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
             error = ((yDataOrg->asFloat())[i] < 1) ? 1 : .1;
-            BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], -1*(xDataRot->asFloat())[i], error);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], -1 * (xDataRot->asFloat())[i], error);
         }
     }
 }
@@ -395,7 +372,7 @@ public:
     T& get(size_t i) {return all.at(i);}
 };
 
-BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
+TEST4FIMEX_TEST_CASE(test_interpolator_vector_backforth)
 {
     TestMany<IP> tests;
     tests(IP("+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
@@ -458,18 +435,16 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 
             for (size_t i = 0; i < dxwind->size(); ++i) {
                 if (!(mifi_isnan(xwind[i]) || (mifi_isnan(ywind[i])))) {
-                    BOOST_CHECK_MESSAGE((std::abs(xWind - xwind[i]) < ip.delta)
-                                     && (std::abs(yWind - ywind[i]) < ip.delta),
-                        "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:("
-                        << xWind << "," << yWind << ") -> " << i << ": ("
-                        << xwind[i] << "," << ywind[i] << "): " << ip.proj);
+                    TEST4FIMEX_CHECK_MESSAGE((std::abs(xWind - xwind[i]) < ip.delta) && (std::abs(yWind - ywind[i]) < ip.delta),
+                                             "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:(" << xWind << "," << yWind << ") -> " << i << ": (" << xwind[i]
+                                                                                               << "," << ywind[i] << "): " << ip.proj);
                 }
             }
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
+TEST4FIMEX_TEST_CASE(test_interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
@@ -487,11 +462,10 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
     lonLat.push_back(make_pair<double,double>(10.74,59.9)); // Oslo
     vc.push_back(CrossSectionDefinition("BergenOslo", lonLat));
     interpolator->changeProjectionToCrossSections(MIFI_INTERPOL_BILINEAR, vc);
-    BOOST_CHECK(true);
-    BOOST_CHECK(interpolator->getCDM().hasVariable("vcross_name"));
-    BOOST_CHECK(interpolator->getCDM().hasDimension("nvcross"));
-    BOOST_CHECK_EQUAL(interpolator->getCDM().getDimension("nvcross").getLength(), 2);
-    BOOST_CHECK(interpolator->getCDM().getDimension("x").getLength() >  5);
+    TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("vcross_name"));
+    TEST4FIMEX_CHECK(interpolator->getCDM().hasDimension("nvcross"));
+    TEST4FIMEX_CHECK_EQ(interpolator->getCDM().getDimension("nvcross").getLength(), 2);
+    TEST4FIMEX_CHECK(interpolator->getCDM().getDimension("x").getLength() > 5);
 }
 
 namespace {
@@ -505,7 +479,7 @@ std::vector<double> range(double start, double step, double end)
 #include "testInterpolator_forward_ex.cc"
 } // namespace
 
-BOOST_AUTO_TEST_CASE(interpolator_forward)
+TEST4FIMEX_TEST_CASE(interpolator_forward)
 {
     if (DEBUG)
         defaultLogLevel(Logger::DEBUG);
@@ -516,13 +490,13 @@ BOOST_AUTO_TEST_CASE(interpolator_forward)
                                    range(411386.521566, 50, 413886.672091), range(7539081.567715, 50, 7541081.780868), "m", "m", CDM_DOUBLE, CDM_DOUBLE);
 
     DataPtr interpolatedData = interpolator->getDataSlice("Amplitude_VV", 0);
-    BOOST_REQUIRE(interpolatedData);
-    BOOST_REQUIRE_EQUAL(interpolator_forward_N, interpolatedData->size());
+    TEST4FIMEX_REQUIRE(interpolatedData);
+    TEST4FIMEX_REQUIRE_EQ(interpolator_forward_N, interpolatedData->size());
     boost::shared_array<unsigned short> interpolatedValues = interpolatedData->asUShort();
     int bad = 0;
     for (size_t i = 0; i < interpolator_forward_N; ++i) {
 #if 0
-        BOOST_CHECK_EQUAL(interpolator_forward_ex[i], interpolatedValues[i]);
+        TEST4FIMEX_CHECK_EQ(interpolator_forward_ex[i], interpolatedValues[i]);
 #else
         if (interpolator_forward_ex[i] != interpolatedValues[i]) {
             std::cout << "i=" << i << " ex=" << interpolator_forward_ex[i] << " ac=" << interpolatedValues[i] << std::endl;
@@ -530,7 +504,5 @@ BOOST_AUTO_TEST_CASE(interpolator_forward)
         }
 #endif
     }
-    BOOST_CHECK_EQUAL(0, bad);
+    TEST4FIMEX_CHECK_EQ(0, bad);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

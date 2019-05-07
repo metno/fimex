@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include <boost/shared_array.hpp>
 #include <memory>
 
@@ -48,7 +46,7 @@ using namespace MetNoFimex;
 
 //#define TEST_DEBUG
 
-BOOST_AUTO_TEST_CASE( test_qualityExtract )
+TEST4FIMEX_TEST_CASE(test_qualityExtract)
 {
         if (!hasTestExtra())
             return;
@@ -80,15 +78,13 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 	    cerr << endl;
 	}
 #endif /* TEST_DEBUG */
-	BOOST_CHECK(statusVariables.find("air_temperature") != statusVariables.end());
-    BOOST_CHECK(statusVariables["bla"] == "blub");
-    BOOST_CHECK(variableFlags.find("bla") == variableFlags.end());
-    BOOST_CHECK(variableValues["bla"][2] == 3);
+        TEST4FIMEX_CHECK(statusVariables.find("air_temperature") != statusVariables.end());
+        TEST4FIMEX_CHECK_EQ(statusVariables["bla"], "blub");
+        TEST4FIMEX_CHECK(variableFlags.find("bla") == variableFlags.end());
+        TEST4FIMEX_CHECK_EQ(variableValues["bla"][2], 3);
 }
 
-
-
-BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
+TEST4FIMEX_TEST_CASE(test_qualityExtract_convert)
 {
     if (!hasTestExtra())
         return;
@@ -99,16 +95,13 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
 #ifdef HAVE_NETCDF_H
     string outputFile("test_qualityExtract_convert.nc");
     NetCDF_CDMWriter(qe, outputFile);
-    BOOST_CHECK(exists(outputFile));
+    TEST4FIMEX_CHECK(exists(outputFile));
 #else
     Null_CDMWriter(qe, "");
-    BOOST_CHECK(true);
 #endif /* NETCDF */
 }
 
-
-
-BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
+TEST4FIMEX_TEST_CASE(test_qualityExtract_mask)
 {
 #ifdef HAVE_NETCDF_H
     const string fileNameD = pathTest("testQEmask_data.nc");
@@ -119,17 +112,13 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
     std::shared_ptr<CDMQualityExtractor> mask = std::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
     DataPtr sliceM = mask->getDataSlice("salt", 0);
-    BOOST_CHECK( sliceM.get() != 0 );
-    
+    TEST4FIMEX_CHECK(sliceM);
+
     const int NXSI = 21, NETA = 16, N_SRHO=35;
-    BOOST_CHECK( sliceM->size() == N_SRHO*NXSI*NETA );
+    TEST4FIMEX_CHECK_EQ(sliceM->size(), N_SRHO * NXSI * NETA);
     boost::shared_array<double> valuesM = sliceM->asDouble();
     const int offset0 = 0, offset1 = 12+NXSI*12;
-    BOOST_CHECK( valuesM[offset0] > 1e36 );
-    BOOST_CHECK( fabs(valuesM[offset1] - 35.114) < 0.001 );
-#else
-    BOOST_CHECK(true);
+    TEST4FIMEX_CHECK(valuesM[offset0] > 1e36);
+    TEST4FIMEX_CHECK(fabs(valuesM[offset1] - 35.114) < 0.001);
 #endif /* HAVE_NETCDF_H */
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

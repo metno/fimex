@@ -25,13 +25,11 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/vertical_coordinate_transformations.h"
 
 using namespace std;
 
-BOOST_AUTO_TEST_CASE( test_atmosphere_sigma_pressure )
+TEST4FIMEX_TEST_CASE(test_atmosphere_sigma_pressure)
 {
     /*
      * NCL example
@@ -51,10 +49,10 @@ BOOST_AUTO_TEST_CASE( test_atmosphere_sigma_pressure )
 
     mifi_atmosphere_sigma_pressure(n, pTop, pSurf, sigma, pOut);
     for (size_t i = 0; i < n; ++i)
-        BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
+        TEST4FIMEX_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
 }
 
-BOOST_AUTO_TEST_CASE( test_atmosphere_hybrid_sigma_pressure )
+TEST4FIMEX_TEST_CASE(test_atmosphere_hybrid_sigma_pressure)
 {
     /*
      * NCL example
@@ -80,13 +78,11 @@ BOOST_AUTO_TEST_CASE( test_atmosphere_hybrid_sigma_pressure )
 
     mifi_atmosphere_hybrid_sigma_pressure(n, p0, pSurf, a, b, pOut);
     for (size_t i = 0; i < n; ++i)
-        BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
+        TEST4FIMEX_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
 
     for (size_t i = 0; i < n; ++i)
         ap[i] = a[i]*p0;
     mifi_atmosphere_hybrid_sigma_ap_pressure(n, pSurf, ap, b, pOut);
     for (size_t i = 0; i < n; ++i)
-        BOOST_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
+        TEST4FIMEX_CHECK_CLOSE(pExp[i], pOut[i], 1e-3);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

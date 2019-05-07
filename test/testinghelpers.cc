@@ -29,8 +29,12 @@
 */
 
 
-// prevent #include <boost/test/unit_test.hpp> from testinghelpers.h here
-#define FIMEX_TESTINGHELPERS_NO_BOOST
+#include "fimex_config.h"
+
+#if HAVE_BOOST_UNIT_TEST_FRAMEWORK
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
+#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
 #include "testinghelpers.h"
 
 #include <stdexcept>
@@ -108,9 +112,3 @@ void copyFile(const std::string& from, const std::string& to)
 }
 
 } // namespace MetNoFimex
-
-#ifndef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-// no / old boost testframework
-int main(int argc, char* args[]) {
-}
-#endif // !HAVE_BOOST_UNIT_TEST_FRAMEWORK

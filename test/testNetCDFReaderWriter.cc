@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
@@ -38,7 +36,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_update )
+TEST4FIMEX_TEST_CASE(test_update)
 {
     if (not fimexHas(MIFI_FILETYPE_NETCDF)) {
         // no netcdf support, skip test
@@ -51,11 +49,11 @@ BOOST_AUTO_TEST_CASE( test_update )
     const double diff = 10.0, scale = 1.2;
     DataPtr read1, read2;
     {
-        std::shared_ptr<CDMReaderWriter> rw = std::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
-        BOOST_CHECK(rw.get() != 0);
+        CDMReaderWriter_p rw = std::make_shared<NetCDF_CDMReader>(fileName, true);
+        TEST4FIMEX_CHECK(rw);
 
         read1 = rw->getDataSlice("ga_2t_1", 0);
-        BOOST_CHECK(read1.get() != 0);
+        TEST4FIMEX_CHECK(read1);
 
         DataPtr write1 = read1->clone();
         const size_t size1 = read1->size();
@@ -66,22 +64,22 @@ BOOST_AUTO_TEST_CASE( test_update )
     }
     {
         CDMReader_p r = CDMReader_p(new NetCDF_CDMReader(fileName));
-        BOOST_CHECK(r.get() != 0);
+        TEST4FIMEX_CHECK(r);
 
         read2 = r->getDataSlice("ga_2t_1", 0);
-        BOOST_CHECK(read2.get() != 0);
+        TEST4FIMEX_CHECK(read2);
 
         const size_t size2 = read2->size();
-        BOOST_CHECK(size2 == read1->size());
+        TEST4FIMEX_CHECK_EQ(size2, read1->size());
         for(size_t i=0; i<size2; ++i) {
             const double actual = read2->getDouble(i);
             const double expect = diff + scale*read1->getDouble(i);
-            BOOST_CHECK(abs(actual - expect) < 1e-3);
+            TEST4FIMEX_CHECK(abs(actual - expect) < 1e-3);
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_scaled )
+TEST4FIMEX_TEST_CASE(test_scaled)
 {
     if (not fimexHas(MIFI_FILETYPE_NETCDF)) {
         // no netcdf support, skip test
@@ -94,14 +92,14 @@ BOOST_AUTO_TEST_CASE( test_scaled )
     const double addF = 1.0, addK = addF * 5.0/9.0;
     DataPtr read1, read2;
     {
-        std::shared_ptr<CDMReaderWriter> rw = std::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
-        BOOST_CHECK(rw.get() != 0);
+        CDMReaderWriter_p rw = std::make_shared<NetCDF_CDMReader>(fileName, true);
+        TEST4FIMEX_CHECK(rw);
 
         read1 = rw->getScaledDataSlice("ga_2t_1", 0);
-        BOOST_CHECK(read1.get() != 0);
+        TEST4FIMEX_CHECK(read1);
 
         DataPtr write1 = rw->getScaledDataSliceInUnit("ga_2t_1", "deg_F", 0);
-        BOOST_CHECK(write1.get() != 0);
+        TEST4FIMEX_CHECK(write1);
 
         const size_t size1 = write1->size();
         for(size_t i=0; i<size1; ++i) {
@@ -112,20 +110,18 @@ BOOST_AUTO_TEST_CASE( test_scaled )
         rw->putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, write1);
     }
     {
-        CDMReader_p r = CDMReader_p(new NetCDF_CDMReader(fileName));
-        BOOST_CHECK(r.get() != 0);
+        CDMReader_p r = std::make_shared<NetCDF_CDMReader>(fileName);
+        TEST4FIMEX_CHECK(r);
 
         read2 = r->getScaledDataSlice("ga_2t_1", 0);
-        BOOST_CHECK(read2.get() != 0);
+        TEST4FIMEX_CHECK(read2);
 
         const size_t size2 = read2->size();
-        BOOST_CHECK(size2 == read1->size());
+        TEST4FIMEX_CHECK_EQ(size2, read1->size());
         for(size_t i=0; i<size2; ++i) {
             const double actual = read2->getDouble(i);
             const double expect = addK + read1->getDouble(i);
-            BOOST_CHECK(abs(actual - expect) < 1e-3);
+            TEST4FIMEX_CHECK(abs(actual - expect) < 1e-3);
         }
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

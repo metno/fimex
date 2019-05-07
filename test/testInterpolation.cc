@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/interpolation.h"
 
 #include <cmath>
@@ -38,7 +36,6 @@
 // definitions from proj_api.h
 #define RAD_TO_DEG      57.29577951308232
 
-using boost::unit_test_framework::test_suite;
 using MetNoFimex::pathTest;
 
 namespace {
@@ -48,73 +45,69 @@ inline bool near(float a, float b, float eps)
 }
 } // namespace
 
-BOOST_AUTO_TEST_CASE( test_mifi_points2position )
+TEST4FIMEX_TEST_CASE(test_mifi_points2position)
 {
     double axis[5] = {1., 2., 3., 4., 5.};
     double points[5] = {-3., 5., 1.3, 2., 6.};
     double apoints[5] = {-4., 4., 0.3, 1., 5.}; // results
     mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
     for (int i = 0; i < 5; ++i) {
-        BOOST_CHECK(near(apoints[i], points[i], 1e-10));
+        TEST4FIMEX_CHECK(near(apoints[i], points[i], 1e-10));
     }
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_points2position_reverse )
+TEST4FIMEX_TEST_CASE(test_mifi_points2position_reverse)
 {
     double axis[5] = {5., 4., 3., 2., 1.};
     double points[5] = {-3., 5., 1.3, 2., 6.};
     double apoints[5] = {8., 0., 3.7, 3., -1.}; // results
     mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
     for (int i = 0; i < 5; ++i) {
-        BOOST_CHECK(near(apoints[i], points[i], 1e-10));
+        TEST4FIMEX_CHECK(near(apoints[i], points[i], 1e-10));
     }
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_f)
 {
     float infield[4] = {1., 2., 1., 2.}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
     float outvalues[1];
 
     mifi_get_values_f(infield, outvalues, 0.3, 0.3, 2, 2, 1);
-    BOOST_CHECK(near(outvalues[0], 1, 1e-10));
+    TEST4FIMEX_CHECK(near(outvalues[0], 1, 1e-10));
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_bilinear_f)
 {
     float infield[4] = {1., 2., 2., 1+std::sqrt(2.0f)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
     float outvalues[1];
 
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
-    BOOST_CHECK(near(outvalues[0], 1.3, 1e-6));
+    TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0.0001, 2, 2, 1);
     //std::cerr << outvalues[0] << std::endl;
-    BOOST_CHECK(near(outvalues[0], 1.3, 1e-4));
+    TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-4));
     mifi_get_values_bilinear_f(infield, outvalues, 0., 0.3, 2, 2, 1);
-    BOOST_CHECK(near(outvalues[0], 1.3, 1e-6));
+    TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
     //std::cerr << outvalues[0] << std::endl;
-    BOOST_CHECK(near(outvalues[0], 1.3, 1e-4));
+    TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-4));
 
     // check for border values / nan
     mifi_get_values_bilinear_f(infield, outvalues, 0, 0, 2, 2, 1);
-    BOOST_CHECK(!std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(!std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 1, 1, 2, 2, 1);
-    BOOST_CHECK(!std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(!std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 1.5, 0.5, 2, 2, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 0.5, 1.5, 2, 2, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 0.5, -0.5, 2, 2, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_bicubic_f)
 {
     /* infield constant in x-direction */
     float infield[16] = {1, 1, 1, 1,
@@ -127,37 +120,36 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
         for (int j = 0; j < 4; j++)
             infield_t[i+4*j] = infield[j+4*i];
     mifi_get_values_bicubic_f(infield, outvalues, 1, 1, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield, outvalues, 1, 1.99999, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield, outvalues, 1, 1.5, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield, outvalues, 1.5, 1, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
 
     // and transposed
     mifi_get_values_bicubic_f(infield_t, outvalues, 1, 1, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield_t, outvalues, 1.99999, 1, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield_t, outvalues, 1.5, 1, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
     mifi_get_values_bicubic_f(infield_t, outvalues, 1, 1.5, 4, 4, 1);
-    BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
 
     // check for border values / nan
     mifi_get_values_bicubic_f(infield, outvalues, .5, 1, 4, 4, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 1, .5, 4, 4, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 2.5, 1, 4, 4, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 1, 2.5, 4, 4, 1);
-    BOOST_CHECK(std::isnan(outvalues[0]));
+    TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_f)
 {
     const int nr = 4;
     float infieldA[nr] = {0, 1, -1, 1};
@@ -166,25 +158,24 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_f )
     // infieldA and infieldB at same position (a=b), take field1
     mifi_get_values_linear_f(infieldA, infieldB, outfield, nr, 1., 1., .5);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], infieldA[i], 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], infieldA[i], 1e-5);
     }
 
     // real values between a and b
     mifi_get_values_linear_f(infieldA, infieldB, outfield, nr, 1., 2., 1.5);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], (float).5*(infieldA[i]+infieldB[i]), 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], (float).5 * (infieldA[i] + infieldB[i]), 1e-5);
     }
 
 
     // extrapolation values between a and b
     mifi_get_values_linear_f(infieldA, infieldB, outfield, nr, 0., 1., 2.);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], (float)infieldA[i]+2*(infieldB[i]-infieldA[i]), 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], (float)infieldA[i] + 2 * (infieldB[i] - infieldA[i]), 1e-5);
     }
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_d )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_d)
 {
     const int nr = 4;
     double infieldA[nr] = {0, 1, -1, 1};
@@ -193,25 +184,24 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_d )
     // infieldA and infieldB at same position (a=b), take field1
     mifi_get_values_linear_d(infieldA, infieldB, outfield, nr, 1., 1., .5);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], infieldA[i], 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], infieldA[i], 1e-5);
     }
 
     // real values between a and b
     mifi_get_values_linear_d(infieldA, infieldB, outfield, nr, 1., 2., 1.5);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], .5*(infieldA[i]+infieldB[i]), 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], .5 * (infieldA[i] + infieldB[i]), 1e-5);
     }
 
 
     // extrapolation values between a and b
     mifi_get_values_linear_d(infieldA, infieldB, outfield, nr, 0., 1., 2.);
     for (int i = 0; i < nr; i++) {
-        BOOST_CHECK_CLOSE(outfield[i], infieldA[i]+2*(infieldB[i]-infieldA[i]), 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(outfield[i], infieldA[i] + 2 * (infieldB[i] - infieldA[i]), 1e-5);
     }
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_f)
 {
     const int nr = 1;
     float infieldA[nr] = {1000.};
@@ -219,26 +209,25 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
     float outfield[nr];
     // corner value 100.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 100.);
-    BOOST_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
     // corner value 1000.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1000.);
-    BOOST_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
     // interpolation at 500.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 500.);
-    BOOST_CHECK_CLOSE(outfield[0], 729.073f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 729.073f, 1e-3);
     // extrapolation at 1500.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1500.);
-    BOOST_CHECK_CLOSE(outfield[0], 1158.482f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 1158.482f, 1e-3);
     // interpolation at 200.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 200.);
-    BOOST_CHECK_CLOSE(outfield[0], 370.927f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 370.927f, 1e-3);
     // interpolation at 800.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 800.);
-    BOOST_CHECK_CLOSE(outfield[0], 912.781f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 912.781f, 1e-3);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
+TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_log_f)
 {
     const int nr = 1;
     float infieldA[nr] = {1000.};
@@ -246,25 +235,24 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
     float outfield[nr];
     // corner value 100.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 100.);
-    BOOST_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
     // corner value 1000.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1000.);
-    BOOST_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
 
     // below are results from NCLs vintp2p_ecmwf
     // interpolation at 500.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 500.);
-    BOOST_CHECK_CLOSE(outfield[0], 763.1873f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 763.1873f, 1e-3);
     // interpolation at 200.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 200.);
-    BOOST_CHECK_CLOSE(outfield[0], 408.0904f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 408.0904f, 1e-3);
     // interpolation at 800.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 800.);
-    BOOST_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
+    TEST4FIMEX_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
+TEST4FIMEX_TEST_CASE(test_mifi_project_axes)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -273,13 +261,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
     double emepY[] = {108,109,110};
     double outX[9];
     double outY[9];
-    BOOST_CHECK(MIFI_OK == mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
+    TEST4FIMEX_CHECK_EQ(MIFI_OK, mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            BOOST_CHECK((RAD_TO_DEG * outY[j+3*i]) > 89);
+            TEST4FIMEX_CHECK((RAD_TO_DEG * outY[j + 3 * i]) > 89);
 }
 
-BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
+TEST4FIMEX_TEST_CASE(test_mifi_interpolate_f)
 {
     const int iSize = 170;
     const int jSize = 150;
@@ -319,7 +307,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     // reading the data
     // i j country-id
     std::ifstream datafile (pathTest("inData.txt").c_str(), std::ios::in);
-    BOOST_REQUIRE(datafile.is_open());
+    TEST4FIMEX_REQUIRE(datafile.is_open());
     datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
     int line = 0;
     while (true) {
@@ -332,21 +320,19 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
             datafile >> country;
             inArray[mifi_3d_array_position(x-1,y-1,0,iSize,jSize,zSize)] = country;
         } catch (std::exception& fail) {
-            BOOST_REQUIRE_MESSAGE(datafile.eof(), "Exception '" << fail.what()
-                                  << "' in line: " << line <<
-                                  " with x=" << x << " y=" << y << " country=" << country);
+            TEST4FIMEX_REQUIRE_MESSAGE(datafile.eof(),
+                                       "Exception '" << fail.what() << "' in line: " << line << " with x=" << x << " y=" << y << " country=" << country);
             break;
         }
     }
     datafile.close();
-    BOOST_REQUIRE(near(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)], 4, 1e-5));
+    TEST4FIMEX_REQUIRE(near(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)], 4, 1e-5));
 
-    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR,
-                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-                == MIFI_OK);
+    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize,
+                                        jSize, zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
+                                        latSize) == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
+    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " "
               << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -356,12 +342,11 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BILINEAR,
-                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-                == MIFI_OK);
+    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BILINEAR, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
+                                        zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
+                                        latSize) == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
+    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
               << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -376,12 +361,11 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    BOOST_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BICUBIC,
-                                   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
-                                   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
-                == MIFI_OK);
+    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BICUBIC, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
+                                        zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
+                                        latSize) == MIFI_OK);
     // -25 43 32 (long, lat, val)
-    BOOST_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
+    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
               << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
@@ -394,8 +378,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 #endif
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
+TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_values_rotate_90)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
@@ -447,14 +430,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 //            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
 //            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << " " << uRot[j*5+i] << std::endl;
             // rotation of 90deg -> u->-v, v->u
-            BOOST_CHECK(fabs(vRot[j*5+i] - uOut[j*5+i]) < 1e-4);
-            BOOST_CHECK(fabs(uRot[j*5+i] + vOut[j*5+i]) < 1e-4);
+TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] - uOut[j * 5 + i]) < 1e-4);
+TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
         }
     }
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
+TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_values_rotate_180)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=180 +lat_ts=60");
@@ -506,15 +488,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
             //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
             //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
             // rotation of 90deg -> u->v, v->-u
-            BOOST_CHECK(fabs(vRot[j*5+i] + vOut[j*5+i]) < 1e-5);
-            BOOST_CHECK(fabs(uRot[j*5+i] + uOut[j*5+i]) < 1e-5);
+            TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-5);
+            TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + uOut[j * 5 + i]) < 1e-5);
         }
     }
-    BOOST_CHECK(true);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
+TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_keep_size)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -577,15 +557,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
             double diff2 = (uOut[j*4+i]*uOut[j*4+i] + vOut[j*4+i]*vOut[j*4+i] - uRot[j*4+i]*uRot[j*4+i] - vRot[j*4+i]*vRot[j*4+i]);
             if (!std::isnan(diff2)) {
                 //std::cerr << diff2  << std::endl;
-                BOOST_CHECK(fabs(diff2) < 1e-3);
+                TEST4FIMEX_CHECK(fabs(diff2) < 1e-3);
             }
         }
     }
-    BOOST_CHECK(true);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
+TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_directions)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -624,7 +602,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
     // calculate the positions in the original proj.
     int errcode = mifi_get_vector_reproject_matrix_field(emepProj.c_str(),
         latlongProj.c_str(), in_x_field, in_y_field, ox, oy, matrix);
-    BOOST_CHECK(errcode == MIFI_OK);
+    TEST4FIMEX_CHECK_EQ(errcode, MIFI_OK);
 
     mifi_vector_reproject_direction_by_matrix_f(MIFI_VECTOR_KEEP_SIZE, matrix, angles, ox, oy, oz);
 #if 0
@@ -636,79 +614,97 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
         }
     }
 #endif
-    BOOST_CHECK_CLOSE(315, angles[0 + oy*0], 1);
-    BOOST_CHECK_CLOSE(270, angles[0 + oy*2], 1);
-    BOOST_CHECK_CLOSE(225, angles[0 + oy*4], 1);
+    TEST4FIMEX_CHECK_CLOSE(315, angles[0 + oy * 0], 1);
+    TEST4FIMEX_CHECK_CLOSE(270, angles[0 + oy * 2], 1);
+    TEST4FIMEX_CHECK_CLOSE(225, angles[0 + oy * 4], 1);
     float out = angles[2 + oy*0];
     if (out > 300)
         out -= 360;
-    BOOST_CHECK_CLOSE(10, 10+out, 1);
+    TEST4FIMEX_CHECK_CLOSE(10, 10 + out, 1);
     out = angles[2 + oy*1];
     if (out > 300)
         out -= 360;
-    BOOST_CHECK_CLOSE(10, 10+out, 1);
-    BOOST_CHECK_CLOSE(180, angles[2 + oy*3], 1);
-    BOOST_CHECK_CLOSE(180, angles[2 + oy*4], 1);
+    TEST4FIMEX_CHECK_CLOSE(10, 10 + out, 1);
+    TEST4FIMEX_CHECK_CLOSE(180, angles[2 + oy * 3], 1);
+    TEST4FIMEX_CHECK_CLOSE(180, angles[2 + oy * 4], 1);
 
-    BOOST_CHECK_CLOSE(45, angles[4 + oy*0], 1);
-    BOOST_CHECK_CLOSE(90, angles[4 + oy*2], 1);
-    BOOST_CHECK_CLOSE(135, angles[4 + oy*4], 1);
+    TEST4FIMEX_CHECK_CLOSE(45, angles[4 + oy * 0], 1);
+    TEST4FIMEX_CHECK_CLOSE(90, angles[4 + oy * 2], 1);
+    TEST4FIMEX_CHECK_CLOSE(135, angles[4 + oy * 4], 1);
 }
 
-BOOST_AUTO_TEST_CASE(test_linear_no_extrapol)
+TEST4FIMEX_TEST_CASE(test_linear_no_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
     float out = 12345;
-    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(std::isnan(out));
-    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(std::isnan(out));
-    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
-    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(std::isnan(out));
-    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5);
+    TEST4FIMEX_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
+    mifi_get_values_linear_no_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
 }
 
-BOOST_AUTO_TEST_CASE(test_linear_const_extrapol)
+TEST4FIMEX_TEST_CASE(test_linear_const_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
     float out = 12345;
-    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(near(out, 200, 0.01));
-    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 200, 0.01));
-    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
-    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 300, 0.01));
-    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(near(out, 300, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5);
+    TEST4FIMEX_CHECK(near(out, 200, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5);
+    TEST4FIMEX_CHECK(near(out, 200, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5);
+    TEST4FIMEX_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5);
+    TEST4FIMEX_CHECK(near(out, 300, 0.01));
+    mifi_get_values_linear_const_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5);
+    TEST4FIMEX_CHECK(near(out, 300, 0.01));
 }
 
-BOOST_AUTO_TEST_CASE(test_linear_weak_extrapol)
+TEST4FIMEX_TEST_CASE(test_linear_weak_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
     float out = 12345;
-    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(std::isnan(out));
-    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 150, 0.01));
-    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
-    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 350, 0.01));
-    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(std::isnan(out));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 0.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 1.5);
+    TEST4FIMEX_CHECK(near(out, 150, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 2.5);
+    TEST4FIMEX_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 3.5);
+    TEST4FIMEX_CHECK(near(out, 350, 0.01));
+    mifi_get_values_linear_weak_extrapol_f(&in0, &in1, &out, 1, a, b, 4.5);
+    TEST4FIMEX_CHECK(std::isnan(out));
 }
 
-BOOST_AUTO_TEST_CASE(test_linear)
+TEST4FIMEX_TEST_CASE(test_linear)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
     float out = 12345;
-    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 0.5); BOOST_CHECK(near(out,  50, 0.01));
-    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 1.5); BOOST_CHECK(near(out, 150, 0.01));
-    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 2.5); BOOST_CHECK(near(out, 250, 0.01));
-    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 3.5); BOOST_CHECK(near(out, 350, 0.01));
-    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(near(out, 450, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 0.5);
+    TEST4FIMEX_CHECK(near(out, 50, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 1.5);
+    TEST4FIMEX_CHECK(near(out, 150, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 2.5);
+    TEST4FIMEX_CHECK(near(out, 250, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 3.5);
+    TEST4FIMEX_CHECK(near(out, 350, 0.01));
+    mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 4.5);
+    TEST4FIMEX_CHECK(near(out, 450, 0.01));
 }
 
-BOOST_AUTO_TEST_CASE(binary_search)
+TEST4FIMEX_TEST_CASE(binary_search)
 {
     const int N = 10;
     const double values[N] = {1, 3, 5, 7, 9, 13, 17, 21, 24, 28};
-    BOOST_CHECK_EQUAL(3, bsearchDoubleIndex(7, values, N, ascendingDoubleComparator));
-    BOOST_CHECK_EQUAL(-5, bsearchDoubleIndex(8, values, N, ascendingDoubleComparator));
+    TEST4FIMEX_CHECK_EQ(3, bsearchDoubleIndex(7, values, N, ascendingDoubleComparator));
+    TEST4FIMEX_CHECK_EQ(-5, bsearchDoubleIndex(8, values, N, ascendingDoubleComparator));
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

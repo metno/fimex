@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include <boost/algorithm/minmax_element.hpp>
 #include "fimex/interpolation.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -40,7 +38,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
+TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
 {
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
@@ -52,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
     DataPtr bD = reader->getScaledData("b0");
 
     CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("air_temperature_ml"));
-    BOOST_REQUIRE(varSysIt != coordSys.end());
+    TEST4FIMEX_REQUIRE(varSysIt != coordSys.end());
     CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
     CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
     CoordinateAxis_cp zAxis = (*varSysIt)->getGeoZAxis(); // Z
@@ -71,15 +69,15 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
     size_t timePos = 0;
 
     DataPtr zsD = reader->getScaledDataSliceInUnit("geopotential_pl", "m^2/s^2", timePos); // need to devide by g=9.81m/s2
-    BOOST_CHECK_EQUAL(zsD->size(), nx*ny);
+    TEST4FIMEX_CHECK_EQ(zsD->size(), nx * ny);
     DataPtr psD = reader->getScaledDataSliceInUnit("surface_air_pressure", "Pa", timePos);
-    BOOST_CHECK_EQUAL(psD->size(), nx*ny);
+    TEST4FIMEX_CHECK_EQ(psD->size(), nx * ny);
     DataPtr uD = reader->getScaledDataSliceInUnit("x_wind_ml", "m/s", timePos);
-    BOOST_CHECK_EQUAL(uD->size(), nx*ny*nz);
+    TEST4FIMEX_CHECK_EQ(uD->size(), nx * ny * nz);
     DataPtr vD = reader->getScaledDataSliceInUnit("y_wind_ml", "m/s", timePos);
-    BOOST_CHECK_EQUAL(vD->size(), nx*ny*nz);
+    TEST4FIMEX_CHECK_EQ(vD->size(), nx * ny * nz);
     DataPtr tD = reader->getScaledDataSliceInUnit("air_temperature_ml", "K", timePos);
-    BOOST_CHECK_EQUAL(tD->size(), nx*ny*nz);
+    TEST4FIMEX_CHECK_EQ(tD->size(), nx * ny * nz);
 
     //cerr << "got data" << endl;
 
@@ -99,35 +97,35 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
     DataPtr latVals = reader->getScaledDataInUnit(lat, "degree");
     boost::shared_array<float> gridDistX(new float[nx*ny]());
     boost::shared_array<float> gridDistY(new float[nx*ny]());
-    BOOST_CHECK_EQUAL(MIFI_OK, mifi_griddistance(nx, ny, lonVals->asDouble().get(), latVals->asDouble().get(), gridDistX.get(), gridDistY.get()));
+    TEST4FIMEX_CHECK_EQ(MIFI_OK, mifi_griddistance(nx, ny, lonVals->asDouble().get(), latVals->asDouble().get(), gridDistX.get(), gridDistY.get()));
     //cerr << "got gridDistance" << endl;
     boost::shared_array<float> w(new float[nx*ny*nz]());
-    BOOST_CHECK_EQUAL(MIFI_OK, mifi_compute_vertical_velocity(nx, ny, nz, dx, dy, gridDistX.get(), gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(), zs.get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()));
-
-
+    TEST4FIMEX_CHECK_EQ(MIFI_OK,
+                        mifi_compute_vertical_velocity(nx, ny, nz, dx, dy, gridDistX.get(), gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(),
+                                                       zs.get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()));
 
     DataPtr hyD = reader->getScaledData("hybrid0");
     boost::shared_array<float> hy = hyD->asFloat();
     for (size_t k = 0; k < nz; ++k) {
         pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
-        BOOST_CHECK(*minMax.first > -4);
-        BOOST_CHECK(*minMax.second < 4);
+        TEST4FIMEX_CHECK(*minMax.first > -4);
+        TEST4FIMEX_CHECK(*minMax.second < 4);
         //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
+TEST4FIMEX_TEST_CASE(test_cdmprocessor_addverticalvelocity)
 {
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
 
     std::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
     proc->addVerticalVelocity();
-    BOOST_CHECK(proc->getCDM().hasVariable("upward_air_velocity_ml"));
+    TEST4FIMEX_CHECK(proc->getCDM().hasVariable("upward_air_velocity_ml"));
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(proc);
 
     CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("upward_air_velocity_ml"));
-    BOOST_REQUIRE(varSysIt != coordSys.end());
+    TEST4FIMEX_REQUIRE(varSysIt != coordSys.end());
 
     CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
     CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
@@ -147,11 +145,9 @@ BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
         boost::shared_array<float> w = proc->getScaledDataSliceInUnit("upward_air_velocity_ml", "m/s", t)->asFloat();
         for (size_t k = 0; k < nz; ++k) {
             pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
-            BOOST_CHECK(*minMax.first > -4);
-            BOOST_CHECK(*minMax.second < 4);
+            TEST4FIMEX_CHECK(*minMax.first > -4);
+            TEST4FIMEX_CHECK(*minMax.second < 4);
             //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
         }
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -25,16 +25,13 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/binaryConstants.h"
 
-BOOST_AUTO_TEST_CASE(test_binaryConstants) {
-    BOOST_CHECK(0 == binary<0>::value);
-    BOOST_CHECK(1 == binary<01>::value);
-    BOOST_CHECK(64 == binary<01000000>::value);
-    BOOST_CHECK(64 != binary< 1000000>::value); // remember to take octal values
-    BOOST_CHECK(2097152 == binary<01000000000000000000000ULL>::value); // large value
+TEST4FIMEX_TEST_CASE(test_binaryConstants)
+{
+    TEST4FIMEX_CHECK_EQ(0, binary<0>::value);
+    TEST4FIMEX_CHECK_EQ(1, binary<01>::value);
+    TEST4FIMEX_CHECK_EQ(64, binary<01000000>::value);
+    TEST4FIMEX_CHECK(64 != binary<1000000>::value);                          // remember to take octal values
+    TEST4FIMEX_CHECK_EQ(2097152, binary<01000000000000000000000ULL>::value); // large value
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "FeltCDMReader2.h"
 #include "FeltParameters.h"
 #include "Felt_Array2.h"
@@ -43,22 +41,22 @@ using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_feltparameter )
+TEST4FIMEX_TEST_CASE(test_feltparameter)
 {
     FeltParameters fp = FeltParameters(pathTest("diana.setup"));
     const std::array<short, 16> tksoil = fp.getParameters(string("tksoil"));
-    BOOST_CHECK_EQUAL(tksoil[10], 2);
-    BOOST_CHECK_EQUAL(tksoil[11], 29);
-    BOOST_CHECK_EQUAL(tksoil[12], 1000);
-    BOOST_CHECK_EQUAL(fp.getParameterName(tksoil), "tksoil");
+    TEST4FIMEX_CHECK_EQ(tksoil[10], 2);
+    TEST4FIMEX_CHECK_EQ(tksoil[11], 29);
+    TEST4FIMEX_CHECK_EQ(tksoil[12], 1000);
+    TEST4FIMEX_CHECK_EQ(fp.getParameterName(tksoil), "tksoil");
     const std::array<short, 16> lameps_prob_t2m = fp.getParameters(string("lameps_prob_t2m>+30"));
-    BOOST_CHECK_EQUAL(lameps_prob_t2m[10], 2);
-    BOOST_CHECK_EQUAL(lameps_prob_t2m[11], 115);
-    BOOST_CHECK_EQUAL(lameps_prob_t2m[12], 1000);
-    BOOST_CHECK_EQUAL(fp.getParameterName(lameps_prob_t2m), "lameps_prob_t2m>+30");
+    TEST4FIMEX_CHECK_EQ(lameps_prob_t2m[10], 2);
+    TEST4FIMEX_CHECK_EQ(lameps_prob_t2m[11], 115);
+    TEST4FIMEX_CHECK_EQ(lameps_prob_t2m[12], 1000);
+    TEST4FIMEX_CHECK_EQ(fp.getParameterName(lameps_prob_t2m), "lameps_prob_t2m>+30");
 }
 
-BOOST_AUTO_TEST_CASE( test_feltfile )
+TEST4FIMEX_TEST_CASE(test_feltfile)
 {
     if (!hasTestExtra())
         return;
@@ -69,35 +67,30 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
     vector<std::shared_ptr<Felt_Array2>> vec = ff.listFeltArrays();
     Felt_Array2& fa = *(ff.getFeltArray("u10m").get());
     vector<LevelPair> levels = fa.getLevelPairs();
-    BOOST_CHECK_EQUAL((fa.getX() * fa.getY()), 44884);
+    TEST4FIMEX_CHECK_EQ((fa.getX() * fa.getY()), 44884);
     vector<short> data(fa.getX()*fa.getY());
     fa.getGrid(fa.getTimes().at(50), levels.at(0), data);
-    BOOST_CHECK_EQUAL( levels.size(), 1 );
-    BOOST_CHECK_EQUAL( fa.getName(), "u10m" );
-    BOOST_CHECK_EQUAL( fa.getTimes().size(), 61);
-    BOOST_CHECK_EQUAL( fa.getX(), 229 );
-    BOOST_CHECK_EQUAL( fa.getY(), 196 );
-    BOOST_CHECK( std::abs(fa.getScalingFactor() - 0.001) < 1e-6 );
+    TEST4FIMEX_CHECK_EQ(levels.size(), 1);
+    TEST4FIMEX_CHECK_EQ(fa.getName(), "u10m");
+    TEST4FIMEX_CHECK_EQ(fa.getTimes().size(), 61);
+    TEST4FIMEX_CHECK_EQ(fa.getX(), 229);
+    TEST4FIMEX_CHECK_EQ(fa.getY(), 196);
+    TEST4FIMEX_CHECK(std::abs(fa.getScalingFactor() - 0.001) < 1e-6);
 
-    try {
-        ff.getFeltArray("this parameter is intentionally unknown");
-        BOOST_CHECK(false); // should never reach this line
-    } catch (Felt_File_Error& ffe) {
-    }
+    TEST4FIMEX_CHECK_THROW(ff.getFeltArray("this parameter is intentionally unknown"), Felt_File_Error);
 
-    BOOST_CHECK_EQUAL(static_cast<int>(data.size()), (fa.getX()*fa.getY()));
+    TEST4FIMEX_CHECK_EQ(static_cast<int>(data.size()), (fa.getX() * fa.getY()));
     // u10m not defined on border
-    BOOST_CHECK_EQUAL(data[0], ANY_VALUE());
-    BOOST_CHECK_EQUAL(data[10000], 820);
-    BOOST_CHECK_EQUAL(data[20000], 8964);
-
+    TEST4FIMEX_CHECK_EQ(data[0], ANY_VALUE());
+    TEST4FIMEX_CHECK_EQ(data[10000], 820);
+    TEST4FIMEX_CHECK_EQ(data[20000], 8964);
 
     // check consistency of Felt_File and Felt_Array for time
     timeVec ff_times = ff.getFeltTimes();
     timeVec fa_times = fa.getTimes();
     for (timeVec::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
         if (find(ff_times.begin(), ff_times.end(), *it) == ff_times.end()) {
-            BOOST_FAIL("time '" << boost::posix_time::to_iso_extended_string(*it) << "' not found");
+            TEST4FIMEX_FAIL("time '" << boost::posix_time::to_iso_extended_string(*it) << "' not found");
         }
     }
 
@@ -106,28 +99,28 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
     vector<LevelPair> fa_levels = fa.getLevelPairs();
     for (vector<LevelPair>::iterator it = fa_levels.begin(); it < fa_levels.end(); ++it) {
         if (find(ff_levels.begin(), ff_levels.end(), *it) == ff_levels.end()) {
-            BOOST_FAIL("level " << it->first << "/" << it->second << " not found");
+            TEST4FIMEX_FAIL("level " << it->first << "/" << it->second << " not found");
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_felt_axis )
+TEST4FIMEX_TEST_CASE(test_felt_axis)
 {
     if (!hasTestExtra())
         return;
     Felt_File2 ff(pathTestExtra("flth00.dat"), pathTest("diana.setup"));
     // gridPar needs to be a copy here, since the reference of gridPar will disappear with the gridDefinition
     std::array<float, 6> gridPar = ff.getGridDefinition()->getGridParameters();
-    BOOST_CHECK_EQUAL(ff.getGridType(), 1);
+    TEST4FIMEX_CHECK_EQ(ff.getGridType(), 1);
 
     DataPtr xdata = ff.getXData();
-    BOOST_CHECK(fabs((xdata->asFloat())[(int)gridPar[0]-1]) < .5);
-    BOOST_CHECK_EQUAL((xdata->asInt())[(int)gridPar[0]], 50162); // tis is 50162.2...
-    BOOST_CHECK(fabs((ff.getYData()->asFloat())[(int)gridPar[1]-1]) < .5);
-    BOOST_CHECK_EQUAL((ff.getYData()->asInt())[(int)gridPar[1]], 50162); // tis is 50162.2...
+    TEST4FIMEX_CHECK(fabs((xdata->asFloat())[(int)gridPar[0] - 1]) < .5);
+    TEST4FIMEX_CHECK_EQ((xdata->asInt())[(int)gridPar[0]], 50162); // tis is 50162.2...
+    TEST4FIMEX_CHECK(fabs((ff.getYData()->asFloat())[(int)gridPar[1] - 1]) < .5);
+    TEST4FIMEX_CHECK_EQ((ff.getYData()->asInt())[(int)gridPar[1]], 50162); // tis is 50162.2...
 }
 
-BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
+TEST4FIMEX_TEST_CASE(test_felt_cdm_reader)
 {
     if (!hasTestExtra())
         return;
@@ -135,25 +128,22 @@ BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
     FeltCDMReader2 feltCDM(fileName, pathShareEtc("felt2nc_variables.xml"));
     string projName, projXAxis, projYAxis, projXUnit, projYUnit;
     feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
-    BOOST_CHECK_EQUAL(projName, "projection_1");
-    BOOST_CHECK_EQUAL(projXAxis, "x");
-    BOOST_CHECK_EQUAL(projYAxis, "y");
-    BOOST_CHECK_EQUAL(projXUnit, "m");
-    BOOST_CHECK_EQUAL(projYUnit, "m");
+    TEST4FIMEX_CHECK_EQ(projName, "projection_1");
+    TEST4FIMEX_CHECK_EQ(projXAxis, "x");
+    TEST4FIMEX_CHECK_EQ(projYAxis, "y");
+    TEST4FIMEX_CHECK_EQ(projXUnit, "m");
+    TEST4FIMEX_CHECK_EQ(projYUnit, "m");
     DataPtr xVals = feltCDM.getData(projXAxis);
     DataPtr yVals = feltCDM.getData(projYAxis);
-    BOOST_CHECK_EQUAL(xVals->size(), 229);
-    BOOST_CHECK_EQUAL(yVals->size(), 196);
+    TEST4FIMEX_CHECK_EQ(xVals->size(), 229);
+    TEST4FIMEX_CHECK_EQ(yVals->size(), 196);
 
     const CDMAttribute& attr = feltCDM.getCDM().getAttribute(feltCDM.getCDM().globalAttributeNS(), "min_time");
-    BOOST_CHECK_EQUAL(attr.getStringValue().substr(0,4), "2007");
-
+    TEST4FIMEX_CHECK_EQ(attr.getStringValue().substr(0, 4), "2007");
 
     FeltCDMReader2 feltCDM2(fileName, pathTest("felt2nc_variables_level1000.xml"));
     // without level restrictions:
-    BOOST_CHECK_EQUAL(feltCDM.getData("sigma")->size(), 4);
+    TEST4FIMEX_CHECK_EQ(feltCDM.getData("sigma")->size(), 4);
     // with level restrictions
-    BOOST_CHECK_EQUAL(feltCDM2.getData("sigma")->size(), 1);
+    TEST4FIMEX_CHECK_EQ(feltCDM2.getData("sigma")->size(), 1);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
@@ -32,55 +30,38 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_cdm) {
-    CDM cdm;
-    BOOST_CHECK(true); // cdm initialized
-
-}
-
-
-BOOST_AUTO_TEST_CASE( test_variable) {
+TEST4FIMEX_TEST_CASE(test_variable)
+{
     vector<std::string> noDim;
     string varName("test");
     CDMVariable testVar(varName, CDM_NAT, noDim);
     CDM cdm;
     cdm.addVariable(testVar);
-    BOOST_CHECK(cdm.hasVariable(varName));
+    TEST4FIMEX_CHECK(cdm.hasVariable(varName));
 
-    try {
-        CDMVariable failVar(varName, CDM_NAT, noDim);
-        cdm.addVariable(failVar); // adding new variable with same name should fail
-        BOOST_CHECK(false);
-    } catch (CDMException& ex) {
-        BOOST_CHECK(true);
-    }
+    CDMVariable failVar(varName, CDM_NAT, noDim);
+    TEST4FIMEX_CHECK_THROW(cdm.addVariable(failVar), CDMException); // adding new variable with same name should fail
 
     CDMVariable& varRef = cdm.getVariable(varName);
-    BOOST_CHECK(varRef.getName() == varName);
-    try {
-        cdm.getVariable("dummy");
-        BOOST_CHECK(false);
-    } catch (CDMException& ex) {
-        BOOST_CHECK(true);
-    }
+    TEST4FIMEX_CHECK_EQ(varRef.getName(), varName);
+    TEST4FIMEX_CHECK_THROW(cdm.getVariable("dummy"), CDMException);
 
     string newName = varName + "xx";
     cdm.renameVariable(varName, newName);
-    BOOST_CHECK(cdm.hasVariable(newName));
-    BOOST_CHECK(!cdm.hasVariable(varName));
-    BOOST_CHECK(cdm.getVariable(newName).getName() == newName);
+    TEST4FIMEX_CHECK(cdm.hasVariable(newName));
+    TEST4FIMEX_CHECK(!cdm.hasVariable(varName));
+    TEST4FIMEX_CHECK_EQ(cdm.getVariable(newName).getName(), newName);
 
     cdm.removeVariable(newName);
-    BOOST_CHECK(true);
 }
 
-BOOST_AUTO_TEST_CASE(test_attribute_types)
+TEST4FIMEX_TEST_CASE(test_attribute_types)
 {
-    BOOST_CHECK_EQUAL(CDM_FLOAT, CDMAttribute("att1", 1.0f).getDataType());
-    BOOST_CHECK_EQUAL(CDM_DOUBLE, CDMAttribute("att1", 1.0).getDataType());
+    TEST4FIMEX_CHECK_EQ(CDM_FLOAT, CDMAttribute("att1", 1.0f).getDataType());
+    TEST4FIMEX_CHECK_EQ(CDM_DOUBLE, CDMAttribute("att1", 1.0).getDataType());
 
-    BOOST_CHECK_EQUAL(CDM_CHAR, CDMAttribute("att1", ' ').getDataType());
-    BOOST_CHECK_EQUAL(CDM_STRING, CDMAttribute("att1", "value").getDataType());
+    TEST4FIMEX_CHECK_EQ(CDM_CHAR, CDMAttribute("att1", ' ').getDataType());
+    TEST4FIMEX_CHECK_EQ(CDM_STRING, CDMAttribute("att1", "value").getDataType());
 
     std::vector<std::string> v_1_2;
     v_1_2.push_back("1");
@@ -91,55 +72,55 @@ BOOST_AUTO_TEST_CASE(test_attribute_types)
 
     {
         const CDMAttribute a("att", CDM_CHAR, v_1_2);
-        BOOST_CHECK_EQUAL(CDM_CHAR, a.getDataType());
+        TEST4FIMEX_CHECK_EQ(CDM_CHAR, a.getDataType());
         const DataPtr d = a.getData();
-        BOOST_REQUIRE(d);
-        BOOST_CHECK_EQUAL(2, d->size());
+        TEST4FIMEX_REQUIRE(d);
+        TEST4FIMEX_CHECK_EQ(2, d->size());
         const boost::shared_array<char> v = d->asChar();
-        BOOST_CHECK_EQUAL(1, v[0]);
-        BOOST_CHECK_EQUAL(2, v[1]);
+        TEST4FIMEX_CHECK_EQ(1, v[0]);
+        TEST4FIMEX_CHECK_EQ(2, v[1]);
     }
     {
         const CDMAttribute a("att", CDM_DOUBLE, v_1_2);
-        BOOST_CHECK_EQUAL(CDM_DOUBLE, a.getDataType());
+        TEST4FIMEX_CHECK_EQ(CDM_DOUBLE, a.getDataType());
         const DataPtr d = a.getData();
-        BOOST_REQUIRE(d);
-        BOOST_CHECK_EQUAL(2, d->size());
+        TEST4FIMEX_REQUIRE(d);
+        TEST4FIMEX_CHECK_EQ(2, d->size());
         const boost::shared_array<double> v = d->asDouble();
-        BOOST_CHECK_EQUAL(1.0, v[0]);
-        BOOST_CHECK_EQUAL(2.0, v[1]);
-        BOOST_CHECK_EQUAL("1 2", a.getStringValue());
+        TEST4FIMEX_CHECK_EQ(1.0, v[0]);
+        TEST4FIMEX_CHECK_EQ(2.0, v[1]);
+        TEST4FIMEX_CHECK_EQ("1 2", a.getStringValue());
     }
     {
         const CDMAttribute a("att", "char", "65");
-        BOOST_CHECK_EQUAL(CDM_CHAR, a.getDataType());
-        BOOST_CHECK_EQUAL("65", a.getStringValue());
-        BOOST_CHECK_EQUAL(65, a.getData()->getDouble(0));
+        TEST4FIMEX_CHECK_EQ(CDM_CHAR, a.getDataType());
+        TEST4FIMEX_CHECK_EQ("65", a.getStringValue());
+        TEST4FIMEX_CHECK_EQ(65, a.getData()->getDouble(0));
     }
     {
         const CDMAttribute a("att", "double", "1.25");
-        BOOST_CHECK_EQUAL(CDM_DOUBLE, a.getDataType());
-        BOOST_CHECK_EQUAL("1.25", a.getStringValue());
-        BOOST_CHECK_EQUAL(1.25, a.getData()->getDouble(0));
+        TEST4FIMEX_CHECK_EQ(CDM_DOUBLE, a.getDataType());
+        TEST4FIMEX_CHECK_EQ("1.25", a.getStringValue());
+        TEST4FIMEX_CHECK_EQ(1.25, a.getData()->getDouble(0));
     }
     {
         const CDMAttribute a_string("att", "string", "hello");
-        BOOST_CHECK_EQUAL(CDM_STRING, a_string.getDataType());
-        BOOST_CHECK_EQUAL("hello", a_string.getStringValue());
+        TEST4FIMEX_CHECK_EQ(CDM_STRING, a_string.getDataType());
+        TEST4FIMEX_CHECK_EQ("hello", a_string.getStringValue());
     }
     {
         const CDMAttribute a("u", CDM_USHORT, v_123_234);
-        BOOST_CHECK_EQUAL(2, a.getData()->size());
-        BOOST_CHECK_EQUAL("123 234", a.getStringValue());
+        TEST4FIMEX_CHECK_EQ(2, a.getData()->size());
+        TEST4FIMEX_CHECK_EQ("123 234", a.getStringValue());
     }
     {
         const CDMAttribute a("u", CDM_UCHAR, v_123_234);
-        BOOST_CHECK_EQUAL(2, a.getData()->size());
-        BOOST_CHECK_EQUAL("123 234", a.getStringValue());
+        TEST4FIMEX_CHECK_EQ(2, a.getData()->size());
+        TEST4FIMEX_CHECK_EQ("123 234", a.getStringValue());
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_attributes)
+TEST4FIMEX_TEST_CASE(test_attributes)
 {
     CDM cdm;
     string varName("test");
@@ -157,35 +138,29 @@ BOOST_AUTO_TEST_CASE( test_attributes)
     cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
 
     vector<std::string> vars = cdm.findVariables("attr", "value");
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
     vars = cdm.findVariables("attr2", "valueX");
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
 
     /* find attributes of renamed variables */
     cdm.renameVariable(varName2, varName3);
     vars = cdm.findVariables("attr", "value");
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) == vars.end());
-    BOOST_CHECK(find(vars.begin(), vars.end(), varName3) != vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName2) == vars.end());
+    TEST4FIMEX_CHECK(find(vars.begin(), vars.end(), varName3) != vars.end());
 
+    TEST4FIMEX_CHECK_THROW(cdm.addAttribute(varName, CDMAttribute("attr", "value")), CDMException); // should throw an error
 
-    try {
-        cdm.addAttribute(varName, CDMAttribute("attr", "value"));
-        BOOST_CHECK(false); // should throw an error
-    } catch (CDMException& ex) {
-        BOOST_CHECK(true);
-    }
     cdm.addOrReplaceAttribute(varName, CDMAttribute("attr", "valueNew"));
-    BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
+    TEST4FIMEX_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
     cdm.removeAttribute("bla", "blub");
-    BOOST_CHECK(true); // no error
 
     cdm.removeAttribute(varName, "attr");
-    BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
+    TEST4FIMEX_CHECK_EQ(cdm.findVariables("attr", "valueNew").size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE( test_dimension)
+TEST4FIMEX_TEST_CASE(test_dimension)
 {
     CDM cdm;
     string dim1Str("dim1");
@@ -203,36 +178,29 @@ BOOST_AUTO_TEST_CASE( test_dimension)
     CDMVariable var("var", CDM_NAT, varDims);
     cdm.addVariable(var);
 
-    BOOST_CHECK(cdm.getDimension(dim1Str).getName() == dim1Str);
-    BOOST_CHECK(cdm.hasDimension(dim2Str));
-    BOOST_CHECK(!cdm.hasDimension(dim3Str));
-    BOOST_CHECK(cdm.getVariable("var").checkDimension(dim2Str));
+    TEST4FIMEX_CHECK_EQ(cdm.getDimension(dim1Str).getName(), dim1Str);
+    TEST4FIMEX_CHECK(cdm.hasDimension(dim2Str));
+    TEST4FIMEX_CHECK(!cdm.hasDimension(dim3Str));
+    TEST4FIMEX_CHECK(cdm.getVariable("var").checkDimension(dim2Str));
 
-    BOOST_CHECK(cdm.testDimensionInUse(dim2Str));
-    BOOST_CHECK(!cdm.testDimensionInUse(dim3Str));
-
+    TEST4FIMEX_CHECK(cdm.testDimensionInUse(dim2Str));
+    TEST4FIMEX_CHECK(!cdm.testDimensionInUse(dim3Str));
 
     cdm.renameDimension(dim2Str, dim3Str);
-    BOOST_CHECK(cdm.hasDimension(dim3Str));
-    BOOST_CHECK(!cdm.hasDimension(dim2Str));
-    BOOST_CHECK(cdm.getVariable("var").checkDimension(dim3Str));
-    BOOST_CHECK(!cdm.getVariable("var").checkDimension(dim2Str));
+    TEST4FIMEX_CHECK(cdm.hasDimension(dim3Str));
+    TEST4FIMEX_CHECK(!cdm.hasDimension(dim2Str));
+    TEST4FIMEX_CHECK(cdm.getVariable("var").checkDimension(dim3Str));
+    TEST4FIMEX_CHECK(!cdm.getVariable("var").checkDimension(dim2Str));
 
-
-    try {
-        cdm.renameDimension(dim3Str, dim1Str); // fails, dim1Str in use
-        BOOST_CHECK(false);
-    } catch (CDMException& ex) {
-        BOOST_CHECK(true);
-    }
+    TEST4FIMEX_CHECK_THROW(cdm.renameDimension(dim3Str, dim1Str), CDMException); // fails, dim1Str in use
 
     cdm.addDimension(dim2);
-    BOOST_CHECK(!cdm.testDimensionInUse(dim2Str));
-    BOOST_CHECK(cdm.removeDimension(dim2Str));
-    BOOST_CHECK(!cdm.removeDimension(dim2Str));
+    TEST4FIMEX_CHECK(!cdm.testDimensionInUse(dim2Str));
+    TEST4FIMEX_CHECK(cdm.removeDimension(dim2Str));
+    TEST4FIMEX_CHECK(!cdm.removeDimension(dim2Str));
 }
 
-BOOST_AUTO_TEST_CASE( test_constructor )
+TEST4FIMEX_TEST_CASE(test_constructor)
 {
     // test constructors and assignment
     CDM cdm, cdm2;
@@ -244,26 +212,26 @@ BOOST_AUTO_TEST_CASE( test_constructor )
     cdm2 = cdm;
     cdm.addDimension(CDMDimension("test3",3));
     cdm2.addDimension(CDMDimension("xxx2",1));
-    BOOST_CHECK(cdm2.hasDimension("test2"));
-    BOOST_CHECK(! cdm2.hasDimension("test3"));
-    BOOST_CHECK(! cdm2.hasDimension("xxx"));
-    BOOST_CHECK(cdm2.hasDimension("xxx2"));
-    BOOST_CHECK(! cdm.hasDimension("xxx2"));
+    TEST4FIMEX_CHECK(cdm2.hasDimension("test2"));
+    TEST4FIMEX_CHECK(!cdm2.hasDimension("test3"));
+    TEST4FIMEX_CHECK(!cdm2.hasDimension("xxx"));
+    TEST4FIMEX_CHECK(cdm2.hasDimension("xxx2"));
+    TEST4FIMEX_CHECK(!cdm.hasDimension("xxx2"));
 
     // copy
     CDM cdm3(cdm);
-    BOOST_CHECK(cdm3.hasDimension("test1"));
-    BOOST_CHECK(cdm3.hasDimension("test2"));
-    BOOST_CHECK(cdm3.hasDimension("test3"));
+    TEST4FIMEX_CHECK(cdm3.hasDimension("test1"));
+    TEST4FIMEX_CHECK(cdm3.hasDimension("test2"));
+    TEST4FIMEX_CHECK(cdm3.hasDimension("test3"));
     cdm.removeDimension("test3");
-    BOOST_CHECK(! cdm.hasDimension("test3"));
-    BOOST_CHECK(cdm3.hasDimension("test3"));
+    TEST4FIMEX_CHECK(!cdm.hasDimension("test3"));
+    TEST4FIMEX_CHECK(cdm3.hasDimension("test3"));
     cdm3.addDimension(CDMDimension("xxx2",1));
-    BOOST_CHECK(! cdm.hasDimension("xxx2"));
-    BOOST_CHECK(cdm3.hasDimension("xxx2"));
+    TEST4FIMEX_CHECK(!cdm.hasDimension("xxx2"));
+    TEST4FIMEX_CHECK(cdm3.hasDimension("xxx2"));
 }
 
-BOOST_AUTO_TEST_CASE( test_coordinateSystem)
+TEST4FIMEX_TEST_CASE(test_coordinateSystem)
 {
     // preparing a cs
     CDM cdm;
@@ -320,12 +288,12 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
     }
 #endif
 
-    BOOST_CHECK(x == cdm.getHorizontalXAxis(var));
-    BOOST_CHECK(y == cdm.getHorizontalYAxis(var));
-    BOOST_CHECK(t == cdm.getTimeAxis(var));
-    BOOST_CHECK(p == cdm.getVerticalAxis(var));
-    BOOST_CHECK(l == cdm.getVerticalAxis(var2));
-    BOOST_CHECK("" == cdm.getVerticalAxis(var3d));
+    TEST4FIMEX_CHECK_EQ(x, cdm.getHorizontalXAxis(var));
+    TEST4FIMEX_CHECK_EQ(y, cdm.getHorizontalYAxis(var));
+    TEST4FIMEX_CHECK_EQ(t, cdm.getTimeAxis(var));
+    TEST4FIMEX_CHECK_EQ(p, cdm.getVerticalAxis(var));
+    TEST4FIMEX_CHECK_EQ(l, cdm.getVerticalAxis(var2));
+    TEST4FIMEX_CHECK_EQ("", cdm.getVerticalAxis(var3d));
 
     // test cdm.getLatitudeLongitude
     string lat("lat");
@@ -340,9 +308,7 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
     cdm.addAttribute(var, CDMAttribute("coordinates", lat + " " + lon));
 
     string latRetVal, lonRetVal;
-    BOOST_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
-    BOOST_CHECK(latRetVal == lat);
-    BOOST_CHECK(lonRetVal == lon);
+    TEST4FIMEX_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
+    TEST4FIMEX_CHECK_EQ(latRetVal, lat);
+    TEST4FIMEX_CHECK_EQ(lonRetVal, lon);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -24,11 +24,7 @@
  *      Author: heikok
  */
 
-#define BOOST_TEST_MODULE fimex
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
-#include <unistd.h>
 
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
@@ -37,6 +33,8 @@
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/NetCDF_CDMWriter.h"
+
+#include <unistd.h>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -51,74 +49,72 @@ struct TestConfig {
 TestConfig::TestConfig()
 {
     char* cwd = getcwd(oldDir, sizeof(oldDir));
-    assert(cwd == oldDir);
+    TEST4FIMEX_REQUIRE(cwd == oldDir);
     const string test_data = pathTest("data");
     if (chdir(test_data.c_str()) != 0) {
-        BOOST_FAIL("cannot chdir to '" << test_data << "'");
+        TEST4FIMEX_FAIL("cannot chdir to '" << test_data << "'");
     }
 }
 TestConfig::~TestConfig()
 {
     if (chdir(oldDir) != 0) {
-        BOOST_FAIL("cannot chdir to '" << oldDir << "'");
+        TEST4FIMEX_FAIL("cannot chdir to '" << oldDir << "'");
     }
 }
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(suite, TestConfig);
-
-BOOST_AUTO_TEST_CASE( test_joinExisting )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExisting, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_REQUIRE(reader);
-    BOOST_REQUIRE(reader->getCDM().getUnlimitedDim());
-    BOOST_CHECK_EQUAL(reader->getCDM().getUnlimitedDim()->getLength(), 5);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("unlim", 3)->asShort()[0], 4);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", 3)->asShort()[1], -4);
+    TEST4FIMEX_REQUIRE(reader);
+    TEST4FIMEX_REQUIRE(reader->getCDM().getUnlimitedDim());
+    TEST4FIMEX_CHECK_EQ(reader->getCDM().getUnlimitedDim()->getLength(), 5);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("unlim", 3)->asShort()[0], 4);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", 3)->asShort()[1], -4);
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 3, 1);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", sb)->asShort()[1], -4);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", sb)->asShort()[1], -4);
 
     sb = SliceBuilder(reader->getCDM(), "unlim");
     sb.setStartAndSize("unlim", 3, 1);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("unlim", sb)->asShort()[0], 4);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("unlim", sb)->asShort()[0], 4);
 }
 
-BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAggSuffix.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     const CDMDimension* unlim = reader->getCDM().getUnlimitedDim();
-    BOOST_REQUIRE(unlim);
-    BOOST_CHECK_EQUAL(unlim->getLength(), 5);
+    TEST4FIMEX_REQUIRE(unlim);
+    TEST4FIMEX_CHECK_EQ(unlim->getLength(), 5);
     DataPtr slice = reader->getDataSlice("unlim", 3);
-    BOOST_REQUIRE(slice);
-    BOOST_REQUIRE_EQUAL(slice->size(), 1);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_EQ(slice->size(), 1);
     boost::shared_array<short> values = slice->asShort();
-    BOOST_REQUIRE(values);
-    BOOST_CHECK_EQUAL(values[0], 4);
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[0], 4);
 
     slice = reader->getDataSlice("multi", 3);
-    BOOST_REQUIRE(slice);
-    BOOST_REQUIRE_EQUAL(slice->size(), 2);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_EQ(slice->size(), 2);
     values = slice->asShort();
-    BOOST_REQUIRE(values);
-    BOOST_CHECK_EQUAL(values[1], -4);
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[1], -4);
 }
 
-BOOST_AUTO_TEST_CASE( test_aggNothing )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNothing, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggNothing.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK_EQUAL(reader->getCDM().getVariables().size(), 0);
+    TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE( test_aggWrong )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggWrong, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggWrong.ncml");
@@ -126,10 +122,10 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
     defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
     defaultLogLevel(Logger::INFO);
-    BOOST_CHECK_EQUAL(reader->getCDM().getVariables().size(), 0);
+    TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE( test_aggNewDim )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
     defaultLogLevel(Logger::FATAL);
@@ -139,14 +135,14 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim )
     NetCDF_CDMWriter(reader, test_output, "", 4); // does not work for netcdf-3
     CDMReader_p reader2(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, test_output));
     DataPtr slice = reader->getDataSlice("notlimited", 2);
-    BOOST_REQUIRE(slice);
-    BOOST_REQUIRE_GT(slice->size(), 0);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_GT(slice->size(), 0);
     boost::shared_array<int> values = slice->asInt();
-    BOOST_REQUIRE(values);
-    BOOST_CHECK_EQUAL(values[0], 3);
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[0], 3);
 }
 
-BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
     defaultLogLevel(Logger::FATAL);
@@ -156,35 +152,29 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("notlimited", 2, 1);
     DataPtr slice = reader->getDataSlice("multi", sb);
-    BOOST_REQUIRE(slice);
-    BOOST_REQUIRE_GE(slice->size(), 2);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_GE(slice->size(), 2);
     const boost::shared_array<int> values = slice->asInt();
-    BOOST_REQUIRE(values);
-    BOOST_CHECK_EQUAL(values[0],  4);
-    BOOST_CHECK_EQUAL(values[1], -4);
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[0], 4);
+    TEST4FIMEX_CHECK_EQ(values[1], -4);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_union )
+TEST4FIMEX_FIXTURE_TEST_CASE(test_union, TestConfig)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("unionAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK(true);
-    BOOST_CHECK(reader->getCDM().hasVariable("b"));
-    BOOST_CHECK(reader->getCDM().hasVariable("extra"));
-    BOOST_CHECK(reader->getCDM().hasVariable("multi"));
-    BOOST_CHECK(reader->getCDM().hasVariable("unlim"));
-    BOOST_CHECK_EQUAL(reader->getDataSlice("extra", 1)->asShort()[0], -1);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", 1)->asShort()[1], -2);
+    TEST4FIMEX_CHECK(reader->getCDM().hasVariable("b"));
+    TEST4FIMEX_CHECK(reader->getCDM().hasVariable("extra"));
+    TEST4FIMEX_CHECK(reader->getCDM().hasVariable("multi"));
+    TEST4FIMEX_CHECK(reader->getCDM().hasVariable("unlim"));
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("extra", 1)->asShort()[0], -1);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", 1)->asShort()[1], -2);
 
-    BOOST_CHECK(reader->getCDM().hasVariable("multi"));
+    TEST4FIMEX_CHECK(reader->getCDM().hasVariable("multi"));
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 1, 1);
-    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", sb)->asShort()[1], -2);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", sb)->asShort()[1], -2);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
@@ -39,7 +37,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_accumulate )
+TEST4FIMEX_TEST_CASE(test_accumulate)
 {
 //    defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc");
@@ -51,24 +49,24 @@ BOOST_AUTO_TEST_CASE( test_accumulate )
 
         DataPtr data = proc->getData("time");
         boost::shared_array<double> time = data->asDouble();
-        BOOST_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
-        BOOST_CHECK_CLOSE(time[1], 3600., 1e-5);
-        BOOST_CHECK_CLOSE(time[2], 3600., 1e-5);
-        BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
+        TEST4FIMEX_CHECK_CLOSE(time[1], 3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[2], 3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[3], 3600., 1e-5);
     }
     {
         std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->accumulate("time");
         DataPtr data = proc->getData("time");
         boost::shared_array<double> time = data->asDouble();
-        BOOST_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
-        BOOST_CHECK_CLOSE(time[1], time[0] + t0+3600., 1e-5);
-        BOOST_CHECK_CLOSE(time[2], time[1] + t0+2*3600., 1e-5);
-        BOOST_CHECK_CLOSE(time[3], time[2] + t0+3*3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
+        TEST4FIMEX_CHECK_CLOSE(time[1], time[0] + t0 + 3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[2], time[1] + t0 + 2 * 3600., 1e-5);
+        TEST4FIMEX_CHECK_CLOSE(time[3], time[2] + t0 + 3 * 3600., 1e-5);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_rotate )
+TEST4FIMEX_TEST_CASE(test_rotate)
 {
     //    defaultLogLevel(Logger::DEBUG);
         const string fileName = pathTest("coordTest.nc");
@@ -77,9 +75,9 @@ BOOST_AUTO_TEST_CASE( test_rotate )
         std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->rotateAllVectorsToLatLon(true);
         const CDMAttribute& attrx = proc->getCDM().getAttribute("x_wind_10m", "standard_name");
-        BOOST_CHECK_EQUAL(attrx.getStringValue(), "LATLON_ROTATED_x_wind");
+        TEST4FIMEX_CHECK_EQ(attrx.getStringValue(), "LATLON_ROTATED_x_wind");
         const CDMAttribute& attry = proc->getCDM().getAttribute("y_wind_10m", "standard_name");
-        BOOST_CHECK_EQUAL(attry.getStringValue(), "LATLON_ROTATED_y_wind");
+        TEST4FIMEX_CHECK_EQ(attry.getStringValue(), "LATLON_ROTATED_y_wind");
 
         float xn = proc->getDataSlice("x_wind_10m", 0)->asFloat()[3];
         float yn = proc->getDataSlice("y_wind_10m", 0)->asFloat()[3];
@@ -87,9 +85,7 @@ BOOST_AUTO_TEST_CASE( test_rotate )
         float xo = nc->getDataSlice("x_wind_10m", 0)->asFloat()[3];
         float yo = nc->getDataSlice("y_wind_10m", 0)->asFloat()[3];
 
-        BOOST_CHECK_NE(xn, xo);
-        BOOST_CHECK_NE(yn, yo);
-        BOOST_CHECK_CLOSE(xn*xn+yn*yn, xo*xo+yo*yo, 1e-4);
+        TEST4FIMEX_CHECK_NE(xn, xo);
+        TEST4FIMEX_CHECK_NE(yn, yo);
+        TEST4FIMEX_CHECK_CLOSE(xn * xn + yn * yn, xo * xo + yo * yo, 1e-4);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

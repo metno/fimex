@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/MetGmCDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -39,29 +37,24 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
+TEST4FIMEX_TEST_CASE(test_write_hirlam12_nc)
+{
     const string ncSource = pathTest("hirlam12.nc");
 
     defaultLogLevel(Logger::INFO);
 
     // create reader that reads ncSource
     CDMReader_p netcdfReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncSource);
-    BOOST_CHECK(true); // made it so far
 
     // use the metgm writer to create mgm file based on nc source
     const std::string mgmFile("hirlam12.mgm");
     MetGmCDMWriter(netcdfReader, mgmFile, pathShareEtc("cdmMetGmWriterConfig.xml"));
-    BOOST_CHECK(true); // made it so far
 
     // create metgm reader to read newly writen mgm file
     CDMReader_p mgmReader = CDMFileReaderFactory::create(MIFI_FILETYPE_METGM, mgmFile, pathShareEtc("cdmMetGmReaderConfig.xml"));
-    BOOST_CHECK(true); // made it so far
 
     // from metgm reader write again to nc file and compare:
     // hirlam12.nc and hirlam12.mgm.nc
     const std::string newNcFile("hirlam12.mgm.nc");
     NetCDF_CDMWriter(mgmReader, newNcFile);
-    BOOST_CHECK(true); // made it so far
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/Data.h"
 #include "../src/DataImpl.h"
 #include "fimex/IndexedData.h"
@@ -31,55 +29,54 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_data_retrieval )
+TEST4FIMEX_TEST_CASE(test_data_retrieval)
 {
     DataImpl<int> data(10);
     for (int i = 0; i < 10; i++) {
         data.setValue(i, i);
     }
-    BOOST_CHECK(data.asBase()[0] == 0);
-    BOOST_CHECK(data.asBase()[4] == 4);
-    BOOST_CHECK(data.asInt()[0] == 0);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[0], 0);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[4], 4);
+    TEST4FIMEX_CHECK_EQ(data.asInt()[0], 0);
 
     // changing data
     data.asInt()[0] = 10;
-    BOOST_CHECK(data.asInt()[0] == 10);
+    TEST4FIMEX_CHECK_EQ(data.asInt()[0], 10);
 
     // changing data with different type not reflected
     data.asDouble()[0] = 100;
-    BOOST_CHECK(data.asInt()[0] == 10);
+    TEST4FIMEX_CHECK_EQ(data.asInt()[0], 10);
 }
 
-BOOST_AUTO_TEST_CASE( test_indexed_data )
+TEST4FIMEX_TEST_CASE(test_indexed_data)
 {
     DataPtr dPtr(new DataImpl<int>(9));
     for (int i = 0; i < 9; i++) {
         dPtr->setValue(i, i);
     }
     IndexedData iData(dPtr, vector<size_t>(2,3)); // 3x3 array
-    BOOST_CHECK(iData.idx().getDims().size() == 2);
+    TEST4FIMEX_CHECK_EQ(iData.idx().getDims().size(), 2);
     for (size_t j = 0; j < 3; j++) {
         for (size_t i = 0; i < 3; i++) {
-            BOOST_CHECK(iData.getLongLong(i) == i);
-            BOOST_CHECK(iData.getLongLong(i,j) == (3*j)+i);
-            BOOST_CHECK(iData.getLongLong(i,j,17,35) == (3*j)+i);
-            BOOST_CHECK_CLOSE(iData.getDouble(i), i, 1e-5);
-            BOOST_CHECK_CLOSE(iData.getDouble(i,j), (3*j)+i, 1e-5);
-            BOOST_CHECK_CLOSE(iData.getDouble(i,j,17,35), (3*j)+i, 1e-5);
+            TEST4FIMEX_CHECK_EQ(iData.getLongLong(i), i);
+            TEST4FIMEX_CHECK_EQ(iData.getLongLong(i, j), (3 * j) + i);
+            TEST4FIMEX_CHECK_EQ(iData.getLongLong(i, j, 17, 35), (3 * j) + i);
+            TEST4FIMEX_CHECK_CLOSE(iData.getDouble(i), i, 1e-5);
+            TEST4FIMEX_CHECK_CLOSE(iData.getDouble(i, j), (3 * j) + i, 1e-5);
+            TEST4FIMEX_CHECK_CLOSE(iData.getDouble(i, j, 17, 35), (3 * j) + i, 1e-5);
          }
     }
 }
 
-
-BOOST_AUTO_TEST_CASE( test_slicing )
+TEST4FIMEX_TEST_CASE(test_slicing)
 {
     DataImpl<int> data(10);
     for (int i = 0; i < 10; i++) {
         data.setValue(i, i);
     }
-    BOOST_CHECK(data.asBase()[0] == 0);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[0], 0);
     int start = 4;
-    BOOST_CHECK(data.asBase()[start] == start);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[start], start);
 
     std::vector<size_t> orgDimSize(1, 10);
     std::vector<size_t> newDimStart(1, start);
@@ -87,18 +84,18 @@ BOOST_AUTO_TEST_CASE( test_slicing )
     std::vector<size_t> newDimSize(1, newSize);
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
-    BOOST_CHECK(slice->size() == newSize);
-    BOOST_CHECK((slice->asInt())[0] == start);
+    TEST4FIMEX_CHECK_EQ(slice->size(), newSize);
+    TEST4FIMEX_CHECK_EQ((slice->asInt())[0], start);
 
     // test_slicing of a scalar (size 0 or size 1)
     DataImpl<double> scalar(1);
     scalar.setValue(0, 3.);
     DataPtr scalarSlice = scalar.slice(vector<size_t>(0), vector<size_t>(0), vector<size_t>(0));
-    BOOST_CHECK(scalar.size() == scalarSlice->size());
-    BOOST_CHECK(scalar.asDouble()[0] == scalarSlice->asDouble()[0]);
+    TEST4FIMEX_CHECK_EQ(scalar.size(), scalarSlice->size());
+    TEST4FIMEX_CHECK_EQ(scalar.asDouble()[0], scalarSlice->asDouble()[0]);
 }
 
-BOOST_AUTO_TEST_CASE( test_slicing2D )
+TEST4FIMEX_TEST_CASE(test_slicing2D)
 {
     DataImpl<int> data(100);
     for (int i = 0; i < 10; i++) {
@@ -106,9 +103,9 @@ BOOST_AUTO_TEST_CASE( test_slicing2D )
             data.setValue(i*10+j, i*10+j);
         }
     }
-    BOOST_CHECK(data.asBase()[0] == 0);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[0], 0);
     int start = 4;
-    BOOST_CHECK(data.asBase()[start] == start);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[start], start);
 
     std::vector<size_t> orgDimSize(2, 10);
     std::vector<size_t> newDimStart(2, start);
@@ -116,12 +113,12 @@ BOOST_AUTO_TEST_CASE( test_slicing2D )
     std::vector<size_t> newDimSize(2, newSize);
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
-    BOOST_CHECK(slice->size() == newSize*newSize);
-    BOOST_CHECK((slice->asInt())[0] == static_cast<int>(newDimStart[1]*10 + start)); // 44
-    BOOST_CHECK((slice->asInt())[newSize] == static_cast<int>(newDimStart[1]*10 + (newSize-1)*10 + start)); // 44
+    TEST4FIMEX_CHECK_EQ(slice->size(), newSize * newSize);
+    TEST4FIMEX_CHECK_EQ((slice->asInt())[0], static_cast<int>(newDimStart[1] * 10 + start));                            // 44
+    TEST4FIMEX_CHECK_EQ((slice->asInt())[newSize], static_cast<int>(newDimStart[1] * 10 + (newSize - 1) * 10 + start)); // 44
 }
 
-BOOST_AUTO_TEST_CASE( test_slicing3D )
+TEST4FIMEX_TEST_CASE(test_slicing3D)
 {
     DataImpl<int> data(1000);
     for (int i = 0; i < 10; i++) {
@@ -130,9 +127,9 @@ BOOST_AUTO_TEST_CASE( test_slicing3D )
                 data.setValue(k+(i*10+j)*10, k+(i*10+j)*10);
         }
     }
-    BOOST_CHECK(data.asBase()[0] == 0);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[0], 0);
     int start = 4;
-    BOOST_CHECK(data.asBase()[start] == start);
+    TEST4FIMEX_CHECK_EQ(data.asBase()[start], start);
 
     std::vector<size_t> orgDimSize(3, 10);
     std::vector<size_t> newDimStart(3, start);
@@ -140,12 +137,12 @@ BOOST_AUTO_TEST_CASE( test_slicing3D )
     std::vector<size_t> newDimSize(3, newSize);
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
-    BOOST_CHECK(slice->size() == newSize*newSize*newSize);
-    BOOST_CHECK((slice->asInt())[0] == (start*100 + start*10 + start)); // 444
-    BOOST_CHECK((slice->asInt())[newSize*newSize+1] == 545); // 545
+    TEST4FIMEX_CHECK_EQ(slice->size(), newSize * newSize * newSize);
+    TEST4FIMEX_CHECK_EQ((slice->asInt())[0], (start * 100 + start * 10 + start)); // 444
+    TEST4FIMEX_CHECK_EQ((slice->asInt())[newSize * newSize + 1], 545);            // 545
 }
 
-BOOST_AUTO_TEST_CASE( test_slice_asym )
+TEST4FIMEX_TEST_CASE(test_slice_asym)
 {
     size_t sigma = 1;
     size_t y = 3;
@@ -170,18 +167,18 @@ BOOST_AUTO_TEST_CASE( test_slice_asym )
     newDimSize[1] = 2;
     newDimSize[2] = sigma;
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
-    BOOST_CHECK(slice->size() == newDimSize[0]*newDimSize[1]*newDimSize[2]);
+    TEST4FIMEX_CHECK_EQ(slice->size(), newDimSize[0] * newDimSize[1] * newDimSize[2]);
     boost::shared_array<int> intSlice = slice->asInt();
     for (size_t i = 0; i < newDimSize[2]; i++)
         for (size_t j = 0; j < newDimSize[1]; j++)
             for (size_t k = 0; k < newDimSize[0]; k++) {
                 int pos = k + j * (newDimSize[0]) + i * (newDimSize[1]*newDimSize[0]);
                 //std::cerr << i << ":" << j << ":" << k << " = " << pos << ":" << intSlice[pos] << std::endl;
-                BOOST_CHECK(intSlice[pos] == static_cast<int>(j + newDimStart[1]));
+                TEST4FIMEX_CHECK_EQ(intSlice[pos], static_cast<int>(j + newDimStart[1]));
             }
 }
 
-BOOST_AUTO_TEST_CASE( test_slice_segfault )
+TEST4FIMEX_TEST_CASE(test_slice_segfault)
 {
     // this is a hirlam20 case which caused a segfault, keeping it for interest
     size_t sigma = 1;
@@ -204,11 +201,10 @@ BOOST_AUTO_TEST_CASE( test_slice_segfault )
     newDimSize[1] = 100;
     newDimSize[2] = x;
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
-    BOOST_CHECK(slice->size() == newDimSize[0]*newDimSize[1]*newDimSize[2]);
-
+    TEST4FIMEX_CHECK_EQ(slice->size(), newDimSize[0] * newDimSize[1] * newDimSize[2]);
 }
 
-BOOST_AUTO_TEST_CASE( test_rounding )
+TEST4FIMEX_TEST_CASE(test_rounding)
 {
     DataPtr dataDouble(new DataImpl<double>(40));
     for (int i = -20; i < 20; i++) {
@@ -233,9 +229,7 @@ BOOST_AUTO_TEST_CASE( test_rounding )
         else
             expect = 2;
 
-        BOOST_CHECK_MESSAGE(asS[j] == expect, "short: i=" << i << " have == " << asS[j] << " expected " << expect);
-        BOOST_CHECK_MESSAGE(asI[j] == expect, "int:   i=" << i << " have == " << asI[j] << " expected " << expect);
+        TEST4FIMEX_CHECK_MESSAGE(asS[j] == expect, "short: i=" << i << " have == " << asS[j] << " expected " << expect);
+        TEST4FIMEX_CHECK_MESSAGE(asI[j] == expect, "int:   i=" << i << " have == " << asI[j] << " expected " << expect);
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

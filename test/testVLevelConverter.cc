@@ -24,7 +24,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -41,7 +40,7 @@
 
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_pressure_integrator)
+TEST4FIMEX_TEST_CASE(test_pressure_integrator)
 {
     const std::string fileName = pathTest("testdata_arome_vc.nc");
 
@@ -50,41 +49,41 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
 
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
-    BOOST_REQUIRE(cs);
+    TEST4FIMEX_REQUIRE(cs);
 
     VerticalTransformation_cp vt = cs->getVerticalTransformation();
-    BOOST_REQUIRE(vt);
+    TEST4FIMEX_REQUIRE(vt);
 
     ToVLevelConverter_p pressc = vt->getConverter(reader, MIFI_VINT_PRESSURE, 0, cs);
-    BOOST_REQUIRE(pressc);
+    TEST4FIMEX_REQUIRE(pressc);
 
     const std::vector<double> pressures = (*pressc)(1, 0, 0);
-    BOOST_REQUIRE(pressures.size() == 65);
-    BOOST_CHECK_CLOSE(10, pressures[0], 1);
-    BOOST_CHECK_CLOSE(980, pressures[64], 1);
+    TEST4FIMEX_REQUIRE(pressures.size() == 65);
+    TEST4FIMEX_CHECK_CLOSE(10, pressures[0], 1);
+    TEST4FIMEX_CHECK_CLOSE(980, pressures[64], 1);
 
     if (1) {
         ToVLevelConverter_p altic = vt->getConverter(reader, MIFI_VINT_ALTITUDE, 0, cs);
-        BOOST_REQUIRE(altic);
+        TEST4FIMEX_REQUIRE(altic);
 
         const std::vector<double> altitudes = (*altic)(1, 0, 0);
-        BOOST_REQUIRE(altitudes.size() == 65);
-        BOOST_CHECK_CLOSE(29910, altitudes[0], 1);
-        BOOST_CHECK_CLOSE(23210, altitudes[1], 1);
-        BOOST_CHECK_CLOSE(198, altitudes[63], 1);
-        BOOST_CHECK_CLOSE(173, altitudes[64], 1);
+        TEST4FIMEX_REQUIRE(altitudes.size() == 65);
+        TEST4FIMEX_CHECK_CLOSE(29910, altitudes[0], 1);
+        TEST4FIMEX_CHECK_CLOSE(23210, altitudes[1], 1);
+        TEST4FIMEX_CHECK_CLOSE(198, altitudes[63], 1);
+        TEST4FIMEX_CHECK_CLOSE(173, altitudes[64], 1);
     }
 
     {
         VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
-        BOOST_REQUIRE(altivc);
+        TEST4FIMEX_REQUIRE(altivc);
 
         const std::vector<std::string> shape_ac = altivc->getShape();
-        BOOST_REQUIRE(4 == shape_ac.size());
-        BOOST_CHECK_EQUAL("x", shape_ac[0]);
-        BOOST_CHECK_EQUAL("y", shape_ac[1]);
-        BOOST_CHECK_EQUAL("hybrid", shape_ac[2]);
-        BOOST_CHECK_EQUAL("time", shape_ac[3]);
+        TEST4FIMEX_REQUIRE(4 == shape_ac.size());
+        TEST4FIMEX_CHECK_EQ("x", shape_ac[0]);
+        TEST4FIMEX_CHECK_EQ("y", shape_ac[1]);
+        TEST4FIMEX_CHECK_EQ("hybrid", shape_ac[2]);
+        TEST4FIMEX_CHECK_EQ("time", shape_ac[3]);
 
         SliceBuilder sb = createSliceBuilder(reader->getCDM(), altivc);
         sb.setStartAndSize("x", 1, 1);
@@ -92,22 +91,22 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
         if (1) {
             sb.setStartAndSize("hybrid", 0, 2);
             DataPtr vd = altivc->getDataSlice(sb);
-            BOOST_REQUIRE(vd);
-            BOOST_REQUIRE(2 == vd->size());
+            TEST4FIMEX_REQUIRE(vd);
+            TEST4FIMEX_REQUIRE(2 == vd->size());
             boost::shared_array<float> va = vd->asFloat();
-            BOOST_REQUIRE(va);
-            BOOST_CHECK_CLOSE(29910, va[0], 1);
-            BOOST_CHECK_CLOSE(23210, va[1], 1);
+            TEST4FIMEX_REQUIRE(va);
+            TEST4FIMEX_CHECK_CLOSE(29910, va[0], 1);
+            TEST4FIMEX_CHECK_CLOSE(23210, va[1], 1);
         }
         if (1) {
             sb.setStartAndSize("hybrid", 63, 2);
             DataPtr vd = altivc->getDataSlice(sb);
-            BOOST_REQUIRE(vd);
-            BOOST_REQUIRE_EQUAL(2, vd->size());
+            TEST4FIMEX_REQUIRE(vd);
+            TEST4FIMEX_REQUIRE_EQ(2, vd->size());
             boost::shared_array<float> va = vd->asFloat();
-            BOOST_REQUIRE(va);
-            BOOST_CHECK_CLOSE(198, va[0], 1);
-            BOOST_CHECK_CLOSE(173, va[1], 1);
+            TEST4FIMEX_REQUIRE(va);
+            TEST4FIMEX_CHECK_CLOSE(198, va[0], 1);
+            TEST4FIMEX_CHECK_CLOSE(173, va[1], 1);
         }
     }
 }
@@ -115,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
 /* Create a test case where lowest altitude = highest pressure is first along the pressure axis.
  * Done by vertical interpolation of an existing test data set.
  */
-BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
 {
     const std::string fileName = pathTest("testdata_arome_vc.nc");
     CDMReader_p ncreader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
@@ -131,20 +130,20 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     reader->interpolateToFixed(vi_level1);
 
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "air_temperature_ml");
-    BOOST_REQUIRE(cs);
+    TEST4FIMEX_REQUIRE(cs);
 
     std::shared_ptr<const VerticalTransformation> vt = cs->getVerticalTransformation();
-    BOOST_REQUIRE(vt);
+    TEST4FIMEX_REQUIRE(vt);
 
     VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
-    BOOST_REQUIRE(altivc);
+    TEST4FIMEX_REQUIRE(altivc);
 
     const std::vector<std::string> shape_ac = altivc->getShape();
-    BOOST_REQUIRE(4 == shape_ac.size());
-    BOOST_CHECK_EQUAL("x", shape_ac[0]);
-    BOOST_CHECK_EQUAL("y",shape_ac[1]);
-    BOOST_CHECK_EQUAL("pressure", shape_ac[2]);
-    BOOST_CHECK_EQUAL("time", shape_ac[3]);
+    TEST4FIMEX_REQUIRE(4 == shape_ac.size());
+    TEST4FIMEX_CHECK_EQ("x", shape_ac[0]);
+    TEST4FIMEX_CHECK_EQ("y", shape_ac[1]);
+    TEST4FIMEX_CHECK_EQ("pressure", shape_ac[2]);
+    TEST4FIMEX_CHECK_EQ("time", shape_ac[3]);
 
     SliceBuilder sb = createSliceBuilder(reader->getCDM(), altivc);
     sb.setStartAndSize("x", 0, 2);
@@ -152,16 +151,14 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     sb.setStartAndSize("pressure", 0, 3);
     sb.setStartAndSize("time", 0, 1);
     DataPtr vd = altivc->getDataSlice(sb);
-    BOOST_REQUIRE(vd);
-    BOOST_REQUIRE_EQUAL(6, vd->size());
+    TEST4FIMEX_REQUIRE(vd);
+    TEST4FIMEX_REQUIRE_EQ(6, vd->size());
     boost::shared_array<float> va = vd->asFloat();
-    BOOST_REQUIRE(va);
-    BOOST_CHECK_CLOSE(12.1, va[0], 1);
-    BOOST_CHECK_CLOSE(12.4, va[1], 1);
-    BOOST_CHECK_CLOSE(1292, va[2], 1);
-    BOOST_CHECK_CLOSE(1292, va[3], 1);
-    BOOST_CHECK_CLOSE(5000, va[4], 1);
-    BOOST_CHECK_CLOSE(5000, va[5], 1);
+    TEST4FIMEX_REQUIRE(va);
+    TEST4FIMEX_CHECK_CLOSE(12.1, va[0], 1);
+    TEST4FIMEX_CHECK_CLOSE(12.4, va[1], 1);
+    TEST4FIMEX_CHECK_CLOSE(1292, va[2], 1);
+    TEST4FIMEX_CHECK_CLOSE(1292, va[3], 1);
+    TEST4FIMEX_CHECK_CLOSE(5000, va[4], 1);
+    TEST4FIMEX_CHECK_CLOSE(5000, va[5], 1);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -37,52 +35,55 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
+TEST4FIMEX_TEST_CASE(test_cs_slicebuilder_simple)
 {
     CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordTest.nc"));
+    TEST4FIMEX_CHECK(reader);
+
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
+
     // find an appropriate coordinate system for a variable
-    string varName = "air_temperature";
+    const string varName = "air_temperature";
     CoordinateSystem_cp_v::iterator csIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
-    if (csIt == coordSys.end()) BOOST_CHECK(false);
+    TEST4FIMEX_REQUIRE(csIt != coordSys.end());
+
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
     sb.setReferenceTimePos(1);
     sb.setTimeStartAndSize(0, 4);
 
-    BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "x");
-    BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "y");
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames()[0], "x");
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames()[1], "y");
 
-    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
-                                                        sb.getTimeVariableSliceBuilder());
-    BOOST_CHECK(data->size() == 4);
-    BOOST_CHECK(data->asInt()[1] == 1179313200);
+    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(), sb.getTimeVariableSliceBuilder());
+    TEST4FIMEX_CHECK_EQ(data->size(), 4);
+    TEST4FIMEX_CHECK_EQ(data->asInt()[1], 1179313200);
 }
 
-BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
+TEST4FIMEX_TEST_CASE(test_cs_slicebuilder_reftime)
 {
     CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordRefTimeTest.nc"));
-    BOOST_CHECK(reader.get() != 0);
+    TEST4FIMEX_CHECK(reader);
+
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
-    BOOST_CHECK(coordSys.size() > 0);
+    TEST4FIMEX_CHECK(coordSys.size() > 0);
     const CDM& cdm = reader->getCDM();
+
     // find an appropriate coordinate system for a variable
-    string varName = "air_temperature";
+    const string varName = "air_temperature";
     CoordinateSystem_cp_v::iterator csIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
-    if (csIt == coordSys.end()) BOOST_CHECK(false);
+    TEST4FIMEX_REQUIRE(csIt != coordSys.end());
+
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
     sb.setReferenceTimePos(1);
     sb.setTimeStartAndSize(0, 2);
 
-    BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "x");
-    BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "y");
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames()[0], "x");
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames()[1], "y");
 
-    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
-                                                        sb.getTimeVariableSliceBuilder());
-    BOOST_CHECK(data->size() == 2);
-    BOOST_CHECK(data->asShort()[1] == 27);
+    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(), sb.getTimeVariableSliceBuilder());
+    TEST4FIMEX_CHECK_EQ(data->size(), 2);
+    TEST4FIMEX_CHECK_EQ(data->asShort()[1], 27);
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

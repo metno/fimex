@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/FillWriter.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDM.h"
@@ -35,7 +33,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_fillWriter )
+TEST4FIMEX_TEST_CASE(test_fillWriter)
 {
     const string fileName = pathTest("coordRefTimeTest.nc");
     const string inFillName = pathTest("fillIn2.nc");
@@ -47,11 +45,11 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
         CDMReaderWriter_p out = CDMFileReaderFactory::createReaderWriter(MIFI_FILETYPE_NETCDF, outFile);
 
         // sanity check before test
-        BOOST_CHECK(out->getCDM().getDimension("refTime").getLength() == 2);
-        BOOST_CHECK(out->getCDM().getDimension("sigma").getLength() == 4);
+        TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("refTime").getLength(), 2);
+        TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("sigma").getLength(), 4);
 
-        BOOST_CHECK(in->getCDM().getDimension("refTime").getLength() == 2);
-        BOOST_CHECK(in->getCDM().getDimension("sigma").getLength() == 2);
+        TEST4FIMEX_CHECK_EQ(in->getCDM().getDimension("refTime").getLength(), 2);
+        TEST4FIMEX_CHECK_EQ(in->getCDM().getDimension("sigma").getLength(), 2);
 
         FillWriter(in, out);
     // close the writer before re-reading it
@@ -59,20 +57,21 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
     {
         CDMReader_p out = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outFile);
 
-        BOOST_CHECK(out->getCDM().getDimension("refTime").getLength() == 3);
-        BOOST_CHECK(out->getCDM().getDimension("sigma").getLength() == 4);
-        BOOST_CHECK(out->getData("sigma")->asInt()[0] ==  300);
-        BOOST_CHECK(out->getData("sigma")->asInt()[3] == 1000);
-        BOOST_CHECK(out->getData("refTime")->asInt()[0] ==  12);
-        BOOST_CHECK(out->getData("refTime")->asInt()[2] == 36);
+        TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("refTime").getLength(), 3);
+        TEST4FIMEX_CHECK_EQ(out->getCDM().getDimension("sigma").getLength(), 4);
+        TEST4FIMEX_CHECK_EQ(out->getData("sigma")->asInt()[0], 300);
+        TEST4FIMEX_CHECK_EQ(out->getData("sigma")->asInt()[3], 1000);
+        TEST4FIMEX_CHECK_EQ(out->getData("refTime")->asInt()[0], 12);
+        TEST4FIMEX_CHECK_EQ(out->getData("refTime")->asInt()[2], 36);
 
-        BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",0)->asInt()[11*11*2] == -32767); // first number, 3rd level
-        BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4] == -32767); // last level, last number, first offsetTime
-        BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4*2 - 1] == -32767); // last level, last number
+        TEST4FIMEX_CHECK_EQ(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer", 0)->asInt()[11 * 11 * 2], -32767); // first number, 3rd level
+        TEST4FIMEX_CHECK_EQ(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer", 2)->asInt()[11 * 11 * 4],
+                            -32767); // last level, last number, first offsetTime
+        TEST4FIMEX_CHECK_EQ(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer", 2)->asInt()[11 * 11 * 4 * 2 - 1], -32767); // last level, last number
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
+TEST4FIMEX_TEST_CASE(test_fillWriterConfig)
 {
     const string fileName = pathTest("coordRefTimeTest.nc");
     const string inFillName = pathTest("fillIn3.nc");
@@ -86,9 +85,7 @@ BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
     }
     {
         CDMReader_p out = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outFile);
-        BOOST_CHECK(out->getData("longitude")->asFloat()[2*11]+13 < 1e-5);
-        BOOST_CHECK(out->getData("latitude")->asFloat()[2*11]-28 < 1e-5);
+        TEST4FIMEX_CHECK(out->getData("longitude")->asFloat()[2 * 11] + 13 < 1e-5);
+        TEST4FIMEX_CHECK(out->getData("latitude")->asFloat()[2 * 11] - 28 < 1e-5);
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include <fimex/SliceBuilder.h>
@@ -52,39 +50,25 @@ void setupCDM(CDM& cdm)
     cdm.addVariable(var);
 }
 
-BOOST_AUTO_TEST_CASE( test_slicebuilder )
+TEST4FIMEX_TEST_CASE(test_slicebuilder)
 {
     CDM cdm;
     setupCDM(cdm);
-    BOOST_CHECK(cdm.hasVariable("var"));
+    TEST4FIMEX_CHECK(cdm.hasVariable("var"));
     SliceBuilder sb(cdm, "var");
-    BOOST_CHECK(true);
     sb.setStartAndSize("dim1", 1, 3);
 
-    try {
-        sb.setStartAndSize("doesNotExit", 5, 1);
-        BOOST_CHECK(false);
-    } catch (CDMException& ce) {
-        BOOST_CHECK(true);
-    }
+    TEST4FIMEX_CHECK_THROW(sb.setStartAndSize("doesNotExit", 5, 1), CDMException);
+    TEST4FIMEX_CHECK_THROW(sb.setStartAndSize("dim2", 17, 1), out_of_range);
 
-    try {
-        sb.setStartAndSize("dim2", 17, 1);
-        BOOST_CHECK(false);
-    } catch (out_of_range& ce) {
-        BOOST_CHECK(true);
-    }
-
-    BOOST_CHECK(sb.getDimensionNames()[0] == "dim1");
-    BOOST_CHECK(sb.getDimensionNames()[1] == "dim2");
-    BOOST_CHECK(sb.getDimensionSizes()[0] == 3);
-    BOOST_CHECK(sb.getDimensionSizes()[1] == 6);
-    BOOST_CHECK(sb.getDimensionStartPositions()[0] == 1);
-    BOOST_CHECK(sb.getDimensionStartPositions()[1] == 0);
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionNames()[0], "dim1");
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionNames()[1], "dim2");
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionSizes()[0], 3);
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionSizes()[1], 6);
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionStartPositions()[0], 1);
+    TEST4FIMEX_CHECK_EQ(sb.getDimensionStartPositions()[1], 0);
 
     // cerr << "unset dimensionNames: " << sb.getUnsetDimensionNames().size() << endl;
-    BOOST_CHECK(sb.getUnsetDimensionNames().size() == 1);
-    BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "dim2");
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames().size(), 1);
+    TEST4FIMEX_CHECK_EQ(sb.getUnsetDimensionNames()[0], "dim2");
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

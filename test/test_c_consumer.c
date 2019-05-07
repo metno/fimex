@@ -167,8 +167,8 @@ int testFeltReadNetcdfWrite(const char* feltFile, const char* configFile) {
     return retVal;
 }
 
-
-int testNetcdfReadNetcdfWrite() {
+int testNetcdfReadNetcdfWrite()
+{
     int retVal = 0;
     const char w_filename[] = "test_c_NetcdfReadNetcdfWrite.nc";
 
@@ -347,7 +347,8 @@ int main(int argc, char* argv[])
     if (testFeltVariables(feltFile, configFile) == 0) retVal--;
     if (testFeltData(feltFile, configFile) == 0) retVal--;
     if (testFeltReadNetcdfWrite(feltFile, configFile) == 0) retVal--;
-    if (testNetcdfReadNetcdfWrite(feltFile, configFile) == 0) retVal--;
+    if (testNetcdfReadNetcdfWrite() == 0)
+        retVal--;
     if (testCReader(feltFile, configFile) == 0) retVal--;
     if (testCSliceBuilder(feltFile, configFile) == 0) retVal--;
 

@@ -51,9 +51,9 @@ OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib
 FIND_PACKAGE(Boost REQUIRED COMPONENTS
   date_time
   program_options
-  unit_test_framework
+  #unit_test_framework
 )
-IF ((Boost_VERSION EQUAL 103400) OR (Boost_VERSION GREATER 103400))
+IF ((Boost_UNIT_TEST_FRAMEWORK_FOUND) AND ((Boost_VERSION EQUAL 103400) OR (Boost_VERSION GREATER 103400)))
   SET (HAVE_BOOST_UNIT_TEST_FRAMEWORK TRUE)
 ENDIF ()
 
@@ -163,6 +163,16 @@ ENDIF()
 #IF(ENABLE_PYTHON)
 #  ADD_SUBDIRECTORY(modules/python)
 #ENDIF()
+
+IF (NOT USE_BOOST_UNIT_TEST)
+  SET (MI_CPPTEST_3RDPARTY "third_party/mi-cpptest")
+  IF ((NOT mi-cpptest_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${MI_CPPTEST_3RDPARTY}/CMakeLists.txt"))
+    ADD_SUBDIRECTORY(${MI_CPPTEST_3RDPARTY})
+  ELSE ()
+    FIND_PACKAGE(mi-cpptest REQUIRED)
+  ENDIF ()
+ENDIF ()
+
 ADD_SUBDIRECTORY(test)
 ADD_SUBDIRECTORY(share/etc)
 

@@ -25,8 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMMerger.h"
@@ -38,7 +36,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_merger )
+TEST4FIMEX_TEST_CASE(test_merger)
 {
     const string fileNameInner = pathTest("test_merge_inner.nc"), fileNameOuter = pathTest("test_merge_outer.nc");
 
@@ -49,10 +47,10 @@ BOOST_AUTO_TEST_CASE( test_merger )
     merger->setTargetGridFromInner();
 
     DataPtr sliceM = merger->getDataSlice("ga_2t_1", 0);
-    BOOST_CHECK( sliceM.get() != 0 );
+    TEST4FIMEX_CHECK(sliceM);
 
     const int NLON = 61, NLAT = 113;
-    BOOST_CHECK( sliceM->size() == NLON*NLAT );
+    TEST4FIMEX_CHECK_EQ(sliceM->size(), NLON * NLAT);
 
     // test values: middle, transition, outer
     const int iLon[] = { 28, 24,  8, -1 };
@@ -67,11 +65,11 @@ BOOST_AUTO_TEST_CASE( test_merger )
              << " expected=" << expected[i]
              << " actual=" << valuesM[offset] << endl;
 #endif
-        BOOST_CHECK( fabs(valuesM[offset] - expected[i]) < 0.001 );
+        TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.001);
     }
 }
 
-BOOST_AUTO_TEST_CASE( test_merge_target )
+TEST4FIMEX_TEST_CASE(test_merge_target)
 {
     const string fileNameB = pathTest("merge_target_base.nc"), fileNameT = pathTest("merge_target_top.nc");
 
@@ -83,10 +81,10 @@ BOOST_AUTO_TEST_CASE( test_merge_target )
             "-1192800,-1192000,...,-1112800", "-1304000,-1303200,...,-1224000", "m", "m", "double", "double");
 
     DataPtr sliceM = merger->getDataSlice("air_temperature_2m", 0);
-    BOOST_CHECK( sliceM.get() != 0 );
+    TEST4FIMEX_CHECK(sliceM);
 
     const int NX = 101, NY = 101;
-    BOOST_CHECK( sliceM->size() == NX*NY );
+    TEST4FIMEX_CHECK_EQ(sliceM->size(), NX * NY);
 
     // test values: middle, transition, outer
     const int ix[] = { 19, 22, -1 };
@@ -101,8 +99,6 @@ BOOST_AUTO_TEST_CASE( test_merge_target )
              << " expected=" << expected[i]
              << " actual=" << valuesM[offset] << endl;
 #endif
-        BOOST_CHECK( fabs(valuesM[offset] - expected[i]) < 0.01 );
+        TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.01);
     }
 }
-
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
