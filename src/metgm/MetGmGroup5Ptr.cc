@@ -35,10 +35,6 @@
 #include "fimex/DataTypeChanger.h"
 #include "fimex/Units.h"
 
-// boost
-//
-#include <boost/progress.hpp>
-
 // standard
 #include <cstdio>
 #include <cmath>

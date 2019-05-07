@@ -48,24 +48,24 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #endif
 
+// boost
+//
+#include <boost/algorithm/string.hpp>
+
 // PROJ.4
 //
 #include "proj_api.h"
 
-// boost
-//
-#include <boost/algorithm/string.hpp>
-#include <memory>
-#include <regex>
-
 // standard
-#include <functional>
 #include <algorithm>
-#include <limits>
-#include <set>
-#include <string>
 #include <ctime>
 #include <fstream>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <regex>
+#include <set>
+#include <string>
 
 namespace MetNoFimex
 {

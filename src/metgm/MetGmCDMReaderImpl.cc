@@ -52,7 +52,6 @@
 // boost
 //
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 // libxml2

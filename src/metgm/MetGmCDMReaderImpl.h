@@ -44,16 +44,10 @@
 
 // boost
 //
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/multi_index/composite_key.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index_container.hpp>
 
 // standard
 //
-#include <cstdio>
 #include <memory>
 #include <string>
 #include <vector>
