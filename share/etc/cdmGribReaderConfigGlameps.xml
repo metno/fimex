@@ -353,7 +353,7 @@
     <parameter name="z_pl" type="float">
         <grib1 indicatorOfParameter="6" typeOfLevel="100"/>
         <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="geopotential_height" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
@@ -361,111 +361,111 @@
     <parameter name="z_ml" type="float">
         <grib1 indicatorOfParameter="6" typeOfLevel="109"/>
         <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="geopotential_height" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
     <parameter name="air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="11"  typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature_ml" type="float">
         <grib1 indicatorOfParameter="11"  typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature_pl" type="float">
         <grib1 indicatorOfParameter="11"  typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_pressure_at_sea_level" type="float">
         <grib1 indicatorOfParameter="1" typeOfLevel="103" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
 
     <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
     </parameter>
     <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="y" counterpart="x_wind_10m" />
     </parameter>
     <parameter name="x_wind_pl" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_pl" />
     </parameter>
     <parameter name="y_wind_pl" type="float">
         <grib1 indicatorOfParameter="34" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="y" counterpart="x_wind_pl" />
     </parameter>
     <parameter name="x_wind_ml" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_ml" />
     </parameter>
     <parameter name="y_wind_ml" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
         <spatial_vector direction="y" counterpart="x_wind_ml" />
     </parameter>
     <parameter name="relative_humidity_2m" type="float">
         <grib1 indicatorOfParameter="52"  typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="liquid_water_content_of_surface_snow" type="float">
         <grib1 indicatorOfParameter="65" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="liquid_water_content_of_surface_snow" type="string" />
         <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
     <parameter name="total_precipitation" type="float">
         <grib1 indicatorOfParameter="61" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="total_precipitation" type="string" />
         <attribute name="units" value="kg m^-2" type="string" />
     </parameter>
     <parameter name="wind_gust_10m" type="float">
         <grib1 indicatorOfParameter="228" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="" type="string" />
         <attribute name="units" value="m s-1" type="string" />
     </parameter>
     <parameter name="surface_downwelling_shortwave_flux_in_air" type="float">
         <grib1 indicatorOfParameter="117" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
         <attribute name="units" value="W m-2" type="string" />
     </parameter>

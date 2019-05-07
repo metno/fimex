@@ -87,8 +87,19 @@ template <typename T>
 T string2type(const std::string& s)
 {
     T retVal;
-    std::istringstream buffer(s);
-    buffer >> retVal;
+    bool ok = !s.empty();
+
+    if (std::is_arithmetic<T>() && ok) {
+        const char c = s[0];
+        ok = (c == '-') || (std::is_floating_point<T>() && c == '.') || std::isdigit(c);
+    }
+    if (ok) {
+        std::istringstream buffer(s);
+        buffer >> retVal;
+        ok = buffer.eof() && !buffer.fail();
+    }
+    if (!ok)
+        throw std::runtime_error("could not convert '" + s + "'");
     return retVal;
 }
 

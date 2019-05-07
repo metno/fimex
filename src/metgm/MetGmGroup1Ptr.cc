@@ -35,9 +35,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/TimeUnit.h"
-
-// boost
-#include <boost/lexical_cast.hpp>
+#include "fimex/Utils.h"
 
 // standard
 #include <iostream>
@@ -97,10 +95,10 @@ std::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(c
     gp1->dataType_ = 4;
     if(!gp1->parser_->dataType().empty()) {
         /* value from xml */
-        gp1->dataType_ = boost::lexical_cast<unsigned int>(gp1->parser_->dataType().c_str());
+        gp1->dataType_ = string2type<unsigned int>(gp1->parser_->dataType().c_str());
     } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), DATA_TYPE, metgmDataTypeAttribute)) {
         /* value from cdm model */
-        gp1->dataType_ = boost::lexical_cast<unsigned int>(metgmDataTypeAttribute.getStringValue().c_str());
+        gp1->dataType_ = string2type<unsigned int>(metgmDataTypeAttribute.getStringValue().c_str());
     }
 
     CDMAttribute metgmModelTypeAttribute;

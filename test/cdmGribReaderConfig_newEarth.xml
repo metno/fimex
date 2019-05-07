@@ -361,7 +361,7 @@
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="2"/>
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="3"/>
         <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="geopotential_height" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
@@ -378,13 +378,13 @@
         <!-- fog -->
         <grib1 indicatorOfParameter="248" identificationOfOriginatingGeneratingCentre="98"/>
         <!--  <grib2 discipline="" parameterCategory="" parameterNumber=""/> -->
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="cloud coverage" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="total_precipitation" type="float">
         <grib1 indicatorOfParameter="61" gribTablesVersionNo="3"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="total_precipitation" type="string" />
         <attribute name="units" value="kg m^-2" type="string" />
     </parameter>
@@ -392,136 +392,136 @@
 <!-- from metcoop -->
     <parameter name="u_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
     <parameter name="v_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
     <parameter name="u_wind" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
     <parameter name="v_wind" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
     <parameter name="T0M" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="T2M" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature" type="float">
         <grib2 discipline="0" parameterCategory="0" parameterNumber="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="tk" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="fi" type="float" constantTime="true">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
     <parameter name="fis" type="float">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
     <parameter name="q" type="float">
         <grib1 indicatorOfParameter="51" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="etadot" type="float">
         <grib1 indicatorOfParameter="40" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="metno_name" value="etadot" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="rh2_grib" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="rh_grib" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="tcc" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="lcc" type="float">
         <grib1 indicatorOfParameter="73" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <!-- standard-name not ensured yet -->
         <attribute name="standard_name" value="low_type_cloud_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="mcc" type="float">
         <grib1 indicatorOfParameter="74" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <!-- standard-name not ensured yet -->
         <attribute name="standard_name" value="medium_type_cloud_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="hcc" type="float">
         <grib1 indicatorOfParameter="75" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <!-- standard-name not ensured yet -->
         <attribute name="standard_name" value="high_type_cloud_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="frontalprec" type="float">
         <grib1 indicatorOfParameter="62" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="lwe_thickness_of_stratiform_precipitation_amount" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
     <parameter name="convecprec" type="float">
         <grib1 indicatorOfParameter="63" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
     <parameter name="mslp.pa" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="103"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
     <parameter name="psurf.pa" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_pressure" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
@@ -529,20 +529,20 @@
 <!-- from MEE ensembles (ec) -->
     <parameter name="geopotential" type="float" constantTime="true">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="long_name" value="geopotential" type="string" />
         <attribute name="standard_name" value="geopotential" type="string" />
         <attribute name="units" value="m2/s2" type="string" />
     </parameter>
     <parameter name="lwe_thickness_of_percipitation_amount" type="float">
         <grib1 indicatorOfParameter="228" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="lwe_thickness_of_percipitation_amount" type="string" />
         <attribute name="units" value="kg/m2" type="string" />
     </parameter>
     <parameter name="lwe_thickness_of_snowfall_amount" type="float">
         <grib1 indicatorOfParameter="144" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
         <attribute name="units" value="kg/m2" type="string" />
     </parameter>
@@ -555,30 +555,30 @@
     </parameter>
     <parameter name="air_temperature" type="float">
         <grib1 indicatorOfParameter="130" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="dewpoint_2m" type="float">
         <grib1 indicatorOfParameter="168" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="167" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="max_air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="121" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="min_air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="122" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
@@ -586,26 +586,26 @@
         <grib1 indicatorOfParameter="165" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98">
           <extraKey name="localDefinitionNumber" value="1" /> <!-- just for testing -->
         </grib1>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
 		<precision scale_factor="0.1" />
     </parameter>
     <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
     </parameter>
     <parameter name="max_wind_speed_of_gust_10m" type="float">
         <grib1 indicatorOfParameter="123" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="max_wind_speed_of_gust" type="string" />
         <attribute name="units" value="m/s" type="string" />
     </parameter>
     <parameter name="sea_level_pressure" type="float">
         <grib1 indicatorOfParameter="151" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
@@ -613,25 +613,25 @@
     <!-- wave parameters -->
     <parameter name="significant_wave_height" type="float">
       <grib1 indicatorOfParameter="229" gribTablesVersionNo="140" />
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
       <attribute name="units" value="m" type="string"/>
       <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
     </parameter>
     <parameter name="wave_direction" type="float">
       <grib1 indicatorOfParameter="230" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
       <attribute name="units" value="degree" type="string"/>
       <attribute name="standard_name" value="sea_surface_wave_to_direction" type="string"/>
     </parameter>
     <parameter name="peak_wave_period"  type="float">
       <grib1 indicatorOfParameter="231" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
       <attribute name="long_name" value="sea_surface_wave_peak_period" type="string"/>
       <attribute name="units" value="s" type="string"/>
     </parameter>
     <parameter  name="mean_wave_period"  type="float">
       <grib1 indicatorOfParameter="232" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
       <attribute name="units" value="s" type="string"/>
       <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment" type="string"/>
       <attribute name="long_name" value="sea_surface_wave_significant_period" type="string"/>
@@ -643,7 +643,7 @@
     </parameter>
     <parameter name="wind_speed_10m"  type="float">
       <grib1 indicatorOfParameter="245" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
       <attribute name="units" value="m/s" type="string"/>
       <attribute name="standard_name" value="wind_speed" type="string"/>
     </parameter>

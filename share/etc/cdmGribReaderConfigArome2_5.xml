@@ -675,7 +675,7 @@
     </parameter>
     <parameter name="fog_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" levelNo="65"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
         <!-- standard-name not ensured yet -->
         <attribute name="long_name" value="Fog" type="string" />
         <attribute name="metno_name" value="fog_area_fraction" type="string" />

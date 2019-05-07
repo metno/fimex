@@ -34,8 +34,7 @@
 //
 #include "fimex/DataTypeChanger.h"
 #include "fimex/Units.h"
-
-#include <boost/lexical_cast.hpp>
+#include "fimex/Utils.h"
 
 // standard
 #include <cmath>
@@ -560,10 +559,8 @@ std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(c
             case MetGmHDTag::HD_1D_T:
             case MetGmHDTag::HD_3D:
             default:
-                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
-                                   + hdTag_->asString()
-                                   + " for p_id ="
-                                   + boost::lexical_cast<std::string>(pGp3_->p_id()));
+                throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdTag_->asString() +
+                                   " for p_id =" + type2string<int>(pGp3_->p_id()));
         }
 
         return  boost::shared_array<float>();

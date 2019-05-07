@@ -812,10 +812,10 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
             std::smatch what;
             if (std::regex_match(v, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
                 try {
-                    int transition = boost::lexical_cast<int>(what[1]);
-                    int border     = boost::lexical_cast<int>(what[2]);
+                    int transition = string2type<int>(what[1]);
+                    int border = string2type<int>(what[2]);
                     merger->setSmoothing(CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory(transition, border)));
-                } catch (boost::bad_lexical_cast&) {
+                } catch (std::runtime_error&) {
                     throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
                 }
             } else {

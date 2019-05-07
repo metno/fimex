@@ -1082,7 +1082,7 @@
     <!-- mp2 -->
     <parameter name="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
       <grib1 indicatorOfParameter="221" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
       <attribute name="units" value="s" type="string"/>
     </parameter>
@@ -1090,7 +1090,7 @@
     <!-- p2ps -->
     <parameter name="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
       <grib1 indicatorOfParameter="227" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="standard_name" value="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
       <attribute name="units" value="s" type="string"/>
     </parameter>
@@ -1098,7 +1098,7 @@
     <!-- swh -->
     <parameter name="sea_surface_wave_significant_height" type="float">
       <grib1 indicatorOfParameter="229" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="units" value="m" type="string"/>
       <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
     </parameter>
@@ -1106,7 +1106,7 @@
     <!-- pp1d -->
     <parameter name="sea_surface_wave_period_at_variance_spectral_density_maximum" type="float">
       <grib1 indicatorOfParameter="231" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="standard_name" value="sea_surface_wave_period_at_variance_spectral_density_maximum" type="string"/>
       <attribute name="units" value="s" type="string"/>
     </parameter>
@@ -1114,7 +1114,7 @@
     <!-- shts -->
     <parameter name="sea_surface_swell_wave_significant_height" type="float">
       <grib1 indicatorOfParameter="237" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string"/>
       <attribute name="units" value="m" type="string"/>
     </parameter>
@@ -1122,7 +1122,7 @@
     <!-- mdts -->
     <parameter name="sea_surface_swell_wave_from_direction" type="float">
       <grib1 indicatorOfParameter="238" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36" type="float"/>
       <attribute name="standard_name" value="sea_surface_swell_wave_from_direction" type="string"/>
       <attribute name="units" value="degree" type="string"/>
     </parameter>

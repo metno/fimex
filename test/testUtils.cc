@@ -26,7 +26,16 @@
 
 
 #include "testinghelpers.h"
+
 #include "fimex/Utils.h"
+
+//#define COMPARE_WITH_BOOST_LEXICAL_CAST
+#ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
+#include <boost/lexical_cast.hpp>
+#endif
+
+#include <cctype>
+#include <type_traits>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -242,4 +251,50 @@ TEST4FIMEX_TEST_CASE(test_replace_all_copy)
 {
     TEST4FIMEX_CHECK_EQ("hei hei", replace_all_copy("hek hek", 'k', 'i'));
     TEST4FIMEX_CHECK_EQ("hei hei", replace_all_copy("hei hei", 'k', 'i'));
+}
+
+#define CHECK_THROW_S2T(T, S) \
+    TEST4FIMEX_CHECK_THROW(string2type<T>(S), std::runtime_error)
+#define CHECK_EQ_S2T(T, V, S) \
+    TEST4FIMEX_CHECK_EQ((T)V, string2type<T>(S))
+
+#ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
+#define CHECK_THROW_BLC(T, S) \
+    TEST4FIMEX_CHECK_THROW(boost::lexical_cast<T>(S), boost::bad_lexical_cast)
+#define CHECK_EQ_BLC(T, V, S) \
+    TEST4FIMEX_CHECK_EQ((T)V, boost::lexical_cast<T>(S))
+#else
+#define CHECK_THROW_BLC(T, S) \
+    do { } while (0) // nothing
+#define CHECK_EQ_BLC(T, V, S) \
+    do { } while (0) // nothing
+#endif
+
+#define CHECK_THROW(T, S) \
+    do { CHECK_THROW_BLC(T, S); CHECK_THROW_S2T(T, S); } while (0)
+#define CHECK_EQ(T, V, S) \
+    do { CHECK_EQ_BLC(T, V, S); CHECK_EQ_S2T(T, V, S); } while (0)
+
+TEST4FIMEX_TEST_CASE(test_string2type)
+{
+    TEST4FIMEX_CHECK_EQ("hei", string2type<std::string>("hei"));
+
+    TEST4FIMEX_CHECK_EQ((char)23, string2type<char>("23"));
+    TEST4FIMEX_CHECK_EQ((unsigned char)34, string2type<unsigned char>("34"));
+    TEST4FIMEX_CHECK_EQ((char)-12, string2type<char>("-12"));
+
+    CHECK_EQ(int, 12, "12");
+    CHECK_EQ(float, 1234.5f, "1234.5");
+    CHECK_EQ(double, 0.125, ".125"); // no leading 0
+    CHECK_EQ(int, -23, "-23");
+
+    CHECK_THROW(int, "   1234");
+    CHECK_THROW(int, "1111e");
+    CHECK_THROW(float, "123e");
+    CHECK_THROW(unsigned char, "222  ");
+    CHECK_THROW(int, ".25e");
+    CHECK_THROW(int, "125e0");
+
+    CHECK_THROW(int, "55.5");
+    CHECK_THROW(int, "hei");
 }

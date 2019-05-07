@@ -44,6 +44,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
+#include "fimex/Utils.h"
 #include "fimex/interpolation.h"
 
 // udunits
@@ -54,7 +55,6 @@
 #include <libxml/xpath.h>
 
 // boost
-#include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
 // standard
@@ -107,7 +107,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
             if (str_p_id.empty()) {
                 continue;
             }
-            p_id = boost::lexical_cast<size_t>(str_p_id);
+            p_id = string2type<size_t>(str_p_id);
         } else {
             continue;
         }
@@ -188,7 +188,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
             if (str_p_id.empty()) {
                 continue;
             }
-            p_id = boost::lexical_cast<size_t>(str_p_id);
+            p_id = string2type<size_t>(str_p_id);
         } else {
             continue;
         }

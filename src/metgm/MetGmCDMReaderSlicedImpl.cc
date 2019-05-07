@@ -50,10 +50,6 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 
-// boost
-//
-#include <boost/lexical_cast.hpp>
-
 #include <regex>
 #include <tuple>
 
@@ -94,7 +90,7 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 
             std::vector<CDMAttribute> attributes;
 
-            CDMAttribute metgmPidAttribute("metgm_p_id", "short", boost::lexical_cast<std::string>(p_id));
+            CDMAttribute metgmPidAttribute("metgm_p_id", "short", type2string<short>(p_id));
             attributes.push_back(metgmPidAttribute);
 
             CDMAttribute cfNameAttribute("standard_name", "string", profile.standardName_);

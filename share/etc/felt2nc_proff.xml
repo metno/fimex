@@ -21,13 +21,13 @@
 <variables>
 <!--  I dont use components in model-layer 59/60 (see hirlam12ml) -->
 <parameter id="14,2,1000" name="lwe_precipitation_rate" type="float">
-    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
     <attribute name="long_name" value="precipitation_rate" type="string" />
     <attribute name="standard_name" value="lwe_precipitation_rate" type="string" />
     <attribute name="units" value="m/s" type="string" />
 </parameter>
 <parameter id="17,2,1000" name="precipitation_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
 	<attribute name="long_name" value="precipitation_amount" type="string" />
 	<attribute name="standard_name" value="precipitation_amount" type="string" />
 	<attribute name="units" value="kg/m2" type="string" />
@@ -41,7 +41,7 @@
 	<attribute name="units" value="1" type="string" />
 </parameter>
 <parameter id="31,2,1000" name="air_temperature" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
 	<attribute name="cell_methods" value="time: point height: 2m" type="string" />
 	<attribute name="long_name" value="air_temperature_2m" type="string" />
 	<attribute name="standard_name" value="air_temperature" type="string" />
@@ -56,7 +56,7 @@
 	<attribute name="units" value="1" type="string" />
 </parameter>
 <parameter id="33,2,1000" name="x_wind" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
 	<attribute name="long_name" value="x_wind" type="string" />
 	<attribute name="standard_name" value="x_wind" type="string" />
@@ -65,7 +65,7 @@
 	<spatial_vector direction="x,longitude" counterpart="y_wind" />
 </parameter>
 <parameter id="34,2,1000" name="y_wind" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
 	<attribute name="long_name" value="y_wind" type="string" />
 	<attribute name="standard_name" value="y_wind" type="string" />
@@ -96,14 +96,14 @@
 	<attribute name="units" value="K" type="string" />
 </parameter>
 <parameter id="200,3,0" name="significant_wave_height" type="float">
-    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
     <attribute name="cell_methods" value="time: point" type="string" />
     <attribute name="long_name" value="sea_surface_wave_significant_height" type="string" />
     <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
     <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="1047,2,1000" name="visibility" type="float">
-    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
     <attribute name="cell_methods" value="height: 2m" type="string" />
     <attribute name="long_name" value="x_wind" type="string" />
     <attribute name="standard_name" value="visibility_in_air" type="string" />
@@ -117,7 +117,7 @@
     <attribute name="units" value="1" type="string" />
 </parameter>
 <parameter id="1105,2,1000" name="air_temp2m_auto_corr" type="float">
-    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36" type="float" />
     <attribute name="cell_methods" value="time: point height: 2m" type="string" />
     <attribute name="long_name" value="air_temp2m_autocorr" type="string" />
     <attribute name="standard_name" value="air_temperature" type="string" />

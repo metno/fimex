@@ -50,10 +50,6 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 
-// boost
-//
-#include <boost/lexical_cast.hpp>
-
 // libxml2
 //
 #include <libxml/xinclude.h>
@@ -118,7 +114,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
                 if(str_p_id == std::string("")) {
                     continue;
                 }
-                p_id = boost::lexical_cast<size_t>(str_p_id);
+                p_id = string2type<size_t>(str_p_id);
             } else {
                 continue;
             }
@@ -473,7 +469,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
                 }
 
                 // to create unique fimex name for CDM modell
-                longName.append("_pid_").append(boost::lexical_cast<std::string>(profile.p_id_));
+                longName.append("_pid_").append(type2string<short>(profile.p_id_));
 
                 DataPtr data =
                         createData(CDM_FLOAT,
@@ -524,7 +520,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
 
             std::vector<CDMAttribute> attributes;
 
-            CDMAttribute metgmPidAttribute("metgm_p_id", "short", boost::lexical_cast<std::string>(p_id));
+            CDMAttribute metgmPidAttribute("metgm_p_id", "short", type2string<short>(p_id));
             attributes.push_back(metgmPidAttribute);
 
             CDMAttribute cfNameAttribute("standard_name", "string", profile.standardName_);
