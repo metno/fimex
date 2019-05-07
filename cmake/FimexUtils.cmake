@@ -1,6 +1,6 @@
 # Fimex, cmake/FimexUtils.cmake
 #
-# Copyright (C) 2018 met.no
+# Copyright (C) 2018-2019 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -34,7 +34,6 @@ MACRO(FIMEX_CMAKE_SETUP)
   IF(CMAKE_VERSION VERSION_LESS "3.1")
     IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
       SET(CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
-      #SET(CMAKE_CXX_FLAGS "--std=c+11 ${CMAKE_CXX_FLAGS}")
     ELSEIF (CMAKE_C_COMPILER_ID STREQUAL "Intel")
       SET(CMAKE_C_FLAGS "-std=c99 ${CMAKE_C_FLAGS}")
     ELSE()
@@ -42,11 +41,13 @@ MACRO(FIMEX_CMAKE_SETUP)
     ENDIF()
   ELSE()
     SET(CMAKE_C_STANDARD 99)
-    #SET(CMAKE_CXX_STANDARD 11)
   ENDIF()
 
   INCLUDE(GNUInstallDirs)
   INCLUDE(FindPkgConfig)
+
+  SET(CMAKE_CXX_STANDARD 11)
+  SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
   # see https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
