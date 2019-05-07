@@ -14,6 +14,7 @@
       reader config xml files might have to be adapted
     * CDMInterpolator improvements, faster forward nearest neighbor interpolation
     * code simplification in NetCDF_CDMWriter and Null_CDMWriter
+    * use mi-programoptions
   * 2019-01-09 fimex-0.67.2
     * ignore GRIB stepType
     * fix some memory leaks when using xmlTextReader

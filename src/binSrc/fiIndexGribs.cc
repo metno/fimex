@@ -32,7 +32,7 @@
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 
-#include <boost/program_options.hpp>
+#include <mi_programoptions.h>
 
 #include <grib_api.h>
 
@@ -41,13 +41,14 @@
 #include <memory>
 #include <stdexcept>
 
-namespace po = boost::program_options;
+namespace po = miutil::program_options;
 using namespace std;
 
-static void writeUsage(ostream& out, const po::options_description& options) {
+static void writeUsage(ostream& out, const po::option_set& options)
+{
     out << "usage: fiIndexGribs [ --outputDirectory DIRNAME | --appendFile GRMBL_NAME] [-c] -i gribFile" << endl;
     out << endl;
-    out << options << endl;
+    options.help(out);
 }
 
 void indexGrib(const std::string& input, const std::string& append, const std::string& output, vector<string> extraKeys, string config,
@@ -83,64 +84,70 @@ int main(int argc, char* args[])
     // only use one thread
     mifi_setNumThreads(1);
 
-    po::options_description options("options");
-    options.add_options()
-        ("help,h", "help message")
-        ("debug", "debug option")
-        ("version", "program version")
-        ("extraKey", po::value<vector<string> >()->composing(), "multiple extraKey to index")
-        ("readerConfig", po::value<string>(), "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.")
-        ("outputFile,o", po::value<string>(), "output grbml file")
-        ("inputFile,i", po::value<string>(), "input gribFile")
-        ("input.optional", po::value<vector<string> >()->composing(), "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs")
-        ("appendFile,a", po::value<string>(), "append output new index to a grbml-file")
+    const po::option op_help = po::option("help", "help message").set_shortkey("h").set_narg(0);
+    const po::option op_debug = po::option("debug", "debug option").set_narg(0);
+    const po::option op_version = po::option("version", "program version").set_narg(0);
+    const po::option op_extraKey = po::option("extraKey", "multiple extraKey to index").set_composing();
+    const po::option op_readerConfig = po::option("readerConfig", "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.");
+    const po::option op_outputFile = po::option("outputFile", "output grbml file").set_shortkey("o");
+    const po::option op_inputFile = po::option("inputFile", "input gribFile").set_shortkey("i");
+    const po::option op_input_optional = po::option("input.optional", "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs").set_composing();
+    const po::option op_appendFile = po::option("appendFile", "append output new index to a grbml-file").set_shortkey("a");
+
+    po::option_set options;
+    options
+        << op_help
+        << op_debug
+        << op_version
+        << op_extraKey
+        << op_readerConfig
+        << op_outputFile
+        << op_inputFile
+        << op_input_optional
+        << op_appendFile
         ;
 
     // read the options
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).options(options).run(), vm);
-    po::notify(vm);
+    po::string_v positional;
+    po::value_set vm = po::parse_command_line(argc, args, options, positional);
 
-    if (argc == 1 || vm.count("help")) {
+    if (argc == 1 || vm.is_set(op_help)) {
         writeUsage(cout, options);
         return 0;
     }
-    if (vm.count("debug") >= 1) {
-        // TODO allow for multiple occurances and use INFO as == 1
-        MetNoFimex::defaultLogLevel(MetNoFimex::Logger::DEBUG);
-    } else if (vm.count("debug") > 1) {
+    if (vm.is_set(op_debug)) {
         MetNoFimex::defaultLogLevel(MetNoFimex::Logger::DEBUG);
     }
-    if (vm.count("version")) {
+    if (vm.is_set(op_version)) {
         cout << "fiIndexGribs version " << fimexVersion() << endl;
         return 0;
     }
-    if (vm.count("inputFile") == 0) {
+    if (!vm.is_set(op_inputFile)) {
         cerr << "missing input file" << endl;
         writeUsage(cout, options);
         return 1;
     }
-    const std::string inputFile(vm["inputFile"].as<string>());
+    const std::string& inputFile = vm.value(op_inputFile);
 
     std::string outputFile = inputFile + ".grbml";
-    if (vm.count("outputFile"))
-        outputFile = vm["outputFile"].as<string>();
+    if (vm.is_set(op_outputFile))
+        outputFile = vm.value(op_outputFile);
 
     vector<string> extraKeys;
-    if (vm.count("extraKey")) {
-        extraKeys = vm["extraKey"].as<vector<string> >();
+    if (vm.is_set(op_extraKey)) {
+        extraKeys = vm.values(op_extraKey);
     }
     string readerConfig("");
-    if (vm.count("readerConfig")) {
-        readerConfig = vm["readerConfig"].as<string>();
+    if (vm.is_set(op_readerConfig)) {
+        readerConfig = vm.value(op_readerConfig);
     }
     vector<string> members;
-    if (vm.count("input.optional")) {
-        members = vm["input.optional"].as<vector<string> >();
+    if (vm.is_set(op_input_optional)) {
+        members = vm.values(op_input_optional);
     }
     std::string appendFile;
-    if (vm.count("appendFile")) {
-        outputFile = appendFile = vm["appendFile"].as<string>();
+    if (vm.is_set(op_appendFile)) {
+        outputFile = appendFile = vm.value(op_appendFile);
     }
     indexGrib(inputFile, appendFile, outputFile, extraKeys, readerConfig, members);
     return 0;

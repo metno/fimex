@@ -39,17 +39,20 @@
 #include "fimex/Units.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
-#include <boost/program_options.hpp>
+#include <mi_programoptions.h>
 
 #include <functional>
 #include <iostream>
 #include <numeric>
 
-namespace po = boost::program_options;
+namespace po = miutil::program_options;
 using namespace std;
 using namespace MetNoFimex;
 
-static void writeUsage(ostream& out, const po::options_description& generic) {
+namespace {
+
+void writeUsage(ostream& out, const po::option_set& generic)
+{
     out << "usage: fiXYcontents --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
     out << "             [--input.config CFGFILENAME]" << endl;
     out << "             [--input.optional OPT1 --input.optional OPT2 ...]" << endl;
@@ -60,24 +63,45 @@ static void writeUsage(ostream& out, const po::options_description& generic) {
     out << "             [--forecastTime ... ]" << endl;
     out << "             [--stats mean,median,min,max,stddev,def,undef]" << endl;
     out << endl;
-    out << generic << endl;
+    generic.help(out);
 }
 
-static CDMReader_p getCDMFileReader(po::variables_map& vm) {
-    string name = vm["input.file"].as<string>();
+const po::option op_help = po::option("help", "help message").set_shortkey("h");
+const po::option op_version = po::option("version", "program version");
+const po::option op_debug = po::option("debug", "debug program");
+const po::option op_log4cpp = po::option("log4cpp", "log4cpp property file (- = log4cpp without prop-file)");
+const po::option op_num_threads = po::option("num_threads", "number of threads").set_shortkey("n");
+const po::option op_input_file = po::option("input.file", "input file");
+const po::option op_input_type = po::option("input.type", "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2");
+const po::option op_input_config = po::option("input.config", "non-standard input configuration");
+const po::option op_input_optional = po::option("input.optional", "additional options, e.g. multiple files for grib").set_composing();
+const po::option op_verticalLayer = po::option("verticalLayer", "vertical layer definitions, defined by standard_name or units (or no for no (or size 1) "
+                                                                "vertical axis), e.g. units:hPa, no, atmosphere_hybrid_sigma_pressure_coordinate")
+                                        .set_composing();
+const po::option op_layerValue = po::option("layerValue", "vertical layer values, e.g. 1000,950,...,500,300,100");
+const po::option op_layerPosition = po::option("layerPosition", "vertical layer positions, e.g. 0,1,2,...,90");
+const po::option op_stdName = po::option("stdName", "standard_name of parameters").set_composing();
+const po::option op_varName = po::option("varName", "variable name of parameters").set_composing();
+const po::option op_forecastTime = po::option("forecastTime", "forecast hours since reference time, e.g. 3,6,12,15,...,24,36");
+const po::option op_stats = po::option("stats", "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef (=all)");
+
+// FIXME same as fimex.cc
+CDMReader_p getCDMFileReader(po::value_set& vm)
+{
+    const string& name = vm.value(op_input_file);
     string type;
-    if (vm.count("input.type")) {
-        type = vm["input.type"].as<string>();
+    if (vm.is_set(op_input_type)) {
+        type = vm.value(op_input_type);
     } else {
         type = mifi_get_filetype_name(CDMFileReaderFactory::detectFileType(name));
     }
     string config;
-    if (vm.count("input.config")) {
-        config = vm["input.config"].as<string>();
+    if (vm.is_set(op_input_config)) {
+        config = vm.value(op_input_config);
     }
     vector<string> opts;
-    if (vm.count("input.optional")) {
-        opts = vm["input.optional"].as<vector<string> >();
+    if (vm.is_set(op_input_optional)) {
+        opts = vm.values(op_input_optional);
     }
     return CDMFileReaderFactory::create(type, name, config, opts);
 }
@@ -89,7 +113,8 @@ double quantile(vector<double> &v, float quant)
     return v.at(n);
 }
 
-static map<string, double> calcStats(DataPtr data) {
+map<string, double> calcStats(DataPtr data)
+{
     map<string, double> stats;
     vector<double> vec;
     size_t undefs = 0;
@@ -126,21 +151,21 @@ static map<string, double> calcStats(DataPtr data) {
     return stats;
 }
 
-static void runStats(po::variables_map& vm, CDMReader_p reader)
+void runStats(po::value_set& vm, CDMReader_p reader)
 {
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
     const CDM::VarVec& variables = cdm.getVariables();
     set<string> varNames;
-    if (vm.count("varName") || vm.count("stdName")) {
-        if (vm.count("varName")) {
-            vector<string> vars = vm["varName"].as<vector<string> >();
+    if (vm.is_set(op_varName) || vm.is_set(op_stdName)) {
+        if (vm.is_set(op_varName)) {
+            const vector<string>& vars = vm.values(op_varName);
             varNames.insert(vars.begin(), vars.end());
         }
-        if (vm.count("stdName")) {
-            vector<string> stds = vm["stdName"].as<vector<string> >();
-            for (vector<string>::iterator it = stds.begin(); it != stds.end(); ++it) {
-                vector<string> vars = cdm.findVariables("standard_name", *it + "(\\s.*)?");
+        if (vm.is_set(op_stdName)) {
+            const vector<string>& stds = vm.values(op_stdName);
+            for (const string& std : stds) {
+                const vector<string> vars = cdm.findVariables("standard_name", std + "(\\s.*)?");
                 varNames.insert(vars.begin(), vars.end());
             }
         }
@@ -155,8 +180,8 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
     };
     VLType vlType = vlStd;
     string vlName = "not_defined";
-    if (vm.count("verticalLayer")) {
-        string vl = vm["verticalLayer"].as<string>();
+    if (vm.is_set(op_verticalLayer)) {
+        const string& vl = vm.value(op_verticalLayer);
         if (vl == "no") {
             vlType = vlNo;
         } else if (vl.substr(0,6) == "units:") {
@@ -167,7 +192,6 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
             vlName = vl;
         }
     }
-
 
     // find an appropriate coordinate system for a variable
     Units units;
@@ -182,7 +206,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
 
         CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *varIt);
         if (cs.get()) {
-            if (vm.count("verticalLayer")) {
+            if (vm.is_set(op_verticalLayer)) {
                 CoordinateAxis_cp zAxis = cs->getGeoXAxis(); // X or Lon
                 bool use = false;
                 switch (vlType) {
@@ -241,8 +265,8 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                                                              sb.getTimeVariableSliceBuilder());
                     shared_array<float> tArray = tData->asFloat();
                     set<long> forecastTimes60;
-                    if (vm.count("forecastTime")) {
-                        vector<float> ft = tokenizeDotted<float>(vm["forecastTime"].as<string>(), ",");
+                    if (vm.is_set(op_forecastTime)) {
+                        vector<float> ft = tokenizeDotted<float>(vm.value(op_forecastTime), ",");
                         for (size_t i = 0; i < ft.size(); i++) {
                             forecastTimes60.insert(ft.at(i)*60);
                         }
@@ -270,13 +294,13 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                     }
                     vector<CoordinateSystemSliceBuilder> csbs_temp;
                     set<size_t> layerPos;
-                    if (vm.count("layerPosition")) {
-                        vector<size_t> lp = tokenizeDotted<size_t>(vm["layerPosition"].as<string>());
+                    if (vm.is_set(op_layerPosition)) {
+                        vector<size_t> lp = tokenizeDotted<size_t>(vm.value(op_layerPosition));
                         layerPos.insert(lp.begin(), lp.end());
                     }
                     set<long> layerVal10;
-                    if (vm.count("layerValue")) {
-                        vector<float> lp = tokenizeDotted<float>(vm["layerValue"].as<string>());
+                    if (vm.is_set(op_layerValue)) {
+                        vector<float> lp = tokenizeDotted<float>(vm.value(op_layerValue));
                         transform(lp.begin(), lp.end(), lp.begin(), bind1st(multiplies<float>(),10.));
                         layerVal10.insert(lp.begin(), lp.end());
                     }
@@ -358,10 +382,10 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                     }
                 }
                 // fetch the data
-                if (vm.count("stats")) {
+                if (vm.is_set(op_stats)) {
                     DataPtr data = reader->getScaledDataSlice(*varIt, *sbIt);
                     map<string, double> stats = calcStats(data);
-                    string statStr = vm["stats"].as<string>();
+                    string statStr = vm.value(op_stats);
                     if (statStr == "all" || statStr == "") {
                         statStr = "def,mean,median,stddev,min,max,undef";
                     }
@@ -396,53 +420,44 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 cout << endl;
             }
         }
-
     }
-    return;
 }
 
 int run(int argc, char* args[])
 {
-    // Declare the supported options.
-    po::options_description generic("Options");
-    int num_threads = 1;
-    generic.add_options()
-        ("help,h", "help message")
-        ("version", "program version")
-        ("debug", "debug program")
-        ("log4cpp", po::value<string>(), "log4cpp property file (- = log4cpp without prop-file)")
-        ("num_threads,n", po::value<int>(&num_threads)->default_value(num_threads), "number of threads")
-        ("input.file", po::value<string>(), "input file")
-        ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2")
-        ("input.config", po::value<string>(), "non-standard input configuration")
-        ("input.optional", po::value<vector<string> >()->composing(), "additional options, e.g. multiple files for grib")
-        ("verticalLayer", po::value<vector<string> >()->composing(), "vertical layer definitions, defined by standard_name or units (or no for no (or size 1) vertical axis), e.g. units:hPa, no, atmosphere_hybrid_sigma_pressure_coordinate")
-        ("layerValue", po::value<string>(), "vertical layer values, e.g. 1000,950,...,500,300,100")
-        ("layerPosition", po::value<string>(), "vertical layer positions, e.g. 0,1,2,...,90")
-        ("stdName", po::value<vector<string> >()->composing(), "standard_name of parameters")
-        ("varName", po::value<vector<string> >()->composing(), "variable name of parameters")
-        ("forecastTime", po::value<string>(), "forecast hours since reference time, e.g. 3,6,12,15,...,24,36")
-        ("stats", po::value<string>(), "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef (=all)")
+    po::option_set generic;
+    generic
+        << op_help
+        << op_version
+        << op_debug
+        << op_log4cpp
+        << op_num_threads
+        << op_input_file
+        << op_input_type
+        << op_input_config
+        << op_input_optional
+        << op_verticalLayer
+        << op_layerValue
+        << op_layerPosition
+        << op_stdName
+        << op_varName
+        << op_forecastTime
+        << op_stats
         ;
 
-
-    po::options_description cmdline_options;
-    cmdline_options.add(generic);
-
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).options(cmdline_options).run(), vm);
-    po::notify(vm);
-    if (argc == 1 || vm.count("help")) {
+    po::string_v positional;
+    po::value_set vm = po::parse_command_line(argc, args, generic, positional);
+    if (argc == 1 || vm.is_set(op_help)) {
         writeUsage(cout, generic);
         return 0;
     }
-    if (vm.count("version")) {
+    if (vm.is_set(op_version)) {
         cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "." << mifi_version_status() << ")" << endl;
         return 0;
     }
 
     defaultLogLevel(Logger::WARN);
-    if (vm.count("log4cpp")) {
+    if (vm.is_set(op_log4cpp)) {
 #ifdef HAVE_LOG4CPP
         Logger::setClass(Logger::LOG4CPP);
         std::string propFile = vm["log4cpp"].as<string>();
@@ -453,14 +468,16 @@ int run(int argc, char* args[])
         defaultLogLevel(Logger::DEBUG);
 #endif
     }
-    if (vm.count("debug") >= 1) {
-        defaultLogLevel(Logger::DEBUG);
-    } else if (vm.count("debug") > 1) {
+    if (vm.is_set(op_debug)) {
         defaultLogLevel(Logger::DEBUG);
     }
+    int num_threads = 1;
+    if (vm.is_set(op_num_threads))
+        num_threads = string2type<int>(vm.value(op_num_threads));
     mifi_setNumThreads(num_threads);
+
     Logger_p logger = getLogger("fimex");
-    if (!(vm.count("input.file"))) {
+    if (!(vm.is_set(op_input_file))) {
         writeUsage(cerr, generic);
         LOG4FIMEX(logger, Logger::FATAL, "input.file required");
         return 1;
@@ -472,11 +489,10 @@ int run(int argc, char* args[])
     return 0;
 }
 
+} // namespace
+
 int main(int argc, char* args[])
 {
-
-    int retStatus = 0;
-
     // wrapping main-functions in run to catch all exceptions
 #ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
     try {
@@ -484,19 +500,16 @@ int main(int argc, char* args[])
 #warning Not catching exceptions in main method
 #endif
 
-
-        retStatus = run(argc, args);
+        return run(argc, args);
 
 #ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
-    } catch (const boost::program_options::error& ex) {
+    } catch (const po::option_error& ex) {
         clog << "invalid options: " << ex.what() << endl;
-        retStatus = 1;
+        return 1;
     } catch (exception& ex) {
         clog << "exception occured: " << ex.what() << endl;
-        retStatus = 1;
+        return 1;
     }
 #endif
-
-    return retStatus;
 }
 

@@ -26,7 +26,7 @@
 
 #include "fimex/XMLUtils.h"
 
-#include <boost/program_options.hpp>
+#include <mi_programoptions.h>
 
 #include <libxml/xmlreader.h>
 
@@ -36,12 +36,13 @@
 #include <string>
 
 using namespace std;
-namespace po = boost::program_options;
+namespace po = miutil::program_options;
 
-static void writeUsage(ostream& out, const po::options_description& options) {
+static void writeUsage(ostream& out, const po::option_set& options)
+{
     out << "usage: fiGrbmlCat --outputFile=OUTFILE.grbml file1.grml [file2.grbml ...] [--inputFile=fileX.grbml] " << endl;
     out << endl;
-    out << options << endl;
+    options.help(out);
 }
 
 
@@ -141,27 +142,27 @@ void extractToStream(std::ostream& out, const std::vector<std::string>& files)
 
 int main(int argc, char* args[])
 {
-    po::options_description options("options");
-    options.add_options()
-        ("outputFile,o", po::value<string>(), "output grbml")
-        ("inputFile,i", po::value<vector<string> >()->composing(), "input grbml, possibly many")
-        ;
-    po::positional_options_description posi;
-    posi.add("inputFile", -1);
+    const po::option op_outputFile = po::option("outputFile", "output grbml").set_shortkey("o");
+    const po::option op_inputFile = po::option("inputFile", "input grbml, possibly many").set_composing().set_shortkey("i");
+
+    po::option_set options;
+    options << op_outputFile << op_inputFile;
 
     // read the options
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).
-              options(options).positional(posi).run(), vm);
-    po::notify(vm);
+    po::string_v positional;
+    po::value_set vm = po::parse_command_line(argc, args, options, positional);
 
-    if (vm.count("inputFile") == 0) {
-        writeUsage(cerr, options);
+    po::positional_args_consumer pac(vm, positional);
+    while (!pac.done())
+        pac >> op_inputFile;
+    if (!vm.is_set(op_inputFile)) {
+        options.dump(cerr, vm);
+        pac.dump(cerr);
         return 1;
     }
-    const vector<string> files = vm["inputFile"].as<vector<string>>();
 
-    const std::string outputFile = vm["outputFile"].as<string>();
+    const vector<string>& files = vm.values(op_inputFile);
+    const std::string& outputFile = vm.value(op_outputFile);
     if (outputFile != "-") {
         std::ofstream outputStream(outputFile, std::ios::binary);
         extractToStream(outputStream, files);

@@ -1,31 +1,27 @@
 
-FUNCTION(ADD_EXE
-    name_
-    libs_
-    )
-  ADD_EXECUTABLE(${name_} "${name_}.cc")
+SET(LIBRARIES
+  libfimex
+  mi-programoptions
+  ${libxml2_LIB}
+)
+
+FUNCTION(ADD_EXE name_)
+  ADD_EXECUTABLE("${name_}" "${name_}.cc")
   SET_TARGET_PROPERTIES("${name_}" PROPERTIES
     OUTPUT_NAME "${name_}${MINUS_FIMEX_VERSION}"
     )
-  TARGET_LINK_LIBRARIES("${name_}" ${libs_})
+  TARGET_LINK_LIBRARIES("${name_}" ${LIBRARIES})
   INSTALL(TARGETS "${name_}" DESTINATION bin)
 ENDFUNCTION()
 
 LINK_DIRECTORIES(${PC_LIBRARY_DIRS})
 INCLUDE_DIRECTORIES(${PC_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-SET(LIBRARIES
-  libfimex
-  ${PC_LIBRARIES}
-  ${libxml2_LIB}
-  ${Boost_LIBRARIES}
-)
-
-ADD_EXE(fimex        ${LIBRARIES})
-ADD_EXE(fiXYcontents ${LIBRARIES})
+ADD_EXE(fimex)
+ADD_EXE(fiXYcontents)
 
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
-  ADD_EXE(fiIndexGribs ${LIBRARIES})
-  ADD_EXE(fiGribCut    ${LIBRARIES})
-  ADD_EXE(fiGrbmlCat   ${LIBRARIES})
+  ADD_EXE(fiIndexGribs)
+  ADD_EXE(fiGribCut)
+  ADD_EXE(fiGrbmlCat)
 ENDIF()

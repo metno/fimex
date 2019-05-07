@@ -33,7 +33,7 @@
 #include "fimex/ThreadPool.h"
 #include "fimex/Type2String.h"
 
-#include <boost/program_options.hpp>
+#include <mi_programoptions.h>
 
 #include <cassert>
 #include <cstdio>
@@ -43,18 +43,19 @@
 
 #include <grib_api.h>
 
-namespace po = boost::program_options;
+namespace po = miutil::program_options;
 
 using namespace std;
 using namespace MetNoFimex;
 
 static int debug = 0;
 
-static void writeUsage(ostream& out, const po::options_description& options) {
+static void writeUsage(ostream& out, const po::option_set& options)
+{
     out << "usage: fiGribCut --outputFile PATH --inputFile gribFile [--inputfile gribfile] " << endl;
     out << "                 --parameter PARAM1 [--parameter PARAM2]" << endl;
     out << endl;
-    out << options << endl;
+    options.help(out);
 }
 
 static bool gribMatchParameters(const std::shared_ptr<grib_handle>& gh, vector<long> parameters)
@@ -269,63 +270,71 @@ int main(int argc, char* args[])
 {
     // only use one thread
     mifi_setNumThreads(1);
+
     /*
-     * inputFile: path; repeatable = concattenation
+     * inputFile: path; repeatable = concatenation
      * outputFile: path; not-repeatable
      * parameter: grib-api parameterIds; repeatable, not required
      * boundingBox: north,east,south,west values of geographical boundingbox, i.e. 90,30,60,-30; non-repeatable, not required
      */
-    po::options_description options("options");
-    options.add_options()
-        ("help,h", "help message")
-        ("debug,d", "enable debug")
-        ("version,v", "program version")
-        ("outputFile,o", po::value<string>(), "outputFile")
-        ("inputFile,i", po::value<vector<string> >()->composing(), "input gribFile")
-        ("parameter,p", po::value<vector<long> >()->composing(), "grib-parameterID")
-        ("boundingBox,b", po::value<string>(), "bounding-box, north,east,south,west")
-        ("compress,c", "enable gzip compression")
+
+    const po::option op_help = po::option("help", "help message").set_shortkey("h").set_narg(0);
+    const po::option op_debug = po::option("debug", "enable debug").set_shortkey("d").set_narg(0);
+    const po::option op_version = po::option("version", "program version").set_shortkey("v").set_narg(0);
+    const po::option op_outputFile = po::option("outputFile", "outputFile").set_shortkey("o");
+    const po::option op_inputFile = po::option("inputFile", "input gribFile").set_composing().set_shortkey("i");
+    const po::option op_parameter = po::option("parameter", "grib-parameterID").set_composing().set_shortkey("p");
+    const po::option op_boundingBox = po::option("boundingBox", "bounding-box, north,east,south,west").set_shortkey("b");
+
+    po::option_set options;
+    options
+        << op_help
+        << op_debug
+        << op_version
+        << op_outputFile
+        << op_inputFile
+        << op_parameter
+        << op_boundingBox
         ;
 
     // read the options
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).options(options).run(), vm);
-    po::notify(vm);
+    po::string_v positional;
+    po::value_set vm = po::parse_command_line(argc, args, options, positional);
 
-    debug = vm.count("debug");
+    debug = vm.is_set(op_debug);
 
-    if (argc == 1 || vm.count("help")) {
+    if (argc == 1 || vm.is_set(op_help)) {
         writeUsage(cout, options);
         return 0;
     }
-    if (vm.count("version")) {
+    if (vm.is_set(op_version)) {
         cout << "fiIndexGribs version " << fimexVersion() << endl;
         return 0;
     }
-    if (vm.count("inputFile") == 0) {
+    if (!vm.is_set(op_inputFile)) {
         cerr << "missing input file" << endl;
         writeUsage(cout, options);
         return 1;
     }
-    vector<string> inputFiles = vm["inputFile"].as<vector<string> >();
+    const vector<string>& inputFiles = vm.values(op_inputFile);
 
-    if (vm.count("outputFile") == 0) {
+    if (!vm.is_set(op_outputFile)) {
         cerr << "missing output file" << endl;
         writeUsage(cout, options);
         return 1;
     }
 
-    const std::string outputFile = vm["outputFile"].as<string>();
+    const std::string& outputFile = vm.value(op_outputFile);
     vector<long> parameters;
-    if (vm.count("parameter") > 0) {
-        parameters = vm["parameter"].as<vector<long> >();
+    if (vm.is_set(op_parameter)) {
+        parameters = strings2types<long>(vm.values(op_parameter));
     }
 
     map<string, double> bb;
-    if (vm.count("boundingBox") > 0) {
-        vector<string> bbVec = tokenize(vm["boundingBox"].as<string>(), ",");
+    if (vm.is_set(op_boundingBox)) {
+        const vector<string> bbVec = tokenize(vm.value(op_boundingBox), ",");
         if (bbVec.size() < 4) {
-            cerr << "boundingBox requires 4 values: north,east,south,west, got " << bb.size() << " values: "<< vm["boundingBox"].as<string>() << endl;
+            cerr << "boundingBox requires 4 values: north,east,south,west, got " << bb.size() << " values: " << vm.value(op_boundingBox) << endl;
             return 1;
         }
         double north = MetNoFimex::string2type<double>(bbVec.at(0));

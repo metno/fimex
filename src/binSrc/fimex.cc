@@ -49,7 +49,9 @@
 #include "fimex/interpolation.h"
 #include "fimex_config.h"
 
-#include <boost/program_options.hpp>
+#include "CDMMergeUtils.h"
+
+#include <mi_programoptions.h>
 
 #include <cctype>
 #include <fstream>
@@ -64,17 +66,168 @@
 #include "fimex/mifi_mpi.h"
 #endif
 
-namespace po = boost::program_options;
+namespace po = miutil::program_options;
 using namespace std;
 using namespace MetNoFimex;
 
 namespace {
 
 Logger_p logger = getLogger("fimex");
-po::options_description config_file_options;
-CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader);
 
-void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config)
+// generic options
+const po::option op_help = po::option("help", "help message").set_shortkey("h").set_narg(0);
+const po::option op_version = po::option("version", "program version").set_narg(0);
+const po::option op_debug = po::option("debug", "debug program").set_narg(0);
+const po::option op_log4cpp = po::option("log4cpp", "log4cpp property file (- = log4cpp without prop-file)");
+const po::option op_print_options = po::option("print-options", "print all options").set_narg(0);
+const po::option op_config = po::option("config", "configuration file").set_shortkey("c");
+const po::option op_num_threads = po::option("num_threads", "number of threads").set_shortkey("n");
+
+// options for command line and config file
+const po::option op_input_file = po::option("input.file", "input file");
+const po::option op_input_type = po::option("input.type", "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2");
+const po::option op_input_config = po::option("input.config", "non-standard input configuration");
+const po::option op_input_optional = po::option("input.optional", "additional options, e.g. multiple files for grib").set_composing();
+const po::option op_input_printNcML = po::option("input.printNcML", "print NcML description of input").set_implicit_value("-");
+const po::option op_input_printCS = po::option("input.printCS", "print CoordinateSystems of input file");
+const po::option op_input_printSize = po::option("input.printSize", "print size estimate");
+const po::option op_output_file = po::option("output.file", "output file");
+const po::option op_output_fillFile = po::option("output.fillFile", "existing output file to be filled");
+const po::option op_output_type = po::option("output.type", "filetype of output file, e.g. nc, nc4, grib1, grib2");
+const po::option op_output_config = po::option("output.config", "non-standard output configuration");
+const po::option op_output_printNcML = po::option("output.printNcML", "print NcML description of input").set_implicit_value("-");
+const po::option op_output_printCS = po::option("output.printCS", "print CoordinateSystems of input file");
+const po::option op_output_printSize = po::option("output.printSize", "print size estimate");
+const po::option op_process_accumulateVariable = po::option("process.accumulateVariable",
+        "accumulate variable along unlimited dimension").set_composing();
+const po::option op_process_deaccumulateVariable = po::option("process.deaccumulateVariable",
+        "deaccumulate variable along unlimited dimension").set_composing();
+// const po::option op_process_rotateVectorToLatLonX = po::option("process.rotateVectorToLatLonX",
+//         "deprecated: rotate this vector x component from grid-direction to latlon direction").set_composing();
+// const po::option op_process_rotateVectorToLatLonY = po::option("process.rotateVectorToLatLonY",
+//         "deprecated: rotate this vector y component from grid-direction to latlon direction").set_composing();
+const po::option op_process_rotateVector_direction = po::option("process.rotateVector.direction",
+        "set direction: to latlon or grid");
+const po::option op_process_rotateVector_angle = po::option("process.rotateVector.angle",
+        "rotate these angles (in degree) to the direction ").set_composing();
+const po::option op_process_rotateVector_x = po::option("process.rotateVector.x",
+        "rotate this vector x component to direction").set_composing();
+const po::option op_process_rotateVector_stdNameX = po::option("process.rotateVector.stdNameX",
+        "new standard_name for the rotated vector").set_composing();
+const po::option op_process_rotateVector_y = po::option("process.rotateVector.y",
+        "rotate this vector y component from grid-direction to latlon direction").set_composing();
+const po::option op_process_rotateVector_stdNameY = po::option("process.rotateVector.stdNameY",
+        "new standard_name for the rotated vector").set_composing();
+const po::option op_process_rotateVector_all = po::option("process.rotateVector.all",
+        "rotate all known vectors (e.g. standard_name) to given direction");
+const po::option op_process_addVerticalVelocity = po::option("process.addVerticalVelocity",
+        "calculate upward_air_velocity_ml");
+const po::option op_process_printNcML = po::option("process.printNcML",
+        "print NcML description of process").set_implicit_value("-");
+const po::option op_process_printCS = po::option("process.printCS", "print CoordinateSystems of process");
+const po::option op_process_printSize = po::option("process.printSize", "print size estimate");
+const po::option op_extract_removeVariable = po::option("extract.removeVariable",
+        "remove variables").set_composing();
+const po::option op_extract_selectVariables = po::option("extract.selectVariables",
+        "select only those variables").set_composing();
+const po::option op_extract_selectVariables_noAuxiliary = po::option("extract.selectVariables.noAuxiliary", "don't add auxiliary variables");
+const po::option op_extract_reduceDimension_name = po::option("extract.reduceDimension.name", "name of a dimension to reduce").set_composing();
+const po::option op_extract_reduceDimension_start = po::option("extract.reduceDimension.start", "start position of the dimension to reduce (>=0)").set_composing();
+const po::option op_extract_reduceDimension_end = po::option("extract.reduceDimension.end", "end position of the dimension to reduce").set_composing();
+const po::option op_extract_pickDimension_name = po::option("extract.pickDimension.name", "name of a dimension to pick levels").set_composing();
+const po::option op_extract_pickDimension_list = po::option("extract.pickDimension.list", "list of dim-positions (including dots), starting at 0").set_composing();
+const po::option op_extract_reduceTime_start = po::option("extract.reduceTime.start", "start-time as iso-string");
+const po::option op_extract_reduceTime_end = po::option("extract.reduceTime.end", "end-time by iso-string");
+const po::option op_extract_reduceVerticalAxis_unit = po::option("extract.reduceVerticalAxis.unit", "unit of vertical axis to reduce");
+const po::option op_extract_reduceVerticalAxis_start = po::option("extract.reduceVerticalAxis.start", "start value of vertical axis");
+const po::option op_extract_reduceVerticalAxis_end = po::option("extract.reduceVerticalAxis.end", "end value of the vertical axis");
+const po::option op_extract_reduceToBoundingBox_south = po::option("extract.reduceToBoundingBox.south", "geographical bounding-box in degree");
+const po::option op_extract_reduceToBoundingBox_north = po::option("extract.reduceToBoundingBox.north", "geographical bounding-box in degree");
+const po::option op_extract_reduceToBoundingBox_east = po::option("extract.reduceToBoundingBox.east", "geographical bounding-box in degree");
+const po::option op_extract_reduceToBoundingBox_west = po::option("extract.reduceToBoundingBox.west", "geographical bounding-box in degree");
+const po::option op_extract_printNcML = po::option("extract.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_extract_printCS = po::option("extract.printCS", "print CoordinateSystems of extractor");
+const po::option op_extract_printSize = po::option("extract.printSize", "print size estimate");
+const po::option op_qualityExtract_autoConfString = po::option("qualityExtract.autoConfString", "configure the quality-assignment using CF-1.3 status-flag");
+const po::option op_qualityExtract_config = po::option("qualityExtract.config", "configure the quality-assignment with a xml-config file");
+const po::option op_qualityExtract_printNcML = po::option("qualityExtract.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_qualityExtract_printCS = po::option("qualityExtract.printCS", "print CoordinateSystems of extractor");
+const po::option op_qualityExtract_printSize = po::option("qualityExtract.printSize", "print size estimate");
+const po::option op_interpolate_projString = po::option("interpolate.projString", "proj4 input string describing the new projection");
+const po::option op_interpolate_method = po::option("interpolate.method", "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_*");
+const po::option op_interpolate_xAxisValues = po::option("interpolate.xAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
+const po::option op_interpolate_yAxisValues = po::option("interpolate.yAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
+const po::option op_interpolate_xAxisUnit = po::option("interpolate.xAxisUnit", "unit of x-Axis given as udunits string, i.e. m or degrees_east");
+const po::option op_interpolate_yAxisUnit = po::option("interpolate.yAxisUnit", "unit of y-Axis given as udunits string, i.e. m or degrees_north");
+const po::option op_interpolate_xAxisType = po::option("interpolate.xAxisType", "datatype of x-axis (double,float,int,short)").set_default_value("double");
+const po::option op_interpolate_yAxisType = po::option("interpolate.yAxisType", "datatype of y-axis").set_default_value("double");
+const po::option op_interpolate_distanceOfInterest = po::option("interpolate.distanceOfInterest", "optional distance of interest used differently depending on method");
+const po::option op_interpolate_latitudeName = po::option("interpolate.latitudeName", "name for auto-generated projection coordinate latitude");
+const po::option op_interpolate_longitudeName = po::option("interpolate.longitudeName", "name for auto-generated projection coordinate longitude");
+const po::option op_interpolate_preprocess = po::option("interpolate.preprocess", "add a 2d preprocess before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"");
+const po::option op_interpolate_postprocess = po::option("interpolate.postprocess", "add a 2d postprocess after the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"");
+const po::option op_interpolate_latitudeValues = po::option("interpolate.latitudeValues",
+        "latitude values, in degrees north, of a list of points to interpolate to, e.g. 60.5,70,90"
+        " (use with 'longitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)");
+const po::option op_interpolate_longitudeValues = po::option("interpolate.longitudeValues",
+        "longitude values, in degrees east, of a list of points to interpolate to, e.g. -10.5,-10.5,29.5"
+        " (use with 'latitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)");
+const po::option op_interpolate_vcrossNames = po::option("interpolate.vcrossNames", "string with comma-separated names for vertical cross sections");
+const po::option op_interpolate_vcrossNoPoints = po::option("interpolate.vcrossNoPoints", "string with comma-separated number of lat/lon values for each vertical cross sections");
+const po::option op_interpolate_template = po::option("interpolate.template", "netcdf file containing lat/lon list used in interpolation");
+const po::option op_interpolate_printNcML = po::option("interpolate.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_interpolate_printCS = po::option("interpolate.printCS", "print CoordinateSystems of interpolator");
+const po::option op_interpolate_printSize = po::option("interpolate.printSize", "print size estimate");
+
+const po::option op_merge_inner_file = po::option("merge.inner.file", "inner file for merge");
+const po::option op_merge_inner_type = po::option("merge.inner.type", "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2");
+const po::option op_merge_inner_config = po::option("merge.inner.config", "non-standard configuration for inner merge file");
+const po::option op_merge_inner_cfg = po::option("merge.inner.cfg", "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging");
+const po::option op_merge_smoothing = po::option("merge.smoothing", "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border");
+const po::option op_merge_keepOuterVariables = po::option("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer");
+const po::option op_merge_method = po::option("merge.method", "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
+        " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum");
+const po::option op_merge_projString = po::option("merge.projString", "proj4 input string describing the new projection, default: use inner projection extended to outer grid");
+const po::option op_merge_xAxisValues = po::option("merge.xAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
+const po::option op_merge_yAxisValues = po::option("merge.yAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
+const po::option op_merge_xAxisUnit = po::option("merge.xAxisUnit", "unit of x-Axis given as udunits string, i.e. m or degrees_east");
+const po::option op_merge_yAxisUnit = po::option("merge.yAxisUnit", "unit of y-Axis given as udunits string, i.e. m or degrees_north");
+const po::option op_merge_xAxisType = po::option("merge.xAxisType", "datatype of x-axis (double,float,int,short)").set_default_value("double");
+const po::option op_merge_yAxisType = po::option("merge.yAxisType", "datatype of y-axis").set_default_value("double");
+const po::option op_merge_printNcML = po::option("merge.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_merge_printCS = po::option("merge.printCS", "print CoordinateSystems of interpolator");
+const po::option op_merge_printSize = po::option("merge.printSize", "print size estimate");
+
+const po::option op_verticalInterpolate_type = po::option("verticalInterpolate.type", "pressure, height (above ground) or depth");
+const po::option op_verticalInterpolate_ignoreValidityMin = po::option("verticalInterpolate.ignoreValidityMin", "ignore minimum value from vertical transformation (e.g. ocean surface)");
+const po::option op_verticalInterpolate_ignoreValidityMax = po::option("verticalInterpolate.ignoreValidityMax", "ignore maximum value from vertical transformation (e.g. ocean bathymetry)");
+const po::option op_verticalInterpolate_method = po::option("verticalInterpolate.method", "linear, linear_weak_extra, linear_no_extra, linear_const_extra, log, loglog or nearestneighbor interpolation");
+const po::option op_verticalInterpolate_templateVar = po::option("verticalInterpolate.templateVar", "specification template variable for interpolation to fixed or hybrid levels");
+const po::option op_verticalInterpolate_level1 = po::option("verticalInterpolate.level1", "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition");
+const po::option op_verticalInterpolate_level2 = po::option("verticalInterpolate.level2", "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition");
+const po::option op_verticalInterpolate_dataConversion = po::option("verticalInterpolate.dataConversion", "vertical data-conversion: theta2T, omega2vwind or add4Dpressure").set_composing();
+const po::option op_verticalInterpolate_printNcML = po::option("verticalInterpolate.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_verticalInterpolate_printCS = po::option("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator");
+const po::option op_verticalInterpolate_printSize = po::option("verticalInterpolate.printSize", "print size estimate");
+const po::option op_timeInterpolate_timeSpec = po::option("timeInterpolate.timeSpec", "specification of times to interpolate to, see MetNoFimex::TimeSpec for a full definition");
+const po::option op_timeInterpolate_printNcML = po::option("timeInterpolate.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_timeInterpolate_printCS = po::option("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator");
+const po::option op_timeInterpolate_printSize = po::option("timeInterpolate.printSize", "print size estimate");
+const po::option op_qualityExtract2_autoConfString = po::option("qualityExtract2.autoConfString", "configure the quality-assignment using CF-1.3 status-flag");
+const po::option op_qualityExtract2_config = po::option("qualityExtract2.config", "configure the quality-assignment with a xml-config file");
+const po::option op_qualityExtract2_printNcML = po::option("qualityExtract2.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_qualityExtract2_printCS = po::option("qualityExtract2.printCS", "print CoordinateSystems of extractor");
+const po::option op_qualityExtract2_printSize = po::option("qualityExtract2.printSize", "print size estimate");
+const po::option op_ncml_config = po::option("ncml.config", "modify/configure with ncml-file");
+const po::option op_ncml_printNcML = po::option("ncml.printNcML", "print NcML description of extractor").set_implicit_value("-");
+const po::option op_ncml_printCS = po::option("ncml.printCS", "print CoordinateSystems after ncml-configuration");
+const po::option op_ncml_printSize = po::option("ncml.printSize", "print size estimate");
+
+po::option_set config_file_options;
+
+CDMReader_p applyFimexStreamTasks(const po::value_set& vm, CDMReader_p dataReader);
+
+void writeUsage(ostream& out, const po::option_set& config)
 {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
     out << "             [--output.file FILENAME | --output.fillFile [--output.type OUTPUT_TYPE]]" << endl;
@@ -91,236 +244,127 @@ void writeUsage(ostream& out, const po::options_description& generic, const po::
     out << "             [--qualityExtract2....]" << endl;
     out << "             [--ncml.config NCMLFILE]" << endl;
     out << endl;
-    out << generic << endl;
-    out << config << endl;
+    config.help(out);
 }
 
-template<typename T>
-void writeOption(ostream& out, const string& var, const po::variables_map& vm)
-{
-    if (vm.count(var)) {
-        out << var << ": ";
-#if defined(__GNUC__) && __GNUC__ < 4
-// Use erroneous syntax hack to work around a compiler bug.
-        out << vm[var].template as<T>();
-#else
-        out << vm[var].as<T>();
-#endif
-        out << endl;
-    }
-}
-
-void writeOptionAny(ostream& out, const string& var, const po::variables_map& vm)
-{
-    // variables without real value, just set or unset
-    if (vm.count(var)) {
-        out << var  << endl;
-    }
-}
-
-void writeVectorOptionString(ostream& out, const string& var, const po::variables_map& vm)
-{
-    if (vm.count(var)) {
-        vector<string> vals = vm[var].as<vector<string> >();
-        typedef vector<string>::iterator VIT;
-        for (VIT it = vals.begin(); it != vals.end(); ++it) {
-            out << var << ": " << *it << endl;
-        }
-    }
-}
-
-void writeVectorOptionInt(ostream& out, const string& var, const po::variables_map& vm)
-{
-    if (vm.count(var)) {
-        vector<int> vals = vm[var].as<vector<int> >();
-        typedef vector<int>::iterator VIT;
-        for (VIT it = vals.begin(); it != vals.end(); ++it) {
-            out << var << ": " << *it << endl;
-        }
-    }
-}
-
-void writeOptions(ostream& out, const po::variables_map& vm)
-{
-    out << "Currently active options: " << endl;
-    writeOptionAny(out, "help", vm);
-    writeOptionAny(out, "version", vm);
-    writeOption<string>(out, "log4cpp", vm);
-    writeOptionAny(out, "debug", vm);
-    writeOptionAny(out, "print-options", vm);
-    writeOption<string>(out, "config", vm);
-    writeOption<int>(out, "num_threads", vm);
-    writeOption<string>(out, "input.file", vm);
-    writeOption<string>(out, "input.type", vm);
-    writeOption<string>(out, "input.config", vm);
-    writeVectorOptionString(out, "input.optional", vm);
-    writeOption<string>(out, "input.printNcML", vm);
-    writeOptionAny(out, "input.printCS", vm);
-    writeOptionAny(out, "input.printSize", vm);
-    writeOption<string>(out, "output.file", vm);
-    writeOption<string>(out, "output.fillFile", vm);
-    writeOption<string>(out, "output.type", vm);
-    writeOption<string>(out, "output.config", vm);
-    writeOption<string>(out, "output.printNcML", vm);
-    writeOptionAny(out, "output.printCS", vm);
-    writeOptionAny(out, "output.printSize", vm);
-    writeVectorOptionString(out, "process.accumulateVariable", vm);
-    writeVectorOptionString(out, "process.deaccumulateVariable", vm);
-    writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
-    writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
-    writeVectorOptionString(out, "process.rotateVector.x", vm);
-    writeVectorOptionString(out, "process.rotateVector.y", vm);
-    writeOptionAny(out, "process.rotateVector.all", vm);
-    writeVectorOptionString(out, "process.rotateVector.stdNameX", vm);
-    writeVectorOptionString(out, "process.rotateVector.stdNameY", vm);
-    writeOptionAny(out, "process.addVerticalVelocity", vm);
-    writeOption<string>(out, "process.printNcML", vm);
-    writeOption<string>(out, "process.printCS", vm);
-    writeOption<string>(out, "process.printSize", vm);
-    writeOption<string>(out, "qualityExtract.autoConfigString", vm);
-    writeOption<string>(out, "qualityExtract.config", vm);
-    writeOption<string>(out, "qualityExtract.printNcML", vm);
-    writeOption<string>(out, "qualityExtract.printCS", vm);
-    writeOption<string>(out, "qualityExtract.printSize", vm);
-    writeVectorOptionString(out, "extract.removeVariable", vm);
-    writeVectorOptionString(out, "extract.selectVariables", vm);
-    writeOptionAny(out, "extract.selectVariables.noAuxiliary", vm);
-    writeVectorOptionString(out, "extract.reduceDimension.name", vm);
-    writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
-    writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
-    writeVectorOptionString(out, "extract.pickDimension.name", vm);
-    writeVectorOptionString(out, "extract.pickDimension.list", vm);
-    writeOption<string>(out, "extract.reduceTime.start", vm);
-    writeOption<string>(out, "extract.reduceTime.end", vm);
-    writeOption<string>(out, "extract.reduceVerticalAxis.unit", vm);
-    writeOption<double>(out, "extract.reduceVerticalAxis.start", vm);
-    writeOption<double>(out, "extract.reduceVerticalAxis.end", vm);
-    writeOption<double>(out, "extract.reduceToBoundingBox.south", vm);
-    writeOption<double>(out, "extract.reduceToBoundingBox.north", vm);
-    writeOption<double>(out, "extract.reduceToBoundingBox.west", vm);
-    writeOption<double>(out, "extract.reduceToBoundingBox.east", vm);
-    writeOption<string>(out, "extract.printNcML", vm);
-    writeOptionAny(out, "extract.printCS", vm);
-    writeOptionAny(out, "extract.printSize", vm);
-    writeOption<string>(out, "interpolate.projString", vm);
-    writeOption<string>(out, "interpolate.method", vm);
-    writeOption<string>(out, "interpolate.latitudeValues", vm);
-    writeOption<string>(out, "interpolate.longitudeValues", vm);
-    writeOption<string>(out, "interpolate.vcrossNames", vm);
-    writeOption<string>(out, "interpolate.vcrossNoPoints", vm);
-    writeOption<string>(out, "interpolate.xAxisValues", vm);
-    writeOption<string>(out, "interpolate.yAxisValues", vm);
-    writeOption<string>(out, "interpolate.xAxisUnit", vm);
-    writeOption<string>(out, "interpolate.yAxisUnit", vm);
-    writeOption<string>(out, "interpolate.xAxisType", vm);
-    writeOption<string>(out, "interpolate.yAxisType", vm);
-    writeOption<double>(out, "interpolate.distanceOfInterest", vm);
-    writeOption<string>(out, "interpolate.latitudeName", vm);
-    writeOption<string>(out, "interpolate.longitudeName", vm);
-    writeOption<string>(out, "interpolate.preprocess", vm);
-    writeOption<string>(out, "interpolate.postprocess", vm);
-    writeOption<string>(out, "interpolate.printNcML", vm);
-    writeOptionAny(out, "interpolate.printCS", vm);
-    writeOptionAny(out, "interpolate.printSize", vm);
-    writeOption<string>(out, "verticalInterpolate.method", vm);
-    writeOption<bool>(out, "verticalInterpolate.ignoreValidityMin", vm);
-    writeOption<bool>(out, "verticalInterpolate.ignoreValidityMax", vm);
-    writeOption<string>(out, "verticalInterpolate.type", vm);
-    writeOption<string>(out, "verticalInterpolate.templateVar", vm);
-    writeOption<string>(out, "verticalInterpolate.level1", vm);
-    writeVectorOptionString(out, "verticalInterpolate.dataConversion", vm);
-    writeOption<string>(out, "verticalInterpolate.printNcML", vm);
-    writeOptionAny(out, "verticalInterpolate.printCS", vm);
-    writeOptionAny(out, "verticalInterpolate.printSize", vm);
-    writeOption<string>(out, "timeInterpolate.timeSpec", vm);
-    writeOption<string>(out, "timeInterpolate.printNcML", vm);
-    writeOptionAny(out, "timeInterpolate.printCS", vm);
-    writeOptionAny(out, "timeInterpolate.printSize", vm);
-    writeOption<string>(out, "merge.inner.file", vm);
-    writeOption<string>(out, "merge.inner.type", vm);
-    writeOption<string>(out, "merge.inner.config", vm);
-    writeOption<string>(out, "merge.inner.cfg", vm);
-    writeOption<string>(out, "merge.smoothing", vm);
-    writeOptionAny(out, "merge.keepOuterVariables", vm);
-    writeOption<string>(out, "merge.method", vm);
-    writeOption<string>(out, "merge.projString", vm);
-    writeOption<string>(out, "merge.xAxisValues", vm);
-    writeOption<string>(out, "merge.yAxisValues", vm);
-    writeOption<string>(out, "merge.xAxisUnit", vm);
-    writeOption<string>(out, "merge.yAxisUnit", vm);
-    writeOption<string>(out, "merge.xAxisType", vm);
-    writeOption<string>(out, "merge.yAxisType", vm);
-    writeOption<string>(out, "merge.printNcML", vm);
-    writeOptionAny(out, "merge.printCS", vm);
-    writeOptionAny(out, "merge.printSize", vm);
-    writeOption<string>(out, "qualityExtract2.autoConfigString", vm);
-    writeOption<string>(out, "qualityExtract2.config", vm);
-    writeOption<string>(out, "qualityExtract2.printNcML", vm);
-    writeOption<string>(out, "qualityExtract2.printCS", vm);
-    writeOption<string>(out, "qualityExtract2.printSize", vm);
-    writeOption<string>(out, "ncml.config", vm);
-    writeOption<string>(out, "ncml.printNcML", vm);
-    writeOptionAny(out, "ncml.printCS", vm);
-    writeOptionAny(out, "ncml.printSize", vm);
-}
-
-string getType(const string& io, const po::variables_map& vm)
+string getType(const string& io, const po::value_set& vm)
 {
     string type;
-    if (vm.count(io+".type")) {
-        type = vm[io+".type"].as<string>();
+    if (po::option_cx opt = vm.find(io + ".type")) {
+        type = vm.value(opt);
     } else {
-        string file;
-        if (vm.count(io+".file")) {
-            file = ".file";
-        } else if (vm.count(io+".fillFile")) {
-            file = ".fillFile";
-        }
-        if (file != "") {
+        po::option_cx fopt = vm.find(io + ".file");
+        if (!fopt)
+            fopt = vm.find(io + ".fillFile");
+        if (fopt) {
             std::smatch what;
-            if (std::regex_match(vm[io + file].as<string>(), what, std::regex(".*\\.(\\w+)$"))) {
+            if (std::regex_match(vm.value(fopt), what, std::regex(".*\\.(\\w+)$"))) {
                 type = what[1].str();
             }
         }
     }
-    std::transform(type.begin(), type.end(), type.begin(), (int(*)(int)) tolower);
+    std::transform(type.begin(), type.end(), type.begin(), (int (*)(int))tolower);
     return type;
 }
 
-std::string getFile(const string& io, const po::variables_map& vm)
+template <typename T>
+bool getOption(po::option_cx opt, const po::value_set& vm, T& t)
 {
-  return vm[io + ".file"].as<string>();
+    if (vm.is_set(opt)) {
+        t = string2type<T>(vm.value(opt));
+        return true;
+    } else {
+        return false;
+    }
 }
 
-template<typename T>
-T getOption(const string& key, const po::variables_map& vm)
+template <typename T>
+bool getOptions(po::option_cx opt, const po::value_set& vm, std::vector<T>& t)
 {
-  if (vm.count(key))
-    return vm[key].as<T>();
-  else
-    return T();
+    if (vm.is_set(opt)) {
+        t = strings2types<T>(vm.values(opt));
+        return true;
+    } else {
+        t.clear();
+        return false;
+    }
 }
 
-template<typename T>
-bool getOption(const string& key, const po::variables_map& vm, T& t)
+template <typename T>
+T getOption(po::option_cx opt, const po::value_set& vm)
 {
-  if (!vm.count(key))
-    return false;
-  t = vm[key].as<T>();
-  return true;
+    T t;
+    getOption(opt, vm, t);
+    return t;
 }
 
-std::string getString(const string& key, const po::variables_map& vm)
+template <typename T>
+std::vector<T> getOptions(po::option_cx opt, const po::value_set& vm)
 {
-  return getOption<string>(key, vm);
+    std::vector<T> t;
+    getOptions(opt, vm, t);
+    return t;
 }
 
-std::string getConfig(const string& io, const po::variables_map& vm)
+template <typename T>
+T getOption(const string& key, const po::value_set& vm)
 {
-  return getString(io+".config", vm);
+    return getOption<T>(vm.find(key), vm);
 }
 
-void printReaderStatements(const string& readerName, const po::variables_map& vm, CDMReader_p reader)
+template <typename T>
+std::vector<T> getOptions(const string& key, const po::value_set& vm)
+{
+    return getOptions<T>(vm.find(key), vm);
+}
+
+template <typename T>
+bool getOption(const string& key, const po::value_set& vm, T& t)
+{
+    return getOption<T>(vm.find(key), vm, t);
+}
+
+template <typename T>
+bool getOptions(const string& key, const po::value_set& vm, std::vector<T>& t)
+{
+    return getOptions<T>(vm.find(key), vm, t);
+}
+
+template <typename T>
+T getOption(const po::option& opt, const po::value_set& vm)
+{
+    return getOption<T>(&opt, vm);
+}
+
+template <typename T>
+std::vector<T> getOptions(const po::option& opt, const po::value_set& vm)
+{
+    return getOptions<T>(&opt, vm);
+}
+
+template <typename T>
+bool getOption(const po::option& opt, const po::value_set& vm, T& t)
+{
+    return getOption<T>(&opt, vm, t);
+}
+
+template <typename T>
+bool getOptions(const po::option& opt, const po::value_set& vm, std::vector<T>& t)
+{
+    return getOptions<T>(&opt, vm, t);
+}
+
+std::string getFile(const string& io, const po::value_set& vm)
+{
+    return getOption<string>(io + ".file", vm);
+}
+
+std::string getConfig(const string& io, const po::value_set& vm)
+{
+    return getOption<string>(io + ".config", vm);
+}
+
+void printReaderStatements(const string& readerName, const po::value_set& vm, CDMReader_p reader)
 {
     string ncmlout;
     if (getOption(readerName+".printNcML", vm, ncmlout)) {
@@ -339,14 +383,14 @@ void printReaderStatements(const string& readerName, const po::variables_map& vm
             }
         }
     }
-    if (vm.count(readerName+".printCS")) {
+    if (po::option_cx opt = vm.find(readerName + ".printCS")) {
         cout << readerName + " CoordinateSystems: ";
         CoordinateSystem_cp_v csVec = listCoordinateSystems(reader);
         cout << csVec.size() << ": ";
         cout << joinPtr(csVec.begin(), csVec.end(), " | ");
         cout << endl;
     }
-    if (vm.count(readerName+".printSize")) {
+    if (po::option_cx opt = vm.find(readerName + ".printSize")) {
         cout << readerName << " size: ~" << ceil(estimateCDMDataSize(reader->getCDM())/1024./1024.) << "MB";
         cout << endl;
     }
@@ -354,7 +398,7 @@ void printReaderStatements(const string& readerName, const po::variables_map& vm
 
 const string FELT_VARIABLES = (string(PKGDATADIR) + "/felt2nc_variables.xml");
 
-CDMReader_p getCDMFileReader(const po::variables_map& vm, const string& io="input")
+CDMReader_p getCDMFileReader(const po::value_set& vm, const string& io = "input")
 {
     const string type = getType(io, vm);
     const std::string fileName = getFile(io, vm);
@@ -368,7 +412,7 @@ CDMReader_p getCDMFileReader(const po::variables_map& vm, const string& io="inpu
         config = FELT_VARIABLES;
     } else if (isGribType(type)) {
       filetype = MIFI_FILETYPE_GRIB;
-      optional = getOption< vector<string> >(io+".optional", vm);
+      optional = getOptions<string>(io + ".optional", vm);
     } else if (isNetCDFType(type)) {
       filetype = MIFI_FILETYPE_NETCDF;
     } else {
@@ -386,11 +430,11 @@ CDMReader_p getCDMFileReader(const po::variables_map& vm, const string& io="inpu
     exit(1);
 }
 
-int getInterpolationMethod(const po::variables_map& vm, const string& key)
+int getInterpolationMethod(const po::value_set& vm, const string& key)
 {
     int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-    if (vm.count(key)) {
-        const string& m = vm[key].as<string>();
+    if (po::option_cx opt = vm.find(key)) {
+        const string& m = vm.value(opt);
         method = mifi_string_to_interpolation_method(m.c_str());
         if (method == MIFI_INTERPOL_UNKNOWN) {
             LOG4FIMEX(logger, Logger::WARN, "unknown " << key << ": " << m << " using nearestneighbor");
@@ -400,36 +444,25 @@ int getInterpolationMethod(const po::variables_map& vm, const string& key)
     return method;
 }
 
-CDMReader_p getCDMProcessor(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMProcessor(const po::value_set& vm, CDMReader_p dataReader)
 {
-    if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") ||
-            vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction") ||
-            vm.count("process.addVerticalVelocity")))
-    {
+    if (!(vm.is_set(op_process_accumulateVariable) || vm.is_set(op_process_deaccumulateVariable) || vm.is_set(op_process_rotateVector_direction) ||
+          vm.is_set(op_process_addVerticalVelocity))) {
         LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
         return dataReader;
     }
     std::shared_ptr<CDMProcessor> processor(new CDMProcessor(dataReader));
-    if (vm.count("process.deaccumulateVariable")) {
-        vector<string> vars = vm["process.deaccumulateVariable"].as<vector<string> >();
-        for (size_t i = 0; i < vars.size(); i++) {
-            processor->deAccumulate(vars.at(i));
-        }
+    if (vm.is_set(op_process_deaccumulateVariable)) {
+        for (const std::string& v : vm.values(op_process_deaccumulateVariable))
+            processor->deAccumulate(v);
     }
-    if (vm.count("process.accumulateVariable")) {
-        vector<string> vars = vm["process.accumulateVariable"].as<vector<string> >();
-        for (size_t i = 0; i < vars.size(); i++) {
-            processor->accumulate(vars.at(i));
-        }
+    if (vm.is_set(op_process_accumulateVariable)) {
+        for (const std::string& v : vm.values(op_process_accumulateVariable))
+            processor->accumulate(v);
     }
-    if (vm.count("process.rotateVectorToLatLonX")) {
-        vector<string> xvars = vm["process.rotateVectorToLatLonX"].as<vector<string> >();
-        vector<string> yvars = vm["process.rotateVectorToLatLonY"].as<vector<string> >();
-        processor->rotateVectorToLatLon(true, xvars, yvars);
-    }
-    if (vm.count("process.rotateVector.direction")) {
+    if (vm.is_set(op_process_rotateVector_direction)) {
         bool toLatLon = true;
-        const string direction = vm["process.rotateVector.direction"].as<string>();
+        const string& direction = vm.value(op_process_rotateVector_direction);
         if (direction == "latlon") {
             toLatLon = true;
         } else if (direction == "grid") {
@@ -438,47 +471,45 @@ CDMReader_p getCDMProcessor(const po::variables_map& vm, CDMReader_p dataReader)
             LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.direction != 'latlon' or 'grid' : " << direction << " invalid");
             exit(1);
         }
-        if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.y")) {
-            vector<string> xvars = vm["process.rotateVector.x"].as<vector<string> >();
-            vector<string> yvars = vm["process.rotateVector.y"].as<vector<string> >();
-            vector<string> stdX = getOption< vector<string> >("process.rotateVector.stdNameX", vm);
-            vector<string> stdY = getOption< vector<string> >("process.rotateVector.stdNameY", vm);
+        if (vm.is_set(op_process_rotateVector_x) && vm.is_set(op_process_rotateVector_y)) {
+            const vector<string>& xvars = vm.values(op_process_rotateVector_x);
+            const vector<string>& yvars = vm.values(op_process_rotateVector_y);
+            vector<string> stdX = getOptions<string>("process.rotateVector.stdNameX", vm);
+            vector<string> stdY = getOptions<string>("process.rotateVector.stdNameY", vm);
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
-        } else if (vm.count("process.rotateVector.all")) {
+        } else if (vm.is_set(op_process_rotateVector_all)) {
             processor->rotateAllVectorsToLatLon(toLatLon);
-        } else if (vm.count("process.rotateVector.angle")) {
+        } else if (vm.is_set(op_process_rotateVector_angle)) {
             // do nothing here, but don't abort either (see below)
         } else {
             LOG4FIMEX(logger, Logger::FATAL, "process.rotateVector.x and process.rotateVector.y, or process.rotateVector.angle not found");
             exit(1);
         }
-        if (vm.count("process.rotateVector.angle")) {
-               vector<string> angles = vm["process.rotateVector.angle"].as<vector<string> >();
-               processor->rotateDirectionToLatLon(toLatLon, angles);
+        if (vm.is_set(op_process_rotateVector_angle)) {
+            const vector<string>& angles = vm.values(op_process_rotateVector_angle);
+            processor->rotateDirectionToLatLon(toLatLon, angles);
         }
     }
-    if (vm.count("process.addVerticalVelocity")) {
+    if (vm.is_set(op_process_addVerticalVelocity)) {
         processor->addVerticalVelocity();
     }
     return processor;
 }
 
-CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMExtractor(const po::value_set& vm, CDMReader_p dataReader)
 {
-    if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.pickDimension.name") || vm.count("extract.removeVariable") ||
-           vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
-           vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit") ||
-           vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
-           vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east")))
-    {
+    if (!(vm.is_set(op_extract_reduceDimension_name) || vm.is_set(op_extract_pickDimension_name) || vm.is_set(op_extract_removeVariable) ||
+          vm.is_set(op_extract_selectVariables) || vm.is_set(op_extract_reduceTime_start) || vm.is_set(op_extract_reduceTime_start) ||
+          vm.is_set(op_extract_reduceVerticalAxis_unit) || vm.is_set(op_extract_reduceToBoundingBox_south) || vm.is_set(op_extract_reduceToBoundingBox_north) ||
+          vm.is_set(op_extract_reduceToBoundingBox_west) || vm.is_set(op_extract_reduceToBoundingBox_east))) {
         LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
         return dataReader;
     }
     std::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
-    if (vm.count("extract.reduceDimension.name")) {
-        vector<string> vars = vm["extract.reduceDimension.name"].as<vector<string> >();
-        vector<int> startPos = getOption< vector<int> >("extract.reduceDimension.start", vm);
-        vector<int> endPos = getOption< vector<int> >("extract.reduceDimension.end", vm);
+    if (vm.is_set(op_extract_reduceDimension_name)) {
+        vector<string> vars = vm.values(op_extract_reduceDimension_name);
+        vector<int> startPos = getOptions<int>("extract.reduceDimension.start", vm);
+        vector<int> endPos = getOptions<int>("extract.reduceDimension.end", vm);
         if (startPos.size() != vars.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.start has different number of elements than extract.reduceDimension.name; "
                                              "use start = 0 if you don't want to reduce the start-position");
@@ -496,9 +527,9 @@ CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
             }
         }
     }
-    if (vm.count("extract.pickDimension.name")) {
-        vector<string> dims = vm["extract.pickDimension.name"].as<vector<string> >();
-        vector<string> lists = getOption< vector<string> >("extract.pickDimension.list", vm);
+    if (vm.is_set(op_extract_pickDimension_name)) {
+        const vector<string>& dims = vm.values(op_extract_pickDimension_name);
+        vector<string> lists = getOptions<string>("extract.pickDimension.list", vm);
         if (dims.size() != lists.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.pickDimension.name has different number of elements than extract.pickDimension.list");
         }
@@ -508,18 +539,18 @@ CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
             extractor->reduceDimension(dims.at(i), posSet);
         }
     }
-    if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {
+    if (vm.is_set(op_extract_reduceTime_start) || vm.is_set(op_extract_reduceTime_end)) {
         FimexTime start(FimexTime::min_date_time);
-        if (vm.count("extract.reduceTime.start")) {
-            const string tStart = vm["extract.reduceTime.start"].as<string>();
+        if (vm.is_set(op_extract_reduceTime_start)) {
+            const string tStart = vm.value(op_extract_reduceTime_start);
             if (!start.parseISO8601(tStart)) {
                 LOG4FIMEX(logger, Logger::FATAL, "cannot parse time '" << tStart << "'");
                 exit(1);
             }
         }
         FimexTime end(FimexTime::max_date_time);
-        if (vm.count("extract.reduceTime.end")) {
-            const string tEnd = vm["extract.reduceTime.end"].as<string>();
+        if (vm.is_set(op_extract_reduceTime_end)) {
+            const string tEnd = vm.value(op_extract_reduceTime_end);
             if (! end.parseISO8601(tEnd) ) {
                 LOG4FIMEX(logger, Logger::FATAL, "cannot parse time '" << tEnd << "'");
                 exit(1);
@@ -527,51 +558,52 @@ CDMReader_p getCDMExtractor(const po::variables_map& vm, CDMReader_p dataReader)
         }
         extractor->reduceTime(start, end);
     }
-    if (vm.count("extract.reduceVerticalAxis.unit")) {
-        if (!(vm.count("extract.reduceVerticalAxis.start") && vm.count("extract.reduceVerticalAxis.end"))) {
+    if (vm.is_set(op_extract_reduceVerticalAxis_unit)) {
+        if (!(vm.is_set(op_extract_reduceVerticalAxis_start) && vm.is_set(op_extract_reduceVerticalAxis_end))) {
             LOG4FIMEX(logger, Logger::FATAL, "extract.reduceVerticalAxis requires all 'start','end','unit'");
             exit(1);
         }
-        string unit = vm["extract.reduceVerticalAxis.unit"].as<string>();
-        double start = vm["extract.reduceVerticalAxis.start"].as<double>();
-        double end = vm["extract.reduceVerticalAxis.end"].as<double>();
+        const string& unit = vm.value(op_extract_reduceVerticalAxis_unit);
+        double start = string2type<double>(vm.value(op_extract_reduceVerticalAxis_start));
+        double end = string2type<double>(vm.value(op_extract_reduceVerticalAxis_end));
         extractor->reduceVerticalAxis(unit, start, end);
     }
-    if (vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
-        vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east")) {
-        string bb[4] = {"south", "north", "west", "east"};
+    if (vm.is_set(op_extract_reduceToBoundingBox_south) || vm.is_set(op_extract_reduceToBoundingBox_north) || vm.is_set(op_extract_reduceToBoundingBox_west) ||
+        vm.is_set(op_extract_reduceToBoundingBox_east)) {
+        po::option_cx bb[4] = {&op_extract_reduceToBoundingBox_south, &op_extract_reduceToBoundingBox_north, &op_extract_reduceToBoundingBox_west,
+                               &op_extract_reduceToBoundingBox_east};
         double bbVals[4];
         for (int i = 0; i < 4; i++) {
-            if (!vm.count("extract.reduceToBoundingBox."+bb[i])) {
+            if (!vm.is_set(bb[i])) {
                 LOG4FIMEX(logger, Logger::FATAL, "extract.reduceToBoundingBox." << bb[i] << " missing");
                 exit(1);
             }
-            bbVals[i] = vm["extract.reduceToBoundingBox."+bb[i]].as<double>();
+            bbVals[i] = string2type<double>(vm.value(bb[i]));
         }
         LOG4FIMEX(logger, Logger::DEBUG, "reduceLatLonBoudingBox(" << join(&bbVals[0], &bbVals[0]+4, ",")<<")");
         extractor->reduceLatLonBoundingBox(bbVals[0], bbVals[1], bbVals[2], bbVals[3]);
     }
-    if (vm.count("extract.selectVariables")) {
-        vector<string> vars = vm["extract.selectVariables"].as<vector<string> >();
-        bool addAuxiliaryVariables = !vm.count("extract.selectVariables.noAuxiliary");
+    if (vm.is_set(op_extract_selectVariables)) {
+        const vector<string>& vars = vm.values(op_extract_selectVariables);
+        bool addAuxiliaryVariables = !vm.is_set(op_extract_selectVariables_noAuxiliary);
         extractor->selectVariables(set<string>(vars.begin(), vars.end()), addAuxiliaryVariables);
     }
 
-    vector<string> vars = getOption< vector<string> >("extract.removeVariable", vm);
-    for (vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-      extractor->removeVariable(*it);
+    if (vm.is_set(op_extract_removeVariable)) {
+        for (const std::string& v : vm.values(op_extract_removeVariable))
+            extractor->removeVariable(v);
     }
     printReaderStatements("extract", vm, extractor);
 
     return extractor;
 }
 
-CDMReader_p getCDMQualityExtractor(const string& version, const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMQualityExtractor(const string& version, const po::value_set& vm, CDMReader_p dataReader)
 {
     const string io = "qualityExtract"+version, autoConfKey = io +".autoConfigString";
     string autoConf;
-    if (vm.count(autoConfKey))
-      autoConf = vm[autoConfKey].as<string>();
+    if (po::option_cx opt = vm.find(autoConfKey))
+        autoConf = vm.value(opt);
     const string config = getConfig(io, vm);
     if (autoConf != "" || config != "") {
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
@@ -581,7 +613,7 @@ CDMReader_p getCDMQualityExtractor(const string& version, const po::variables_ma
     return dataReader;
 }
 
-CDMReader_p getCDMTimeInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMTimeInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     string timeSpec;
     if (!getOption("timeInterpolate.timeSpec", vm, timeSpec)) {
@@ -595,10 +627,10 @@ CDMReader_p getCDMTimeInterpolator(const po::variables_map& vm, CDMReader_p data
     return timeInterpolator;
 }
 
-CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     vector<string> operations;
-    if (getOption("verticalInterpolate.dataConversion", vm, operations)) {
+    if (getOptions("verticalInterpolate.dataConversion", vm, operations)) {
         try {
             dataReader = std::make_shared<CDMPressureConversions>(dataReader, operations);
         } catch (CDMException& ex) {
@@ -669,7 +701,7 @@ std::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, co
      throw CDMException("undefined interpolate."+logProcess+": " + procString);
 }
 
-CDMInterpolator_p createCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+CDMInterpolator_p createCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(dataReader);
     string value;
@@ -689,7 +721,7 @@ CDMInterpolator_p createCDMInterpolator(const po::variables_map& vm, CDMReader_p
     return interpolator;
 }
 
-CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     CDMInterpolator_p interpolator;
     int method = getInterpolationMethod(vm, "interpolate.method");
@@ -706,31 +738,31 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
             exit(1);
         }
         interpolator = createCDMInterpolator(vm, dataReader);
-        if (vm.count("interpolate.distanceOfInterest")) {
-            interpolator->setDistanceOfInterest(vm["interpolate.distanceOfInterest"].as<double>());
+        if (vm.is_set(op_interpolate_distanceOfInterest)) {
+            interpolator->setDistanceOfInterest(string2type<double>(vm.value(op_interpolate_distanceOfInterest)));
         }
-        interpolator->changeProjection(method, proj4, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit,
-                                       vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
-    } else if (vm.count("interpolate.template")) {
+        interpolator->changeProjection(method, proj4, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit, vm.value(op_interpolate_xAxisType),
+                                       vm.value(op_interpolate_yAxisType));
+    } else if (vm.is_set(op_interpolate_template)) {
         interpolator = createCDMInterpolator(vm, dataReader);
-        interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
-    } else if (vm.count("interpolate.vcrossNames")) {
-        if (!vm.count("interpolate.vcrossNoPoints")) {
+        interpolator->changeProjection(method, vm.value(op_interpolate_template));
+    } else if (vm.is_set(op_interpolate_vcrossNames)) {
+        if (!vm.is_set(op_interpolate_vcrossNoPoints)) {
             LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires vcrossNoPoints, too");
             exit(1);
         }
-        if (!vm.count("interpolate.longitudeValues")) {
+        if (!vm.is_set(op_interpolate_longitudeValues)) {
             LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires longitudeValues, too");
             exit(1);
         }
-        if (!vm.count("interpolate.latitudeValues")) {
+        if (!vm.is_set(op_interpolate_latitudeValues)) {
             LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames requires latitudeValues, too");
             exit(1);
         }
-        vector<string> vNames = tokenize(vm["interpolate.vcrossNames"].as<string>(), ",");
-        vector<size_t> pointNo = tokenizeDotted<size_t>(vm["interpolate.vcrossNoPoints"].as<string>());
-        vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
-        vector<double> lonVals = tokenizeDotted<double>(vm["interpolate.longitudeValues"].as<string>());
+        vector<string> vNames = tokenize(vm.value(op_interpolate_vcrossNames), ",");
+        vector<size_t> pointNo = tokenizeDotted<size_t>(vm.value(op_interpolate_vcrossNoPoints));
+        vector<double> latVals = tokenizeDotted<double>(vm.value(op_interpolate_latitudeValues));
+        vector<double> lonVals = tokenizeDotted<double>(vm.value(op_interpolate_longitudeValues));
         if (vNames.size() != pointNo.size()) {
             LOG4FIMEX(logger, Logger::FATAL, "interpolate.vcrossNames and vcrossNoPoints need same size: " << vNames.size() << "!=" << pointNo.size());
             exit(1);
@@ -757,13 +789,13 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
         }
         interpolator = createCDMInterpolator(vm, dataReader);
         interpolator->changeProjectionToCrossSections(method, csd);
-    } else if (vm.count("interpolate.latitudeValues")) {
-        if (!vm.count("interpolate.longitudeValues")) {
+    } else if (vm.is_set(op_interpolate_latitudeValues)) {
+        if (!vm.is_set(op_interpolate_longitudeValues)) {
             LOG4FIMEX(logger, Logger::FATAL, "interpolate.latitudeValues requires longitudeValues, too");
             exit(1);
         }
-        vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
-        vector<double> lonVals = tokenizeDotted<double>(vm["interpolate.longitudeValues"].as<string>());
+        vector<double> latVals = tokenizeDotted<double>(vm.value(op_interpolate_latitudeValues));
+        vector<double> lonVals = tokenizeDotted<double>(vm.value(op_interpolate_longitudeValues));
         interpolator = createCDMInterpolator(vm, dataReader);
         interpolator->changeProjection(method, lonVals, latVals);
     } else {
@@ -775,7 +807,7 @@ CDMReader_p getCDMInterpolator(const po::variables_map& vm, CDMReader_p dataRead
     return interpolator;
 }
 
-CDMReader_p getNcmlCDMReader(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getNcmlCDMReader(const po::value_set& vm, CDMReader_p dataReader)
 {
     const string config = getConfig("ncml", vm);
     if (!config.empty()) {
@@ -785,31 +817,25 @@ CDMReader_p getNcmlCDMReader(const po::variables_map& vm, CDMReader_p dataReader
     return dataReader;
 }
 
-CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p getCDMMerger(const po::value_set& vm, CDMReader_p dataReader)
 {
-    if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
-                    or vm.count("merge.smoothing") or vm.count("merge.method")))
+    if (not(vm.is_set(op_merge_inner_file) or vm.is_set(op_merge_inner_type) or vm.is_set(op_merge_inner_config) or vm.is_set(op_merge_smoothing) or
+            vm.is_set(op_merge_method)))
         return dataReader;
 
     CDMReader_p readerI = getCDMFileReader(vm, "merge.inner");
     if( not readerI )
         throw CDMException("could not create reader for inner in merge");
-    if (vm.count("merge.inner.cfg")) {
-        po::variables_map mvm;
-        ifstream ifs(vm["merge.inner.cfg"].as<string>().c_str());
-        if (!ifs) {
-            LOG4FIMEX(logger, Logger::ERROR, "missing merge.inner.cfg file '" << vm["merge.inner.cfg"].as<string>() << "'");
-        } else {
-            po::store(po::parse_config_file(ifs, config_file_options), mvm);
-            // apply all fimex processing tasks to the merge.inner stream
-            readerI = applyFimexStreamTasks(mvm, readerI);
-        }
+    if (vm.is_set(op_merge_inner_cfg)) {
+        po::value_set mvm = po::parse_config_file(vm.value(op_merge_inner_cfg), config_file_options);
+        // apply all fimex processing tasks to the merge.inner stream
+        readerI = applyFimexStreamTasks(mvm, readerI);
     }
 
-    std::shared_ptr<CDMMerger> merger = std::shared_ptr<CDMMerger>(new CDMMerger(readerI, dataReader));
+    CDMMerger_p merger = std::make_shared<CDMMerger>(readerI, dataReader);
 
-    if( vm.count("merge.smoothing") ) {
-        const string& v = vm["merge.smoothing"].as<string>();
+    if (vm.is_set(op_merge_smoothing)) {
+        const string& v = vm.value(op_merge_smoothing);
         if (starts_with(v, "LINEAR")) {
             std::smatch what;
             if (std::regex_match(v, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
@@ -818,35 +844,33 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
                     int border = string2type<int>(what[2]);
                     merger->setSmoothing(CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory(transition, border)));
                 } catch (std::runtime_error&) {
-                    throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
+                    throw CDMException("problem parsing parameters for linear smoothing: " + vm.value(op_merge_smoothing));
                 }
             } else {
-                throw CDMException("malformed linear smoothing specification: " + vm["merge.smoothing"].as<string>());
+                throw CDMException("malformed linear smoothing specification: " + vm.value(op_merge_smoothing));
             }
         } else {
-            throw CDMException("unknown smoothing: " + vm["merge.smoothing"].as<string>());
+            throw CDMException("unknown smoothing: " + vm.value(op_merge_smoothing));
         }
     } else {
         LOG4FIMEX(logger, Logger::DEBUG, "no merge.smoothing given, using default as defined by CDMMerger");
     }
 
-    if (vm.count("merge.keepOuterVariables")) {
+    if (vm.is_set(op_merge_keepOuterVariables)) {
         merger->setKeepOuterVariables(true);
     }
     int method = getInterpolationMethod(vm, "merge.method");
     merger->setGridInterpolationMethod(method);
 
-    if (vm.count("merge.projString")) {
-        if (not (vm.count("merge.xAxisUnit") && vm.count("merge.yAxisUnit")))
+    if (vm.is_set(op_merge_projString)) {
+        if (not(vm.is_set(op_merge_xAxisUnit) && vm.is_set(op_merge_yAxisUnit)))
             throw CDMException("merge.xAxisUnit and merge.yAxisUnit required");
 
-        if (not (vm.count("merge.xAxisValues") && vm.count("merge.yAxisValues")))
+        if (not(vm.is_set(op_merge_xAxisValues) && vm.is_set(op_merge_yAxisValues)))
             throw CDMException("merge.xAxisValues and merge.yAxisValues required");
 
-        merger->setTargetGrid(vm["merge.projString"].as<string>(),
-                vm["merge.xAxisValues"].as<string>(), vm["merge.yAxisValues"].as<string>(),
-                vm["merge.xAxisUnit"].as<string>(), vm["merge.yAxisUnit"].as<string>(),
-                vm["merge.xAxisType"].as<string>(), vm["merge.yAxisType"].as<string>());
+        merger->setTargetGrid(vm.value(op_merge_projString), vm.value(op_merge_xAxisValues), vm.value(op_merge_yAxisValues), vm.value(op_merge_xAxisUnit),
+                              vm.value(op_merge_yAxisUnit), vm.value(op_merge_xAxisType), vm.value(op_merge_yAxisType));
     } else {
         merger->setTargetGridFromInner();
     }
@@ -855,7 +879,7 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
     return merger;
 }
 
-CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader)
+CDMReader_p applyFimexStreamTasks(const po::value_set& vm, CDMReader_p dataReader)
 {
     dataReader = getCDMProcessor(vm, dataReader);
     dataReader = getCDMQualityExtractor("", vm, dataReader);
@@ -869,7 +893,7 @@ CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataR
     return dataReader;
 }
 
-void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm)
+void fillWriteCDM(CDMReader_p dataReader, po::value_set& vm)
 {
     string fillFile;
     if (!getOption("output.fillFile", vm, fillFile)) {
@@ -888,7 +912,7 @@ void fillWriteCDM(CDMReader_p dataReader, po::variables_map& vm)
     LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
 }
 
-void writeCDM(CDMReader_p dataReader, const po::variables_map& vm)
+void writeCDM(CDMReader_p dataReader, const po::value_set& vm)
 {
     printReaderStatements("output", vm, dataReader);
     string fileName;
@@ -909,230 +933,154 @@ void writeCDM(CDMReader_p dataReader, const po::variables_map& vm)
     }
 }
 
-
 int run(int argc, char* args[])
 {
-    // Declare the supported options.
-    po::options_description generic("Generic options");
-    int num_threads = 1;
-    generic.add_options()
-        ("help,h", "help message")
-        ("version", "program version")
-        ("debug", "debug program")
-        ("log4cpp", po::value<string>(), "log4cpp property file (- = log4cpp without prop-file)")
-        ("print-options", "print all options")
-        ("config,c", po::value<string>(), "configuration file")
-        ("num_threads,n", po::value<int>(&num_threads)->default_value(num_threads), "number of threads")
+    config_file_options
+        << op_input_file
+        << op_input_type
+        << op_input_config
+        << op_input_optional
+        << op_input_printNcML
+        << op_input_printCS
+        << op_input_printSize
+        << op_output_file
+        << op_output_fillFile
+        << op_output_type
+        << op_output_config
+        << op_output_printNcML
+        << op_output_printCS
+        << op_output_printSize
+        << op_process_accumulateVariable
+        << op_process_deaccumulateVariable
+//        << op_process_rotateVectorToLatLonX
+//        << op_process_rotateVectorToLatLonY
+        << op_process_rotateVector_direction
+        << op_process_rotateVector_angle
+        << op_process_rotateVector_x
+        << op_process_rotateVector_stdNameX
+        << op_process_rotateVector_y
+        << op_process_rotateVector_stdNameY
+        << op_process_rotateVector_all
+        << op_process_addVerticalVelocity
+        << op_process_printNcML
+        << op_process_printCS
+        << op_process_printSize
+        << op_extract_removeVariable
+        << op_extract_selectVariables
+        << op_extract_selectVariables_noAuxiliary
+        << op_extract_reduceDimension_name
+        << op_extract_reduceDimension_start
+        << op_extract_reduceDimension_end
+        << op_extract_pickDimension_name
+        << op_extract_pickDimension_list
+        << op_extract_reduceTime_start
+        << op_extract_reduceTime_end
+        << op_extract_reduceVerticalAxis_unit
+        << op_extract_reduceVerticalAxis_start
+        << op_extract_reduceVerticalAxis_end
+        << op_extract_reduceToBoundingBox_south
+        << op_extract_reduceToBoundingBox_north
+        << op_extract_reduceToBoundingBox_east
+        << op_extract_reduceToBoundingBox_west
+        << op_extract_printNcML
+        << op_extract_printCS
+        << op_extract_printSize
+        << op_qualityExtract_autoConfString
+        << op_qualityExtract_config
+        << op_qualityExtract_printNcML
+        << op_qualityExtract_printCS
+        << op_qualityExtract_printSize
+        << op_interpolate_projString
+        << op_interpolate_method
+        << op_interpolate_xAxisValues
+        << op_interpolate_yAxisValues
+        << op_interpolate_xAxisUnit
+        << op_interpolate_yAxisUnit
+        << op_interpolate_xAxisType
+        << op_interpolate_yAxisType
+        << op_interpolate_distanceOfInterest
+        << op_interpolate_latitudeName
+        << op_interpolate_longitudeName
+        << op_interpolate_preprocess
+        << op_interpolate_postprocess
+        << op_interpolate_latitudeValues
+        << op_interpolate_longitudeValues
+        << op_interpolate_vcrossNames
+        << op_interpolate_vcrossNoPoints
+        << op_interpolate_template
+        << op_interpolate_printNcML
+        << op_interpolate_printCS
+        << op_interpolate_printSize
+
+        << op_merge_inner_file
+        << op_merge_inner_type
+        << op_merge_inner_config
+        << op_merge_inner_cfg
+        << op_merge_smoothing
+        << op_merge_keepOuterVariables
+        << op_merge_method
+        << op_merge_projString
+        << op_merge_xAxisValues
+        << op_merge_yAxisValues
+        << op_merge_xAxisUnit
+        << op_merge_yAxisUnit
+        << op_merge_xAxisType
+        << op_merge_yAxisType
+        << op_merge_printNcML
+        << op_merge_printCS
+        << op_merge_printSize
+
+        << op_verticalInterpolate_type
+        << op_verticalInterpolate_ignoreValidityMin
+        << op_verticalInterpolate_ignoreValidityMax
+        << op_verticalInterpolate_method
+        << op_verticalInterpolate_templateVar
+        << op_verticalInterpolate_level1
+        << op_verticalInterpolate_level2
+        << op_verticalInterpolate_dataConversion
+        << op_verticalInterpolate_printNcML
+        << op_verticalInterpolate_printCS
+        << op_verticalInterpolate_printSize
+        << op_timeInterpolate_timeSpec
+        << op_timeInterpolate_printNcML
+        << op_timeInterpolate_printCS
+        << op_timeInterpolate_printSize
+        << op_qualityExtract2_autoConfString
+        << op_qualityExtract2_config
+        << op_qualityExtract2_printNcML
+        << op_qualityExtract2_printCS
+        << op_qualityExtract2_printSize
+        << op_ncml_config
+        << op_ncml_printNcML
+        << op_ncml_printCS
+        << op_ncml_printSize
         ;
 
-    // Declare a group of options that will be
-    // allowed both on command line and in
-    // config file
-    po::options_description config("Configurational options");
-    config.add_options()
-        ("input.file", po::value<string>(), "input file")
-        ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2")
-        ("input.config", po::value<string>(), "non-standard input configuration")
-        ("input.optional", po::value<vector<string> >()->composing(), "additional options, e.g. multiple files for grib")
-#if BOOST_VERSION >= 104000
-        ("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input")
-#else
-        ("input.printNcML", po::value<string>(), "print NcML description of input (use - for command-line")
-#endif
-        ("input.printCS", "print CoordinateSystems of input file")
-        ("input.printSize", "print size estimate")
-        ("output.file", po::value<string>(), "output file")
-        ("output.fillFile", po::value<string>(), "existing output file to be filled")
-        ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
-        ("output.config", po::value<string>(), "non-standard output configuration")
-#if BOOST_VERSION >= 104000
-        ("output.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input")
-#else
-        ("output.printNcML", po::value<string>(), "print NcML description of input (use - for command-line")
-#endif
-        ("output.printCS", "print CoordinateSystems of input file")
-        ("output.printSize", "print size estimate")
-        ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
-        ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
-        ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "deprecated: rotate this vector x component from grid-direction to latlon direction")
-        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "deprecated: rotate this vector y component from grid-direction to latlon direction")
-        ("process.rotateVector.direction", po::value<string>(), "set direction: to latlon or grid")
-        ("process.rotateVector.angle", po::value<vector<string> >()->composing(), "rotate these angles (in degree) to the direction ")
-        ("process.rotateVector.x", po::value<vector<string> >()->composing(), "rotate this vector x component to direction")
-        ("process.rotateVector.stdNameX", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
-        ("process.rotateVector.y", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")
-        ("process.rotateVector.stdNameY", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
-        ("process.rotateVector.all", "rotate all known vectors (e.g. standard_name) to given direction")
-        ("process.addVerticalVelocity", "calculate upward_air_velocity_ml")
-#if BOOST_VERSION >= 104000
-        ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
-#else
-        ("process.printNcML", po::value<string>(), "print NcML description of process (use - for command-line")
-#endif
-        ("process.printCS", "print CoordinateSystems of process")
-        ("process.printSize", "print size estimate")
-        ("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
-        ("extract.selectVariables", po::value<vector<string> >()->composing(), "select only those variables")
-        ("extract.selectVariables.noAuxiliary", "don't add auxiliary variables")
-        ("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
-        ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
-        ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
-        ("extract.pickDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to pick levels")
-        ("extract.pickDimension.list", po::value<vector<string> >()->composing(), "list of dim-positions (including dots), starting at 0")
-        ("extract.reduceTime.start", po::value<string>(), "start-time as iso-string")
-        ("extract.reduceTime.end", po::value<string>(), "end-time by iso-string")
-        ("extract.reduceVerticalAxis.unit", po::value<string>(), "unit of vertical axis to reduce")
-        ("extract.reduceVerticalAxis.start", po::value<double>(), "start value of vertical axis")
-        ("extract.reduceVerticalAxis.end", po::value<double>(), "end value of the vertical axis")
-        ("extract.reduceToBoundingBox.south", po::value<double>(), "geographical bounding-box in degree")
-        ("extract.reduceToBoundingBox.north", po::value<double>(), "geographical bounding-box in degree")
-        ("extract.reduceToBoundingBox.east", po::value<double>(), "geographical bounding-box in degree")
-        ("extract.reduceToBoundingBox.west", po::value<double>(), "geographical bounding-box in degree")
-#if BOOST_VERSION >= 104000
-        ("extract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("extract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("extract.printCS", "print CoordinateSystems of extractor")
-        ("extract.printSize", "print size estimate")
-        ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
-        ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
-#if BOOST_VERSION >= 104000
-        ("qualityExtract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("qualityExtract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("qualityExtract.printCS", "print CoordinateSystems of extractor")
-        ("qualityExtract.printSize", "print size estimate")
-        ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
-        ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_*")
-        ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
-        ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
-        ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
-        ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
-        ("interpolate.xAxisType", po::value<string>()->default_value("double"), "datatype of x-axis (double,float,int,short)")
-        ("interpolate.yAxisType", po::value<string>()->default_value("double"), "datatype of y-axis")
-        ("interpolate.distanceOfInterest", po::value<double>(), "optional distance of interest used differently depending on method")
-        ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
-        ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
-        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
-        ("interpolate.postprocess", po::value<string>(), "add a 2d postprocess after the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
-        ("interpolate.latitudeValues", po::value<string>(), "latitude values, in degrees north, of a list of points to interpolate to, e.g. 60.5,70,90"
-                                                            " (use with 'longitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)")
-        ("interpolate.longitudeValues", po::value<string>(), "longitude values, in degrees east, of a list of points to interpolate to, e.g. -10.5,-10.5,29.5"
-                                                             " (use with 'latitudeValues' -- to produce a grid, use 'projString', 'xAxisValues', 'yAxisValues', ...)")
-        ("interpolate.vcrossNames", po::value<string>(), "string with comma-separated names for vertical cross sections")
-        ("interpolate.vcrossNoPoints", po::value<string>(), "string with comma-separated number of lat/lon values for each vertical cross sections")
-        ("interpolate.template", po::value<string>(), "netcdf file containing lat/lon list used in interpolation")
-#if BOOST_VERSION >= 104000
-        ("interpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("interpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("interpolate.printCS", "print CoordinateSystems of interpolator")
-        ("interpolate.printSize", "print size estimate")
-
-        ("merge.inner.file", po::value<string>(), "inner file for merge")
-        ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2")
-        ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
-        ("merge.inner.cfg", po::value<string>(), "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging")
-        ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")
-        ("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer")
-        ("merge.method", po::value<string>(), "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
-                " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum")
-        ("merge.projString", po::value<string>(), "proj4 input string describing the new projection, default: use inner projection extended to outer grid")
-        ("merge.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
-        ("merge.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
-        ("merge.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
-        ("merge.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
-        ("merge.xAxisType", po::value<string>()->default_value("double"), "datatype of x-axis (double,float,int,short)")
-        ("merge.yAxisType", po::value<string>()->default_value("double"), "datatype of y-axis")
-#if BOOST_VERSION >= 104000
-        ("merge.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("merge.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("merge.printCS", "print CoordinateSystems of interpolator")
-        ("merge.printSize", "print size estimate")
-
-        ("verticalInterpolate.type", po::value<string>(), "pressure, height (above ground) or depth")
-        ("verticalInterpolate.ignoreValidityMin", po::value<bool>(), "ignore minimum value from vertical transformation (e.g. ocean surface)")
-        ("verticalInterpolate.ignoreValidityMax", po::value<bool>(), "ignore maximum value from vertical transformation (e.g. ocean bathymetry)")
-        ("verticalInterpolate.method", po::value<string>(), "linear, linear_weak_extra, linear_no_extra, linear_const_extra, log, loglog or nearestneighbor interpolation")
-        ("verticalInterpolate.templateVar", po::value<string>(), "specification template variable for interpolation to fixed or hybrid levels")
-        ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
-        ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
-        ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T, omega2vwind or add4Dpressure")
-#if BOOST_VERSION >= 104000
-        ("verticalInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("verticalInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
-        ("verticalInterpolate.printSize", "print size estimate")
-        ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see MetNoFimex::TimeSpec for a full definition")
-#if BOOST_VERSION >= 104000
-        ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("timeInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
-        ("timeInterpolate.printSize", "print size estimate")
-        ("qualityExtract2.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
-        ("qualityExtract2.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
-#if BOOST_VERSION >= 104000
-        ("qualityExtract2.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("qualityExtract2.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("qualityExtract2.printCS", "print CoordinateSystems of extractor")
-        ("qualityExtract2.printSize", "print size estimate")
-        ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
-#if BOOST_VERSION >= 104000
-        ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
-#else
-        ("ncml.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
-#endif
-        ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
-        ("ncml.printSize", "print size estimate")
+    po::option_set cmdline_options = config_file_options;
+    cmdline_options
+        << op_help
+        << op_version
+        << op_debug
+        << op_log4cpp
+        << op_print_options
+        << op_config
+        << op_num_threads
         ;
 
-
-    po::options_description cmdline_options;
-    cmdline_options.add(generic).add(config);
-
-    config_file_options.add(config);
-
-    po::positional_options_description p;
-    p.add("input.file", 1);
-    p.add("output.file", 1);
-
-    // read first only cmd-line to get the configFile right
-    po::variables_map genVm;
-    po::store(po::command_line_parser(argc, args).options(cmdline_options).run(), genVm);
-    po::notify(genVm);
-
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).options(cmdline_options).positional(p).run(), vm);
-    if (vm.count("config")) {
-        ifstream ifs(vm["config"].as<string>().c_str());
-        if (!ifs) {
-            cerr << "missing config file '" << vm["config"].as<string>() << "'" << endl;
-            return -1;
-        }
-        po::store(po::parse_config_file(ifs, config_file_options), vm);
-    }
-    po::notify(vm);
-    if (argc == 1 || vm.count("help")) {
-        writeUsage(cout, generic, config);
+    std::vector<std::string> positional;
+    po::value_set vm = parse_command_line(argc, args, cmdline_options, positional);
+    if (vm.is_set(op_config))
+        vm.add(parse_config_file(vm.value(op_config), config_file_options));
+    if (argc == 1 || vm.is_set(op_help)) {
+        writeUsage(cout, cmdline_options);
         return 0;
     }
-    if (vm.count("version")) {
+    if (vm.is_set(op_version)) {
         cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "-" << std::hex << mifi_version_status() << ")" << endl;
         return 0;
     }
 
-    const int opt_debug = vm.count("debug");
+    const int opt_debug = vm.is_set(op_debug);
     if (opt_debug >= 1) {
         // TODO allow for multiple occurances and use INFO as == 1
         defaultLogLevel(Logger::DEBUG);
@@ -1140,10 +1088,10 @@ int run(int argc, char* args[])
         defaultLogLevel(Logger::WARN);
     }
 
-    if (vm.count("log4cpp")) {
+    if (vm.is_set(op_log4cpp)) {
 #ifdef HAVE_LOG4CPP
         Logger::setClass(Logger::LOG4CPP);
-        std::string propFile = vm["log4cpp"].as<string>();
+        std::string propFile = vm.value(op_log4cpp);
         if (propFile != "-") {
             log4cpp::PropertyConfigurator::configure(propFile);
             if (opt_debug)
@@ -1157,15 +1105,25 @@ int run(int argc, char* args[])
         Logger::setClass(Logger::LOG2STDERR);
     }
 
+    int num_threads = 1;
+    if (vm.is_set(op_num_threads))
+        num_threads = string2type<int>(vm.value(op_num_threads));
     mifi_setNumThreads(num_threads);
-    if (vm.count("print-options")) {
-        writeOptions(cout, vm);
+
+    if (vm.is_set(op_print_options)) {
+        cmdline_options.dump(cout, vm);
     } else if (opt_debug) {
-        writeOptions(cerr, vm);
+        cmdline_options.dump(cerr, vm);
     }
-    if (!(vm.count("input.file"))) {
-        writeUsage(cerr, generic, config);
-        LOG4FIMEX(logger, Logger::FATAL, "input.file required");
+
+    po::positional_args_consumer pac(vm, positional);
+    pac >> op_input_file;
+    if (!pac.done())
+        pac >> op_output_file;
+    if (!pac.done()) {
+        cmdline_options.dump(cerr, vm);
+        pac.dump(cerr);
+        LOG4FIMEX(logger, Logger::FATAL, "too many positional arguments");
         return 1;
     }
 
@@ -1213,7 +1171,7 @@ int main(int argc, char* args[])
         retStatus = run(argc, args);
 
 #ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
-    } catch (const boost::program_options::error& ex) {
+    } catch (const po::option_error& ex) {
         clog << "invalid options: " << ex.what() << endl;
         retStatus = 1;
     } catch (exception& ex) {

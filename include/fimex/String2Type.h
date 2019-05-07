@@ -25,6 +25,7 @@
 #define FIMEX_STRING2TYPE_H_
 
 #include <sstream>
+#include <vector>
 
 namespace MetNoFimex {
 
@@ -72,6 +73,16 @@ inline std::string string2type<std::string>(const std::string& s)
 //! recognize on/true/1 as true, off,0,false as false
 template <>
 bool string2type<bool>(const std::string& s);
+
+template <typename T>
+std::vector<T> strings2types(const std::vector<std::string>& values)
+{
+    std::vector<T> t;
+    t.reserve(values.size());
+    for (const std::string& v : values)
+        t.push_back(string2type<T>(v));
+    return t;
+}
 
 } // namespace MetNoFimex
 
