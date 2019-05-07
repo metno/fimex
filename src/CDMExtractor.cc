@@ -518,11 +518,4 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     }
 }
 
-
-void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype)
-{
-    // TODO
-    throw CDMException("not implemented yet");
-}
-
 } // end of namespace

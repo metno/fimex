@@ -166,18 +166,6 @@ public:
      * @param east easternmost border in dec. degree, -180 < west < east < 180
      */
     virtual void reduceLatLonBoundingBox(double south, double north, double west, double east);
-
-    /**
-     * @brief change the datatype of the variable
-     *
-     * a change of the variable will also change the datatype of the _FillValue attribute
-     *
-     * @param variable name of the variable
-     * @param datatype new datatype
-     * @throw CDMException if variable doesn't exist or conversion to datatype is not supported
-     */
-    virtual void changeDataType(std::string variable, CDMDataType datatype);
-
 };
 
 }
