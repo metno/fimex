@@ -10,7 +10,6 @@ SET(libfimex_INCLUDE_DIRECTORIES
   ${proj_INC_DIR}
   ${udunits2_INC_DIR}
   ${ECCODES_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${date_INC_DIR}
 )
 
@@ -20,7 +19,7 @@ SET(libfimex_COMPILE_OPTIONS
 SET(libfimex_COMPILE_DEFINITIONS
   -DPKGDATADIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/fimex${MINUS_FIMEX_VERSION}"
   )
-LINK_DIRECTORIES(${PC_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+LINK_DIRECTORIES(${PC_LIBRARY_DIRS})
 
 SET(INCF "${CMAKE_SOURCE_DIR}/include/fimex")
 
@@ -408,7 +407,6 @@ SET(libfimex_LIBS
   ${proj_LIB}
   ${udunits2_LIB}
   ${eccodes_LIB}
-  ${Boost_LIBRARIES}
   ${date_LIB}
 )
 

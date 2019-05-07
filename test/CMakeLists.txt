@@ -2,7 +2,8 @@
 INCLUDE_DIRECTORIES(
   "${CMAKE_SOURCE_DIR}/include"
   "${CMAKE_SOURCE_DIR}/src" ## for FeltCDMReader2.h
-  )
+  ${CMAKE_CURRENT_BINARY_DIR} ## for test_config.h
+)
 LINK_DIRECTORIES(${PC_LIBRARY_DIRS} ${BOOST_LIBRARY_DIRS})
 
 IF (NOT TEST_EXTRADATA_DIR)
@@ -142,11 +143,15 @@ IF (ENABLE_NETCDF)
     SET(NCDUMP_PROGRAM "ncdump")
   ENDIF()
 ENDIF()
+
 CONFIGURE_FILE(nccmp.sh.in nccmp.sh @ONLY)
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
+
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
+
+CONFIGURE_FILE(test_config.h.in test_config.h)
 
 ADD_LIBRARY(testinghelpers STATIC
   testinghelpers.cc
@@ -167,7 +172,8 @@ ENDIF()
 
 FOREACH(T ${CC_TESTS})
   ADD_EXECUTABLE(${T} "${T}.cc")
-  TARGET_LINK_LIBRARIES(${T} libfimex testinghelpers)
+  TARGET_INCLUDE_DIRECTORIES(${T} PRIVATE ${Boost_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(${T} libfimex testinghelpers ${Boost_LIBRARIES})
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
 

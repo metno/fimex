@@ -1,0 +1,9 @@
+#ifndef TEST_CONFIG_H
+#define TEST_CONFIG_H 1
+
+#include "fimex_config.h"
+
+// defined if boost version >= 1.34.0
+#cmakedefine HAVE_BOOST_UNIT_TEST_FRAMEWORK 1
+
+#endif // TEST_CONFIG_H

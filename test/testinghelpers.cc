@@ -29,7 +29,7 @@
 */
 
 
-#include "fimex_config.h"
+#include "test_config.h"
 
 #if HAVE_BOOST_UNIT_TEST_FRAMEWORK
 #define BOOST_TEST_MAIN
