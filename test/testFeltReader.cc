@@ -24,17 +24,17 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/array.hpp>
-#include <cassert>
-#include <ctime>
-#include <cmath>
+#include "FeltCDMReader2.h"
 #include "FeltParameters.h"
 #include "Felt_Array2.h"
 #include "Felt_File2.h"
-#include "FeltCDMReader2.h"
 #include "felt/FeltGridDefinition.h"
+#include <array>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
+#include <cassert>
+#include <cmath>
+#include <ctime>
 
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
@@ -46,22 +46,16 @@ using namespace MetNoFimex;
 BOOST_AUTO_TEST_CASE( test_feltparameter )
 {
     FeltParameters fp = FeltParameters(pathTest("diana.setup"));
-    const boost::array<short, 16>  tksoil = fp.getParameters(string("tksoil"));
-    //cout << "tksoil:" << tksoil[10] << ":" << tksoil[11] << ":" << tksoil[12] << endl;
+    const std::array<short, 16> tksoil = fp.getParameters(string("tksoil"));
     BOOST_CHECK_EQUAL(tksoil[10], 2);
     BOOST_CHECK_EQUAL(tksoil[11], 29);
     BOOST_CHECK_EQUAL(tksoil[12], 1000);
-    //cout << "reverse lookup: " << fp.getParameterName(tksoil) << endl;
     BOOST_CHECK_EQUAL(fp.getParameterName(tksoil), "tksoil");
-    const boost::array<short, 16>  lameps_prob_t2m = fp.getParameters(string("lameps_prob_t2m>+30"));
-    //cout << "lameps_prob_t2m>+30:" << lameps_prob_t2m[10] << ":" << lameps_prob_t2m[11] << ":" << lameps_prob_t2m[12] << endl;
+    const std::array<short, 16> lameps_prob_t2m = fp.getParameters(string("lameps_prob_t2m>+30"));
     BOOST_CHECK_EQUAL(lameps_prob_t2m[10], 2);
     BOOST_CHECK_EQUAL(lameps_prob_t2m[11], 115);
     BOOST_CHECK_EQUAL(lameps_prob_t2m[12], 1000);
-    //cout << "reverse lookup: " << fp.getParameterName(lameps_prob_t2m) << endl;
     BOOST_CHECK_EQUAL(fp.getParameterName(lameps_prob_t2m), "lameps_prob_t2m>+30");
-    //boost::array<short, 16> special = { {88, 1905, 2007, 516, 0, 20684, 1, 12137, 3, 0, 2, 58, 1000, 0, 1, 101} };
-    //cout << "special array is: " << fp.getParameterName(special) << endl;
 }
 
 BOOST_AUTO_TEST_CASE( test_feltfile )
@@ -81,7 +75,6 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
     BOOST_CHECK_EQUAL( levels.size(), 1 );
     BOOST_CHECK_EQUAL( fa.getName(), "u10m" );
     BOOST_CHECK_EQUAL( fa.getTimes().size(), 61);
-    //cout << fa.getX() << "x" << fa.getY() << ": " << fa.getScalingFactor() << endl;
     BOOST_CHECK_EQUAL( fa.getX(), 229 );
     BOOST_CHECK_EQUAL( fa.getY(), 196 );
     BOOST_CHECK( std::abs(fa.getScalingFactor() - 0.001) < 1e-6 );
@@ -94,7 +87,6 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
 
     BOOST_CHECK_EQUAL(static_cast<int>(data.size()), (fa.getX()*fa.getY()));
     // u10m not defined on border
-    //cerr << "data: " << data[1000] << " " << data[10000] << " " << data[20000] << endl;
     BOOST_CHECK_EQUAL(data[0], ANY_VALUE());
     BOOST_CHECK_EQUAL(data[10000], 820);
     BOOST_CHECK_EQUAL(data[20000], 8964);
@@ -125,12 +117,10 @@ BOOST_AUTO_TEST_CASE( test_felt_axis )
         return;
     Felt_File2 ff(pathTestExtra("flth00.dat"), pathTest("diana.setup"));
     // gridPar needs to be a copy here, since the reference of gridPar will disappear with the gridDefinition
-    boost::array<float, 6> gridPar = ff.getGridDefinition()->getGridParameters();
+    std::array<float, 6> gridPar = ff.getGridDefinition()->getGridParameters();
     BOOST_CHECK_EQUAL(ff.getGridType(), 1);
 
     DataPtr xdata = ff.getXData();
-    //cerr << ff.getGridDefinition()->startX() - 5.71849e+06  << " x " << ff.getGridDefinition()->getXIncrement() - 50162.2<< endl;
-    //cerr << gridPar[0] << "'" << ((int)gridPar[0]-1) << ": "<< (xdata->asFloat())[(int)gridPar[0]-1] << " x " << (xdata->asFloat())[(int)gridPar[0]-1] << endl;
     BOOST_CHECK(fabs((xdata->asFloat())[(int)gridPar[0]-1]) < .5);
     BOOST_CHECK_EQUAL((xdata->asInt())[(int)gridPar[0]], 50162); // tis is 50162.2...
     BOOST_CHECK(fabs((ff.getYData()->asFloat())[(int)gridPar[1]-1]) < .5);
@@ -143,7 +133,6 @@ BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
         return;
     const string fileName = pathTestExtra("flth00.dat");
     FeltCDMReader2 feltCDM(fileName, pathShareEtc("felt2nc_variables.xml"));
-    //feltCDM.getCDM().toXMLStream(std::cerr);
     string projName, projXAxis, projYAxis, projXUnit, projYUnit;
     feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
     BOOST_CHECK_EQUAL(projName, "projection_1");

@@ -23,17 +23,19 @@
 
 #ifndef FELT_ARRAY2_H_
 #define FELT_ARRAY2_H_
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
-#include <boost/array.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <fimex/Felt_Types.h>
 #include "Felt_File_Error.h"
 
 #include "felt/FeltTypes.h"
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <array>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace MetNoFelt {
 using namespace std;
@@ -77,7 +79,7 @@ public:
     void addInformationByField(std::shared_ptr<felt::FeltField> field);
 
     /// get the time/level independent data-header
-//	const boost::array<short, 20>& getDataHeader() const {}
+    //	const std::array<short, 20>& getDataHeader() const {}
 
     /** return the parameter name */
     const string& getName() const;
@@ -96,7 +98,7 @@ public:
      * same as getGrid, but the gridParameters to
      * change up to the value provided in gridParameterDelta
      */
-    int getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta);
+    int getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const std::array<float, 6>& gridParameterDelta);
     /// get the felt level type of this array
     int getLevelType() const;
     /** return the changed fill used in #Felt_File::getScaledDataSlice */

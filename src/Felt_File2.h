@@ -142,7 +142,7 @@ private:
     std::map<std::string, std::shared_ptr<Felt_Array2>> feltArrayMap_;
     FeltParameters feltParameters_;
     std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
-    boost::array<float, 6> gridParameterDelta_; // allowed deviation between two grids
+    std::array<float, 6> gridParameterDelta_; // allowed deviation between two grids
 
     bool findOrCreateFeltArray(const std::shared_ptr<felt::FeltField>);
     /// add processing options by strings, must be set before setOptions

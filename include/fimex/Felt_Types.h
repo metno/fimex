@@ -27,6 +27,9 @@
 #ifndef FELT_TYPES_H_
 #define FELT_TYPES_H_
 
+#include <functional>
+#include <utility>
+
 namespace MetNoFelt {
 /**
  * a pair with two level values
@@ -43,7 +46,6 @@ struct LevelPairLess : public std::binary_function<const LevelPair, const LevelP
         return p1.first < p2.first;
     }
 };
-
 
 } // end namespace MetNoFelt
 

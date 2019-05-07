@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -29,10 +29,10 @@
 #ifndef FELTGRIDDEFINITION_H_
 #define FELTGRIDDEFINITION_H_
 
+#include <array>
+#include <iosfwd>
 #include <string>
 #include <vector>
-#include <iosfwd>
-#include <boost/array.hpp>
 
 namespace felt
 {
@@ -48,7 +48,7 @@ namespace felt
  * @param d used for different depending on gridType, header[17]
  * @param extraData data at the end of the data-region, used for high resolution information (header[8] < 1000) ? 0 : header[8] % 1000
  */
-boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData);
+std::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int>& extraData);
 
 /**
  * convert the libmi-gridparameters to proj4 strings
@@ -56,8 +56,7 @@ boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, i
  * @param gridPars array containing libmi's six gridparameters
  * @return proj.4 string
  */
-std::string gridParametersToProjDefinition(int gridType, const boost::array<float, 6>& gridPars);
-
+std::string gridParametersToProjDefinition(int gridType, const std::array<float, 6>& gridPars);
 
 class FeltGridDefinition
 {
@@ -101,7 +100,7 @@ public:
      * @return Y-start in m or degree
      */
     virtual float startY() const;
-    virtual const boost::array<float, 6>& getGridParameters() const;
+    virtual const std::array<float, 6>& getGridParameters() const;
     Orientation getScanMode() const;
 
 
@@ -114,7 +113,7 @@ private:
     float incrementX_;
     float incrementY_;
     Orientation orientation_;
-    boost::array<float, 6> gridPars_;
+    std::array<float, 6> gridPars_;
 
     Orientation getScanMode_();
     void polarStereographicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);

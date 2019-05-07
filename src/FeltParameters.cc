@@ -144,11 +144,11 @@ FeltParameters::~FeltParameters()
 {
 }
 
-boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& dianaString)
+std::array<short, 16> FeltParameters::diana2feltparameters(const std::string& dianaString)
 {
     boost::regex equalSeparatedRegex("\\s*(\\w*)=(\\d+)\\s*");
     boost::smatch what;
-    boost::array<short, 16> diana2feltParameters;
+    std::array<short, 16> diana2feltParameters;
     for (int i = 0; i < 16; i++) {
         diana2feltParameters[i] = ANY_VALUE();
     }
@@ -198,8 +198,9 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
     return diana2feltParameters;
 }
 
-const boost::array<short, 16>& FeltParameters::getParameters(const std::string& input) {
-    std::map<std::string, boost::array<short, 16> >::iterator it = parameterMap.find(input);
+const std::array<short, 16>& FeltParameters::getParameters(const std::string& input)
+{
+    std::map<std::string, std::array<short, 16>>::iterator it = parameterMap.find(input);
     if (it == parameterMap.end()) {
         // not found
         return ANY_ARRAY();
@@ -208,10 +209,11 @@ const boost::array<short, 16>& FeltParameters::getParameters(const std::string& 
     }
 }
 
-const std::string& FeltParameters::getParameterName(const boost::array<short, 16>&  feltParams) {
-    std::map<std::string, boost::array<short, 16> >::iterator it;
+const std::string& FeltParameters::getParameterName(const std::array<short, 16>& feltParams)
+{
+    std::map<std::string, std::array<short, 16>>::iterator it;
     for	(it = parameterMap.begin(); it != parameterMap.end(); ++it) {
-        boost::array<short, 16>  value = it->second;
+        std::array<short, 16> value = it->second;
         int errors = 0;
         for (int i = 0; i < 16; i++) {
             if ((value[i] != ANY_VALUE()) && value[i] != feltParams[i]) {
@@ -244,9 +246,9 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
 }
 
 std::ostream& operator<<(std::ostream& os, const FeltParameters& fp) {
-    std::map<std::string, boost::array<short, 16> >::const_iterator it;
+    std::map<std::string, std::array<short, 16>>::const_iterator it;
     for (it = fp.parameterMap.begin(); it != fp.parameterMap.end(); ++it) {
-        const boost::array<short, 16>&  value = it->second;
+        const std::array<short, 16>& value = it->second;
         const std::string& name = it->first;
         os << name << ": ";
         for (int i = 0; i < 15; i++) os << value[i] << ",";
@@ -255,7 +257,7 @@ std::ostream& operator<<(std::ostream& os, const FeltParameters& fp) {
     return os;
 }
 
-std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters)
+std::string getProjString(int gridType, const std::array<float, 6>& gridParameters)
 {
     std::ostringstream tempProj;
     std::string earth("+ellps=sphere +a="+MetNoFimex::type2string(MIFI_EARTH_RADIUS_M)+" +e=0");
@@ -280,21 +282,17 @@ const std::string& UNDEFINED() {
     static std::string s("");
     return s;
 }
-const boost::array<short, 16>& ANY_ARRAY() {
-    const static boost::array<short, 16> ary =
-    { {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
+const std::array<short, 16>& ANY_ARRAY()
+{
+    const static std::array<short, 16> ary = {{ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+                                               ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()}};
     return ary;
 }
-const boost::array<short, 20>& ANY_ARRAY20() {
-    const static boost::array<short, 20> ary =
-    { {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
-       ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
+const std::array<short, 20>& ANY_ARRAY20()
+{
+    const static std::array<short, 20> ary = {{ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+                                               ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+                                               ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()}};
     return ary;
 }
 

@@ -31,9 +31,10 @@
 #include "FeltConstants.h"
 #include "FeltGridDefinition.h"
 #include <boost/shared_array.hpp>
-#include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/noncopyable.hpp>
+
+#include <array>
 #include <string>
 #include <vector>
 
@@ -47,63 +48,63 @@ class FeltFile;
 class FeltField : boost::noncopyable
 {
 public:
-	typedef boost::array<word, 16> Header;
+    typedef std::array<word, 16> Header;
 
-	FeltField(const FeltFile & ff, size_t index);
+    FeltField(const FeltFile& ff, size_t index);
 
-	~FeltField();
+    ~FeltField();
 
-	bool valid() const { return gridSize() != 0; }
+    bool valid() const { return gridSize() != 0; }
 
-	int producer() const { return header_[0]; }
-	int gridArea() const { return header_[1]; }
+    int producer() const { return header_[0]; }
+    int gridArea() const { return header_[1]; }
 
-	boost::posix_time::ptime referenceTime() const;
-	boost::posix_time::ptime validTime() const;
+    boost::posix_time::ptime referenceTime() const;
+    boost::posix_time::ptime validTime() const;
 
-	/**
-	 * Get the parameter value. This is the logical value, which means that if
-	 * the parameter is part of an ensemble run, it will not start with
-	 * 2000,3000,4000,5000.
-	 */
-	int parameter() const;
+    /**
+     * Get the parameter value. This is the logical value, which means that if
+     * the parameter is part of an ensemble run, it will not start with
+     * 2000,3000,4000,5000.
+     */
+    int parameter() const;
 
-	/**
-	 * read the time dataType, i.e. 1=analysis 2=interpolated/initialization 3=prognosis 4=parameter-field(no time)
-	 */
-	int dataType() const { return header_[8]; }
+    /**
+     * read the time dataType, i.e. 1=analysis 2=interpolated/initialization 3=prognosis 4=parameter-field(no time)
+     */
+    int dataType() const { return header_[8]; }
 
-	int verticalCoordinate() const { return header_[10]; }
+    int verticalCoordinate() const { return header_[10]; }
 
-	/**
-	 * Get primary level value
-	 */
-	int level1() const;
+    /**
+     * Get primary level value
+     */
+    int level1() const;
 
-	/**
-	 * Get the secondary level value, or 0 if that level field has internally
-	 * been used for something else. This will happen if the field is part of
-	 * an enseble run.
-	 */
-	int level2() const;
+    /**
+     * Get the secondary level value, or 0 if that level field has internally
+     * been used for something else. This will happen if the field is part of
+     * an enseble run.
+     */
+    int level2() const;
 
-	int gridType() const { return header_[14]; }
+    int gridType() const { return header_[14]; }
 
-	/**
-	 * Read the grid from file.
-	 */
-	void grid(std::vector<word> & out) const;
-	size_t gridSize() const;
-	int scaleFactor() const;
-	int xNum() const;
-	int yNum() const;
-	/// this field is described in the felt documentation as "word 19 in data part"
-	int miscField() const;
+    /**
+     * Read the grid from file.
+     */
+    void grid(std::vector<word>& out) const;
+    size_t gridSize() const;
+    int scaleFactor() const;
+    int xNum() const;
+    int yNum() const;
+    /// this field is described in the felt documentation as "word 19 in data part"
+    int miscField() const;
 
-	bool isEpsRunParameter() const
-	{
-		int param = parameterUnmodified_();
-		return 2000 <= param and param < 6000;
+    bool isEpsRunParameter() const
+    {
+        int param = parameterUnmodified_();
+        return 2000 <= param and param < 6000;
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -73,7 +73,7 @@ static void projConvert(const std::string& projStr, double lon, double lat, doub
 
 
 // first scaling method
-void scaleGridInfoFirst_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
+void scaleGridInfoFirst_(std::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int>& extraData)
 {
     assert(parsUsed <= 6);
     for (int i = 0; i < parsUsed; ++i) {
@@ -86,7 +86,7 @@ void scaleGridInfoFirst_(boost::array<float, 6>& gridPar, int parsUsed, float sc
 }
 
 // second scaling method, internal scaling factor
-void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, const std::vector<short int> & extraData)
+void scaleGridInfoSecond_(std::array<float, 6>& gridPar, int parsUsed, const std::vector<short int>& extraData)
 {
 
     // two shorts for consistency checks
@@ -113,7 +113,7 @@ void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, const s
  * @param extraData the extra data at the end of the grid in a felt-grid on disk
  * @throw runtime_error if extraData.size doesn't match any scaling method
  */
-void scaleExtraData_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
+void scaleExtraData_(std::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int>& extraData)
 {
     assert(parsUsed <= 6);
     assert(parsUsed > 0);
@@ -130,10 +130,10 @@ void scaleExtraData_(boost::array<float, 6>& gridPar, int parsUsed, float scale,
     }
 }
 
-boost::array<float, 6> gridParametersPolarStereo_(int ixp, int iyp, int idist, int iphi, const std::vector<short int> & extraData)
+std::array<float, 6> gridParametersPolarStereo_(int ixp, int iyp, int idist, int iphi, const std::vector<short int>& extraData)
 {
     const int parsUsed = 5; // gridPar 6 not used
-    boost::array<float, 6> gridPar;
+    std::array<float, 6> gridPar;
     for (int i = 0; i < 6; ++i) {
         gridPar[i] = 0.;
     }
@@ -166,11 +166,11 @@ boost::array<float, 6> gridParametersPolarStereo_(int ixp, int iyp, int idist, i
     return gridPar;
 }
 
-boost::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist, int lonDist, const std::vector<short int> & extraData)
+std::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist, int lonDist, const std::vector<short int>& extraData)
 {
     // longlat and rotated longlat
     const int parsUsed = 6;
-    boost::array<float, 6> gridPar;
+    std::array<float, 6> gridPar;
     for (int i = 0; i < 6; ++i) {
         gridPar[i] = 0.;
     }
@@ -199,10 +199,10 @@ boost::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist
     return gridPar;
 }
 
-boost::array<float, 6> gridParametersMercator_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int> & extraData)
+std::array<float, 6> gridParametersMercator_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int>& extraData)
 {
     const int parsUsed = 5; // par 6 is empty
-    boost::array<float, 6> gridPar;
+    std::array<float, 6> gridPar;
     for (int i = 0; i < 6; ++i) {
         gridPar[i] = 0.;
     }
@@ -222,10 +222,10 @@ boost::array<float, 6> gridParametersMercator_(int iWestBound, int iSouthBound, 
     return gridPar;
 }
 
-boost::array<float, 6> gridParametersLambertConic_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int> & extraData)
+std::array<float, 6> gridParametersLambertConic_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int>& extraData)
 {
     const int parsUsed = 6;
-    boost::array<float, 6> gridPar;
+    std::array<float, 6> gridPar;
     for (int i = 0; i < 6; ++i) {
         gridPar[i] = 0.;
     }
@@ -249,7 +249,7 @@ boost::array<float, 6> gridParametersLambertConic_(int iWestBound, int iSouthBou
     return gridPar;
 }
 
-boost::array<float, 6> gridParameters(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData)
+std::array<float, 6> gridParameters(int gridType, int a, int b, int c, int d, const std::vector<short int>& extraData)
 {
     switch (gridType) {
         case 1:
@@ -262,8 +262,7 @@ boost::array<float, 6> gridParameters(int gridType, int a, int b, int c, int d, 
     throw std::invalid_argument("Unknown grid specification");
 }
 
-
-std::string gridParametersToProjDefinition(int gridType, const boost::array<float, 6>& gs)
+std::string gridParametersToProjDefinition(int gridType, const std::array<float, 6>& gs)
 {
     std::ostringstream projStr;
     switch (gridType) {
@@ -607,8 +606,7 @@ FeltGridDefinition::Orientation FeltGridDefinition::getScanMode() const
     return orientation_;
 };
 
-const boost::array<float, 6>&
-FeltGridDefinition::getGridParameters() const
+const std::array<float, 6>& FeltGridDefinition::getGridParameters() const
 {
     return gridPars_;
 }

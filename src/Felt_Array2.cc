@@ -217,12 +217,12 @@ int Felt_Array2::getY() const
 }
 int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut)
 {
-    boost::array<float, 6> nullDelta;
+    std::array<float, 6> nullDelta;
     for (int i = 0; i < 6; i++) nullDelta[i] = 0;
     return getGridAllowDelta(time, levelPair, gridOut, nullDelta);
 }
 
-int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta)
+int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const std::array<float, 6>& gridParameterDelta)
 {
     const std::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
 
@@ -236,8 +236,8 @@ int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair leve
     field->grid(gridOut);
 
      // check parameters against delta
-    const boost::array<float, 6> newParams = field->projectionInformation()->getGridParameters();
-    const boost::array<float, 6> defaultParams = defaultField_->projectionInformation()->getGridParameters();
+    const std::array<float, 6> newParams = field->projectionInformation()->getGridParameters();
+    const std::array<float, 6> defaultParams = defaultField_->projectionInformation()->getGridParameters();
     for (int i = 0; i < 6; i++) {
         // allow params to differ by a delta (optional)
         if (newParams[i] != defaultParams[i] && std::fabs(newParams[i]-defaultParams[i]) > gridParameterDelta[i]) {

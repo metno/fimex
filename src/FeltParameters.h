@@ -24,18 +24,18 @@
 #ifndef FELTPARAMETERS_H_
 #define FELTPARAMETERS_H_
 
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <boost/array.hpp>
+
 #include "Felt_File_Error.h"
 
 namespace MetNoFelt {
 
 class FeltParameters
 {
-    std::map<std::string, boost::array<short,16> > parameterMap;
+    std::map<std::string, std::array<short, 16>> parameterMap;
     std::map<std::string, std::string> parameterDatatypeMap;
     std::map<std::string, double> parameterFillValueMap;
 
@@ -53,8 +53,8 @@ public:
      */
     explicit FeltParameters(const std::vector<std::string>& feltParams, const std::string& globalRestrictions);
     virtual ~FeltParameters();
-    const boost::array<short, 16>& getParameters(const std::string&);
-    const std::string& getParameterName(const boost::array<short, 16>&);
+    const std::array<short, 16>& getParameters(const std::string&);
+    const std::string& getParameterName(const std::array<short, 16>&);
     std::string getParameterDatatype(const std::string& parameterName) const;
     double getParameterFillValue(const std::string& parameterName) const;
     // local static objects
@@ -65,15 +65,15 @@ public:
     friend std::ostream & operator<<(std::ostream &os, const FeltParameters& p);
 private:
     void init(std::string filename=DEFAULT_CONFIG());
-    boost::array<short, 16> diana2feltparameters(const std::string&);
+    std::array<short, 16> diana2feltparameters(const std::string&);
 };
 
-std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters);
+std::string getProjString(int gridType, const std::array<float, 6>& gridParameters);
 
 inline short ANY_VALUE() { return -32767;}
 const std::string& UNDEFINED();
-const boost::array<short, 16>& ANY_ARRAY();
-const boost::array<short, 20>& ANY_ARRAY20();
+const std::array<short, 16>& ANY_ARRAY();
+const std::array<short, 20>& ANY_ARRAY20();
 
 } // end namespace MetNoFelt
 
