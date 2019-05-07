@@ -1801,13 +1801,3 @@ size_t mifi_nand2bad(double* posPtr, double* endPtr, double badVal) {
     }
     return 0;
 }
-
-int mifi_isnanf(float val)
-{
-    return isnan(val);
-}
-
-int mifi_isnand(double val)
-{
-    return isnan(val);
-}

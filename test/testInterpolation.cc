@@ -33,6 +33,8 @@
 #include "fimex/CDMAttribute.h"
 #include "fimex/Data.h"
 
+#include <cmath>
+
 // definitions from proj_api.h
 #define RAD_TO_DEG      57.29577951308232
 
@@ -98,17 +100,17 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 
     // check for border values / nan
     mifi_get_values_bilinear_f(infield, outvalues, 0, 0, 2, 2, 1);
-    BOOST_CHECK(!mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(!std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 1, 1, 2, 2, 1);
-    BOOST_CHECK(!mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(!std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 1.5, 0.5, 2, 2, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 0.5, 1.5, 2, 2, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, 0.5, -0.5, 2, 2, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
 }
 
 
@@ -145,13 +147,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 
     // check for border values / nan
     mifi_get_values_bicubic_f(infield, outvalues, .5, 1, 4, 4, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 1, .5, 4, 4, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 2.5, 1, 4, 4, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
     mifi_get_values_bicubic_f(infield, outvalues, 1, 2.5, 4, 4, 1);
-    BOOST_CHECK(mifi_isnanf(outvalues[0]));
+    BOOST_CHECK(std::isnan(outvalues[0]));
 }
 
 
@@ -573,7 +575,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
             //std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
             // check equal length
             double diff2 = (uOut[j*4+i]*uOut[j*4+i] + vOut[j*4+i]*vOut[j*4+i] - uRot[j*4+i]*uRot[j*4+i] - vRot[j*4+i]*vRot[j*4+i]);
-            if (!mifi_isnand(diff2)) {
+            if (!std::isnan(diff2)) {
                 //std::cerr << diff2  << std::endl;
                 BOOST_CHECK(fabs(diff2) < 1e-3);
             }

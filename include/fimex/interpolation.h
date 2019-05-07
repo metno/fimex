@@ -589,33 +589,8 @@ extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
 
 extern size_t mifi_nand2bad(double* posPtr, double* endPtr, double badVal);
 
-/**
- * check if the value is a nan
- *
- * @param val the value to test
- * @return 0 on false, otherwise true
- * @warning this function should only be used in C++, which doesn't define
- *          the isnan macro defined in C99
- * @deprecated use mifi_isnan() template from fimex/Utils.h
- */
-extern MIFI_DEPRECATED(int mifi_isnanf(float val));
-/**
- * check if the value is a nan
- *
- * @param val the value to test
- * @return 0 on false, otherwise true
- * @warning this function should only be used in C++, which doesn't define
- *          the isnan macro defined in C99
- * @deprecated use mifi_isnan() template from fimex/Utils.h
- */
-extern MIFI_DEPRECATED(int mifi_isnand(double val));
-
-
-
-
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /*INTERPOLATION_H_*/

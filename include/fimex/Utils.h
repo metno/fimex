@@ -30,7 +30,6 @@
 #include <sstream>
 #include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/regex.hpp>
 #include <limits>
 #include "fimex/CDMException.h"
@@ -413,7 +412,7 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
  */
 template<typename C>
 int mifi_isnan(C x) {
-    return boost::math::isnan(x);
+    return std::isnan(x);
 }
 
 /**
