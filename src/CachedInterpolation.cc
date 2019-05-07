@@ -204,15 +204,16 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
     return outfield;
 }
 
-inline long long clamp(long long low, double dvalue, long long high)
+namespace {
+const long long EXTEND = 2;
+
+// adapt types
+inline long long clamp_ex(long long low, double dvalue, long long extend, long long high)
 {
-    const long long value = static_cast<long long>(dvalue);
-    if (value < low)
-        return low;
-    if (value < high)
-        return value;
-    return high;
+    const long long value = (extend > 0 ? std::ceil(dvalue) : std::floor(dvalue)) + extend;
+    return clamp(low, value, high);
 }
+} // namespace
 
 void CachedInterpolation::createReducedDomain(const std::string& xDimName, const std::string& yDimName)
 {
@@ -226,11 +227,10 @@ void CachedInterpolation::createReducedDomain(const std::string& xDimName, const
     const double pMaxY = *std::max_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
 
     // allow additional cells for interpolation (2 for bicubic)
-    const long long EXTEND = 2;
-    const long long minX = clamp(0, std::floor(pMinX)-EXTEND, inX-1);
-    const long long minY = clamp(0, std::floor(pMinY)-EXTEND, inY-1);
-    const long long maxX = clamp(0, std::ceil(pMaxX) +EXTEND, inX-1);
-    const long long maxY = clamp(0, std::ceil(pMaxY) +EXTEND, inY-1);
+    const long long minX = clamp_ex(0, pMinX, -EXTEND, inX - 1);
+    const long long minY = clamp_ex(0, pMinY, -EXTEND, inY - 1);
+    const long long maxX = clamp_ex(0, pMaxX, +EXTEND, inX - 1);
+    const long long maxY = clamp_ex(0, pMaxY, +EXTEND, inY - 1);
 
     // make sure we still have a useful size
     if ((maxX - minX) < 1 || (maxY - minY) < 1)

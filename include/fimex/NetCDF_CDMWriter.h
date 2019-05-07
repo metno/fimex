@@ -84,8 +84,10 @@ private:
     NcVarIdMap defineVariables(const NcDimIdMap& dimMap);
     void writeAttributes(const NcVarIdMap& varMap);
     void writeData(const NcVarIdMap& varMap);
-    double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
-    double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
+
+    DataPtr convertData(const CDMVariable& var, DataPtr data);
+
+private:
     CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
     std::unique_ptr<Nc> ncFile;
     std::map<std::string, std::string> variableNameChanges;

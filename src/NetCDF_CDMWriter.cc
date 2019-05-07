@@ -77,12 +77,12 @@ int getNcVersion(int version, std::unique_ptr<XMLDoc>& doc)
 #endif
         default: LOG4FIMEX(logger, Logger::ERROR, "unknown netcdf-version "<< version << " using 3 instead"); break;
     }
-    if (doc.get() != 0) {
+    if (doc) {
         // set the default filetype
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@filetype]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr) {
-            std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
+            const std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
             retVal = NC_CLOBBER;
             if (filetype == "netcdf3") {
                 //retVal = NC_CLOBBER;
@@ -116,15 +116,15 @@ void checkDoc(std::unique_ptr<XMLDoc>& doc, const std::string& filename)
 {
     xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 0)
+    const int size = (nodes) ? nodes->nodeNr : 0;
+    if (size != 1)
         throw CDMException("no root element (/cdm_ncwriter_config) in " + filename);
 }
 
 } // namespace
 
-NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& outputFile, std::string configFile, int version)
-    : CDMWriter(cdmReader, outputFile)
+NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& outputFile, std::string configFile, int version)
+    : CDMWriter(reader, outputFile)
     , ncFile(new Nc())
 {
     std::unique_ptr<XMLDoc> doc;
@@ -132,41 +132,38 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& out
         doc.reset(new XMLDoc(configFile));
         checkDoc(doc, configFile);
     }
-    int ncVersion = getNcVersion(version, doc);
+    const int ncVersion = getNcVersion(version, doc);
     ncFile->filename = outputFile;
 #ifdef HAVE_MPI
     if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
         LOG4FIMEX(logger, Logger::DEBUG, "opening parallel nc-file: " << ncFile->filename);
         ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId), "creating "+ncFile->filename);
-    } else {
+    } else
+#endif
+    {
         ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
     }
-#else
-    ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
-#endif
     ncFile->isOpen = true;
-
 
     ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format));
 #ifdef NC_NETCDF4
     if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
-        if ((ncVersion & NC_CLASSIC_MODEL) != 0) {
+        if ((ncVersion & NC_CLASSIC_MODEL) != 0)
             LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, classic mode");
-        } else {
+        else
             LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format");
-        }
     } else
 #endif
-    LOG4FIMEX(logger, Logger::DEBUG, "netcdf3 format");
+    {
+        LOG4FIMEX(logger, Logger::DEBUG, "netcdf3 format");
+    }
     if (ncFile->format < 3) {
-        /*
-         *  using nofill for netcdf3 (2times io)
-         *  doesn't effect netcdf4
-         */
+        // using nofill for netcdf3 (2times io) -- does not affect netcdf4
         int oldFill;
         nc_set_fill(ncFile->ncId, NC_NOFILL, &oldFill);
     }
     initNcmlReader(doc);
+    cdm = cdmReader->getCDM();
     initRemove(doc);
     // variable needs to be called before dimension!!!
     initFillRenameVariable(doc);
@@ -178,30 +175,31 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& out
 
 void NetCDF_CDMWriter::initNcmlReader(std::unique_ptr<XMLDoc>& doc)
 {
-    if (doc.get() != 0) {
+    if (doc) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        if (size > 0) {
+        const int size = (nodes) ? nodes->nodeNr : 0;
+        if (size == 1) {
             std::string configFile = getXmlProp(nodes->nodeTab[0], "filename");
             LOG4FIMEX(logger, Logger::DEBUG, "configuring CDMWriter with ncml config file: " << configFile);
             cdmReader = std::make_shared<NcmlCDMReader>(cdmReader, XMLInputFile(configFile));
+        } else if (size > 1) {
+            throw CDMException("multiple ncmlConfig elements");
         }
     }
-    cdm = cdmReader->getCDM();
 }
 
 void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
 {
     bool autoRemoveDims = true;
-    if (doc.get() != 0) {
+    if (doc) {
         {
             // remove global attributes
             xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='attribute']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
+            const int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
-                std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                const std::string name = getXmlProp(nodes->nodeTab[i], "name");
                 cdm.removeAttribute(CDM::globalAttributeNS(), name);
             }
         }
@@ -209,10 +207,10 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
             // remove variable attributes
             xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable/remove[@type='attribute']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
+            const int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
-                std::string name = getXmlProp(nodes->nodeTab[i], "name");
-                std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
+                const std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                const std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
                 cdm.removeAttribute(varName, name);
             }
         }
@@ -220,9 +218,9 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
             // remove variables
             xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='variable']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
+            const int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
-                std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                const std::string name = getXmlProp(nodes->nodeTab[i], "name");
                 LOG4FIMEX(logger, Logger::DEBUG, "Removing variables '" << name << "'");
                 cdm.removeVariable(name);
             }
@@ -231,9 +229,9 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
             // remove dimensions
             xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='dimension']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
+            const int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
-                std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                const std::string name = getXmlProp(nodes->nodeTab[i], "name");
                 if (cdm.testDimensionInUse(name)) {
                     LOG4FIMEX(logger, Logger::WARN, "Cannot remove dimension in use: '" << name << "'");
                 } else {
@@ -246,16 +244,17 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
             // check for autoRemoveUnusedDimensions
             xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@autoRemoveUnusedDimension='false']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
-            if (size > 0) autoRemoveDims = false;
-         }
+            const int size = (nodes) ? nodes->nodeNr : 0;
+            if (size > 0)
+                autoRemoveDims = false;
+        }
     }
     if (autoRemoveDims) {
-        const CDM::DimVec dims = cdm.getDimensions();
-        for (CDM::DimVec::const_iterator dimIt = dims.begin(); dimIt != dims.end(); ++dimIt) {
-            if (! cdm.testDimensionInUse(dimIt->getName())) {
-                LOG4FIMEX(logger, Logger::DEBUG, "Auto-removing dimension '" << dimIt->getName() << "'");
-                cdm.removeDimension(dimIt->getName());
+        const CDM::DimVec dims = cdm.getDimensions(); // copy
+        for (const CDMDimension& dim : dims) {
+            if (!cdm.testDimensionInUse(dim.getName())) {
+                LOG4FIMEX(logger, Logger::DEBUG, "Auto-removing dimension '" << dim.getName() << "'");
+                cdm.removeDimension(dim.getName());
             }
         }
     }
@@ -263,14 +262,14 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
 
 void NetCDF_CDMWriter::initFillRenameDimension(std::unique_ptr<XMLDoc>& doc)
 {
-    if (doc.get() != 0) {
+    if (doc) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
+        const int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
             LOG4FIMEX(logger, Logger::WARN, "Changing renaming dimensions in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+            const std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            const std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
             cdm.getDimension(name); // check existence, throw exception
             dimensionNameChanges[name] = newname;
             // change dimension variable unless it has been changed
@@ -292,33 +291,33 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName)
 
 void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
 {
-    if (doc.get() != 0) {
+    if (doc) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
             LOG4FIMEX(logger, Logger::WARN, "Changing variable-names in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            const std::string name = getXmlProp(nodes->nodeTab[i], "name");
             testVariableExists(name);
-            std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+            const std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
             variableNameChanges[name] = newname;
         }
     }
-    if (doc.get() != 0) {
+    if (doc) {
         // read 'type' attribute and enable re-typeing of data
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
+            const std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            const CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
             CDMVariable& v = cdm.getVariable(name);
             v.setDataType(type);
             variableTypeChanges[name] = type;
         }
     }
     unsigned int defaultCompression = 13; // shuffle + comp-level 3
-    if (doc.get() != 0) {
+    if (doc) {
         // set the default compression level for all variables
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@compressionLevel]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -326,30 +325,29 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
             defaultCompression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
         }
     }
-    const CDM::VarVec& vars = cdm.getVariables();
-    for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-        variableCompression[varIt->getName()] = defaultCompression;
+    for (const CDMVariable& var : cdm.getVariables()) {
+        variableCompression[var.getName()] = defaultCompression;
     }
-    if (doc.get() != 0) {
+    if (doc) {
         // set the compression level for all variables
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@compressionLevel]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
+        const int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            unsigned int compression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "compressionLevel"));
+            const std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            const unsigned int compression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "compressionLevel"));
             variableCompression[name] = compression;
         }
     }
     // chunking
-    if (doc.get() != 0) {
+    if (doc) {
         // set the compression level for all variables
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@chunkSize]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
+        const int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
-            std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            unsigned int chunkSize = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "chunkSize"));
+            const std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            const unsigned int chunkSize = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "chunkSize"));
             dimensionChunkSize[name] = chunkSize;
         }
     }
@@ -358,84 +356,84 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
 void NetCDF_CDMWriter::initFillRenameAttribute(std::unique_ptr<XMLDoc>& doc)
 {
     // make a complete copy of the original attributes
-    if (doc.get() != 0) {
-        xmlXPathObject_p xpathObj = doc->getXPathObject("//attribute");
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        for (int i = 0; i < size; i++) {
-            xmlNodePtr node = nodes->nodeTab[i];
-            std::string attName = getXmlProp(node, "name");
-            if (attName != "units")
-                LOG4FIMEX(logger, Logger::WARN, "Changing attributes in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
-            std::string varName = CDM::globalAttributeNS();
-            xmlNodePtr parent = node->parent;
-            std::string parentName = getXmlName(parent);
-            if (parentName == "cdm_ncwriter_config") {
-                // default
-            } else if (parentName == "variable") {
-                varName = getXmlProp(parent, "name");
-                testVariableExists(varName);
-            } else {
-                throw CDMException("unknown parent of attribute " + attName + ": " + parentName);
-            }
+    if (!doc)
+        return;
 
-            std::string attValue = getXmlProp(node, "value");
-            std::string attType = getXmlProp(node, "type");
-            std::string attNewName = getXmlProp(node, "newname");
-            std::string newAttrName = attNewName != "" ? attNewName : attName;
-            CDMAttribute attr;
-            if (attType != "") {
-                attr = CDMAttribute(newAttrName, attType, attValue);
-            } else {
-                const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
-                attr = CDMAttribute(newAttrName, oldAttr.getData());
-            }
-            cdm.removeAttribute(varName, attName); // remove the attribute with the old name
-            cdm.addAttribute(varName, attr);       // set the attribute with the new name and data
-    }
+    xmlXPathObject_p xpathObj = doc->getXPathObject("//attribute");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    const int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        xmlNodePtr node = nodes->nodeTab[i];
+        const std::string attName = getXmlProp(node, "name");
+        if (attName != "units")
+            LOG4FIMEX(logger, Logger::WARN, "Changing attributes in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
+        std::string varName = CDM::globalAttributeNS();
+        xmlNodePtr parent = node->parent;
+        const std::string parentName = getXmlName(parent);
+        if (parentName == "cdm_ncwriter_config") {
+            // default
+        } else if (parentName == "variable") {
+            varName = getXmlProp(parent, "name");
+            testVariableExists(varName);
+        } else {
+            throw CDMException("unknown parent of attribute " + attName + ": " + parentName);
+        }
+
+        const std::string attValue = getXmlProp(node, "value");
+        const std::string attType = getXmlProp(node, "type");
+        const std::string attNewName = getXmlProp(node, "newname");
+        const std::string newAttrName = attNewName != "" ? attNewName : attName;
+        CDMAttribute attr;
+        if (!attType.empty()) {
+            attr = CDMAttribute(newAttrName, attType, attValue);
+        } else {
+            const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
+            attr = CDMAttribute(newAttrName, oldAttr.getData());
+        }
+        cdm.removeAttribute(varName, attName); // remove the attribute with the old name
+        cdm.addAttribute(varName, attr);       // set the attribute with the new name and data
     }
 }
 
-
-NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
-    const CDM::DimVec& cdmDims = cdm.getDimensions();
+NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions()
+{
     NcDimIdMap ncDimMap;
-    for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
-#ifdef HAVE_MPI
+    for (const CDMDimension& dim : cdm.getDimensions()) {
         int length;
+#ifdef HAVE_MPI
         if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
             // netcdf-MPI does not work with unlimited variables
-            length = it->getLength();
-            if (length == 0) length++;
-        } else {
-            length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
-        }
-#else
-        int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
+            length = dim.getLength();
+            if (length == 0)
+                length = 1;
+        } else
 #endif
-        if (!it->isUnlimited()) {
+        {
+            length = dim.isUnlimited() ? NC_UNLIMITED : dim.getLength();
+        }
+        if (!dim.isUnlimited()) {
             // length = 0 means unlimited in netcdf, so I create a dummy
-            if (length == 0) length = 1;
+            if (length == 0)
+                length = 1;
         }
         // NcDim is organized by NcFile, no need to clean
         // change the name written to the file according to getDimensionName
         int dimId;
-        ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(it->getName()).c_str(), length, &dimId));
-        ncDimMap[it->getName()] = dimId;
-        LOG4FIMEX(logger,Logger::DEBUG, "DimId of " << it->getName() << " = " << dimId);
+        ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(dim.getName()).c_str(), length, &dimId));
+        ncDimMap[dim.getName()] = dimId;
+        LOG4FIMEX(logger, Logger::DEBUG, "DimId of " << dim.getName() << " = " << dimId);
     }
     return ncDimMap;
 }
 
-NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap& ncDimIdMap) {
-    const CDM::VarVec& cdmVars = cdm.getVariables();
+NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap& ncDimIdMap)
+{
     NcVarIdMap ncVarMap;
-    for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-        const CDMVariable& var = *it;
+    for (const CDMVariable& var : cdm.getVariables()) {
         const std::vector<std::string>& shape = var.getShape();
         std::unique_ptr<int[]> ncshape(new int[shape.size()]);
         for (size_t i = 0; i < shape.size(); i++) {
-            // revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
+            // revert order, cdm requires fastest moving first, netcdf requires fastest moving first
             ncshape[i] = ncDimIdMap.find(shape[(shape.size()-1-i)])->second;
         }
         CDMDataType datatype = var.getDataType();
@@ -443,7 +441,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
             CDMDataType& newType = variableTypeChanges[var.getName()];
             datatype = newType != CDM_NAT ? newType : datatype;
         }
-        if (datatype == CDM_NAT && shape.size() == 0) {
+        if (datatype == CDM_NAT && shape.empty()) {
             // empty variable, use int datatype
             datatype = CDM_INT;
         }
@@ -457,358 +455,310 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
 #ifdef HAVE_MPI
             if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
                 LOG4FIMEX(logger, Logger::INFO, "disabling all compression, not possible with parallel HDF5");
-            } else {
+            } else
 #endif //HAVE_MPI
-            int compression = 0;
-            int shuffle = 0;
-            assert(variableCompression.find(var.getName()) != variableCompression.end());
-            if (variableCompression.find(var.getName()) != variableCompression.end()) {
-                compression = variableCompression[var.getName()];
-                if (compression > 10) {
-                    compression -= 10;
-                    shuffle = 1;
-                }
-            }
-            if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
-                // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
-                const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1M *sizeof(type)
-                const size_t MIN_CHUNK = 2 << 16; // chunks should be at least reasonably sized, e.g. 64k*sizeof(type)
-                std::unique_ptr<size_t[]> ncChunk(new size_t[shape.size()]);
-                size_t chunkSize = 1;
-                for (size_t i = 0; i < shape.size(); i++) {
-                    // revert order, cdm requires fastest moving first, netcdf-c requires fastest moving last
-                    CDMDimension& dim = cdm.getDimension(shape.at(i));
-                    size_t dimSize = dim.isUnlimited() ? 1 : dim.getLength();
-                    std::map<std::string, unsigned int>::const_iterator defaultChunk = dimensionChunkSize.find(shape.at(i));
-                    if (defaultChunk != dimensionChunkSize.end()) {
-                        unsigned int chunkDim = (defaultChunk->second > dimSize) ? dimSize : defaultChunk->second;
-                        if (chunkDim == 0) chunkDim = 1;
-                        ncChunk[shape.size()-1 - i] = chunkDim;
-                        chunkSize *= chunkDim;
-                    } else {
-                        size_t lastChunkSize = chunkSize;
-                        chunkSize *= dimSize;
-                        if (chunkSize < DEFAULT_CHUNK) {
-                            ncChunk[shape.size()-1 - i] = dimSize;
-                        } else {
-                            size_t thisChunk = 1;
-                            if (dimSize > 1 && (lastChunkSize < (MIN_CHUNK))) {
-                                // create a chunk-size which makes the total chunk ~= MIN_CHUNK
-                                thisChunk = floor(chunkSize / MIN_CHUNK); // a number > 2^4 since chunkSize > DEFAULT_CHUNK
-                                if (thisChunk > dimSize) thisChunk = dimSize;
-                                if (thisChunk < 1) thisChunk = 1;
-                            }
-                            ncChunk[shape.size()-1 - i] = thisChunk;
-                        }
+            {
+                int compression = 0;
+                int shuffle = 0;
+                if (variableCompression.find(var.getName()) != variableCompression.end()) {
+                    compression = variableCompression[var.getName()];
+                    if (compression > 10) {
+                        compression -= 10;
+                        shuffle = 1;
                     }
                 }
-                if (chunkSize > 0) {
-                    LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
-                    ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
+                if (compression > 0 && !shape.empty()) { // non-scalar variables
+                    // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
+                    const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1M *sizeof(type)
+                    const size_t MIN_CHUNK = 2 << 16;     // chunks should be at least reasonably sized, e.g. 64k*sizeof(type)
+                    std::unique_ptr<size_t[]> ncChunk(new size_t[shape.size()]);
+                    size_t chunkSize = 1;
+                    for (size_t i = 0; i < shape.size(); i++) {
+                        // revert order, cdm requires fastest moving first, netcdf-c requires fastest moving last
+                        const CDMDimension& dim = cdm.getDimension(shape[i]);
+                        const unsigned int dimSize = dim.isUnlimited() ? 1 : dim.getLength();
+                        std::map<std::string, unsigned int>::const_iterator defaultChunk = dimensionChunkSize.find(shape[i]);
+                        if (defaultChunk != dimensionChunkSize.end()) {
+                            unsigned int chunkDim = clamp(1u, dimSize, defaultChunk->second);
+                            chunkSize *= chunkDim;
+                            ncChunk[shape.size() - 1 - i] = chunkDim;
+                        } else {
+                            const size_t lastChunkSize = chunkSize;
+                            chunkSize *= dimSize;
+                            if (chunkSize < DEFAULT_CHUNK) {
+                                ncChunk[shape.size() - 1 - i] = dimSize;
+                            } else {
+                                size_t thisChunk = 1;
+                                if (dimSize > 1 && (lastChunkSize < (MIN_CHUNK))) {
+                                    // create a chunk-size which makes the total chunk ~= MIN_CHUNK
+                                    thisChunk =
+                                        clamp(1u, (unsigned int)floor(chunkSize / MIN_CHUNK), dimSize); // a number > 2^4 since chunkSize > DEFAULT_CHUNK
+                                }
+                                ncChunk[shape.size() - 1 - i] = thisChunk;
+                            }
+                        }
+                    }
+                    if (chunkSize > 0) {
+                        LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
+                        ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
+                    }
+                    // start compression
+                    LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression << " and shuffle=" << shuffle);
+                    ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression));
                 }
-                // start compression
-                LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression << " and shuffle="<< shuffle);
-                ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression));
             }
-#ifdef HAVE_MPI
-            }
-#endif // HAVE_MPI
         }
 #endif // NC_NETCDF4
     }
     return ncVarMap;
 }
 
-void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap) {
-    // using C interface since it offers a combined interface to global and var attributes
-    const CDM::StrAttrVecMap& attributes = cdm.getAttributes();
-    for (CDM::StrAttrVecMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
+void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap)
+{
+    for (const auto& nmsp_att : cdm.getAttributes()) {
         int varId;
-        if (it->first == CDM::globalAttributeNS()) {
+        if (nmsp_att.first == CDM::globalAttributeNS()) {
             varId = NC_GLOBAL;
         } else {
-            varId = ncVarMap.find(it->first)->second;
+            varId = ncVarMap.find(nmsp_att.first)->second;
         }
-        for (CDM::AttrVec::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
-            const CDMAttribute& attr = *ait;
-            CDMDataType dt = attr.getDataType();
+        for (const CDMAttribute& attr : nmsp_att.second) {
+            const CDMDataType dt = attr.getDataType();
+            const nc_type nc_dt = cdmDataType2ncType(dt);
+            DataPtr attrData = attr.getData();
+            const size_t attrLen = attrData->size();
+            const char* attrName = attr.getName().c_str();
             switch (dt) {
             case CDM_STRING: {
-                const std::string text = attr.getData()->asString();
-                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), text.size(), text.c_str()));
+                const std::string text = attrData->asString();
+                ncCheck(nc_put_att_text(ncFile->ncId, varId, attrName, text.size(), text.c_str()));
                 break;
             }
             case CDM_CHAR:
-                ncCheck(nc_put_att_schar(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asChar().get()) ));
+                ncCheck(nc_put_att_schar(ncFile->ncId, varId, attrName, nc_dt, attrLen, reinterpret_cast<const signed char*>(attrData->asChar().get())));
                 break;
             case CDM_SHORT:
-                ncCheck(nc_put_att_short(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asShort().get() ));
+                ncCheck(nc_put_att_short(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asShort().get()));
                 break;
             case CDM_INT:
-                ncCheck(nc_put_att_int(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asInt().get() ));
+                ncCheck(nc_put_att_int(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asInt().get()));
                 break;
             case CDM_FLOAT:
-                ncCheck(nc_put_att_float(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asFloat().get() ));
+                ncCheck(nc_put_att_float(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asFloat().get()));
                 break;
             case CDM_DOUBLE:
-                ncCheck(nc_put_att_double(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asDouble().get() ));
+                ncCheck(nc_put_att_double(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asDouble().get()));
                 break;
 #ifdef NC_NETCDF4
             case CDM_STRINGS: {
-                DataPtr attrData = attr.getData();
-                const size_t attrLen = attrData->size();
                 boost::shared_array<std::string> svals = attrData->asStrings();
                 if (ncFile->supports_nc_string()) {
-                    boost::shared_array<const char*> cvals(new const char*[attrLen]);
+                    std::unique_ptr<const char* []> cvals(new const char*[attrLen]);
                     for (size_t i=0; i<attrLen; ++i)
                         cvals[i] = svals[i].c_str();
-                    ncCheck(nc_put_att(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attrLen, &cvals[0]));
+                    ncCheck(nc_put_att(ncFile->ncId, varId, attrName, nc_dt, attrLen, &cvals[0]));
                 } else if (attrLen == 1) {
                     // convert 1 string to char attribute
                     const std::string& s0 = svals[0];
-                    ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), s0.size(), s0.c_str()));
+                    ncCheck(nc_put_att_text(ncFile->ncId, varId, attrName, s0.size(), s0.c_str()));
                 } else {
                     throw CDMException("cannot write CDM_STRINGS with more than 1 entry to this NetCDF format for attribute '" + attr.getName() + "'");
                 }
                 break;
             }
             case CDM_UCHAR:
-                ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asUChar().get() ));
+                ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asUChar().get()));
                 break;
             case CDM_USHORT:
-                ncCheck(nc_put_att_ushort(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asUShort().get() ));
+                ncCheck(nc_put_att_ushort(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asUShort().get()));
                 break;
             case CDM_UINT:
-                ncCheck(nc_put_att_uint(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asUInt().get() ));
+                ncCheck(nc_put_att_uint(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asUInt().get()));
                 break;
             case CDM_INT64:
-                ncCheck(nc_put_att_longlong(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asInt64().get() ));
+                ncCheck(nc_put_att_longlong(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asInt64().get()));
                 break;
             case CDM_UINT64:
-                ncCheck(nc_put_att_ulonglong(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), attr.getData()->asUInt64().get() ));
+                ncCheck(nc_put_att_ulonglong(ncFile->ncId, varId, attrName, nc_dt, attrLen, attrData->asUInt64().get()));
                 break;
 #endif
             case CDM_NAT:
-            default: throw CDMException("unknown datatype for attribute " + attr.getName());
+            default:
+                throw CDMException("unknown datatype for attribute " + attr.getName());
             }
         }
     }
 }
 
-double NetCDF_CDMWriter::getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const
+DataPtr NetCDF_CDMWriter::convertData(const CDMVariable& var, DataPtr data)
 {
-    double retVal = defaultValue;
-    try {
-        const CDMAttribute& attr = cdmReader->getCDM().getAttribute(varName, attName);
-        retVal = attr.getData()->asDouble()[0];
-    } catch (CDMException& e) {} // don't care
-    return retVal;
-}
-double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const
-{
-    double retVal = defaultValue;
-    try {
-        const CDMAttribute& attr = getAttribute(varName, attName);
-        retVal = attr.getData()->asDouble()[0];
-    } catch (CDMException& e) {} // don't care
-    return retVal;
+    const std::string& varName = var.getName();
+    std::map<std::string, CDMDataType>::const_iterator it = variableTypeChanges.find(varName);
+    if (it != variableTypeChanges.end() && it->second != CDM_NAT) {
+        double oldFill = cdmReader->getCDM().getFillValue(varName);
+        double oldScale = cdmReader->getCDM().getScaleFactor(varName);
+        double oldOffset = cdmReader->getCDM().getAddOffset(varName);
+        double newFill = cdm.getFillValue(varName);
+        double newScale = cdm.getScaleFactor(varName);
+        double newOffset = cdm.getAddOffset(varName);
+
+        // changes of the units
+        double unitSlope = 1.;
+        double unitOffset = 0.;
+        std::string oldUnit;
+        std::string newUnit;
+        try {
+            oldUnit = cdmReader->getCDM().getUnits(varName);
+            newUnit = cdm.getUnits(varName);
+            if (oldUnit != newUnit) {
+                Units units;
+                units.convert(oldUnit, newUnit, unitSlope, unitOffset);
+            }
+        } catch (UnitException& e) {
+            LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << var.getName() << ": " << e.what());
+        } catch (CDMException& e) {
+            // units not defined, do nothing
+        }
+
+        try {
+            DataTypeChanger dtc(var.getDataType(), oldFill, oldScale, oldOffset, it->second, newFill, newScale, newOffset, unitSlope, unitOffset);
+            data = dtc.convertData(data);
+        } catch (CDMException& e) {
+            throw CDMException("problems converting data of var " + varName + ": " + e.what());
+        }
+    }
+    return data;
 }
 
-
-void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
+void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
+{
     const CDMDimension* unLimDim = cdm.getUnlimitedDim();
     const int unLimDimId = ncDimId(ncFile->ncId, unLimDim);
     const long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
     const CDM::VarVec& cdmVars = cdm.getVariables();
-    // write data
+
+#ifdef HAVE_MPI
+    const bool sliceAlongUnlimited = (maxUnLim > 3);
+    const bool using_mp = (mifi_mpi_initialized() && mifi_mpi_size > 1);
+#endif
+
+    // read data along unLimDim and then variables, otherwise netcdf3 reading might get very slow
+    // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
+    // use unLimDimPos = -1 for variables without unlimited dimension
+
 #if !defined(__INTEL_COMPILER) // openmp gives currently segfaults with intel compilers
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
-    {
-#pragma omp single
-        {
+#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap)
 #endif
 #endif //__INTEL_COMPILER
-            Units units;
-
-            // read data along unLimDim and then variables, otherwise netcdf3 reading might get very slow
-            // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
-            // use unLimDimPos = -1 for variables without unlimited dimension
-            for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
+    for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
 #ifdef HAVE_MPI
-                const bool sliceAlongUnlimited = (maxUnLim > 3);
-                if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
-                    if (sliceAlongUnlimited) { // MPI-slices along unlimited dimension
-                        // only work on variables which belong to this mpi-process (modulo-base)
-                        if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
-                            LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on unLimDimPos " << unLimDimPos);
-                            continue;
-                        } else {
-                            LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
-                        }
-                    }
+        if (using_mpi) {
+            if (sliceAlongUnlimited) { // MPI-slices along unlimited dimension
+                // only work on variables which belong to this mpi-process (modulo-base)
+                if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
+                    LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping unLimDimPos " << unLimDimPos);
+                    continue;
+                } else {
+                    LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
                 }
-#endif
-                for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
-                    CDMVariable cdmVar = cdmVars.at(vi);
-                    std::string varName = cdmVar.getName();
-                    int varId = ncVarMap.find(cdmVar.getName())->second;
-#ifdef HAVE_MPI
-                    if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
-                        ncCheck(nc_var_par_access(ncFile->ncId, varId, NC_INDEPENDENT));
-                        if (!sliceAlongUnlimited) { // MPI-slices along unlimited dimension
-                            // only work on variables which belong to this mpi-process (modulo-base along variable-ids)
-                            if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
-                                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on variable " << varName);
-                                continue;
-                            } else {
-                                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable '" << varName << "'");
-                            }
-                        }
-                    }
-#endif
-                    DataTypeChanger dtc(cdmVar.getDataType());
-                    if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
-                            (variableTypeChanges[varName] != CDM_NAT)) {
-                        double oldFill = cdmReader->getCDM().getFillValue(varName);
-                        double oldScale = cdmReader->getCDM().getScaleFactor(varName);
-                        double oldOffset = cdmReader->getCDM().getAddOffset(varName);
-                        double newFill = cdm.getFillValue(varName);
-                        double newScale = cdm.getScaleFactor(varName);
-                        double newOffset = cdm.getAddOffset(varName);
-
-                        // changes of the units
-                        double unitSlope = 1.;
-                        double unitOffset = 0.;
-                        std::string oldUnit;
-                        std::string newUnit;
-                        try {
-                            oldUnit = cdmReader->getCDM().getUnits(varName);
-                            newUnit = cdm.getUnits(varName);
-                            if (oldUnit != newUnit) {
-                                units.convert(oldUnit, newUnit, unitSlope, unitOffset);
-                            }
-                        } catch (UnitException& e) {
-                            LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what());
-                        } catch (CDMException& e) {
-                            // units not defined, do nothing
-                        }
-
-                        dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
-                    }
-                    int dimLen;
-                    ncCheck(nc_inq_varndims(ncFile->ncId, varId, &dimLen));
-                    int dimIds[dimLen];
-                    ncCheck(nc_inq_vardimid(ncFile->ncId, varId, &dimIds[0]));
-                    size_t count[dimLen];
-                    size_t start[dimLen];
-                    int unLimDimIdx = -1;
-                    for (int i = 0; i < dimLen; ++i) {
-                        start[i] = 0;
-                        ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
-                        if (dimIds[i] == unLimDimId)
-                            unLimDimIdx = i;
-                    }
-                    LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dimIds[0], &dimIds[0]+dimLen));
-                    if (unLimDimPos == -1) {
-                        if (!cdm.hasUnlimitedDim(cdmVar)) {
-                            //variable without unlimited dimension write at -1
-#if !defined(__INTEL_COMPILER)
-#ifdef _OPENMP
-#pragma omp task firstprivate(cdmVar,varName,vi)
-                            {
-#endif
-#endif
-                                DataPtr data = cdmReader->getData(varName);
-                                try {
-                                    data = dtc.convertData(data);
-                                } catch (CDMException& e) {
-                                    throw CDMException("problems converting data of var " + varName + ": " + e.what());
-                                }
-                                if (data->size() == 0 && ncFile->format < 3) {
-                                    // need to write data with _FillValue,
-                                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
-                                    size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
-                                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
-                                }
-
-                                if (data->size() > 0) {
-                                    try {
-                                        ScopedCritical ncLock(Nc::getMutex());
-                                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
-                                        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-                                    } catch (CDMException& ex) {
-                                        throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
-                                    }
-                                }
-                            }
-#if !defined(__INTEL_COMPILER)
-#ifdef _OPENMP
-                        }
-#endif
-#endif
-                    } else {
-                        if (cdm.hasUnlimitedDim(cdmVar) && unLimDimIdx >= 0) {
-                            // variables with unlimited dimension
-#if !defined(__INTEL_COMPILER)
-#ifdef _OPENMP
-#pragma omp task firstprivate(cdmVar,varName,vi,unLimDimPos)
-                            {
-#endif
-#endif
-                                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
-                                try {
-                                    data = dtc.convertData(data);
-                                } catch (CDMException& e) {
-                                    throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
-                                }
-                                if (data->size() == 0 && ncFile->format < 3) {
-                                    // need to write data with _FillValue,
-                                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
-                                    count[0] = 1; // just one slice
-                                    size_t size = (dimLen == 0) ? 1 : std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
-                                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
-                                }
-                                if (data->size() > 0) {
-                                    count[unLimDimIdx] = 1;
-                                    start[unLimDimIdx] = unLimDimPos;
-                                    try {
-                                        ScopedCritical ncLock(Nc::getMutex());
-                                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName << "("<< unLimDimPos << ")");
-                                        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-                                    } catch (CDMException& ex) {
-                                        throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );
-                                    }
-
-                                }
-#if !defined(__INTEL_COMPILER)
-#ifdef _OPENMP
-                            }
-#endif
-#endif
-                        }
-                    }
-                }
-#ifndef HAVE_MPI
-                if (unLimDimPos >= 0) {
-                    ScopedCritical ncLock(Nc::getMutex());
-                    ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
-                }
-#endif
             }
-#if !defined(__INTEL_COMPILER)
-#ifdef _OPENMP
-        } // single
-    } // parallel
+        }
 #endif
+        for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+            const CDMVariable& cdmVar = cdmVars[vi];
+            const std::string& varName = cdmVar.getName();
+            const int varId = ncVarMap.find(varName)->second;
+#ifdef HAVE_MPI
+            if (using_mpi) {
+                ncCheck(nc_var_par_access(ncFile->ncId, varId, NC_INDEPENDENT));
+                if (!sliceAlongUnlimited) { // MPI-slices along unlimited dimension
+                    // only work on variables which belong to this mpi-process (modulo-base along variable-ids)
+                    if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
+                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping variable " << varName << "'");
+                        continue;
+                    } else {
+                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable '" << varName << "'");
+                    }
+                }
+            }
 #endif
+            int n_dims;
+            std::unique_ptr<int[]> dim_ids;
+            std::unique_ptr<size_t[]> count;
+            std::unique_ptr<size_t[]> start;
+            int unLimDimIdx = -1;
+            {
+                ScopedCritical ncLock(Nc::getMutex());
+
+                ncCheck(nc_inq_varndims(ncFile->ncId, varId, &n_dims));
+
+                dim_ids.reset(new int[n_dims]);
+                ncCheck(nc_inq_vardimid(ncFile->ncId, varId, dim_ids.get()));
+                LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dim_ids[0], &dim_ids[0] + n_dims));
+
+                start.reset(new size_t[n_dims]);
+                count.reset(new size_t[n_dims]);
+                for (int i = 0; i < n_dims; ++i) {
+                    if (dim_ids[i] == unLimDimId)
+                        unLimDimIdx = i;
+
+                    size_t dim_len;
+                    ncCheck(nc_inq_dimlen(ncFile->ncId, dim_ids[i], &dim_len));
+                    start[i] = 0;
+                    count[i] = dim_len;
+                }
+            }
+            const bool no_unlim = (unLimDimPos == -1 && unLimDimIdx == -1 && !cdm.hasUnlimitedDim(cdmVar));
+            const bool with_unlim = (unLimDimPos != -1 && unLimDimIdx >= 0 && cdm.hasUnlimitedDim(cdmVar));
+            DataPtr data;
+            if (no_unlim) {
+                data = cdmReader->getData(varName);
+            } else if (with_unlim) {
+                data = cdmReader->getDataSlice(varName, unLimDimPos);
+            } else {
+                continue; // FIXME
+            }
+            data = convertData(cdmVar, data);
+
+            if (data->size() == 0 && ncFile->format < 3) {
+                // need to write data with _FillValue,
+                // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
+                if (with_unlim)
+                    count[unLimDimIdx] = 1; // just one slice
+                size_t size = (n_dims > 0) ? std::accumulate(count.get(), count.get() + n_dims, 1, std::multiplies<size_t>()) : 1;
+                data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
+            }
+            if (data->size() > 0) {
+                if (with_unlim) {
+                    count[unLimDimIdx] = 1;
+                    start[unLimDimIdx] = unLimDimPos;
+                }
+                LOG4FIMEX(logger, Logger::DEBUG,
+                          "dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims) << " count=" << join(&count[0], &count[0] + n_dims));
+                try {
+                    class ScopedCritical ncLock(Nc::getMutex());
+                    LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
+                    ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), n_dims, start.get(), count.get());
+                } catch (CDMException& ex) {
+                    throw CDMException(ex.what() + std::string(" while writing var ") + varName);
+                }
+            }
+        }
+#ifndef HAVE_MPI
+        if (unLimDimPos >= 0) {
+            class ScopedCritical ncLock(Nc::getMutex());
+            ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
+        }
+#endif
+    }
 }
 
 void NetCDF_CDMWriter::init()
 {
     // write metadata
-    NcDimIdMap ncDimIdMap = defineDimensions();
-    NcVarIdMap ncVarIdMap = defineVariables(ncDimIdMap);
+    const NcDimIdMap ncDimIdMap = defineDimensions();
+    const NcVarIdMap ncVarIdMap = defineVariables(ncDimIdMap);
     writeAttributes(ncVarIdMap);
     // write data
     ncCheck(nc_enddef(ncFile->ncId));
@@ -826,19 +776,14 @@ const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, c
 
 const std::string& NetCDF_CDMWriter::getVariableName(const std::string& varName) const
 {
-    if (variableNameChanges.find(varName) == variableNameChanges.end()) {
-        return varName;
-    } else {
-        return variableNameChanges.find(varName)->second;
-    }
-}
-const std::string& NetCDF_CDMWriter::getDimensionName(const std::string& dimName) const
-{
-    if (dimensionNameChanges.find(dimName) == dimensionNameChanges.end()) {
-        return dimName;
-    } else {
-        return dimensionNameChanges.find(dimName)->second;
-    }
+    std::map<std::string, std::string>::const_iterator it = variableNameChanges.find(varName);
+    return (it != variableNameChanges.end()) ? it->second : varName;
 }
 
+const std::string& NetCDF_CDMWriter::getDimensionName(const std::string& dimName) const
+{
+    std::map<std::string, std::string>::const_iterator it = dimensionNameChanges.find(dimName);
+    return (it != dimensionNameChanges.end()) ? it->second : dimName;
 }
+
+} // namespace MetNoFimex

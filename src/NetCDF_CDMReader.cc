@@ -129,7 +129,6 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimD
         return getDataSliceFromMemory(var, unLimDimPos);
     }
 
-    DataPtr data;
     ScopedCritical lock(Nc::getMutex());
     ncFile->reopen_if_forked();
     int varid;
@@ -164,7 +163,6 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
                                     sb.getDimensionSizes());
     }
 
-    DataPtr data;
     ScopedCritical lock(Nc::getMutex());
     ncFile->reopen_if_forked();
 

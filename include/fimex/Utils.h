@@ -140,6 +140,16 @@ inline int round(float num)
     return ::lroundf(num);
 }
 
+template <typename T>
+inline T clamp(T low, T value, T high)
+{
+    if (value < low)
+        return low;
+    if (value < high)
+        return value;
+    return high;
+}
+
 /** Cast with rounding as functor.
  *
  * Rounding is used if destination type (OUT) is integer and original type (IN) is not.
