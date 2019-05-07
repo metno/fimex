@@ -53,7 +53,7 @@ FIND_PACKAGE(Boost REQUIRED COMPONENTS
   filesystem
   iostreams
   program_options
-  regex system
+  system
   unit_test_framework
 )
 IF ((Boost_VERSION EQUAL 103400) OR (Boost_VERSION GREATER 103400))

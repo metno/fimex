@@ -51,7 +51,6 @@
 
 // boost
 //
-#include <boost/regex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -61,6 +60,8 @@
 //
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
+
+#include <regex>
 
 //#define GXDEBUG 1
 

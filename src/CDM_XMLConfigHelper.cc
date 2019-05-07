@@ -25,13 +25,15 @@
  */
 
 #include "CDM_XMLConfigHelper.h"
-#include "fimex/CDMVariable.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMVariable.h"
 #include "fimex/ReplaceStringObject.h"
-#include "fimex/XMLDoc.h"
-#include <libxml/xpath.h>
-#include <boost/regex.hpp>
 #include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
+
+#include <libxml/xpath.h>
+
+#include <regex>
 
 namespace MetNoFimex {
 
@@ -39,10 +41,10 @@ static string replaceTemplateAttribute(string value, const map<string, std::shar
 {
     for (map<string, std::shared_ptr<ReplaceStringObject>>::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
         stringstream outString;
-        boost::regex rgx(boost::regex("%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%"));
+        std::regex rgx("%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%");
         string::const_iterator  begin = value.begin(), end = value.end();
-        boost::match_results<string::const_iterator> matches;
-        while (boost::regex_search(begin, end, matches, rgx)) {
+        std::match_results<string::const_iterator> matches;
+        while (std::regex_search(begin, end, matches, rgx)) {
             outString << string(begin, matches[0].first);
             std::shared_ptr<ReplaceStringObject> rso = it->second;
             string var(matches[1].first, matches[1].second);

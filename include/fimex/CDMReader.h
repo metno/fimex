@@ -31,7 +31,6 @@
 #include "fimex/SliceBuilder.h"
 #include "fimex/UnitsConverterDecl.h"
 
-#include <boost/noncopyable.hpp>
 #include <memory>
 
 namespace MetNoFimex
@@ -53,10 +52,13 @@ class CDMVariable;
  *
  * @see FeltCDMReader
  */
-class CDMReader : boost::noncopyable
+class CDMReader
 {
 public:
     CDMReader();
+    CDMReader(const CDMReader&) = delete;
+    CDMReader& operator=(const CDMReader&) = delete;
+
     virtual ~CDMReader();
 
     /**

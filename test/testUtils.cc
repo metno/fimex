@@ -50,24 +50,24 @@ BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
 
     string dotted = "1.2,2.4,...,6";
     vector<float> tokens = tokenizeDotted<float>(dotted);
-    BOOST_CHECK_EQUAL(5, tokens.size());
+    BOOST_REQUIRE_EQUAL(5, tokens.size());
     BOOST_CHECK_CLOSE(tokens[4], 6.f, .1);
 
     string dotted2 = "1.2,2.4,...,4.8";
     vector<float> tokens2 = tokenizeDotted<float>(dotted2);
-    BOOST_CHECK_EQUAL(4, tokens2.size());
+    BOOST_REQUIRE_EQUAL(4, tokens2.size());
     BOOST_CHECK_CLOSE(tokens2[2], 3.6f, .1);
 
     // backwards
     string dotted3 = "6,4.8,...,-1.2";
     vector<double> tokens3 = tokenizeDotted<double>(dotted3);
-    BOOST_CHECK_EQUAL(7, tokens3.size());
+    BOOST_REQUIRE_EQUAL(7, tokens3.size());
     BOOST_CHECK_CLOSE(tokens3[2], 3.6, .1);
 
     // old, now fixed error, due to using abs instead of fabs
     string dotted4 = "90,89.96,...,50";
     vector<double> tokens4 = tokenizeDotted<double>(dotted4);
-    BOOST_CHECK_EQUAL(40*25 + 1, tokens4.size());
+    BOOST_REQUIRE_EQUAL(40 * 25 + 1, tokens4.size());
     BOOST_CHECK_CLOSE(tokens4.at(tokens4.size()-2), 50.04, .1);
 
     // check in case end doesn't match forward
@@ -126,15 +126,22 @@ BOOST_AUTO_TEST_CASE(test_find_closest_distinct_elements)
     BOOST_CHECK_EQUAL(p.second, 3);
 }
 
+BOOST_AUTO_TEST_CASE(test_regexEscape)
+{
+    BOOST_CHECK_EQUAL(regex_escape("mouse"), "mouse");
+    BOOST_CHECK_EQUAL(regex_escape("d*g"), "d\\*g");
+    BOOST_CHECK_EQUAL(regex_escape("[]^$1234\\"), "\\[\\]\\^\\$1234\\\\");
+}
+
 BOOST_AUTO_TEST_CASE(test_scanFiles)
 {
     vector<string> files;
-    scanFiles(files, topSrcDir(), -1, boost::regex(".*stUti.?.?\\.cc"), true);
-    BOOST_CHECK_EQUAL(files.size(), 1);
+    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), true);
+    BOOST_REQUIRE_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
     files.clear();
-    scanFiles(files, topSrcDir(), -1, boost::regex(".*stUti.?.?\\.cc"), false);
-    BOOST_CHECK_EQUAL(files.size(), 1);
+    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), false);
+    BOOST_REQUIRE_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
 }
 
@@ -143,13 +150,13 @@ BOOST_AUTO_TEST_CASE(test_globFiles)
     vector<string> files;
     string glob = topSrcDir() + "/**stUti??.cc";
     globFiles(files, glob);
-    BOOST_CHECK_EQUAL(files.size(), 1);
+    BOOST_REQUIRE_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
     files.clear();
 
     string glob2 = topSrcDir() + "/test/*stUti??.cc";
     globFiles(files, glob2);
-    BOOST_CHECK_EQUAL(files.size(), 1);
+    BOOST_REQUIRE_EQUAL(files.size(), 1);
     BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
 }
 

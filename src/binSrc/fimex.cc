@@ -43,17 +43,20 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+
 #include "fimex_config.h"
+
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/version.hpp>
+
 #include <cctype>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <regex>
+
 #ifdef HAVE_LOG4CPP
 #include "log4cpp/PropertyConfigurator.hh"
 #endif
@@ -274,8 +277,8 @@ string getType(const string& io, const po::variables_map& vm)
             file = ".fillFile";
         }
         if (file != "") {
-            boost::smatch what;
-            if (boost::regex_match(vm[io+file].as<string>(), what, boost::regex(".*\\.(\\w+)$"))) {
+            std::smatch what;
+            if (std::regex_match(vm[io + file].as<string>(), what, std::regex(".*\\.(\\w+)$"))) {
                 type = what[1].str();
             }
         }
@@ -639,29 +642,29 @@ CDMReader_p getCDMVerticalInterpolator(const po::variables_map& vm, CDMReader_p 
 
 std::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
 {
-    boost::smatch what;
-     if (boost::regex_match(procString, what, boost::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
-         double critx = string2type<double>(what[1]);
-         double cor = string2type<double>(what[2]);
-         size_t maxLoop = string2type<size_t>(what[3]);
-         LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
-         return std::make_shared<InterpolatorFill2d>(critx, cor, maxLoop);
-     } else if (boost::regex_match(procString, what, boost::regex("\\s*creepfill2d\\((.+)\\).*"))) {
-         vector<string> vals = tokenize(what[1], ",");
-         if (vals.size() == 2) {
-             unsigned short repeat = string2type<unsigned short>(vals.at(0));
-             char setWeight = string2type<char>(vals.at(1));
-             LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfill2d("<<repeat<<","<<setWeight<<")");
-             return std::make_shared<InterpolatorCreepFill2d>(repeat, setWeight);
-         } else if (vals.size() == 3) {
-             unsigned short repeat = string2type<unsigned short>(vals.at(0));
-             char setWeight = string2type<char>(vals.at(1));
-             float defVal = string2type<float>(vals.at(2));
-             LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfillval2d("<<repeat<<","<<setWeight<<","<<defVal<<")");
-             return std::make_shared<InterpolatorCreepFillVal2d>(repeat, setWeight, defVal);
-         } else {
-             throw CDMException("creepfill requires two or three arguments, got " + what[1]);
-         }
+    std::smatch what;
+    if (std::regex_match(procString, what, std::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
+        double critx = string2type<double>(what[1]);
+        double cor = string2type<double>(what[2]);
+        size_t maxLoop = string2type<size_t>(what[3]);
+        LOG4FIMEX(logger, Logger::DEBUG, "running interpolate " << logProcess << ": fill2d(" << critx << "," << cor << "," << maxLoop << ")");
+        return std::make_shared<InterpolatorFill2d>(critx, cor, maxLoop);
+    } else if (std::regex_match(procString, what, std::regex("\\s*creepfill2d\\((.+)\\).*"))) {
+        vector<string> vals = tokenize(what[1], ",");
+        if (vals.size() == 2) {
+            unsigned short repeat = string2type<unsigned short>(vals.at(0));
+            char setWeight = string2type<char>(vals.at(1));
+            LOG4FIMEX(logger, Logger::DEBUG, "running interpolate " << logProcess << ": creepfill2d(" << repeat << "," << setWeight << ")");
+            return std::make_shared<InterpolatorCreepFill2d>(repeat, setWeight);
+        } else if (vals.size() == 3) {
+            unsigned short repeat = string2type<unsigned short>(vals.at(0));
+            char setWeight = string2type<char>(vals.at(1));
+            float defVal = string2type<float>(vals.at(2));
+            LOG4FIMEX(logger, Logger::DEBUG, "running interpolate " << logProcess << ": creepfillval2d(" << repeat << "," << setWeight << "," << defVal << ")");
+            return std::make_shared<InterpolatorCreepFillVal2d>(repeat, setWeight, defVal);
+        } else {
+            throw CDMException("creepfill requires two or three arguments, got " + what[1].str());
+        }
      }
      throw CDMException("undefined interpolate."+logProcess+": " + procString);
 }
@@ -808,8 +811,8 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
     if( vm.count("merge.smoothing") ) {
         const string& v = vm["merge.smoothing"].as<string>();
         if (boost::starts_with(v, "LINEAR")) {
-            boost::smatch what;
-            if (boost::regex_match(v, what, boost::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
+            std::smatch what;
+            if (std::regex_match(v, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
                 try {
                     int transition = boost::lexical_cast<int>(what[1]);
                     int border     = boost::lexical_cast<int>(what[2]);

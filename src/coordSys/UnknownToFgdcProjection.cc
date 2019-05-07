@@ -26,7 +26,7 @@
 
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
 #include "fimex/Utils.h"
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace MetNoFimex
 {
@@ -40,7 +40,7 @@ UnknownToFgdcProjection::UnknownToFgdcProjection()
 
 bool UnknownToFgdcProjection::acceptsProj4(const std::string& proj4Str)
 {
-    return boost::regex_search(proj4Str, boost::regex("\\+proj=(\\S+)"));
+    return std::regex_search(proj4Str, std::regex("\\+proj=(\\S+)"));
 }
 
 std::vector<CDMAttribute> UnknownToFgdcProjection::parametersFromProj4(const std::string& proj4Str)

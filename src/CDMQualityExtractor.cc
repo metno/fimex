@@ -25,17 +25,19 @@
  */
 
 #include "fimex/CDMQualityExtractor.h"
-#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
-#include "fimex/Data.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/mifi_constants.h"
+
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include "fimex/mifi_constants.h"
-#include <boost/regex.hpp>
+
 #include <algorithm>
+#include <regex>
 #include <set>
 
 using namespace std;
@@ -72,9 +74,9 @@ static vector<string> findCorrespondingVariables(const CDM& cdm, const string& s
 
 static vector<double> getValidValues(const CDM& cdm, const string& statusVarName, const string& autoConfString, const string& statusAttrName) {
     vector<double> validVals;
-    boost::smatch matches;
-    boost::regex rgx("values=(.*)");
-    if (boost::regex_match(autoConfString, matches, rgx)) {
+    std::smatch matches;
+    std::regex rgx("values=(.*)");
+    if (std::regex_match(autoConfString, matches, rgx)) {
         validVals = tokenizeDotted<double>(matches[1], ",");
         if (validVals.size() == 0) {
             LOG4FIMEX(logger, Logger::WARN, "could not find values autoConfString: "+autoConfString);
@@ -328,10 +330,10 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                         sdIt++;
                     }
                 }
-                boost::smatch match;
+                std::smatch match;
                 if (flag == "all") {
                     // no more to do
-                } else if (boost::regex_match(flag, match, boost::regex("max:(.+)"))) {
+                } else if (std::regex_match(flag, match, std::regex("max:(.+)"))) {
                     double max = string2type<double>(match[1]);
                     LOG4FIMEX(logger, Logger::DEBUG, "using max="<<max<<" for statusVar "<<statusVar<< " on var "<< varName);
                     double* sdIt = &sd[0];
@@ -341,7 +343,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                         }
                         sdIt++;
                     }
-                } else if (boost::regex_match(flag, match, boost::regex("min:(.+)"))) {
+                } else if (std::regex_match(flag, match, std::regex("min:(.+)"))) {
                     double min = string2type<double>(match[1]);
                     double* sdIt = &sd[0];
                     size_t count = 0;

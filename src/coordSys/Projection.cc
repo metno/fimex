@@ -25,9 +25,9 @@
  */
 
 #include "fimex/coordSys/Projection.h"
-#include <boost/regex.hpp>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <regex>
 
 #include "fimex/interpolation.h"
 

@@ -29,9 +29,10 @@
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/Projection.h"
-#include <boost/regex.hpp>
+
 #include <cmath>
 #include <memory>
+#include <regex>
 
 namespace MetNoFimex {
 

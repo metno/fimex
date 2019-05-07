@@ -24,30 +24,33 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex_config.h"
-#include "fimex/CDM.h"
-#include <boost/regex.hpp>
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GribCDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/GridDefinition.h"
-#include "fimex/GribFileIndex.h"
-#include "fimex/DataTypeChanger.h"
-#include "CDM_XMLConfigHelper.h"
-#include "fimex/XMLDoc.h"
-#include "fimex/Logger.h"
-#include "fimex/Utils.h"
+
+#include "fimex/CDM.h"
 #include "fimex/Data.h"
-#include "fimex/TimeUnit.h"
-#include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/DataTypeChanger.h"
+#include "fimex/GribFileIndex.h"
+#include "fimex/GridDefinition.h"
+#include "fimex/Logger.h"
 #include "fimex/ReplaceStringTemplateObject.h"
+#include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/TimeUnit.h"
+#include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
-#include <set>
+
+#include "CDM_XMLConfigHelper.h"
+#include "MutexLock.h"
+#include "fimex_config.h"
+
+#include <algorithm>
 #include <limits>
 #include <map>
-#include <algorithm>
+#include <regex>
+#include <set>
 #include <stdexcept>
-#include "MutexLock.h"
 
 namespace MetNoFimex
 {
@@ -74,7 +77,7 @@ struct GribCDMReader::Impl
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     string ensembleDimName;
-    vector<pair<string, boost::regex> > ensembleMemberIds;
+    vector<pair<string, std::regex>> ensembleMemberIds;
     size_t maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
@@ -216,7 +219,7 @@ std::string GribCDMReader::getConfigExtraKeys(XMLDoc_p doc)
 void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
 {
     for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
-        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+        p_->ensembleMemberIds.push_back(make_pair(memIt->first, std::regex(memIt->second)));
     }
 
     p_->configId = configXML.id();
@@ -398,7 +401,7 @@ void GribCDMReader::initAddGlobalAttributes()
             cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
         }
     }
-    if (! cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", boost::regex(".*"))) {
+    if (!cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", std::regex(".*"))) {
         boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
         cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex"));
     }
@@ -888,7 +891,7 @@ void GribCDMReader::initAddEnsembles()
         if (p_->ensembleMemberIds.size() == p_->maxEnsembles) {
             // add a character dimension, naming all ensemble members
             size_t maxLen = 0;
-            for (vector<pair<string, boost::regex> >::iterator emi = p_->ensembleMemberIds.begin(); emi != p_->ensembleMemberIds.end(); ++emi) {
+            for (vector<pair<string, std::regex>>::iterator emi = p_->ensembleMemberIds.begin(); emi != p_->ensembleMemberIds.end(); ++emi) {
                 maxLen = std::max(maxLen, emi->first.size());
             }
             string charDim = p_->ensembleDimName + "_strlen";

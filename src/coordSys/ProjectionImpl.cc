@@ -28,13 +28,11 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
+
 #include <algorithm>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
-#include "boost/regex.hpp"
 #include <cmath>
-
 
 namespace MetNoFimex
 {
@@ -203,8 +201,8 @@ std::string ProjectionImpl::toString() const
 
 bool ProjectionImpl::proj4ProjectionMatchesName(const std::string& proj4Str, const std::string& name)
 {
-    boost::smatch what;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+proj=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+proj=(\\S+)"))) {
         return what[1].str() == name;
     } else {
         return false;
@@ -213,26 +211,26 @@ bool ProjectionImpl::proj4ProjectionMatchesName(const std::string& proj4Str, con
 
 void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::vector<CDMAttribute>& attrList)
 {
-    boost::smatch what;
+    std::smatch what;
     // this assumes currently all units to be 'm'
     // convert x_0 to false_easting, y_0 to false_northing
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+x_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+x_0=(\\S+)"))) {
         attrList.push_back(CDMAttribute("false_easting", string2type<double>(what[1].str())));
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+y_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+y_0=(\\S+)"))) {
         attrList.push_back(CDMAttribute("false_northing", string2type<double>(what[1].str())));
     }
 
     // a (or R) and e (or b) to semi_major_axis and semi_minor_axis
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+[aR]=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+[aR]=(\\S+)"))) {
         double major_axis = string2type<double>(what[1].str());
         attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+e=(\\S+)")) && what[1].str() != "0") {
+        if (std::regex_search(proj4Str, what, std::regex("\\+e=(\\S+)")) && what[1].str() != "0") {
             double ecc = string2type<double>(what[1].str());
             double minor_axis = sqrt(major_axis*major_axis*(1-(ecc*ecc)));
             attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
             attrList.push_back(CDMAttribute("semi_minor_axis", minor_axis));
-        } else if (boost::regex_search(proj4Str, what, boost::regex("\\+b=(\\S+)"))) {
+        } else if (std::regex_search(proj4Str, what, std::regex("\\+b=(\\S+)"))) {
             attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
             attrList.push_back(CDMAttribute("semi_minor_axis", string2type<double>(what[1].str())));
         } else {
@@ -241,8 +239,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
     }
 
     // get ellipsoid from ellps/datum, source: http://en.wikipedia.org/wiki/Figure_of_earth
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+ellps=(\\S+)"))
-        || boost::regex_search(proj4Str, what, boost::regex("\\+datum=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+ellps=(\\S+)")) || std::regex_search(proj4Str, what, std::regex("\\+datum=(\\S+)"))) {
         string ellps = string2lowerCase(what[1].str());
         // this list has been manually generated from "proj -le"
         if (ellps == "wgs84") {
@@ -276,7 +273,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
     }
 
     // get towgs84 parameters, see https://cf-pcmdi.llnl.gov/trac/ticket/80 (CF-1.7?)
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+towgs84=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+towgs84=(\\S+)"))) {
         vector<double> bw = tokenizeDotted<double>(what[1].str(), ",");
         // bw (Bursa Wolff parameters)
         // should have 3,6 or 7 characters, if less, fill up with 0
@@ -289,7 +286,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         }
         DataPtr towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
         attrList.push_back(CDMAttribute("towgs84", towgs));
-    } else if (boost::regex_search(proj4Str, what, boost::regex("\\+datum=(\\S+)"))) {
+    } else if (std::regex_search(proj4Str, what, std::regex("\\+datum=(\\S+)"))) {
         // towgs84 parameters implicitly defined by datum (using towgs84=0,0,0 as default)
         string datum = string2lowerCase(what[1].str());
         vector<double> bw;
@@ -304,7 +301,6 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         DataPtr towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
         attrList.push_back(CDMAttribute("towgs84", towgs));
     }
-
 }
 
 }

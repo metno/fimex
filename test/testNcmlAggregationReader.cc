@@ -72,17 +72,19 @@ BOOST_AUTO_TEST_CASE( test_joinExisting )
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
-    BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
-    BOOST_CHECK(reader->getDataSlice("multi", 3)->asShort()[1] == -4);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader->getCDM().getUnlimitedDim());
+    BOOST_CHECK_EQUAL(reader->getCDM().getUnlimitedDim()->getLength(), 5);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("unlim", 3)->asShort()[0], 4);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", 3)->asShort()[1], -4);
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 3, 1);
-    BOOST_CHECK(reader->getDataSlice("multi", sb)->asShort()[1] == -4);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", sb)->asShort()[1], -4);
 
     sb = SliceBuilder(reader->getCDM(), "unlim");
     sb.setStartAndSize("unlim", 3, 1);
-    BOOST_CHECK(reader->getDataSlice("unlim", sb)->asShort()[0] == 4);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("unlim", sb)->asShort()[0], 4);
 }
 
 BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
@@ -90,10 +92,22 @@ BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAggSuffix.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK(true);
-    BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
-    BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
-    BOOST_CHECK(reader->getDataSlice("multi", 3)->asShort()[1] == -4);
+    const CDMDimension* unlim = reader->getCDM().getUnlimitedDim();
+    BOOST_REQUIRE(unlim);
+    BOOST_CHECK_EQUAL(unlim->getLength(), 5);
+    DataPtr slice = reader->getDataSlice("unlim", 3);
+    BOOST_REQUIRE(slice);
+    BOOST_REQUIRE_EQUAL(slice->size(), 1);
+    boost::shared_array<short> values = slice->asShort();
+    BOOST_REQUIRE(values);
+    BOOST_CHECK_EQUAL(values[0], 4);
+
+    slice = reader->getDataSlice("multi", 3);
+    BOOST_REQUIRE(slice);
+    BOOST_REQUIRE_EQUAL(slice->size(), 2);
+    values = slice->asShort();
+    BOOST_REQUIRE(values);
+    BOOST_CHECK_EQUAL(values[1], -4);
 }
 
 BOOST_AUTO_TEST_CASE( test_aggNothing )
@@ -101,8 +115,7 @@ BOOST_AUTO_TEST_CASE( test_aggNothing )
     //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggNothing.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK(true);
-    BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
+    BOOST_CHECK_EQUAL(reader->getCDM().getVariables().size(), 0);
 }
 
 BOOST_AUTO_TEST_CASE( test_aggWrong )
@@ -112,9 +125,8 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
     // suppress ERROR: file unreadable
     defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
-    BOOST_CHECK(true);
     defaultLogLevel(Logger::INFO);
-    BOOST_CHECK(reader->getCDM().getVariables().size() == 0);
+    BOOST_CHECK_EQUAL(reader->getCDM().getVariables().size(), 0);
 }
 
 BOOST_AUTO_TEST_CASE( test_aggNewDim )
@@ -125,10 +137,13 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim )
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
 
     NetCDF_CDMWriter(reader, test_output, "", 4); // does not work for netcdf-3
-    BOOST_CHECK(true);
-
     CDMReader_p reader2(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, test_output));
-    BOOST_CHECK(reader2->getDataSlice("notlimited", 2)->asInt()[0] == 3);
+    DataPtr slice = reader->getDataSlice("notlimited", 2);
+    BOOST_REQUIRE(slice);
+    BOOST_REQUIRE_GT(slice->size(), 0);
+    boost::shared_array<int> values = slice->asInt();
+    BOOST_REQUIRE(values);
+    BOOST_CHECK_EQUAL(values[0], 3);
 }
 
 BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
@@ -140,7 +155,11 @@ BOOST_AUTO_TEST_CASE( test_aggNewDim2 )
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("notlimited", 2, 1);
-    const boost::shared_array<int> values = reader->getDataSlice("multi", sb)->asInt();
+    DataPtr slice = reader->getDataSlice("multi", sb);
+    BOOST_REQUIRE(slice);
+    BOOST_REQUIRE_GE(slice->size(), 2);
+    const boost::shared_array<int> values = slice->asInt();
+    BOOST_REQUIRE(values);
     BOOST_CHECK_EQUAL(values[0],  4);
     BOOST_CHECK_EQUAL(values[1], -4);
 }
@@ -156,14 +175,14 @@ BOOST_AUTO_TEST_CASE( test_union )
     BOOST_CHECK(reader->getCDM().hasVariable("extra"));
     BOOST_CHECK(reader->getCDM().hasVariable("multi"));
     BOOST_CHECK(reader->getCDM().hasVariable("unlim"));
-    BOOST_CHECK(reader->getDataSlice("extra", 1)->asShort()[0] == -1);
-    BOOST_CHECK(reader->getDataSlice("multi", 1)->asShort()[1] == -2);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("extra", 1)->asShort()[0], -1);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", 1)->asShort()[1], -2);
 
     BOOST_CHECK(reader->getCDM().hasVariable("multi"));
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 1, 1);
-    BOOST_CHECK(reader->getDataSlice("multi", sb)->asShort()[1] == -2);
+    BOOST_CHECK_EQUAL(reader->getDataSlice("multi", sb)->asShort()[1], -2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

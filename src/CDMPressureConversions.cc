@@ -201,8 +201,8 @@ std::string deriveVariableName(const ConverterFactory::Operation& oper, const st
         return oper.option(key);
 
     std::string derived = base;
-    const boost::regex replace_this_re(replace_this);
-    boost::regex_replace(derived, replace_this_re, replace_with);
+    const std::regex replace_this_re(replace_this);
+    std::regex_replace(derived, replace_this_re, replace_with);
     if (derived != base)
         return derived;
     else

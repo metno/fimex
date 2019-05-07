@@ -35,7 +35,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/noncopyable.hpp>
 
 #include <iosfwd>
 #include <iterator>
@@ -45,10 +44,13 @@
 namespace felt
 {
 
-class FeltFile : boost::noncopyable
+class FeltFile
 {
 public:
     explicit FeltFile(const boost::filesystem::path & file);
+    FeltFile(const FeltFile&) = delete;
+    FeltFile& operator=(const FeltFile&) = delete;
+
     ~FeltFile();
 
     typedef size_t size_type;

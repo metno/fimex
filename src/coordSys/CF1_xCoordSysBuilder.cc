@@ -44,9 +44,8 @@
 #include <fimex/coordSys/verticalTransform/OceanSG2.h>
 #include <fimex/coordSys/verticalTransform/Pressure.h>
 
-#include <boost/regex.hpp>
 #include <memory>
-
+#include <regex>
 #include <set>
 
 namespace MetNoFimex
@@ -437,8 +436,8 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
                     if (cdm.getAttribute(zAxis->getName(), "formula_terms", formula)) {
                         string term = formula.getStringValue();
                         string::const_iterator begin = term.begin(), end = term.end();
-                        boost::match_results<string::const_iterator> what;
-                        while (boost::regex_search(begin, end, what, boost::regex("(\\S+)\\s*:\\s*(\\S+)"))) {
+                        std::match_results<string::const_iterator> what;
+                        while (std::regex_search(begin, end, what, std::regex("(\\S+)\\s*:\\s*(\\S+)"))) {
                             string term(what[1].first, what[1].second);
                             string var(what[2].first, what[2].second);
                             if (!var.empty() && cdm.hasVariable(var)) {
@@ -523,8 +522,8 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 static void enhanceVectors(CDM& cdm, const std::string& xsn, const std::string& ysn,
                            const std::string& xdir, const std::string& ydir)
 {
-    vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xsn+"\\E.*");
-    vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+ysn+"\\E.*");
+    vector<string> xVars = cdm.findVariables("standard_name", regex_escape(xsn) + ".*");
+    vector<string> yVars = cdm.findVariables("standard_name", regex_escape(ysn) + ".*");
     for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
         CDMVariable& xv = cdm.getVariable(*xVar);
         if (xv.isSpatialVector())

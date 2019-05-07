@@ -25,56 +25,57 @@
  */
 
 #include "fimex/coordSys/OrthographicProjection.h"
-#include <boost/regex.hpp>
+
 #include "fimex/Utils.h"
 
-namespace MetNoFimex
-{
+#include <regex>
 
-using namespace std;
+namespace MetNoFimex {
+
+static const std::string PROJ_ORTHO = "ortho";
+static const std::string KEY_LON0 = "lon_0";
+static const std::string KEY_LAT0 = "lat_0";
+
+double extractProj4InitValue(const std::string& proj4Str, const std::string& key, double dflt = 0)
+{
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+" + key + "=(\\S+)")))
+        return string2type<double>(what[1].str());
+    else
+        return dflt;
+}
 
 OrthographicProjection::OrthographicProjection()
-: ProjectionImpl("orthographic", false)
+    : ProjectionImpl("orthographic", false)
 {
 }
 
 bool OrthographicProjection::acceptsProj4(const std::string& proj4Str)
 {
-    return proj4ProjectionMatchesName(proj4Str, "ortho");
+    return proj4ProjectionMatchesName(proj4Str, PROJ_ORTHO);
 }
 
 std::vector<CDMAttribute> OrthographicProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (acceptsProj4(proj4Str)) {
+        attrs.push_back(CDMAttribute("grid_mapping_name", "orthographic"));
+        attrs.push_back(CDMAttribute("longitude_of_projection_origin", extractProj4InitValue(proj4Str, "lon_0")));
+        attrs.push_back(CDMAttribute("latitude_of_projection_origin", extractProj4InitValue(proj4Str, "lat_0")));
 
-    attrs.push_back(CDMAttribute("grid_mapping_name", "orthographic"));
-
-    boost::smatch what;
-    double lon0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
-        lon0 = string2type<double>(what[1].str());
+        proj4GetEarthAttributes(proj4Str, attrs);
+        attrs.push_back(CDMAttribute("proj4", proj4Str));
     }
-    attrs.push_back(CDMAttribute("longitude_of_projection_origin", lon0));
-
-    double lat0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
-        lat0 = string2type<double>(what[1].str());
-    }
-    attrs.push_back(CDMAttribute("latitude_of_projection_origin", lat0));
-
-    proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 
 std::ostream& OrthographicProjection::getProj4ProjectionPart(std::ostream& oproj) const
 {
-    oproj << "+proj=ortho";
-    addParameterToStream(oproj, "longitude_of_projection_origin", " +lon_0=");
-    addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
+    oproj << "+proj=" << PROJ_ORTHO;
+    addParameterToStream(oproj, "longitude_of_projection_origin", " +" + KEY_LON0 + "=");
+    addParameterToStream(oproj, "latitude_of_projection_origin", " +" + KEY_LAT0 + "=");
 
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

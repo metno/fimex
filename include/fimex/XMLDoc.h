@@ -24,8 +24,6 @@
 #ifndef XMLDOC_H_
 #define XMLDOC_H_
 
-#include <boost/noncopyable.hpp>
-
 #include <memory>
 #include <string>
 
@@ -53,7 +51,7 @@ typedef std::shared_ptr<XMLDoc> XMLDoc_p;
 /**
  * a tiny wrapper around libxml dom and xpath reader with xml::include
  */
-class XMLDoc : boost::noncopyable
+class XMLDoc
 {
 public:
     /**
@@ -63,7 +61,12 @@ public:
      * @throw CDMException if problems with libxml or problems with input-file
      */
     explicit XMLDoc(const std::string& filename);
+
+    XMLDoc(const XMLDoc&) = delete;
+    XMLDoc& operator=(const XMLDoc&) = delete;
+
     virtual ~XMLDoc();
+
     /**
      * get a ptr to the node defined by xpath
      *

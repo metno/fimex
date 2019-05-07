@@ -25,9 +25,8 @@
  */
 
 #include "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
-#include <boost/regex.hpp>
 #include "fimex/Utils.h"
-
+#include <regex>
 
 namespace MetNoFimex
 {
@@ -51,18 +50,18 @@ std::vector<CDMAttribute> LambertCylindricalEqualAreaProjection::parametersFromP
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "lambert_cylindrical_equal_area"));
 
-    boost::smatch what;
+    std::smatch what;
     double lon0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         lon0 = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("longitude_of_central_meridian", lon0));
 
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_ts=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_ts=(\\S+)"))) {
         double lat_ts = string2type<double>(what[1].str());
         attrs.push_back(CDMAttribute("standard_parallel", lat_ts));
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+k=(\\S+)"))) {
         double k = string2type<double>(what[1].str());
         attrs.push_back(CDMAttribute("scale_factor_at_projection_origin", k));
     }

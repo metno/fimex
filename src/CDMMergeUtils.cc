@@ -39,13 +39,9 @@
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
-#include <boost/foreach.hpp>
-
 namespace MetNoFimex {
 
 static Logger_p logger(getLogger("fimex.CDMMergeUtils"));
-
-//namespace CDMMergeUtils {
 
 using namespace std;
 
@@ -250,7 +246,7 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
     const CDM::VarVec varsI = cdmI.getVariables(); // copy, as we modify cdmI
     const CoordinateSystem_cp_v allCsI = listCoordinateSystems(readerI);
 
-    BOOST_FOREACH(const CDMVariable& varI, varsI) {
+    for (const CDMVariable& varI : varsI) {
         const string& varName = varI.getName();
         if (not readerO->getCDM().hasVariable(varName))
             continue;
@@ -280,14 +276,14 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
 
     const CoordinateSystem_cp_v allCsO = listCoordinateSystems(interpolatedO);
     std::set<string> variablesToKeep;
-    BOOST_FOREACH(const CDMVariable& varI, varsI) {
+    for (const CDMVariable& varI : varsI) {
         const string& varName = varI.getName();
         if (is_compatible(readerI, interpolatedO, allCsI, allCsO, varName))
             variablesToKeep.insert(varName);
     }
     addAuxiliary(variablesToKeep, cdmI, allCsI);
 
-    BOOST_FOREACH(const CDMVariable& varI, varsI) {
+    for (const CDMVariable& varI : varsI) {
         const string& varName = varI.getName();
         if (variablesToKeep.find(varName) == variablesToKeep.end()) {
             LOG4FIMEX(logger, Logger::INFO, "variable '" << varName << "' removed");
@@ -299,19 +295,19 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
 
     if (keepAllOuter) {
         const CDM::DimVec& dims = interpolatedO->getCDM().getDimensions();
-        BOOST_FOREACH(const CDMDimension& dim, dims) {
+        for (const CDMDimension& dim : dims) {
             if (!cdmI.hasDimension(dim.getName())) {
                 LOG4FIMEX(logger, Logger::DEBUG, "dimension '" << dim.getName() << "' added from outer");
                 cdmI.addDimension(dim);
             }
         }
         const CDM::VarVec& vars = interpolatedO->getCDM().getVariables();
-        BOOST_FOREACH(const CDMVariable& var, vars) {
+        for (const CDMVariable& var : vars) {
             if (!cdmIC.hasVariable(var.getName())) {
                 LOG4FIMEX(logger, Logger::DEBUG, "variable '" << var.getName() << "' added from outer");
                 cdmI.addVariable(var);
                 vector<CDMAttribute> attrs = interpolatedO->getCDM().getAttributes(var.getName());
-                BOOST_FOREACH(const CDMAttribute& att, attrs) {
+                for (const CDMAttribute& att : attrs) {
                     cdmI.addAttribute(var.getName(), att);
                 }
             }
@@ -320,7 +316,5 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
 
     return cdmI;
 }
-
-//} // namespace CDMMergeUtils
 
 } // namespace MetNoFimex

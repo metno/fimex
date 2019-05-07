@@ -27,7 +27,6 @@
 #ifndef TO_VLEVEL_CONVERTER_H_
 #define TO_VLEVEL_CONVERTER_H_
 
-#include <boost/noncopyable.hpp>
 #include <memory>
 #include <vector>
 
@@ -47,8 +46,13 @@
 namespace MetNoFimex {
 
 /** Deprecated */
-class ToVLevelConverter : boost::noncopyable {
+class ToVLevelConverter
+{
 public:
+    ToVLevelConverter() = default;
+    ToVLevelConverter(const ToVLevelConverter&) = delete;
+    ToVLevelConverter& operator=(const ToVLevelConverter&) = delete;
+
     virtual ~ToVLevelConverter();
 
     /** Deprecated */

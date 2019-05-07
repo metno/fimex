@@ -24,8 +24,6 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include <boost/foreach.hpp>
-
 #include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"

@@ -25,8 +25,8 @@
  */
 
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
-#include <boost/regex.hpp>
 #include <iostream>
+#include <regex>
 
 namespace MetNoFimex
 {

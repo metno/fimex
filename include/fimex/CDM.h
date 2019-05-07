@@ -24,16 +24,17 @@
 #ifndef CDM_H_
 #define CDM_H_
 
-#include <map>
-#include <vector>
-#include <string>
-#include <iosfwd>
-#include <boost/regex_fwd.hpp>
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
+
+#include <iosfwd>
+#include <map>
+#include <regex>
+#include <string>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -125,7 +126,7 @@ public:
      * @param attribute the attribute name
      * @param attrValue the regexp the string-value of the attribute will match against
      */
-    bool checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const;
+    bool checkVariableAttribute(const std::string& varName, const std::string& attribute, const std::regex& attrValue) const;
     /**
      * @brief remove a variable and corresponding attributes
      *

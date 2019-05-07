@@ -40,12 +40,12 @@
 #include "fimex/coordSys/Projection.h"
 #include <algorithm>
 #include <boost/bind.hpp>
-#include <boost/regex.hpp>
 #include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <regex>
 #include <sstream>
 
 namespace MetNoFimex
@@ -78,9 +78,9 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
                         back_inserter(retValues), string2type<double>);
             } else if (mode == "level2") {
                 // get level-id from variableXPath
-                boost::smatch matches;
-                boost::regex rgx(boost::regex("felt_id=[\"'](\\d+)[\"']"));
-                if (boost::regex_search(valuesXPath, matches, rgx)) {
+                std::smatch matches;
+                std::regex rgx(std::regex("felt_id=[\"'](\\d+)[\"']"));
+                if (std::regex_search(valuesXPath, matches, rgx)) {
                     short verticalId = string2type<short>(matches[1]);
                     // cannot take reference here, feltfile_->getFeltLevelPairs container will be deleted
                     const vector<pair<short, short> > level2s = (feltfile_->getFeltLevelPairs())[verticalId];
@@ -92,9 +92,9 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
                 }
             } else if (mode == "hybridLevels") {
                 // get level-id from variableXPath
-                boost::smatch matches;
-                boost::regex rgx(boost::regex("felt_id=[\"'](\\d+)[\"']"));
-                if (boost::regex_search(valuesXPath, matches, rgx)) {
+                std::smatch matches;
+                std::regex rgx(std::regex("felt_id=[\"'](\\d+)[\"']"));
+                if (std::regex_search(valuesXPath, matches, rgx)) {
                     short verticalId = string2type<short>(matches[1]);
                     // cannot take reference here, feltfile_->getFeltLevelPairs container will be deleted
                     const vector<pair<short, short> > level2s = (feltfile_->getFeltLevelPairs())[verticalId];
@@ -325,7 +325,7 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
             cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
         }
     }
-    if (! cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", boost::regex(".*"))) {
+    if (!cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", std::regex(".*"))) {
         boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
         cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
     }

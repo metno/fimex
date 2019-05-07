@@ -64,13 +64,13 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
     if (extraKeys.size() > 0) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
-    std::vector<std::pair<std::string, boost::regex> > members;
+    std::vector<std::pair<std::string, std::regex>> members;
     if (memberOptions.size() > 0) {
         vector<pair<string, string> > memberStrings;
         vector<string> files;
         MetNoFimex::CDMFileReaderFactory::parseGribArgs(memberOptions, memberStrings, files);
         for (vector<pair<string, string> >::const_iterator memIt = memberStrings.begin(); memIt != memberStrings.end(); ++memIt) {
-            members.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+            members.push_back(make_pair(memIt->first, std::regex(memIt->second)));
         }
     }
     MetNoFimex::GribFileIndex gfi(input, append, members, force, options);

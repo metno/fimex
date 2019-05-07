@@ -38,6 +38,8 @@
 
 namespace felt {
 
+static_assert(sizeof(word) == 2, "unexpected sizeof(word)");
+
 /**
  * converts a point on earth to a projection plane
  * @param projStr projection definition for proj4

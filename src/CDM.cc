@@ -23,22 +23,23 @@
 
 #include "fimex/CDM.h"
 
-#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/Units.h"
+#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
 #include <boost/bind.hpp>
-#include <boost/regex.hpp>
-
-#include "proj_api.h"
 
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <regex>
 #include <set>
+
+#include "proj_api.h"
 
 namespace MetNoFimex
 {
@@ -204,16 +205,16 @@ bool CDM::renameVariable(const std::string& oldName, const std::string& newName)
     }
 }
 
-bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const
+bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const std::regex& attrValue) const
 {
     StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
     if (varIt != pimpl_->attributes.end()) {
         AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attribute));
         if (attrIt != varIt->second.end()) {
-            boost::smatch what;
-            if (boost::regex_match(attrIt->getStringValue(), what, attrValue)) {
+            std::smatch what;
+            const std::string val = attrIt->getStringValue();
+            if (std::regex_match(val, what, attrValue))
                 return true;
-            }
         }
     }
     return false;
@@ -229,22 +230,25 @@ public:
 };
 
 /** object-function for checkVariableAttribute */
-class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool>
+class VariableAttributeCheck : public std::unary_function<std::pair<std::string, std::regex>, bool>
 {
     const CDM& cdm;
     const std::string& varName;
 public:
     VariableAttributeCheck(const CDM& cdm, const std::string& varName) : cdm(cdm), varName(varName) { }
-    bool operator() (const std::pair<std::string, boost::regex>& attrRegex) const { return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second); }
+    bool operator()(const std::pair<std::string, std::regex>& attrRegex) const
+    {
+        return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second);
+    }
 };
 
 std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const
 {
     std::vector<std::string> results;
     // precalc regexp
-    std::map<std::string, boost::regex> attrRegExps;
+    std::map<std::string, std::regex> attrRegExps;
     for (std::map<std::string, std::string>::const_iterator attrIt = findAttributes.begin(); attrIt != findAttributes.end(); ++attrIt) {
-        attrRegExps[attrIt->first] = boost::regex(attrIt->second);
+        attrRegExps[attrIt->first] = std::regex(attrIt->second);
     }
     for (VarVec::const_iterator varIt = pimpl_->variables.begin(); varIt != pimpl_->variables.end(); ++varIt) {
         // test if all attributes are found in variable (find_if finds the first not found)
@@ -687,14 +691,14 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     assert(xDimLength == xVar.getData()->size());
     assert(yDimLength == yVar.getData()->size());
     std::string xUnits = getUnits(xDim);
-    if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
+    if (std::regex_match(xUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         boost::shared_array<double> newXData(new double[xDimLength]);
         std::transform(&xData[0], &xData[0]+xDimLength, &newXData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
         xData = newXData;
     }
     std::string yUnits = getUnits(yDim);
-    if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
+    if (std::regex_match(yUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         boost::shared_array<double> newYData(new double[yDimLength]);
         std::transform(&yData[0], &yData[0]+yDimLength, &newYData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));

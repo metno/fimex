@@ -25,12 +25,12 @@
  */
 
 #include "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
-#include <boost/regex.hpp>
-#include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 
-namespace MetNoFimex
-{
+#include <regex>
+
+namespace MetNoFimex {
 
 using namespace std;
 
@@ -51,10 +51,10 @@ std::vector<CDMAttribute> AlbersConicalEqualAreaProjection::parametersFromProj4(
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "albers_conical_equal_area"));
 
-    boost::smatch what;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_1=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_1=(\\S+)"))) {
         double lat1 = string2type<double>(what[1].str());
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_2=(\\S+)"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+lat_2=(\\S+)"))) {
             double lat2 = string2type<double>(what[1].str());
 
             DataPtr stdParallels = createData(CDM_DOUBLE, 2);
@@ -67,13 +67,13 @@ std::vector<CDMAttribute> AlbersConicalEqualAreaProjection::parametersFromProj4(
     }
 
     double lon0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         lon0 = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("longitude_of_central_meridian", lon0));
 
     double lat0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
         lat0 = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("latitude_of_projection_origin", lat0));
@@ -105,4 +105,4 @@ std::ostream& AlbersConicalEqualAreaProjection::getProj4ProjectionPart(std::ostr
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

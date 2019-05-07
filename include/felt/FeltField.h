@@ -30,9 +30,9 @@
 
 #include "FeltConstants.h"
 #include "FeltGridDefinition.h"
+
 #include <boost/shared_array.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/noncopyable.hpp>
 
 #include <array>
 #include <string>
@@ -45,12 +45,14 @@ typedef std::shared_ptr<FeltGridDefinition> FeltGridDefinitionPtr;
 
 class FeltFile;
 
-class FeltField : boost::noncopyable
+class FeltField
 {
 public:
     typedef std::array<word, 16> Header;
 
     FeltField(const FeltFile& ff, size_t index);
+    FeltField(const FeltField&) = delete;
+    FeltField& operator=(const FeltField&) = delete;
 
     ~FeltField();
 
@@ -105,21 +107,21 @@ public:
     {
         int param = parameterUnmodified_();
         return 2000 <= param and param < 6000;
-	}
+    }
 
-	/**
-	 * Get data version if this is an eps parameter, otherwise 0
-	 */
-	int dataVersion() const;
+    /**
+     * Get data version if this is an eps parameter, otherwise 0
+     */
+    int dataVersion() const;
 
-	/// throws
-	FeltGridDefinitionPtr projectionInformation() const;
+    /// throws
+    FeltGridDefinitionPtr projectionInformation() const;
 
-	std::string information() const;
-	std::string gridInformation() const;
+    std::string information() const;
+    std::string gridInformation() const;
 
-	/// access felt index header
-	const Header& getHeader() const {return header_;}
+    /// access felt index header
+    const Header& getHeader() const { return header_; }
 
 private:
 

@@ -359,7 +359,7 @@ GridDefinition getGridDefPolarStereographic(long edition, std::shared_ptr<grib_h
 }
 
 GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
-                                 const std::vector<std::pair<std::string, boost::regex>>& members, const std::vector<std::string>& extraKeys)
+                                 const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys)
     : fileURL_(fileURL)
     , filePos_(filePos)
     , msgPos_(msgPos)
@@ -466,8 +466,8 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
         if (members.size()>0) {
             bool found=false;
             int i = 0;
-            for (vector<std::pair<std::string, boost::regex> >::const_iterator it = members.begin(); it != members.end(); ++it) {
-                if (boost::regex_match(fileURL, it->second)) {
+            for (vector<std::pair<std::string, std::regex>>::const_iterator it = members.begin(); it != members.end(); ++it) {
+                if (std::regex_match(fileURL, it->second)) {
                     perturbationNo_=i;
                     totalNumberOfEnsembles_ = members.size();
                     found=true;
@@ -1232,22 +1232,16 @@ GribFileIndex::GribFileIndex()
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath,
-        const std::vector<std::pair<std::string, boost::regex> >& members,
-        bool ignoreExistingXml,
-        std::map<std::string, std::string> options)
-: options_(options)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml,
+                             std::map<std::string, std::string> options)
+    : options_(options)
 {
     init(gribFilePath, "", members, ignoreExistingXml);
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath,
-        boost::filesystem::path grbmlFilePath,
-        const std::vector<std::pair<std::string,
-        boost::regex> >& members,
-        bool ignoreExistingXml,
-        std::map<std::string, std::string> options)
-: options_(options)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath,
+                             const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml, std::map<std::string, std::string> options)
+    : options_(options)
 {
     init(gribFilePath, grbmlFilePath, members, ignoreExistingXml);
 }
@@ -1268,10 +1262,8 @@ struct HasSameUrl {
     bool operator()(GribFileMessage& gfm) const {return gfm.getFileURL() == file_;}
 };
 
-void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
-        const boost::filesystem::path& grbmlFilePath,
-        const std::vector<std::pair<std::string, boost::regex> >& members,
-        bool ignoreExistingXml)
+void GribFileIndex::init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath,
+                         const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml)
 {
     namespace fs = boost::filesystem;
     if (fs::exists(grbmlFilePath)) {
@@ -1335,8 +1327,8 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
     earthFigure_ = ""; // remember to reset!
 }
 
-
-void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys)
+void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+                               const std::vector<std::string>& extraKeys)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");

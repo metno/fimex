@@ -55,8 +55,8 @@
 // boost
 //
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <memory>
+#include <regex>
 
 // standard
 #include <functional>
@@ -331,8 +331,8 @@ string getProjectionName(const string& proj_input)
 {
     // get the new projection
     std::string newProj;
-    boost::smatch what;
-    if (boost::regex_search(proj_input, what, boost::regex("\\+proj=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj_input, what, std::regex("\\+proj=(\\S+)"))) {
         newProj = what[1].str();
     } else {
         throw CDMException("cannot find +proj=... in proj-string: " + proj_input);
@@ -1296,12 +1296,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         int miupYAxis = MIFI_PROJ_AXIS;
         vector<double> outXAxis = out_x_axis;
         vector<double> outYAxis = out_y_axis;
-        boost::regex degree(".*degree.*");
-        if (boost::regex_match(out_x_axis_unit, degree)) {
+        std::regex degree(".*degree.*");
+        if (std::regex_match(out_x_axis_unit, degree)) {
             transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
             miupXAxis = MIFI_LONGITUDE;
         }
-        if (boost::regex_match(out_y_axis_unit, degree)) {
+        if (std::regex_match(out_y_axis_unit, degree)) {
             transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
             miupYAxis = MIFI_LATITUDE;
         }
@@ -1384,13 +1384,13 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         // translate temporary new axes from deg2rad if required
         vector<double> outXAxis = out_x_axis;
         vector<double> outYAxis = out_y_axis;
-        boost::regex degree(".*degree.*");
+        std::regex degree(".*degree.*");
         bool isMetric = true;
-        if (boost::regex_match(out_x_axis_unit, degree)) {
+        if (std::regex_match(out_x_axis_unit, degree)) {
             isMetric = false;
             transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
         }
-        if (boost::regex_match(out_y_axis_unit, degree)) {
+        if (std::regex_match(out_y_axis_unit, degree)) {
             transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
         }
         // get output axes expressed in latitude, longitude
@@ -1440,12 +1440,12 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         vector<double> outYAxis = out_y_axis;
         int outXAxisType = MIFI_PROJ_AXIS;
         int outYAxisType = MIFI_PROJ_AXIS;
-        boost::regex degree(".*degree.*");
-        if (boost::regex_match(out_x_axis_unit, degree)) {
+        std::regex degree(".*degree.*");
+        if (std::regex_match(out_x_axis_unit, degree)) {
             transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
             outXAxisType = MIFI_LONGITUDE;
         }
-        if (boost::regex_match(out_y_axis_unit, degree)) {
+        if (std::regex_match(out_y_axis_unit, degree)) {
             transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
             outYAxisType = MIFI_LATITUDE;
         }

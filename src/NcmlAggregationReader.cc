@@ -25,6 +25,7 @@
  */
 
 #include "NcmlAggregationReader.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
@@ -33,10 +34,12 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex_config.h"
-#include <boost/regex.hpp>
+
+#include <memory>
+#include <regex>
+
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <memory>
 
 namespace MetNoFimex
 {
@@ -85,9 +88,9 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
 #ifdef HAVE_NETCDF_H
             if (type == "netcdf" || type == "nc" || type == "nc4") {
                 // remove file: URL-prefix
-                file = boost::regex_replace(file, boost::regex("^file:"), "", boost::format_first_only);
+                file = std::regex_replace(file, std::regex("^file:"), "", std::regex_constants::format_first_only);
                 // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
-                file = boost::regex_replace(file, boost::regex("^dods:"), "http:", boost::format_first_only);
+                file = std::regex_replace(file, std::regex("^dods:"), "http:", std::regex_constants::format_first_only);
             }
 #endif // HAVE_NETCDF_H
             LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
@@ -118,11 +121,11 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             string dir, type, config;
             getFileTypeConfig(getXmlProp(nodesScan->nodeTab[i], "location"), dir, type, config);
             string suffix = getXmlProp(nodesScan->nodeTab[i], "suffix");
-            string regExp;
-            if (suffix != "") {
-                regExp = ".*\\Q"+suffix+"\\E$";
+            std::string regExp;
+            if (!suffix.empty()) {
+                regExp = ".*" + regex_escape(suffix) + "$";
             } else {
-                regExp = getXmlProp(nodesScan->nodeTab[i], "regExp");
+                regExp = getXmlProp(nodesScan->nodeTab[i], "regExp"); // what type of regex is this?
             }
             string subdirs = getXmlProp(nodesScan->nodeTab[i], "subdirs");
             int depth = -1; //negative depth == unlimited
@@ -130,7 +133,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
                 depth = 0;
             }
             vector<string> files;
-            scanFiles(files, dir, depth, boost::regex(regExp), true);
+            scanFiles(files, dir, depth, std::regex(regExp), true);
             for (size_t i = 0; i < files.size(); ++i) {
                 LOG4FIMEX(logger, Logger::DEBUG, "scanned file: " << files.at(i));
                 try {

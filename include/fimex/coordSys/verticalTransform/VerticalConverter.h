@@ -36,7 +36,7 @@
 #include "fimex/DataDecl.h"
 
 #include <boost/shared_array.hpp>
-#include <boost/noncopyable.hpp>
+
 #include <vector>
 
 namespace MetNoFimex {
@@ -46,8 +46,13 @@ namespace MetNoFimex {
 class CoordinateSystem;
 class SliceBuilder;
 
-class VerticalConverter : boost::noncopyable {
+class VerticalConverter
+{
 public:
+    VerticalConverter() = default;
+    VerticalConverter(const VerticalConverter&) = delete;
+    VerticalConverter& operator=(const VerticalConverter&) = delete;
+
     virtual ~VerticalConverter();
 
     virtual std::vector<std::string> getShape() const = 0;

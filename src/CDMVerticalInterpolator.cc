@@ -43,9 +43,9 @@
 #include "leap_iterator.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 
-#include <boost/regex.hpp>
-#include <iterator>
 #include <algorithm>
+#include <iterator>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -109,7 +109,7 @@ void replaceZaxis(CDM& cdm, CoordinateSystem_cp cs, const std::string& varName, 
     CDMAttribute coord;
     if (cdm.getAttribute(varName, "coordinates", coord)) {
         std::string coords = coord.getData()->asString();
-        coords = boost::regex_replace(coords, boost::regex("\\b\\Q" + cs->getGeoZAxis()->getName() + "\\E\\b"), "");
+        coords = std::regex_replace(coords, std::regex("\\b" + regex_escape(cs->getGeoZAxis()->getName()) + "\\b"), "");
         cdm.removeAttribute(varName, "coordinates");
         cdm.addAttribute(varName, CDMAttribute("coordinates", coords));
     }

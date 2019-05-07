@@ -27,16 +27,19 @@
 #ifndef GRIBFILEINDEX_H_
 #define GRIBFILEINDEX_H_
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <vector>
-#include <map>
-#include <cstdio>
-#include "fimex/XMLDoc.h"
-#include <libxml/xmlreader.h>
 #include "fimex/GridDefinition.h"
+#include "fimex/XMLDoc.h"
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/regex.hpp>
+#include <boost/filesystem/operations.hpp>
+
+#include <libxml/xmlreader.h>
+
+#include <cstdio>
+#include <map>
+#include <regex>
+#include <vector>
 
 // forward decl of grib_api
 struct grib_handle;
@@ -56,7 +59,7 @@ public:
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
     GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
-                    const std::vector<std::pair<std::string, boost::regex>>& members = std::vector<std::pair<std::string, boost::regex>>(),
+                    const std::vector<std::pair<std::string, std::regex>>& members = std::vector<std::pair<std::string, std::regex>>(),
                     const std::vector<std::string>& extraKeys = std::vector<std::string>());
     GribFileMessage(XMLDoc_p, std::string nsPrefix, xmlNodePtr node);
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
@@ -189,7 +192,8 @@ public:
      * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
+    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml = false,
+                  std::map<std::string, std::string> options = std::map<std::string, std::string>());
     /**
      * Create a joined index from gribml and grib-file
      *
@@ -211,7 +215,8 @@ public:
      * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
+    GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+                  bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
     /**
      * Create an index from gribml.
      *
@@ -237,8 +242,10 @@ private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
     std::map<std::string, std::string> options_;
-    void init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml);
-    void initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys);
+    void init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath,
+              const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml);
+    void initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+                    const std::vector<std::string>& extraKeys);
     void initByXML(const boost::filesystem::path& xmlFilePath);
     void initByXMLReader(const boost::filesystem::path& xmlFilePath);
 };

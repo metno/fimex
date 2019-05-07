@@ -90,38 +90,37 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
 
     // longitude at origin
     double longOfProjOrigin = 0.;
-    boost::smatch what;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lonc=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+lonc=(\\S+)"))) {
         longOfProjOrigin = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("longitude_of_projection_origin", longOfProjOrigin));
 
     // standard_parallel or scale_factor
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
         double latOfProjOrigin = string2type<double>(what[1].str());
         attrs.push_back(CDMAttribute("latitude_of_projection_origin", latOfProjOrigin));
     }
 
     // azimuth of central line
     double azimuthOfCentralLine = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+alpha=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+alpha=(\\S+)"))) {
         azimuthOfCentralLine = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("azimuth_of_central_line", azimuthOfCentralLine));
 
     // gamma
     double gamma = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+gamma=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+gamma=(\\S+)"))) {
         gamma = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("gamma", gamma));
 
-
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+k=(\\S+)"))) {
         attrs.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
     }
 
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+no_rot"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+no_rot"))) {
         attrs.push_back(CDMAttribute("no_rotation", ""));
     }
 

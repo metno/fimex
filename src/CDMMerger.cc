@@ -40,8 +40,6 @@
 
 #include "CDMMergeUtils.h"
 
-#include <boost/foreach.hpp>
-
 // clang-format off
 #define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
 // clang-format on
@@ -163,7 +161,7 @@ void CDMMerger::setTargetGridFromInner()
     const CoordinateSystem_cp_v allCsI = listCoordinateSystems(p->readerI), allCsO = listCoordinateSystems(p->readerO);
 
     const CDM::VarVec& varsI = cdmI.getVariables();
-    BOOST_FOREACH(const CDMVariable& varI, varsI) {
+    for (const CDMVariable& varI : varsI) {
         const string& varName = varI.getName();
         if (not cdmO.hasVariable(varName))
             continue;

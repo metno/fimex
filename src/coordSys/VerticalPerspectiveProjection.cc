@@ -25,8 +25,8 @@
  */
 
 #include "fimex/coordSys/VerticalPerspectiveProjection.h"
-#include <boost/regex.hpp>
 #include "fimex/Utils.h"
+#include <regex>
 
 namespace MetNoFimex
 {
@@ -50,21 +50,21 @@ std::vector<CDMAttribute> VerticalPerspectiveProjection::parametersFromProj4(con
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "vertical_perspective"));
 
-    boost::smatch what;
+    std::smatch what;
     double lon0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         lon0 = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("longitude_of_projection_origin", lon0));
 
     double lat0 = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
         lat0 = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("latitude_of_projection_origin", lat0));
 
     double h = 0.;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+h=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+h=(\\S+)"))) {
         h = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("perspective_point_height", h));

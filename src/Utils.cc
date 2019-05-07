@@ -81,8 +81,31 @@ std::ostream& type2stream<double>(std::ostream& out, double in)
     return out;
 }
 
+static const std::string ESCAPE_THESE = "*?\\+.()[]{}|^$";
+
+void regex_escape(std::ostream& out, char ch)
+{
+    if (ESCAPE_THESE.find(ch) != std::string::npos)
+        out << '\\';
+    out << ch;
+}
+
+void regex_escape(std::ostream& out, const std::string& s)
+{
+    for (char ch : s)
+        regex_escape(out, ch);
+}
+
+std::string regex_escape(const std::string& s)
+{
+    std::ostringstream out;
+    regex_escape(out, s);
+    return out.str();
+}
+
 // internal implementation of scanFiles
-static void scanFiles_(std::vector<std::string>& files, const boost::filesystem::path& dir, int depth, const boost::regex& regexp, bool matchFileOnly, std::string currentRelDir = "", int depthCount = 0)
+static void scanFiles_(std::vector<std::string>& files, const boost::filesystem::path& dir, int depth, const std::regex& regexp, bool matchFileOnly,
+                       std::string currentRelDir = "", int depthCount = 0)
 {
     using namespace std;
     using namespace boost::filesystem;
@@ -129,7 +152,7 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
 #else
             filename += e->leaf();
 #endif
-            if (boost::regex_match(filename, regexp)) {
+            if (std::regex_match(filename, regexp)) {
 #if BOOST_FILESYSTEM_VERSION == 3
                 files.push_back(e->string());
 #else
@@ -139,19 +162,20 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
         }
     }
 }
-void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const boost::regex& regexp, bool matchFileOnly)
+void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const std::regex& regexp, bool matchFileOnly)
 {
     scanFiles_(files, boost::filesystem::path(dir), depth, regexp, matchFileOnly);
 }
+
 void globFiles(std::vector<std::string>& files, const std::string& glob)
 {
     std::string reg = glob;
 
     // get the initial directory = everything without (*,?) until /
-    boost::regex initialPathRegexp("^([^*?]*/)(.*)");
+    std::regex initialPathRegexp("^([^*?]*/)(.*)");
     std::string dir = ".";
-    boost::smatch what;
-    if (boost::regex_match(glob, what, initialPathRegexp)) {
+    std::smatch what;
+    if (std::regex_match(glob, what, initialPathRegexp)) {
         dir = std::string(what[1].first, what[1].second);
         reg = std::string(what[2].first, what[2].second);
     }
@@ -166,26 +190,26 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
     // replace * to [^/]*
     // replace ? to [^/]?
     // and escaping everything else
-    std::stringstream output;
-    output << "\\Q";
+    std::ostringstream output;
     for (size_t i = 0; i < reg.size(); i++) {
-        std::string charI = reg.substr(i,1);
-        if (charI == "?") {
-            output << "\\E[^/]?\\Q";
-        } else if (charI == "*") {
-            if (i < (reg.size()+1) && reg.substr(i+1,1) == "*") {
+        char charI = reg[i];
+        if (charI == '?') {
+            output << "[^/]?";
+        } else if (charI == '*') {
+            if (i + 1 < reg.size() && reg[i + 1] == '*') {
                 i++;
                 // two ** match also new directories
-                output << "\\E.*\\Q";
+                output << ".*";
             } else {
-                output << "\\E[^/]*\\Q";
+                output << "[^/]*";
             }
         } else {
+            if (ESCAPE_THESE.find(charI) != std::string::npos)
+                output << '\\';
             output << charI;
         }
     }
-    output << "\\E";
-    boost::regex globReg(output.str());
+    std::regex globReg(output.str());
     scanFiles(files, dir, depth, globReg, false);
 }
 

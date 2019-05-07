@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -29,11 +29,9 @@
 #ifndef FELTCONSTANTS_H_
 #define FELTCONSTANTS_H_
 
-#include <algorithm>
-#include <boost/static_assert.hpp>
+#include <cstddef>
 
-namespace felt
-{
+namespace felt {
 
 /// A felt block "word" - 2 bytes
 typedef short int word;
@@ -56,9 +54,6 @@ inline bool isUndefined(word w)
 	return -32767 == w;
 }
 
-}
-
-BOOST_STATIC_ASSERT(sizeof(felt::word) == 2);
-
+} // namespace felt
 
 #endif /*FELTCONSTANTS_H_*/

@@ -25,8 +25,8 @@
  */
 
 #include "fimex/coordSys/MercatorProjection.h"
-#include <boost/regex.hpp>
 #include "fimex/Utils.h"
+#include <regex>
 
 namespace MetNoFimex
 {
@@ -53,18 +53,18 @@ std::vector<CDMAttribute> MercatorProjection::parametersFromProj4(const std::str
 
     // longitude at origin
     double longOfProjOrigin = 0.;
-    boost::smatch what;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         longOfProjOrigin = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("longitude_of_projection_origin", longOfProjOrigin));
 
     // standard_paralll or scale_factor
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_ts=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_ts=(\\S+)"))) {
         double standardParallel = string2type<double>(what[1].str());
         attrs.push_back(CDMAttribute("standard_parallel", standardParallel));
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+k=(\\S+)"))) {
         attrs.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
     }
 

@@ -27,38 +27,34 @@
 #ifndef MUTEXLOCK_H_
 #define MUTEXLOCK_H_
 
-#include <boost/noncopyable.hpp>
-
 #ifdef _OPENMP
-# include <omp.h>
+#include <omp.h>
+#define IF_OPENMP(x) x
+#else
+#define IF_OPENMP(x)
 #endif
 
 namespace MetNoFimex
 {
 
-#ifdef _OPENMP
-struct MutexType : boost::noncopyable
+struct MutexType
 {
-    MutexType() {omp_init_lock(&lock_);}
-    ~MutexType() {omp_destroy_lock(&lock_);}
-    void lock() {omp_set_lock(&lock_);}
-    void unlock() {omp_unset_lock(&lock_);}
+    MutexType(const MutexType&) = delete;
+    MutexType& operator=(const MutexType&) = delete;
+
+    MutexType() { IF_OPENMP(omp_init_lock(&lock_)); }
+    ~MutexType() { IF_OPENMP(omp_destroy_lock(&lock_)); }
+    void lock() { IF_OPENMP(omp_set_lock(&lock_)); }
+    void unlock() { IF_OPENMP(omp_unset_lock(&lock_)); }
 
 public:
+#ifdef _OPENMP
     omp_lock_t lock_;
-};
-#else
-/* A dummy mutex that doesn't actually exclude anything,
- * but as there is no parallelism either, no worries. */
-struct MutexType : boost::noncopyable
-{
-    void lock() {}
-    void unlock() {}
-};
 #endif
+};
 
 /* An exception-safe scoped lock-keeper. */
-class ScopedCritical : boost::noncopyable
+class ScopedCritical
 {
 public:
     explicit ScopedCritical(MutexType& m) : mut(m) {
@@ -67,14 +63,21 @@ public:
 #pragma omp flush
 #endif
     }
+    ScopedCritical(const ScopedCritical&) = delete;
+    ScopedCritical& operator=(const ScopedCritical&) = delete;
+
     ~ScopedCritical() {
 #ifdef _OPENMP
 #pragma omp flush
 #endif
         mut.unlock();
     }
-private: MutexType & mut;
+
+private:
+    MutexType& mut;
 };
+
+#undef IF_OPENMP
 
 } // namespace
 #endif /* MUTEXLOCK_H_ */

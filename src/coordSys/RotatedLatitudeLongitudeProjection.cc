@@ -25,9 +25,9 @@
  */
 
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
-#include <boost/regex.hpp>
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
+#include <regex>
 
 namespace MetNoFimex
 {
@@ -47,8 +47,8 @@ RotatedLatitudeLongitudeProjection::RotatedLatitudeLongitudeProjection()
 bool RotatedLatitudeLongitudeProjection::acceptsProj4(const std::string& proj4Str)
 {
     if (proj4ProjectionMatchesName(proj4Str, "ob_tran")) {
-        boost::smatch what;
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+o_proj=(\\S+)"))) {
+        std::smatch what;
+        if (std::regex_search(proj4Str, what, std::regex("\\+o_proj=(\\S+)"))) {
             string orgProj = what[1].str();
             if (orgProj == "latlong" || orgProj == "longlat" || orgProj == "eqc") {
                 return true;
@@ -67,14 +67,14 @@ std::vector<CDMAttribute> RotatedLatitudeLongitudeProjection::parametersFromProj
     double north_pole_lat = 90;
     double north_pole_lon = 0;
     double north_pole_grid_lon = 0;
-    boost::smatch what;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+o_lat_p=(\\S+)"))) {
+    std::smatch what;
+    if (std::regex_search(proj4Str, what, std::regex("\\+o_lat_p=(\\S+)"))) {
         north_pole_lat = string2type<double>(what[1].str());
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+o_lon_p=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+o_lon_p=(\\S+)"))) {
         north_pole_grid_lon = string2type<double>(what[1].str());
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         north_pole_lon = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("grid_north_pole_longitude", normalizeLongitude180(180+north_pole_lon)));

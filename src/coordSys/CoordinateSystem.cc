@@ -40,10 +40,10 @@
 #include <memory>
 
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <functional>
 #include <iterator>
 #include <map>
+#include <regex>
 #include <set>
 
 namespace MetNoFimex

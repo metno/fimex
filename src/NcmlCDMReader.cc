@@ -40,8 +40,8 @@
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
-#include <boost/regex.hpp>
 #include <memory>
+#include <regex>
 
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -69,9 +69,9 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     } else {
         string ncFile = getXmlProp(nodes->nodeTab[0], "location");
         // remove file: URL-prefix
-        ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
+        ncFile = std::regex_replace(ncFile, std::regex("^file:"), "", std::format_first_only);
         // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
-        ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
+        ncFile = std::regex_replace(ncFile, std::regex("^dods:"), "http:", std::format_first_only);
         dataReader = std::make_shared<NetCDF_CDMReader>(ncFile);
     }
 #endif

@@ -25,13 +25,14 @@
  */
 
 #include "fimex/SpatialAxisSpec.h"
-#include "fimex/Utils.h"
-#include <vector>
-#include <algorithm>
-#include <iterator>
 #include "fimex/Logger.h"
 #include "fimex/Units.h"
-#include <boost/regex.hpp>
+#include "fimex/Utils.h"
+
+#include <algorithm>
+#include <iterator>
+#include <regex>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -54,10 +55,10 @@ public:
     {
         std::string retVal;
         if (value != "...") {
-            boost::smatch what;
-            boost::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
+            std::smatch what;
+            std::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
             double retDouble;
-            if (boost::regex_search(value, what, finalVals)) {
+            if (std::regex_search(value, what, finalVals)) {
                 if (what.size() >= 3) {
                     if (what[1] == '+') {
                         retDouble = finalValue + string2type<double> (what[2]);

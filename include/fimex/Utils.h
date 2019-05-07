@@ -28,12 +28,11 @@
 #include "fimex/UnitsConverter.h"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
 
 #include <cmath>
 #include <iterator>
 #include <limits>
+#include <regex>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -468,6 +467,21 @@ int mifi_isnan(C x) {
 }
 
 /**
+ * @brief Escape char for std::regex::extended
+ */
+void regex_escape(std::ostream& out, char ch);
+
+/**
+ * @brief Escape all chars from string for std::regex::extended
+ */
+void regex_escape(std::ostream& out, const std::string& s);
+
+/**
+ * @brief Escape all chars from string for std::regex::extended
+ */
+std::string regex_escape(const std::string& s);
+
+/**
  * Scan the filesystem for files matching the regexp. Can be used similar to 'glob'
  * or 'find' commands. The files will be sorted alphabetically.
  *
@@ -478,7 +492,7 @@ int mifi_isnan(C x) {
  * @param matchFileOnly if true, the regexp will match the file-part only, if false,
  *        the complete path (behind dir) will be matched.
  */
-void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const boost::regex& regexp, bool matchFileOnly);
+void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const std::regex& regexp, bool matchFileOnly);
 /**
  * Similar to scanFiles, but uses glob instead, with * matches everything within a file or directory-name, ? matches exactly one character (not /),
  * and ** match everything even across multiple directories.

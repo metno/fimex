@@ -63,9 +63,9 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
         attrs.push_back(CDMAttribute("scale_factor_at_central_meridian", 0.9996));
         attrs.push_back(CDMAttribute("latitude_of_projection_origin", 0));
         attrs.push_back(CDMAttribute("false_easting", 500000));
-        boost::smatch what;
+        std::smatch what;
         double longOfProjOrigin = 0;
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+zone=(\\d+)"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+zone=(\\d+)"))) {
             short zone = string2type<short>(what[1].str());
             if (zone <= 0) zone = 1;
             else if (zone > 60) zone = 60;
@@ -73,11 +73,11 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
             attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
         }
         // some people use utm with lon_0 instead of zone
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\d+|\\d+\\.\\d+)"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\d+|\\d+\\.\\d+)"))) {
             longOfProjOrigin = string2type<double>(what[1].str());
             attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
         }
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+south"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+south"))) {
             attrs.push_back(CDMAttribute("false_northing", 10000000));
         }
         LOG4FIMEX(logger, Logger::WARN, "proj4 utm projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc (or etmerc proj4.8, NGA rec.) +k=0.9996 +lon_0="<< longOfProjOrigin << "+x_0=500000");
@@ -87,19 +87,19 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
         }
         // longitude at origin
         double longOfProjOrigin = 0.;
-        boost::smatch what;
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+        std::smatch what;
+        if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
             longOfProjOrigin = string2type<double>(what[1].str());
         }
         attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
 
         // standard_parallel or scale_factor
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
             double latOfProjOrigin = string2type<double>(what[1].str());
             attrs.push_back(CDMAttribute("latitude_of_projection_origin", latOfProjOrigin));
         }
 
-        if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
+        if (std::regex_search(proj4Str, what, std::regex("\\+k=(\\S+)"))) {
             attrs.push_back(CDMAttribute("scale_factor_at_central_meridian", string2type<double>(what[1].str())));
         }
     }

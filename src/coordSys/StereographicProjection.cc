@@ -25,11 +25,10 @@
  */
 
 #include "fimex/coordSys/StereographicProjection.h"
-#include <boost/regex.hpp>
-#include <cmath>
-#include <sstream>
 #include "fimex/mifi_constants.h"
-
+#include <cmath>
+#include <regex>
+#include <sstream>
 
 namespace MetNoFimex
 {
@@ -51,23 +50,23 @@ std::vector<CDMAttribute> StereographicProjection::parametersFromProj4(const std
     vector<CDMAttribute> attrs;
     if (!acceptsProj4(proj4Str)) return attrs;
 
-    boost::smatch what;
+    std::smatch what;
     double lon0, lat0, k;
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lon_0=(\\S+)"))) {
         lon0 = std::strtod(what[1].str().c_str(), (char **)NULL);
     } else {
         lon0 = 0;
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
         lat0 = std::strtod(what[1].str().c_str(), (char **)NULL);
     } else {
         lat0 = 0;
     }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_ts=(\\S+)"))) {
+    if (std::regex_search(proj4Str, what, std::regex("\\+lat_ts=(\\S+)"))) {
         double lat_ts = std::strtod(what[1].str().c_str(), (char **)NULL);
         k = (1+sin(MIFI_PI * lat_ts / 180)) / 2;
 
-    } else if (boost::regex_search(proj4Str, what, boost::regex("\\+k=(\\S+)"))) {
+    } else if (std::regex_search(proj4Str, what, std::regex("\\+k=(\\S+)"))) {
         k = std::strtod(what[1].str().c_str(), (char **)NULL);
     } else {
         k = 1;

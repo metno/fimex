@@ -38,17 +38,16 @@
 // boost
 //
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_set.hpp>
-#include <memory>
 
 // standard
 //
-#include <string>
-#include <set>
-#include <vector>
 #include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace MetNoFimex {
 

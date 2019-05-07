@@ -22,16 +22,19 @@
  */
 
 #include "FeltParameters.h"
+
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
+
+#include <boost/tokenizer.hpp>
+
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
-#include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
 
 namespace MetNoFelt {
 
@@ -50,31 +53,31 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams, 
     for (std::vector<std::string>::const_iterator it = dianaFeltParams.begin(); it != dianaFeltParams.end(); ++it) {
         std::string paramName(*it);
         std::string dataType("none");
-        boost::smatch what;
-        boost::regex dTypeRegex(":dataType=([a-z]*)");
+        std::smatch what;
+        std::regex dTypeRegex(":dataType=([a-z]*)");
         // get dataType and remove from paramName
-        if (boost::regex_search(paramName, what, dTypeRegex)) {
+        if (std::regex_search(paramName, what, dTypeRegex)) {
             dataType = what[1].str();
             if (!(dataType == "short" || dataType == "float" || dataType == "double")) {
                 Felt_File_Error("unknown type for variable "+paramName+": "+dataType+ " must be float|double|short");
             }
-            paramName = boost::regex_replace(paramName, dTypeRegex, "");
+            paramName = std::regex_replace(paramName, dTypeRegex, "");
         }
         // remove the global restrictions from the parameter-name
         // which might be used as ID, too
         string cleanParamName = paramName;
         if (globalRestrictions != "") {
-            cleanParamName = boost::regex_replace(paramName, boost::regex(":?\\Q"+globalRestrictions+"\\E"), "");
+            cleanParamName = std::regex_replace(paramName, std::regex(":?" + MetNoFimex::regex_escape(globalRestrictions)), "");
         }
 
         // get fillValue and remove from paramName
-        boost::regex fillValueRegex(":?fillValue=([^:]+)");
-        if (boost::regex_search(paramName, what, fillValueRegex)) {
+        std::regex fillValueRegex(":?fillValue=([^:]+)");
+        if (std::regex_search(paramName, what, fillValueRegex)) {
             std::stringstream ss;
             ss << what[1].str();
             double fillValue;
             ss >> fillValue;
-            cleanParamName = boost::regex_replace(cleanParamName, fillValueRegex, "");
+            cleanParamName = std::regex_replace(cleanParamName, fillValueRegex, "");
             parameterFillValueMap[cleanParamName] = fillValue;
         }
 
@@ -90,23 +93,24 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams, 
 }
 
 void FeltParameters::init(std::string configFile) {
-    boost::regex sectionEx("\\s*<([^/].*)>\\s*");
-    boost::regex parameterEx("\\s*([^=\\s]+)=(\\S+)");
-    boost::smatch what;
+    std::regex sectionEx("\\s*<([^/].*)>\\s*");
+    std::regex parameterEx("\\s*([^=\\s]+)=(\\S+)");
+    std::smatch what;
 
     std::ifstream dianaFeltDeclarations(configFile.c_str());
     if (dianaFeltDeclarations.is_open()) {
         std::string line;
         std::string section;
         std::string lastLine("");
-        boost::regex endSectionEx;
+        bool have_endSectionEx = false;
+        std::regex endSectionEx;
         while (std::getline(dianaFeltDeclarations, line)) {
-            line = boost::regex_replace(line, boost::regex("#.*"), "");
-            if (boost::regex_match(line, boost::regex("\\s*"))) {
+            line = std::regex_replace(line, std::regex("#.*"), "");
+            if (std::regex_match(line, std::regex("\\s*"))) {
                 continue;
             }
 
-            if (boost::regex_match(line, what, boost::regex("(.*)\\\\.*"))) {
+            if (std::regex_match(line, what, std::regex("(.*)\\\\.*"))) {
                 // continuing line
                 lastLine.append(what[1].first, what[1].second);
                 continue;
@@ -115,25 +119,26 @@ void FeltParameters::init(std::string configFile) {
                     lastLine.assign("");
             }
 
-               if (boost::regex_match(line, what, sectionEx)) {
-                   section = what[1].str();
-                   endSectionEx = boost::regex("\\s*</\\Q"+section+"\\E>\\s*");
-               } else if (!endSectionEx.empty() &&  boost::regex_match(line, what, endSectionEx)) {
-                   section.erase();
+            if (std::regex_match(line, what, sectionEx)) {
+                section = what[1].str();
+                endSectionEx = std::regex("\\s*</" + MetNoFimex::regex_escape(section) + ">\\s*");
+                have_endSectionEx = true;
+            } else if (have_endSectionEx && std::regex_match(line, what, endSectionEx)) {
+                section.erase();
                } else if (section == "METNOFIELDFILE_PARAMETERS") {
-                std::string::const_iterator start, end;
-                boost::match_flag_type flags = boost::match_default;
+                   std::string::const_iterator start, end;
+                   std::regex_constants::match_flag_type flags = std::regex_constants::match_default;
                    start = line.begin();
                    end = line.end();
-                while (boost::regex_search(start, end, what, parameterEx)) {
-                    //std::cerr << "Debug: " << what[1] << "===" << what[2] << std::endl;
-                    // update start position
-                    start = what[0].second;
-                    // update flags to allow for --first as start-position
-                      flags |= boost::match_prev_avail;
-                      flags |= boost::match_not_bob;
+                   while (std::regex_search(start, end, what, parameterEx)) {
+                       // std::cerr << "Debug: " << what[1] << "===" << what[2] << std::endl;
+                       // update start position
+                       start = what[0].second;
+                       // update flags to allow for --first as start-position
+                       flags |= std::regex_constants::match_prev_avail;
+                       // flags |= std::regex_constants::match_not_bob; // FIXME not available in std::regex
 
-                      parameterMap[ what[1].str() ] = diana2feltparameters(what[2].str());
+                       parameterMap[what[1].str()] = diana2feltparameters(what[2].str());
                 }
             }
 
@@ -146,8 +151,8 @@ FeltParameters::~FeltParameters()
 
 std::array<short, 16> FeltParameters::diana2feltparameters(const std::string& dianaString)
 {
-    boost::regex equalSeparatedRegex("\\s*(\\w*)=(\\d+)\\s*");
-    boost::smatch what;
+    std::regex equalSeparatedRegex("\\s*(\\w*)=(\\d+)\\s*");
+    std::smatch what;
     std::array<short, 16> diana2feltParameters;
     for (int i = 0; i < 16; i++) {
         diana2feltParameters[i] = ANY_VALUE();
@@ -172,7 +177,7 @@ std::array<short, 16> FeltParameters::diana2feltparameters(const std::string& di
 
     ++tokIt;
     for (;tokIt != tok.end(); ++tokIt) {
-        if (boost::regex_match(*tokIt, what, equalSeparatedRegex)) {
+        if (std::regex_match(*tokIt, what, equalSeparatedRegex)) {
             short id(std::atoi(what[2].str().c_str()));
             //cerr << what[1].str() << ": " << id << endl;
             if (what[1].str() == "prod") {

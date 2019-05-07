@@ -25,16 +25,19 @@
  */
 
 #include "fimex/CDMFileReaderFactory.h"
-#include <iostream>
-#include <fstream>
-#include <boost/regex.hpp>
-#include <cctype>
-#include <algorithm>
-#include "fimex_config.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMWriter.h"
+#include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
+
+#include "fimex_config.h"
+
+#include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <regex>
 
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
@@ -59,8 +62,6 @@
 #endif
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
-#include <memory>
-
 namespace MetNoFimex {
 
 #define MIFI_MAGIC_SIZE 10
@@ -81,7 +82,7 @@ static bool detectNetCDF(const char* magic) {
 }
 
 static bool detectXML(const char* magic) {
-    return boost::regex_match(magic, boost::regex("\\s*<\\?xml\\s.*"));
+    return std::regex_match(magic, std::regex("\\s*<\\?xml\\s.*"));
 }
 
 static int detectFileTypeFromNameOrFile(const std::string & fileTypeName, const std::string& fileName)
@@ -123,8 +124,8 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
 {
     // get appendix
     std::string type("");
-    boost::smatch what;
-    if (boost::regex_match(fileName, what, boost::regex(".*\\.(\\w+)$"))) {
+    std::smatch what;
+    if (std::regex_match(fileName, what, std::regex(".*\\.(\\w+)$"))) {
         type = what[1].str();
         std::transform(type.begin(), type.end(), type.begin(), (int(*)(int)) tolower);
     }
@@ -195,7 +196,7 @@ void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, 
             if (memberNameParts.size() == 1) {
                 memberNameParts.push_back(memberNameParts.at(0));
             }
-            members.push_back(std::make_pair(memberNameParts.at(1), ".*\\Q" + memberNameParts.at(0) + "\\E.*"));
+            members.push_back(std::make_pair(memberNameParts.at(1), ".*" + regex_escape(memberNameParts.at(0)) + ".*"));
         } else {
             // additional file
             files.push_back(*argIt);
