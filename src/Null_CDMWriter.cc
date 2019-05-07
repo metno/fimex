@@ -22,6 +22,7 @@
  */
 
 #include "fimex/Null_CDMWriter.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
@@ -36,47 +37,28 @@
 #include "fimex/mifi_mpi.h"
 #endif
 
-namespace MetNoFimex
+namespace MetNoFimex {
+
+namespace {
+
+Logger_p logger = getLogger("fimex.Null_CDMWriter");
+
+bool convertData(CDMDataType dt, DataPtr data)
 {
-
-static Logger_p logger = getLogger("fimex.Null_CDMWriter");
-
-static bool putRecData(CDMDataType dt, DataPtr data, size_t recNum) {
-    if (data->size() == 0) return true;
+    if (data->size() == 0)
+        return true;
 
     // clang-format off
     switch (dt) {
     case CDM_NAT: return false;
     case CDM_CHAR:   data->asChar().get(); break;
+    case CDM_UCHAR:  data->asUChar().get(); break;
     case CDM_SHORT:  data->asShort().get(); break;
+    case CDM_USHORT: data->asUShort().get(); break;
     case CDM_INT:    data->asInt().get(); break;
-    case CDM_FLOAT:  data->asFloat().get(); break;
-    case CDM_DOUBLE: data->asDouble().get(); break;
-    case CDM_STRING: data->asString(); break;
-    default: return false;
-    }
-    // clang-format on
-    return true;
-
-}
-
-
-static bool putVarData(CDMDataType dt, DataPtr data) {
-    size_t size = data->size();
-    if (size == 0) return true;
-
-    int dims = 5;
-    int dim_size = 1;
-    for (int i = 0; i < dims; i++) {
-        dim_size *= 3;
-    }
-
-    // clang-format off
-    switch (dt) {
-    case CDM_NAT: return false;
-    case CDM_CHAR:   data->asChar().get(); break;
-    case CDM_SHORT:  data->asShort().get(); break;
-    case CDM_INT:    data->asInt().get(); break;
+    case CDM_UINT:   data->asUInt().get(); break;
+    case CDM_INT64:  data->asInt64().get(); break;
+    case CDM_UINT64: data->asUInt64().get(); break;
     case CDM_FLOAT:  data->asFloat().get(); break;
     case CDM_DOUBLE: data->asDouble().get(); break;
     case CDM_STRING: data->asString(); break;
@@ -85,9 +67,11 @@ static bool putVarData(CDMDataType dt, DataPtr data) {
     // clang-format on
     return true;
 }
+
+} // namespace
 
 Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile)
-: CDMWriter(cdmReader, outputFile)
+    : CDMWriter(cdmReader, outputFile)
 {
     const CDM& cdm = cdmReader->getCDM();
     const CDM::DimVec& cdmDims = cdm.getDimensions();
@@ -103,7 +87,6 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
         const CDMVariable& var = *it;
         const std::vector<std::string>& shape = var.getShape();
         for (size_t i = 0; i < shape.size(); i++) {
-            // revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
         }
         CDMDataType datatype = var.getDataType();
         if (datatype == CDM_NAT && shape.size() == 0) {
@@ -111,9 +94,7 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
         }
     }
 
-    // write attributes
     const CDM::StrAttrVecMap& cdmAttrs = cdm.getAttributes();
-    // using C interface since it offers a combined interface to global and var attributes
     for (CDM::StrAttrVecMap::const_iterator it = cdmAttrs.begin(); it != cdmAttrs.end(); ++it) {
         int varId;
         if (it->first == CDM::globalAttributeNS()) {
@@ -123,42 +104,17 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
         }
         for (CDM::AttrVec::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
             const CDMAttribute& attr = *ait;
-            CDMDataType dt = attr.getDataType();
-            switch (dt) {
-            case CDM_STRING:
-                attr.getData()->asString();
-                break;
-            case CDM_CHAR:
-                attr.getData()->asChar().get();
-                break;
-            case CDM_SHORT:
-                attr.getData()->asShort().get();
-                break;
-            case CDM_INT:
-                attr.getData()->asInt().get();
-                break;
-            case CDM_FLOAT:
-                attr.getData()->asFloat().get();
-                break;
-            case CDM_DOUBLE:
-                attr.getData()->asDouble().get();
-                break;
-            case CDM_NAT:
-            default: throw CDMException("unknown datatype for attribute " + attr.getName());
+            if (!convertData(attr.getDataType(), attr.getData())) {
+                throw CDMException("cannot convert datatype for attribute " + attr.getName());
             }
         }
     }
 
     // write data
     const CDMDimension* unLimDim = cdm.getUnlimitedDim();
-    long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
-    MutexType writerMutex;
+    const long long maxUnLim = (unLimDim ? unLimDim->getLength() : 0);
 #ifdef _OPENMP
-#pragma omp parallel default(shared)
-    {
-    //omp_set_nested(1);
-#pragma omp single
-    {
+#pragma omp parallel for default(shared)
 #endif
     for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
 #ifdef HAVE_MPI
@@ -172,64 +128,25 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
             }
         }
 #endif
-        for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
-//	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-            if (unLimDimPos == -1) {
-                if (!cdm.hasUnlimitedDim(cdmVars.at(vi))) {
-#ifdef _OPENMP
-#pragma omp task firstprivate(vi)
-                {
-#endif
-                    const CDMVariable& cdmVar = cdmVars.at(vi);
-                    //std::stringstream ss;
-                    //ss << omp_get_thread_num() << ":" << vi << ":" << cdmVar.getName() << std::endl;
-                    //std::cerr << ss.str();
-                    DataPtr data = cdmReader->getData(cdmVar.getName());
-                    ScopedCritical lock(writerMutex);
-                    if (!putVarData(cdmVar.getDataType(), data)) {
-                        throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
-                    }
-#ifdef _OPENMP
-                } // task
-#endif
-                }
+        for (const CDMVariable& cdmVar : cdmVars) {
+            const bool has_unlimited = cdm.hasUnlimitedDim(cdmVar);
+            DataPtr data;
+            if (unLimDimPos == -1 && !has_unlimited) {
+                data = cdmReader->getData(cdmVar.getName());
+            } else if (unLimDimPos >= 0 && has_unlimited) {
+                data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
             } else {
-                if (cdm.hasUnlimitedDim(cdmVars.at(vi))) {
-                    // iterate over each unlimited dim (usually time)
-#ifdef _OPENMP
-// the execution order of the tasks is completely undefined, even on a single processor
-#pragma omp task firstprivate(vi,unLimDimPos)
-                    {
-#endif
-                    const CDMVariable& cdmVar = cdmVars.at(vi);
-#if 0
-                    std::stringstream ss;
-                    ss << omp_get_thread_num() << ":" << unLimDimPos << ":" << cdmVar.getName() << std::endl;
-                    std::cout << ss.str();//    NetCDF_CDMWriter(timeInterpol, "test4.nc");
-                    BOOST_CHECK(true);
-
-#endif
-                    DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
-                    ScopedCritical lock(writerMutex);
-                    if (!putRecData(cdmVar.getDataType(), data, unLimDimPos)) {
-                        throw CDMException("problems writing datarecord " + type2string(unLimDimPos) + " to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
-                    }
-#ifdef _OPENMP
-                    } // task
-#endif
-                }
+                continue;
+            }
+            if (!convertData(cdmVar.getDataType(), data)) {
+                throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
             }
         }
     }
-#ifdef _OPENMP
-    } // single
-    omp_set_nested(0);
-    } // parallel
-#endif
 }
 
 Null_CDMWriter::~Null_CDMWriter()
 {
 }
 
-}
+} // namespace MetNoFimex
