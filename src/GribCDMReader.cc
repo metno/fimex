@@ -45,6 +45,8 @@
 #include "MutexLock.h"
 #include "fimex_config.h"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -52,8 +54,7 @@
 #include <set>
 #include <stdexcept>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 
@@ -156,9 +157,9 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     }
     options["extraKeys"] = getConfigExtraKeys(p_->doc);
 
-    for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
-        vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
-        copy(messages.begin(), messages.end(), back_inserter(p_->indices));
+    for (const std::string& file : fileNames) {
+        vector<GribFileMessage> messages = GribFileIndex(file, p_->ensembleMemberIds, options).listMessages();
+        p_->indices.insert(p_->indices.end(), messages.begin(), messages.end());
     }
     initPostIndices();
 }
@@ -1318,7 +1319,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
             gridData.resize(maxXySize); // make sure the gridData is always large enough
             {
 #ifndef HAVE_GRIB_API_THREADSAFE
-                ScopedCritical lock(p_->mutex);
+                class ScopedCritical lock(p_->mutex);
 #endif
                 dataRead = gfmIt->readData(gridData, missingValue);
             }
@@ -1386,5 +1387,4 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     return getDataSlice(varName, sb);
 }
 
-
-}
+} // namespace MetNoFimex

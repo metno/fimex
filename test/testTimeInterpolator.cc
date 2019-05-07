@@ -33,17 +33,14 @@
 #include "fimex/Logger.h"
 #include "fimex/NetCDF_CDMWriter.h"
 
-#include <boost/filesystem/operations.hpp>
-
 using namespace std;
 using namespace MetNoFimex;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 {
     //defaultLogLevel(Logger::DEBUG);
     const string outputName = "test_timeInterpolator.nc";
-    fs::remove(outputName);
+    MetNoFimex::remove(outputName);
 
     if (!hasTestExtra())
         return;
@@ -77,7 +74,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
 {
     const string outputName = "test_timeInterpolatorRelative.nc";
-    fs::remove(outputName);
+    MetNoFimex::remove(outputName);
 
     if (!hasTestExtra())
         return;

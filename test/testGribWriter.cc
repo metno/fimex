@@ -29,13 +29,10 @@
 
 #include "FeltCDMReader2.h"
 #include "fimex/GribApiCDMWriter.h"
-#include <boost/filesystem/operations.hpp>
 #include <memory>
 
 using namespace std;
-using namespace MetNoFelt;
 using namespace MetNoFimex;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
 {
@@ -45,17 +42,16 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
 
     const string outputFile("test_append.grb1");
-    fs::remove(outputFile.c_str());
+    MetNoFimex::remove(outputFile);
     GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
-    fs::path out( outputFile );
-    BOOST_CHECK(fs::exists(out));
-    BOOST_CHECK(fs::file_size(out) > 5000000);
+    BOOST_CHECK(MetNoFimex::exists(outputFile));
+    BOOST_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
 
-    const size_t size = fs::file_size(out);
+    const size_t size = MetNoFimex::file_size(outputFile);
     GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
-    BOOST_CHECK(fs::exists(out));
-    BOOST_CHECK(fs::file_size(out) == 2*size);
-    fs::remove(outputFile.c_str());
+    BOOST_CHECK(::exists(outputFile));
+    BOOST_CHECK(MetNoFimex::file_size(outputFile) == 2 * size);
+    MetNoFimex::remove(outputFile);
 }
 
 
@@ -68,9 +64,8 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 
     const string outputFile("test.grb1");
     GribApiCDMWriter(feltReader, outputFile, 1, pathShareEtc("cdmGribWriterConfig.xml"));
-    fs::path out( outputFile );
-    BOOST_CHECK(fs::exists(out));
-    BOOST_CHECK(fs::file_size(out) > 5000000);
+    BOOST_CHECK(MetNoFimex::exists(outputFile));
+    BOOST_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
 }
 
 BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
@@ -81,9 +76,8 @@ BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
     CDMReader_p feltReader(new FeltCDMReader2(fileName, pathShareEtc("felt2nc_variables.xml")));
     const string outputFile("test.grb2");
     GribApiCDMWriter(feltReader, outputFile, 2, pathShareEtc("cdmGribWriterConfig.xml"));
-    fs::path out( outputFile );
-    BOOST_CHECK(fs::exists(out));
-    BOOST_CHECK(fs::file_size(out) > 5000000);
+    BOOST_CHECK(MetNoFimex::exists(outputFile));
+    BOOST_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
 }
 
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK

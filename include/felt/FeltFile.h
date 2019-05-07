@@ -32,12 +32,10 @@
 #include "FeltConstants.h"
 #include "FeltTypes.h"
 
-#include <boost/filesystem/path.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_array.hpp>
 
 #include <iosfwd>
-#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -47,7 +45,7 @@ namespace felt
 class FeltFile
 {
 public:
-    explicit FeltFile(const boost::filesystem::path & file);
+    explicit FeltFile(const std::string& file);
     FeltFile(const FeltFile&) = delete;
     FeltFile& operator=(const FeltFile&) = delete;
 
@@ -57,7 +55,7 @@ public:
     size_type size() const;
     bool empty() const { return size() == 0; }
 
-    const boost::filesystem::path & fileName() const { return fileName_; }
+    const std::string& fileName() const { return fileName_; }
 
     std::string information() const;
 
@@ -69,7 +67,7 @@ public:
     typedef std::shared_ptr<FeltField> FeltFieldPtr;
 
     typedef std::vector<FeltFieldPtr>::const_iterator iterator;
-//	class iterator;
+
     iterator begin();
     iterator end();
 
@@ -105,7 +103,7 @@ private:
      */
     void get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const;
 
-    const boost::filesystem::path fileName_;
+    const std::string fileName_;
 
     /**
      * Should we swap the two bytes that make up a word before trying to
@@ -118,34 +116,10 @@ private:
     typedef std::vector<FeltFieldPtr> Fields;
     mutable Fields fields_;
 
-    mutable std::istream * feltFile_;
+    std::unique_ptr<std::istream> feltFile_;
 
     friend class FeltField;
-//	friend class iterator;
 };
-
-
-
-//class FeltFile::iterator : public std::iterator<std::input_iterator_tag, FeltField>
-//{
-//public:
-//	iterator & operator ++ ();
-//	iterator   operator ++ (int);
-//	const reference operator * () const;
-//	const pointer operator -> () const;
-//
-//	bool operator == ( const iterator & i ) const;
-//	bool operator != ( const iterator & i ) const;
-//
-//private:
-//	value_type & data_;
-//	const FeltFile * ff_;
-//	int index_;
-//	iterator(const FeltFile & ff);
-//	iterator();
-//	friend class FeltFile;
-//};
-
 
 }
 #endif /*FELTFILE_H_*/

@@ -31,18 +31,17 @@
 #include "fimex/Logger.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+
 #include <boost/program_options.hpp>
+
 #include <grib_api.h>
+
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 using namespace std;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
@@ -51,8 +50,8 @@ static void writeUsage(ostream& out, const po::options_description& options) {
     out << options << endl;
 }
 
-void
-indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, string config, vector<string> memberOptions, bool force)
+void indexGrib(const std::string& input, const std::string& append, const std::string& output, vector<string> extraKeys, string config,
+               vector<string> memberOptions)
 {
     std::map<std::string, std::string> options;
     if (config != "") {
@@ -73,32 +72,13 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
             members.push_back(make_pair(memIt->first, std::regex(memIt->second)));
         }
     }
-    MetNoFimex::GribFileIndex gfi(input, append, members, force, options);
-    // open stream before filter, required for closing order
-    std::ofstream realOutStream;
-    boost::iostreams::filtering_ostream outStream;
-#if BOOST_FILESYSTEM_VERSION == 3
-    std::string outputStr = output.string();
-#else
-    std::string outputStr = output.file_string();
-#endif
-    if (outputStr.find_last_of(".gz") == (outputStr.size()-1)) {
-        //cerr << "using gz" << endl;
-        outStream.push(boost::iostreams::gzip_compressor(boost::iostreams::zlib::default_compression));
-        realOutStream.open(outputStr.c_str(), std::ios::binary|std::ios::out);
-    } else {
-        //cerr << output.string().find_last_of(".gz") << " " << output.string().size() << endl;
-        realOutStream.open(outputStr.c_str(), std::ios::out);
-    }
-    outStream.push(realOutStream);
+    MetNoFimex::GribFileIndex gfi(input, append, members, options);
 
-//    fs::ofstream os(output);
+    std::ofstream outStream(output, std::ios::binary);
     outStream << gfi;
-// outStream auto-close will close the file
 }
 
-int
-main(int argc, char* args[])
+int main(int argc, char* args[])
 {
     // only use one thread
     mifi_setNumThreads(1);
@@ -108,10 +88,9 @@ main(int argc, char* args[])
         ("help,h", "help message")
         ("debug", "debug option")
         ("version", "program version")
-        ("force,f", "force update of index-file")
         ("extraKey", po::value<vector<string> >()->composing(), "multiple extraKey to index")
         ("readerConfig", po::value<string>(), "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.")
-        ("outputDirectory,o", po::value<string>(), "output directory")
+        ("outputFile,o", po::value<string>(), "output grbml file")
         ("inputFile,i", po::value<string>(), "input gribFile")
         ("input.optional", po::value<vector<string> >()->composing(), "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs")
         ("appendFile,a", po::value<string>(), "append output new index to a grbml-file")
@@ -141,31 +120,12 @@ main(int argc, char* args[])
         writeUsage(cout, options);
         return 1;
     }
+    const std::string inputFile(vm["inputFile"].as<string>());
 
-    fs::path input(vm["inputFile"].as<string>());
-    fs::path fullInput = fs::system_complete(input);
-    if (!fs::exists(fullInput) && !fs::is_directory(fullInput)) {
-        cerr << "inputFile " << fullInput << " does not exist";
-        return 1;
-    }
+    std::string outputFile = inputFile + ".grbml";
+    if (vm.count("outputFile"))
+        outputFile = vm["outputFile"].as<string>();
 
-    fs::path outDir = fullInput.branch_path().string();
-    if (vm.count("outputDirectory")) {
-        outDir = fs::path(vm["outputDirectory"].as<string>());
-        if (!fs::is_directory(outDir)) {
-            cerr << "outputDir " << outDir << " is not a directory" << endl;
-            return 1;
-        }
-    }
-    std::string filename;
-#if BOOST_FILESYSTEM_VERSION == 3
-    filename = fullInput.filename().string();
-#else
-    filename = fullInput.leaf();
-#endif
-    fs::path outFile = outDir / (filename + ".grbml");
-    bool forceUpdate = false;
-    if (vm.count("force")) forceUpdate = true;
     vector<string> extraKeys;
     if (vm.count("extraKey")) {
         extraKeys = vm["extraKey"].as<vector<string> >();
@@ -178,11 +138,10 @@ main(int argc, char* args[])
     if (vm.count("input.optional")) {
         members = vm["input.optional"].as<vector<string> >();
     }
-    fs::path appendFile;
+    std::string appendFile;
     if (vm.count("appendFile")) {
-        appendFile = fs::path(vm["appendFile"].as<string>());
-        outFile = appendFile;
+        outputFile = appendFile = vm["appendFile"].as<string>();
     }
-    indexGrib(fullInput, appendFile, outFile, extraKeys, readerConfig, members, forceUpdate);
+    indexGrib(inputFile, appendFile, outputFile, extraKeys, readerConfig, members);
     return 0;
 }

@@ -50,10 +50,7 @@ OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib
 
 FIND_PACKAGE(Boost REQUIRED COMPONENTS
   date_time
-  filesystem
-  iostreams
   program_options
-  system
   unit_test_framework
 )
 IF ((Boost_VERSION EQUAL 103400) OR (Boost_VERSION GREATER 103400))

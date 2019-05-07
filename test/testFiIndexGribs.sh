@@ -36,14 +36,14 @@ else
   exit 1;
 fi
 
-rm -f test.grib1.grbml2
-./fiIndexGribs.sh -f -i test.grb1 --readerConfig="${TEST_SRCDIR}/cdmGribReaderConfig_newEarth.xml" -a test.grb1.grbml2
+rm -f test.grb1.grbml2
+./fiIndexGribs.sh -i test.grb1 --readerConfig="${TEST_SRCDIR}/cdmGribReaderConfig_newEarth.xml" -a test.grb1.grbml2
 if [ $? != 0 ]; then
-  echo "failed writing test.grb1.grbml2 with readerConfig"
+  echo "failed writing test.grb1.grbml2 with readerConfig -- failure"
   exit 1
 fi
 if [ ! -f test.grb1.grbml2 ]; then
-  echo "failed writing test.grb1.grbml2 with readerConfig"
+  echo "failed writing test.grb1.grbml2 with readerConfig -- no output"
   exit 1
 fi
 if grep -q localDefinitionNumber test.grb1.grbml2; then
@@ -52,11 +52,11 @@ else
   echo "no localDefinitionNumber in test.grb1.grbml2"
   exit 1;
 fi
-if ! diff -q test.grb1.grbml test.grb1.grbml2 ; then
-  echo "success"
-else
+if cmp -s test.grb1.grbml test.grb1.grbml2 ; then
   echo "earthFigure not different between test.grb1.grbml and test.grb1.grbml2"
   exit 1;
+else
+  echo "success"
 fi
 rm -f test.grb1.grbml2
 

@@ -25,19 +25,18 @@
  */
 
 #include "fimex/XMLUtils.h"
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+
 #include <boost/program_options.hpp>
+
+#include <libxml/xmlreader.h>
+
 #include <fstream>
 #include <iostream>
-#include <libxml/xmlreader.h>
 #include <memory>
 #include <string>
 
 using namespace std;
 namespace po = boost::program_options;
-namespace io = boost::iostreams;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
     out << "usage: fiGrbmlCat --outputFile=OUTFILE.grbml file1.grml [file2.grbml ...] [--inputFile=fileX.grbml] " << endl;
@@ -132,14 +131,20 @@ void grbmlExtract(const string& fileName, ostream& os)
     }
 }
 
-int
-main(int argc, char* args[])
+void extractToStream(std::ostream& out, const std::vector<std::string>& files)
+{
+    for (size_t i = 0; i < files.size(); ++i)
+        grbmlExtract(files[i], out);
+    if (!first)
+        out << "</gribFileIndex>" << endl;
+}
+
+int main(int argc, char* args[])
 {
     po::options_description options("options");
     options.add_options()
         ("outputFile,o", po::value<string>(), "output grbml")
         ("inputFile,i", po::value<vector<string> >()->composing(), "input grbml, possibly many")
-        ("compress,c", "enable gzip compression")
         ;
     po::positional_options_description posi;
     posi.add("inputFile", -1);
@@ -150,30 +155,19 @@ main(int argc, char* args[])
               options(options).positional(posi).run(), vm);
     po::notify(vm);
 
-    // open stream before filter, required for closing order
-    ofstream realOutStream;
-    io::filtering_ostream outStream;
-    if (vm.count("compress") != 0) {
-        // simple compression gives already small size
-        outStream.push(io::gzip_compressor(io::zlib::best_speed));
-    }
-    if (vm["outputFile"].as<string>() != "-") {
-        realOutStream.open(vm["outputFile"].as<string>().c_str(), std::ios::binary|std::ios::out);
-        outStream.push(realOutStream);
-    } else {
-        outStream.push(cout);
-    }
-
-
-    if (vm.count("inputFile") > 0) {
-        vector<string> files = vm["inputFile"].as<vector<string> >();
-        for (size_t i = 0; i < files.size(); ++i)
-            grbmlExtract(files[i], outStream);
-        if (!first)
-            outStream << "</gribFileIndex>" << endl;
-    } else {
+    if (vm.count("inputFile") == 0) {
         writeUsage(cerr, options);
         return 1;
     }
+    const vector<string> files = vm["inputFile"].as<vector<string>>();
+
+    const std::string outputFile = vm["outputFile"].as<string>();
+    if (outputFile != "-") {
+        std::ofstream outputStream(outputFile, std::ios::binary);
+        extractToStream(outputStream, files);
+    } else {
+        extractToStream(std::cout, files);
+    }
+
     return 0;
 }

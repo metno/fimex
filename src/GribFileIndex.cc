@@ -29,38 +29,22 @@
 #include "fimex/GribUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/XMLUtils.h"
-#include "grib_api.h"
-#include "proj_api.h"
+
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/version.hpp>
-#include <libxml/xmlwriter.h>
-#include <cstdlib>
-#include <iostream>
-#include <cstdio>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
-#include <libxml/xmlreader.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
 
-#if BOOST_VERSION < 103400
-// declare is_regular function to allways be true
-namespace boost {
-    namespace filesystem {
-        bool is_regular(boost::filesystem::path p) { return true; }
-    }
-}
-std::string file_string(boost::filesystem::path p) { return p.native_file_string(); }
-#else
-#if BOOST_FILESYSTEM_VERSION == 3
-std::string file_string(boost::filesystem::path p) { return p.string(); }
-#else
-std::string file_string(boost::filesystem::path p) { return p.file_string(); }
-#endif
-#endif
+#include <libxml/tree.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xpath.h>
+
+#include "grib_api.h"
+#include "proj_api.h"
 
 namespace MetNoFimex
 {
@@ -1224,35 +1208,24 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     return size;
 }
 
-
-
-
-GribFileIndex::GribFileIndex()
-{
-    // dummy generator
-}
-
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml,
+GribFileIndex::GribFileIndex(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
                              std::map<std::string, std::string> options)
     : options_(options)
 {
-    init(gribFilePath, "", members, ignoreExistingXml);
+    init(gribFilePath, "", members);
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath,
-                             const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml, std::map<std::string, std::string> options)
+GribFileIndex::GribFileIndex(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+                             std::map<std::string, std::string> options)
     : options_(options)
 {
-    init(gribFilePath, grbmlFilePath, members, ignoreExistingXml);
+    init(gribFilePath, grbmlFilePath, members);
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path grbmlFilePath)
+GribFileIndex::GribFileIndex(const std::string& grbmlFilePath)
 {
-    if (boost::filesystem::exists(grbmlFilePath)) {
-        initByXMLReader(grbmlFilePath);
-    } else {
-        throw runtime_error("no such grbml-file: " + grbmlFilePath.string());
-    }
+    if (!initByXMLReader(grbmlFilePath))
+        throw runtime_error("error reading grbml-file: '" + grbmlFilePath + "'");
 }
 
 
@@ -1262,15 +1235,13 @@ struct HasSameUrl {
     bool operator()(GribFileMessage& gfm) const {return gfm.getFileURL() == file_;}
 };
 
-void GribFileIndex::init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath,
-                         const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml)
+void GribFileIndex::init(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members)
 {
-    namespace fs = boost::filesystem;
-    if (fs::exists(grbmlFilePath)) {
+    if (!grbmlFilePath.empty()) {
         // append to existing grbml-file
         initByXMLReader(grbmlFilePath);
         // but remove existing messages for the same file
-        messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl("file:"+file_string(gribFilePath))), messages_.end());
+        messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl("file:" + gribFilePath)), messages_.end());
     }
     std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
     if (efIt != options_.end()) {
@@ -1284,54 +1255,15 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath, const boos
         extraKeys = tokenize(ekIt->second,",");
     }
 
-    if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
-        throw runtime_error("no such file: " + gribFilePath.string());
-    }
-
-    if (ignoreExistingXml) {
-        initByGrib(gribFilePath, members, extraKeys);
-    } else {
-        // find gribml-file younger than original file
-#if BOOST_FILESYSTEM_VERSION == 3
-        std::string filename = gribFilePath.filename().string();
-#else
-        std::string filename = gribFilePath.leaf();
-#endif
-        fs::path xmlDir = gribFilePath.branch_path();
-        fs::path xmlFile = xmlDir / (filename + ".grbml");
-        if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
-            initByXMLReader(xmlFile);
-        } else {
-            // try environment path: GRIB_INDEX_PATH
-            char* indexDir = getenv("GRIB_INDEX_PATH");
-            if (indexDir != 0) {
-                // Check if complete path
-                std::string indexDirStr(indexDir);
-                if (indexDirStr.find("/") == 0) {
-                    // absolute path
-                    xmlFile = fs::path(indexDir) / (filename + ".grbml");
-                } else {
-                    // relative path to xml-file
-                    xmlFile = xmlDir / indexDir / (filename + ".grbml");
-                }
-                if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
-                    initByXMLReader(xmlFile);
-                } else {
-                    initByGrib(gribFilePath, members, extraKeys);
-                }
-            } else {
-                initByGrib(gribFilePath, members, extraKeys);
-            }
-        }
-    }
+    initByGrib(gribFilePath, members, extraKeys);
     earthFigure_ = ""; // remember to reset!
 }
 
-void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+void GribFileIndex::initByGrib(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
                                const std::vector<std::string>& extraKeys)
 {
-    url_ = "file:"+ file_string(gribFilePath);
-    FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
+    url_ = "file:" + gribFilePath;
+    FILE* fileh = fopen(gribFilePath.c_str(), "r");
     if (fileh == 0) {
         throw runtime_error("cannot open file: " + url_);
     }
@@ -1364,7 +1296,6 @@ void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, cons
             }
         }
     }
-
 }
 
 #if 0
@@ -1395,60 +1326,66 @@ static void processNode(xmlTextReaderPtr reader) {
 }
 #endif
 
-void GribFileIndex::initByXMLReader(const boost::filesystem::path& grbmlFilePath)
+bool GribFileIndex::initByXMLReader(const std::string& grbmlFilePath)
 {
-    std::string fileName = file_string(grbmlFilePath);
-    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << fileName);
-    xmlTextReaderPtr reader = xmlReaderForFile(fileName.c_str(), NULL, 0);
-    if (reader != NULL) {
-        std::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
-        const xmlChar* name;
-        int ret = xmlTextReaderRead(reader);
-        while (ret == 1) {
-            //int depth = xmlTextReaderDepth(reader);
-            int type = xmlTextReaderNodeType(reader);
-            switch (type) {
-            case XML_READER_TYPE_ELEMENT: {
-                name = xmlTextReaderConstName(reader);
-                if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
-                if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
-                    XmlCharPtr url = xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"));
-                    url_ = url.to_string();
-                } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
-                    messages_.push_back(GribFileMessage(reader, fileName));
-                } else {
-                    LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name);
-                }
-                break;
+    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
+    xmlTextReaderPtr reader = xmlReaderForFile(grbmlFilePath.c_str(), NULL, 0);
+    if (!reader)
+        return false;
+
+    std::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
+    const xmlChar* name;
+    int ret = xmlTextReaderRead(reader);
+    while (ret == 1) {
+        // int depth = xmlTextReaderDepth(reader);
+        int type = xmlTextReaderNodeType(reader);
+        switch (type) {
+        case XML_READER_TYPE_ELEMENT: {
+            name = xmlTextReaderConstName(reader);
+            if (name == NULL)
+                name = reinterpret_cast<const xmlChar*>("");
+            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+                XmlCharPtr url = xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"));
+                url_ = url.to_string();
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
+                messages_.push_back(GribFileMessage(reader, grbmlFilePath));
+            } else {
+                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << grbmlFilePath << " name: " << name);
             }
-            case XML_READER_TYPE_END_ELEMENT: {
-                name = xmlTextReaderConstName(reader);
-                if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
-                if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
-                    return; // finished
-                }
-                break;
-            }
-            default: break; // only element nodes of interest
-            }
-            ret = xmlTextReaderRead(reader);
+            break;
         }
-        if (ret != 0) {
-            fprintf(stderr, "%s : failed to parse\n", file_string(grbmlFilePath).c_str());
+        case XML_READER_TYPE_END_ELEMENT: {
+            name = xmlTextReaderConstName(reader);
+            if (name == NULL)
+                name = reinterpret_cast<const xmlChar*>("");
+            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+                return true; // finished
+            }
+            break;
         }
+        default:
+            break; // only element nodes of interest
+        }
+        ret = xmlTextReaderRead(reader);
+    }
+    if (ret != 0) {
+        LOG4FIMEX(logger, Logger::ERROR, "failed to parse '" << grbmlFilePath << "'");
+        return false;
+    } else {
+        return true;
     }
 }
 
-void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
+void GribFileIndex::initByXML(const std::string& grbmlFilePath)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
     initByXMLReader(grbmlFilePath);
-    XMLDoc_p doc = std::make_shared<XMLDoc>(file_string(grbmlFilePath));
+    XMLDoc_p doc = std::make_shared<XMLDoc>(grbmlFilePath);
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     xmlXPathObject_p xp = doc->getXPathObject("/gfi:gribFileIndex");
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
     if (size == 0) {
-        throw runtime_error("grib-index xmlfile does not contain root node at: " + file_string(grbmlFilePath));
+        throw runtime_error("grib-index xmlfile does not contain root node at: " + grbmlFilePath);
     }
     url_ = getXmlProp(xp->nodesetval->nodeTab[0], "url");
 
@@ -1458,8 +1395,6 @@ void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
         messages_.push_back(GribFileMessage(doc, "gfi", xp->nodesetval->nodeTab[i]));
     }
 }
-
-
 
 GribFileIndex::~GribFileIndex()
 {
@@ -1485,6 +1420,4 @@ std::ostream& operator<<( std::ostream& os, const GribFileIndex& gfm)
     return os;
 }
 
-
-
-}
+} // namespace MetNoFimex

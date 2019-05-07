@@ -27,48 +27,26 @@
  */
 
 #include "fimex_config.h"
+
 #include "felt/FeltFile.h"
 #include "felt/FeltTypeConversion.h"
 #include "felt/FeltField.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <iostream>
-#include <stdexcept>
-#include <iterator>
+
+#include <fstream>
 #include <sstream>
 
 using namespace std;
-using namespace boost::filesystem;
-
 
 namespace felt
 {
 
-FeltFile::FeltFile(const path & file)
-    : fileName_(file), changeEndianness_(false)
+FeltFile::FeltFile(const std::string& file)
+    : fileName_(file)
+    , changeEndianness_(false)
+    , feltFile_(new std::ifstream(file, std::ios::binary))
 {
-    string fileName;
-#if BOOST_FILESYSTEM_VERSION == 3
-        fileName = file.string();
-#else
-        fileName = file.native_file_string();
-#endif
-    if ( ! exists(file) ) {
-        throw runtime_error("Cannot find file " + fileName );
-    }
-    if ( is_directory(file) ) {
-        string dirName;
-#if BOOST_FILESYSTEM_VERSION == 3
-        dirName = file.string();
-#else
-        dirName = file.native_directory_string();
-#endif
-        throw runtime_error(dirName + " is a directory, not a file");
-    }
-
-    feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
     word head;
     feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));
     if ( head < 997 or 999 < head )
@@ -93,7 +71,6 @@ FeltFile::FeltFile(const path & file)
 
 FeltFile::~FeltFile()
 {
-    delete feltFile_;
 }
 
 // simple logging

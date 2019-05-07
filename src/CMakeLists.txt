@@ -390,6 +390,7 @@ SET(libfimex_LIBS
   ${udunits2_LIB}
   ${eccodes_LIB}
   ${Boost_LIBRARIES}
+  ${CXX_LIBRARIES}
 )
 
 FIMEX_ADD_LIBRARY(fimex "${libfimex_ALL_SOURCES}" "${libfimex_LIBS}" "${libfimex_INCLUDE_DIRECTORIES}" "${libfimex_COMPILE_DEFINITIONS}" "${libfimex_COMPILE_OPTIONS}")

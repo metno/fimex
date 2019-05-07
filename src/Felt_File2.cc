@@ -121,7 +121,7 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 void Felt_File2::init()
 {
     try {
-        feltFile_ = std::shared_ptr<felt::FeltFile>(new felt::FeltFile(boost::filesystem::path(filename_)));
+        feltFile_ = std::make_shared<felt::FeltFile>(filename_);
         feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
         LOG4FIMEX(logger, Logger::DEBUG, "FeltParameters: " << feltParameters_);
         LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());

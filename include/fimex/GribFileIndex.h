@@ -30,16 +30,15 @@
 #include "fimex/GridDefinition.h"
 #include "fimex/XMLDoc.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-
-#include <libxml/xmlreader.h>
 
 #include <cstdio>
+#include <iosfwd>
 #include <map>
 #include <regex>
 #include <vector>
+
+#include <libxml/xmlreader.h>
 
 // forward decl of grib_api
 struct grib_handle;
@@ -173,7 +172,6 @@ private:
 class GribFileIndex
 {
 public:
-    GribFileIndex();
     /**
      * Initialize the gribFileIndex for the gribFile gribFilePath.
      * If ignoreExistingXml = false, searches for existing indexes in
@@ -192,8 +190,9 @@ public:
      * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml = false,
+    GribFileIndex(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
                   std::map<std::string, std::string> options = std::map<std::string, std::string>());
+
     /**
      * Create a joined index from gribml and grib-file
      *
@@ -215,8 +214,9 @@ public:
      * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
-                  bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
+    GribFileIndex(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+                  std::map<std::string, std::string> options = std::map<std::string, std::string>());
+
     /**
      * Create an index from gribml.
      *
@@ -234,20 +234,23 @@ public:
      *
      * @param gribmlFilePath path to gribml to append information from
      */
-    GribFileIndex(boost::filesystem::path gribmlFilePath);
+    GribFileIndex(const std::string& gribmlFilePath);
+
     virtual ~GribFileIndex();
+
     const std::vector<GribFileMessage>& listMessages() const {return messages_;}
+
     const std::string& getUrl() const {return url_;}
+
 private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
     std::map<std::string, std::string> options_;
-    void init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath,
-              const std::vector<std::pair<std::string, std::regex>>& members, bool ignoreExistingXml);
-    void initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
-                    const std::vector<std::string>& extraKeys);
-    void initByXML(const boost::filesystem::path& xmlFilePath);
-    void initByXMLReader(const boost::filesystem::path& xmlFilePath);
+
+    void init(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members);
+    void initByGrib(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys);
+    void initByXML(const std::string& xmlFilePath);
+    bool initByXMLReader(const std::string& xmlFilePath);
 };
 
 /// outputstream for a GribFileMessage

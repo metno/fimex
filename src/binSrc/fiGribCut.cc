@@ -29,11 +29,10 @@
 #include "fimex/GribUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+
 #include <boost/program_options.hpp>
 #include <boost/shared_array.hpp>
+
 #include <cstdio>
 #include <fstream>
 #include <grib_api.h>
@@ -41,7 +40,6 @@
 #include <memory>
 
 namespace po = boost::program_options;
-namespace io = boost::iostreams;
 
 using namespace std;
 using namespace MetNoFimex;
@@ -263,10 +261,7 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
     return errors;
 }
 
-
-
-int
-main(int argc, char* args[])
+int main(int argc, char* args[])
 {
     // only use one thread
     mifi_setNumThreads(1);
@@ -316,20 +311,7 @@ main(int argc, char* args[])
         return 1;
     }
 
-    // open stream before filter, required for closing order
-    ofstream realOutStream;
-    io::filtering_ostream outStream;
-    if (vm.count("compress") != 0) {
-        // simple compression gives already small size
-        outStream.push(io::gzip_compressor(io::zlib::best_speed));
-    }
-    if (vm["outputFile"].as<string>() != "-") {
-        realOutStream.open(vm["outputFile"].as<string>().c_str(), std::ios::binary|std::ios::out);
-        outStream.push(realOutStream);
-    } else {
-        outStream.push(cout);
-    }
-
+    const std::string outputFile = vm["outputFile"].as<string>();
     vector<long> parameters;
     if (vm.count("parameter") > 0) {
         parameters = vm["parameter"].as<vector<long> >();
@@ -376,11 +358,18 @@ main(int argc, char* args[])
         bb["west"] = west;
     }
 
-    int errors = gribCut(outStream, inputFiles, parameters, bb);
-    if (errors > 0) {
-        cerr << "found " << errors << " errors" << endl;
+    int errors;
+    if (outputFile != "-") {
+        std::ofstream outStream(outputFile, std::ios::binary);
+        errors = gribCut(outStream, inputFiles, parameters, bb);
     } else {
-        if (debug) cerr << "success, no errors detected" << endl;
+        errors = gribCut(std::cout, inputFiles, parameters, bb);
+    }
+    if (errors > 0) {
+        std::cerr << "found " << errors << " errors" << endl;
+    } else {
+        if (debug)
+            std::cerr << "success, no errors detected" << endl;
     }
     return errors;
 }
