@@ -47,7 +47,6 @@
 #include "fimex_config.h"
 
 #include <boost/program_options.hpp>
-#include <boost/tokenizer.hpp>
 
 #include <cctype>
 #include <fstream>

@@ -35,8 +35,6 @@
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
 
-#include <boost/shared_array.hpp>
-
 #include <vector>
 
 namespace MetNoFimex {
@@ -108,21 +106,6 @@ public:
      * @param vlevel The constant level.
      */
     IdentityVerticalConverter(const std::vector<double>& vlevel) : vlevel_(vlevel) {}
-    virtual std::vector<double> operator()(size_t x, size_t y, size_t t);
-};
-
-/**
- * v-levels as 4d field, no calculation needed.
- */
-class Identity4DToVLevelConverter : public VerticalConverter {
-    const boost::shared_array<float> pressure_;
-    size_t nx_;
-    size_t ny_;
-    size_t nz_;
-    size_t nt_;
-public:
-    Identity4DToVLevelConverter(const boost::shared_array<float> pressure, size_t nx, size_t ny, size_t nk, size_t nt)
-        : pressure_(pressure), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
     virtual std::vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
