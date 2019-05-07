@@ -25,15 +25,16 @@
  */
 
 #include "testinghelpers.h"
-#include <boost/algorithm/minmax_element.hpp>
-#include "fimex/interpolation.h"
-#include "fimex/CDMFileReaderFactory.h"
-#include "fimex/CDMReader.h"
-#include "fimex/CDMProcessor.h"
-#include "fimex/Data.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMProcessor.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/Data.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/interpolation.h"
+#include "fimex/min_max.h"
 
 #include <cassert>
 
@@ -109,7 +110,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
     DataPtr hyD = reader->getScaledData("hybrid0");
     shared_array<float> hy = hyD->asFloat();
     for (size_t k = 0; k < nz; ++k) {
-        pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
+        pair<float*, float*> minMax = minmax_element(&w[k * nx * ny], &w[k * nx * ny] + nx * ny);
         TEST4FIMEX_CHECK(*minMax.first > -4);
         TEST4FIMEX_CHECK(*minMax.second < 4);
         //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
@@ -146,7 +147,7 @@ TEST4FIMEX_TEST_CASE(test_cdmprocessor_addverticalvelocity)
     for (size_t t = 0; t < nt; ++t) {
         shared_array<float> w = proc->getScaledDataSliceInUnit("upward_air_velocity_ml", "m/s", t)->asFloat();
         for (size_t k = 0; k < nz; ++k) {
-            pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
+            pair<float*, float*> minMax = minmax_element(&w[k * nx * ny], &w[k * nx * ny] + nx * ny);
             TEST4FIMEX_CHECK(*minMax.first > -4);
             TEST4FIMEX_CHECK(*minMax.second < 4);
             //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);

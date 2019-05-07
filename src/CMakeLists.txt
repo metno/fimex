@@ -132,6 +132,7 @@ SET(libfimex_SOURCES
   ${INCF}/UnitsException.h
   Utils.cc
   ${INCF}/Utils.h
+  ${INCF}/min_max.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h
   XMLInput.cc

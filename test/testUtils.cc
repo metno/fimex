@@ -28,6 +28,7 @@
 #include "testinghelpers.h"
 
 #include "fimex/Utils.h"
+#include "fimex/min_max.h"
 
 //#define COMPARE_WITH_BOOST_LEXICAL_CAST
 #ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
@@ -298,4 +299,56 @@ TEST4FIMEX_TEST_CASE(test_string2type)
 
     CHECK_THROW(int, "55.5");
     CHECK_THROW(int, "hei");
+}
+
+TEST4FIMEX_TEST_CASE(test_min_max_element)
+{
+    const int numbers[10] = {5, 7, 9, 4, 3, 11, 2, 2, 13, 1};
+
+    TEST4FIMEX_CHECK_EQ(5, *min_max_element(numbers, numbers + 1).first);
+    TEST4FIMEX_CHECK_EQ(5, *min_max_element(numbers, numbers + 1).second);
+
+    TEST4FIMEX_CHECK_EQ(5, *min_max_element(numbers, numbers + 2).first);
+    TEST4FIMEX_CHECK_EQ(7, *min_max_element(numbers, numbers + 2).second);
+
+    TEST4FIMEX_CHECK_EQ(4, *min_max_element(numbers + 1, numbers + 4).first);
+    TEST4FIMEX_CHECK_EQ(9, *min_max_element(numbers + 1, numbers + 4).second);
+
+    TEST4FIMEX_CHECK_EQ(4, *min_max_element(numbers, numbers + 4).first);
+    TEST4FIMEX_CHECK_EQ(9, *min_max_element(numbers, numbers + 4).second);
+
+    TEST4FIMEX_CHECK_EQ(3, *min_max_element(numbers, numbers + 5).first);
+    TEST4FIMEX_CHECK_EQ(9, *min_max_element(numbers, numbers + 5).second);
+
+    TEST4FIMEX_CHECK_EQ(3, *min_max_element(numbers, numbers + 6).first);
+    TEST4FIMEX_CHECK_EQ(11, *min_max_element(numbers, numbers + 6).second);
+
+    TEST4FIMEX_CHECK_EQ(2, *min_max_element(numbers, numbers + 7).first);
+    TEST4FIMEX_CHECK_EQ(11, *min_max_element(numbers, numbers + 7).second);
+
+    TEST4FIMEX_CHECK_EQ(2, *min_max_element(numbers, numbers + 8).first);
+    TEST4FIMEX_CHECK_EQ(11, *min_max_element(numbers, numbers + 8).second);
+
+    TEST4FIMEX_CHECK_EQ(2, *min_max_element(numbers, numbers + 9).first);
+    TEST4FIMEX_CHECK_EQ(13, *min_max_element(numbers, numbers + 9).second);
+
+    TEST4FIMEX_CHECK_EQ(1, *min_max_element(numbers, numbers + 10).first);
+    TEST4FIMEX_CHECK_EQ(13, *min_max_element(numbers, numbers + 10).second);
+}
+
+TEST4FIMEX_TEST_CASE(test_minimaximize)
+{
+    int mini = 1, maxi = 1;
+
+    minimaximize(mini, maxi, 3);
+    TEST4FIMEX_CHECK_EQ(1, mini);
+    TEST4FIMEX_CHECK_EQ(3, maxi);
+
+    minimaximize(mini, maxi, 0);
+    TEST4FIMEX_CHECK_EQ(0, mini);
+    TEST4FIMEX_CHECK_EQ(3, maxi);
+
+    minimaximize(mini, maxi, 2);
+    TEST4FIMEX_CHECK_EQ(0, mini);
+    TEST4FIMEX_CHECK_EQ(3, maxi);
 }

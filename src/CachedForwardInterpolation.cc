@@ -28,6 +28,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
+#include "fimex/min_max.h"
 
 #include <numeric>
 #include <algorithm>
@@ -144,14 +145,8 @@ CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimNa
             const size_t px = roundX(pOnX[i]), py = roundY(pOnY[i]);
             if (px != INVALID && py != INVALID) {
                 std::vector<size_t>& pi = pointsInIn[py * outX + px];
-                if (iy > maxInY)
-                    maxInY = iy;
-                if (iy < minInY)
-                    minInY = iy;
-                if (ix > maxInX)
-                    maxInX = ix;
-                if (ix < minInX)
-                    minInX = ix;
+                minimaximize(minInY, maxInY, iy);
+                minimaximize(minInX, maxInX, ix);
                 pi.push_back(i);
                 if (pi.size() > maxPointsInIn)
                     maxPointsInIn = pi.size();

@@ -29,6 +29,7 @@
 #include "fimex/SliceBuilder.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
+#include "fimex/min_max.h"
 
 #include "fimex/Logger.h"
 
@@ -221,16 +222,14 @@ void CachedInterpolation::createReducedDomain(const std::string& xDimName, const
     if (reducedDomain())
         return;
 
-    const double pMinX = *std::min_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
-    const double pMinY = *std::min_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
-    const double pMaxX = *std::max_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
-    const double pMaxY = *std::max_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
+    const auto minmaxX = min_max_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
+    const auto minmaxY = min_max_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
 
     // allow additional cells for interpolation (2 for bicubic)
-    const long long minX = clamp_ex(0, pMinX, -EXTEND, inX - 1);
-    const long long minY = clamp_ex(0, pMinY, -EXTEND, inY - 1);
-    const long long maxX = clamp_ex(0, pMaxX, +EXTEND, inX - 1);
-    const long long maxY = clamp_ex(0, pMaxY, +EXTEND, inY - 1);
+    const long long minX = clamp_ex(0, *minmaxX.first, -EXTEND, inX - 1);
+    const long long minY = clamp_ex(0, *minmaxY.first, -EXTEND, inY - 1);
+    const long long maxX = clamp_ex(0, *minmaxX.second, +EXTEND, inX - 1);
+    const long long maxY = clamp_ex(0, *minmaxY.second, +EXTEND, inY - 1);
 
     // make sure we still have a useful size
     if ((maxX - minX) < 1 || (maxY - minY) < 1)
