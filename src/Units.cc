@@ -98,15 +98,27 @@ void handleUdUnitError(int unitErrCode, const std::string& message)
 }
 
 class LinearUnitsConverter : public UnitsConverter{
-    double scale_;
-    double offset_;
+    double dscale_;
+    double doffset_;
+    double fscale_;
+    double foffset_;
+
 public:
-    LinearUnitsConverter(double scale, double offset) : scale_(scale), offset_(offset) {}
-    virtual ~LinearUnitsConverter() {}
-    virtual double convert(double from) {return scale_*from + offset_;}
-    virtual bool isLinear() {return true;}
-    virtual void getScaleOffset(double& scale, double& offset) {
-        scale = scale_; offset = offset_;
+    LinearUnitsConverter(double scale, double offset)
+        : dscale_(scale)
+        , doffset_(offset)
+        , fscale_(scale)
+        , foffset_(offset)
+    {
+    }
+    ~LinearUnitsConverter() {}
+    double convert(double from) override { return dscale_ * from + doffset_; }
+    float convert(float from) override { return fscale_ * from + foffset_; }
+    bool isLinear() override { return true; }
+    void getScaleOffset(double& scale, double& offset) override
+    {
+        scale = dscale_;
+        offset = doffset_;
     }
 };
 
@@ -115,8 +127,9 @@ class Ud2UnitsConverter : public UnitsConverter {
     cv_converter* conv_;
 public:
     Ud2UnitsConverter(cv_converter* conv) : conv_(conv) {}
-    virtual ~Ud2UnitsConverter() {cv_free(conv_);}
-    virtual double convert(double from) {
+    ~Ud2UnitsConverter() { cv_free(conv_); }
+    double convert(double from) override
+    {
         double retval;
 #pragma omp critical (cv_converter)
         {
@@ -124,7 +137,17 @@ public:
         }
         return retval;
     }
-    virtual bool isLinear() {
+    float convert(float from) override
+    {
+        float retval;
+#pragma omp critical(cv_converter)
+        {
+            retval = cv_convert_float(conv_, from);
+        }
+        return retval;
+    }
+    bool isLinear() override
+    {
         // check some points
         double offset = convert(0.0);
         if (!std::isfinite(offset)) return false;
@@ -146,7 +169,8 @@ public:
 
         return true;
     }
-    virtual void getScaleOffset(double& scale, double& offset) {
+    void getScaleOffset(double& scale, double& offset) override
+    {
         if (! isLinear()) throw UnitException("cannot get scale and offset of non-linear function");
         offset = convert(0.0);
         scale = convert(1.) - offset;

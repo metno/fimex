@@ -46,6 +46,8 @@ public:
      * @return value in the 'to' unit
      */
     virtual double convert(double from) = 0;
+    virtual float convert(float from) = 0;
+
     /**
      * check if the converter is linear (representable by scale & offset)
      */
