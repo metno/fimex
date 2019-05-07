@@ -1,6 +1,6 @@
 # Fimex, modules/python/test_pyfimex0.py
 #
-# Copyright (C) 2018 met.no
+# Copyright (C) 2018-2019 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -40,7 +40,7 @@ class TestReader(unittest.TestCase):
         self.assertEqual(4, len(mv))
         major, minor, patch, status = mv
         self.assertTrue(type(major) is int)
-        self.assertTrue(minor > 0)
+        self.assertTrue((major == 0 and minor > 0) or (major > 0 and minor >= 0))
 
     def test_OpenAndInspect(self):
         test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
