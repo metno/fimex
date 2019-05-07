@@ -47,7 +47,7 @@ public:
 
     void* getDataPtr() { return (void*)(text_.data()); }
 
-    void toStream(std::ostream& out, std::string) const { out << text_; };
+    void toStream(std::ostream& out, const std::string&) const { out << text_; };
 
     boost::shared_array<char> asChar() const { throw CDMException("cannot convert string data to char"); }
 
@@ -76,7 +76,7 @@ public:
         return strings;
     }
 
-    std::string asString(std::string) const { return text_; }
+    std::string asString(const std::string&) const { return text_; }
 
     double getDouble(size_t) { throw CDMException("cannot get string data as double"); }
 

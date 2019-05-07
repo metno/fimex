@@ -86,7 +86,7 @@ namespace MetNoFimex
         virtual size_t size() const {return length;}
         virtual int bytes_for_one() const {return sizeof(C);}
         virtual void* getDataPtr() {return &theData[0];}
-        virtual void toStream(std::ostream& os, std::string separator = "") const;
+        virtual void toStream(std::ostream& os, const std::string& separator = "") const;
 
         /**
          *  @brief get the datapointer of the data
@@ -111,8 +111,7 @@ namespace MetNoFimex
         virtual boost::shared_array<std::string> asStrings() const {return as<std::string>();}
         virtual boost::shared_array<float> asFloat() const {return as<float>();}
         virtual boost::shared_array<double> asDouble() const {return as<double>();}
-        virtual std::string asString(std::string separator = "") const;
-
+        virtual std::string asString(const std::string& separator = "") const;
 
         virtual double getDouble(size_t pos) {return data_caster<double, C>()(theData[pos]);}
         virtual long long getLongLong(size_t pos) {return data_caster<long long, C>()(theData[pos]);}
@@ -159,8 +158,9 @@ namespace MetNoFimex
         return *this;
     }
 
-    template<typename C>
-    void DataImpl<C>::toStream(std::ostream& os, std::string separator) const {
+    template <typename C>
+    void DataImpl<C>::toStream(std::ostream& os, const std::string& separator) const
+    {
         for (size_t i = 0; i < length; i++) {
             if (i != 0)
                 os << separator;
@@ -168,8 +168,9 @@ namespace MetNoFimex
         }
     }
 
-    template<typename C>
-    std::string DataImpl<C>::asString(std::string separator) const {
+    template <typename C>
+    std::string DataImpl<C>::asString(const std::string& separator) const
+    {
         std::ostringstream o;
         toStream(o, separator);
         return o.str();

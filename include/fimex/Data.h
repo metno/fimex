@@ -59,7 +59,7 @@ namespace MetNoFimex
         virtual void* getDataPtr() = 0;
 
         /// @brief printing of the current data to ostream, with optional separator
-        virtual void toStream(std::ostream&, std::string separator = "") const = 0;
+        virtual void toStream(std::ostream&, const std::string& separator = "") const = 0;
 
         /// @brief retrieve data as char
         virtual boost::shared_array<char> asChar() const = 0;
@@ -95,7 +95,7 @@ namespace MetNoFimex
         virtual boost::shared_array<std::string> asStrings() const = 0;
 
         /// @brief retrieve the whole array as a string (with possible separator)
-        virtual std::string asString(std::string separator = "") const = 0;
+        virtual std::string asString(const std::string& separator = "") const = 0;
 
         /**
          *  @brief get a value at the desired position
