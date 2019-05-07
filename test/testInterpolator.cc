@@ -22,41 +22,45 @@
  */
 
 #include "testinghelpers.h"
-#include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
-#include "fimex/CDMProcessor.h"
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
-
-#include <iostream>
 
 using namespace std;
 using namespace MetNoFimex;
 
 static const int DEBUG = 0;
 
-TEST4FIMEX_TEST_CASE(test_interpolator)
+static CDMReader_p createFeltReader()
 {
     if (!hasTestExtra())
-        return;
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+        return CDMReader_p();
     const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    return CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, flth00_dat, pathShareEtc("felt2nc_variables.xml"));
+}
+
+TEST4FIMEX_TEST_CASE(interpolator)
+{
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    CDMReader_p feltReader = createFeltReader();
+    if (!feltReader)
+        return;
+
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
+
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
         xAxis.push_back(i * 50000);
         yAxis.push_back(i * 50000);
     }
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-    //interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
-    //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
-    //interpolator->getCDM().toXMLStream(cerr);
+
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
@@ -70,22 +74,26 @@ TEST4FIMEX_TEST_CASE(test_interpolator)
     NetCDF_CDMWriter(interpolator, "test_interpolator.nc");
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolatorKDTree)
+TEST4FIMEX_TEST_CASE(interpolatorKDTree)
 {
-    if (!hasTestExtra())
-        return;
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    CDMReader_p feltReader = createFeltReader();
+    if (!feltReader)
+        return;
+
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
     vector<double> xAxis, yAxis;
     for (int i = -100; i < 10; i++) {
         xAxis.push_back(i * 50000);
         yAxis.push_back(i * 50000);
     }
     interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
+    TEST4FIMEX_REQUIRE(altitudeData);
     boost::shared_array<double> altArray = altitudeData->asDouble();
+    TEST4FIMEX_REQUIRE(altArray);
+
     int found = 0;
     for (size_t i = 0; i < altitudeData->size(); i++) {
         if (altArray[i] > 2000) {
@@ -95,22 +103,28 @@ TEST4FIMEX_TEST_CASE(test_interpolatorKDTree)
     TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolatorSatellite)
+TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("satellite_cma.nc");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
     vector<double> xAxis, yAxis;
     for (int i = 0; i < 10; i++) {
         xAxis.push_back(55+ i * 0.1);
         yAxis.push_back(-106 + i * 0.1);
     }
-    interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=latlon +R="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "degrees_east", "degrees_north", CDM_DOUBLE, CDM_DOUBLE);
+    interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=latlon +R=" + type2string(MIFI_EARTH_RADIUS_M) + " +e=0", xAxis, yAxis, "degrees_east",
+                                   "degrees_north", CDM_DOUBLE, CDM_DOUBLE);
     DataPtr cmaData = interpolator->getDataSlice("cma", 0);
+    TEST4FIMEX_REQUIRE(cmaData);
     boost::shared_array<double> cmaArray = cmaData->asDouble();
+    TEST4FIMEX_REQUIRE(cmaArray);
+
     SliceBuilder cmaSb(interpolator->getCDM(), "cma");
     DataPtr cmaData2 = interpolator->getDataSlice("cma", cmaSb);
+    TEST4FIMEX_REQUIRE(cmaData2);
+
     TEST4FIMEX_CHECK_EQ(cmaData2->size(), cmaData->size());
 }
 
@@ -119,7 +133,7 @@ TEST4FIMEX_TEST_CASE(test_interpolator2coords)
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
     {
         vector<double> xAxis, yAxis;
         for (int i = 0; i < 12; i++) {
@@ -141,7 +155,7 @@ TEST4FIMEX_TEST_CASE(test_interpolator2coords)
         TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
     }
 
-    interpolator = std::shared_ptr<CDMInterpolator>(new CDMInterpolator(reader));
+    interpolator = std::make_shared<CDMInterpolator>(reader);
     {
         vector<double> xAxis, yAxis;
         for (int i = 0; i < 12; i++) {
@@ -164,41 +178,20 @@ TEST4FIMEX_TEST_CASE(test_interpolator2coords)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolatorRelative)
+TEST4FIMEX_TEST_CASE(interpolatorRelative)
 {
-    if (!hasTestExtra())
+    if (DEBUG)
+        defaultLogLevel(Logger::DEBUG);
+    CDMReader_p feltReader = createFeltReader();
+    if (!feltReader)
         return;
-    const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
-    //interpolator->getCDM().toXMLStream(cerr);
     TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("x")->size(), 297);
     TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("y")->size(), 286);
-    //    NetCDF_CDMWriter(interpolator, "test_interpolatorRelative.nc");
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolatorNcml)
-{
-    const string fileName = pathTest("coordTest.nc");
-    const string ncmlName = pathTest("test.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
-    TEST4FIMEX_REQUIRE(reader);
-
-    const CDM& cdm = reader->getCDM();
-
-    TEST4FIMEX_REQUIRE(cdm.hasVariable("x_wind"));
-    CDMVariable var = cdm.getVariable("x_wind");
-    TEST4FIMEX_CHECK(var.isSpatialVector());
-    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "y_wind");
-
-    TEST4FIMEX_REQUIRE(cdm.hasVariable("y_wind"));
-    var = cdm.getVariable("y_wind");
-    TEST4FIMEX_CHECK(var.isSpatialVector());
-    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "x_wind");
-}
-
-TEST4FIMEX_TEST_CASE(test_interpolator_template)
+TEST4FIMEX_TEST_CASE(interpolator_template)
 {
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     const string templateFileName(pathTest("template_noaa17.nc"));
@@ -220,7 +213,7 @@ TEST4FIMEX_TEST_CASE(test_interpolator_template)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolator_latlon)
+TEST4FIMEX_TEST_CASE(interpolator_latlon)
 {
     double lat[] = {59.109, 59.052, 58.994, 58.934, 58.874, 58.812, 58.749, 58.685, 58.62, 64.};
     double lon[] = {4.965, 5.13, 5.296, 5.465, 5.637, 5.81, 5.986, 6.164001, 6.344, 3.};
@@ -229,11 +222,13 @@ TEST4FIMEX_TEST_CASE(test_interpolator_latlon)
 
     const string ncFileName(pathTest("erai.sfc.40N.0.75d.200301011200.nc"));
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
     TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), lonVals.size());
     TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
     TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
+
     DataPtr data = interpolator->getData("ga_skt");
     boost::shared_array<double> array = data->asDouble();
     TEST4FIMEX_CHECK((!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
@@ -243,7 +238,7 @@ TEST4FIMEX_TEST_CASE(test_interpolator_latlon)
     //interpolator->getCDM().toXMLStream(cout);
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolator_wrongaxes_latlon)
+TEST4FIMEX_TEST_CASE(interpolator_wrongaxes_latlon)
 {
     double lat[] = {60.0};
     double lon[] = {10.0};
@@ -253,101 +248,32 @@ TEST4FIMEX_TEST_CASE(test_interpolator_wrongaxes_latlon)
     const string ncmlFileName = pathTest("c11.ncml");
     const string ncFileName = pathTest("c11.nc");
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
-    CDMReader_p ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
+    CDMReader_p ncmlReader = std::make_shared<NcmlCDMReader>(ncReader, XMLInputFile(ncmlFileName));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncmlReader);
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
-    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), lonVals.size());
-    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
-    TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("x_wind_pl"));
-    DataPtr data = interpolator->getData("x_wind_pl");
+
+    DataPtr lonData = interpolator->getDataSlice("longitude");
+    DataPtr latData = interpolator->getDataSlice("latitude");
+    TEST4FIMEX_REQUIRE(lonData && latData);
+    TEST4FIMEX_CHECK_EQ(lonData->size(), lonVals.size());
+    TEST4FIMEX_CHECK_EQ(lonData->size(), latData->size());
+
+    TEST4FIMEX_REQUIRE(interpolator->getCDM().hasVariable("x_wind_pl"));
+#if 1
+    SliceBuilder sb(interpolator->getCDM(), "x_wind_pl");
+    DataPtr data = interpolator->getDataSlice("x_wind_pl", sb);
+#else
+    DataPtr data = interpolator->getDataSlice("x_wind_pl", 0);
+#endif
+    TEST4FIMEX_REQUIRE(data);
     boost::shared_array<double> array = data->asDouble();
+    TEST4FIMEX_REQUIRE(array);
     for (size_t i = 0; i < data->size(); ++i) {
         TEST4FIMEX_CHECK((!mifi_isnan(array[i])));
     }
-    //interpolator->getCDM().toXMLStream(cout);
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolator_vectorlatlon)
-{
-    if (!hasTestExtra())
-        return;
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader(new FeltCDMReader2(flth00_dat, pathShareEtc("felt2nc_variables.xml")));
-    std::shared_ptr<CDMProcessor> processor(new CDMProcessor(feltReader));
-    vector<string> x(1, "x_wind_10m");
-    vector<string> y(1, "y_wind_10m");
-    processor->rotateVectorToLatLon(true, x, y);
-    SliceBuilder sbX0(feltReader->getCDM(), x[0]);
-    SliceBuilder sbY0(feltReader->getCDM(), y[0]);
-    {
-        // 0deg longitude
-        sbX0.setStartAndSize("x", 114, 1);
-        sbX0.setStartAndSize("y", 85, 1);
-        sbY0.setStartAndSize("x", 114, 1);
-        sbY0.setStartAndSize("y", 85, 1);
-        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
-        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
-        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
-        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (size_t i = 0; i < xDataOrg->size(); i++) {
-            // no change in x
-            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-2);
-            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], 1e-2);
-        }
-    }
-    {
-        // 90deg longitude
-        sbX0.setStartAndSize("x", 182, 1);
-        sbX0.setStartAndSize("y", 147, 1);
-        sbY0.setStartAndSize("x", 182, 1);
-        sbY0.setStartAndSize("y", 147, 1);
-        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
-        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
-        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
-        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (size_t i = 0; i < xDataOrg->size(); i++) {
-            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], -1. * (yDataRot->asFloat())[i], 1e-1);
-            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-1);
-        }
-    }
-    {
-        // ~0deg longitude (no org data at 180)
-        sbX0.setStartAndSize("x", 113, 1);
-        sbX0.setStartAndSize("y", 10, 1);
-        sbY0.setStartAndSize("x", 113, 1);
-        sbY0.setStartAndSize("y", 10, 1);
-        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
-        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
-        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
-        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (size_t i = 0; i < xDataOrg->size(); i++) {
-            float error = ((xDataOrg->asFloat())[i] < 1) ? 50 : 3;
-            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], error);
-            error = ((yDataOrg->asFloat())[i] < 1) ? 50 : 3;
-            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
-        }
-    }
-    {
-        // -90deg longitude
-        sbX0.setStartAndSize("x", 38, 1);
-        sbX0.setStartAndSize("y", 147, 1);
-        sbY0.setStartAndSize("x", 38, 1);
-        sbY0.setStartAndSize("y", 147, 1);
-        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
-        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
-        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
-        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (size_t i = 0; i < xDataOrg->size(); i++) {
-            float error = ((xDataOrg->asFloat())[i] < 1) ? 1 : .1;
-            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
-            error = ((yDataOrg->asFloat())[i] < 1) ? 1 : .1;
-            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], -1 * (xDataRot->asFloat())[i], error);
-        }
-    }
-}
-
-
+namespace {
 struct IP {
     IP(string proj, string xAxis, string yAxis, string unit, string lonAxis="-180,-179,...,180", string latAxis="-90,-89,...,90", double delta=1e-4)
         : proj(proj), xAxis(xAxis), yAxis(yAxis), unit(unit), lonAxis(lonAxis), latAxis(latAxis), delta(delta) {}
@@ -371,8 +297,9 @@ public:
     size_t size() {return all.size();}
     T& get(size_t i) {return all.at(i);}
 };
+} // namespace
 
-TEST4FIMEX_TEST_CASE(test_interpolator_vector_backforth)
+TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
 {
     TestMany<IP> tests;
     tests(IP("+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
@@ -419,11 +346,11 @@ TEST4FIMEX_TEST_CASE(test_interpolator_vector_backforth)
         }
         for (size_t i = 0; i < tests.size(); ++i) {
             IP ip(tests.get(i));
-            std::shared_ptr<CDMInterpolator> interp(new CDMInterpolator(reader));
+            CDMInterpolator_p interp = std::make_shared<CDMInterpolator>(reader);
             interp->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, ip.proj,
                     ip.xAxis, ip.yAxis, ip.unit, ip.unit);
 
-            std::shared_ptr<CDMInterpolator> iback(new CDMInterpolator(interp));
+            CDMInterpolator_p iback = std::make_shared<CDMInterpolator>(interp);
             iback->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR,
                     "+proj=latlon +R=" + type2string(MIFI_EARTH_RADIUS_M),
                     ip.lonAxis, ip.latAxis, "degrees_east", "degrees_north");
@@ -444,12 +371,12 @@ TEST4FIMEX_TEST_CASE(test_interpolator_vector_backforth)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolator_vcross)
+TEST4FIMEX_TEST_CASE(interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
-    std::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
 
     vector<CrossSectionDefinition> vc;
     vector<pair<double, double> > lonLat;
@@ -485,7 +412,7 @@ TEST4FIMEX_TEST_CASE(interpolator_forward)
         defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("interpolator_forward_in.nc");
     CDMReader_p ncReader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, ncFileName));
-    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
     interpolator->changeProjection(MIFI_INTERPOL_FORWARD_MEAN, "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
                                    range(411386.521566, 50, 413886.672091), range(7539081.567715, 50, 7541081.780868), "m", "m", CDM_DOUBLE, CDM_DOUBLE);
 
@@ -495,14 +422,9 @@ TEST4FIMEX_TEST_CASE(interpolator_forward)
     boost::shared_array<unsigned short> interpolatedValues = interpolatedData->asUShort();
     int bad = 0;
     for (size_t i = 0; i < interpolator_forward_N; ++i) {
-#if 0
-        TEST4FIMEX_CHECK_EQ(interpolator_forward_ex[i], interpolatedValues[i]);
-#else
         if (interpolator_forward_ex[i] != interpolatedValues[i]) {
-            std::cout << "i=" << i << " ex=" << interpolator_forward_ex[i] << " ac=" << interpolatedValues[i] << std::endl;
             bad += 1;
         }
-#endif
     }
     TEST4FIMEX_CHECK_EQ(0, bad);
 }

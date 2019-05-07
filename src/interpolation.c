@@ -281,6 +281,8 @@ static int mifi_interpolate_f_functional(int (*func)(const float* infield, float
     return MIFI_OK;
 }
 
+static int mifi_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
+
 int mifi_interpolate_f(const int method,
                        const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis,
                        const int in_x_axis_type, const int in_y_axis_type, const int ix, const int iy, const int iz,
@@ -861,19 +863,15 @@ int mifi_vector_reproject_values_f(int method,
     return errcode;
 }
 
-
-int mifi_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
+static int mifi_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
     int rx = lround(x);
     int ry = lround(y);
-    // fprintf(stderr, "values: %f, %f (%d ,%d)\n", x, y, rx, ry);
-    if (((rx >= 0) && (rx < ix)) &&
-        ((ry >= 0) && (ry < iy))) { // pos in range
+    if (rx >= 0 && rx < ix && ry >= 0 && ry < iy) { // pos in range
         for (int z = 0; z < iz; ++z) {
             outvalues[z] = infield[mifi_3d_array_position(rx,ry,z,ix,iy,iz)];
         }
     } else {
-        // fprintf(stderr, "outside values: %f, %f (0,%d : 0,%d)\n", x, y, ix, iy);
         for (int z = 0; z < iz; ++z) {
             outvalues[z] = MIFI_UNDEFINED_F;
         }
@@ -1199,7 +1197,9 @@ int mifi_project_values(const char* proj_input, const char* proj_output, double*
 
 }
 
-int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis) {
+int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy,
+                      double* out_xproj_axis, double* out_yproj_axis)
+{
     // init projections
     projPJ inputPJ;
     projPJ outputPJ;

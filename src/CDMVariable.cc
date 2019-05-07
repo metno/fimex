@@ -30,8 +30,26 @@
 namespace MetNoFimex
 {
 
+// static
+CDMVariable::SpatialVectorDirection CDMVariable::vectorDirectionFromString(const std::string& vd)
+{
+    if (vd.find("x") != std::string::npos)
+        return CDMVariable::SPATIAL_VECTOR_X;
+    else if (vd.find("y") != std::string::npos)
+        return CDMVariable::SPATIAL_VECTOR_Y;
+    else if (vd.find("lon") != std::string::npos)
+        return CDMVariable::SPATIAL_VECTOR_LON;
+    else if (vd.find("lat") != std::string::npos)
+        return CDMVariable::SPATIAL_VECTOR_LAT;
+    else
+        return CDMVariable::SPATIAL_VECTOR_NONE;
+}
+
 CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape)
-: name(name), datatype(datatype), shape(shape)
+    : name(name)
+    , datatype(datatype)
+    , shape(shape)
+    , spatialVectorDirection(SPATIAL_VECTOR_NONE)
 {
 }
 
@@ -45,9 +63,10 @@ bool CDMVariable::checkDimension(const std::string& dimension) const
     return (std::find(shape.begin(), shape.end(), dimension) != shape.end());
 }
 
-void CDMVariable::setAsSpatialVector(const std::string& counterpart, const std::string& direction) {
-	spatialVectorCounterpart = counterpart;
-	spatialVectorDirection = direction;
+void CDMVariable::setAsSpatialVector(const std::string& counterpart, SpatialVectorDirection direction)
+{
+    spatialVectorCounterpart = counterpart;
+    spatialVectorDirection = direction;
 }
 
 

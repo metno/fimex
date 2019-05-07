@@ -24,14 +24,12 @@
 #include "testinghelpers.h"
 #include "fimex/interpolation.h"
 
-#include <cmath>
-#include <fstream>
-#include <string>
-
 #include "fimex/CDMAttribute.h"
 #include "fimex/Data.h"
 
 #include <cmath>
+#include <fstream>
+#include <string>
 
 // definitions from proj_api.h
 #define RAD_TO_DEG      57.29577951308232
@@ -45,7 +43,7 @@ inline bool near(float a, float b, float eps)
 }
 } // namespace
 
-TEST4FIMEX_TEST_CASE(test_mifi_points2position)
+TEST4FIMEX_TEST_CASE(mifi_points2position)
 {
     double axis[5] = {1., 2., 3., 4., 5.};
     double points[5] = {-3., 5., 1.3, 2., 6.};
@@ -56,7 +54,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_points2position)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_points2position_reverse)
+TEST4FIMEX_TEST_CASE(mifi_points2position_reverse)
 {
     double axis[5] = {5., 4., 3., 2., 1.};
     double points[5] = {-3., 5., 1.3, 2., 6.};
@@ -67,16 +65,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_points2position_reverse)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_f)
-{
-    float infield[4] = {1., 2., 1., 2.}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
-    float outvalues[1];
-
-    mifi_get_values_f(infield, outvalues, 0.3, 0.3, 2, 2, 1);
-    TEST4FIMEX_CHECK(near(outvalues[0], 1, 1e-10));
-}
-
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_bilinear_f)
+TEST4FIMEX_TEST_CASE(mifi_get_values_bilinear_f)
 {
     float infield[4] = {1., 2., 2., 1+std::sqrt(2.0f)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
     float outvalues[1];
@@ -107,7 +96,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_bilinear_f)
     TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_bicubic_f)
+TEST4FIMEX_TEST_CASE(mifi_get_values_bicubic_f)
 {
     /* infield constant in x-direction */
     float infield[16] = {1, 1, 1, 1,
@@ -149,7 +138,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_bicubic_f)
     TEST4FIMEX_CHECK(std::isnan(outvalues[0]));
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_f)
+TEST4FIMEX_TEST_CASE(mifi_get_values_linear_f)
 {
     const int nr = 4;
     float infieldA[nr] = {0, 1, -1, 1};
@@ -175,7 +164,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_f)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_d)
+TEST4FIMEX_TEST_CASE(mifi_get_values_linear_d)
 {
     const int nr = 4;
     double infieldA[nr] = {0, 1, -1, 1};
@@ -201,7 +190,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_linear_d)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_f)
+TEST4FIMEX_TEST_CASE(mifi_get_values_log_f)
 {
     const int nr = 1;
     float infieldA[nr] = {1000.};
@@ -227,7 +216,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_f)
     TEST4FIMEX_CHECK_CLOSE(outfield[0], 912.781f, 1e-3);
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_log_f)
+TEST4FIMEX_TEST_CASE(mifi_get_values_log_log_f)
 {
     const int nr = 1;
     float infieldA[nr] = {1000.};
@@ -252,7 +241,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_get_values_log_log_f)
     TEST4FIMEX_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_project_axes)
+TEST4FIMEX_TEST_CASE(mifi_project_axes)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -267,7 +256,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_project_axes)
             TEST4FIMEX_CHECK((RAD_TO_DEG * outY[j + 3 * i]) > 89);
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_interpolate_f)
+TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
 {
     const int iSize = 170;
     const int jSize = 150;
@@ -378,7 +367,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_interpolate_f)
 #endif
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_values_rotate_90)
+TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
@@ -436,7 +425,7 @@ TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_values_rotate_180)
+TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=180 +lat_ts=60");
@@ -494,7 +483,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_values_rotate_180)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_keep_size)
+TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -563,7 +552,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_keep_size)
     }
 }
 
-TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_directions)
+TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
 {
     std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
     std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
@@ -633,7 +622,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_vector_reproject_directions)
     TEST4FIMEX_CHECK_CLOSE(135, angles[4 + oy * 4], 1);
 }
 
-TEST4FIMEX_TEST_CASE(test_linear_no_extrapol)
+TEST4FIMEX_TEST_CASE(linear_no_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
@@ -650,7 +639,7 @@ TEST4FIMEX_TEST_CASE(test_linear_no_extrapol)
     TEST4FIMEX_CHECK(std::isnan(out));
 }
 
-TEST4FIMEX_TEST_CASE(test_linear_const_extrapol)
+TEST4FIMEX_TEST_CASE(linear_const_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
@@ -667,7 +656,7 @@ TEST4FIMEX_TEST_CASE(test_linear_const_extrapol)
     TEST4FIMEX_CHECK(near(out, 300, 0.01));
 }
 
-TEST4FIMEX_TEST_CASE(test_linear_weak_extrapol)
+TEST4FIMEX_TEST_CASE(linear_weak_extrapol)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;
@@ -684,7 +673,7 @@ TEST4FIMEX_TEST_CASE(test_linear_weak_extrapol)
     TEST4FIMEX_CHECK(std::isnan(out));
 }
 
-TEST4FIMEX_TEST_CASE(test_linear)
+TEST4FIMEX_TEST_CASE(linear)
 {
     const float in0 = 200, in1 = 300;
     const double a = 2, b = 3;

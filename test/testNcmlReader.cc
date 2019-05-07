@@ -41,7 +41,7 @@ TEST4FIMEX_TEST_CASE(test_ncmlRead)
 {
     //defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc"), ncmlName = pathTest("test.ncml");
-    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, ncmlName));
     DataPtr data = reader->getDataSlice("sea_surface_temperature", 1);
     SliceBuilder sb(reader->getCDM(), "sea_surface_temperature");
     sb.setStartAndSize("time", 1, 1);
@@ -78,4 +78,24 @@ TEST4FIMEX_TEST_CASE(test_ncmlRead)
     sb.setStartAndSize("time", 1, 1);
     dataSlice = reader->getDataSlice("new_var", sb);
     TEST4FIMEX_CHECK_EQ(dataSlice->size(), 0);
+}
+
+TEST4FIMEX_TEST_CASE(cdm_ncml)
+{
+    const string fileName = pathTest("coordTest.nc");
+    const string ncmlName = pathTest("test.ncml");
+    CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
+    TEST4FIMEX_REQUIRE(reader);
+
+    const CDM& cdm = reader->getCDM();
+
+    TEST4FIMEX_REQUIRE(cdm.hasVariable("x_wind"));
+    CDMVariable var = cdm.getVariable("x_wind");
+    TEST4FIMEX_CHECK(var.isSpatialVector());
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "y_wind");
+
+    TEST4FIMEX_REQUIRE(cdm.hasVariable("y_wind"));
+    var = cdm.getVariable("y_wind");
+    TEST4FIMEX_CHECK(var.isSpatialVector());
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "x_wind");
 }

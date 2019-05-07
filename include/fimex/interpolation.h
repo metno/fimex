@@ -220,15 +220,6 @@ int mifi_get_vector_reproject_matrix_points(const char* proj_input,
         int on,
         double* matrix
         );
-/**
- * Get the nearest neighbor of a value. Values are rounded to array-position.
- *
- * @param infield 3d fortran array of size ix,iy,iz
- * @param outfield 1d array of size iz containing the values
- * @param x,y
- * @param ix,iy,iz
- */
-extern int mifi_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
 
 /**
  * Get the nearest neighbor of a value. Values are rounded to array-position. Extrapolates to once the distance of the two leftmost values (or rightmost).
@@ -424,11 +415,11 @@ extern int mifi_points2position(double* points, const int n, const double* axis,
  *
  *  @return the position of x, y, z
  */
-static inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
+inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
+{
     (void)iz; // suppress compiler warning
     return (z*iy + y)*ix + x;
 }
-
 
 
 /**

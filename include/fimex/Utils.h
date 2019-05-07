@@ -190,15 +190,19 @@ struct data_caster<OUT, std::string> {
 /** Round a double orr float to integer, and if the value is outside a range, replace with an "invalid" value.
  */
 struct RoundAndClamp {
-  int mini, maxi, invalid;
+    size_t mini, maxi, invalid;
 
-  RoundAndClamp(int vb, int ve, int inv)
-    : mini(vb), maxi(ve), invalid(inv) { }
+    RoundAndClamp(size_t vb, size_t ve, size_t inv)
+        : mini(vb)
+        , maxi(ve)
+        , invalid(inv)
+    {
+    }
 
-  int operator()(double d) const;
-  int operator()(float f) const;
+    size_t operator()(double d) const;
+    size_t operator()(float f) const;
 
-  int clamped(int r) const;
+    size_t clamped(size_t r) const;
 };
 
 /**

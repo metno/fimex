@@ -338,28 +338,29 @@ void CDMProcessor::deAccumulate(const std::string& varName)
     }
 }
 
-void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
+void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon)
+{
     // find all vectors and rotate them to lat/lon (or x/y)
     enhanceVectorProperties(CDMReader_p(this, null_deleter()));
     vector<string> varNameX, varNameY, standardNameX, standardNameY;
-    string type = toLatLon ? "x" : "lon";
+    CDMVariable::SpatialVectorDirection type = toLatLon ? CDMVariable::SPATIAL_VECTOR_X : CDMVariable::SPATIAL_VECTOR_LON;
     string rot = toLatLon ? "LATLON_ROTATED_" : "GRID_ROTATED_";
     const CDM::VarVec& vars = getCDM().getVariables();
     for (CDM::VarVec::const_iterator vit = vars.begin(); vit != vars.end(); ++vit) {
-       if (vit->isSpatialVector() && vit->getSpatialVectorDirection().find(type) != string::npos) {
-           varNameX.push_back(vit->getName());
-           CDMAttribute attr;
-           if (getCDM().getAttribute(vit->getName(), "standard_name", attr)) {
-               standardNameX.push_back(rot + attr.getStringValue());
-           } else {
-               standardNameX.push_back(rot + vit->getName());
-           }
-           varNameY.push_back(vit->getSpatialVectorCounterpart());
-           if (getCDM().getAttribute(vit->getSpatialVectorCounterpart(), "standard_name", attr)) {
-               standardNameY.push_back(rot + attr.getStringValue());
-           } else {
-               standardNameY.push_back(rot + vit->getSpatialVectorCounterpart());
-           }
+        if (vit->isSpatialVector() && vit->getSpatialVectorDirection() == type) {
+            varNameX.push_back(vit->getName());
+            CDMAttribute attr;
+            if (getCDM().getAttribute(vit->getName(), "standard_name", attr)) {
+                standardNameX.push_back(rot + attr.getStringValue());
+            } else {
+                standardNameX.push_back(rot + vit->getName());
+            }
+            varNameY.push_back(vit->getSpatialVectorCounterpart());
+            if (getCDM().getAttribute(vit->getSpatialVectorCounterpart(), "standard_name", attr)) {
+                standardNameY.push_back(rot + attr.getStringValue());
+            } else {
+                standardNameY.push_back(rot + vit->getSpatialVectorCounterpart());
+            }
        }
     }
     rotateVectorToLatLon(toLatLon, varNameX, varNameY, standardNameX, standardNameY);
@@ -396,11 +397,11 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
         }
         // change spatial vector properties
         if (toLatLon) {
-            cdm_->getVariable(varNameX[i]).setAsSpatialVector(varNameY[i], "longitude");
-            cdm_->getVariable(varNameY[i]).setAsSpatialVector(varNameX[i], "latitude");
+            cdm_->getVariable(varNameX[i]).setAsSpatialVector(varNameY[i], CDMVariable::SPATIAL_VECTOR_LON);
+            cdm_->getVariable(varNameY[i]).setAsSpatialVector(varNameX[i], CDMVariable::SPATIAL_VECTOR_LAT);
         } else {
-            cdm_->getVariable(varNameX[i]).setAsSpatialVector(varNameY[i], "x");
-            cdm_->getVariable(varNameY[i]).setAsSpatialVector(varNameX[i], "y");
+            cdm_->getVariable(varNameX[i]).setAsSpatialVector(varNameY[i], CDMVariable::SPATIAL_VECTOR_X);
+            cdm_->getVariable(varNameY[i]).setAsSpatialVector(varNameX[i], CDMVariable::SPATIAL_VECTOR_Y);
         }
 
         const string& csXId = projectionVariables[varNameX[i]];

@@ -80,8 +80,8 @@ void WRFCoordSysBuilder::enhanceVectorProperties(CDMReader_p reader)
             CDMVariable& yv = cdm.getVariable(xy_vectors.at(i).second);
             if (xv.isSpatialVector()) continue;
             if (yv.isSpatialVector()) continue;
-            xv.setAsSpatialVector(yv.getName(), "x");
-            yv.setAsSpatialVector(xv.getName(), "y");
+            xv.setAsSpatialVector(yv.getName(), CDMVariable::SPATIAL_VECTOR_X);
+            yv.setAsSpatialVector(xv.getName(), CDMVariable::SPATIAL_VECTOR_Y);
             LOG4FIMEX(logger, Logger::INFO, "making "<< xv.getName() << "," << yv.getName() << " a vector");
         }
     }

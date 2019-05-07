@@ -284,7 +284,7 @@ void NcmlCDMReader::initVariableSpatialVector()
             std::string direction = getXmlProp(nodes->nodeTab[i], "direction");
             std::string counterPart = getXmlProp(nodes->nodeTab[i], "counterpart");
             CDMVariable& var = cdm_->getVariable(name);
-            var.setAsSpatialVector(counterPart, direction);
+            var.setAsSpatialVector(counterPart, CDMVariable::vectorDirectionFromString(direction));
         }
     }
 }

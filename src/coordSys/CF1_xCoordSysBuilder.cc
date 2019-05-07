@@ -535,8 +535,8 @@ static void enhanceVectors(CDM& cdm, const std::string& xsn, const std::string& 
                 continue;
             const vector<string>& ySh = yv.getShape();
             if (xSh == ySh) {
-                xv.setAsSpatialVector(*yVar, xdir);
-                yv.setAsSpatialVector(*xVar, ydir);
+                xv.setAsSpatialVector(*yVar, CDMVariable::vectorDirectionFromString(xdir));
+                yv.setAsSpatialVector(*xVar, CDMVariable::vectorDirectionFromString(ydir));
                 LOG4FIMEX(logger, Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
                 break;
             }

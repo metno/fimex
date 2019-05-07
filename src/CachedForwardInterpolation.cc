@@ -25,109 +25,202 @@
  */
 
 #include "CachedForwardInterpolation.h"
-#include "fimex/interpolation.h"
+#include "fimex/Logger.h"
 #include "fimex/Utils.h"
+#include "fimex/interpolation.h"
+
 #include <numeric>
 #include <algorithm>
+
+#include <iostream>
 
 using namespace std;
 
 namespace MetNoFimex
 {
 
-float aggrSum(vector<float>& vec) {
-#if 0
-    for (vector<float>::const_iterator vit = vec.begin(); vit != vec.end(); ++vit)
-        cerr << *vit << " ";
-    cerr << endl;
-#endif
-    return accumulate(vec.begin(), vec.end(), 0.f);
-}
-float aggrMean(vector<float>& vec) {
-    return aggrSum(vec)/vec.size();
-}
-float aggrMedian(vector<float>& vec) {
-    nth_element(vec.begin(), vec.begin()+vec.size()/2, vec.end());
-    float median = vec[vec.size()/2];
+namespace {
+Logger_p logger = getLogger("fimex.CachedForwardInterpolation");
+} // namespace
+
+namespace {
+
+const size_t INVALID = ~0u;
+
+} // namespace
+
+struct Aggregator
+{
+    virtual ~Aggregator();
+    virtual void push(float f) = 0;
+    virtual float get_and_reset() = 0;
+};
+
+Aggregator::~Aggregator() {}
+
+struct AggSimple : Aggregator
+{
+    size_t count;
+    float val;
+    AggSimple() { reset(0); }
+    float get_and_reset() override { return reset(val); }
+    float reset(float v)
+    {
+        val = 0;
+        if (count == 0)
+            return MIFI_UNDEFINED_F;
+        count = 0;
+        return v;
+    }
+};
+
+struct AggSum : AggSimple
+{
+    void push(float f) override
+    {
+        count += 1;
+        val += f;
+    }
+};
+
+struct AggMean : AggSum
+{
+    float get_and_reset() override { return reset(count > 0 ? val / count : 0); }
+};
+
+struct AggMin : AggSimple
+{
+    void push(float f) override
+    {
+        if (count == 0 || f < val)
+            val = f;
+        count += 1;
+    }
+};
+
+struct AggMax : AggSimple
+{
+    void push(float f) override
+    {
+        if (count == 0 || f > val)
+            val = f;
+        count += 1;
+    }
+};
+
+struct AggMedian : Aggregator
+{
+    std::vector<float> values;
+    AggMedian(size_t n) { values.reserve(n); }
+    void push(float f) override { values.push_back(f); }
+    float get_and_reset() override;
+};
+
+float AggMedian::get_and_reset()
+{
+    if (values.empty())
+        return MIFI_UNDEFINED_F;
+
+    std::nth_element(values.begin(), values.begin() + values.size() / 2, values.end());
+    const float median = values[values.size() / 2];
+    values.clear();
     return median;
-}
-float aggrMax(vector<float>& vec) {
-    return *(max_element(vec.begin(), vec.end()));
-}
-float aggrMin(vector<float>& vec) {
-    return *(min_element(vec.begin(), vec.end()));
 }
 
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
-CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType,
-                                                       const std::vector<double>& pOnX, const std::vector<double>& pOnY,
-                                                       size_t inX, size_t inY, size_t outX, size_t outY)
-  : CachedInterpolationInterface(xDimName, yDimName)
-  , inX(inX)
-  , inY(inY)
-  , outX(outX)
-  , outY(outY)
+CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, boost::shared_array<double> pOnX,
+                                                       boost::shared_array<double> pOnY, size_t inx, size_t iny, size_t outx, size_t outy)
+    : CachedInterpolationInterface(xDimName, yDimName, inx, iny, outx, outy)
 {
-    pointsOnXAxis.reserve(pOnX.size());
-    pointsOnYAxis.reserve(pOnY.size());
-    std::transform(pOnX.begin(), pOnX.end(), std::back_inserter(pointsOnXAxis), RoundAndClamp(0, outX-1, -1));
-    std::transform(pOnY.begin(), pOnY.end(), std::back_inserter(pointsOnYAxis), RoundAndClamp(0, outY-1, -1));
+    const size_t outLayerSize = outX * outY;
+    pointsInIn = boost::shared_array<vector<size_t>>(new vector<size_t>[outLayerSize]);
+    size_t minInX = inX, maxInX = 0, minInY = inY, maxInY = 0;
+    maxPointsInIn = 0;
+    const RoundAndClamp roundX(0, outX - 1, INVALID);
+    const RoundAndClamp roundY(0, outY - 1, INVALID);
+    for (size_t iy = 0; iy < inY; ++iy) {
+        for (size_t ix = 0; ix < inX; ++ix) {
+            const size_t i = iy * inX + ix;
+            const size_t px = roundX(pOnX[i]), py = roundY(pOnY[i]);
+            if (px != INVALID && py != INVALID) {
+                std::vector<size_t>& pi = pointsInIn[py * outX + px];
+                if (iy > maxInY)
+                    maxInY = iy;
+                if (iy < minInY)
+                    minInY = iy;
+                if (ix > maxInX)
+                    maxInX = ix;
+                if (ix < minInX)
+                    minInX = ix;
+                pi.push_back(i);
+                if (pi.size() > maxPointsInIn)
+                    maxPointsInIn = pi.size();
+            }
+        }
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "maxPointsInIn=" << maxPointsInIn);
+
+    // allow additional cells for pre/postprocessing
+    const size_t EXTEND = 2;
+    if (minInX > EXTEND) minInX -= EXTEND; else minInX = 0;
+    if (minInY > EXTEND) minInY -= EXTEND; else minInY = 0;
+    maxInX = std::min(inX-1, maxInX + EXTEND);
+    maxInY = std::min(inY-1, maxInY + EXTEND);
+    if ((minInX > 0 || minInY > 0 || maxInX < inX - 1 || maxInY < inY - 1) && (minInX + 2 * EXTEND <= maxInX) && (minInY + 2 * EXTEND <= maxInY)) {
+        const size_t redInX = maxInX - minInX + 1;
+        const size_t redInY = maxInY - minInY + 1;
+        for (size_t o = 0; o < outLayerSize; ++o) {
+            for (size_t& i : pointsInIn[o]) {
+                const size_t iy = i / inX - minInY, ix = i % inX - minInX;
+                i = iy * redInX + ix;
+            }
+        }
+
+        reducedDomain_ = std::make_shared<ReducedInterpolationDomain>(xDimName, yDimName, minInX, minInY);
+
+        inX = redInX;
+        inY = redInY;
+    }
 
     undefAggr = false;
+    // clang-format off
     switch (funcType) {
-    case MIFI_INTERPOL_FORWARD_SUM: aggrFunc = aggrSum; break;
-    case MIFI_INTERPOL_FORWARD_MEAN: aggrFunc = aggrMean; break;
-    case MIFI_INTERPOL_FORWARD_MEDIAN: aggrFunc = aggrMedian; break;
-    case MIFI_INTERPOL_FORWARD_MAX: aggrFunc = aggrMax; break;
-    case MIFI_INTERPOL_FORWARD_MIN: aggrFunc = aggrMin; break;
-    case MIFI_INTERPOL_FORWARD_UNDEF_SUM: aggrFunc = aggrSum; undefAggr = true; break;
-    case MIFI_INTERPOL_FORWARD_UNDEF_MEAN: aggrFunc = aggrMean; undefAggr = true; break;
-    case MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN: aggrFunc = aggrMedian; undefAggr = true; break;
-    case MIFI_INTERPOL_FORWARD_UNDEF_MAX: aggrFunc = aggrMax; undefAggr = true; break;
-    case MIFI_INTERPOL_FORWARD_UNDEF_MIN: aggrFunc = aggrMin; undefAggr = true; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_SUM: undefAggr = true; // fallthrough
+    case MIFI_INTERPOL_FORWARD_SUM: agg.reset(new AggSum()); break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEAN: undefAggr = true; // fallthrough
+    case MIFI_INTERPOL_FORWARD_MEAN: agg.reset(new AggMean()); break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN: undefAggr = true; // fallthrough
+    case MIFI_INTERPOL_FORWARD_MEDIAN: agg.reset(new AggMedian(maxPointsInIn)); break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MAX: undefAggr = true; // fallthrough
+    case MIFI_INTERPOL_FORWARD_MAX: agg.reset(new AggMax()); break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MIN: undefAggr = true; // fallthrough
+    case MIFI_INTERPOL_FORWARD_MIN: agg.reset(new AggMin()); break;
     default: throw CDMException("unknown forward interpolation method: " + type2string(funcType));
     }
+    // clang-format on
 }
+
+CachedForwardInterpolation::~CachedForwardInterpolation() {}
 
 boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
 {
     size_t outLayerSize = outX*outY;
-    size_t inZ = size / (inX*inY);
+    size_t inLayerSize = inX * inY;
+    size_t inZ = size / inLayerSize;
     newSize = outLayerSize*inZ;
     boost::shared_array<float> outData(new float[newSize]);
-    boost::shared_array< vector<float> > tempOut(new vector<float>[outLayerSize]);
-    float *inDataIt = &inData[0];
-    // foreach value in inData, add to closest position in outData
     for (size_t z = 0; z < inZ; ++z) {
-        for (size_t y = 0; y < inY; ++y) {
-            for (size_t x = 0; x < inX; ++x) {
-                float val = *inDataIt++;
-                if (undefAggr || !mifi_isnan(val)) {
-                    int xOutPos = pointsOnXAxis[y*inX+x];
-                    if (xOutPos >= 0) {
-                        int yOutPos = pointsOnYAxis[y*inX+x];
-                        if (yOutPos >= 0) {
-                            tempOut[yOutPos*outX + xOutPos].push_back(val);
-                        }
-                    }
-                }
-            }
-        }
-        // foreach position in outData, aggregate all values at position with
-        // sum/average/median ...
-        vector<float> *tempOutIt = &tempOut[0];
         float* outDataIt = &outData[z*outLayerSize];
         for (size_t i = 0; i < outLayerSize; i++) {
-            vector<float>& vals = *tempOutIt++;
-            if (vals.empty()) {
-                *outDataIt++ = MIFI_UNDEFINED_F;
-            } else {
-                *outDataIt++ = aggrFunc(vals);
+            for (size_t ii : pointsInIn[i]) {
+                const float val = inData[ii];
+                if (undefAggr || !mifi_isnan(val))
+                    agg->push(val);
             }
-            vals.clear();
+            *outDataIt++ = agg->get_and_reset();
         }
     }
     return outData;
 }
 
-}
+} // namespace MetNoFimex

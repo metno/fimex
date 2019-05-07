@@ -1129,8 +1129,8 @@ void GribCDMReader::initAddVariables()
              }
 
              CDMVariable var(varName, type, shape);
-             if (vectorCounterpart != "") {
-                 var.setAsSpatialVector(vectorCounterpart, vectorDirection);
+             if (!vectorCounterpart.empty()) {
+                 var.setAsSpatialVector(vectorCounterpart, CDMVariable::vectorDirectionFromString(vectorDirection));
              }
              cdm_->addVariable(var);
              for (vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {

@@ -89,3 +89,82 @@ TEST4FIMEX_TEST_CASE(test_rotate)
         TEST4FIMEX_CHECK_NE(yn, yo);
         TEST4FIMEX_CHECK_CLOSE(xn * xn + yn * yn, xo * xo + yo * yo, 1e-4);
 }
+
+TEST4FIMEX_TEST_CASE(interpolator_vectorlatlon)
+{
+    if (!hasTestExtra())
+        return;
+    const string flth00_dat = pathTestExtra("flth00.dat");
+    CDMReader_p feltReader = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, flth00_dat, pathShareEtc("felt2nc_variables.xml"));
+    std::shared_ptr<CDMProcessor> processor = std::make_shared<CDMProcessor>(feltReader);
+    vector<string> x(1, "x_wind_10m");
+    vector<string> y(1, "y_wind_10m");
+    processor->rotateVectorToLatLon(true, x, y);
+    SliceBuilder sbX0(feltReader->getCDM(), x[0]);
+    SliceBuilder sbY0(feltReader->getCDM(), y[0]);
+    {
+        // 0deg longitude
+        sbX0.setStartAndSize("x", 114, 1);
+        sbX0.setStartAndSize("y", 85, 1);
+        sbY0.setStartAndSize("x", 114, 1);
+        sbY0.setStartAndSize("y", 85, 1);
+        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
+        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
+        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
+        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
+            // no change in x
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-2);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], 1e-2);
+        }
+    }
+    {
+        // 90deg longitude
+        sbX0.setStartAndSize("x", 182, 1);
+        sbX0.setStartAndSize("y", 147, 1);
+        sbY0.setStartAndSize("x", 182, 1);
+        sbY0.setStartAndSize("y", 147, 1);
+        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
+        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
+        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
+        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], -1. * (yDataRot->asFloat())[i], 1e-1);
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-1);
+        }
+    }
+    {
+        // ~0deg longitude (no org data at 180)
+        sbX0.setStartAndSize("x", 113, 1);
+        sbX0.setStartAndSize("y", 10, 1);
+        sbY0.setStartAndSize("x", 113, 1);
+        sbY0.setStartAndSize("y", 10, 1);
+        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
+        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
+        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
+        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
+            float error = ((xDataOrg->asFloat())[i] < 1) ? 50 : 3;
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], error);
+            error = ((yDataOrg->asFloat())[i] < 1) ? 50 : 3;
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
+        }
+    }
+    {
+        // -90deg longitude
+        sbX0.setStartAndSize("x", 38, 1);
+        sbX0.setStartAndSize("y", 147, 1);
+        sbY0.setStartAndSize("x", 38, 1);
+        sbY0.setStartAndSize("y", 147, 1);
+        DataPtr xDataOrg = feltReader->getScaledDataSlice(x[0], sbX0);
+        DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
+        DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
+        DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
+            float error = ((xDataOrg->asFloat())[i] < 1) ? 1 : .1;
+            TEST4FIMEX_CHECK_CLOSE((xDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
+            error = ((yDataOrg->asFloat())[i] < 1) ? 1 : .1;
+            TEST4FIMEX_CHECK_CLOSE((yDataOrg->asFloat())[i], -1 * (xDataRot->asFloat())[i], error);
+        }
+    }
+}

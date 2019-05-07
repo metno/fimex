@@ -648,8 +648,8 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
             }
             CDMDataType type = string2datatype((*it)->getDatatype());
             CDMVariable var(varName, type, shape);
-            if (vectorCounterpart != "") {
-                var.setAsSpatialVector(vectorCounterpart, vectorDirection);
+            if (!vectorCounterpart.empty()) {
+                var.setAsSpatialVector(vectorCounterpart, CDMVariable::vectorDirectionFromString(vectorDirection));
             }
             cdm_->addVariable(var);
             varNameFeltIdMap[varName] = (*it)->getName();

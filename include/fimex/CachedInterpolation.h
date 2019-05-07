@@ -40,38 +40,38 @@ namespace MetNoFimex
  * Struct to store information used to create a slicebuilder limiting the amount of input data.
  */
 struct ReducedInterpolationDomain {
-    // name of x-dimension
-    std::string xDim;
-    // name of y-dimension
-    std::string yDim;
-    // offset on x-axis
-    size_t xMin;
-    // original complete size of x-axis
-    size_t xOrg;
-    // offset on y-axis
-    size_t yMin;
-    // original complete size of y-axis
-    size_t yOrg;
+    std::string xDim; //!< name of x-dimension
+    std::string yDim; //!< name of y-dimension
+    size_t xMin;      //!< offset on x-axis
+    size_t yMin;      //!< offset on y-axis
+
+    ReducedInterpolationDomain(const std::string& xdim, const std::string& ydim, size_t xmin, size_t ymin);
 };
+
+typedef std::shared_ptr<ReducedInterpolationDomain> ReducedInterpolationDomain_p;
 
 /**
  * Interface for new cached spatial interpolation as used in #MetNoFimex::CDMInterpolator
  */
 class CachedInterpolationInterface {
-private:
-    std::string _xDimName, _yDimName;
 public:
-    CachedInterpolationInterface(std::string xDimName, std::string yDimName) : _xDimName(xDimName), _yDimName(yDimName) {}
-    virtual ~CachedInterpolationInterface() {}
+    CachedInterpolationInterface(const std::string& xDimName, const std::string& yDimName, size_t inX, size_t inY, size_t outX, size_t outY);
+    virtual ~CachedInterpolationInterface();
+
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
+
     /** @return x-size of input array */
-    virtual size_t getInX() const = 0;
+    size_t getInX() const { return inX; }
+
     /** @return y-size of input array */
-    virtual size_t getInY() const = 0;
+    size_t getInY() const { return inY; }
+
     /** @return x-size of output array */
-    virtual size_t getOutX() const = 0;
+    size_t getOutX() const { return outX; }
+
     /** @return y-size of output array */
-    virtual size_t getOutY() const = 0;
+    size_t getOutY() const { return outY; }
+
     /**
      * Read the input data from the reader, which is later used for the interpolateValues() function. This function will eventually reduce the
      * domain of the input data if createReducedDomain was called earlier.
@@ -81,6 +81,7 @@ public:
      * @return Data matching input-data for this CachedInterpolationInterface
      */
     virtual DataPtr getInputDataSlice(CDMReader_p reader, const std::string& varName, size_t unLimDim) const;
+
     /**
      * Read the input data from the reader, which is later used for the interpolateValues() function. This function will eventually reduce the
      * domain of the input data if createReducedDomain was called earlier.
@@ -90,13 +91,31 @@ public:
      * @return Data matching input-data for this CachedInterpolationInterface
      */
     virtual DataPtr getInputDataSlice(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb) const;
-private:
+
+    virtual DataPtr getOutputDataSlice(DataPtr data, const SliceBuilder& sb) const;
+
     /**
      * allow fetching of a reduced interpolation domain, i.e. to work with a much smaller amount of input data
      * @return a 0-pointer unless a internal function to reduce the domain has been run, e.g. CachedInterpolation::createReducedDomain()
      */
-    virtual std::shared_ptr<ReducedInterpolationDomain> reducedDomain() const { return std::shared_ptr<ReducedInterpolationDomain>(); }
+    ReducedInterpolationDomain_p reducedDomain() const { return reducedDomain_; }
+
+private:
+    std::string _xDimName, _yDimName;
+
+protected:
+    size_t inX;
+    size_t inY;
+    size_t outX;
+    size_t outY;
+    std::shared_ptr<ReducedInterpolationDomain> reducedDomain_;
 };
+
+typedef std::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
+
+CachedInterpolationInterface_p createCachedInterpolation(const std::string& xDimName, const std::string& yDimName, int method,
+                                                         const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis, size_t inX,
+                                                         size_t inY, size_t outX, size_t outY);
 
 /**
  * Container to cache projection details to speed up
@@ -107,11 +126,6 @@ class CachedInterpolation : public CachedInterpolationInterface
 private:
     std::vector<double> pointsOnXAxis;
     std::vector<double> pointsOnYAxis;
-    size_t inX;
-    size_t inY;
-    size_t outX;
-    size_t outY;
-    std::shared_ptr<ReducedInterpolationDomain> reducedDomain_;
     int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
     /**
@@ -134,34 +148,47 @@ public:
      * @param size the size of the input data array
      * @param newSize return the size of the output-array
      */
-    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
-    /**
-     * @return x-size of the input data
-     */
-    virtual size_t getInX() const {return inX;}
-    /**
-     * @return y-size of the input data
-     */
-    virtual size_t getInY() const {return inY;}
-    /**
-     * @return x-size of the output data
-     */
-    virtual size_t getOutX() const {return outX;}
-    /**
-     * @return y-size of the output data
-     */
-    virtual size_t getOutY() const {return outY;}
-    virtual std::shared_ptr<ReducedInterpolationDomain> reducedDomain() const { return reducedDomain_; }
+    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
+
+private:
     /**
      * Create a reduced domain for later generation of a slicebuild to read a smaller domain.
      * It should be run immediately after creating the CachedInterpolation.
      */
-    void createReducedDomain(std::string xDimName, std::string yDimName);
-
+    void createReducedDomain(const std::string& xDimName, const std::string& yDimName);
 };
 
+/**
+ * Container to cache nearest-neighbor reprojection details to speed up
+ * interpolation of lots of fields.
+ */
+class CachedNNInterpolation : public CachedInterpolationInterface
+{
+private:
+    std::vector<size_t> pointsInIn;
 
+public:
+    /**
+     * @param pointsOnXAxis projected values of the new projections coordinates expressed in the current x-coordinate (size = outX*outY)
+     * @param pointsOnYAxis projected values of the new projections coordinates expressed in the current y-coordinate (size = outX*outY)
+     * @param inX size of current X axis
+     * @param inY size of current Y axis
+     * @param outX size of new X axis
+     * @param outY size of new Y axis
+     */
+    CachedNNInterpolation(const std::string& xDimName, const std::string& yDimName, const std::vector<double>& pointsOnXAxis,
+                          const std::vector<double>& pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
 
-}
+    /**
+     * Actually interpolate the data. The data will be interpolated as floats internally.
+     *
+     * @param inData the input data
+     * @param size the size of the input data array
+     * @param newSize return the size of the output-array
+     */
+    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
+};
+
+} // namespace MetNoFimex
 
 #endif /*CACHEDINTERPOLATION_H_*/

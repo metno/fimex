@@ -28,36 +28,26 @@
 #define CACHEDFORWARDINTERPOLATION_H_
 
 #include "fimex/CachedInterpolation.h"
-#include <boost/shared_array.hpp>
-#include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
+struct Aggregator;
 
 class CachedForwardInterpolation : public CachedInterpolationInterface
 {
 private:
-//    All defined in CachedInterpolation
-    std::vector<int> pointsOnXAxis; // x*inX+y maps to x in out
-    std::vector<int> pointsOnYAxis; // x*inX+y maps to y in out
-    size_t inX;
-    size_t inY;
-    size_t outX;
-    size_t outY;
-    float (*aggrFunc)(std::vector<float>& vec);
+    boost::shared_array<std::vector<size_t>> pointsInIn;
+    size_t maxPointsInIn;
+    std::unique_ptr<Aggregator> agg;
     bool undefAggr;
 
 public:
-    CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType,
-                               const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis,
-                               size_t inX, size_t inY, size_t outX, size_t outY);
-    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
-    virtual size_t getInX() const {return inX;}
-    virtual size_t getInY() const {return inY;}
-    virtual size_t getOutX() const {return outX;}
-    virtual size_t getOutY() const {return outY;}
+    CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, boost::shared_array<double> pointsOnXAxis,
+                               boost::shared_array<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    ~CachedForwardInterpolation();
+    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* CACHEDFORWARDINTERPOLATION_H_ */

@@ -56,17 +56,17 @@ namespace MetNoFimex
 
 static Logger_p logger = getLogger("fimex.Utils");
 
-int RoundAndClamp::operator()(double d) const
+size_t RoundAndClamp::operator()(double d) const
 {
   return clamped(round(d));
 }
 
-int RoundAndClamp::operator()(float f) const
+size_t RoundAndClamp::operator()(float f) const
 {
   return clamped(round(f));
 }
 
-int RoundAndClamp::clamped(int r) const
+size_t RoundAndClamp::clamped(size_t r) const
 {
   if (r>=mini && r<=maxi)
     return r;

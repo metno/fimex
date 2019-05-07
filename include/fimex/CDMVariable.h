@@ -41,41 +41,55 @@ namespace MetNoFimex
 class CDMVariable : public CDMNamedEntity
 {
 public:
+    enum SpatialVectorDirection { SPATIAL_VECTOR_NONE, SPATIAL_VECTOR_X, SPATIAL_VECTOR_Y, SPATIAL_VECTOR_LON, SPATIAL_VECTOR_LAT };
+    static SpatialVectorDirection vectorDirectionFromString(const std::string& vd);
+
+public:
     explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape);
     virtual ~CDMVariable();
     const std::string& getName() const {return name;}
-    void setName(std::string newName) {name = newName;}
+    void setName(const std::string& newName) { name = newName; }
     CDMDataType getDataType() const {return datatype;}
     void setDataType(CDMDataType type) {datatype = type;}
     const std::vector<std::string>& getShape() const {return shape;}
-    void setShape(std::vector<std::string> newShape) {shape = newShape;}
+    void setShape(const std::vector<std::string>& newShape) { shape = newShape; }
+
     /**
      * Declare this variable to be part of a spatial vector, e.g. (x-wind, y-wind)
      *
      * @param counterpart name of the other variable being part of this vector
      * @param direction comma-separated list of possible directions for this vector, e.g. "x,longitude"
      */
-    void setAsSpatialVector(const std::string& counterpart, const std::string& direction);
+
+    void setAsSpatialVector(const std::string& counterpart, SpatialVectorDirection direction);
+
     /**
      * test if this variable has been declared to be a spatial vector
      */
-    bool isSpatialVector() const {return "" != spatialVectorCounterpart;}
+    bool isSpatialVector() const { return !spatialVectorCounterpart.empty(); }
+
     /// get the spatial counterpart of this vector
     const std::string& getSpatialVectorCounterpart() const {return spatialVectorCounterpart;}
+
     /// get the possible directions of this spatial vector (comma-separated string)
-    const std::string& getSpatialVectorDirection() const {return spatialVectorDirection;}
+    SpatialVectorDirection getSpatialVectorDirection() const { return spatialVectorDirection; }
+
     /**
      * check the dimension of a variable
      *
      * @param dimension the dimension to check for
      */
     bool checkDimension(const std::string& dimension) const;
+
     /// print a xml representation to the stream without attributes
     void toXMLStream(std::ostream& out) const;
+
     /// print a xml representation to the stream with attributes
     void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const;
+
     /// add data to the variable
     void setData(DataPtr data) {this->data = data;}
+
     /**
      * @brief retrieve volatile data from this variable
      *
@@ -84,8 +98,10 @@ public:
      * to get the data from memory or from disk.
      */
     const DataPtr getData() const {return data;}
+
     /// check if real data has been set with setData() (null-pointer reference returns false)
-    int hasData() const {return (data.get() != 0);}
+    bool hasData() const { return static_cast<bool>(data); }
+
 private:
     std::string name;
     CDMDataType datatype;
@@ -93,7 +109,7 @@ private:
     void shapeToXMLStream(std::ostream& out) const;
     DataPtr data;
     std::string spatialVectorCounterpart;
-    std::string spatialVectorDirection;
+    SpatialVectorDirection spatialVectorDirection;
 };
 
 }
