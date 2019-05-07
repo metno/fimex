@@ -149,7 +149,7 @@ CDMAttribute::~CDMAttribute()
 {
 }
 
-const std::string CDMAttribute::getStringValue() const
+std::string CDMAttribute::getStringValue() const
 {
     if (!data)
         return std::string();

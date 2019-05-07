@@ -71,9 +71,9 @@ public:
     /// set the name of the attribute
     void setName(std::string newName) {name = newName;}
     /// retrieve the stringified value of the attribute
-    const std::string getStringValue() const;
+    std::string getStringValue() const;
     /// retrieve the data-pointer of the attribute
-    const DataPtr getData() const {return data;}
+    DataPtr getData() const { return data; }
     /// set the data for this attribute
     void setData(DataPtr data) {this->data = data;}
     /// retrieve the datatype of the attribute
