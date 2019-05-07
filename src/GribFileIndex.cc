@@ -25,10 +25,16 @@
  */
 
 #include "fimex/GribFileIndex.h"
+
+#include "fimex/CDMException.h"
+#include "fimex/DataUtils.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUtils.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/XMLUtils.h"
 
 #include <date/date.h>

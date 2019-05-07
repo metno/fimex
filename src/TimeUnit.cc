@@ -23,9 +23,10 @@
 
 #include "fimex/TimeUnit.h"
 
+#include "fimex/CDMException.h"
 #include "fimex/TimeUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 
 #include "MutexLock.h"
 
@@ -48,15 +49,6 @@ namespace MetNoFimex
 {
 /// only use for internals, exported from Units.cc
 extern MutexType& getUnitsMutex();
-
-static std::string twoDigits(int i) {
-    std::string s = type2string(i);
-    if (s.length() < 2) {
-        return "0" + s;
-    } else {
-        return s;
-    }
-}
 
 static void void_ut_free(void* ptr)
 {

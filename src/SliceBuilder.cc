@@ -27,9 +27,10 @@
 #include "fimex/SliceBuilder.h"
 
 #include "fimex/CDM.h"
-#include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
-#include "fimex/Utils.h"
+#include "fimex/CDMException.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/Type2String.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 
 #include "fimex/Logger.h"

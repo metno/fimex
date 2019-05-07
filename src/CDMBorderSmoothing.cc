@@ -28,12 +28,13 @@
 #include "fimex/CDMBorderSmoothing_Linear.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
-#include "fimex/Utils.h"
+#include "fimex/MathUtils.h"
 
 #include "CDMMergeUtils.h"
 

@@ -25,12 +25,14 @@
  */
 
 #include "fimex/CDMReaderUtils.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/SharedArray.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 

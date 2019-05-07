@@ -26,10 +26,14 @@
 
 #include "fimex/TimeSpec.h"
 
+#include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
-#include "fimex/Utils.h"
+#include "fimex/TokenizeDotted.h"
+#include "fimex/Type2String.h"
 
 #include <algorithm>
 #include <cassert>

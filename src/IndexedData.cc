@@ -25,12 +25,14 @@
  */
 
 #include "fimex/IndexedData.h"
+
+#include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
+
 #include <numeric>
 #include <functional>
-#include "fimex/CDMDataType.h"
 
 namespace MetNoFimex
 {

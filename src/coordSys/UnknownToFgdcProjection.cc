@@ -25,7 +25,9 @@
  */
 
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
-#include "fimex/Utils.h"
+
+#include "fimex/CDMException.h"
+
 #include <regex>
 
 namespace MetNoFimex

@@ -24,10 +24,12 @@
 #include "fimex/CachedInterpolation.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/MathUtils.h"
 #include "fimex/SliceBuilder.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/interpolation.h"
 #include "fimex/min_max.h"
 

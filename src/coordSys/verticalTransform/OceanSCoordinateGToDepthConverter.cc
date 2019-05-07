@@ -26,12 +26,12 @@
 
 #include "fimex/coordSys/verticalTransform/OceanSG1.h"
 #include "fimex/coordSys/verticalTransform/OceanSG2.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReader.h"
-#include "fimex/CDMReaderUtils.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/vertical_coordinate_transformations.h"
@@ -43,8 +43,6 @@
 #include <sstream>
 
 namespace MetNoFimex {
-
-static const double ZERO = 0;
 
 OceanSCoordinateGToDepthConverter::OceanSCoordinateGToDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs, const OceanSGVars& vars,
                                                                      heightconversion_t func)

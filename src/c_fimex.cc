@@ -25,13 +25,14 @@
  */
 
 #include "fimex/c_fimex.h"
-#include "fimex/mifi_cdm_reader.h"
-#include "fimex_config.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/XMLInput.h"
-#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/mifi_cdm_reader.h"
+#include "fimex_config.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
 #endif
@@ -48,7 +49,6 @@
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
 #include "fimex/mifi_constants.h"
 
 #include <algorithm>

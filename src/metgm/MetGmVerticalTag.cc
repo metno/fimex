@@ -37,7 +37,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/StringUtils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 namespace MetNoFimex {

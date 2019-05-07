@@ -34,8 +34,8 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
+#include "fimex/String2Type.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
 
 // standard
 #include <iostream>

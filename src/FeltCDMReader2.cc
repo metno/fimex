@@ -21,20 +21,23 @@
  * USA.
  */
 
-#include "fimex/CDM.h"
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "FeltCDMReader2.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+
 #include "CDM_XMLConfigHelper.h"
 #include "Felt_Array2.h"
 #include "Felt_File2.h"
 #include "Felt_File_Error.h"
 #include "felt/FeltGridDefinition.h"
+#include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
 

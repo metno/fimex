@@ -23,9 +23,11 @@
 
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
+#include "fimex/UnitsConverter.h"
 #include "fimex/UnitsException.h"
-#include "fimex/Utils.h"
+
 #include "testinghelpers.h"
 
 #include <cmath>

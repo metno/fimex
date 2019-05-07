@@ -22,12 +22,15 @@
  */
 
 #include "FeltCDMReader2.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/SliceBuilder.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/interpolation.h"
+#include "testinghelpers.h"
 
 #include "testinghelpers.h"
 

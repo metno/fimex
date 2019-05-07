@@ -78,7 +78,7 @@ public:
     leap_iterator operator+(difference_type n) const
     {
         leap_iterator r = *this;
-        r.base_ += n * r.step_;
+        r += n;
         return r;
     }
     leap_iterator operator-(difference_type n) const { return this->operator+(-n); }

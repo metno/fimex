@@ -130,8 +130,18 @@ SET(libfimex_SOURCES
   Units.cc
   ${INCF}/Units.h
   ${INCF}/UnitsException.h
-  Utils.cc
-  ${INCF}/Utils.h
+  ${INCF}/String2Type.h
+  Type2String.cc
+  ${INCF}/Type2String.h
+  ${INCF}/TokenizeDotted.h
+  ${INCF}/FindNeighborElements.h
+  StringUtils.cc
+  ${INCF}/StringUtils.h
+  MathUtils.cc
+  ${INCF}/MathUtils.h
+  FileUtils.cc
+  ${INCF}/FileUtils.h
+  ${INCF}/DataUtils.h
   ${INCF}/min_max.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h

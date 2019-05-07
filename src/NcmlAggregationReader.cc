@@ -27,12 +27,17 @@
 #include "NcmlAggregationReader.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
+#include "fimex/FileUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/Utils.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/StringUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
+
 #include "fimex_config.h"
 
 #include <cassert>

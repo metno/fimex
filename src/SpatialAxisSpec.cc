@@ -25,9 +25,12 @@
  */
 
 #include "fimex/SpatialAxisSpec.h"
+
+#include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 
 #include <algorithm>
 #include <iterator>

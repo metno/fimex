@@ -21,15 +21,17 @@
  * USA.
  */
 
-#include "testinghelpers.h"
-#include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NcmlCDMReader.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Data.h"
-#include "fimex/interpolation.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
+#include "fimex/NcmlCDMReader.h"
+#include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/Type2String.h"
+#include "fimex/interpolation.h"
+#include "testinghelpers.h"
 
 using namespace std;
 using namespace MetNoFimex;

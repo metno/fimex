@@ -25,15 +25,18 @@
  */
 
 #include "fimex/coordSys/CoordinateSystem.h"
+
 #include "CF1_xCoordSysBuilder.h"
 #include "CoordSysBuilder.h"
 #include "CoordSysImpl.h"
 #include "WRFCoordSysBuilder.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 

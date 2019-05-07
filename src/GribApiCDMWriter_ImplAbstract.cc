@@ -29,10 +29,12 @@
 #include "fimex/Data.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include <grib_api.h>

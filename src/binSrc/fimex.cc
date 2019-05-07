@@ -23,6 +23,7 @@
 
 #include "fimex/CDM.h"
 #include "fimex/CDMBorderSmoothing_Linear.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
@@ -39,12 +40,13 @@
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
-
 #include "fimex_config.h"
 
 #include <boost/program_options.hpp>
@@ -55,7 +57,6 @@
 #include <memory>
 #include <numeric>
 #include <regex>
-
 #ifdef HAVE_LOG4CPP
 #include "log4cpp/PropertyConfigurator.hh"
 #endif

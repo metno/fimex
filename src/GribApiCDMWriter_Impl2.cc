@@ -26,8 +26,9 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 
 #include <libxml/tree.h>
 #include <libxml/xpath.h>

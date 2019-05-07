@@ -25,14 +25,19 @@
  */
 
 #include "fimex/coordSys/ProjectionImpl.h"
+
+#include "fimex/CDMException.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
+#include "fimex/TokenizeDotted.h"
 
 #include <algorithm>
-#include <iomanip>
-#include <sstream>
 #include <cmath>
+#include <iomanip>
+#include <regex>
+#include <sstream>
 
 namespace MetNoFimex
 {
@@ -294,7 +299,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         if (datum == "wgs84") {
             bw.resize(3, 0);
         } else if (datum == "ggrs87") {
-            bw = tokenizeDotted<double>("-199.87,74.79,246.62", ",");
+            bw = vector<double>{-199.87, 74.79, 246.62};
         } else {
             bw.resize(3, 0); // default
         }

@@ -30,8 +30,8 @@
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>

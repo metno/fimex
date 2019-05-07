@@ -30,7 +30,7 @@
 
 #include "StringData.h"
 
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 
 namespace MetNoFimex {
 

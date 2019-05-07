@@ -32,6 +32,9 @@
 #include "fimex/interpolation.h"
 
 // list over supported projections
+#include "fimex/CDMException.h"
+#include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 #include "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
 #include "fimex/coordSys/AzimuthalEquidistantProjection.h"
 #include "fimex/coordSys/GeostationaryProjection.h"
@@ -46,10 +49,8 @@
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 #include "fimex/coordSys/StereographicProjection.h"
 #include "fimex/coordSys/TransverseMercatorProjection.h"
-#include "fimex/coordSys/VerticalPerspectiveProjection.h"
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
-#include "fimex/Logger.h"
-#include "fimex/Utils.h"
+#include "fimex/coordSys/VerticalPerspectiveProjection.h"
 
 #include <proj_api.h>
 

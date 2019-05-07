@@ -26,7 +26,6 @@
 #include "fimex/Logger.h"
 #include "fimex/UnitsConverter.h"
 #include "fimex/UnitsException.h"
-#include "fimex/Utils.h"
 
 #include <memory>
 

@@ -26,6 +26,8 @@
 
 #include "fimex/CDMBorderSmoothing_Linear.h"
 
+#include "fimex/CDMException.h"
+
 #include <memory>
 
 namespace { // anonymous

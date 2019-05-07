@@ -25,21 +25,20 @@
  */
 
 #include "fimex/CDMPressureConversions.h"
-#include "fimex/CDMVerticalInterpolator.h"
-#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
-#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
-#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
-#include "fimex/Logger.h"
-#include "fimex/CDMReader.h"
+
+#include "coordSys/CoordSysUtils.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
-#include "fimex/Logger.h"
-#include "coordSys/CoordSysUtils.h"
 
 #include <memory>
 

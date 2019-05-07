@@ -25,12 +25,8 @@
  */
 
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure2.h"
-#include "fimex/CDMReader.h"
-#include "fimex/Data.h"
-#include "fimex/Utils.h"
-#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
-#include <fimex/CDMReaderUtils.h>
 
+#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 
 namespace MetNoFimex {
 

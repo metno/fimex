@@ -46,8 +46,9 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
 
 #include <cassert>

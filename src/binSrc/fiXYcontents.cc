@@ -31,10 +31,12 @@
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
+#include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include <boost/program_options.hpp>

@@ -25,7 +25,9 @@
  */
 
 #include "fimex/coordSys/AzimuthalEquidistantProjection.h"
-#include "fimex/Utils.h"
+
+#include "fimex/String2Type.h"
+
 #include <regex>
 
 namespace MetNoFimex

@@ -29,14 +29,13 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "fimex/Utils.h"
+#include "fimex/String2Type.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/mifi_constants.h"
-
+#include <algorithm>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-
-#include <algorithm>
 #include <regex>
 #include <set>
 

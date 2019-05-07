@@ -31,13 +31,14 @@
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReader.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/coordSys/verticalTransform/VerticalConverter.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/VerticalConverter.h"
 
 #include <map>
 

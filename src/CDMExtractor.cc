@@ -25,13 +25,15 @@
 
 #include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include "CDMMergeUtils.h"

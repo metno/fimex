@@ -32,8 +32,8 @@
 
 // fimex
 //
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 
 // standard
 #include <cassert>

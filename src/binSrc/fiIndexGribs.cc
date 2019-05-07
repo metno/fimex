@@ -29,8 +29,8 @@
 #include "fimex/GribCDMReader.h"
 #include "fimex/GribFileIndex.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
-#include "fimex/Utils.h"
 
 #include <boost/program_options.hpp>
 

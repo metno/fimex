@@ -21,16 +21,19 @@
  * USA.
  */
 
-#include "fimex/Utils.h"
+#include "fimex/FileUtils.h"
+
+#include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <exception>
-#include <cmath>
 #include <iomanip>
+#include <iostream>
 
 #if __cplusplus >= 201703L
 #define HAVE_STD_FILESYSTEM 1
@@ -51,106 +54,9 @@
 #include <sys/types.h>
 #endif
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-static Logger_p logger = getLogger("fimex.Utils");
-
-size_t RoundAndClamp::operator()(double d) const
-{
-  return clamped(round(d));
-}
-
-size_t RoundAndClamp::operator()(float f) const
-{
-  return clamped(round(f));
-}
-
-size_t RoundAndClamp::clamped(size_t r) const
-{
-  if (r>=mini && r<=maxi)
-    return r;
-  else
-    return invalid;
-}
-
-std::string trim(const std::string& str, const std::string& ws)
-{
-    const size_t begin = str.find_first_not_of(ws);
-    if (begin == std::string::npos)
-        return std::string();
-    const size_t end = str.find_last_not_of(ws);
-    if (end == std::string::npos)
-        return str.substr(begin);
-    else
-        return str.substr(begin, end + 1 - begin);
-}
-
-std::string string2lowerCase(const std::string& str)
-{
-    std::string s(str);
-    for (unsigned int i = 0; i < s.length(); i++) {
-        s[i] = std::tolower(s[i]);
-    }
-    return s;
-}
-
-static bool startsOrEndsWith(const std::string& txt, const std::string& sub, int startcompare)
-{
-    if (sub.empty())
-        return true;
-    if (txt.size() < sub.size())
-        return false;
-    return txt.compare(startcompare, sub.size(), sub) == 0;
-}
-
-bool starts_with(const std::string& txt, const std::string& start)
-{
-    return startsOrEndsWith(txt, start, 0);
-}
-
-bool ends_with(const std::string& txt, const std::string& end)
-{
-    return startsOrEndsWith(txt, end, ((int)txt.size()) - ((int)end.size()));
-}
-
-std::string replace_all_copy(const std::string& in, char thys, char that)
-{
-    std::string out = in;
-    std::replace(out.begin(), out.end(), thys, that);
-    return out;
-}
-
-template <>
-std::ostream& type2stream<double>(std::ostream& out, double in)
-{
-    std::ostringstream buffer;
-    buffer << std::setprecision(std::numeric_limits<double>::digits10 + 1) << in;
-    out << buffer.str();
-    return out;
-}
-
-static const std::string ESCAPE_THESE = "*?\\+.()[]{}|^$";
-
-void regex_escape(std::ostream& out, char ch)
-{
-    if (ESCAPE_THESE.find(ch) != std::string::npos)
-        out << '\\';
-    out << ch;
-}
-
-void regex_escape(std::ostream& out, const std::string& s)
-{
-    for (char ch : s)
-        regex_escape(out, ch);
-}
-
-std::string regex_escape(const std::string& s)
-{
-    std::ostringstream out;
-    regex_escape(out, s);
-    return out.str();
-}
+static Logger_p logger = getLogger("fimex.FileUtils");
 
 namespace {
 #if defined(HAVE_STD_FILESYSTEM) || defined(HAVE_BOOST_FILESYSTEM)
@@ -313,40 +219,11 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
                 output << "[^/]*";
             }
         } else {
-            if (ESCAPE_THESE.find(charI) != std::string::npos)
-                output << '\\';
-            output << charI;
+            regex_escape(output, charI);
         }
     }
     std::regex globReg(output.str());
     scanFiles(files, dir, depth, globReg, false);
-}
-
-
-std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters)
-{
-    std::vector<std::string> tokens;
-    // skip delimiters at beginning.
-    std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    // find first "non-delimiter".
-    std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-    while (std::string::npos != pos || std::string::npos != lastPos) {
-        // found a token, add it to the vector.
-        tokens.push_back(str.substr(lastPos, pos - lastPos));
-        // skip delimiters.  Note the "not_of"
-        lastPos = str.find_first_not_of(delimiters, pos);
-        // find next "non-delimiter"
-        pos = str.find_first_of(delimiters, lastPos);
-    }
-    return tokens;
-}
-
-std::vector<std::string> split_any(const std::string& str, const std::string& delims)
-{
-    std::vector<std::string> out;
-    split_any(std::back_inserter(out), str, delims);
-    return out;
 }
 
 } // namespace MetNoFimex

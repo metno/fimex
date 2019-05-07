@@ -25,7 +25,7 @@
  */
 
 #include "fimex/coordSys/LambertAzimuthalEqualAreaProjection.h"
-#include "fimex/Utils.h"
+#include "fimex/String2Type.h"
 #include <regex>
 
 namespace MetNoFimex

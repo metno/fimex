@@ -29,12 +29,13 @@
 #include <memory>
 #include <vector>
 
+#include "fimex/Data.h"
 #include "fimex/GribCDMReader.h"
+#include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
-#include "fimex/Logger.h"
-#include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/SliceBuilder.h"
 
 using namespace std;
 using namespace MetNoFimex;

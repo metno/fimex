@@ -24,12 +24,14 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/mifi_cdm_reader.h"
 #include "fimex/C_CDMReader.h"
-#include "fimex/Data.h"
-#include "fimex/CDMVariable.h"
+
 #include "fimex/CDM.h"
-#include "fimex/Utils.h"
+#include "fimex/CDMException.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/Data.h"
+#include "fimex/Type2String.h"
+#include "fimex/mifi_cdm_reader.h"
 
 #include <cassert>
 
@@ -58,7 +60,7 @@ void C_CDMReader::setDoubleCallbackFunction(const std::string& varName, doubleDa
     doubleCallbacks_[varName] = callback;
 }
 
-void noDealloc(CDMReader* reader)
+void noDealloc(CDMReader*)
 {
     // do nothing
     // this function is intended to overwrite the standard 'free'
@@ -76,10 +78,8 @@ DataPtr C_CDMReader::getDataSlice(const std::string & varName, size_t unLimDimPo
     // start modify the data by the existing callback
     doubleDatasliceCallbackPtr callback = callbackIt->second;
 
-    const CDMVariable& variable = cdm_->getVariable(varName);
-    // this reader should never have in-memory data, since it is not accessible
-    // from C
-    assert(variable.hasData() == false);
+    // this reader should never have in-memory data, since it is not accessible from C
+    assert(cdm_->getVariable(varName).hasData() == false);
     DataPtr data = dataReader_->getScaledDataSlice(varName, unLimDimPos);
 
     // wrap the object as a mifi_cdm_reader for C-usage

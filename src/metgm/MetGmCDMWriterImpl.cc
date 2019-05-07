@@ -44,8 +44,8 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/SharedArray.h"
+#include "fimex/String2Type.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/interpolation.h"
 
 // udunits

@@ -24,8 +24,9 @@
 #include "FeltParameters.h"
 
 #include "fimex/CDMconstants.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
+#include "fimex/Type2String.h"
 
 #include <cstdlib>
 #include <fstream>

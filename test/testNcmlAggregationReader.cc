@@ -26,13 +26,14 @@
 
 #include "testinghelpers.h"
 
-#include "fimex/CDMFileReaderFactory.h"
-#include "fimex/CDMconstants.h"
-#include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/SliceBuilder.h"
 
 #include <unistd.h>
 

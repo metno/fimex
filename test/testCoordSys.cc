@@ -26,12 +26,13 @@
 
 #include "testinghelpers.h"
 
+#include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/coordSys/verticalTransform/OceanSG2.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
-#include "fimex/CDM.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/OceanSG2.h"
 
 #include <numeric>
 

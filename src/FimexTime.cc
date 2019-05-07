@@ -23,12 +23,14 @@
 
 #include "fimex/FimexTime.h"
 
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUtils.h"
-#include "fimex/Utils.h"
+#include "fimex/TokenizeDotted.h"
 
 #include <climits>
 #include <cmath>
 #include <limits>
+#include <vector>
 
 namespace MetNoFimex {
 

@@ -28,15 +28,14 @@
 #include "fimex/CDMException.h"
 #include "fimex/CDMWriter.h"
 #include "fimex/CDMconstants.h"
-#include "fimex/Utils.h"
-
+#include "fimex/FileUtils.h"
+#include "fimex/StringUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex_config.h"
-
 #include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <regex>
 
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -61,6 +60,8 @@
 #include "ProradXMLCDMReader.h"
 #endif
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+
+#include <memory>
 
 namespace MetNoFimex {
 

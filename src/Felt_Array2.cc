@@ -23,8 +23,8 @@
 
 #include "Felt_Array2.h"
 #include "FeltParameters.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/Type2String.h"
 
 #include "felt/FeltField.h"
 

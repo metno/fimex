@@ -31,7 +31,10 @@
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SharedArray.h"
+#include "fimex/SliceBuilder.h"
+
 #include "testinghelpers.h"
+
 #include <memory>
 
 using namespace std;

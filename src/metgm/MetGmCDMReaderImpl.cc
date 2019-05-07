@@ -46,8 +46,11 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
 
 // libxml2

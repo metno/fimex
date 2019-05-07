@@ -25,15 +25,21 @@
  */
 
 #include "fimex/FillWriter.h"
-#include "fimex/Logger.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/Logger.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
-#include <vector>
-#include <map>
-#include <utility>
+
 #include <algorithm>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 

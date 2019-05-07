@@ -27,9 +27,9 @@
 #include "fimex/CDMNamedEntity.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/coordSys/Projection.h"
-
 #include <cmath>
 #include <memory>
 #include <regex>

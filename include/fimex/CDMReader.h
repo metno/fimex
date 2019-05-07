@@ -25,19 +25,18 @@
 #define CDMREADER_H_
 
 #include "fimex/CDMReaderDecl.h"
-
-#include "fimex/CDMException.h"
 #include "fimex/DataDecl.h"
-#include "fimex/SliceBuilder.h"
 #include "fimex/UnitsConverterDecl.h"
 
 #include <memory>
+#include <vector>
 
 namespace MetNoFimex
 {
 /* forward declarations */
 class CDM;
 class CDMVariable;
+class SliceBuilder;
 
 /**
  * @headerfile fimex/CDMReader.h

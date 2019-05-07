@@ -22,7 +22,10 @@
  */
 
 #include "fimex/ReplaceStringTimeObject.h"
-#include "fimex/Utils.h"
+
+#include "fimex/String2Type.h"
+
+#include <ostream>
 
 namespace MetNoFimex {
 

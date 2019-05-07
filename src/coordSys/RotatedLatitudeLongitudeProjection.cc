@@ -26,7 +26,9 @@
 
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/MathUtils.h"
+#include "fimex/String2Type.h"
+
 #include <regex>
 
 namespace MetNoFimex

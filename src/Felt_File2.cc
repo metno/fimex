@@ -22,15 +22,18 @@
  */
 
 #include "Felt_File2.h"
+
 #include "Felt_Array2.h"
-#include "felt/FeltFile.h"
 #include "felt/FeltField.h"
+#include "felt/FeltFile.h"
 #include "felt/FeltGridDefinition.h"
 #include "fimex/CDMDataType.h"
-#include "fimex/Data.h"
 #include "fimex/CDMconstants.h"
-#include "fimex/Utils.h"
+#include "fimex/Data.h"
+#include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 
 #include <algorithm>
 #include <cassert>

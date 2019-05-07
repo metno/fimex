@@ -27,7 +27,11 @@
 
 #include "testinghelpers.h"
 
-#include "fimex/Utils.h"
+#include "fimex/DataUtils.h"
+#include "fimex/FileUtils.h"
+#include "fimex/FindNeighborElements.h"
+#include "fimex/StringUtils.h"
+#include "fimex/TokenizeDotted.h"
 #include "fimex/min_max.h"
 
 #include "leap_iterator.h"
@@ -132,8 +136,8 @@ TEST4FIMEX_TEST_CASE(test_tokenizeDotted)
 
 TEST4FIMEX_TEST_CASE(test_find_closest_distinct_elements)
 {
-    int ary[8] = {1, 2, 3, 4, 4, -1, -2, 5};
-    pair<size_t, size_t> p = find_closest_distinct_elements(&ary[0], &ary[0]+8, 1.5);
+    const float ary[8] = {1, 2, 3, 4, 4, -1, -2, 5};
+    pair<size_t, size_t> p = find_closest_distinct_elements(&ary[0], &ary[0] + 8, 1.5f);
     TEST4FIMEX_CHECK_EQ(p.first, 0);
     TEST4FIMEX_CHECK_EQ(p.second, 1);
 
@@ -154,7 +158,7 @@ TEST4FIMEX_TEST_CASE(test_find_closest_distinct_elements)
     TEST4FIMEX_CHECK_EQ(p.second, 3);
 
     // below follow test for find_closest_neighbor_distinct_elements
-    p = find_closest_neighbor_distinct_elements(&ary[0], &ary[0]+8, 1.5);
+    p = find_closest_neighbor_distinct_elements(&ary[0], &ary[0] + 8, 1.5f);
     TEST4FIMEX_CHECK_EQ(p.first, 0);
     TEST4FIMEX_CHECK_EQ(p.second, 1);
 

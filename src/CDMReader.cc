@@ -22,11 +22,14 @@
  */
 
 #include "fimex/CDMReader.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/Type2String.h"
 #include "fimex/Units.h"
 #include "fimex/UnitsConverter.h"
-#include "fimex/Utils.h"
 #include "fimex/mifi_constants.h"
 
 #include <cassert>

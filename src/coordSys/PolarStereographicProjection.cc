@@ -26,7 +26,7 @@
 
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
+#include "fimex/String2Type.h"
 
 #include <cassert>
 #include <cmath>

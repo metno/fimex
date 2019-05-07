@@ -41,10 +41,12 @@ extern "C" {
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/Units.h"
 #include "fimex/UnitsException.h"
-#include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/mifi_constants.h"
 

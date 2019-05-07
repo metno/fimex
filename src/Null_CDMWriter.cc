@@ -25,10 +25,11 @@
 
 #include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SharedArray.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 
 #include "MutexLock.h"
 

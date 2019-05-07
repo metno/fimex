@@ -56,15 +56,14 @@
 
 #include "fimex/coordSys/ObliqueMercatorProjection.h"
 
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
 
-#include <boost/regex.hpp>
+#include <regex>
 
 #include <proj_api.h>
 
 namespace MetNoFimex {
-
 using namespace std;
 
 static Logger_p logger = getLogger("fimex.ObliqueMercatorProjection");

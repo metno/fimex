@@ -25,7 +25,6 @@
  */
 
 #include "testinghelpers.h"
-#include "fimex/Utils.h"
 #include "fimex/SpatialAxisSpec.h"
 
 using namespace std;

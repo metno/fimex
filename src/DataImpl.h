@@ -24,10 +24,12 @@
 #ifndef DATAIMPL_H_
 #define DATAIMPL_H_
 
-#include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
-#include "fimex/Utils.h"
+#include "fimex/Data.h"
+#include "fimex/DataUtils.h"
+#include "fimex/MathUtils.h"
+#include "fimex/Type2String.h"
 
 #include <algorithm>
 #include <cmath>

@@ -22,9 +22,10 @@
  */
 
 #include "fimex/GribApiCDMWriter.h"
+
 #include "GribApiCDMWriter_Impl1.h"
 #include "GribApiCDMWriter_Impl2.h"
-#include "fimex/Utils.h"
+#include "fimex/Type2String.h"
 
 namespace MetNoFimex
 {

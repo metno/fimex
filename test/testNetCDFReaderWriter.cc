@@ -27,7 +27,6 @@
 #include "testinghelpers.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"

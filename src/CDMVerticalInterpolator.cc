@@ -30,8 +30,9 @@
 #include "fimex/CDMInterpolator.h" // for data <-> interpolationArray
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
+#include "fimex/FindNeighborElements.h"
 #include "fimex/Logger.h"
-#include "fimex/Utils.h"
+#include "fimex/StringUtils.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/interpolation.h"

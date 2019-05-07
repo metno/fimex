@@ -30,24 +30,28 @@
 //
 #include "CachedForwardInterpolation.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/SpatialAxisSpec.h"
-#include "fimex/Utils.h"
+#include "fimex/StringUtils.h"
+#include "fimex/Type2String.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 #include "fimex_config.h"
-#include "nanoflann/nanoflann.hpp"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #endif
+
+#include "nanoflann/nanoflann.hpp"
 
 // PROJ.4
 //

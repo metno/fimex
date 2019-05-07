@@ -30,6 +30,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/XMLInput.h"
 
+#include <map>
 #include <memory>
 
 namespace MetNoFimex

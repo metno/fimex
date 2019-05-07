@@ -29,16 +29,21 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/GribFileIndex.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/ReplaceStringTemplateObject.h"
 #include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
-#include "fimex/Utils.h"
-#include "fimex/XMLDoc.h"
+#include "fimex/TokenizeDotted.h"
+#include "fimex/Type2String.h"
 #include "fimex/coordSys/Projection.h"
 
 #include "CDM_XMLConfigHelper.h"

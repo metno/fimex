@@ -25,8 +25,11 @@
  */
 
 #include "fimex/NcmlCDMReader.h"
+
 #include "MutexLock.h"
 #include "NcmlAggregationReader.h"
+
+#include "fimex/CDMException.h"
 #include "fimex/XMLDoc.h"
 
 #include "fimex_config.h"
@@ -35,10 +38,13 @@
 #include "fimex/NetCDF_CDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #endif
-#include "fimex/Logger.h"
-#include "fimex/Utils.h"
-#include "fimex/Data.h"
 #include "fimex/CDM.h"
+#include "fimex/Data.h"
+#include "fimex/Logger.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
+#include "fimex/TokenizeDotted.h"
 
 #include <memory>
 #include <regex>

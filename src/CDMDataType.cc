@@ -22,7 +22,8 @@
  */
 
 #include "fimex/CDMDataType.h"
-#include "fimex/Utils.h"
+
+#include "fimex/StringUtils.h"
 
 namespace MetNoFimex
 {
@@ -81,4 +82,4 @@ std::string datatype2string(CDMDataType type)
     }
 }
 
-}
+} // namespace MetNoFimex

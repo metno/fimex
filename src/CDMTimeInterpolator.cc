@@ -27,11 +27,12 @@
 #include "fimex/CDMTimeInterpolator.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/TimeSpec.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/interpolation.h"
 
 #include <algorithm>

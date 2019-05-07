@@ -23,10 +23,10 @@
 
 #include "fimex/CDM.h"
 
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/Units.h"
-#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"

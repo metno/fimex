@@ -26,7 +26,7 @@
 
 #include "Log4cppLogger.h"
 #ifdef HAVE_LOG4CPP
-#include "fimex/Utils.h"
+
 #include "log4cpp/CategoryStream.hh"
 
 namespace MetNoFimex {

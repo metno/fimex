@@ -25,10 +25,12 @@
  */
 
 #include "CDM_XMLConfigHelper.h"
+
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/ReplaceStringObject.h"
-#include "fimex/Utils.h"
+#include "fimex/StringUtils.h"
 #include "fimex/XMLDoc.h"
 
 #include <libxml/xpath.h>
