@@ -22,11 +22,13 @@
  */
 
 #include "fimex/CachedInterpolation.h"
-#include "fimex/Data.h"
-#include "fimex/CDMReader.h"
+
 #include "fimex/CDM.h"
+#include "fimex/CDMReader.h"
+#include "fimex/Data.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/Utils.h"
+#include "fimex/interpolation.h"
 
 #include "fimex/Logger.h"
 

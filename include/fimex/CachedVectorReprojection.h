@@ -25,15 +25,14 @@
 #define CACHEDVECTORREPROJECTION_H_
 
 #include <boost/shared_array.hpp>
-#include "fimex/interpolation.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 class CachedVectorReprojection
 {
 public:
-    CachedVectorReprojection() : method(MIFI_OK), ox(0), oy(0) {}
+    CachedVectorReprojection() = delete;
+
     CachedVectorReprojection(int method, boost::shared_array<double> matrix, int ox, int oy) : method(method), matrix(matrix), ox(ox), oy(oy) {}
     virtual ~CachedVectorReprojection() {}
     /**
@@ -62,6 +61,6 @@ private:
     size_t oy;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*CACHEDVECTORREPROJECTION_H_*/

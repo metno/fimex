@@ -41,7 +41,6 @@
 //
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
-#include "fimex/interpolation.h"
 
 // boost
 //

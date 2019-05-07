@@ -24,11 +24,11 @@
 #ifndef CACHEDINTERPOLATION_H_
 #define CACHEDINTERPOLATION_H_
 
-#include <boost/shared_array.hpp>
-#include "fimex/interpolation.h"
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
 #include "fimex/SliceBuilder.h"
+
+#include <boost/shared_array.hpp>
 
 namespace MetNoFimex
 {

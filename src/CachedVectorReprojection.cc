@@ -22,13 +22,13 @@
  */
 
 #include "fimex/CachedVectorReprojection.h"
+
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include <iostream>
+#include "fimex/interpolation.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.CachedVectorReprojection");
 
@@ -54,5 +54,4 @@ void CachedVectorReprojection::reprojectDirectionValues(boost::shared_array<floa
     if (errcode != MIFI_OK) throw CDMException("Error during reprojection of vector-direction-values");
 }
 
-
-}
+} // namespace MetNoFimex

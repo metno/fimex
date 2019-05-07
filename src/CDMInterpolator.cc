@@ -28,20 +28,21 @@
 
 // fimex
 //
+#include "CachedForwardInterpolation.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMInterpolator.h"
-#include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/coordSys/Projection.h"
-#include "fimex/coordSys/CoordinateAxis.h"
-#include "CachedForwardInterpolation.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
-#include "nanoflann/nanoflann.hpp"
 #include "fimex/Utils.h"
-#include "fimex/CDMReaderUtils.h"
+#include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/Projection.h"
+#include "fimex/interpolation.h"
 #include "fimex_config.h"
+#include "nanoflann/nanoflann.hpp"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
@@ -69,6 +70,26 @@ using namespace std;
 
 typedef std::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
 typedef std::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
+
+InterpolatorProcess2d::~InterpolatorProcess2d() {}
+
+void InterpolatorFill2d::operator()(float* array, size_t nx, size_t ny)
+{
+    size_t nChanged;
+    mifi_fill2d_f(nx, ny, array, relaxCrit_, corrEff_, maxLoop_, &nChanged);
+}
+
+void InterpolatorCreepFill2d::operator()(float* array, size_t nx, size_t ny)
+{
+    size_t nChanged;
+    mifi_creepfill2d_f(nx, ny, array, repeat_, setWeight_, &nChanged);
+}
+
+void InterpolatorCreepFillVal2d::operator()(float* array, size_t nx, size_t ny)
+{
+    size_t nChanged;
+    mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);
+}
 
 struct CDMInterpolator::Impl
 {

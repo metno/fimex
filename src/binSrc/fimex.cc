@@ -43,6 +43,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/interpolation.h"
 
 #include "fimex_config.h"
 
