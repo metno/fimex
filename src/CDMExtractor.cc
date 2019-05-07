@@ -272,14 +272,11 @@ void CDMExtractor::reduceDimension(const std::string& dimName, const std::set<st
     LOG4FIMEX(logger,Logger::DEBUG, "reducing dimension '" << dimName << "' to: " << join(useSlices.begin(), useSlices.end(), ",") );
 
     // removing all data containing this dimension, just to be sure it's read from the dataReader_
-    const CDM::VarVec& variables = cdm_->getVariables();
-    for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-        const std::vector<std::string>& shape = it->getShape();
-        if (std::find(shape.begin(), shape.end(), dim.getName()) != shape.end()) {
-            cdm_->getVariable(it->getName()).setData(DataPtr());
+    for (const CDMVariable& v : cdm_->getVariables()) {
+        if (v.checkDimension(dim.getName())) {
+            cdm_->getVariable(v.getName()).setData(DataPtr()); // v is const, need to get non-const variable
         }
     }
-
 }
 
 void CDMExtractor::reduceDimension(const std::string& dimName, size_t start, size_t length)
