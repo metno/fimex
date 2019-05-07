@@ -30,6 +30,8 @@
 #include "fimex/Utils.h"
 #include "fimex/min_max.h"
 
+#include "leap_iterator.h"
+
 //#define COMPARE_WITH_BOOST_LEXICAL_CAST
 #ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
 #include <boost/lexical_cast.hpp>
@@ -351,4 +353,56 @@ TEST4FIMEX_TEST_CASE(test_minimaximize)
     minimaximize(mini, maxi, 2);
     TEST4FIMEX_CHECK_EQ(0, mini);
     TEST4FIMEX_CHECK_EQ(3, maxi);
+}
+
+TEST4FIMEX_TEST_CASE(test_leap_iterator_const)
+{
+    typedef leap_iterator<const int*> iter;
+
+    const int numbers[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const int N = sizeof(numbers) / sizeof(numbers[0]);
+
+    const iter i0(numbers, 2);
+    const iter i1 = i0 + N / i0.step();
+
+    iter ii = i0 + 3;
+    TEST4FIMEX_CHECK_EQ(6, *ii);
+    --ii;
+    TEST4FIMEX_CHECK_EQ(4, *ii);
+
+    for (iter i = i0; i != i1; ++i) {
+        TEST4FIMEX_CHECK_EQ(0, ((*i) & 1));
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_leap_iterator)
+{
+    typedef leap_iterator<int*> iter;
+
+    int numbers[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const int N = sizeof(numbers) / sizeof(numbers[0]);
+
+    const iter i0(numbers, 2);
+    const iter i1 = i0 + N / i0.step();
+
+    iter ii = i0;
+    ii++;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 1, ii);
+    ++ii;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 2, ii);
+    ii += 2;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 4, ii);
+    ii = ii + 2;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 6, ii);
+    --ii;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 5, ii);
+    ii -= 2;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 3, ii);
+    ii--;
+    TEST4FIMEX_REQUIRE_EQ(i0 + 2, ii);
+
+    for (iter i = i0; i != i1; i++) {
+        *i -= 1;
+    }
+    TEST4FIMEX_CHECK_EQ(45 - 5, std::accumulate(numbers, numbers + N, 0));
 }

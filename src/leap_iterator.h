@@ -1,51 +1,98 @@
+/*
+  Fimex, src/leap_iterator.h
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #ifndef LEAP_ITERATOR_HH
 #define LEAP_ITERATOR_HH 1
 
-#include <boost/iterator/iterator_adaptor.hpp>
+#include <iterator>
 
 /**
  * Iterator adaptor that leaps forward/backward:
  * one step in the leap_iterator are n steps in the adapted iterator.
  */
 template <class I>
-class leap_iterator
-    : public boost::iterator_adaptor< leap_iterator<I>, I>
+class leap_iterator : public std::iterator<std::bidirectional_iterator_tag, typename std::iterator_traits<I>::value_type>
 {
-    typedef boost::iterator_adaptor< leap_iterator<I>, I> super_t;
-    friend class boost::iterator_core_access;
-
 public:
+    typedef typename std::iterator_traits<I>::value_type value_type;
+    typedef typename std::iterator_traits<I>::difference_type difference_type;
+    typedef typename std::iterator_traits<I>::reference reference;
+
     leap_iterator() {}
 
-    explicit leap_iterator(I x, typename super_t::difference_type step)
-        : super_t(x), step_(step) { }
+    explicit leap_iterator(I x, difference_type step)
+        : base_(x)
+        , step_(step)
+    {
+    }
 
-    template<class O>
-    leap_iterator(leap_iterator<O> const& o, typename boost::enable_if_convertible<O, I>::type* = 0)
-        : super_t(o.base()), step_(o.step_) { }
+    leap_iterator& operator++() { return this->operator+=(1); }
+    leap_iterator& operator--() { return this->operator-=(1); }
+    leap_iterator operator++(int)
+    {
+        leap_iterator r = *this;
+        *this += 1;
+        return r;
+    }
+    leap_iterator operator--(int)
+    {
+        leap_iterator r = *this;
+        *this -= 1;
+        return r;
+    }
+
+    leap_iterator& operator+=(difference_type n)
+    {
+        base_ += n * step_;
+        return *this;
+    }
+    leap_iterator& operator-=(difference_type n) { return this->operator+=(-n); }
+
+    leap_iterator operator+(difference_type n) const
+    {
+        leap_iterator r = *this;
+        r.base_ += n * r.step_;
+        return r;
+    }
+    leap_iterator operator-(difference_type n) const { return this->operator+(-n); }
+
+    bool operator==(leap_iterator other) const { return base_ == other.base_; }
+    bool operator!=(leap_iterator other) const { return !(*this == other); }
+
+    reference operator*() const { return *base_; }
+
+    difference_type step() const { return step_; }
 
 private:
-    typename super_t::reference dereference() const
-        { return *this->base(); }
-
-    void increment() { this->base_reference() += step_; }
-    void decrement() { this->base_reference() -= step_; }
-
-    void advance(typename super_t::difference_type n)
-        { this->base_reference() += n*step_; }
-
-    template<class O>
-    typename super_t::difference_type
-    distance_to(leap_iterator<O> const& o) const
-        { return (o.base() - this->base_reference()) / step_; }
-
-    typename super_t::difference_type step_;
+    I base_;
+    difference_type step_;
 };
-
-template <class I>
-inline leap_iterator<I> make_leap_iterator(I x, typename std::iterator_traits<I>::difference_type step)
-{
-    return leap_iterator<I>(x, step);
-}
 
 #endif // LEAP_ITERATOR_HH
