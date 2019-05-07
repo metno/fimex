@@ -31,8 +31,6 @@
 #ifndef CDMCONSTANTS_H_
 #define CDMCONSTANTS_H_
 
-#include "fimex/deprecated.h"
-
 /**
  * @headerfile fimex/CDMconstants.h
  */

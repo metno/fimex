@@ -26,15 +26,15 @@
 
 #include "fimex/NcmlCDMReader.h"
 
-#include "fimex/CDMException.h"
-#include "fimex/XMLDoc.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
+#include "fimex/XMLDoc.h"
 
 #include "fimex_config.h"
 #ifdef HAVE_NETCDF_H

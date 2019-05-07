@@ -38,6 +38,9 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/FillWriter.h"
 #include "fimex/Logger.h"
+#ifdef HAVE_MPI
+#include "fimex/mifi_mpi.h"
+#endif
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/String2Type.h"
@@ -47,9 +50,9 @@
 #include "fimex/TokenizeDotted.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
-#include "fimex_config.h"
 
 #include "CDMMergeUtils.h"
+#include "fimex_config.h"
 
 #include <mi_programoptions.h>
 
@@ -61,9 +64,6 @@
 #include <regex>
 #ifdef HAVE_LOG4CPP
 #include "log4cpp/PropertyConfigurator.hh"
-#endif
-#ifdef HAVE_MPI
-#include "fimex/mifi_mpi.h"
 #endif
 
 namespace po = miutil::program_options;

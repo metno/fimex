@@ -30,8 +30,6 @@
 #include <memory>
 #include <vector>
 
-#include "fimex/deprecated.h"
-
 #include "fimex/coordSys/verticalTransform/AltitudeHeightConverter.h"
 #include "fimex/coordSys/verticalTransform/AltitudeStandardToPressureConverter.h"
 #include "fimex/coordSys/verticalTransform/GeopotentialToAltitudeConverter.h"

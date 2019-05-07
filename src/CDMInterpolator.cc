@@ -46,8 +46,6 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
-#include "fimex_config.h"
-
 #include "nanoflann/nanoflann.hpp"
 
 // PROJ.4

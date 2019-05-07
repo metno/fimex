@@ -25,11 +25,6 @@
  */
 
 #include "fimex/CDMconstants.h"
-#include "fimex_config.h"
-#include <vector>
-#include <iterator>
-#include <algorithm>
-#include <string>
 
 const char* fimexVersion()
 {

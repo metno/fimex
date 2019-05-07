@@ -29,7 +29,6 @@
 
 #include <stddef.h>
 #include "fimex/CDMconstants.h"
-#include "fimex/deprecated.h"
 
 /**
  * @headerfile fimex/c_fimex.h
@@ -373,7 +372,6 @@ extern int mifi_write_scaled_double_dataslice(mifi_cdm_reader* rwreader, const c
  * @return time in the given unit, or NaN
  */
 double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units);
-
 
 
 #ifdef __cplusplus

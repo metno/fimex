@@ -28,7 +28,6 @@
  * @headerfile "fimex/interpolation.h"
  */
 
-#include "fimex/deprecated.h"
 #include "fimex/mifi_constants.h"
 
 #ifdef __cplusplus

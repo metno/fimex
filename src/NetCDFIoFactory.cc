@@ -36,8 +36,6 @@
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/StringUtils.h"
 
-#include "fimex_config.h"
-
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"

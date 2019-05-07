@@ -25,10 +25,11 @@
 #define CDM_H_
 
 #include "fimex/CDMAttribute.h"
-#include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/CDMVariable.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
+#include "fimex/deprecated.h"
 
 #include <iosfwd>
 #include <map>
