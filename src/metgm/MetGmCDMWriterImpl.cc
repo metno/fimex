@@ -55,8 +55,6 @@
 
 // boost
 #include <boost/shared_array.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/bind.hpp>
 
 // standard
 #include <algorithm>

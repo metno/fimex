@@ -22,13 +22,15 @@
  */
 
 #include "NetCDF_Utils.h"
+
 #include "fimex/Data.h"
 #include "fimex/CDMException.h"
 #include "fimex/Logger.h"
 #include "MutexLock.h"
-#include <boost/scoped_array.hpp>
+
 #include <functional>
 #include <numeric>
+
 extern "C" {
 #include "netcdf.h"
 }

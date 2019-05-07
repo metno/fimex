@@ -53,7 +53,6 @@
 //
 #include <boost/regex.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>

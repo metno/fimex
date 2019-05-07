@@ -31,20 +31,20 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
-#include <cstring>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <cerrno>
-#include <cassert>
-#include <cmath>
-#include <set>
-#include <iostream>
-#include <fstream>
-#include <boost/scoped_array.hpp>
-#include <algorithm>
-#include <iostream>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cmath>
+#include <cstring>
+#include <fstream>
+#include <set>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace MetNoFelt {
 

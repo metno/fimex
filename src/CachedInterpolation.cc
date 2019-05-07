@@ -30,11 +30,9 @@
 
 #include "fimex/Logger.h"
 
-#include <boost/scoped_array.hpp>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
 
 namespace MetNoFimex
 {
@@ -126,7 +124,7 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
 #pragma omp parallel default(shared)
     {
 #endif
-    boost::scoped_array<float> zValues(new float[inZ]);
+        std::unique_ptr<float[]> zValues(new float[inZ]);
 #ifdef _OPENMP
 #pragma omp for
 #endif
@@ -137,7 +135,9 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
                 *outPos = zValues[z];
                 outPos += outLayerSize;
             }
-        } else (throw CDMException("error during interpolation"));
+        } else {
+            throw CDMException("error during interpolation");
+        }
     }
 #ifdef _OPENMP
     }

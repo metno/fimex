@@ -51,7 +51,6 @@ extern "C" {
 
 #include "NetCDF_Utils.h"
 
-#include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
 #include <functional>
@@ -434,7 +433,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
     for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
         const CDMVariable& var = *it;
         const std::vector<std::string>& shape = var.getShape();
-        boost::scoped_array<int> ncshape(new int[shape.size()]);
+        std::unique_ptr<int[]> ncshape(new int[shape.size()]);
         for (size_t i = 0; i < shape.size(); i++) {
             // revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
             ncshape[i] = ncDimIdMap.find(shape[(shape.size()-1-i)])->second;
@@ -474,7 +473,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                 // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
                 const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1M *sizeof(type)
                 const size_t MIN_CHUNK = 2 << 16; // chunks should be at least reasonably sized, e.g. 64k*sizeof(type)
-                boost::scoped_array<size_t> ncChunk(new size_t[shape.size()]);
+                std::unique_ptr<size_t[]> ncChunk(new size_t[shape.size()]);
                 size_t chunkSize = 1;
                 for (size_t i = 0; i < shape.size(); i++) {
                     // revert order, cdm requires fastest moving first, netcdf-c requires fastest moving last
