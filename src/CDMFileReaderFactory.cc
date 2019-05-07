@@ -33,7 +33,10 @@
 #include "fimex/IoFactory.h"
 #include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
-#include "fimex/XMLInput.h"
+#include "fimex/XMLDoc.h"
+#include "fimex/XMLInputDoc.h"
+#include "fimex/XMLInputFile.h"
+#include "fimex/XMLInputString.h"
 #include "fimex/min_max.h"
 
 #include <algorithm>
@@ -51,12 +54,14 @@ static bool detectXML(const char* magic) {
 
 // ========================================================================
 
-static IoFactory_pm& ioFactories()
+namespace {
+
+IoFactory_pm& ioFactories()
 {
     return IoFactory::factories();
 }
 
-static IoFactory_p findFactoryFromFileType(const std::string& fileTypeName)
+IoFactory_p findFactoryFromFileType(const std::string& fileTypeName)
 {
     if (fileTypeName.empty())
         return IoFactory_p();
@@ -70,7 +75,7 @@ static IoFactory_p findFactoryFromFileType(const std::string& fileTypeName)
     return factory;
 }
 
-static IoFactory_p findFactoryFromMagic(const std::string& fileName)
+IoFactory_p findFactoryFromMagic(const std::string& fileName)
 {
     size_t magicSize = 0;
     for (const auto& id_f : ioFactories())
@@ -93,7 +98,7 @@ static IoFactory_p findFactoryFromMagic(const std::string& fileName)
     return factory;
 }
 
-static IoFactory_p findFactoryFromFileName(const std::string& fileName)
+IoFactory_p findFactoryFromFileName(const std::string& fileName)
 {
     int bestType = 0;
     IoFactory_p factory;
@@ -104,7 +109,7 @@ static IoFactory_p findFactoryFromFileName(const std::string& fileName)
     return factory;
 }
 
-static IoFactory_p findFactory(const std::string& fileTypeName, const std::string& fileName)
+IoFactory_p findFactory(const std::string& fileTypeName, const std::string& fileName)
 {
     if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
         return f;
@@ -114,6 +119,24 @@ static IoFactory_p findFactory(const std::string& fileTypeName, const std::strin
 
     return findFactoryFromFileName(fileName);
 }
+
+XMLInputDoc createXMLInput(const XMLInput& xi)
+{
+    return XMLInputDoc(xi.id(), xi.getXMLDoc());
+}
+
+XMLInputDoc createXMLInput(const std::string& configXML)
+{
+    if (configXML.empty()) {
+        return XMLInputDoc("", XMLDoc_p());
+    } else if (starts_with(configXML, "<?xml ")) {
+        return createXMLInput(XMLInputString(configXML));
+    } else {
+        return createXMLInput(XMLInputFile(configXML));
+    }
+}
+
+} // namespace
 
 // static
 CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
@@ -128,7 +151,7 @@ CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fi
 CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const std::string& configFile,
                                                            const std::vector<std::string>& args)
 {
-    XMLInputFile configXML(configFile);
+    XMLInputDoc configXML = createXMLInput(configFile);
     return createReaderWriter(fileTypeName, fileName, configXML, args);
 }
 
@@ -144,7 +167,7 @@ CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const 
 // static
 CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
 {
-    XMLInputFile configXML(configFile);
+    XMLInputDoc configXML = createXMLInput(configFile);
     return create(fileTypeName, fileName, configXML, args);
 }
 

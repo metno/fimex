@@ -24,20 +24,21 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/XMLInput.h"
+#include "fimex/XMLInputString.h"
 #include "fimex/XMLDoc.h"
 
-namespace MetNoFimex
-{
+#include <algorithm>
 
-XMLDoc_p XMLInputFile::getXMLDoc() const
-{
-    return XMLDoc::fromFile(filename_);
-}
+namespace MetNoFimex {
 
 XMLDoc_p XMLInputString::getXMLDoc() const
 {
     return XMLDoc::fromString(content_, url_);
 }
 
+std::string XMLInputString::id() const
+{
+    return content_.substr(0, std::min(content_.size(), 100ul));
 }
+
+} // namespace MetNoFimex

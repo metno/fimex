@@ -27,9 +27,10 @@
 #ifndef NCMLCDMREADER_H_
 #define NCMLCDMREADER_H_
 
-#include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
-#include "fimex/XMLInput.h"
+#include "fimex/CDMReader.h"
+#include "fimex/XMLDocDecl.h"
+
 #include <map>
 #include <memory>
 
@@ -37,6 +38,7 @@ namespace MetNoFimex
 {
 /* forward declarations */
 class MutexType;
+class XMLInput;
 
 /**
  * The NcmlCDMReader can be used as both standard reader of a data and

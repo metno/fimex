@@ -24,6 +24,8 @@
 #ifndef XMLDOC_H_
 #define XMLDOC_H_
 
+#include "fimex/XMLDocDecl.h"
+
 #include <memory>
 #include <string>
 
@@ -41,9 +43,6 @@ typedef struct _xmlXPathObject xmlXPathObject;
 namespace MetNoFimex {
 
 typedef std::shared_ptr<xmlXPathObject> xmlXPathObject_p;
-
-class XMLDoc;
-typedef std::shared_ptr<XMLDoc> XMLDoc_p;
 
 /**
  * @headerfile fimex/XMLDoc.h

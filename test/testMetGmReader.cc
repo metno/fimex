@@ -32,7 +32,7 @@
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "fimex/XMLInput.h"
+#include "fimex/XMLInputFile.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include <memory>

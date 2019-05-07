@@ -24,44 +24,31 @@
  *      Author: Heiko Klein
  */
 
-#ifndef XMLINPUT_H_
-#define XMLINPUT_H_
+#ifndef FIMEX_XMLINPUTFILE_H
+#define FIMEX_XMLINPUTFILE_H
 
-#include "fimex/XMLDocDecl.h"
+/**
+ * @headerfile "fimex/XMLInputFile.h"
+ */
 
-#include <string>
+#include "fimex/XMLInput.h"
 
 namespace MetNoFimex {
 
-/**
- * @headerfile fimex/XMLInput.h
- */
-/**
- * Interface for different XML sources like URL, file or string
- */
-class XMLInput
+class XMLInputFile : public XMLInput
 {
+private:
+    std::string filename_;
+
 public:
-    virtual ~XMLInput() {}
-    /**
-     * retrieve the XMLDoc
-     *
-     * @return XMLDoc
-     * @throw CDMException
-     */
-    virtual XMLDoc_p getXMLDoc() const = 0;
-
-    /**
-     * return an identifier of the XMLInput
-     */
-    virtual std::string id() const = 0;
-
-    /**
-     * check if information is available
-     */
-    virtual bool isEmpty() const {return (id().empty());}
+    XMLInputFile(const std::string& filename)
+        : filename_(filename)
+    {
+    }
+    XMLDoc_p getXMLDoc() const override;
+    std::string id() const override { return filename_; }
 };
 
 } // namespace MetNoFimex
 
-#endif /* XMLINPUT_H_ */
+#endif // FIMEX_XMLINPUTFILE_H

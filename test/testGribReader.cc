@@ -33,7 +33,7 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
-#include "fimex/XMLInput.h"
+#include "fimex/XMLInputFile.h"
 
 #include "testinghelpers.h"
 

@@ -48,6 +48,7 @@ extern "C" {
 #include "fimex/Units.h"
 #include "fimex/UnitsException.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInputFile.h"
 #include "fimex/mifi_constants.h"
 
 #include "NetCDF_Utils.h"

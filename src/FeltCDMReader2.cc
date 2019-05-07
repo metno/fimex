@@ -39,6 +39,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInputFile.h"
 #include "fimex/coordSys/Projection.h"
 
 #include <algorithm>

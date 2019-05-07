@@ -37,6 +37,7 @@
 #include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInputString.h"
 
 #include <cassert>
 #include <memory>

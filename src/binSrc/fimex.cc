@@ -48,6 +48,7 @@
 #include "fimex/ThreadPool.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TokenizeDotted.h"
+#include "fimex/XMLInputFile.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 

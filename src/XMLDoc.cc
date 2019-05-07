@@ -36,7 +36,8 @@ XMLDoc::XMLDoc(const std::string& filename)
 {
     init();
     xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, 0);
-    if (pdoc == 0) throw CDMException("cannot read xml-file: "+filename);
+    if (pdoc == 0)
+        throw CDMException("cannot read xml-file '" + filename + "'");
     setDoc(pdoc);
     setXPathCtx(pdoc);
 }

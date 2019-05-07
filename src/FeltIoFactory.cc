@@ -34,6 +34,7 @@
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "FeltCDMReader2.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "fimex/XMLInputFile.h"
 
 namespace MetNoFimex {
 

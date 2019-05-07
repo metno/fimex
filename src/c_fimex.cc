@@ -40,7 +40,7 @@
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/XMLInput.h"
+#include "fimex/XMLInputFile.h"
 #include "fimex/mifi_cdm_reader.h"
 #include "fimex/mifi_constants.h"
 

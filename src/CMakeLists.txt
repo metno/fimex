@@ -151,8 +151,12 @@ SET(libfimex_SOURCES
   ${INCF}/min_max.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h
-  XMLInput.cc
   ${INCF}/XMLInput.h
+  ${INCF}/XMLInputDoc.h
+  XMLInputFile.cc
+  ${INCF}/XMLInputFile.h
+  XMLInputString.cc
+  ${INCF}/XMLInputString.h
   XMLUtils.cc
   ${INCF}/XMLUtils.h
 

@@ -33,6 +33,7 @@
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
+#include "fimex/XMLInputFile.h"
 
 #include <mi_programoptions.h>
 

@@ -33,6 +33,8 @@
 
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "fimex/XMLInputFile.h"
 
 namespace MetNoFimex {
 
