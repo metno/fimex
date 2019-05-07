@@ -380,13 +380,12 @@ const CDMDimension* CDM::getUnlimitedDim() const
 
 bool CDM::hasUnlimitedDim(const CDMVariable& var) const
 {
-    const std::vector<std::string>& shape = var.getShape();
     const CDMDimension* unlimDim = getUnlimitedDim();
-    if (unlimDim == 0) {
+    if (!unlimDim)
         return false;
-    } else {
-        return (find(shape.begin(), shape.end(), unlimDim->getName()) != shape.end());
-    }
+
+    const std::vector<std::string>& shape = var.getShape();
+    return (find(shape.begin(), shape.end(), unlimDim->getName()) != shape.end());
 }
 
 

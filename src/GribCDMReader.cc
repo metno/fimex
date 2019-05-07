@@ -749,7 +749,7 @@ string GribCDMReader::getVariableName(const GribFileMessage& gfm) const
 {
     xmlNodePtr node = findVariableXMLNode(gfm);
     string varName;
-    if (node == 0) {
+    if (!node) {
         // prepend names from grib-api with 'ga_'
         // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
         varName = "ga_" + gfm.getShortName() + "_" + type2string(gfm.getLevelType());

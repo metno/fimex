@@ -238,22 +238,31 @@ DataPtr CDMReader::getScaledDataInUnit(const std::string& varName, const std::st
 
 DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
 {
-    if (variable.hasData()) {
-        if (variable.getData()->size() == 0) { // not possible to slice
-            return variable.getData();
+    if (DataPtr data = variable.getData()) {
+        if (data->size() == 0) // not possible to slice
+            return data;
+        if (cdm_->hasUnlimitedDim(variable)) {
+            // cut out the unlimited dim data
+            std::vector<size_t> dims = getDimsSlice(variable.getName());
+            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+            return createDataSlice(variable.getDataType(), *data, unLimDimPos * sliceSize, sliceSize);
         } else {
-            if (cdm_->hasUnlimitedDim(variable)) {
-                // cut out the unlimited dim data
-                std::vector<size_t> dims = getDimsSlice(variable.getName());
-                size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
-                return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
-            } else {
-                return variable.getData()->clone();
-            }
+            return data->clone();
         }
     } else {
         return DataPtr();
     }
 }
 
+DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, const SliceBuilder& sb)
+{
+    if (DataPtr data = variable.getData()) {
+        if (data->size() == 0)
+            return data;
+        return data->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+    } else {
+        return DataPtr();
+    }
 }
+
+} // namespace MetNoFimex
