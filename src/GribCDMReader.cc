@@ -48,7 +48,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include "MutexLock.h"
-#include <boost/math/special_functions/round.hpp>
 
 namespace MetNoFimex
 {
@@ -1175,7 +1174,7 @@ public:
     T operator()(T in) {
         if (in == initialMissing_)
             return finalMissing_;
-        return scale_ * boost::math::round<T>(scaleInv_ * in);
+        return scale_ * MetNoFimex::round(scaleInv_ * in);
     }
 };
 
