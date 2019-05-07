@@ -30,7 +30,6 @@
 
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
-#include "fimex/DataTypeChanger.h"
 #include "fimex/GribFileIndex.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/Logger.h"
@@ -1334,19 +1333,18 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
         }
         dataCurrentPos += xySliceSize; // always forward a complete slice
     }
-    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
+    std::map<string, std::pair<double, double>>::const_iterator it = p_->varPrecision.find(varName);
+    if (it != p_->varPrecision.end()) {
+        const double scale = it->second.first;
+        const double offset = it->second.second;
         if (variable.getDataType() == CDM_FLOAT || variable.getDataType() == CDM_DOUBLE) {
-            double scale = p_->varPrecision[varName].first;
             if (variable.getDataType() == CDM_FLOAT) {
                 data = roundData(data->asFloat(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
             } else {
                 data = roundData(data->asDouble(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
             }
         } else {
-            double scale = p_->varPrecision[varName].first;
-            double offset = p_->varPrecision[varName].second;
-            DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
-            data = dtc.convertData(data);
+            data = data->convertDataType(missingValue, 1, 0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset);
         }
     }
     return data;

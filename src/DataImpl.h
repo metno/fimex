@@ -288,56 +288,35 @@ namespace MetNoFimex
         std::transform(begin, end, &theData[dataStartPos], data_caster<C, typename InputIterator::value_type>());
     }
 
-    template<typename OUT, typename IN>
-    boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) {
-        boost::shared_array<OUT> outData(new OUT[length]);
-        ScaleValue<IN, OUT> sv(oldFill, oldScale, oldOffset, newFill, newScale, newOffset);
-        std::transform(&inData[0], &inData[length], &outData[0], sv);
-        return outData;
-    }
     template <typename OUT, typename IN>
     boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset,
                                               UnitsConverter_p unitsConverter, double newFill, double newScale, double newOffset)
     {
         boost::shared_array<OUT> outData(new OUT[length]);
-        ScaleValueUnits<IN, OUT> sv(oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset);
-        std::transform(&inData[0], &inData[length], &outData[0], sv);
+        if (!unitsConverter) {
+            ScaleValue<IN, OUT> sv(oldFill, oldScale, oldOffset, newFill, newScale, newOffset);
+            std::transform(&inData[0], &inData[length], &outData[0], sv);
+        } else {
+            ScaleValueUnits<IN, OUT> sv(oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset);
+            std::transform(&inData[0], &inData[length], &outData[0], sv);
+        }
         return outData;
     }
 
     template<typename C>
     DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
     {
-        // clang-format off
-        switch (newType) {
-        case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_SHORT:  return createData(size(), convertArrayType<short>             (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_INT:    return createData(size(), convertArrayType<int>               (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_UCHAR:  return createData(size(), convertArrayType<unsigned char>     (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_USHORT: return createData(size(), convertArrayType<unsigned short>    (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_UINT:   return createData(size(), convertArrayType<unsigned int>      (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_INT64:  return createData(size(), convertArrayType<long long>         (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_UINT64: return createData(size(), convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_FLOAT:  return createData(size(), convertArrayType<float>             (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_DOUBLE: return createData(size(), convertArrayType<double>            (theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
-        case CDM_STRING:
-        case CDM_STRINGS:
-        case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
-        }
-        // clang-format on
-        throw CDMException("cannot convert unknown datatype");
+        return convertDataType(oldFill, oldScale, oldOffset, UnitsConverter_p(), newType, newFill, newScale, newOffset);
     }
 
-    template <>
-    DataPtr DataImpl<std::string>::convertDataType(double, double, double, CDMDataType, double, double, double)
-    {
-        throw CDMException("cannot convert CDM_STRINGS datatype");
-    }
 
     template <typename C>
     DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitsConverter, CDMDataType newType,
                                          double newFill, double newScale, double newOffset)
     {
+        if (oldFill == newFill && oldScale == newScale && oldOffset == newOffset && !unitsConverter)
+            return convertValues(*this, newType);
+
         // clang-format off
         switch (newType) {
         case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));

@@ -214,4 +214,29 @@ CDMDataType DataImpl<double>::getDataType() const {return CDM_DOUBLE;}
 template<>
 CDMDataType DataImpl<std::string>::getDataType() const {return CDM_STRINGS;}
 // clang-format on
+
+DataPtr convertValues(const Data& data, CDMDataType newType)
+{
+    if (data.getDataType() == newType)
+        return data.clone();
+
+    switch (newType) {
+    case CDM_CHAR:   return createData(data.size(), data.asChar());
+    case CDM_SHORT:  return createData(data.size(), data.asShort());
+    case CDM_INT:    return createData(data.size(), data.asInt());
+    case CDM_UCHAR:  return createData(data.size(), data.asUChar());
+    case CDM_USHORT: return createData(data.size(), data.asUShort());
+    case CDM_UINT:   return createData(data.size(), data.asUInt());
+    case CDM_INT64:  return createData(data.size(), data.asInt64());
+    case CDM_UINT64: return createData(data.size(), data.asUInt64());
+    case CDM_FLOAT:  return createData(data.size(), data.asFloat());
+    case CDM_DOUBLE: return createData(data.size(), data.asDouble());
+    case CDM_STRING:
+    case CDM_STRINGS:
+    case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
+    }
+    // clang-format on
+    throw CDMException("cannot convert unknown datatype");
 }
+
+} // namespace MetNoFimex

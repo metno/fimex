@@ -32,7 +32,6 @@
 
 // fimex
 //
-#include "fimex/DataTypeChanger.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 

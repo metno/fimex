@@ -319,6 +319,8 @@ namespace MetNoFimex
          return createData(0, boost::shared_array<char>(new char[0])); // a dummy dataset
     }
 
-}
+    DataPtr convertValues(const Data& data, CDMDataType newType);
+
+} // namespace MetNoFimex
 
 #endif /*DATA_H_*/

@@ -40,7 +40,6 @@ extern "C" {
 
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
-#include "fimex/DataTypeChanger.h"
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Units.h"
@@ -60,8 +59,7 @@ extern "C" {
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 namespace {
 
@@ -593,38 +591,34 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap)
 DataPtr NetCDF_CDMWriter::convertData(const CDMVariable& var, DataPtr data)
 {
     const std::string& varName = var.getName();
-    std::map<std::string, CDMDataType>::const_iterator it = variableTypeChanges.find(varName);
-    if (it != variableTypeChanges.end() && it->second != CDM_NAT) {
-        double oldFill = cdmReader->getCDM().getFillValue(varName);
-        double oldScale = cdmReader->getCDM().getScaleFactor(varName);
-        double oldOffset = cdmReader->getCDM().getAddOffset(varName);
-        double newFill = cdm.getFillValue(varName);
-        double newScale = cdm.getScaleFactor(varName);
-        double newOffset = cdm.getAddOffset(varName);
 
-        // changes of the units
-        double unitSlope = 1.;
-        double unitOffset = 0.;
-        std::string oldUnit;
-        std::string newUnit;
+    const std::string oldUnit = cdmReader->getCDM().getUnits(varName);
+    const std::string newUnit = cdm.getUnits(varName);
+
+    const CDMDataType oldType = var.getDataType();
+    const std::map<std::string, CDMDataType>::const_iterator it = variableTypeChanges.find(varName);
+    const CDMDataType newType = (it != variableTypeChanges.end()) ? it->second : oldType;
+
+    const double oldFill = cdmReader->getCDM().getFillValue(varName);
+    const double oldScale = cdmReader->getCDM().getScaleFactor(varName);
+    const double oldOffset = cdmReader->getCDM().getAddOffset(varName);
+    const double newFill = cdm.getFillValue(varName);
+    const double newScale = cdm.getScaleFactor(varName);
+    const double newOffset = cdm.getAddOffset(varName);
+
+    if ((newType != CDM_NAT && oldType != CDM_NAT) &&
+        (newType != oldType || newUnit != oldUnit || oldFill != newFill || oldScale != newScale || oldOffset != newOffset)) {
         try {
-            oldUnit = cdmReader->getCDM().getUnits(varName);
-            newUnit = cdm.getUnits(varName);
-            if (oldUnit != newUnit) {
+            UnitsConverter_p uc;
+            if (oldUnit != newUnit) { // changes of the units
                 Units units;
-                units.convert(oldUnit, newUnit, unitSlope, unitOffset);
+                uc = units.getConverter(oldUnit, newUnit);
             }
+            data = data->convertDataType(oldFill, oldScale, oldOffset, uc, newType, newFill, newScale, newOffset);
         } catch (UnitException& e) {
             LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << var.getName() << ": " << e.what());
         } catch (CDMException& e) {
             // units not defined, do nothing
-        }
-
-        try {
-            DataTypeChanger dtc(var.getDataType(), oldFill, oldScale, oldOffset, it->second, newFill, newScale, newOffset, unitSlope, unitOffset);
-            data = dtc.convertData(data);
-        } catch (CDMException& e) {
-            throw CDMException("problems converting data of var " + varName + ": " + e.what());
         }
     }
     return data;

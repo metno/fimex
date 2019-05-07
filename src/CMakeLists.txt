@@ -92,8 +92,6 @@ SET(libfimex_SOURCES
   ${INCF}/DataIndex.h
   ArrayLoop.cc
   ${INCF}/ArrayLoop.h
-  DataTypeChanger.cc
-  ${INCF}/DataTypeChanger.h
   FillWriter.cc
   ${INCF}/FillWriter.h
   FimexTime.cc
