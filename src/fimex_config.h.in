@@ -8,7 +8,6 @@
 #cmakedefine HAVE_FELT 1
 #cmakedefine HAVE_GRIB_API_H 1
 #cmakedefine HAVE_GRIB_API_THREADSAFE 1
-#cmakedefine HAVE_LIBPQ_FE_H 1
 #cmakedefine HAVE_LOG4CPP 1
 #cmakedefine HAVE_METGM_H 1
 #cmakedefine HAVE_MPI 1

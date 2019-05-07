@@ -48,7 +48,6 @@ static std::vector<std::string> getFiletypeNames_()
         addName_(MIFI_FILETYPE_NETCDF, "netcdf");
         addName_(MIFI_FILETYPE_NCML,   "ncml");
         addName_(MIFI_FILETYPE_GRIB,   "grib");
-        addName_(MIFI_FILETYPE_WDB,    "wdb");
         addName_(MIFI_FILETYPE_METGM,  "metgm");
         addName_(MIFI_FILETYPE_PRORAD, "prorad");
         addName_(MIFI_FILETYPE_GRBML,  "grbml");
@@ -121,12 +120,6 @@ int fimexHas(int fileType)
     case MIFI_FILETYPE_NCML: return 1;
     case MIFI_FILETYPE_GRIB:
 #ifdef HAVE_GRIB_API_H
-    return 1;
-#else
-    return 0;
-#endif
-    case MIFI_FILETYPE_WDB:
-#ifdef HAVE_LIBPQ_FE_H
     return 1;
 #else
     return 0;

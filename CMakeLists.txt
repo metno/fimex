@@ -1,6 +1,6 @@
 # Fimex, CMakeLists.txt
 #
-# Copyright (C) 2018 met.no
+# Copyright (C) 2018-2019 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -104,11 +104,6 @@ ELSEIF(ENABLE_GRIBAPI)
   IF(ENABLE_GRIBAPIPTHREAD)
     SET(HAVE_GRIB_API_THREADSAFE 1)
   ENDIF()
-ENDIF()
-
-OPTION(ENABLE_WDB "Use wdb" OFF)
-IF(ENABLE_WDB)
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE libpq)
 ENDIF()
 
 OPTION(ENABLE_METGM "Use metgm" OFF)

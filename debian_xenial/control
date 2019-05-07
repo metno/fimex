@@ -27,7 +27,6 @@ Build-Depends: debhelper (>= 9),
  libpng12-dev,
  libjpeg-dev,
  zlib1g-dev,
- libpq-dev,
  liblog4cpp5-dev,
  netcdf-bin
 Build-Conflicts: libfimex-dev,

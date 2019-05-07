@@ -50,9 +50,6 @@
 #include "fimex/GribCDMReader.h"
 #include "fimex/GribApiCDMWriter.h"
 #endif
-#ifdef HAVE_LIBPQ_FE_H
-#include "fimex/WdbCDMReader.h"
-#endif
 #ifdef HAVE_METGM_H
 #include "fimex/MetGmCDMReader.h"
 #include "fimex/MetGmCDMWriter.h"
@@ -315,11 +312,6 @@ CDMReader_p CDMFileReaderFactory::create(int fileType, const std::string & fileN
 #ifdef HAVE_PRORADXML
     case MIFI_FILETYPE_PRORAD: {
         return boost::make_shared<ProradXMLCDMReader>(fileName);
-    }
-#endif
-#ifdef HAVE_LIBPQ_FE_H
-    case MIFI_FILETYPE_WDB: {
-        return boost::make_shared<WdbCDMReader>(fileName, configXML);
     }
 #endif
     case MIFI_FILETYPE_NCML:

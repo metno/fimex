@@ -56,9 +56,6 @@ SET(config_DATA
   ncml-2.2-fimex-0.xsd
   ncmlCDMConfig.ncml
   template4interpolation.cdl
-  wdb_config.xml
-  wdb_config.xsd
-  wdb.example.wdbml
   log4cpp.properties
 )
 

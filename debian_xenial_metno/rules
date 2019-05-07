@@ -27,7 +27,6 @@ override_dh_auto_configure:
 	    -DENABLE_FORTRAN=YES \
 	    -DENABLE_PRORADXML=YES \
 	    -DENABLE_METGM=YES \
-	    -DENABLE_WDB=YES \
 	    -DENABLE_FIMEX_OMP=YES \
 	    -DENABLE_PYTHON=YES \
 	    -DPython_ADDITIONAL_VERSIONS=3.5 \

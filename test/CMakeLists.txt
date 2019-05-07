@@ -130,31 +130,6 @@ IF(ENABLE_METGM)
     )
 ENDIF(ENABLE_METGM)
 
-IF(ENABLE_WDB)
-  INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src"
-    "${CMAKE_BINARY_DIR}/src"
-    ${PC_INCLUDE_DIRS}
-    )
-  ADD_DEFINITIONS(-DWDB_TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}/wdb")
-  ADD_COMPILE_OPTIONS(${PC_CFLAGS_OTHER})
-  LINK_DIRECTORIES(${PC_LIBRARY_DIRS})
-
-  ADD_EXECUTABLE(wdbTest
-    wdb/TestingGridData.cpp
-    wdb/GridDataFactory.cpp
-    wdb/TestingGridData.h
-    wdb/GridDataFactory.h
-
-    wdb/Wdb2CdmBuilderTest.cc
-    wdb/WdbIndexTest.cc
-    wdb/ConfigurationTest.cpp
-    wdb/GlobalWdbConfigurationTest.cpp
-    wdb/TimeHandlerTest.cpp
-    )
-  TARGET_LINK_LIBRARIES(wdbTest libfimex)
-  ADD_TEST(NAME wdbTest COMMAND wdbTest)
-ENDIF()
-
 IF (ENABLE_NETCDF)
   FIND_PROGRAM(NCDUMP_PROGRAM
     NAMES ncdump

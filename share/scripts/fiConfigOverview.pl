@@ -95,8 +95,6 @@ use constant FILETYPES => {
     'cdmQualityConfig' => \&ignore,
     'gribFileIndex' => \&ignore,
     'metgm_config' => \&ignore,
-    "wdb_netcdf_config" => \&parseWdbReader,
-    'wdb_query' => \&ignore,
 };
 
 
@@ -223,11 +221,6 @@ sub parseGribWriter {
         }
     }
     return @content;
-}
-
-sub parseWdbReader {
-    my ($fileName, $xpc, $doc) = @_;
-    return ();
 }
 
 sub parseFeltConfig {

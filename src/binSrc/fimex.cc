@@ -932,7 +932,7 @@ int run(int argc, char* args[])
     po::options_description config("Configurational options");
     config.add_options()
         ("input.file", po::value<string>(), "input file")
-        ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
+        ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2")
         ("input.config", po::value<string>(), "non-standard input configuration")
         ("input.optional", po::value<vector<string> >()->composing(), "additional options, e.g. multiple files for grib")
 #if BOOST_VERSION >= 104000
@@ -1034,7 +1034,7 @@ int run(int argc, char* args[])
         ("interpolate.printSize", "print size estimate")
 
         ("merge.inner.file", po::value<string>(), "inner file for merge")
-        ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
+        ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2")
         ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
         ("merge.inner.cfg", po::value<string>(), "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging")
         ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")

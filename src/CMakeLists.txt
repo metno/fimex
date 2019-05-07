@@ -264,49 +264,6 @@ if(ENABLE_PRORADXML)
     )
 ENDIF(ENABLE_PRORADXML)
 
-IF(ENABLE_WDB)
-  SET(HAVE_LIBPQ_FE_H 1)
-
-  # include wdb/make.mk
-  SET(libfimex_wdb_SOURCES
-    WdbCDMReader.cc
-    wdb/WdbIndex.cpp
-    wdb/DataSummary.cpp
-    wdb/ParameterData.cpp
-    wdb/Wdb2CdmBuilder.cpp
-    wdb/TimeHandler.cpp
-    wdb/LevelHandler.cpp
-    wdb/VersionHandler.cpp
-    wdb/GridHandler.cpp
-
-    wdb/WdbIndex.h
-    )
-
-  # include wdb/gridInformation/make.mk
-  LIST(APPEND libfimex_wdb_SOURCES
-    wdb/gridInformation/GridInformation.cpp
-    wdb/gridInformation/LatLonGridInformation.cpp
-    wdb/gridInformation/RotatedLatLonGridInformation.cpp
-    wdb/gridInformation/MetricGridInformation.cpp
-    )
-  # include wdb/database_access/make.mk
-  LIST(APPEND libfimex_wdb_SOURCES
-    wdb/database_access/Parameter.cpp
-    wdb/database_access/Level.cpp
-    wdb/database_access/WdbConnection.cpp
-    wdb/database_access/WciReadQuerySpecification.cpp
-    wdb/database_access/DataSanitizer.cpp
-    wdb/database_access/GridData.cpp
-    )
-  # include wdb/config/make.mk
-  LIST(APPEND libfimex_wdb_SOURCES
-    wdb/config/WdbConfiguration.cpp
-    wdb/config/GlobalWdbConfiguration.cpp
-    )
-
-  FIMEX_HEADERS(libfimex_wdb_HEADERS libfimex_wdb_SOURCES ".cpp" ".h")
-ENDIF()
-
 CONFIGURE_FILE(fimex_config.h.in fimex_config.h)
 
 SET(libfimex_ALL_SOURCES
@@ -316,7 +273,6 @@ SET(libfimex_ALL_SOURCES
   ${libfimex_felt_SOURCES}
   ${libfimex_metgm_SOURCES}
   ${libfimex_proradxml_SOURCES}
-  ${libfimex_wdb_SOURCES}
 )
 
 SET(libfimex_LIBS
