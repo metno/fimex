@@ -40,17 +40,14 @@ BOOST_AUTO_TEST_CASE( test_data_retrieval )
     BOOST_CHECK(data.asBase()[0] == 0);
     BOOST_CHECK(data.asBase()[4] == 4);
     BOOST_CHECK(data.asInt()[0] == 0);
-    BOOST_CHECK(data.asConstInt()[0] == 0);
 
     // changing data
     data.asInt()[0] = 10;
     BOOST_CHECK(data.asInt()[0] == 10);
-    BOOST_CHECK(data.asConstInt()[0] == 10);
 
     // changing data with different type not reflected
     data.asDouble()[0] = 100;
     BOOST_CHECK(data.asInt()[0] == 10);
-    BOOST_CHECK(data.asConstInt()[0] == 10);
 }
 
 BOOST_AUTO_TEST_CASE( test_indexed_data )

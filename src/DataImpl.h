@@ -100,37 +100,16 @@ namespace MetNoFimex
         template<typename T>
         boost::shared_array<T> as() {return ArrayTypeConverter<T, C>(theData, length)();}
         // conversion function
-        virtual const boost::shared_array<char> asConstChar() const {return as<char>();}
         virtual boost::shared_array<char> asChar() const {return as<char>();}
-        virtual const boost::shared_array<short> asConstShort() const {return as<short>();}
         virtual boost::shared_array<short> asShort() const {return as<short>();}
-        virtual const boost::shared_array<int> asConstInt() const {return as<int>();}
         virtual boost::shared_array<int> asInt() const {return as<int>();}
-        /// @brief retrieve data as int64
-        virtual const boost::shared_array<long long> asConstInt64() const {return as<long long>();}
-        /// @brief retrieve data as int64
         virtual boost::shared_array<long long> asInt64() const {return as<long long>();}
-        /// @brief retrieve data as uchar
-        virtual const boost::shared_array<unsigned char> asConstUChar() const {return as<unsigned char>();}
-        /// @brief retrieve data as uchar
         virtual boost::shared_array<unsigned char> asUChar() const {return as<unsigned char>();}
-        /// @brief retrieve data as short
-        virtual const boost::shared_array<unsigned short> asConstUShort() const {return as<unsigned short>();}
-        /// @brief retrieve data as short
         virtual boost::shared_array<unsigned short> asUShort() const {return as<unsigned short>();}
-        /// @brief retrieve data as uint
-        virtual const boost::shared_array<unsigned int> asConstUInt() const {return as<unsigned int>();}
-        /// @brief retrieve data as uint
         virtual boost::shared_array<unsigned int> asUInt() const {return as<unsigned int>();}
-        /// @brief retrieve data as uint64
-        virtual const boost::shared_array<unsigned long long> asConstUInt64() const {return as<unsigned long long>();}
-        /// @brief retrieve data as uint64
         virtual boost::shared_array<unsigned long long> asUInt64() const {return as<unsigned long long>();}
-        /// @brief retrieve data as array of strings
         virtual boost::shared_array<std::string> asStrings() const {return as<std::string>();}
-        virtual const boost::shared_array<float> asConstFloat() const {return as<float>();}
         virtual boost::shared_array<float> asFloat() const {return as<float>();}
-        virtual const boost::shared_array<double> asConstDouble() const {return as<double>();}
         virtual boost::shared_array<double> asDouble() const {return as<double>();}
         virtual std::string asString(std::string separator = "") const;
 

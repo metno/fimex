@@ -31,7 +31,6 @@
 #include <iosfwd>
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
-#include "fimex/deprecated.h"
 
 #include <vector>
 
@@ -56,70 +55,47 @@ namespace MetNoFimex
 
         /// @brief sizeof the data-impl datatype
         virtual int bytes_for_one() const = 0;
+
         virtual void* getDataPtr() = 0;
+
         /// @brief printing of the current data to ostream, with optional separator
         virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
-        /**
-         *  @brief retrieve data as char
-         *  @deprecated use asChar()
-         */
-        MIFI_DEPRECATED(virtual const boost::shared_array<char> asConstChar() const) = 0;
         /// @brief retrieve data as char
         virtual boost::shared_array<char> asChar() const = 0;
-        /**
-         *  @brief retrieve data as short
-         *  @deprecated use asShort()
-         */
-        MIFI_DEPRECATED(virtual const boost::shared_array<short> asConstShort() const) = 0;
+
         /// @brief retrieve data as short
         virtual boost::shared_array<short> asShort() const = 0;
-        /**
-         *  @brief retrieve data as int
-         *  @deprecated use asInt()
-         */
-        MIFI_DEPRECATED(virtual const boost::shared_array<int> asConstInt() const) = 0;
+
         /// @brief retrieve data as int
         virtual boost::shared_array<int> asInt() const = 0;
-        /**
-         *  @brief retrieve data as int64
-         *  @deprecated use asInt64()
-         */
-        MIFI_DEPRECATED(virtual const boost::shared_array<long long> asConstInt64() const) = 0;
+
         /// @brief retrieve data as int64
         virtual boost::shared_array<long long> asInt64() const = 0;
-        /**
-         * @brief retrieve data as uchar
-         * @deprecated use asUChar()
-         */
-        MIFI_DEPRECATED(virtual const boost::shared_array<unsigned char> asConstUChar() const) = 0;
+
         /// @brief retrieve data as uchar
         virtual boost::shared_array<unsigned char> asUChar() const = 0;
-        /// @brief retrieve data as short
-        MIFI_DEPRECATED(virtual const boost::shared_array<unsigned short> asConstUShort() const) = 0;
+
         /// @brief retrieve data as short
         virtual boost::shared_array<unsigned short> asUShort() const = 0;
-        /// @brief retrieve data as uint
-        MIFI_DEPRECATED(virtual const boost::shared_array<unsigned int> asConstUInt() const) = 0;
+
         /// @brief retrieve data as uint
         virtual boost::shared_array<unsigned int> asUInt() const = 0;
-        /// @brief retrieve data as uint64
-        MIFI_DEPRECATED(virtual const boost::shared_array<unsigned long long> asConstUInt64() const) = 0;
+
         /// @brief retrieve data as uint64
         virtual boost::shared_array<unsigned long long> asUInt64() const = 0;
-        /// @brief retrieve data as float
-        MIFI_DEPRECATED(virtual const boost::shared_array<float> asConstFloat() const) = 0;
+
         /// @brief retrieve data as float (eventually copy)
         virtual boost::shared_array<float> asFloat() const = 0;
-        /// @brief retrieve data as double
-        MIFI_DEPRECATED(virtual const boost::shared_array<double> asConstDouble() const) = 0;
+
         /// @brief retrieve data as double
         virtual boost::shared_array<double> asDouble() const = 0;
+
         /// @brief retrieve data as array of strings
         virtual boost::shared_array<std::string> asStrings() const = 0;
+
         /// @brief retrieve the whole array as a string (with possible separator)
         virtual std::string asString(std::string separator = "") const = 0;
-
 
         /**
          *  @brief get a value at the desired position
@@ -136,6 +112,7 @@ namespace MetNoFimex
 
         /// @brief set a value at the desired position
         virtual void setValue(size_t pos, double val) = 0;
+
         /**
          * set the values from another Data implementation
          * @param startPos the first position the data should be written to
@@ -144,11 +121,13 @@ namespace MetNoFimex
          * @param end the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
          */
         virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) = 0;
+
         /**
          * set all values to the submitted value
          * @param val value to set
          */
         virtual void setAllValues(double val) = 0;
+
         /**
          * @brief duplicate the data
          *
@@ -156,6 +135,7 @@ namespace MetNoFimex
          * of the data. The internal array-data will be copied.
          */
         virtual DataPtr clone() const = 0;
+
         /**
          * @brief get a multi-dimensional slice of the data
          *
@@ -171,12 +151,14 @@ namespace MetNoFimex
          * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
          */
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) = 0;
+
         /**
          * @brief convert the datatype from one type,fill,scale,offset to another
          */
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
 
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitConverter, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
+
         /**
          * return the CDMDataType of this data
          */
