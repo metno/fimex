@@ -35,8 +35,7 @@
 
 namespace MetNoFelt {
 
-static MetNoFimex::LoggerPtr logger = MetNoFimex::getLogger("fimex.FeltParameters");
-
+static MetNoFimex::Logger_p logger = MetNoFimex::getLogger("fimex.FeltParameters");
 
 FeltParameters::FeltParameters() {
     init();

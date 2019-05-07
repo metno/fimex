@@ -55,8 +55,8 @@ public:
      * @return
      * @warning listCoordinateSystems can currently not be called several times on the same reader
      */
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDMReader_p reader);
+    virtual CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm);
+    virtual CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader);
     virtual void enhanceVectorProperties(CDMReader_p reader);
 };
 

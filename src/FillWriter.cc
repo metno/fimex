@@ -39,7 +39,7 @@
 
 namespace MetNoFimex
 {
-static LoggerPtr logger = getLogger("fimex.FillWriter");
+static Logger_p logger = getLogger("fimex.FillWriter");
 
 struct FillWriterTranslation {
     std::string inputDim;
@@ -66,7 +66,7 @@ static std::string findFirstUnusableDimension(const std::set<std::string>& unusa
     return "";
 }
 
-FillWriter::FillWriter(CDMReader_p in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
+FillWriter::FillWriter(CDMReader_p in, CDMReaderWriter_p io, std::string configFileName)
 {
     using namespace std;
 
@@ -247,7 +247,7 @@ std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName)
 
     XMLDoc doc(fileName);
     doc.registerNamespace("c", "http://www.met.no/schema/fimex/cdmFillWriterConfig");
-    XPathObjPtr xpathObj = doc.getXPathObject("/c:cdmFillWriter");
+    xmlXPathObject_p xpathObj = doc.getXPathObject("/c:cdmFillWriter");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
         throw CDMException("file '"+fileName+"' is not a cdmFillWriterConfig with root /cdmFillWriter");

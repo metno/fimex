@@ -28,8 +28,9 @@
 #define fimex_CDMOverlay_H 1
 
 #include "fimex/CDMReader.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/DataDecl.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/mifi_constants.h"
 
 namespace MetNoFimex {
 
@@ -60,7 +61,7 @@ private:
     std::auto_ptr<CDMOverlayPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMOverlay> CDMOverlayPtr;
+typedef boost::shared_ptr<CDMOverlay> CDMOverlay_p;
 
 } // namespace MetNoFimex
 

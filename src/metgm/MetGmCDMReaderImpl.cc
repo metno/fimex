@@ -92,12 +92,12 @@ namespace MetNoFimex {
         return boost::algorithm::replace_all_copy(name, " ", "_");
     }
 
-    void MetGmCDMReaderImpl::configure(const boost::shared_ptr<XMLDoc>& doc)
+    void MetGmCDMReaderImpl::configure(const XMLDoc_p& doc)
     {
         if(!doc.get())
             throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
 
-        XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/reader/variable");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/reader/variable");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         size_t size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
@@ -109,7 +109,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
@@ -173,7 +173,7 @@ namespace MetNoFimex {
 
     void MetGmCDMReaderImpl::init(const XMLInput& configXML)
     {
-        boost::shared_ptr<XMLDoc> xmlDoc = configXML.getXMLDoc();
+        XMLDoc_p xmlDoc = configXML.getXMLDoc();
         configure(xmlDoc);
 
         parseMgmFile(sourceFileName_);

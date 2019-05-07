@@ -24,18 +24,21 @@
 #ifndef CDMREADER_H_
 #define CDMREADER_H_
 
-#include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
-#include "fimex/DataDecl.h"
 #include "fimex/CDMReaderDecl.h"
+
+#include "fimex/CDMException.h"
+#include "fimex/DataDecl.h"
 #include "fimex/SliceBuilder.h"
+#include "fimex/UnitsConverterDecl.h"
+
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
 {
 /* forward declarations */
 class CDM;
 class CDMVariable;
-class UnitsConverter;
 
 /**
  * @headerfile fimex/CDMReader.h
@@ -235,7 +238,7 @@ private:
     std::vector<std::size_t> getDimsSlice(const std::string& varName);
 
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, double unitScale = 1., double unitOffset = 0.);
-    DataPtr scaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc);
+    DataPtr scaleDataOf(const std::string& varName, DataPtr data, UnitsConverter_p uc);
     DataPtr scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& unit);
 };
 

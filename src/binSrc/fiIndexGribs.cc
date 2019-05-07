@@ -58,7 +58,7 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
     std::map<std::string, std::string> options;
     if (config != "") {
         using namespace MetNoFimex;
-        boost::shared_ptr<XMLDoc> doc = GribCDMReader::initXMLConfig(XMLInputFile(config));
+        XMLDoc_p doc = GribCDMReader::initXMLConfig(XMLInputFile(config));
         options["earthfigure"] = GribCDMReader::getConfigEarthFigure(doc);
         extraKeys.push_back(GribCDMReader::getConfigExtraKeys(doc));
     }

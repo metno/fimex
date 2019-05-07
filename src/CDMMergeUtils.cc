@@ -31,21 +31,26 @@
 
 #include "CDMMergeUtils.h"
 
+#include "fimex/CDM.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMInterpolator.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 
 #include <boost/foreach.hpp>
+#include <boost/make_shared.hpp>
 
 namespace MetNoFimex {
 
-static LoggerPtr logger(getLogger("fimex.CDMMergeUtils"));
+static Logger_p logger(getLogger("fimex.CDMMergeUtils"));
 
 //namespace CDMMergeUtils {
 
 using namespace std;
 
-values_v getAxisValues(const CDMReader_p reader, CoordinateSystem::ConstAxisPtr axis, const string& unit)
+values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const string& unit)
 {
     const CDM& cdm = reader->getCDM();
     const string &name = axis->getName();
@@ -64,7 +69,7 @@ values_v getAxisValues(const CDMReader_p reader, CoordinateSystem::ConstAxisPtr 
     return values_v(array.get(), array.get() + axisData->size());
 }
 
-static int axisLength(CDMReader_p reader, CoordinateSystem::ConstAxisPtr ax)
+static int axisLength(CDMReader_p reader, CoordinateAxis_cp ax)
 {
     if (ax.get() == 0)
         return -2;
@@ -74,9 +79,7 @@ static int axisLength(CDMReader_p reader, CoordinateSystem::ConstAxisPtr ax)
     return dim.getLength();
 }
 
-bool checkSingleAxisCompatibility(CDMReader_p readerB, CDMReader_p readerT,
-        CoordinateSystem::ConstAxisPtr axB, CoordinateSystem::ConstAxisPtr axT,
-        const char* messageLabel)
+bool checkSingleAxisCompatibility(CDMReader_p readerB, CDMReader_p readerT, CoordinateAxis_cp axB, CoordinateAxis_cp axT, const char* messageLabel)
 {
     const int axisLengthB = axisLength(readerB, axB), axisLengthT = axisLength(readerT, axT);
     LOG4FIMEX(logger, Logger::DEBUG, "axis " << messageLabel << " length B=" << axisLengthB << " T= " << axisLengthT);
@@ -96,7 +99,7 @@ bool checkSingleAxisCompatibility(CDMReader_p readerB, CDMReader_p readerT,
     return true;
 }
 
-bool checkAxesCompatibility(CDMReader_p readerB, CDMReader_p readerT, CoordinateSystemPtr csB, CoordinateSystemPtr csT)
+bool checkAxesCompatibility(CDMReader_p readerB, CDMReader_p readerT, CoordinateSystem_cp csB, CoordinateSystem_cp csT)
 {
     const int N = 6;
     const CoordinateAxis::AxisType types[N] = {
@@ -119,7 +122,7 @@ bool checkAxesCompatibility(CDMReader_p readerB, CDMReader_p readerT, Coordinate
     return true;
 }
 
-void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys)
+void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, const CoordinateSystem_cp_v& coordSys)
 {
     using namespace std;
     // add all dimension variables
@@ -143,7 +146,7 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
     // add coordinate-system variables
     set<string> varsCopy = variables;
     for (set<string>::iterator sit = varsCopy.begin(); sit != varsCopy.end(); ++sit) {
-        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, *sit);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *sit);
         if (cs.get()) {
             set<string> csDepVars = cs->getDependencyVariables();
             for (set<string>::iterator dIt = csDepVars.begin(); dIt != csDepVars.end(); ++dIt) {
@@ -162,9 +165,7 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
         return false;                                                   \
     } while(false)
 
-bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
-        const CoordinateSystemPtr_v& allCsB, const CoordinateSystemPtr_v& allCsT,
-        const string& varName)
+bool is_compatible(CDMReader_p readerB, CDMReader_p readerT, const CoordinateSystem_cp_v& allCsB, const CoordinateSystem_cp_v& allCsT, const string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "checking compatibility for variable '" << varName << "' ...");
 
@@ -172,8 +173,8 @@ bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
     if (not (cdmT.hasVariable(varName) and cdmB.hasVariable(varName)))
         LOG_INCOMPATIBLE("not found in top and base");
 
-    const CoordinateSystemPtr csB = findCompleteCoordinateSystemFor(allCsB, varName);
-    const CoordinateSystemPtr csT = findCompleteCoordinateSystemFor(allCsT, varName);
+    const CoordinateSystem_cp csB = findCompleteCoordinateSystemFor(allCsB, varName);
+    const CoordinateSystem_cp csT = findCompleteCoordinateSystemFor(allCsT, varName);
     const bool hasCsB = (csB.get()), hasCsT = (csT.get());
     if (hasCsB != hasCsT)
         LOG_INCOMPATIBLE("CS in base but not in top, or vice versa");
@@ -242,27 +243,27 @@ bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
     return true;
 }
 
-CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod,
-        CDMInterpolatorPtr& interpolatedO, string& nameX, string& nameY, bool keepAllOuter)
+CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod, CDMInterpolator_p& interpolatedO, string& nameX, string& nameY,
+                  bool keepAllOuter)
 {
     const CDM& cdmIC = readerI->getCDM();
     CDM cdmI = readerI->getCDM();                  // copy, as we modify cdmI
     const CDM::VarVec varsI = cdmI.getVariables(); // copy, as we modify cdmI
-    const vector<CoordinateSystemPtr> allCsI = listCoordinateSystems(readerI);
+    const CoordinateSystem_cp_v allCsI = listCoordinateSystems(readerI);
 
     BOOST_FOREACH(const CDMVariable& varI, varsI) {
         const string& varName = varI.getName();
         if (not readerO->getCDM().hasVariable(varName))
             continue;
 
-        const CoordinateSystemPtr csI = findCompleteCoordinateSystemFor(allCsI, varName);
+        const CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(allCsI, varName);
         if (csI.get() == 0)
             continue;
         if (not (csI->hasProjection() and csI->isSimpleSpatialGridded()))
             continue;
 
-        ProjectionPtr projI = csI->getProjection();
-        interpolatedO = CDMInterpolatorPtr(new CDMInterpolator(readerO));
+        Projection_cp projI = csI->getProjection();
+        interpolatedO = boost::make_shared<CDMInterpolator>(readerO);
         nameX = csI->getGeoXAxis()->getName();
         nameY = csI->getGeoYAxis()->getName();
         const string& unitIX = cdmI.getUnits(nameX),
@@ -278,7 +279,7 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
     if (not interpolatedO)
         THROW("CDMBorderSmoothing: could not find CS for interpolation");
 
-    const vector<CoordinateSystemPtr> allCsO = listCoordinateSystems(interpolatedO);
+    const CoordinateSystem_cp_v allCsO = listCoordinateSystems(interpolatedO);
     std::set<string> variablesToKeep;
     BOOST_FOREACH(const CDMVariable& varI, varsI) {
         const string& varName = varI.getName();

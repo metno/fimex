@@ -94,7 +94,7 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
  */
 int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
 {
-    XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
+    xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size == 0) return 0;

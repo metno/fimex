@@ -40,6 +40,7 @@
 #include <boost/python/object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/stl_iterator.hpp>
+#include <boost/python/str.hpp>
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/ndarrayobject.h> // ensure you include this header
@@ -67,13 +68,51 @@ struct numpy_type<short> {
     static int typenum() { return NPY_SHORT; }
 };
 
-template<>
-struct numpy_type<int> {
+template <>
+struct numpy_type<unsigned short>
+{
+    static int typenum() { return NPY_USHORT; }
+};
+
+template <>
+struct numpy_type<char>
+{
+    static int typenum() { return NPY_BYTE; }
+};
+
+template <>
+struct numpy_type<unsigned char>
+{
+    static int typenum() { return NPY_UBYTE; }
+};
+
+template <>
+struct numpy_type<int>
+{
     static int typenum() { return NPY_INT; }
 };
 
-template<>
-struct numpy_type<std::string> {
+template <>
+struct numpy_type<unsigned int>
+{
+    static int typenum() { return NPY_UINT; }
+};
+
+template <>
+struct numpy_type<long long>
+{
+    static int typenum() { return NPY_INT64; }
+};
+
+template <>
+struct numpy_type<unsigned long long>
+{
+    static int typenum() { return NPY_UINT64; }
+};
+
+template <>
+struct numpy_type<std::string>
+{
     static int typenum() { return NPY_STRING; }
 };
 
@@ -115,12 +154,26 @@ bp::object Data_values(DataPtr data)
     switch (data->getDataType()) {
     case CDM_SHORT:
         return wrap(data->asShort(), data->size());
+    case CDM_USHORT:
+        return wrap(data->asUShort(), data->size());
+    case CDM_CHAR:
+        return wrap(data->asChar(), data->size());
+    case CDM_UCHAR:
+        return wrap(data->asUChar(), data->size());
     case CDM_INT:
         return wrap(data->asInt(), data->size());
+    case CDM_UINT:
+        return wrap(data->asUInt(), data->size());
+    case CDM_INT64:
+        return wrap(data->asInt64(), data->size());
+    case CDM_UINT64:
+        return wrap(data->asUInt64(), data->size());
     case CDM_FLOAT:
         return wrap(data->asFloat(), data->size());
     case CDM_DOUBLE:
         return wrap(data->asDouble(), data->size());
+    case CDM_STRING:
+        return bp::object(data->asString());
     case CDM_STRINGS:
         return wrap(data->asStrings(), data->size());
     default:
@@ -128,7 +181,8 @@ bp::object Data_values(DataPtr data)
     }
 }
 
-template <typename T> DataPtr unwrap(const bp::object& values)
+template <typename T>
+DataPtr unwrap(const bp::object& values)
 {
     const size_t length = bp::len(values);
     boost::shared_array<T> array(new T[length]);
@@ -137,22 +191,51 @@ template <typename T> DataPtr unwrap(const bp::object& values)
     return createData(length, array);
 }
 
-DataPtr Data_create(CDMDataType dataType, bp::object values)
+template <>
+DataPtr unwrap<char>(const bp::object& values)
+{
+    const size_t length = bp::len(values);
+    boost::shared_array<char> array(new char[length]);
+    typedef boost::python::stl_input_iterator<int> I; // for some reason python-int => c++-char is not supported
+    std::copy(I(values), I(), &array[0]);
+    return createData(length, array);
+}
+
+DataPtr Data_createTV(CDMDataType dataType, bp::object values)
 {
     switch (dataType) {
     case CDM_SHORT:
         return unwrap<short>(values);
+    case CDM_USHORT:
+        return unwrap<unsigned short>(values);
+    case CDM_CHAR:
+        return unwrap<char>(values);
+    case CDM_UCHAR:
+        return unwrap<unsigned char>(values);
     case CDM_INT:
         return unwrap<int>(values);
+    case CDM_UINT:
+        return unwrap<unsigned int>(values);
+    case CDM_INT64:
+        return unwrap<long long>(values);
+    case CDM_UINT64:
+        return unwrap<unsigned long long>(values);
     case CDM_FLOAT:
         return unwrap<float>(values);
     case CDM_DOUBLE:
         return unwrap<double>(values);
+    case CDM_STRING:
+        return createData(bp::extract<std::string>(values));
     case CDM_STRINGS:
         return unwrap<std::string>(values);
     default:
         throw CDMException("datatype not supported in pyfimex0");
     }
+}
+
+DataPtr Data_createS(const std::string& value)
+{
+    return createData(value);
 }
 
 #if PY_MAJOR_VERSION >= 3
@@ -193,11 +276,10 @@ void pyfimex0_Data()
       .value("STRINGS", CDM_STRINGS)
       ;
 
-  bp::class_<Data, boost::noncopyable>("_Data", bp::no_init)
-            .def("size", &Data::size)
-            .def("values", Data_values)
-            ;
+  bp::class_<Data, boost::noncopyable>("_Data", bp::no_init).def("size", &Data::size).def("values", Data_values).def("getDataType", &Data::getDataType);
+  ;
   bp::register_ptr_to_python<DataPtr>();
 
-  bp::def("createData", Data_create);
+  bp::def("createData", Data_createS, "create Data with datatype CDM_STRING");
+  bp::def("createData", Data_createTV, "create Data with given datatype and values (not CDM_STRING)");
 }

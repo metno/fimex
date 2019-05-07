@@ -31,26 +31,23 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr Height::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p Height::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-//    DataPtr h = reader->getScaledDataSliceInUnit(height, "m", unLimDimPos);
-//    boost::shared_array<double> ha = h->asDouble();
-//    return boost::shared_ptr<ToVLevelConverter>(new HeightStandardToPressureConverter(vector<double> (&ha[0],&ha[0] + h->size())));
     // does not exist generally without known topography, which depends the variable to read
-    return VerticalConverterPtr();
+    return VerticalConverter_p();
 }
 
-VerticalConverterPtr Height::getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p Height::getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return IdentityConverter::createConverterForVarName(reader, cs, height, "m");
 }
 
-VerticalConverterPtr Height::getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p Height::getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    if (VerticalConverterPtr height = getHeightConverter(reader, cs))
+    if (VerticalConverter_p height = getHeightConverter(reader, cs))
         return AltitudeHeightConverter::createToAltitudeConverter(reader, cs, height);
 
-    return VerticalConverterPtr();
+    return VerticalConverter_p();
 }
 
 } // namespace MetNoFimex

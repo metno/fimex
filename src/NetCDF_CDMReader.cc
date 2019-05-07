@@ -38,7 +38,7 @@ namespace MetNoFimex
 {
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.NetCDF_CDMReader");
+static Logger_p logger = getLogger("fimex.NetCDF_CDMReader");
 
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
 : ncFile(std::auto_ptr<Nc>(new Nc()))

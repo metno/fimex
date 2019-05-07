@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
     BOOST_CHECK(coordSys.size() == 3);
 
     // find an appropriate coordinate system for a variable
     string altitude = "altitude";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(altitude));
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(altitude));
     if (varSysIt == coordSys.end()) {
         BOOST_FAIL("no coordinate system found for '" << altitude << "'");
         return;
@@ -60,15 +60,15 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
 
     if ((*varSysIt)->isSimpleSpatialGridded()) {
         // find the geographical axes, returns 0 axes if not found
-        CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+        CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
         BOOST_CHECK(xAxis->getName() == "x");
-        CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+        CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
         BOOST_CHECK(yAxis->getName() == "y");
         // find vertical axis
-        CoordinateSystem::ConstAxisPtr vAxis = (*varSysIt)->getGeoZAxis();
+        CoordinateAxis_cp vAxis = (*varSysIt)->getGeoZAxis();
         BOOST_CHECK(vAxis.get() == 0);
         // find time axis
-        CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis();
+        CoordinateAxis_cp tAxis = (*varSysIt)->getTimeAxis();
         BOOST_CHECK(tAxis->getName() == "time");
 
         //std::cerr << *((*varSysIt)->getProjection()) << endl;
@@ -217,10 +217,9 @@ BOOST_AUTO_TEST_CASE( test_vTrans )
     CDMReader_p reader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     string varName = "temp";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     BOOST_CHECK(varSysIt != coordSys.end());
     BOOST_CHECK((*varSysIt)->hasVerticalTransformation());
     boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();

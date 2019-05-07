@@ -91,15 +91,14 @@ std::string XMLDoc::toString(const xmlNodePtr node)
     return retVal;
 }
 
-
-boost::shared_ptr<XMLDoc> XMLDoc::fromFile(const std::string& filename)
+XMLDoc_p XMLDoc::fromFile(const std::string& filename)
 {
-    return boost::shared_ptr<XMLDoc>(new XMLDoc(filename));
+    return XMLDoc_p(new XMLDoc(filename));
 }
 
-boost::shared_ptr<XMLDoc> XMLDoc::fromString(const std::string& buffer, const std::string& url)
+XMLDoc_p XMLDoc::fromString(const std::string& buffer, const std::string& url)
 {
-    boost::shared_ptr<XMLDoc> pdoc(new XMLDoc());
+    XMLDoc_p pdoc(new XMLDoc());
     xmlDoc* pxmldoc = xmlReadMemory(buffer.c_str(), buffer.length(), url.c_str(), NULL, 0);
     pdoc->setDoc(pxmldoc);
     pdoc->setXPathCtx(pxmldoc);
@@ -131,14 +130,14 @@ XMLDoc::~XMLDoc()
     cleanup();
 }
 
-XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const
+xmlXPathObject_p XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const
 {
     if (node == 0) {
         xpathCtx->node = xmlDocGetRootElement(doc);
     } else {
         xpathCtx->node = node;
     }
-    XPathObjPtr xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
+    xmlXPathObject_p xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
     if (xpathObj.get() == 0) {
         throw CDMException("unable to parse xpath: " + xpath);
     }

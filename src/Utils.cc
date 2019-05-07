@@ -37,7 +37,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.Utils");
+static Logger_p logger = getLogger("fimex.Utils");
 
 int RoundAndClamp::operator()(double d) const
 {

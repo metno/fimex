@@ -54,7 +54,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.GribCDMReader");
+static Logger_p logger = getLogger("fimex.GribCDMReader");
 
 struct ProjectionInfo {
     string xDim;
@@ -66,7 +66,7 @@ struct ProjectionInfo {
 struct GribCDMReaderImpl {
     string configId;
     vector<GribFileMessage> indices;
-    boost::shared_ptr<XMLDoc> doc;
+    XMLDoc_p doc;
     map<int, vector<xmlNodePtr> > nodeIdx1;
     map<int, vector<xmlNodePtr> > nodeIdx2;
     MutexType mutex;
@@ -169,23 +169,23 @@ GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& config
     initPostIndices();
 }
 
-boost::shared_ptr<XMLDoc> GribCDMReader::initXMLConfig(const XMLInput& configXML)
+XMLDoc_p GribCDMReader::initXMLConfig(const XMLInput& configXML)
 {
-    boost::shared_ptr<XMLDoc> doc(configXML.getXMLDoc());
+    XMLDoc_p doc(configXML.getXMLDoc());
     doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
     {
         // check config for root element
-        XPathObjPtr xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig");
         size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
         if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configXML.id());
     }
     return doc;
 }
 
-std::string GribCDMReader::getConfigEarthFigure(boost::shared_ptr<XMLDoc> doc)
+std::string GribCDMReader::getConfigEarthFigure(XMLDoc_p doc)
 {
     // get the overruled earthform
-    XPathObjPtr xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     string replaceEarthString = "";
@@ -195,11 +195,11 @@ std::string GribCDMReader::getConfigEarthFigure(boost::shared_ptr<XMLDoc> doc)
     return replaceEarthString;
 }
 
-std::string GribCDMReader::getConfigExtraKeys(boost::shared_ptr<XMLDoc> doc)
+std::string GribCDMReader::getConfigExtraKeys(XMLDoc_p doc)
 {
     set<string> extraKeys;
     // get the additinal keys from the xml-document
-    XPathObjPtr xpathObj = doc->getXPathObject("//gr:extraKey");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("//gr:extraKey");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -228,7 +228,7 @@ void GribCDMReader::initPostIndices()
 
     // select wanted indices from doc, default to all
     {
-        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='selectParameters']");
+        xmlXPathObject_p xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='selectParameters']");
         size_t size = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
         if (size > 0) {
             string select = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -258,14 +258,14 @@ void GribCDMReader::initPostIndices()
 
 void GribCDMReader::initXMLNodeIdx() {
     string xpathString = "/gr:cdmGribReaderConfig/gr:variables/gr:parameter";
-    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
+    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     size_t size = (nodes) ? nodes->nodeNr : 0;
     //cerr << "found " << size << " parameters " << endl;
     for (size_t i = 0; i < size; ++i) {
         xmlNodePtr node = nodes->nodeTab[i];
         string grib1Id = "gr:grib1";
-        XPathObjPtr xpathObj1 = p_->doc->getXPathObject(grib1Id, node);
+        xmlXPathObject_p xpathObj1 = p_->doc->getXPathObject(grib1Id, node);
         xmlNodeSetPtr nodes1 = xpathObj1->nodesetval;
         size_t size1 = (nodes1) ? nodes1->nodeNr : 0;
         for (size_t i = 0; i < size1; ++i) {
@@ -277,7 +277,7 @@ void GribCDMReader::initXMLNodeIdx() {
         }
         // and the same for grib2
         string grib2Id = "gr:grib2";
-        XPathObjPtr xpathObj2 = p_->doc->getXPathObject(grib2Id, node);
+        xmlXPathObject_p xpathObj2 = p_->doc->getXPathObject(grib2Id, node);
         xmlNodeSetPtr nodes2 = xpathObj2->nodesetval;
         size_t size2 = (nodes2) ? nodes2->nodeNr : 0;
         for (size_t i = 0; i < size2; ++i) {
@@ -329,7 +329,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             // check the options from msg.getOtherKeys()
             for (map<string, long>::const_iterator opt = msg.getOtherKeys().begin(); opt != msg.getOtherKeys().end(); ++opt) {
                 string xpathStr = "gr:extraKey[@name='" + opt->first + "']";
-                XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathStr, node);
+                xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathStr, node);
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 size_t size = (nodes) ? nodes->nodeNr : 0;
                 if (size != 0) {
@@ -380,7 +380,7 @@ void GribCDMReader::initSelectParameters(const string& select)
 void GribCDMReader::initAddGlobalAttributes()
 {
     string xpathString("/gr:cdmGribReaderConfig/gr:global_attributes");
-    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
+    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size != 1) {
@@ -409,7 +409,7 @@ void GribCDMReader::initLevels()
         long edition = string2type<long>(editionType.at(0));
         long typeId = string2type<long>(editionType.at(1));
         string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[@grib"+type2string(edition)+"_id='"+type2string(typeId)+"']");
-        XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathLevelString);
+        xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size > 1) {
@@ -464,7 +464,7 @@ void GribCDMReader::initLevels()
                 // add special attributes for grib1 / grib2
                 {
                     string xpathGribLevelString("gr:grib"+type2string(edition));
-                    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
+                    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
                     xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
                     int size = (gribNodes) ? gribNodes->nodeNr : 0;
                     if (size == 1) {
@@ -512,7 +512,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
 {
     vector<double> retValues;
     string valuesXPath("./gr:values");
-    XPathObjPtr xpathObj = p_->doc->getXPathObject(valuesXPath, node);
+    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(valuesXPath, node);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -618,7 +618,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
 
 void GribCDMReader::initSpecialLevels_(xmlNodePtr node, const string& extension, const string& levelType, size_t levelPos, const vector<string>& levelShape, DataPtr& levelData) {
     string xpathAdditional = "gr:additional_axis_variable";
-    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathAdditional, node);
+    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathAdditional, node);
     xmlNodeSetPtr addNodes = xpathObj->nodesetval;
     int size = (addNodes) ? addNodes->nodeNr : 0;
     if (size > 0) {
@@ -685,7 +685,7 @@ void GribCDMReader::initAddTimeDimension()
         p_->times = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
     }
 
-    XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:axes/gr:time");
+    xmlXPathObject_p xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:axes/gr:time");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size != 1) {

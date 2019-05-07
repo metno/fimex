@@ -24,20 +24,19 @@
 #ifndef CDMINTERPOLATOR_H_
 #define CDMINTERPOLATOR_H_
 
-#include <vector>
-#include <map>
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/CrossSectionDefinition.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/deprecated.h"
 
+#include <map>
+#include <vector>
 
 namespace MetNoFimex
 {
-// forward decl
-class CoordinateSystem;
 struct CDMInterpolatorInternals;
 
 /**
@@ -87,6 +86,7 @@ public:
       {size_t nChanged; mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);}
 };
 
+typedef boost::shared_ptr<InterpolatorProcess2d> InterpolatorProcess2d_p;
 
 /**
  * This class is responsible for horizontal reprojections and selection
@@ -97,11 +97,12 @@ public:
  *   - the vector can be detected by the coordinate-system, e.g. CF standard-name
  *   - the method allows detection of x and y axes, e.g. changeProjectionByProjectionParameters or changeProjectionByProjectionParametersToLatLonTemplate
  */
-class CDMInterpolator : public MetNoFimex::CDMReader
+class CDMInterpolator : public CDMReader
 {
 private:
     // the pimpl
     class boost::shared_ptr<CDMInterpolatorInternals> p_;
+
     /** converter for axes-strings */
     void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
     void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
@@ -122,7 +123,7 @@ private:
     /**
      * map of CoordinateSystem::horizontalId() and the CoordinateSystem
      */
-    std::map<std::string, boost::shared_ptr<const CoordinateSystem> > findBestCoordinateSystemsAndProjectionVars(bool withProjection);
+    std::map<std::string, CoordinateSystem_cp> findBestCoordinateSystemsAndProjectionVars(bool withProjection);
     /**
      * check if the input-data has spatial vectors
      * @return
@@ -282,13 +283,13 @@ public:
      *
      * @warning this function is not completely thought through and might change
      */
-    virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
+    virtual void addPreprocess(InterpolatorProcess2d_p process);
     /**
      * add a process to the internal list of postprocesses, run after interpolation
      *
      * @warning this function is not completely thought through and might change
      */
-    virtual void addPostprocess(boost::shared_ptr<InterpolatorProcess2d> process);
+    virtual void addPostprocess(InterpolatorProcess2d_p process);
 };
 
 /**
@@ -308,6 +309,8 @@ extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData,
  * @return
  */
 extern DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue);
+
+typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 
 } // namespace MetNoFimex
 

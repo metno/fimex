@@ -28,8 +28,9 @@
 #define fimex_CDMBorderSmoothing_H 1
 
 #include "fimex/CDMReader.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/DataDecl.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/mifi_constants.h"
 
 namespace MetNoFimex {
 
@@ -66,16 +67,16 @@ public:
         size_t sizeX_, sizeY_;
     };
 
-    typedef boost::shared_ptr<Smoothing> SmoothingPtr;
+    typedef boost::shared_ptr<Smoothing> Smoothing_p;
 
     //! A factory for creating smoothing function objects.
     class SmoothingFactory {
     public:
         virtual ~SmoothingFactory() {}
-        virtual SmoothingPtr operator()(const std::string& varName) = 0;
+        virtual Smoothing_p operator()(const std::string& varName) = 0;
     };
 
-    typedef boost::shared_ptr<SmoothingFactory> SmoothingFactoryPtr;
+    typedef boost::shared_ptr<SmoothingFactory> SmoothingFactory_p;
 
 public:
     //! Smooth transition to 'outer' from inner's data. Returns data on inner grid.
@@ -83,7 +84,7 @@ public:
             int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR);
 
     //! Change the smooting function factory.
-    void setSmoothing(SmoothingFactoryPtr smoothingFactory);
+    void setSmoothing(SmoothingFactory_p smoothingFactory);
 
     //! Decide if the outer value shall be used if the inner value is undefined. Default: true.
     void setUseOuterIfInnerUndefined(bool useOuter);
@@ -95,7 +96,7 @@ private:
     std::auto_ptr<CDMBorderSmoothingPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothingPtr;
+typedef boost::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothing_p;
 
 } // namespace MetNoFimex
 

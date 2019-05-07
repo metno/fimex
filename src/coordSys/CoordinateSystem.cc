@@ -24,23 +24,27 @@
  *      Author: Heiko Klein
  */
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
-#include <boost/regex.hpp>
-#include <set>
-#include <map>
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "CF1_xCoordSysBuilder.h"
+#include "CoordSysBuilder.h"
+#include "CoordSysImpl.h"
+#include "WRFCoordSysBuilder.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMReader.h"
-#include "fimex/Utils.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
-#include "CoordSysImpl.h"
-#include "CoordSysBuilder.h"
-#include "CF1_xCoordSysBuilder.h"
-#include "WRFCoordSysBuilder.h"
+#include "fimex/Units.h"
+#include "fimex/Utils.h"
+#include "fimex/coordSys/Projection.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
 #include <boost/make_shared.hpp>
+
+#include <algorithm>
+#include <boost/regex.hpp>
+#include <functional>
+#include <iterator>
+#include <map>
+#include <set>
 
 namespace MetNoFimex
 {
@@ -49,17 +53,14 @@ using namespace std;
 namespace {
 
 struct CompareCoordinateAxis {
-    bool operator()(CoordinateSystem::ConstAxisPtr a, CoordinateSystem::ConstAxisPtr b) const {
-        return *a < *b;
-    }
+    bool operator()(CoordinateAxis_cp a, CoordinateAxis_cp b) const { return *a < *b; }
 };
 
-struct TypeCheck : public std::unary_function <CoordinateSystem::ConstAxisPtr, bool> {
+struct TypeCheck : public std::unary_function<CoordinateAxis_cp, bool>
+{
     CoordinateAxis::AxisType type_;
     TypeCheck(CoordinateAxis::AxisType type) : type_(type) {}
-    bool operator() (const CoordinateSystem::ConstAxisPtr& ca) const {
-        return ca->isAxisType(type_);
-    }
+    bool operator()(const CoordinateAxis_cp& ca) const { return ca->isAxisType(type_); }
 };
 
 // search a string in a set
@@ -77,25 +78,25 @@ inline void set_insert_erase(set<string>& s, const std::string& str, bool set)
         s.erase(str);
 }
 
-bool hasTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
+bool hasTypeInAxes(CoordinateAxis::AxisType type, CoordinateAxis_cp_v& axes)
 {
-    CoordinateSystem::ConstAxisList::const_iterator found = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    CoordinateAxis_cp_v::const_iterator found = find_if(axes.begin(), axes.end(), TypeCheck(type));
     return found != axes.end();
 }
 
-CoordinateSystem::ConstAxisPtr findTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
+CoordinateAxis_cp findTypeInAxes(CoordinateAxis::AxisType type, CoordinateAxis_cp_v& axes)
 {
-    CoordinateSystem::ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    CoordinateAxis_cp_v::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
     if (axis != axes.end()) {
         return *axis;
     }
     // return 0/NULL Ptr
-    return CoordinateSystem::ConstAxisPtr();
+    return CoordinateAxis_cp();
 }
 
-void removeAxis(CoordinateSystem::ConstAxisList& axes, const std::string& axisname)
+void removeAxis(CoordinateAxis_cp_v& axes, const std::string& axisname)
 {
-    CoordinateSystem::ConstAxisList::iterator found = axes.begin();
+    CoordinateAxis_cp_v::iterator found = axes.begin();
     while (true) {
         found = find_if(found, axes.end(), CDMNameEqualPtr(axisname));
         if (found == axes.end())
@@ -104,12 +105,12 @@ void removeAxis(CoordinateSystem::ConstAxisList& axes, const std::string& axisna
     }
 }
 
-typedef boost::shared_ptr<CoordSysBuilder> CoordSysBuilderPtr;
-typedef std::vector<CoordSysBuilderPtr> builders_t;
+typedef boost::shared_ptr<CoordSysBuilder> CoordSysBuilder_p;
+typedef std::vector<CoordSysBuilder_p> CoordSysBuilder_pv;
 
-builders_t createBuilders()
+CoordSysBuilder_pv createBuilders()
 {
-    builders_t builders;
+    CoordSysBuilder_pv builders;
     // supported conventions, 1st will be used as fallback
     builders.push_back(boost::make_shared<CF1_xCoordSysBuilder>());
     builders.push_back(boost::make_shared<WRFCoordSysBuilder>());
@@ -118,24 +119,26 @@ builders_t createBuilders()
 
 } // anonymous namespace
 
-static LoggerPtr logger = getLogger("fimex.coordSys.CoordinateSystem");
+static Logger_p logger = getLogger("fimex.coordSys.CoordinateSystem");
 
 CoordinateSystem::CoordinateSystem()
-: pimpl_(boost::shared_ptr<CoordSysImpl>(new CoordSysImpl()))
+    : pimpl_(new CoordSysImpl())
 {
 }
 
 CoordinateSystem::CoordinateSystem(const std::string& conventionName)
-: pimpl_(boost::shared_ptr<CoordSysImpl>(new CoordSysImpl()))
+    : pimpl_(new CoordSysImpl())
 {
     pimpl_->conventionName_ = conventionName;
 }
 
+CoordinateSystem::~CoordinateSystem() {}
+
 std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
 {
     out << cs.getConventionName() << "=";
-    CoordinateSystem::ConstAxisList axes = cs.getAxes();
-    for (CoordinateSystem::ConstAxisList::const_iterator axis = axes.begin(); axis != axes.end(); ++axis) {
+    CoordinateAxis_cp_v axes = cs.getAxes();
+    for (CoordinateAxis_cp_v::const_iterator axis = axes.begin(); axis != axes.end(); ++axis) {
         out << (*axis)->getName() << ":" << (*axis)->getAxisType() << "";
         if ((axis+1) != axes.end()) out << ",";
     }
@@ -153,15 +156,15 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
 
 std::string CoordinateSystem::id() const
 {
-    CoordinateSystem::ConstAxisList axes = getAxes();
+    CoordinateAxis_cp_v axes = getAxes();
     sort(axes.begin(), axes.end(), CompareCoordinateAxis());
     return getConventionName() + ":" + joinPtr(axes.begin(), axes.end());
 }
 
 std::string CoordinateSystem::horizontalId() const
 {
-    ConstAxisPtr xAxis = getGeoXAxis();
-    ConstAxisPtr yAxis = getGeoYAxis();
+    CoordinateAxis_cp xAxis = getGeoXAxis();
+    CoordinateAxis_cp yAxis = getGeoYAxis();
     if (xAxis.get() != 0 && yAxis.get() != 0) {
         return xAxis->getName() + "," + yAxis->getName();
     } else if (xAxis.get() != 0) {
@@ -222,12 +225,12 @@ bool CoordinateSystem::hasProjection() const
 {
     return pimpl_->proj_.get() != 0;
 }
-boost::shared_ptr<const Projection> CoordinateSystem::getProjection() const
+Projection_cp CoordinateSystem::getProjection() const
 {
     return pimpl_->proj_;
 }
 
-void CoordinateSystem::setProjection(boost::shared_ptr<const Projection> proj)
+void CoordinateSystem::setProjection(Projection_cp proj)
 {
     pimpl_->proj_ = proj;
 }
@@ -237,12 +240,12 @@ bool CoordinateSystem::hasVerticalTransformation() const
     return pimpl_->vtran_.get() != 0;
 }
 
-boost::shared_ptr<const VerticalTransformation> CoordinateSystem::getVerticalTransformation() const
+VerticalTransformation_cp CoordinateSystem::getVerticalTransformation() const
 {
     return pimpl_->vtran_;
 }
 
-void CoordinateSystem::setVerticalTransformation(boost::shared_ptr<const VerticalTransformation> vtran)
+void CoordinateSystem::setVerticalTransformation(VerticalTransformation_cp vtran)
 {
     pimpl_->vtran_ = vtran;
 }
@@ -252,27 +255,27 @@ bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
     return hasTypeInAxes(type, pimpl_->axes_) || hasTypeInAxes(type, pimpl_->auxiliaryAxes_);
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
+CoordinateAxis_cp CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
 {
-    CoordinateSystem::ConstAxisPtr axis = findTypeInAxes(type, pimpl_->axes_);
+    CoordinateAxis_cp axis = findTypeInAxes(type, pimpl_->axes_);
     if (axis.get() == 0) {
         axis = findTypeInAxes(type, pimpl_->auxiliaryAxes_);
     }
     return axis;
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
+CoordinateAxis_cp CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
 {
     for (vector<CoordinateAxis::AxisType>::const_iterator typeIt = types.begin(); typeIt != types.end(); ++typeIt) {
-        ConstAxisPtr axis = findAxisOfType(*typeIt);
+        CoordinateAxis_cp axis = findAxisOfType(*typeIt);
         if (axis.get() != 0)
             return axis;
     }
     // return 0/NULL Ptr
-    return ConstAxisPtr();
+    return CoordinateAxis_cp();
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoXAxis() const
+CoordinateAxis_cp CoordinateSystem::getGeoXAxis() const
 {
     vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoX);
@@ -280,8 +283,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoXAxis() const
     return findAxisOfType(types);
 }
 
-
-CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoYAxis() const
+CoordinateAxis_cp CoordinateSystem::getGeoYAxis() const
 {
     vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoY);
@@ -289,7 +291,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoYAxis() const
     return findAxisOfType(types);
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoZAxis() const
+CoordinateAxis_cp CoordinateSystem::getGeoZAxis() const
 {
     vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoZ);
@@ -299,56 +301,56 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoZAxis() const
     return findAxisOfType(types);
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::getTimeAxis() const
+CoordinateAxis_cp CoordinateSystem::getTimeAxis() const
 {
     vector<CoordinateAxis::AxisType> types(1, CoordinateAxis::Time);
     return findAxisOfType(types);
 }
 
-CoordinateSystem::ConstAxisList CoordinateSystem::getAxes() const
+CoordinateAxis_cp_v CoordinateSystem::getAxes() const
 {
-    ConstAxisList axes(pimpl_->axes_.begin(), pimpl_->axes_.end());
+    CoordinateAxis_cp_v axes(pimpl_->axes_.begin(), pimpl_->axes_.end());
     axes.insert(axes.end(), pimpl_->auxiliaryAxes_.begin(), pimpl_->auxiliaryAxes_.end());
     return axes;
 }
 
-void CoordinateSystem::setAxis(ConstAxisPtr axis)
+void CoordinateSystem::setAxis(CoordinateAxis_cp axis)
 {
     assert(axis.get() != 0);
-    ConstAxisList& v = pimpl_->axes_;
+    CoordinateAxis_cp_v& v = pimpl_->axes_;
     // remove axis with same name
     removeAxis(v, axis->getName());
     // add new axis
     if (axis->getAxisType() != CoordinateAxis::Undefined &&
         hasTypeInAxes(axis->getAxisType(), v)) {
-        ConstAxisPtr otherAxis = findTypeInAxes(axis->getAxisType(), v);
+        CoordinateAxis_cp otherAxis = findTypeInAxes(axis->getAxisType(), v);
         throw CDMException("adding axis "+axis->getName()+" to CS: type already exists: " + CoordinateAxis::type2string(axis->getAxisType()) + " in " + otherAxis->getName());
     }
     v.push_back(axis);
 
     // remove auxiliary axes
-    ConstAxisList& va = pimpl_->auxiliaryAxes_;
+    CoordinateAxis_cp_v& va = pimpl_->auxiliaryAxes_;
     // remove axis with same name
     removeAxis(va, axis->getName());
 }
 
-void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
+void CoordinateSystem::setAuxiliaryAxis(CoordinateAxis_cp axis)
 {
     assert(axis.get() != 0);
-    CoordinateSystem::ConstAxisList& v = pimpl_->axes_;
-    CoordinateSystem::ConstAxisList::iterator foundInAxes = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
+    CoordinateAxis_cp_v& v = pimpl_->axes_;
+    CoordinateAxis_cp_v::iterator foundInAxes = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
     if (foundInAxes != v.end()) {
         return; // ignore, existing true axis with same name
     }
 
     if (axis->getAxisType() != CoordinateAxis::Undefined) {
-        ConstAxisPtr otherAxis = findTypeInAxes(axis->getAxisType(), v);
+        CoordinateAxis_cp otherAxis = findTypeInAxes(axis->getAxisType(), v);
         if (otherAxis.get() != 0) {
             return; // ignore, axisType already in use
         }
     }
 
-    ConstAxisList& va = pimpl_->auxiliaryAxes_;
+    CoordinateAxis_cp_v& va = pimpl_->auxiliaryAxes_;
     // remove axis with same name
     removeAxis(va, axis->getName());
     va.push_back(axis);
@@ -357,8 +359,8 @@ void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
 std::set<std::string> CoordinateSystem::getDependencyVariables() const
 {
     std::set<std::string> retVal = pimpl_->dependencyVars_;
-    ConstAxisList axes = getAxes();
-    for (ConstAxisList::iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
+    CoordinateAxis_cp_v axes = getAxes();
+    for (CoordinateAxis_cp_v::iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
         retVal.insert((*axIt)->getName());
     }
     return retVal;
@@ -369,17 +371,14 @@ void CoordinateSystem::addDependencyVariable(std::string varName)
     pimpl_->dependencyVars_.insert(varName);
 }
 
-int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
-        std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems,
-        std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
+int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader, std::map<std::string, CoordinateSystem_cp>& systems,
+                                        std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
 {
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    typedef map<string, CoordSysPtr> CoordSysMap;
-    typedef vector<CoordSysPtr> CoordSysVec;
+    typedef map<string, CoordinateSystem_cp> CoordSysMap;
     CoordSysMap coordSysMap;
-    CoordSysVec coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
-    for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
+    for (CoordinateSystem_cp_v::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
         if (((!withProjection) || ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection())) &&
               (withProjection || ((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
             coordSysMap[(*cs)->horizontalId()] = *cs;
@@ -394,7 +393,7 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
     // find all variables belonging to a cs containing the projection
     const CDM::VarVec& vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-        CoordSysPtr cs = findCompleteCoordinateSystemFor(coordSys, v->getName());
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, v->getName());
         if (cs.get()) {
             if (coordSysMap.find((cs)->horizontalId()) != coordSysMap.end()) {
                 variables[v->getName()] = cs->horizontalId();
@@ -411,7 +410,7 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
         geoDimensions.insert(xShape.begin(), xShape.end());
         geoDimensions.insert(yShape.begin(), yShape.end());
         CDM::VarVec vars = cdm.getVariables();
-        CoordinateSystem::ConstAxisList axes = csmi->second->getAxes();
+        CoordinateAxis_cp_v axes = csmi->second->getAxes();
         for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
             if ((axes.end() == find_if(axes.begin(), axes.end(), CDMNameEqualPtr(v->getName()))) &&
                 (variables.end() == variables.find(v->getName()))) {
@@ -432,7 +431,7 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
 
     // make the coordinateSystems minimal
     for (CoordSysMap::iterator csmi = coordSysMap.begin(); csmi != coordSysMap.end(); ++csmi) {
-        boost::shared_ptr<CoordinateSystem> cs(new CoordinateSystem());
+        CoordinateSystem_p cs = boost::make_shared<CoordinateSystem>();
         cs->setConventionName(csmi->second->getConventionName());
         cs->setAxis(csmi->second->getGeoXAxis());
         cs->setAxis(csmi->second->getGeoYAxis());
@@ -464,22 +463,22 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
     return systems.size();
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm)
+CoordinateSystem_cp_v listCoordinateSystems(const CDM& cdm)
 {
     return listCoordinateSystems(const_cast<CDM&>(cdm));
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm)
+CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm)
 {
     // the return value
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
+    CoordinateSystem_cp_v coordSystems;
 
-    const builders_t builders = createBuilders();
+    const CoordSysBuilder_pv builders = createBuilders();
 
     for (size_t i = 0; i < builders.size(); ++i) {
-        CoordSysBuilderPtr builder = builders.at(i);
+        CoordSysBuilder_p builder = builders.at(i);
         if (builder->isMine(cdm)) {
-            vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(cdm);
+            CoordinateSystem_cp_v myCoordSystems = builder->listCoordinateSystems(cdm);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
             copy(myCoordSystems.begin(), myCoordSystems.end(), back_inserter(coordSystems));
         } else {
@@ -487,7 +486,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
         }
     }
     if (coordSystems.empty() && !builders.empty()) {
-        CoordSysBuilderPtr b0 = builders.front();
+        CoordSysBuilder_p b0 = builders.front();
         LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
         coordSystems = b0->listCoordinateSystems(cdm);
     }
@@ -496,17 +495,17 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     return coordSystems;
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDMReader_p reader)
+CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader)
 {
     // the return value
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
+    CoordinateSystem_cp_v coordSystems;
 
-    const builders_t builders = createBuilders();
+    const CoordSysBuilder_pv builders = createBuilders();
 
     for (size_t i = 0; i < builders.size(); ++i) {
-        CoordSysBuilderPtr builder = builders.at(i);
+        CoordSysBuilder_p builder = builders.at(i);
         if (builder->isMine(reader->getCDM())) {
-            vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(reader);
+            CoordinateSystem_cp_v myCoordSystems = builder->listCoordinateSystems(reader);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
             copy(myCoordSystems.begin(), myCoordSystems.end(), back_inserter(coordSystems));
         } else {
@@ -514,7 +513,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
         }
     }
     if (coordSystems.empty() && !builders.empty()) {
-        CoordSysBuilderPtr b0 = builders.front();
+        CoordSysBuilder_p b0 = builders.front();
         LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
         coordSystems = b0->listCoordinateSystems(reader);
     }
@@ -525,11 +524,11 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
 
 void enhanceVectorProperties(CDMReader_p reader)
 {
-    const builders_t builders = createBuilders();
+    const CoordSysBuilder_pv builders = createBuilders();
 
     bool found = false;
     for (size_t i = 0; i < builders.size(); ++i) {
-        CoordSysBuilderPtr builder = builders.at(i);
+        CoordSysBuilder_p builder = builders.at(i);
         if (builder->isMine(reader->getCDM())) {
             found = true;
             builder->enhanceVectorProperties(reader);
@@ -539,19 +538,19 @@ void enhanceVectorProperties(CDMReader_p reader)
         }
     }
     if (!found && !builders.empty()) {
-        CoordSysBuilderPtr b0 = builders.front();
+        CoordSysBuilder_p b0 = builders.front();
         LOG4FIMEX(logger, Logger::DEBUG, "no regular conventions found, wild-guess checking " << b0->getName());
         b0->enhanceVectorProperties(reader);
     }
 }
 
-boost::shared_ptr<const CoordinateSystem> findCompleteCoordinateSystemFor(const std::vector<boost::shared_ptr<const CoordinateSystem> >& coordSys, const std::string& varName)
+CoordinateSystem_cp findCompleteCoordinateSystemFor(const CoordinateSystem_cp_v& coordSys, const std::string& varName)
 {
-    const std::vector<boost::shared_ptr<const CoordinateSystem> >::const_iterator itCS = std::find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    const CoordinateSystem_cp_v::const_iterator itCS = std::find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (itCS != coordSys.end())
         return *itCS;
     else
-        return boost::shared_ptr<const CoordinateSystem>();
+        return CoordinateSystem_cp();
 }
 
 }

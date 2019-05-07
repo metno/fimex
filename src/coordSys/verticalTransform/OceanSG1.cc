@@ -37,17 +37,17 @@ OceanSG1::OceanSG1(const OceanSGVars& vars)
     , vars(vars)
 {}
 
-VerticalConverterPtr OceanSG1::getPressureConverter(CDMReader_p, CoordSysPtr) const
+VerticalConverter_p OceanSG1::getPressureConverter(CDMReader_p, CoordinateSystem_cp) const
 {
     throw CDMException("no pressure converter for " + getName());
 }
 
-VerticalConverterPtr OceanSG1::getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p OceanSG1::getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     throw CDMException("no altitude converter for " + getName());
 }
 
-VerticalConverterPtr OceanSG1::getDepthConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p OceanSG1::getDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return boost::make_shared<OceanSCoordinateGToDepthConverter>(reader, cs, vars, heightConversionFunction);
 }

@@ -314,9 +314,8 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
     cdm.addAttribute(y, CDMAttribute("standard_name", "projection_y_coordinate"));
 
 #if 0
-    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList cs = listCoordinateSystems(cdm);
-    for (CsList::const_iterator cit = cs.begin(); cit != cs.end(); ++cit) {
+    CoordinateSystem_cp_v cs = listCoordinateSystems(cdm);
+    for (CoordinateSystem_cp_v::const_iterator cit = cs.begin(); cit != cs.end(); ++cit) {
         std::cerr << **cit << std::endl;
     }
 #endif

@@ -27,15 +27,12 @@
 #ifndef COORDINATESYSTEMSLICEBUILDER_H_
 #define COORDINATESYSTEMSLICEBUILDER_H_
 
-
 #include "SliceBuilder.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 
 namespace MetNoFimex
 {
-
-// forward decl;
-class CoordinateSystem;
 
 /**
  * @headerfile fimex/CoordinateSystemSliceBuilder.h
@@ -47,7 +44,7 @@ class CoordinateSystem;
 class CoordinateSystemSliceBuilder: public MetNoFimex::SliceBuilder
 {
 public:
-    CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
+    CoordinateSystemSliceBuilder(const CDM& cdm, CoordinateSystem_cp cs);
     virtual ~CoordinateSystemSliceBuilder() {}
 
     /**
@@ -96,10 +93,10 @@ public:
      * Return the Coordinate-System of the SliceBuilder.
      * @return coordinateSystem, same as used for initialization
      */
-    boost::shared_ptr<const CoordinateSystem> getCoordinateSystem() {return cs_;}
+    CoordinateSystem_cp getCoordinateSystem() { return cs_; }
 
 private:
-    boost::shared_ptr<const CoordinateSystem> cs_;
+    CoordinateSystem_cp cs_;
     std::vector<std::string> tShape_;
 };
 

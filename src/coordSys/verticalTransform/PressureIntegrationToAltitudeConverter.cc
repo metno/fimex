@@ -1,3 +1,33 @@
+/*
+  Fimex, src/coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.cc
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #include "fimex/coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.h"
 
 #include "fimex/CDM.h"
@@ -16,11 +46,10 @@
 
 namespace MetNoFimex {
 
-static LoggerPtr logger = getLogger("fimex.PressureIntegrationToAltitudeConverter");
+static Logger_p logger = getLogger("fimex.PressureIntegrationToAltitudeConverter");
 
 // static method
-VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDMReader_p reader,
-        CoordSysPtr cs, VerticalConverterPtr pressure)
+VerticalConverter_p PressureIntegrationToAltitudeConverter::createConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure)
 {
     const CDM& rcdm = reader->getCDM();
 
@@ -30,32 +59,32 @@ VerticalConverterPtr PressureIntegrationToAltitudeConverter::createConverter(CDM
     const std::string air_temperature = findVariableWithDims(rcdm, "air_temperature", pshape);
     if (air_temperature.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "no air temperature");
-        return VerticalConverterPtr();
+        return VerticalConverter_p();
     }
 
     const std::string specific_humidity = findVariableWithDims(rcdm, "specific_humidity", pshape); // no problem if empty
     std::vector<std::string> surface_shape(reader->getCDM().getVariable(air_temperature).getShape());
-    if (CoordinateSystem::ConstAxisPtr zax = cs->getGeoZAxis())
+    if (CoordinateAxis_cp zax = cs->getGeoZAxis())
         erase_value(surface_shape, zax->getName());
     removeDimsWithLength1(rcdm, surface_shape);
 
     const std::string surface_air_pressure = findVariableWithDims(rcdm, "surface_air_pressure", surface_shape);
 
-    if (CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis())
+    if (CoordinateAxis_cp tax = cs->getTimeAxis())
         erase_value(surface_shape, tax->getName());
     const std::string surface_geopotential = findVariableWithDims(rcdm, "surface_geopotential", surface_shape);
 
     if (surface_air_pressure.empty() || surface_geopotential.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "no surface_air_pressure or surface_geopotential");
-        return VerticalConverterPtr();
+        return VerticalConverter_p();
     }
     return boost::make_shared<PressureIntegrationToAltitudeConverter>(reader, cs, pressure,
         air_temperature, specific_humidity, surface_air_pressure, surface_geopotential);
 }
 
-
-PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr pressure,
-    const std::string& air_temperature, const std::string& specific_humidity, const std::string& surface_air_pressure, const std::string& surface_geopotential)
+PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure,
+                                                                               const std::string& air_temperature, const std::string& specific_humidity,
+                                                                               const std::string& surface_air_pressure, const std::string& surface_geopotential)
     : BasicVerticalConverter(reader, cs)
     , pressure_(pressure)
     , air_temperature_(air_temperature)

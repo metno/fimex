@@ -43,7 +43,7 @@
 
 namespace MetNoFimex {
 
-static LoggerPtr logger = getLogger("fimex.VerticalTransformation");
+static Logger_p logger = getLogger("fimex.VerticalTransformation");
 
 std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransformation& vt)
 {
@@ -51,22 +51,21 @@ std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransforma
     return out;
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
-        CoordSysPtr cs, size_t /*nx*/, size_t /*ny*/, size_t /*nz*/, size_t /*nt*/) const
+ToVLevelConverter_p VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos, CoordinateSystem_cp cs, size_t /*nx*/,
+                                                         size_t /*ny*/, size_t /*nz*/, size_t /*nt*/) const
 {
     return getConverter(reader, verticalType, unLimDimPos, cs);
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
-        CoordSysPtr cs) const
+ToVLevelConverter_p VerticalTransformation::getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos, CoordinateSystem_cp cs) const
 {
-    if (VerticalConverterPtr c = getConverter(reader, cs, verticalType))
+    if (VerticalConverter_p c = getConverter(reader, cs, verticalType))
         return boost::make_shared<ToVLevelConverterAdapter>(reader, cs, c, unLimDimPos);
     else
-        return boost::shared_ptr<ToVLevelConverter>();
+        return ToVLevelConverter_p();
 }
 
-VerticalConverterPtr VerticalTransformation::getConverter(CDMReader_p reader, CoordSysPtr cs, int verticalType) const
+VerticalConverter_p VerticalTransformation::getConverter(CDMReader_p reader, CoordinateSystem_cp cs, int verticalType) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getConverter vt=" << verticalType);
     switch (verticalType) {
@@ -78,45 +77,45 @@ VerticalConverterPtr VerticalTransformation::getConverter(CDMReader_p reader, Co
     }
 }
 
-VerticalConverterPtr VerticalTransformation::getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p VerticalTransformation::getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     // try geopotential_height or fall back to pressure
 
-    if (VerticalConverterPtr c = IdentityConverter::createConverterForStandardName(reader, cs, "geopotential_height", "m"))
+    if (VerticalConverter_p c = IdentityConverter::createConverterForStandardName(reader, cs, "geopotential_height", "m"))
         return c;
 
-    VerticalConverterPtr pressure = findPressureConverter(reader, cs);
+    VerticalConverter_p pressure = findPressureConverter(reader, cs);
     if (!pressure)
-        return VerticalConverterPtr();
+        return VerticalConverter_p();
 
-    if (VerticalConverterPtr c = PressureIntegrationToAltitudeConverter::createConverter(reader, cs, pressure))
+    if (VerticalConverter_p c = PressureIntegrationToAltitudeConverter::createConverter(reader, cs, pressure))
         return c;
 
     LOG4FIMEX(logger, Logger::WARN, "unable to use anything better than standard atmosphere to derive altitude from pressure");
     return PressureToStandardAltitudeConverter::createConverter(reader, cs, pressure);
 }
 
-VerticalConverterPtr VerticalTransformation::getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p VerticalTransformation::getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    if (VerticalConverterPtr altitude = getAltitudeConverter(reader, cs))
+    if (VerticalConverter_p altitude = getAltitudeConverter(reader, cs))
         return AltitudeHeightConverter::createToHeightConverter(reader, cs, altitude);
 
-    return VerticalConverterPtr(); // no converter
+    return VerticalConverter_p(); // no converter
 }
 
-VerticalConverterPtr VerticalTransformation::getDepthConverter(CDMReader_p, CoordSysPtr) const
+VerticalConverter_p VerticalTransformation::getDepthConverter(CDMReader_p, CoordinateSystem_cp) const
 {
-    return VerticalConverterPtr(); // no converter
+    return VerticalConverter_p(); // no converter
 }
 
-VerticalConverterPtr VerticalTransformation::getIdentityPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p VerticalTransformation::getIdentityPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return IdentityConverter::createConverterForStandardName(reader, cs, "(air_)?pressure", "hPa");
 }
 
-VerticalConverterPtr VerticalTransformation::findPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p VerticalTransformation::findPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    if (VerticalConverterPtr c = getIdentityPressureConverter(reader,cs))
+    if (VerticalConverter_p c = getIdentityPressureConverter(reader, cs))
         return c;
     return getPressureConverter(reader, cs);
 }

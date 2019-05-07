@@ -39,7 +39,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CachedInterpolation");
+static Logger_p logger = getLogger("fimex.CachedInterpolation");
 
 DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, const std::string& varName, size_t unLimDimPos) const
 {

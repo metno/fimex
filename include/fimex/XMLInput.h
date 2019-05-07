@@ -31,14 +31,12 @@
  * @headerfile "fimex/XMLInput.h"
  */
 
+#include "fimex/XMLDocDecl.h"
+
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
 {
-
-// forward decl.
-class XMLDoc;
 
 /**
  * @headerfile fimex/XMLInput.h
@@ -56,7 +54,7 @@ public:
      * @return XMLDoc
      * @throw CDMException
      */
-    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const = 0;
+    virtual XMLDoc_p getXMLDoc() const = 0;
     /**
      * return an identifier of the XMLInput
      */
@@ -73,7 +71,7 @@ private:
     std::string filename_;
 public:
     XMLInputFile(const std::string& filename) : filename_(filename) {}
-    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const;
+    virtual XMLDoc_p getXMLDoc() const;
     virtual std::string id() const {return filename_;}
 };
 
@@ -89,7 +87,7 @@ public:
      *
      */
     XMLInputString(const std::string& content, const std::string& url = "") : content_(content), url_(url) {}
-    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const;
+    virtual XMLDoc_p getXMLDoc() const;
     virtual std::string id() const {return content_.substr(0,((content_.size() > 100) ? 100 : content_.size()));}
 };
 
@@ -97,10 +95,15 @@ class XMLInputDoc : public XMLInput
 {
 private:
     std::string id_;
-    boost::shared_ptr<XMLDoc> doc_;
+    XMLDoc_p doc_;
+
 public:
-    XMLInputDoc(const std::string& id, boost::shared_ptr<XMLDoc> doc) : id_(id), doc_(doc) {}
-    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const {return doc_;}
+    XMLInputDoc(const std::string& id, XMLDoc_p doc)
+        : id_(id)
+        , doc_(doc)
+    {
+    }
+    virtual XMLDoc_p getXMLDoc() const { return doc_; }
     virtual std::string id() const {return id_;}
 };
 

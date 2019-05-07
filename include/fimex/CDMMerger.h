@@ -61,7 +61,7 @@ public:
      * Must be called before setting target grid.
      * \parameter smoothingFactory a factory for smoothing functors
      */
-    void setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory);
+    void setSmoothing(CDMBorderSmoothing::SmoothingFactory_p smoothingFactory);
 
     /** Decide if the outer value shall be used if the inner value is undefined. Default: true.
      * Forwarded to CDMOverlay::setUseOuterIfInnerUndefined
@@ -106,7 +106,7 @@ private:
     std::auto_ptr<CDMMergerPrivate> p;
 };
 
-typedef boost::shared_ptr<CDMMerger> CDMMergerPtr;
+typedef boost::shared_ptr<CDMMerger> CDMMerger_p;
 
 } // namespace MetNoFimex
 

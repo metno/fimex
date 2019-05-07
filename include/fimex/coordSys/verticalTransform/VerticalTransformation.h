@@ -28,20 +28,14 @@
 #define VERTICALTRANSFORMATION_H_
 
 #include "fimex/CDMReaderDecl.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/mifi_constants.h"
 
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 #include <iosfwd>
 
-namespace MetNoFimex
-{
-
-// forward declarations
-class CoordinateSystem;
-class ToVLevelConverter;
-class VerticalConverter;
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/verticalTransform/VerticalTransformation.h
@@ -53,10 +47,10 @@ class VerticalConverter;
  *
  @code
     string varName = "air_temperature";
-    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, varName);
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, varName);
     if (cs.get()) {
         if (cs->hasVerticalTransformation()) {
-            boost::shared_ptr<const VerticalTransformation> vtran = cs->getVerticalTransformation();
+            VerticalTransformation_cp vtran = cs->getVerticalTransformation();
             if (vtran->getName() == HybridSigmaPressure1::NAME()) {
                 const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
                 assert(hyb1 != 0);
@@ -78,9 +72,6 @@ class VerticalConverter;
 class VerticalTransformation
 {
 public:
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    typedef boost::shared_ptr<VerticalConverter> VerticalConverterPtr;
-
     virtual ~VerticalTransformation() {}
     /// the indentifier of the vertical transformation
     virtual std::string getName() const = 0;
@@ -99,12 +90,11 @@ public:
     virtual bool isComplete() const = 0;
 
     /** Deprecated, does not work well with additional dimensions. Use VerticalConverter. */
-    boost::shared_ptr<ToVLevelConverter> getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
-            CoordSysPtr cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    ToVLevelConverter_p getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos, CoordinateSystem_cp cs, size_t nx, size_t ny, size_t nz,
+                                     size_t nt) const;
 
     /** Deprecated, does not work well with additional dimensions. Use VerticalConverter. */
-    boost::shared_ptr<ToVLevelConverter> getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos,
-            CoordSysPtr cs) const;
+    ToVLevelConverter_p getConverter(CDMReader_p reader, int verticalType, size_t unLimDimPos, CoordinateSystem_cp cs) const;
 
     /**
      * get a converter. Pressure will be in unit hPa, height/depth in unit m.
@@ -113,10 +103,10 @@ public:
      * @param cs the coordinate system one is interested in
      * @return
      */
-    virtual VerticalConverterPtr getConverter(CDMReader_p reader, CoordSysPtr cs, int verticalType) const;
+    virtual VerticalConverter_p getConverter(CDMReader_p reader, CoordinateSystem_cp cs, int verticalType) const;
 
 protected:
-    virtual VerticalConverterPtr getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const = 0;
+    virtual VerticalConverter_p getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const = 0;
 
     /**
      * Default implementation: Convert to altitude (height above MSL) with pressure(-converter) and standard atmosphere.
@@ -124,7 +114,7 @@ protected:
      * @param cs
      * @return
      */
-    virtual VerticalConverterPtr getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    virtual VerticalConverter_p getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 
     /**
      * Default implementation: Convert to height above ground with pressure(-converter) and standard atmosphere.
@@ -132,7 +122,7 @@ protected:
      * @param cs
      * @return
      */
-    virtual VerticalConverterPtr getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    virtual VerticalConverter_p getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 
     /**
      * Default implementation: No conversion.
@@ -140,12 +130,14 @@ protected:
      * @param cs
      * @return
      */
-    virtual VerticalConverterPtr getDepthConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    virtual VerticalConverter_p getDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 
 private:
-    VerticalConverterPtr getIdentityPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
-    VerticalConverterPtr findPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    VerticalConverter_p getIdentityPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
+    VerticalConverter_p findPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 };
+
+typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
 
 std::ostream& operator<<(std::ostream& out, const VerticalTransformation& vt);
 

@@ -24,10 +24,7 @@
 #ifndef UNITS_H_
 #define UNITS_H_
 
-#include "fimex/CDMException.h"
-#include "fimex/UnitsConverter.h"
-
-#include <boost/shared_ptr.hpp>
+#include "fimex/UnitsConverterDecl.h"
 
 #include <string>
 
@@ -72,7 +69,8 @@ public:
      * @return a UnitsConverter object
      * @throw  UnitException
      */
-    boost::shared_ptr<UnitsConverter> getConverter(const std::string& from, const std::string& to);
+    UnitsConverter_p getConverter(const std::string& from, const std::string& to);
+
     /**
      * @brief test if two units are convertible to each others
      * @param unit1 first unit

@@ -31,7 +31,7 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr AtmosphereSigma::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p AtmosphereSigma::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return boost::make_shared<SigmaToPressureConverter>(reader, cs, sigma, ps, ptop);
 }

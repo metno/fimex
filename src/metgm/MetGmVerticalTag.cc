@@ -52,13 +52,13 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
 {
     boost::shared_ptr<MetGmVerticalTag> VTag;
 
-    const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
-    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
     if (cs.get()) {
         if(cs->isSimpleSpatialGridded()) {
 
-            CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+            CoordinateAxis_cp zAxis = cs->getGeoZAxis();
 
             if(!zAxis.get()) {
                 return boost::shared_ptr<MetGmVerticalTag>();

@@ -24,10 +24,12 @@
 #include "fimex/Units.h"
 
 #include "fimex/Logger.h"
+#include "fimex/UnitsConverter.h"
 #include "fimex/UnitsException.h"
 #include "fimex/Utils.h"
 
-#include "boost/shared_ptr.hpp"
+#include <boost/make_shared.hpp>
+
 #include "MutexLock.h"
 #include "fimex_config.h"
 #ifdef HAVE_UDUNITS2_H
@@ -54,7 +56,7 @@ extern MutexType& getUnitsMutex() {
     return unitsMutex;
 }
 
-static LoggerPtr logger = getLogger("fimex.Units");
+static Logger_p logger = getLogger("fimex.Units");
 
 void handleUdUnitError(int unitErrCode, const std::string& message)
 {
@@ -209,15 +211,15 @@ bool Units::unload(bool force)
 void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "convert from '" << from << "' to '" << to << "'");
-    boost::shared_ptr<UnitsConverter> conv = getConverter(from, to);
+    UnitsConverter_p conv = getConverter(from, to);
     conv->getScaleOffset(slope, offset);
 }
 
-boost::shared_ptr<UnitsConverter> Units::getConverter(const std::string& from, const std::string& to)
+UnitsConverter_p Units::getConverter(const std::string& from, const std::string& to)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getConverter from '" << from << "' to '" << to << "'");
     if (from == to) {
-        return boost::shared_ptr<UnitsConverter>(new LinearUnitsConverter(1.,0.));
+        return boost::make_shared<LinearUnitsConverter>(1., 0.);
     }
     ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
@@ -227,14 +229,14 @@ boost::shared_ptr<UnitsConverter> Units::getConverter(const std::string& from, c
     handleUdUnitError(ut_get_status(), "'" + to + "'");
     cv_converter* conv = ut_get_converter(fromUnit.get(), toUnit.get());
     handleUdUnitError(ut_get_status(), "'" + from + "' converted to '" +to + "'");
-    return boost::shared_ptr<UnitsConverter>(new Ud2UnitsConverter(conv));
+    return boost::make_shared<Ud2UnitsConverter>(conv);
 #else
     double slope, offset;
     utUnit fromUnit, toUnit;
     handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
     handleUdUnitError(utScan(to.c_str(), &toUnit), to);
     handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
-    return boost::shared_ptr<UnitsConverter>(new LinearUnitsConverter(slope, offset));
+    return boost::make_shared<LinearUnitsConverter>(slope, offset);
 #endif
 
 }

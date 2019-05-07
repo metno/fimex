@@ -1,16 +1,46 @@
+/*
+  Fimex, src/CDMMergeUtils.h
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 
 #ifndef fimex_CDMMergeUtils_h
 #define fimex_CDMMergeUtils_h
 
-#include "fimex/CDM.h"
-#include "fimex/CDMInterpolator.h"
-#include "fimex/coordSys/CoordinateAxis.h"
-#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 
 #include <boost/shared_ptr.hpp>
 
 #include <algorithm>
+#include <cmath>
+#include <set>
 #include <sstream>
 #include <vector>
 
@@ -18,15 +48,10 @@
 
 namespace MetNoFimex {
 
-//namespace CDMMergeUtils {
+class CDM;
 
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolatorPtr;
-typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystemPtr;
-typedef boost::shared_ptr<const Projection> ProjectionPtr;
-
-typedef std::vector<CoordinateSystemPtr> CoordinateSystemPtr_v;
-typedef CoordinateSystemPtr_v::iterator CoordinateSystemPtr_it;
-typedef CoordinateSystemPtr_v::const_iterator CoordinateSystemPtr_cit;
+class CDMInterpolator;
+typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 
 typedef std::vector<double> values_v;
 typedef values_v::iterator values_it;
@@ -34,7 +59,7 @@ typedef values_v::const_iterator values_cit;
 
 inline bool equal(double a, double b)
 {
-    return fabs(a-b) < 1e-6;
+    return std::abs(a - b) < 1e-6;
 }
 
 struct equal_float : public std::unary_function<bool, float>
@@ -46,16 +71,15 @@ struct equal_float : public std::unary_function<bool, float>
         { return equal(value, v); }
 };
 
-void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys);
+void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, const CoordinateSystem_cp_v& coordSys);
 
-bool is_compatible(CDMReader_p readerB, CDMReader_p readerT,
-        const CoordinateSystemPtr_v& allCsB, const CoordinateSystemPtr_v& allCsT,
-        const std::string& varName);
+bool is_compatible(CDMReader_p readerB, CDMReader_p readerT, const CoordinateSystem_cp_v& allCsB, const CoordinateSystem_cp_v& allCsT,
+                   const std::string& varName);
 
-values_v getAxisValues(const CDMReader_p reader, CoordinateSystem::ConstAxisPtr axis, const std::string& unit);
+values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const std::string& unit);
 
-CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod,
-        CDMInterpolatorPtr& interpolatedO, std::string& nameX, std::string& nameY, bool keepAllOuter = false);
+CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod, CDMInterpolator_p& interpolatedO, std::string& nameX,
+                  std::string& nameY, bool keepAllOuter = false);
 
 //} // namespace CDMMergeUtils
 

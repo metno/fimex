@@ -96,9 +96,9 @@ CDMBorderSmoothing_LinearFactory::CDMBorderSmoothing_LinearFactory(size_t transi
         throw CDMException("invalid parameter values for linear smoothing");
 }
 
-CDMBorderSmoothing::SmoothingPtr CDMBorderSmoothing_LinearFactory::operator()(const std::string& /*varName*/)
+CDMBorderSmoothing::Smoothing_p CDMBorderSmoothing_LinearFactory::operator()(const std::string& /*varName*/)
 {
-    return CDMBorderSmoothing::SmoothingPtr(new CDMBorderSmoothing_Linear(transitionWidth_, borderWidth_));
+    return CDMBorderSmoothing::Smoothing_p(new CDMBorderSmoothing_Linear(transitionWidth_, borderWidth_));
 }
 
 } // namespace MetNoFimex

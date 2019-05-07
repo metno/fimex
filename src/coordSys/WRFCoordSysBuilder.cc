@@ -38,13 +38,15 @@
 #include <cmath>
 #include <vector>
 #include <map>
+
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/make_shared.hpp>
 
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.WRFCoordSysBuilder");
+static Logger_p logger = getLogger("fimex.WRFCoordSysBuilder");
 
 WRFCoordSysBuilder::WRFCoordSysBuilder()
 {
@@ -96,12 +98,12 @@ static double findAttributeDouble(const CDM& cdm, std::string attName)
 }
 
 // function for compatibility between the old (only CDM) and new (only CDMReader) interface
-static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinateSystems(CDM& cdm, CDMReader_p reader)
+static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p reader)
 {
     assert(reader.get() != 0);
     // reader might be 0
     using namespace std;
-    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys;
+    CoordinateSystem_cp_v coordSys;
     if (!WRFCoordSysBuilder().isMine(cdm))
         return coordSys;
     /*
@@ -151,7 +153,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     const int R0 = 6370000; // WRF earth radius = 6370km
     proj4 << " +R=" << R0 << " +no_defs";
     //cerr << proj4.str() << endl;
-    boost::shared_ptr<Projection> proj = Projection::createByProj4(proj4.str());
+    Projection_p proj = Projection::createByProj4(proj4.str());
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
     mifi_project_values(MIFI_WGS84_LATLON_PROJ4, proj4.str().c_str(), &centerX, &centerY, 1);
@@ -164,7 +166,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     //       is build twice
 
     // build axes and staggered coordinate system
-    CoordinateSystem::AxisPtr timeAxis, westAxis, stagWestAxis, northAxis, stagNorthAxis, bottomAxis, stagBottomAxis;
+    CoordinateAxis_p timeAxis, westAxis, stagWestAxis, northAxis, stagNorthAxis, bottomAxis, stagBottomAxis;
     if (cdm.hasDimension("west_east")) {
         vector<string> shape;
         shape.push_back("west_east");
@@ -189,7 +191,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             }
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        westAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        westAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         westAxis->setAxisType(CoordinateAxis::GeoX);
         westAxis->setExplicit(true);
     }
@@ -217,7 +219,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             }
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        stagWestAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        stagWestAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         stagWestAxis->setAxisType(CoordinateAxis::GeoX);
         stagWestAxis->setExplicit(true);
     }
@@ -247,7 +249,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             }
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        northAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        northAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         northAxis->setAxisType(CoordinateAxis::GeoY);
         northAxis->setExplicit(true);
     }
@@ -277,7 +279,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             }
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        stagNorthAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        stagNorthAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         stagNorthAxis->setAxisType(CoordinateAxis::GeoY);
         stagNorthAxis->setExplicit(true);
     }
@@ -294,7 +296,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        bottomAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        bottomAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         bottomAxis->setAxisType(CoordinateAxis::GeoZ);
         bottomAxis->setExplicit(true);
     }
@@ -311,7 +313,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        stagBottomAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        stagBottomAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(shape.at(0)));
         stagBottomAxis->setAxisType(CoordinateAxis::GeoZ);
         stagBottomAxis->setExplicit(true);
     }
@@ -400,13 +402,12 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.getVariable(reftime).setData(createData(1, refvals));
         }
     }
-    timeAxis = CoordinateSystem::AxisPtr(
-            new CoordinateAxis(cdm.getVariable(Time)));
+    timeAxis = boost::make_shared<CoordinateAxis>(cdm.getVariable(Time));
     timeAxis->setAxisType(CoordinateAxis::Time);
     timeAxis->setExplicit(true);
 
     // now, create the coordinate-systems depending on the variables shape
-    map<string, boost::shared_ptr<CoordinateSystem> > cs;
+    map<string, CoordinateSystem_p> cs;
     const CDM::VarVec vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator vit = vars.begin(); vit != vars.end(); ++vit) {
         vector<string> shape = vit->getShape();
@@ -415,7 +416,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             && ((find(shape.begin(), shape.end(), "south_north") != shape.end()) || (find(shape.begin(), shape.end(), "south_north_stag") != shape.end()))) {
             string shapeId = join(shape.begin(), shape.end());
             if (cs.find(shapeId) == cs.end()) {
-                boost::shared_ptr<CoordinateSystem> coord(new CoordinateSystem(WRFCoordSysBuilder().getName()));
+                CoordinateSystem_p coord = boost::make_shared<CoordinateSystem>(WRFCoordSysBuilder().getName());
                 coord->setProjection(proj);
                 for (vector<string>::iterator dimIt = shape.begin(); dimIt != shape.end(); dimIt++) {
                     if (*dimIt == "west_east") {
@@ -445,7 +446,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                             }
                             cdm.getVariable(*dimIt).setData(createData(dimSize, vals));
                         }
-                        CoordinateSystem::AxisPtr other = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(*dimIt)));
+                        CoordinateAxis_p other = boost::make_shared<CoordinateAxis>(cdm.getVariable(*dimIt));
                         other->setExplicit(true);
                         coord->setAxis(other);
                     }
@@ -453,19 +454,19 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 coord->setSimpleSpatialGridded(true);
                 cs[shapeId] = coord;
             }
-            boost::shared_ptr<CoordinateSystem> coord = cs[shapeId];
+            CoordinateSystem_p coord = cs[shapeId];
             coord->setCSFor(vit->getName(), true);
             coord->setComplete(vit->getName(), true);
         }
     }
-    for (map<string, boost::shared_ptr<CoordinateSystem> >::iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
+    for (map<string, CoordinateSystem_p>::iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
         coordSys.push_back(csIt->second);
     }
 
 
     return coordSys;
 }
-std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDM& cdm)
+CoordinateSystem_cp_v WRFCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {
 #if 0
     // this will cause a failed assert(reader != 0)
@@ -473,11 +474,11 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
 #else
     LOG4FIMEX(logger, Logger::ERROR,
             "cannot list WRF coordinate systems from a CDM, please pass a CDMReader");
-    return std::vector<boost::shared_ptr<const CoordinateSystem> >();
+    return CoordinateSystem_cp_v();
 #endif
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
+CoordinateSystem_cp_v WRFCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
 {
     return wrfListCoordinateSystems(reader->getInternalCDM(), reader);
 }

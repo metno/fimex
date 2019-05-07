@@ -335,7 +335,8 @@ public:
      * @param latDim name of the latitude variable
      * @throw CDMException if any information is missing
      */
-    void generateProjectionCoordinates(boost::shared_ptr<const Projection> projection, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim);
+    void generateProjectionCoordinates(Projection_cp projection, const std::string& xDim, const std::string& yDim, const std::string& lonDim,
+                                       const std::string& latDim);
     /**
      * @brief generate the projection coordinates (usually named "lat lon")
      *
@@ -372,7 +373,7 @@ public:
      * @return projection
      * @warning not thread-safe, though read-only, it might change the internal state of the CDM due to caching
      */
-    boost::shared_ptr<const Projection> getProjectionOf(std::string varName) const;
+    Projection_cp getProjectionOf(std::string varName) const;
 
     /**
      * @brief get the x-(lon) axis of the variable

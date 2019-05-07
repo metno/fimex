@@ -28,18 +28,17 @@
 #define COORDSYSBUILDER_H_
 
 #include "fimex/CDMReaderDecl.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/deprecated.h"
 
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 // forward decl
 class CDM;
-class CoordinateSystem;
 
 class CoordSysBuilder
 {
@@ -48,8 +47,8 @@ public:
     virtual ~CoordSysBuilder() {};
     virtual std::string getName() = 0;
     virtual bool isMine(const CDM& cdm) = 0;
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDMReader_p reader) = 0;
-    virtual MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm)) = 0;
+    virtual CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader) = 0;
+    virtual MIFI_DEPRECATED(CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm)) = 0;
     virtual void enhanceVectorProperties(CDMReader_p reader) = 0;
 };
 

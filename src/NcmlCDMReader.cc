@@ -28,8 +28,7 @@
 #include "MutexLock.h"
 #include "NcmlAggregationReader.h"
 #include "fimex/XMLDoc.h"
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
+
 #include "fimex_config.h"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -40,15 +39,19 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
+
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 namespace MetNoFimex
 {
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.NcmlCDMReader");
+static Logger_p logger = getLogger("fimex.NcmlCDMReader");
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())
@@ -98,7 +101,7 @@ void NcmlCDMReader::setConfigDoc(const XMLInput& configXML)
     doc = configXML.getXMLDoc();
     if (!configXML.isEmpty()) {
         doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
-        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr != 1) {
             throw CDMException("config "+configId+" is not a ncml document with root /nc:netcdf");
@@ -108,7 +111,7 @@ void NcmlCDMReader::setConfigDoc(const XMLInput& configXML)
 
 void NcmlCDMReader::init()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf");
     int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
     if (size == 0) {
         LOG4FIMEX(logger, Logger::WARN, "config " << configId << " not a ncml-file, ignoring");
@@ -133,7 +136,7 @@ void NcmlCDMReader::init()
 }
 
 void NcmlCDMReader::warnUnsupported(std::string xpath, std::string msg) {
-    XPathObjPtr xpathObj = doc->getXPathObject(xpath);
+    xmlXPathObject_p xpathObj = doc->getXPathObject(xpath);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size > 0) {
@@ -142,7 +145,7 @@ void NcmlCDMReader::warnUnsupported(std::string xpath, std::string msg) {
 }
 
 void NcmlCDMReader::initRemove() {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:remove");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:remove");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -195,7 +198,7 @@ void NcmlCDMReader::initWarnUnsupported() {
 
 void NcmlCDMReader::initVariableShapeChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@shape]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@shape]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -217,7 +220,7 @@ void NcmlCDMReader::initVariableShapeChange()
 
 void NcmlCDMReader::initVariableTypeChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@type]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@type]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -239,7 +242,7 @@ void NcmlCDMReader::initVariableTypeChange()
 
 void NcmlCDMReader::initVariableDataChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:values");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:values");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -271,7 +274,7 @@ void NcmlCDMReader::initVariableDataChange()
 
 void NcmlCDMReader::initVariableSpatialVector()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:spatial_vector");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:spatial_vector");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -288,7 +291,7 @@ void NcmlCDMReader::initVariableSpatialVector()
 
 void NcmlCDMReader::initAddReassignAttribute()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@value]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@value]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -326,7 +329,7 @@ void NcmlCDMReader::initAddReassignAttribute()
 /* change the variable names */
 void NcmlCDMReader::initVariableNameChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@orgName]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@orgName]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -361,7 +364,7 @@ void NcmlCDMReader::initVariableNameChange()
 /* change the dimension names */
 void NcmlCDMReader::initDimensionNameChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@orgName]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@orgName]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -399,7 +402,7 @@ void NcmlCDMReader::initDimensionNameChange()
  */
 void NcmlCDMReader::initDimensionUnlimited()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@isUnlimited]");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@isUnlimited]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -436,7 +439,7 @@ void NcmlCDMReader::initDimensionUnlimited()
 void NcmlCDMReader::initAttributeNameChange()
 {
     { /* the global attributes */
-        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@orgName]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@orgName]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -453,7 +456,7 @@ void NcmlCDMReader::initAttributeNameChange()
         }
     }
     { /* the variable attributes */
-        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@name]/nc:attribute[@orgName]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@name]/nc:attribute[@orgName]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {

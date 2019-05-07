@@ -45,19 +45,18 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", pathTest("verticalVelocity.nc")));
     if (reader.get() == 0) return; // no support for netcdf4
 
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
 
     DataPtr apD = reader->getScaledDataInUnit("ap0", "Pa");
     DataPtr bD = reader->getScaledData("b0");
 
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("air_temperature_ml"));
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("air_temperature_ml"));
     BOOST_REQUIRE(varSysIt != coordSys.end());
-    CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
-    CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
-    CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
-    CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+    CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+    CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+    CoordinateAxis_cp zAxis = (*varSysIt)->getGeoZAxis(); // Z
+    CoordinateAxis_cp tAxis = (*varSysIt)->getTimeAxis(); // time
 
     //cerr << "found axes" << endl;
 
@@ -125,16 +124,15 @@ BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
     boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
     proc->addVerticalVelocity();
     BOOST_CHECK(proc->getCDM().hasVariable("upward_air_velocity_ml"));
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(proc);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(proc);
 
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("upward_air_velocity_ml"));
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("upward_air_velocity_ml"));
     BOOST_REQUIRE(varSysIt != coordSys.end());
 
-    CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
-    CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
-    CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
-    CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+    CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+    CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+    CoordinateAxis_cp zAxis = (*varSysIt)->getGeoZAxis(); // Z
+    CoordinateAxis_cp tAxis = (*varSysIt)->getTimeAxis(); // time
 
     //cerr << "found axes" << endl;
 

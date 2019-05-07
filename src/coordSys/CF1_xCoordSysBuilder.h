@@ -42,8 +42,8 @@ public:
     virtual ~CF1_xCoordSysBuilder();
     virtual std::string getName() {return "CF-1.x";}
     virtual bool isMine(const CDM& cdm);
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDMReader_p reader);
+    virtual CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm);
+    virtual CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader);
     virtual void enhanceVectorProperties(CDMReader_p reader);
 
 };

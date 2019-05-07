@@ -121,7 +121,8 @@ namespace MetNoFimex
         virtual DataPtr clone() const {return DataPtr(new DataImpl<C>(*this));}
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitConverter, CDMDataType newType, double newFill, double newScale, double newOffset);
+        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
+                                        double newScale, double newOffset);
         // specialized for each known type in Data.cc
         virtual CDMDataType getDataType() const {return CDM_NAT;}
 
@@ -295,8 +296,10 @@ namespace MetNoFimex
         std::transform(&inData[0], &inData[length], &outData[0], sv);
         return outData;
     }
-    template<typename OUT, typename IN>
-    boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitsConverter, double newFill, double newScale, double newOffset) {
+    template <typename OUT, typename IN>
+    boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset,
+                                              UnitsConverter_p unitsConverter, double newFill, double newScale, double newOffset)
+    {
         boost::shared_array<OUT> outData(new OUT[length]);
         ScaleValueUnits<IN, OUT> sv(oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset);
         std::transform(&inData[0], &inData[length], &outData[0], sv);
@@ -332,8 +335,9 @@ namespace MetNoFimex
         throw CDMException("cannot convert CDM_STRINGS datatype");
     }
 
-    template<typename C>
-    DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitsConverter, CDMDataType newType, double newFill, double newScale, double newOffset)
+    template <typename C>
+    DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitsConverter, CDMDataType newType,
+                                         double newFill, double newScale, double newOffset)
     {
         // clang-format off
         switch (newType) {
@@ -356,7 +360,7 @@ namespace MetNoFimex
     }
 
     template <>
-    DataPtr DataImpl<std::string>::convertDataType(double, double, double, boost::shared_ptr<UnitsConverter>, CDMDataType, double, double, double)
+    DataPtr DataImpl<std::string>::convertDataType(double, double, double, UnitsConverter_p, CDMDataType, double, double, double)
     {
         throw CDMException("cannot convert CDM_STRINGS datatype");
     }

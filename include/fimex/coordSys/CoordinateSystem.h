@@ -34,18 +34,16 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <iosfwd>
+
+#include "fimex/CDMReaderDecl.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/coordSys/CoordinateAxis.h"
-#include "fimex/coordSys/Projection.h"
-#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 #include "fimex/deprecated.h"
 
-
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 //forward decl.
 class CDM;
-class CDMReader;
 struct CoordSysImpl;
 
 /**
@@ -60,29 +58,17 @@ class CoordinateSystem
 {
 public:
     /**
-     * a garbage collected pointer to a constant coordinateAxis
-     */
-    typedef boost::shared_ptr<const CoordinateAxis> ConstAxisPtr;
-    /**
-     * a garbage collected pointer to a CoordinateAxis
-     */
-    typedef boost::shared_ptr<CoordinateAxis> AxisPtr;
-    /**
-     * a list to constant axis pointer
-     */
-    typedef std::vector<ConstAxisPtr> ConstAxisList;
-
-    /**
      * CoordinateSystems are usually created within the listCoordinateSystems(CDMReader_p) funcion.
      */
     CoordinateSystem();
     explicit CoordinateSystem(const std::string& conventionName);
-    virtual ~CoordinateSystem() {}
+    virtual ~CoordinateSystem();
 
     /**
      * unique identifier for a coordinate system
      */
     virtual std::string id() const;
+
     /**
      * get an id for the horizontal part of the coordinate system, i.e.
      * geoXAxis and geoYAxis
@@ -138,11 +124,11 @@ public:
      * This includes also coordinate-systems in latitude-longitude 'projection'.
      * @return projection, or null ptr
      */
-    virtual boost::shared_ptr<const Projection> getProjection() const;
+    virtual Projection_cp getProjection() const;
     /**
      * Set the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
      */
-    virtual void setProjection(boost::shared_ptr<const Projection> proj);
+    virtual void setProjection(Projection_cp proj);
     /**
      * Check if the coordinate-system has a vertical transformation (of GeoZ)
      * This includes also coordinate-systems in pressure or height.
@@ -153,11 +139,11 @@ public:
      * This includes also height or pressure 'transformations'
      * @return vtrans, or null ptr
      */
-    virtual boost::shared_ptr<const VerticalTransformation> getVerticalTransformation() const;
+    virtual VerticalTransformation_cp getVerticalTransformation() const;
     /**
      * Set the vertical transformation of the coordinate-system (transformation of GeoZ)
      */
-    virtual void setVerticalTransformation(boost::shared_ptr<const VerticalTransformation> vtran);
+    virtual void setVerticalTransformation(VerticalTransformation_cp vtran);
     /**
      * Check if the CoordinateSystem contains exactly the axis type
      * @param type axis type to check against
@@ -168,49 +154,49 @@ public:
      * @param type
      * @return an axis or null
      */
-    virtual ConstAxisPtr findAxisOfType(CoordinateAxis::AxisType type) const;
+    virtual CoordinateAxis_cp findAxisOfType(CoordinateAxis::AxisType type) const;
     /**
      * find the first axis with one of the types
      * @param types list of types
      * @return an axis or null
      */
-    virtual ConstAxisPtr findAxisOfType(const std::vector<CoordinateAxis::AxisType>& types) const;
+    virtual CoordinateAxis_cp findAxisOfType(const std::vector<CoordinateAxis::AxisType>& types) const;
     /**
      * get the geographical x/lon-axis, that is one of
      * GeoX, Longitude (in that order if several exist)
      * @return an axis or null
      */
-    virtual ConstAxisPtr getGeoXAxis() const;
+    virtual CoordinateAxis_cp getGeoXAxis() const;
     /**
      * Set/overwrite the geographic y axis, that is one of
      * GeoY, Latitude (in that order if several exist)
      * @return an axis or null
      */
-    virtual ConstAxisPtr getGeoYAxis() const;
+    virtual CoordinateAxis_cp getGeoYAxis() const;
     /**
      * get the geographical z-axis, that is one of
      * GeoZ, Height, Pressure (in that order if several exist)
      * @return an axis, or null
      */
-    virtual ConstAxisPtr getGeoZAxis() const;
+    virtual CoordinateAxis_cp getGeoZAxis() const;
     /**
      * get the time-axis, or NULL/0
      */
-    virtual ConstAxisPtr getTimeAxis() const;
+    virtual CoordinateAxis_cp getTimeAxis() const;
     /**
      * get all axes, which are not duplicated (i.e. twice in auxiliary)
      */
-    virtual ConstAxisList getAxes() const;
+    virtual CoordinateAxis_cp_v getAxes() const;
     /**
      * Set any axis.
      * @throw CDMException if an axis with the same axistype (except undefined) exists
      */
-    virtual void setAxis(ConstAxisPtr axis);
+    virtual void setAxis(CoordinateAxis_cp axis);
     /**
      * Set an auxiliary axis. An auxiliary axis may be dropped silently if
      * another axis with the axistype exists.
      */
-    virtual void setAuxiliaryAxis(ConstAxisPtr axis);
+    virtual void setAuxiliaryAxis(CoordinateAxis_cp axis);
     /**
      * Get all dependency-variables for this Coordinate-System, i.e.
      * axes, grid-mapping-variable, formula-terms, ...
@@ -221,8 +207,13 @@ public:
      * @param varName
      */
     virtual void addDependencyVariable(std::string varName);
+
 private:
-    boost::shared_ptr<CoordSysImpl> pimpl_;
+    CoordinateSystem(const CoordinateSystem&);            // not implemented
+    CoordinateSystem& operator=(const CoordinateSystem&); // not implemented
+
+private:
+    std::auto_ptr<CoordSysImpl> pimpl_;
 };
 
 /**
@@ -241,11 +232,12 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  * @warning since this function might change the CDM of the reader, it is usually a good idea to
  *          run this function before copying the readers CDM, e.g.
  * @code
-     vector<boost::shared_ptr<const CoordinateSystem> > css = listCoordinateSystems(reader);
+     CoordinateSystem_cp_v css = listCoordinateSystems(reader);
      CDM cdm = reader.getCDM();
    @endcode
  */
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
+CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader);
+
 /**
  * set spatial-vector properties according to convention
  * won't overwrite any existing spatial vector properties
@@ -257,12 +249,13 @@ void enhanceVectorProperties(CDMReader_p reader);
  * fetch all coordinate system from a MetNoFimex::CDM
  * @deprecated call listCoordinateSystems(CDMReader_p reader) instead
  */
-MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm));
+MIFI_DEPRECATED(CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm));
+
 /**
  * fetch all coordinate system from a MetNoFimex::CDM
  * @deprecated call listCoordinateSystems(CDMReader_p reader) instead
  */
-MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
+MIFI_DEPRECATED(CoordinateSystem_cp_v listCoordinateSystems(const CDM& cdm));
 
 /**
  * find all horizontal coordinate systems, either with or without projections, list
@@ -277,18 +270,18 @@ MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoor
  *        which might interfere when changing dimensions
  * @return number of horizontal coordinate systems found, i.e. systems.size()
  */
-int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader, std::map<std::string,
-        boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
+int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader, std::map<std::string, CoordinateSystem_cp>& systems,
+                                        std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
 
 /**
  * Functor to check if a coordinate system completely describes a variable, i.e. all axes match fully.
  */
-struct CompleteCoordinateSystemForComparator : public std::unary_function<boost::shared_ptr<const CoordinateSystem>, bool>
+struct CompleteCoordinateSystemForComparator : public std::unary_function<CoordinateSystem_cp, bool>
 {
 public:
     CompleteCoordinateSystemForComparator(const std::string& varName) : varName(varName) {}
-    bool operator()(const boost::shared_ptr<const CoordinateSystem>& cs) const
-      { return cs->isCSAndCompleteFor(varName); }
+    bool operator()(const CoordinateSystem_cp& cs) const { return cs->isCSAndCompleteFor(varName); }
+
 private:
     const std::string& varName;
 };
@@ -297,9 +290,7 @@ private:
  * find a complete coordinate system for a variable using CompleteCoordinateSystemForComparator
  * @return a shared_ptr to the coordinate system that has been found, or a null ptr if none was found
  */
-boost::shared_ptr<const CoordinateSystem> findCompleteCoordinateSystemFor(const std::vector<boost::shared_ptr<const CoordinateSystem> >& coordSys,
-        const std::string& varName);
-
+CoordinateSystem_cp findCompleteCoordinateSystemFor(const CoordinateSystem_cp_v& coordSys, const std::string& varName);
 }
 
 #endif /* COORDINATESYSTEM_H_ */

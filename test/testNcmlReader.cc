@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     BOOST_CHECK(!reader->getCDM().getAttribute("projection_1", "proj4",proj4));
 
     // find towgs84
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("sea_surface_temperature"));
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("sea_surface_temperature"));
     string s = (*varSysIt)->getProjection()->getProj4String();
     BOOST_CHECK(s.find("+towgs84=") != string::npos);
 

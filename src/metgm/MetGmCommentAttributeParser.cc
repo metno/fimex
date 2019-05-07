@@ -45,7 +45,7 @@
 
 namespace MetNoFimex {
 
-static LoggerPtr logger = getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute");
+static Logger_p logger = getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute");
 
 boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader) {
     boost::shared_ptr<MetGmCommentAttributeParser> parser =
@@ -56,10 +56,10 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
         try {
             std::string commentStr = metgmMetaData.getStringValue();
             if (! (commentStr.size() > 0 && commentStr.substr(0,1) == "<")) throw CDMException("comment not xml");
-            boost::shared_ptr<XMLDoc> doc = XMLDoc::fromString(metgmMetaData.getStringValue());
+            XMLDoc_p doc = XMLDoc::fromString(metgmMetaData.getStringValue());
 
             if(doc.get() != 0) {
-                XPathObjPtr xpathObj = doc->getXPathObject("/meta_data/attribute");
+                xmlXPathObject_p xpathObj = doc->getXPathObject("/meta_data/attribute");
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 size_t size = (nodes) ? nodes->nodeNr : 0;
                 for (size_t i = 0; i < size; ++i) {

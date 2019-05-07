@@ -38,8 +38,7 @@ namespace MetNoFelt {
 
 using MetNoFimex::type2string;
 
-static MetNoFimex::LoggerPtr logger = MetNoFimex::getLogger("fimex.Felt_Array2");
-
+static MetNoFimex::Logger_p logger = MetNoFimex::getLogger("fimex.Felt_Array2");
 
 Felt_Array2::Felt_Array2(const string name, const boost::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
 : feltArrayName_(name),

@@ -1,4 +1,34 @@
 /*
+  Fimex, src/coordSys/ObliqueMercatorProjection.cc
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
+/*
  * Fimex, ObliqueMercatorProjection.cc
  *
  * (C) Copyright 2017, SMHI
@@ -25,23 +55,26 @@
  */
 
 #include "fimex/coordSys/ObliqueMercatorProjection.h"
-#include <boost/regex.hpp>
-#include <proj_api.h>
+
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-namespace MetNoFimex
-{
-    using namespace std;
+#include <boost/regex.hpp>
 
-static LoggerPtr logger = getLogger("fimex.ObliqueMercatorProjection");
+#include <proj_api.h>
+
+namespace MetNoFimex {
+
+using namespace std;
+
+static Logger_p logger = getLogger("fimex.ObliqueMercatorProjection");
 
 ObliqueMercatorProjection::ObliqueMercatorProjection()
-: ProjectionImpl("oblique_mercator", false)
-{}
+    : ProjectionImpl("oblique_mercator", false)
+{
+}
 
-ObliqueMercatorProjection::~ObliqueMercatorProjection()
-{}
+ObliqueMercatorProjection::~ObliqueMercatorProjection() {}
 
 bool ObliqueMercatorProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -109,4 +142,4 @@ std::ostream& ObliqueMercatorProjection::getProj4ProjectionPart(std::ostream& op
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

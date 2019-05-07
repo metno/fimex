@@ -1,3 +1,33 @@
+/*
+  Fimex, src/coordSys/verticalTransform/VerticalTransformationUtils.cc
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 
 #include "fimex/CDM.h"
@@ -15,18 +45,21 @@ namespace MetNoFimex {
 
 namespace {
 
-static LoggerPtr logger = getLogger("fimex.VerticalTransformationUtils");
+static Logger_p logger = getLogger("fimex.VerticalTransformationUtils");
 
 typedef std::map<std::string, std::string> string_string_m;
 
 struct CompleteCSForVariable : public std::unary_function<std::string, bool>
 {
 public:
-    CompleteCSForVariable(boost::shared_ptr<const CoordinateSystem> cs) : cs_(cs) {}
+    CompleteCSForVariable(CoordinateSystem_cp cs)
+        : cs_(cs)
+    {
+    }
     bool operator()(const std::string& varName) const
       { return cs_->isCSAndCompleteFor(varName); }
 private:
-    CoordSysPtr cs_;
+    CoordinateSystem_cp cs_;
 };
 
 } // anonymous namespace
@@ -53,7 +86,7 @@ std::string findVariableWithDims(const CDM& cdm, const std::string& standard_nam
     return std::string();
 }
 
-std::string findVariableWithCS(const CDM& cdm, CoordSysPtr cs, const std::string& standard_name)
+std::string findVariableWithCS(const CDM& cdm, CoordinateSystem_cp cs, const std::string& standard_name)
 {
     string_string_m attrs;
     attrs["standard_name"] = standard_name;
@@ -80,17 +113,17 @@ ShapeMerger& ShapeMerger::merge(const std::string& varName, bool skipLength1)
         return *this;
 }
 
-ShapeMerger& ShapeMerger::merge(VerticalConverterPtr vc, bool skipLength1)
+ShapeMerger& ShapeMerger::merge(VerticalConverter_p vc, bool skipLength1)
 {
     return merge(vc->getShape(), skipLength1);
 }
 
-const std::string& ShapeMerger::axisDim(CoordinateSystem::ConstAxisPtr axis) const
+const std::string& ShapeMerger::axisDim(CoordinateAxis_cp axis) const
 {
     return rcdm_.getVariable(axis->getName()).getShape().front();
 }
 
-ShapeMerger::shape_t::iterator ShapeMerger::findAxis(CoordinateSystem::ConstAxisPtr axis)
+ShapeMerger::shape_t::iterator ShapeMerger::findAxis(CoordinateAxis_cp axis)
 {
     if (axis)
         return std::find(shape_.begin(), shape_.end(), axisDim(axis));
@@ -98,7 +131,7 @@ ShapeMerger::shape_t::iterator ShapeMerger::findAxis(CoordinateSystem::ConstAxis
         return shape_.end();
 }
 
-bool ShapeMerger::equalsAxisDim(const std::string& dim, CoordinateSystem::ConstAxisPtr axis) const
+bool ShapeMerger::equalsAxisDim(const std::string& dim, CoordinateAxis_cp axis) const
 {
     return axis && dim == axisDim(axis);
 }
@@ -216,7 +249,7 @@ SliceBuilder adaptSliceBuilder(const CDM& cdm, const std::string& varName, const
     return sbVar;
 }
 
-SliceBuilder adaptSliceBuilder(const CDM& cdm, VerticalConverterPtr converter, const SliceBuilder& sb)
+SliceBuilder adaptSliceBuilder(const CDM& cdm, VerticalConverter_p converter, const SliceBuilder& sb)
 {
     const string_v& conShape= converter->getShape();
     SliceBuilder sbCon(conShape, getDimSizes(cdm, conShape));
@@ -256,7 +289,7 @@ SliceBuilder createSliceBuilder(const CDM& cdm, const string_v& dimNames)
     return SliceBuilder(dimNames, dimSizes);
 }
 
-SliceBuilder createSliceBuilder(const CDM& cdm, boost::shared_ptr<VerticalConverter> converter)
+SliceBuilder createSliceBuilder(const CDM& cdm, VerticalConverter_p converter)
 {
     return createSliceBuilder(cdm, converter->getShape());
 }
@@ -321,7 +354,7 @@ ArrayDims makeArrayDims(const CDM& cdm, const std::string& varName)
     return makeArrayDims(cdm, cdm.getVariable(varName).getShape());
 }
 
-ArrayDims makeArrayDims(const CDM& cdm, boost::shared_ptr<VerticalConverter> converter)
+ArrayDims makeArrayDims(const CDM& cdm, VerticalConverter_p converter)
 {
     const string_v dimNames = converter->getShape();
     const size_v dimSizes = getDimSizes(cdm, dimNames);
@@ -335,23 +368,23 @@ ArrayDims makeArrayDims(const SliceBuilder& sb)
     return ArrayDims(dimNames, dimSizes);
 }
 
-VerticalConverterPtr verticalConverter(boost::shared_ptr<const CoordinateSystem> cs, CDMReader_p reader, int verticalType)
+VerticalConverter_p verticalConverter(CoordinateSystem_cp cs, CDMReader_p reader, int verticalType)
 {
-    if (boost::shared_ptr<const VerticalTransformation> vt = cs->getVerticalTransformation()) {
-        if (VerticalConverterPtr converter = vt->getConverter(reader, cs, verticalType))
+    if (VerticalTransformation_cp vt = cs->getVerticalTransformation()) {
+        if (VerticalConverter_p converter = vt->getConverter(reader, cs, verticalType))
             return converter;
     }
     throw CDMException("no vertical transformation found: " + cs->id());
 }
 
-DataPtr verticalData4D(VerticalConverterPtr converter, const CDM& cdm, size_t unLimDimPos)
+DataPtr verticalData4D(VerticalConverter_p converter, const CDM& cdm, size_t unLimDimPos)
 {
     SliceBuilder sb = createSliceBuilder(cdm, converter);
     setUnLimDimPos(cdm, sb, unLimDimPos);
     return converter->getDataSlice(sb);
 }
 
-DataPtr verticalData4D(boost::shared_ptr<const CoordinateSystem> cs, CDMReader_p reader, size_t unLimDimPos, int verticalType)
+DataPtr verticalData4D(CoordinateSystem_cp cs, CDMReader_p reader, size_t unLimDimPos, int verticalType)
 {
     return verticalData4D(verticalConverter(cs, reader, verticalType), reader->getCDM(), unLimDimPos);
 }
@@ -377,7 +410,7 @@ Var::Var(CDMReader_p reader, const std::string& varName, const std::string& unit
 {
 }
 
-Var::Var(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+Var::Var(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig)
     : sb(adaptSliceBuilder(reader->getCDM(), converter, sbOrig))
     , dims(makeArrayDims(sb))
     , data(converter->getDataSlice(sb))
@@ -390,7 +423,7 @@ VarFloat::VarFloat(CDMReader_p reader, const std::string& varName, const std::st
 {
 }
 
-VarFloat::VarFloat(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+VarFloat::VarFloat(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
     , values(data ? data->asFloat() : boost::shared_array<float>())
 {
@@ -402,7 +435,7 @@ VarDouble::VarDouble(CDMReader_p reader, const std::string& varName, const std::
 {
 }
 
-VarDouble::VarDouble(CDMReader_p reader, VerticalConverterPtr converter, const SliceBuilder& sbOrig)
+VarDouble::VarDouble(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
     , values(data ? data->asDouble() : boost::shared_array<double>())
 {

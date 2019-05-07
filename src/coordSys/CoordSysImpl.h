@@ -41,11 +41,11 @@ struct CoordSysImpl {
     bool isSimpleSpatialGridded_;
     std::set<std::string> isCSForVars_;
     std::set<std::string> isCompleteVars_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > auxiliaryAxes_;
+    CoordinateAxis_cp_v axes_;
+    CoordinateAxis_cp_v auxiliaryAxes_;
     std::set<std::string> dependencyVars_;
-    boost::shared_ptr<const Projection> proj_;
-    boost::shared_ptr<const VerticalTransformation> vtran_;
+    Projection_cp proj_;
+    VerticalTransformation_cp vtran_;
 };
 
 }

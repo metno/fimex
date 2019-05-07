@@ -38,8 +38,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.TimeSpec");
-
+static Logger_p logger = getLogger("fimex.TimeSpec");
 
 /**
  * Translate the relative time-strings, e.g. 0,3,x,x+1 to startOffset,startOffset+3,finalTime,finalTime+1

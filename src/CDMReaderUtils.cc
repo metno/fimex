@@ -182,24 +182,21 @@ struct CoordsInformation {
     string xDim;
     string yDim;
     set<string> variables;
-    boost::shared_ptr<const Projection> proj;
+    Projection_cp proj;
 };
 
 void generateProjectionCoordinates(CDMReader_p reader)
 {
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    typedef vector<CoordSysPtr> CoordSysVec;
-
-    CoordSysVec coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     CDM& cdm = reader->getInternalCDM();
     vector<CDMVariable> variables = cdm.getVariables();
     map<string, CoordsInformation> coords;
-    for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
+    for (CoordinateSystem_cp_v::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
         if ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection() &&
               (!((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
-            CoordinateSystem::ConstAxisPtr x = (*cs)->getGeoXAxis();
+            CoordinateAxis_cp x = (*cs)->getGeoXAxis();
             assert(x.get() != 0);
-            CoordinateSystem::ConstAxisPtr y = (*cs)->getGeoYAxis();
+            CoordinateAxis_cp y = (*cs)->getGeoYAxis();
             assert(y.get() != 0);
             string xy = x->getName() + "_" + y->getName();
             coords[xy].xDim = x->getName();

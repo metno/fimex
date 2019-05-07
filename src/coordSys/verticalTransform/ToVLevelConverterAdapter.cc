@@ -1,3 +1,33 @@
+/*
+  Fimex, src/coordSys/verticalTransform/ToVLevelConverterAdapter.cc
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #include "fimex/coordSys/verticalTransform/ToVLevelConverterAdapter.h"
 
 #include "fimex/CDM.h"
@@ -13,12 +43,11 @@ namespace MetNoFimex {
 
 using std::vector;
 
-static LoggerPtr logger = getLogger("fimex.ToVLevelConverterAdapter");
+static Logger_p logger = getLogger("fimex.ToVLevelConverterAdapter");
 
 static const size_t NOTSET = ~0ul;
 
-ToVLevelConverterAdapter::ToVLevelConverterAdapter(CDMReader_p reader, boost::shared_ptr<const CoordinateSystem> cs,
-                                                   VerticalConverterPtr converter, size_t unLimDimPos)
+ToVLevelConverterAdapter::ToVLevelConverterAdapter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p converter, size_t unLimDimPos)
     : reader_(reader)
     , converter_(converter)
     , unlimitedTimePos_(NOTSET)
@@ -26,19 +55,19 @@ ToVLevelConverterAdapter::ToVLevelConverterAdapter(CDMReader_p reader, boost::sh
     const std::vector<std::string>& shape = converter_->getShape();
     const std::set<std::string> shapedims(shape.begin(), shape.end());
 
-    if (CoordinateSystem::ConstAxisPtr xax = cs->getGeoXAxis()) {
+    if (CoordinateAxis_cp xax = cs->getGeoXAxis()) {
         const std::string& xdim0 = xax->getShape().front();
         if (shapedims.count(xdim0))
             varGeoX_ = xdim0;
     }
 
-    if (CoordinateSystem::ConstAxisPtr yax = cs->getGeoYAxis()) {
+    if (CoordinateAxis_cp yax = cs->getGeoYAxis()) {
         const std::string& ydim0 = yax->getShape().front();
         if (shapedims.count(ydim0))
             varGeoY_ = ydim0;
     }
 
-    if (CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis()) {
+    if (CoordinateAxis_cp tax = cs->getTimeAxis()) {
         const std::string& tdim0 = tax->getShape().front();
         if (shapedims.count(tdim0)) {
             varTime_ = tdim0;

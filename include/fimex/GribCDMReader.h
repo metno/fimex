@@ -67,19 +67,17 @@ public:
      * @param configXML
      * @return the XMLDoc dom object
      */
-    static boost::shared_ptr<XMLDoc> initXMLConfig(const XMLInput& configXML);
+    static XMLDoc_p initXMLConfig(const XMLInput& configXML);
     /**
      * read the earth-figure from the xml-file
      * @return "" or proj4-string as in xml-file
      */
-    static std::string getConfigEarthFigure(boost::shared_ptr<XMLDoc> doc);
+    static std::string getConfigEarthFigure(XMLDoc_p doc);
     /**
      * read the non-standard attributes of parameters from the xml-config
      * @return "" or a comma delimited string with attributes
      */
-    static std::string getConfigExtraKeys(boost::shared_ptr<XMLDoc> doc);
-
-
+    static std::string getConfigExtraKeys(XMLDoc_p doc);
 
 private:
     // pimpl

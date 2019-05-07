@@ -38,7 +38,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.SpatialAxisSpec");
+static Logger_p logger = getLogger("fimex.SpatialAxisSpec");
 
 class TranslateRelativePlace
 {

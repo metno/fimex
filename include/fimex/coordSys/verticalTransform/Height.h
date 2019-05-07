@@ -56,9 +56,9 @@ public:
     virtual bool isComplete() const {return !height.empty();}
 
 protected:
-    VerticalConverterPtr getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
-    VerticalConverterPtr getHeightConverter(CDMReader_p reader, CoordSysPtr cs) const;
-    VerticalConverterPtr getAltitudeConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    VerticalConverter_p getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
+    VerticalConverter_p getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
+    VerticalConverter_p getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 };
 
 } /* namespace MetNoFimex */

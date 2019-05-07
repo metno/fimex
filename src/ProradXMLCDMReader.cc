@@ -49,7 +49,7 @@ namespace MetNoFimex
 {
 
 static MutexType mutex;
-static LoggerPtr logger = getLogger("fimex.ProradXMLCDMReader");
+static Logger_p logger = getLogger("fimex.ProradXMLCDMReader");
 
 class ProradXMLImpl {
 public:
@@ -93,7 +93,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             cdm_->addVariable(tVar);
             cdm_->addAttribute(pimpl_->time, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
         }
-        boost::shared_ptr<Projection> proj = Projection::createByProj4(cartesian->projdef);
+        Projection_p proj = Projection::createByProj4(cartesian->projdef);
         if (proj->getName() == LatitudeLongitudeProjection::NAME()) {
             pimpl_->xname = "lon";
             pimpl_->yname = "lat";

@@ -36,7 +36,6 @@
 namespace MetNoFimex
 {
 /* forward declarations */
-class XMLDoc;
 class MutexType;
 
 /**
@@ -143,7 +142,7 @@ private:
     DataPtr applyVariableTypeChange(DataPtr data, const std::string &varName, const std::string &orgVarName);
 
     std::string configId;
-    boost::shared_ptr<XMLDoc> doc;
+    XMLDoc_p doc;
     std::auto_ptr<MutexType> mutex_;
     CDMReader_p dataReader;
     /*

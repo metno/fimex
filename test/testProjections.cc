@@ -41,39 +41,39 @@ const string projLonLat = "+proj=lonlat +ellps=sphere +a=6371000 +e=0";
 BOOST_AUTO_TEST_CASE( test_projection )
 {
     string proj4stere = "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=6371000 +e=0";
-    boost::shared_ptr<Projection> projs = Projection::createByProj4(proj4stere);
+    Projection_p projs = Projection::createByProj4(proj4stere);
     BOOST_CHECK((projs->getName() == "stereographic") || (projs->getName() == "polar_stereographic"));
     BOOST_CHECK(projs->isDegree() == false);
 
     std::vector<CDMAttribute> attrs = projs->getParameters();
     // generate another projection
-    boost::shared_ptr<Projection> projs2 = Projection::create(attrs);
+    Projection_p projs2 = Projection::create(attrs);
     BOOST_CHECK((projs2->getName() == "stereographic") || (projs2->getName() == "polar_stereographic"));
 }
 
 BOOST_AUTO_TEST_CASE( test_projection_oblique_mercator )
 {
     string proj4omerc="+proj=omerc +lonc=5.34065 +lat_0=60.742 +alpha=19.0198 +no_rot   +a=6.37814e+06  +b=6.35675e+06 +no_defs +x_0=-3.86098e+06 +y_0=1.5594e+06";
-    boost::shared_ptr<Projection> projs_omerc = Projection::createByProj4(proj4omerc);
+    Projection_p projs_omerc = Projection::createByProj4(proj4omerc);
     BOOST_CHECK(projs_omerc->getName() == "oblique_mercator");
     BOOST_CHECK(projs_omerc->isDegree() == false);
 
     std::vector<CDMAttribute> attrs_omerc = projs_omerc->getParameters();
     // generate another projection
-    boost::shared_ptr<Projection> projs2_omerc = Projection::create(attrs_omerc);
+    Projection_p projs2_omerc = Projection::create(attrs_omerc);
     BOOST_CHECK(projs2_omerc->getName() == "oblique_mercator");
 }
 
 BOOST_AUTO_TEST_CASE( test_projection_geostationary )
 {
     string proj4geos="+proj=geos +lon_0=0 +h=3.57858e+07  +a=6.37817e+06  +b=6.35658e+06 +no_defs +x_0=-2.2098e+06 +y_0=-3.50297e+06";
-    boost::shared_ptr<Projection> projs_geos = Projection::createByProj4(proj4geos);
+    Projection_p projs_geos = Projection::createByProj4(proj4geos);
     BOOST_CHECK(projs_geos->getName() == "geostationary");
     BOOST_CHECK(projs_geos->isDegree() == false);
 
     std::vector<CDMAttribute> attrs_geos = projs_geos->getParameters();
     // generate another projection
-    boost::shared_ptr<Projection> projs2_geos = Projection::create(attrs_geos);
+    Projection_p projs2_geos = Projection::create(attrs_geos);
     BOOST_CHECK(projs2_geos->getName() == "geostationary");
 }
 
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_projection_geostationary )
 BOOST_AUTO_TEST_CASE( test_conversion )
 {
     string proj4stere = "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=6371000 +e=0";
-    boost::shared_ptr<Projection> projs = Projection::createByProj4(proj4stere);
+    Projection_p projs = Projection::createByProj4(proj4stere);
 
     std::vector<double> xVals;
     std::vector<double> yVals;
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( test_conversion )
 BOOST_AUTO_TEST_CASE( test_conversion_oblique_mercator )
 {
     string proj4omerc="+proj=omerc +lonc=5.34065 +lat_0=60.742 +alpha=19.0198 +no_rot   +a=6.37814e+06  +b=6.35675e+06 +no_defs +x_0=-3.86098e+06 +y_0=1.5594e+06";
-    boost::shared_ptr<Projection> projom = Projection::createByProj4(proj4omerc);
+    Projection_p projom = Projection::createByProj4(proj4omerc);
 
     std::vector<double> xVals;
     std::vector<double> yVals;
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( test_conversion_oblique_mercator )
 BOOST_AUTO_TEST_CASE( test_conversion_geostationary )
 {
     string proj4geos="+proj=geos +lon_0=0 +h=3.57858e+07  +a=6.37817e+06  +b=6.35658e+06 +no_defs +x_0=-2.2098e+06 +y_0=-3.50297e+06";
-    boost::shared_ptr<Projection> projs_geos = Projection::createByProj4(proj4geos);
+    Projection_p projs_geos = Projection::createByProj4(proj4geos);
 
     std::vector<double> xVals;
     std::vector<double> yVals;

@@ -50,8 +50,7 @@ namespace MetNoFelt {
 
 using namespace MetNoFimex;
 
-static LoggerPtr logger = getLogger("fimex.Felt_File2");
-
+static Logger_p logger = getLogger("fimex.Felt_File2");
 
 Felt_File2::Felt_File2(const string& filename)
     : filename_(filename)

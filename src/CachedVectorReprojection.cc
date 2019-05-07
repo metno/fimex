@@ -30,7 +30,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CachedVectorReprojection");
+static Logger_p logger = getLogger("fimex.CachedVectorReprojection");
 
 void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const
 {

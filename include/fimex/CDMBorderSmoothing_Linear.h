@@ -56,7 +56,7 @@ public:
 
     CDMBorderSmoothing_LinearFactory(size_t transitionWidth = DEFAULT_TRANSITIONWIDTH, size_t borderWidth = DEFAULT_BORDERWIDTH);
 
-    CDMBorderSmoothing::SmoothingPtr operator()(const std::string& varName);
+    CDMBorderSmoothing::Smoothing_p operator()(const std::string& varName);
 
 private:
     size_t transitionWidth_, borderWidth_;

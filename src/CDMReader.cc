@@ -23,10 +23,12 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
-#include "fimex/mifi_constants.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
+#include "fimex/UnitsConverter.h"
 #include "fimex/Utils.h"
+#include "fimex/mifi_constants.h"
+
 #include <functional>
 #include <numeric>
 
@@ -180,7 +182,7 @@ DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, double 
     return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
 
-DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc)
+DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, UnitsConverter_p uc)
 {
     // retrieve scale and offset
     double scale, offset;
@@ -193,7 +195,7 @@ DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, boost::
 DataPtr CDMReader::scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit)
 {
     std::string myUnit = cdm_->getUnits(varName);
-    boost::shared_ptr<UnitsConverter> uc = Units().getConverter(myUnit, newUnit);
+    UnitsConverter_p uc = Units().getConverter(myUnit, newUnit);
     if (uc->isLinear()) {
         // performance optimization, >3x faster
         double unitOffset = 0.;

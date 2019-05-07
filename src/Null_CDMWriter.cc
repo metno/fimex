@@ -38,8 +38,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.Null_CDMWriter");
-
+static Logger_p logger = getLogger("fimex.Null_CDMWriter");
 
 static bool putRecData(CDMDataType dt, DataPtr data, size_t recNum) {
     if (data->size() == 0) return true;

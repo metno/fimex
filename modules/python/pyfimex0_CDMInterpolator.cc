@@ -35,10 +35,6 @@
 #include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-namespace MetNoFimex {
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
-} // namespace MetNoFimex
-
 using namespace MetNoFimex;
 namespace bp = boost::python;
 

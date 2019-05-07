@@ -41,6 +41,7 @@
 #include "CDMMergeUtils.h"
 
 #include <boost/foreach.hpp>
+#include <boost/make_shared.hpp>
 
 // clang-format off
 #define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
@@ -53,7 +54,7 @@ using namespace std;
 
 namespace MetNoFimex {
 
-static LoggerPtr logger(getLogger("fimex.CDMMerger"));
+static Logger_p logger(getLogger("fimex.CDMMerger"));
 
 // ========================================================================
 
@@ -61,20 +62,20 @@ struct CDMMergerPrivate {
     CDMReader_p readerI;
     CDMReader_p readerO;
 
-    CDMInterpolatorPtr interpolatedOT;  //! outer interpolated to target grid
-    CDMBorderSmoothingPtr readerSmooth; //! smoothed (inner+outer) on inner grid
-    CDMInterpolatorPtr interpolatedST;  //! smoothed (inner+outer), interpolated to target grid
-    CDMOverlayPtr readerOverlay;        //! final result, we forward getDataSlice there
+    CDMInterpolator_p interpolatedOT;  //! outer interpolated to target grid
+    CDMBorderSmoothing_p readerSmooth; //! smoothed (inner+outer) on inner grid
+    CDMInterpolator_p interpolatedST;  //! smoothed (inner+outer), interpolated to target grid
+    CDMOverlay_p readerOverlay;        //! final result, we forward getDataSlice there
 
     int gridInterpolationMethod;
     bool useOuterIfInnerUndefined;
     bool keepOuterVariables;
-    CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory;
+    CDMBorderSmoothing::SmoothingFactory_p smoothingFactory;
 
     CDM makeCDM(const string& tproj, const values_v& tx, const values_v& ty,
             const std::string& tx_unit, const std::string& ty_unit,
             const CDMDataType& tx_type, const CDMDataType& ty_type);
-    values_v extendInnerAxis(CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO, const char* unit);
+    values_v extendInnerAxis(CoordinateAxis_cp axisI, CoordinateAxis_cp axisO, const char* unit);
 };
 
 // ========================================================================
@@ -85,14 +86,14 @@ CDMMerger::CDMMerger(CDMReader_p inner, CDMReader_p outer)
     p->readerI = inner;
     p->readerO = outer;
     p->gridInterpolationMethod = MIFI_INTERPOL_BILINEAR;
-    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory());
+    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory());
     p->useOuterIfInnerUndefined = true;
     p->keepOuterVariables = false;
 }
 
 // ------------------------------------------------------------------------
 
-void CDMMerger::setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory)
+void CDMMerger::setSmoothing(CDMBorderSmoothing::SmoothingFactory_p smoothingFactory)
 {
     p->smoothingFactory = smoothingFactory;
     if (p->readerSmooth.get() != 0)
@@ -158,8 +159,7 @@ void CDMMerger::setTargetGridFromInner()
 {
     const CDM &cdmI = p->readerI->getCDM(), &cdmO = p->readerO->getCDM();
 
-    const vector<CoordinateSystemPtr> allCsI = listCoordinateSystems(p->readerI),
-            allCsO = listCoordinateSystems(p->readerO);
+    const CoordinateSystem_cp_v allCsI = listCoordinateSystems(p->readerI), allCsO = listCoordinateSystems(p->readerO);
 
     const CDM::VarVec& varsI = cdmI.getVariables();
     BOOST_FOREACH(const CDMVariable& varI, varsI) {
@@ -169,8 +169,7 @@ void CDMMerger::setTargetGridFromInner()
         if (cdmI.hasDimension(varName) or cdmO.hasDimension(varName))
             continue;
 
-        const CoordinateSystemPtr csI = findCompleteCoordinateSystemFor(allCsI, varName),
-                csO = findCompleteCoordinateSystemFor(allCsO, varName);
+        const CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(allCsI, varName), csO = findCompleteCoordinateSystemFor(allCsO, varName);
         if (!csI.get() || !csO.get())
             continue;
 
@@ -179,12 +178,11 @@ void CDMMerger::setTargetGridFromInner()
         if (not (csI->hasProjection() and csO->hasProjection()))
             continue;
 
-        ProjectionPtr projI = csI->getProjection(), projO = csO->getProjection();
+        Projection_cp projI = csI->getProjection(), projO = csO->getProjection();
         if (projI->isDegree() != projO->isDegree())
             continue;
 
-        CoordinateSystem::ConstAxisPtr xAxisI = csI->getGeoXAxis(),
-                yAxisI = csI->getGeoYAxis();
+        CoordinateAxis_cp xAxisI = csI->getGeoXAxis(), yAxisI = csI->getGeoYAxis();
 
         const char* unit = projI->isDegree() ? "degree" : "m";
         const values_v vx = p->extendInnerAxis(xAxisI, csO->getGeoXAxis(), unit);
@@ -216,22 +214,22 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
         const std::string& tx_unit, const std::string& ty_unit,
         const CDMDataType& tx_type, const CDMDataType& ty_type)
 {
-    readerSmooth = CDMBorderSmoothingPtr(new CDMBorderSmoothing(readerI, readerO));
+    readerSmooth = boost::make_shared<CDMBorderSmoothing>(readerI, readerO);
     readerSmooth->setSmoothing(smoothingFactory);
     readerSmooth->setUseOuterIfInnerUndefined(useOuterIfInnerUndefined);
 
-    interpolatedST = CDMInterpolatorPtr(new CDMInterpolator(readerSmooth));
+    interpolatedST = boost::make_shared<CDMInterpolator>(readerSmooth);
     interpolatedST->changeProjection(gridInterpolationMethod, proj,
             tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 
-    readerOverlay = CDMOverlayPtr(new CDMOverlay(readerO, interpolatedST, gridInterpolationMethod, keepOuterVariables));
+    readerOverlay = boost::make_shared<CDMOverlay>(readerO, interpolatedST, gridInterpolationMethod, keepOuterVariables);
 
     return readerOverlay->getCDM();
 }
 
 // ------------------------------------------------------------------------
 
-values_v CDMMergerPrivate::extendInnerAxis(CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO, const char* unit)
+values_v CDMMergerPrivate::extendInnerAxis(CoordinateAxis_cp axisI, CoordinateAxis_cp axisO, const char* unit)
 {
     const string &nameI = axisI->getName(), &nameO = axisO->getName();
 

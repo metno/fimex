@@ -22,10 +22,12 @@
  */
 
 #include "fimex/CDMReaderWriter.h"
+
 #include "fimex/CDM.h"
-#include "fimex/mifi_constants.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
+#include "fimex/UnitsConverter.h"
+#include "fimex/mifi_constants.h"
 
 namespace MetNoFimex {
 
@@ -67,7 +69,7 @@ DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data,
     return data->convertDataType(MIFI_UNDEFINED_D, unitScale, unitOffset, cdm_->getVariable(varName).getDataType(), outFillValue, scale, offset);
 }
 
-DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc)
+DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data, UnitsConverter_p uc)
 {
     // retrieve scale and offset
     double scale, offset;
@@ -80,7 +82,7 @@ DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data,
 DataPtr CDMReaderWriter::unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit)
 {
     const std::string newUnit = cdm_->getUnits(varName);
-    boost::shared_ptr<UnitsConverter> uc = Units().getConverter(dataUnit, newUnit);
+    UnitsConverter_p uc = Units().getConverter(dataUnit, newUnit);
     if (uc->isLinear()) {
         // performance optimization, >3x faster
         double unitOffset = 0.;

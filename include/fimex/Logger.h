@@ -162,7 +162,7 @@ extern void defaultLogLevel(Logger::LogLevel);
         buffer << message; \
         logger->forcedLog(level, buffer.str(), __FILE__, __LINE__);}}
 
-typedef boost::shared_ptr<Logger> LoggerPtr;
+typedef boost::shared_ptr<Logger> Logger_p;
 
 /**
  * Retrieve a logger for Fimex. It will use loggers in the following order, skipping
@@ -170,7 +170,7 @@ typedef boost::shared_ptr<Logger> LoggerPtr;
  * 1) log4cxx
  * 2) no/dummy logger
  */
-extern LoggerPtr getLogger(const std::string& className);
+extern Logger_p getLogger(const std::string& className);
 
 }  // namespace MetNoFimex
 

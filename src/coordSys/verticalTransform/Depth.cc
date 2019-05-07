@@ -27,22 +27,22 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr Depth::getPressureConverter(CDMReader_p, CoordSysPtr) const
+VerticalConverter_p Depth::getPressureConverter(CDMReader_p, CoordinateSystem_cp) const
 {
-    return VerticalConverterPtr();
+    return VerticalConverter_p();
 }
 
-VerticalConverterPtr Depth::getHeightConverter(CDMReader_p, CoordSysPtr) const
+VerticalConverter_p Depth::getHeightConverter(CDMReader_p, CoordinateSystem_cp) const
 {
-    return VerticalConverterPtr();
+    return VerticalConverter_p();
 }
 
-VerticalConverterPtr Depth::getAltitudeConverter(CDMReader_p, CoordSysPtr) const
+VerticalConverter_p Depth::getAltitudeConverter(CDMReader_p, CoordinateSystem_cp) const
 {
-    return VerticalConverterPtr();
+    return VerticalConverter_p();
 }
 
-VerticalConverterPtr Depth::getDepthConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p Depth::getDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return IdentityConverter::createConverterForVarName(reader, cs, depth, "m");
 }

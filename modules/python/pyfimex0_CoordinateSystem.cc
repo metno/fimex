@@ -58,15 +58,12 @@ void register_ptr_from_python()
 #endif
 }
 
-typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystem_cp;
-typedef boost::shared_ptr<CoordinateSystem> CoordinateSystem_p;
-
 typedef boost::shared_ptr<CoordinateAxis> CoordinateAxis_p;
 typedef boost::shared_ptr<const CoordinateAxis> CoordinateAxis_cp;
 
 bp::list listCoordinateSystems1(CDMReader_p reader)
 {
-    const std::vector<CoordinateSystem_cp> cs = listCoordinateSystems(reader);
+    const CoordinateSystem_cp_v cs = listCoordinateSystems(reader);
     bp::list py_cs;
     for (size_t i=0; i<cs.size(); ++i)
         py_cs.append(cs[i]);
@@ -75,7 +72,7 @@ bp::list listCoordinateSystems1(CDMReader_p reader)
 
 CoordinateSystem_cp findCompleteCoordinateSystemFor1(const bp::list& py_cs, const std::string& varName)
 {
-    return findCompleteCoordinateSystemFor(to_std_container< std::vector<CoordinateSystem_cp> >(py_cs), varName);
+    return findCompleteCoordinateSystemFor(to_std_container<CoordinateSystem_cp_v>(py_cs), varName);
 }
 
 CoordinateAxis_cp CoordinateSyste__findAxisOfType1(CoordinateSystem_cp cs, CoordinateAxis::AxisType type)

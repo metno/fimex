@@ -27,11 +27,13 @@
 #include "fimex/CDMBorderSmoothing.h"
 #include "fimex/CDMBorderSmoothing_Linear.h"
 
+#include "fimex/CDM.h"
+#include "fimex/CDMInterpolator.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 
 #include "CDMMergeUtils.h"
 
@@ -40,19 +42,19 @@ using namespace std;
 
 namespace MetNoFimex {
 
-static LoggerPtr logger(getLogger("fimex.CDMBorderSmoothing"));
+static Logger_p logger(getLogger("fimex.CDMBorderSmoothing"));
 
 // ========================================================================
 
 struct CDMBorderSmoothingPrivate {
     CDMReader_p readerI;
     CDMReader_p readerO;
-    CDMInterpolatorPtr interpolatedO;
+    CDMInterpolator_p interpolatedO;
 
     string nameX, nameY;
 
     bool useOuterIfInnerUndefined;
-    CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory;
+    CDMBorderSmoothing::SmoothingFactory_p smoothingFactory;
     int gridInterpolationMethod;
 
     CDM makeCDM();
@@ -67,7 +69,7 @@ CDMBorderSmoothing::CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer, int
     p->readerO = outer;
 
     p->useOuterIfInnerUndefined = true;
-    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory());
+    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory());
     p->gridInterpolationMethod = grim;
 
     *cdm_ = p->makeCDM();
@@ -75,7 +77,7 @@ CDMBorderSmoothing::CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer, int
 
 // ------------------------------------------------------------------------
 
-void CDMBorderSmoothing::setSmoothing(SmoothingFactoryPtr smoothingFactory)
+void CDMBorderSmoothing::setSmoothing(SmoothingFactory_p smoothingFactory)
 {
     p->smoothingFactory = smoothingFactory;
 }
@@ -117,8 +119,8 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
     
     if (dimSizes.empty())
         return sliceI;
-    
-    SmoothingPtr smoothing = (*p->smoothingFactory)(varName);
+
+    Smoothing_p smoothing = (*p->smoothingFactory)(varName);
     smoothing->setHorizontalSizes(dimSizes[shapeIdxX], dimSizes[shapeIdxY]);
 
     const DataIndex idx(dimSizes);

@@ -65,8 +65,8 @@ std::string file_string(boost::filesystem::path p) { return p.file_string(); }
 namespace MetNoFimex
 {
 using namespace std;
-static LoggerPtr logger = getLogger("fimex.GribFileIndex");
-static LoggerPtr loggerGFM = getLogger("fimex.GribFileMessage");
+static Logger_p logger = getLogger("fimex.GribFileIndex");
+static Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
 
 /**
  * @warn This variable is only for functions inside the GribFileIndex initialization.
@@ -525,7 +525,7 @@ GribFileMessage::GribFileMessage(
 
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix, xmlNodePtr node)
+GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
 {
     fileURL_ = getXmlProp(node, "url");
     if (fileURL_.size() == 0) {
@@ -542,14 +542,14 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
 
 
     {// parameter
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":parameter", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":parameter", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size == 0) throw runtime_error("parameter not found in node");
         xmlNodePtr pNode = xp->nodesetval->nodeTab[0];
         parameterName_ = getXmlProp(pNode, "name");
         shortName_ = getXmlProp(pNode, "shortName");
         // grib
-        XPathObjPtr xpG = doc->getXPathObject(nsPrefix+":grib1", pNode);
+        xmlXPathObject_p xpG = doc->getXPathObject(nsPrefix + ":grib1", pNode);
         int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
         if (gSize > 0) {
             edition_ = 1;
@@ -573,7 +573,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
     {
         // level
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":level", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":level", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
@@ -583,7 +583,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
     {
         // time
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":time", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":time", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
@@ -597,7 +597,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
     {
         // typeOfGrid
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":typeOfGrid", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":typeOfGrid", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
@@ -606,7 +606,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
     {
         // ensemble
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":ensemble", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":ensemble", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
@@ -619,7 +619,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
     {
         // extraKeys
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":extraKey", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":extraKey", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         for (int i = 0; i < size; ++i) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[i];
@@ -629,7 +629,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
 
     {
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":gridDefinition", node);
+        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":gridDefinition", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
@@ -1455,9 +1455,9 @@ void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
     initByXMLReader(grbmlFilePath);
-    boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(grbmlFilePath)));
+    XMLDoc_p doc(new XMLDoc(file_string(grbmlFilePath)));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
-    XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
+    xmlXPathObject_p xp = doc->getXPathObject("/gfi:gribFileIndex");
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
     if (size == 0) {
         throw runtime_error("grib-index xmlfile does not contain root node at: " + file_string(grbmlFilePath));

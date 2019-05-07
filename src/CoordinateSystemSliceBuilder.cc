@@ -33,11 +33,11 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CoordinateSystemSliceBuilder");
+static Logger_p logger = getLogger("fimex.CoordinateSystemSliceBuilder");
 
 using namespace std;
 
-const std::string& getCSVarFromCDM_(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
+const std::string& getCSVarFromCDM_(const CDM& cdm, CoordinateSystem_cp cs)
 {
     const CDM::VarVec& vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
@@ -49,8 +49,9 @@ const std::string& getCSVarFromCDM_(const CDM& cdm, boost::shared_ptr<const Coor
     throw CDMException("no variable belonging to CoordinateSystem found in CoordinateSystem for CoordinateSystemSliceBuilder");
 }
 
-CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
-: SliceBuilder(cdm, getCSVarFromCDM_(cdm, cs)), cs_(cs)
+CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, CoordinateSystem_cp cs)
+    : SliceBuilder(cdm, getCSVarFromCDM_(cdm, cs))
+    , cs_(cs)
 {
     setReferenceTimePos(0); // referenceTime is allways set
     if (cs_->hasAxisType(CoordinateAxis::Time)) {
@@ -61,7 +62,7 @@ CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, boost
 void CoordinateSystemSliceBuilder::setReferenceTimePos(size_t refTimePos)
 {
     if (cs_->hasAxisType(CoordinateAxis::ReferenceTime)) {
-        CoordinateSystem::ConstAxisPtr refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);
+        CoordinateAxis_cp refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);
         if (refAxis->isExplicit()) {
             setStartAndSize(refAxis, refTimePos, 1);
         } else {
@@ -72,14 +73,14 @@ void CoordinateSystemSliceBuilder::setReferenceTimePos(size_t refTimePos)
 void CoordinateSystemSliceBuilder::setTimeStartAndSize(size_t start, size_t size)
 {
     if (cs_->hasAxisType(CoordinateAxis::Time)) {
-        CoordinateSystem::ConstAxisPtr tAxis = cs_->getTimeAxis();
+        CoordinateAxis_cp tAxis = cs_->getTimeAxis();
         if (tAxis->isExplicit()) {
             setStartAndSize(tAxis, start, size);
         } else {
             set<string> tShape(tShape_.begin(), tShape_.end());
             // try to reduce the time-variables dimensions by extracting the refTime
             if (cs_->hasAxisType(CoordinateAxis::ReferenceTime)) {
-                CoordinateSystem::ConstAxisPtr refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);
+                CoordinateAxis_cp refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);
                 tShape.erase(refAxis->getName());
             }
             if (tShape.size() == 1) {
@@ -119,9 +120,8 @@ void CoordinateSystemSliceBuilder::setAxisStartAndSize(CoordinateAxis::AxisType 
         case CoordinateAxis::Time : setTimeStartAndSize(start, size); break;
         default: {
             if (cs_->hasAxisType(axis)) {
-                typedef CoordinateSystem::ConstAxisList Csal;
-                Csal axes = cs_->getAxes();
-                for (Csal::const_iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
+                CoordinateAxis_cp_v axes = cs_->getAxes();
+                for (CoordinateAxis_cp_v::const_iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
                     if ((*axIt)->getAxisType() == axis) {
                         if ((*axIt)->isExplicit()) {
                             setStartAndSize(*axIt, start, size);
@@ -138,10 +138,9 @@ vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes() co
 {
     vector<string> dimNames = getDimensionNames();
     vector<CoordinateAxis::AxisType> retVal;
-    typedef CoordinateSystem::ConstAxisList Csal;
-    Csal axes = cs_->getAxes();
+    CoordinateAxis_cp_v axes = cs_->getAxes();
     for (vector<string>::iterator it = dimNames.begin(); it != dimNames.end(); ++it) {
-        Csal::const_iterator axIt = find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
+        CoordinateAxis_cp_v::const_iterator axIt = find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
         if (axIt != axes.end()) {
             LOG4FIMEX(logger, Logger::DEBUG, (*axIt)->getAxisType() << CoordinateAxis::type2int((*axIt)->getAxisType()));
             retVal.push_back((*axIt)->getAxisType());

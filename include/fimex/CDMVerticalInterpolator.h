@@ -84,7 +84,7 @@ public:
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
 private:
-    DataPtr getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
+    DataPtr getLevelDataSlice(CoordinateSystem_cp cs, const std::string& varName, size_t unLimDimPos);
 
 private:
     CDMReader_p dataReader_;

@@ -126,7 +126,7 @@ static map<string, double> calcStats(DataPtr data) {
 
 static void runStats(po::variables_map& vm, CDMReader_p reader)
 {
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
     const CDM::VarVec& variables = cdm.getVariables();
     set<string> varNames;
@@ -178,10 +178,10 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
         boost::posix_time::ptime refTime = boost::posix_time::not_a_date_time;
         map<string, DataPtr> dimData; // hours since refTime
 
-        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, *varIt);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *varIt);
         if (cs.get()) {
             if (vm.count("verticalLayer")) {
-                CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoXAxis(); // X or Lon
+                CoordinateAxis_cp zAxis = cs->getGeoXAxis(); // X or Lon
                 bool use = false;
                 switch (vlType) {
                     case vlNo: if (zAxis == 0 || zAxis->getData()->size() <= 1) use = true; break;
@@ -205,11 +205,11 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 if (use == false) continue;
             }
             if (cs->isSimpleSpatialGridded()) {
-                CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis(); // X or Lon
-                CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis(); // Y or Lat
+                CoordinateAxis_cp xAxis = cs->getGeoXAxis(); // X or Lon
+                CoordinateAxis_cp yAxis = cs->getGeoYAxis(); // Y or Lat
                 xSize = cdm.getDimension(xAxis->getName()).getLength();
                 ySize = cdm.getDimension(yAxis->getName()).getLength();
-                CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis(); // time
+                CoordinateAxis_cp tAxis = cs->getTimeAxis(); // time
 
                 CoordinateSystemSliceBuilder sb(cdm, cs);
                 // handling of time
@@ -221,7 +221,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 if (tAxis.get() != 0) {
                     // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
                     if (cs->hasAxisType(CoordinateAxis::ReferenceTime)) {
-                        CoordinateSystem::ConstAxisPtr rtAxis = cs->findAxisOfType(CoordinateAxis::ReferenceTime);
+                        CoordinateAxis_cp rtAxis = cs->findAxisOfType(CoordinateAxis::ReferenceTime);
                         DataPtr refTimes = reader->getScaledDataInUnit(rtAxis->getName(),"minutes since 1970-01-01 00:00:00 +00:00");
                         TimeUnit tu("minutes since 1970-01-01 00:00:00 +00:00");
                         /* do something with the refTimes and select the wanted Position */
@@ -258,7 +258,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                     }
                 }
 
-                CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis(); // Y or Lat
+                CoordinateAxis_cp zAxis = cs->getGeoZAxis(); // Y or Lat
                 if (zAxis != 0) {
                     if (vlType == vlUnit) {
                         zData = reader->getScaledDataInUnit(zAxis->getName(), vlName);
@@ -455,7 +455,7 @@ int run(int argc, char* args[])
         defaultLogLevel(Logger::DEBUG);
     }
     mifi_setNumThreads(num_threads);
-    LoggerPtr logger = getLogger("fimex");
+    Logger_p logger = getLogger("fimex");
     if (!(vm.count("input.file"))) {
         writeUsage(cerr, generic);
         LOG4FIMEX(logger, Logger::FATAL, "input.file required");

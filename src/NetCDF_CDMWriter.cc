@@ -67,7 +67,7 @@ namespace MetNoFimex
 
 namespace {
 
-LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
+Logger_p logger = getLogger("fimex.NetCDF_CDMWriter");
 
 int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
@@ -81,7 +81,7 @@ int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
     }
     if (doc.get() != 0) {
         // set the default filetype
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@filetype]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@filetype]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr) {
             std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
@@ -116,7 +116,7 @@ int ncDimId(int ncId, const CDMDimension* unLimDim)
 
 void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size == 0)
@@ -182,7 +182,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& out
 void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size > 0) {
@@ -200,7 +200,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
     if (doc.get() != 0) {
         {
             // remove global attributes
-            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='attribute']");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='attribute']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
@@ -210,7 +210,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
         }
         {
             // remove variable attributes
-            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable/remove[@type='attribute']");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable/remove[@type='attribute']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
@@ -221,7 +221,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
         }
         {
             // remove variables
-            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='variable']");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='variable']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
@@ -232,7 +232,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
         }
         {
             // remove dimensions
-            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='dimension']");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='dimension']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
@@ -247,7 +247,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
         }
         {
             // check for autoRemoveUnusedDimensions
-            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@autoRemoveUnusedDimension='false']");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@autoRemoveUnusedDimension='false']");
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             if (size > 0) autoRemoveDims = false;
@@ -267,7 +267,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
 void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -296,7 +296,7 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName)
 void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -309,7 +309,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
     }
     if (doc.get() != 0) {
         // read 'type' attribute and enable re-typeing of data
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -323,7 +323,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
     unsigned int defaultCompression = 13; // shuffle + comp-level 3
     if (doc.get() != 0) {
         // set the default compression level for all variables
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@compressionLevel]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@compressionLevel]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr) {
             defaultCompression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
@@ -335,7 +335,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
     }
     if (doc.get() != 0) {
         // set the compression level for all variables
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@compressionLevel]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@compressionLevel]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -347,7 +347,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
     // chunking
     if (doc.get() != 0) {
         // set the compression level for all variables
-        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@chunkSize]");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@chunkSize]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -362,38 +362,39 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
 {
     // make a complete copy of the original attributes
     if (doc.get() != 0) {
-    XPathObjPtr xpathObj = doc->getXPathObject("//attribute");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    for (int i = 0; i < size; i++) {
-        xmlNodePtr node = nodes->nodeTab[i];
-        std::string attName = getXmlProp(node, "name");
-        if (attName != "units") LOG4FIMEX(logger, Logger::WARN, "Changing attributes in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
-        std::string varName = CDM::globalAttributeNS();
-        xmlNodePtr parent = node->parent;
-        std::string parentName = getXmlName(parent);
-        if (parentName == "cdm_ncwriter_config") {
-            // default
-        } else if (parentName == "variable") {
-            varName = getXmlProp(parent, "name");
-            testVariableExists(varName);
-        } else {
-            throw CDMException("unknown parent of attribute "+attName+": "+parentName);
-        }
+        xmlXPathObject_p xpathObj = doc->getXPathObject("//attribute");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        for (int i = 0; i < size; i++) {
+            xmlNodePtr node = nodes->nodeTab[i];
+            std::string attName = getXmlProp(node, "name");
+            if (attName != "units")
+                LOG4FIMEX(logger, Logger::WARN, "Changing attributes in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
+            std::string varName = CDM::globalAttributeNS();
+            xmlNodePtr parent = node->parent;
+            std::string parentName = getXmlName(parent);
+            if (parentName == "cdm_ncwriter_config") {
+                // default
+            } else if (parentName == "variable") {
+                varName = getXmlProp(parent, "name");
+                testVariableExists(varName);
+            } else {
+                throw CDMException("unknown parent of attribute " + attName + ": " + parentName);
+            }
 
-        std::string attValue = getXmlProp(node, "value");
-        std::string attType = getXmlProp(node, "type");
-        std::string attNewName = getXmlProp(node, "newname");
-        std::string newAttrName = attNewName != "" ? attNewName : attName;
-        CDMAttribute attr;
-        if (attType != "") {
-            attr = CDMAttribute(newAttrName, attType, attValue);
-        } else {
-            const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
-            attr = CDMAttribute(newAttrName, oldAttr.getData());
-        }
-        cdm.removeAttribute(varName, attName); // remove the attribute with the old name
-        cdm.addAttribute(varName, attr); // set the attribute with the new name and data
+            std::string attValue = getXmlProp(node, "value");
+            std::string attType = getXmlProp(node, "type");
+            std::string attNewName = getXmlProp(node, "newname");
+            std::string newAttrName = attNewName != "" ? attNewName : attName;
+            CDMAttribute attr;
+            if (attType != "") {
+                attr = CDMAttribute(newAttrName, attType, attValue);
+            } else {
+                const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
+                attr = CDMAttribute(newAttrName, oldAttr.getData());
+            }
+            cdm.removeAttribute(varName, attName); // remove the attribute with the old name
+            cdm.addAttribute(varName, attr);       // set the attribute with the new name and data
     }
     }
 }

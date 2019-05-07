@@ -27,22 +27,22 @@
 #ifndef SLICEBUILDER_H_
 #define SLICEBUILDER_H_
 
+#include "fimex/coordSys/CoordSysDecl.h"
+
 #include <iosfwd>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
-#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
 {
 // forward decl
 class CDM;
-class CoordinateAxis;
+
 /**
  * @headerfile fimex/SliceBuilder.h
  */
-
 
 class SliceBuilder
 {
@@ -90,7 +90,7 @@ public:
      * @throw CDMException if axis not part of the dimensions of the variable
      * @throw out_of_range depending on startPos or size
      */
-    void setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size);
+    void setStartAndSize(const CoordinateAxis_cp& axis, size_t start, size_t size);
     /**
      * Set the start to 0 and the size to the maximum size. Though this is the default
      * this function will reset prevous reduced dimensions and it will mark the dimension as 'set'
@@ -104,7 +104,7 @@ public:
      * and not return it in getUnsetDimensionNames.
      * @param axis name of the dimension to restrict, ignored if NULL
      */
-    void setAll(const boost::shared_ptr<const CoordinateAxis>& axis);
+    void setAll(const MetNoFimex::CoordinateAxis_cp& axis);
     /**
      * @return vector with start-positions of shape-size and order of the variable
      */

@@ -210,7 +210,7 @@ void Logger::forcedLog(LogLevel level, const std::string& message, const char* f
 
 // ========================================================================
 
-LoggerPtr getLogger(const std::string& className)
+Logger_p getLogger(const std::string& className)
 {
     return boost::make_shared<Logger>(className);
 }

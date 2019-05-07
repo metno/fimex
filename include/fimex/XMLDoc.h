@@ -41,7 +41,10 @@ typedef struct _xmlXPathObject xmlXPathObject;
 namespace MetNoFimex
 {
 
-typedef boost::shared_ptr<xmlXPathObject> XPathObjPtr;
+typedef boost::shared_ptr<xmlXPathObject> xmlXPathObject_p;
+
+class XMLDoc;
+typedef boost::shared_ptr<XMLDoc> XMLDoc_p;
 
 /**
  * @headerfile fimex/XMLDoc.h
@@ -68,7 +71,7 @@ public:
      * @return node a xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
      * @throw CDMException if xpath is not parsable
      */
-    XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
+    xmlXPathObject_p getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
     /**
      * @brief register a namespace for later xpath
      *
@@ -87,8 +90,8 @@ public:
      */
     std::string toString(const xmlNodePtr node);
 
-    static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
-    static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer, const std::string& url = "");
+    static XMLDoc_p fromFile(const std::string& filename);
+    static XMLDoc_p fromString(const std::string& buffer, const std::string& url = "");
 
 private:
         /**

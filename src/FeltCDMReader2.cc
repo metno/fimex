@@ -55,13 +55,13 @@ namespace MetNoFimex
 using namespace std;
 using namespace MetNoFelt;
 
-static LoggerPtr logger = getLogger("fimex.FeltCDMReader2");
+static Logger_p logger = getLogger("fimex.FeltCDMReader2");
 
 vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const string& variableXPath)
 {
     vector<double> retValues;
     string valuesXPath(variableXPath + "/values");
-    XPathObjPtr xpathObj = doc.getXPathObject(valuesXPath);
+    xmlXPathObject_p xpathObj = doc.getXPathObject(valuesXPath);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -136,7 +136,7 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
 void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
 {
     string addAxisXPath(xpathLevelString + "/additional_axis_variable");
-    XPathObjPtr xpathObj = doc.getXPathObject(addAxisXPath);
+    xmlXPathObject_p xpathObj = doc.getXPathObject(addAxisXPath);
     if (xpathObj.get() != 0) {
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
@@ -195,9 +195,9 @@ FeltCDMReader2::~FeltCDMReader2()
 
 void FeltCDMReader2::init(const XMLInput& configInput) {
     // test lib vs compile version
-    boost::shared_ptr<XMLDoc> doc = configInput.getXMLDoc();
+    XMLDoc_p doc = configInput.getXMLDoc();
     configId = configInput.id();
-    XPathObjPtr xpathObj = doc->getXPathObject("/cdm_felt_config");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_felt_config");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
         throw CDMException("config "+configId+" is not a /cdm_felt_config configuration");
@@ -266,7 +266,7 @@ vector<string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc, con
     }
 
     vector<string> knownFeltIds;
-    XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter");
+    xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; ++i) {
@@ -278,7 +278,7 @@ vector<string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc, con
             dataType = ":dataType=" + dataType;
         }
         // get the fill value
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter[@id=\"" + id + "\"]/attribute[@name=\"_FillValue\"]");
         string fillValue;
         if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
             fillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -295,7 +295,7 @@ map<string, string> FeltCDMReader2::initGetOptionsFromXML(const XMLDoc& doc)
 {
     map<string, string> options;
     // optional processing options
-    XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/processOptions/option");
+    xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/processOptions/option");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; ++i) {
@@ -308,7 +308,7 @@ map<string, string> FeltCDMReader2::initGetOptionsFromXML(const XMLDoc& doc)
 void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 {
     string xpathString("/cdm_felt_config/global_attributes");
-    XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
+    xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size != 1) {
@@ -335,7 +335,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
     string timeType;
     xmlNodePtr timeNode;
     {
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
@@ -348,7 +348,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
     }
     string timeUnits;
     {
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time/attribute[@name='units']");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time/attribute[@name='units']");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size >= 1) {
@@ -410,7 +410,7 @@ map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XML
     for (map<short, vector<LevelPair> >::const_iterator it = levels.begin(); it != levels.end(); ++it) {
         // add a level
         string xpathLevelString("/cdm_felt_config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
-        XPathObjPtr xpathObj = doc.getXPathObject(xpathLevelString);
+        xmlXPathObject_p xpathObj = doc.getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
@@ -474,7 +474,7 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
 
     // get the overruled earthform
     {
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/overrule/earthFigure");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdm_felt_config/overrule/earthFigure");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         string replaceEarthString = "";
@@ -577,7 +577,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
     vector<boost::shared_ptr<Felt_Array2> > fArrays(feltfile_->listFeltArrays());
     for (vector<boost::shared_ptr<Felt_Array2> >::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
         string xpathString("/cdm_felt_config/variables/parameter[@id='"+(*it)->getName()+"']");
-        XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
+        xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size > 1) {

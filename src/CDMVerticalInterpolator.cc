@@ -26,15 +26,17 @@
 
 #include "fimex/CDMVerticalInterpolator.h"
 
-#include "fimex/interpolation.h"
-#include "fimex/vertical_coordinate_transformations.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMInterpolator.h" // for data <-> interpolationArray
-#include "fimex/Logger.h"
-#include "fimex/Utils.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
+#include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+#include "fimex/interpolation.h"
+#include "fimex/vertical_coordinate_transformations.h"
+
 #include "coordSys/CoordSysUtils.h"
 
 #include "fimex/ArrayLoop.h"
@@ -52,12 +54,12 @@ namespace MetNoFimex
 
 namespace {
 
-LoggerPtr logger = getLogger("fimex.CDMVerticalInterpolator");
+Logger_p logger = getLogger("fimex.CDMVerticalInterpolator");
 
-bool isSimpleZAxis(const CDM& cdm, CoordSysPtr cs)
+bool isSimpleZAxis(const CDM& cdm, CoordinateSystem_cp cs)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "simple z? " << cs->id());
-    CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+    CoordinateAxis_cp zAxis = cs->getGeoZAxis();
     if (!zAxis || !cs->getGeoXAxis() || !cs->getGeoYAxis()) {
         LOG4FIMEX(logger, Logger::DEBUG, "no z/x/y axis: " << cs->id());
         return false;
@@ -81,7 +83,7 @@ bool isSimpleZAxis(const CDM& cdm, CoordSysPtr cs)
     return true;
 }
 
-void replaceZaxis(CDM& cdm, CoordSysPtr cs, const std::string& varName, const std::string& zAxisName)
+void replaceZaxis(CDM& cdm, CoordinateSystem_cp cs, const std::string& varName, const std::string& zAxisName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "replace z? " << cs->id() << " var='" << varName << "' zaxis='" << zAxisName);
     // change the shape of the variables with this cs: remove the old z axis, add the new one
@@ -124,10 +126,10 @@ struct VIntPimpl {
     // name of the generated vertical axis
     string vAxis;
     // variable-names with vertical information to change
-    vector<CoordSysPtr> changeCoordSys;
+    CoordinateSystem_cp_v changeCoordSys;
 
     string templateVarName;
-    CoordSysPtr templateCS;
+    CoordinateSystem_cp templateCS;
 
     bool ignoreValidityMin;
     bool ignoreValidityMax;
@@ -196,9 +198,8 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
 {
     pimpl_->level1 = level1;
 
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     // get all coordinate systems from file before changing this cdm
-    const vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(dataReader_);
 
     // allocate a new vertical axis
     const CDM& rcdm = dataReader_->getCDM();
@@ -244,7 +245,7 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
     }
 
     for (size_t i = 0; i < coordSys.size(); i++) {
-        CoordSysPtr cs = coordSys[i];
+        CoordinateSystem_cp cs = coordSys[i];
         if (isSimpleZAxis(*cdm_, cs)) {
             pimpl_->changeCoordSys.push_back(cs);
 
@@ -262,9 +263,8 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
 
 void CDMVerticalInterpolator::interpolateByTemplateVariable(const std::string& tv)
 {
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     // get all coordinate systems from file before changing this cdm
-    const vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(dataReader_);
 
     pimpl_->templateVarName = tv;
     pimpl_->templateCS = findCompleteCoordinateSystemFor(coordSys, pimpl_->templateVarName);
@@ -275,12 +275,12 @@ void CDMVerticalInterpolator::interpolateByTemplateVariable(const std::string& t
     if (!pimpl_->templateCS->getVerticalTransformation())
         throw CDMException("vertical interpolation template variable '" + tv + "' without vertical transformation");
 
-    CoordinateSystem::ConstAxisPtr zAxisTemplate = pimpl_->templateCS->getGeoZAxis();
+    CoordinateAxis_cp zAxisTemplate = pimpl_->templateCS->getGeoZAxis();
     const std::string& zAxisTemplateShape0 = zAxisTemplate->getShape().at(0);
 
     for (size_t i = 0; i < coordSys.size(); i++) {
-        CoordSysPtr cs = coordSys[i];
-        CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+        CoordinateSystem_cp cs = coordSys[i];
+        CoordinateAxis_cp zAxis = cs->getGeoZAxis();
         if (zAxis == zAxisTemplate)
             continue;
         if (!isSimpleZAxis(*cdm_, cs))
@@ -302,7 +302,7 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     if (variable.hasData()) {
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
-    CoordSysPtr csI = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
+    CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
     if (csI.get() == 0) {
         LOG4FIMEX(logger, Logger::DEBUG, "no cs change for var='" << varName << "'");
         // no level to change, propagate to the dataReader_
@@ -312,17 +312,17 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     return getLevelDataSlice(csI, varName, unLimDimPos);
 }
 
-DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr csI, const std::string& varName, size_t unLimDimPos)
+DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, const std::string& varName, size_t unLimDimPos)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getLevelDataSlice(.. '" << varName << "' ..)");
     if (!csI->hasVerticalTransformation()) {
         throw CDMException(varName + " has no vertical transformation");
     }
 
-    VerticalConverterPtr iConverter = verticalConverter(csI, dataReader_, pimpl_->verticalType);
+    VerticalConverter_p iConverter = verticalConverter(csI, dataReader_, pimpl_->verticalType);
     DataPtr iVerticalData = verticalData4D(iConverter, dataReader_->getCDM(), unLimDimPos);
 
-    VerticalConverterPtr oConverter;
+    VerticalConverter_p oConverter;
     DataPtr oVerticalData;
     if (pimpl_->templateCS) {
         oConverter = verticalConverter(pimpl_->templateCS, dataReader_, pimpl_->verticalType);

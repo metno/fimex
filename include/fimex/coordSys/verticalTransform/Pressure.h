@@ -57,7 +57,7 @@ public:
     virtual bool isComplete() const {return !pressure.empty();}
 
 protected:
-    VerticalConverterPtr getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const;
+    VerticalConverter_p getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
 };
 
 } // namespace MetNoFimex

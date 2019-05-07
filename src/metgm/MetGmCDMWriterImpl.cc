@@ -89,7 +89,7 @@ namespace MetNoFimex {
         const CDM& cdmRef = cdmReader->getCDM();
 
         // start metgm_parameter
-        XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         size_t size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
@@ -101,7 +101,8 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            xmlXPathObject_p xpathObj =
+                doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\"" + metgmName + "\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
@@ -182,7 +183,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\"" + kildeName + "\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {

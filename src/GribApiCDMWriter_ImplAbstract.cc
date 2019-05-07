@@ -75,7 +75,7 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
 
     {
         std::string templXPath("/cdm_gribwriter_config/template_file");
-        XPathObjPtr xPObj = xmlConfig->getXPathObject(templXPath);
+        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
         xmlNodeSetPtr nodes = xPObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size == 1) {
@@ -98,7 +98,7 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
     {
         std::ios_base::openmode mode = std::ios::binary|std::ios::out;
         std::string templXPath("/cdm_gribwriter_config/output_file[@type]");
-        XPathObjPtr xPObj = xmlConfig->getXPathObject(templXPath);
+        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
         xmlNodeSetPtr nodes = xPObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size > 0) {
@@ -146,13 +146,11 @@ void GribApiCDMWriter_ImplAbstract::run()
     setGlobalAttributes();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmReader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(cdmReader);
     const CDM& cdm = cdmReader->getCDM();
     const CDM::VarVec& vars = cdm.getVariables();
     set<string> usedVariables;
-    for (vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = coordSys.begin();
-            varSysIt != coordSys.end();
-            ++varSysIt) {
+    for (CoordinateSystem_cp_v::iterator varSysIt = coordSys.begin(); varSysIt != coordSys.end(); ++varSysIt) {
 
         if ((*varSysIt)->isSimpleSpatialGridded()) {
             vector<string> csVars;
@@ -177,10 +175,10 @@ void GribApiCDMWriter_ImplAbstract::run()
                 continue;
             }
 
-            CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
-            CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
-            CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
-            CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+            CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+            CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+            CoordinateAxis_cp zAxis = (*varSysIt)->getGeoZAxis(); // Z
+            CoordinateAxis_cp tAxis = (*varSysIt)->getTimeAxis(); // time
             string stepUnit = "s";
 
             CoordinateSystemSliceBuilder sb(cdm, *varSysIt);
@@ -192,7 +190,7 @@ void GribApiCDMWriter_ImplAbstract::run()
             if (tAxis.get() != 0) {
                 // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
                 if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
-                    CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
+                    CoordinateAxis_cp rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
                     DataPtr refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
                     boost::shared_array<unsigned long long> refs = refTimesD->asUInt64();
                     /* do something with the refTimes and select the wanted Position */
@@ -338,7 +336,7 @@ void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
 
 void GribApiCDMWriter_ImplAbstract::setNodesAttributes(std::string attName, void* node)
 {
-    XPathObjPtr xPObj;
+    xmlXPathObject_p xPObj;
     if (node == 0) {
         xPObj = xmlConfig->getXPathObject(attName);
     } else {
@@ -443,7 +441,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 
     // scale the levels according to grib
     verticalAxisXPath += "/grib" + type2string(gribVersion);
-    XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
+    xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
     xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size == 1) {
@@ -493,8 +491,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
-    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
-    CoordSysList css = listCoordinateSystems(cdmReader);
+    CoordinateSystem_cp_v css = listCoordinateSystems(cdmReader);
     const CDM& cdm = cdmReader->getCDM();
     std::string time = cdm.getTimeAxis(varName);
     std::vector<FimexTime> timeData;
@@ -504,8 +501,8 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
         timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
     } else {
         // find a somewhat useful default, wild guess: first time in first time-axis found
-        for (CoordSysList::iterator csit = css.begin(); csit != css.end(); ++csit) {
-            CoordinateSystem::ConstAxisPtr timeAxis = (*csit)->getTimeAxis();
+        for (CoordinateSystem_cp_v::iterator csit = css.begin(); csit != css.end(); ++csit) {
+            CoordinateAxis_cp timeAxis = (*csit)->getTimeAxis();
             if (timeAxis.get() != 0) {
                 time = timeAxis->getName();
                 const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
@@ -540,7 +537,7 @@ bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, std::
     std::string parameterXPath = baseXPath + "[@name=\"" + varName + "\"]";
     parameterXPath += "/grib"+type2string(gribVersion);
     // try first with name
-    XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
+    xmlXPathObject_p xpathObj = xmlConfig->getXPathObject(parameterXPath);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     size_t found = (nodes) ? (nodes->nodeNr > 0) : 0;
     if (found == 0) {
@@ -548,7 +545,7 @@ bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, std::
         if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
             std::string stdNameXPath = baseXPath + "[@standard_name=\"" + attr.getData()->asString() + "\"]";
             stdNameXPath += "/grib"+type2string(gribVersion);
-            XPathObjPtr xpathObj2 = xmlConfig->getXPathObject(stdNameXPath);
+            xmlXPathObject_p xpathObj2 = xmlConfig->getXPathObject(stdNameXPath);
             nodes = xpathObj2->nodesetval;
             found = (nodes) ? (nodes->nodeNr > 0) : 0;
             if (found > 0)
@@ -567,7 +564,7 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, d
     std::vector<int> possibleNodes;
     std::string usedXPath;
     if (hasNodePtr(varName, usedXPath)) {
-        XPathObjPtr xpathObj = xmlConfig->getXPathObject(usedXPath);
+        xmlXPathObject_p xpathObj = xmlConfig->getXPathObject(usedXPath);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         assert(size > 0); // checked with hasNodePtr

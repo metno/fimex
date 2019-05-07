@@ -65,7 +65,7 @@ private:
     // map each new time-position to the closest time-positions in the old times
     typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
     TimeChangeMap timeChangeMap_;
-    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSystems_;
+    CoordinateSystem_cp_v coordSystems_;
     // store the datareaders times as doubles of the new units
     std::map<std::string, std::vector<double> > dataReaderTimesInNewUnits_;
 };

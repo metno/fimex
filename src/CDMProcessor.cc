@@ -34,9 +34,12 @@
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
+
+#include <boost/make_shared.hpp>
 
 #include <set>
 #include <algorithm>
@@ -47,13 +50,11 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.CDMProcessor");
+static Logger_p logger = getLogger("fimex.CDMProcessor");
 
-typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-typedef vector<CoordSysPtr> CoordSysPtr_v;
-typedef map<string, CoordSysPtr> CoordSysMap;
+typedef map<string, CoordinateSystem_cp> CoordSysMap;
 
-typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojectionPtr;
+typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
 
 struct SliceCache {
     string varName;
@@ -94,20 +95,18 @@ struct CDMProcessorImpl {
     // variable -> <counterPart, horizontalId> (same as above but with Y as first component)
     map<string, pair<string, string> > rotateLatLonVectorY;
     // horizontalId -> cachedVectorReprojection
-    map<string, CachedVectorReprojectionPtr> cachedVectorReprojection;
+    map<string, CachedVectorReprojection_p> cachedVectorReprojection;
     SliceCache sliceCache;
     VerticalVelocityComps vvComp;
 };
 
-CachedVectorReprojectionPtr makeCachedVectorReprojection(CDMReader_p dataReader,
-                                                         CoordSysPtr cs, bool toLatLon)
+CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, CoordinateSystem_cp cs, bool toLatLon)
 {
     assert(cs->hasProjection());
 
-    typedef CoordinateSystem::ConstAxisPtr ConstAxisPtr;
-    ConstAxisPtr xAxis = cs->getGeoXAxis();
+    CoordinateAxis_cp xAxis = cs->getGeoXAxis();
     assert(xAxis.get() != 0);
-    ConstAxisPtr yAxis = cs->getGeoYAxis();
+    CoordinateAxis_cp yAxis = cs->getGeoYAxis();
     assert(yAxis.get() != 0);
 
     DataPtr xAxisData;
@@ -144,7 +143,7 @@ CachedVectorReprojectionPtr makeCachedVectorReprojection(CDMReader_p dataReader,
                 MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, xAxisSize, yAxisSize, matrix.get());
     }
     LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
-    return CachedVectorReprojectionPtr(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
+    return boost::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize);
 }
 
 CDMProcessor::CDMProcessor(CDMReader_p dataReader)
@@ -160,21 +159,21 @@ CDMProcessor::~CDMProcessor()
 
 void CDMProcessor::addVerticalVelocity()
 {
-    LoggerPtr logger = getLogger("fimex.CDMProcessor.addVerticalVelocity");
+    Logger_p logger = getLogger("fimex.CDMProcessor.addVerticalVelocity");
     if (cdm_->hasVariable("upward_air_velocity_ml")) {
         LOG4FIMEX(logger, Logger::INFO, "upward_air_velocity_ml already exists, not calculating new one");
     }
     enhanceVectorProperties(p_->dataReader); // set spatial-vectors
-    const CoordSysPtr_v coordSys = listCoordinateSystems(p_->dataReader);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(p_->dataReader);
 
     // find x_wind in hybrid-sigma layers (complete with ap and b)
     vector<string> xWinds = cdm_->findVariables("standard_name","(x|grid_eastward)_wind");
     vector<VerticalVelocityComps> vvcs;
     for (vector<string>::iterator xw = xWinds.begin(); xw != xWinds.end(); xw++) {
-        CoordSysPtr cs = findCompleteCoordinateSystemFor(coordSys, *xw);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *xw);
         if (cs.get() && cs->hasVerticalTransformation() && cs->isSimpleSpatialGridded()) {
-            CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis(); // Z or Lat
-            boost::shared_ptr<const VerticalTransformation> vtrans = cs->getVerticalTransformation();
+            CoordinateAxis_cp zAxis = cs->getGeoZAxis(); // Z or Lat
+            VerticalTransformation_cp vtrans = cs->getVerticalTransformation();
             if (vtrans->getName() == HybridSigmaPressure1::NAME() && vtrans->isComplete()) {
                 VerticalVelocityComps vvc;
                 vvc.xWind = *xw;
@@ -223,10 +222,10 @@ void CDMProcessor::addVerticalVelocity()
     vector<string> geopots = cdm_->findVariables("standard_name","(surface_geopotential|altitude|surface_altitude|geopotential_height|geopotential)");
     for (vector<VerticalVelocityComps>::iterator vvcIt = vvcs.begin(); vvcIt != vvcs.end(); vvcIt++) {
         for (vector<string>::iterator gpIt = geopots.begin(); gpIt != geopots.end(); gpIt++) {
-            CoordSysPtr gpCs = findCompleteCoordinateSystemFor(coordSys, *gpIt);
+            CoordinateSystem_cp gpCs = findCompleteCoordinateSystemFor(coordSys, *gpIt);
             if (gpCs.get()) {
-                CoordinateSystem::ConstAxisPtr gxAxis = gpCs->getGeoXAxis();
-                CoordinateSystem::ConstAxisPtr gyAxis = gpCs->getGeoYAxis();
+                CoordinateAxis_cp gxAxis = gpCs->getGeoXAxis();
+                CoordinateAxis_cp gyAxis = gpCs->getGeoYAxis();
                 if (gxAxis != 0 && gyAxis != 0) {
                     size_t gxSize = cdm_->getDimension(gxAxis->getName()).getLength();
                     size_t gySize = cdm_->getDimension(gyAxis->getName()).getLength();
@@ -605,7 +604,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             xData = p_->dataReader->getDataSlice(xVar, unLimDimPos);
             csId = p_->rotateLatLonVectorY[varName].second;
         }
-        CachedVectorReprojectionPtr cvr = p_->cachedVectorReprojection[csId];
+        CachedVectorReprojection_p cvr = p_->cachedVectorReprojection[csId];
         boost::shared_array<float> xArray = data2InterpolationArray(xData, getCDM().getFillValue(xVar));
         boost::shared_array<float> yArray = data2InterpolationArray(yData, getCDM().getFillValue(yVar));
         if (xData->size() != yData->size()) {
@@ -627,7 +626,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         const string& csId = p_->rotateLatLonDirection[varName];
         LOG4FIMEX(logger, Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
         assert(p_->cachedVectorReprojection.find(csId) != p_->cachedVectorReprojection.end());
-        CachedVectorReprojectionPtr cvr = p_->cachedVectorReprojection[csId];
+        CachedVectorReprojection_p cvr = p_->cachedVectorReprojection[csId];
         boost::shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));
         double addOffset = 0.;
         double scaleFactor = 1.;

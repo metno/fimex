@@ -25,6 +25,7 @@
  */
 
 #include "fimex/SliceBuilder.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
@@ -40,7 +41,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.SliceBuilder");
+static Logger_p logger = getLogger("fimex.SliceBuilder");
 
 SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>& dimSize)
 {
@@ -117,7 +118,7 @@ void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, si
     setDims_.insert(dimName);
 }
 
-void SliceBuilder::setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size)
+void SliceBuilder::setStartAndSize(const CoordinateAxis_cp& axis, size_t start, size_t size)
 {
     if (axis.get() == 0)
         return;
@@ -134,7 +135,7 @@ void SliceBuilder::setAll(const std::string & dimName)
     setStartAndSize(dimName, 0, maxSize_.at(pos));
 }
 
-void SliceBuilder::setAll(const boost::shared_ptr<const CoordinateAxis>& axis)
+void SliceBuilder::setAll(const CoordinateAxis_cp& axis)
 {
     if (axis.get() == 0)
         return;

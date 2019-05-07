@@ -44,7 +44,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger(getLogger("fimex.CDMExtractor"));
+static Logger_p logger(getLogger("fimex.CDMExtractor"));
 
 CDMExtractor::CDMExtractor(CDMReader_p datareader)
 : dataReader_(datareader)
@@ -338,14 +338,12 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of "<< aUnits << "(" << startVal << "," << endVal <<")");
 
     Units units;
-    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(dataReader_);
+    CoordinateSystem_cp_v coordsys = listCoordinateSystems(dataReader_);
     const CDM& cdm = dataReader_->getCDM();
-    typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
-    VAxesList vAxes;
-    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
+    CoordinateAxis_cp_v vAxes;
+    for (CoordinateSystem_cp_v::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
         for (vector<CoordinateAxis::AxisType>::const_iterator vType = types.begin(); vType != types.end(); ++vType) {
-            CoordinateSystem::ConstAxisPtr vAxis = (*cs)->findAxisOfType(*vType);
+            CoordinateAxis_cp vAxis = (*cs)->findAxisOfType(*vType);
             if (vAxis.get() != 0) {
                 string vaUnits = cdm.getUnits(vAxis->getName());
                 if (units.areConvertible(vaUnits, aUnits)) {
@@ -356,7 +354,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
     }
 
     set<string> usedDimensions;
-    for (VAxesList::const_iterator va = vAxes.begin(); va != vAxes.end(); ++va) {
+    for (CoordinateAxis_cp_v::const_iterator va = vAxes.begin(); va != vAxes.end(); ++va) {
         const vector<string>& shape = (*va)->getShape();
         if (shape.size() != 1) {
             LOG4FIMEX(logger, Logger::WARN, "cannot reduce axis '" << (*va)->getName() << "': axis is not 1-dim");
@@ -453,11 +451,10 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     const bool wrap180 = (west > east);
 
     // find coordinate-systems
-    typedef vector<CoordinateSystemPtr> CsList;
-    CsList coordsys = listCoordinateSystems(dataReader_);
+    CoordinateSystem_cp_v coordsys = listCoordinateSystems(dataReader_);
     set<string> convertedAxes;
-    for (CsList::const_iterator ics = coordsys.begin(); ics != coordsys.end(); ++ics) {
-        CoordinateSystemPtr cs = *ics;
+    for (CoordinateSystem_cp_v::const_iterator ics = coordsys.begin(); ics != coordsys.end(); ++ics) {
+        CoordinateSystem_cp cs = *ics;
 
         if (!cs->isSimpleSpatialGridded())
             continue;

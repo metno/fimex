@@ -43,7 +43,7 @@ using namespace std;
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CDMQualityExtractor");
+static Logger_p logger = getLogger("fimex.CDMQualityExtractor");
 
 /**
  * find the variable which is quality-assured by the status-variable
@@ -133,7 +133,7 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
     }
     if (configFile != "") {
         XMLDoc doc(configFile);
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdmQualityConfig");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdmQualityConfig");
         size_t size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
         if (size != 1) {
             throw CDMException("config-file "+configFile+" does not contain cdmQualityConfig root element");
@@ -146,7 +146,7 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
             xmlNodePtr node = nodes->nodeTab[i];
             string varName = getXmlProp(node, "name");
             string fillValStr = getXmlProp(node, "fillValue");
-            XPathObjPtr statusVarXPath = doc.getXPathObject("status_flag_variable", node);
+            xmlXPathObject_p statusVarXPath = doc.getXPathObject("status_flag_variable", node);
             int statusVarNr = statusVarXPath->nodesetval ? statusVarXPath->nodesetval->nodeNr : 0;
             string statusVarName;
             string statusVarUse;
@@ -154,7 +154,7 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
             string statusVarFile, statusVarType, statusVarConfig;
             if (statusVarNr == 1) {
                 statusVarName = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "name");
-                XPathObjPtr allowedXPath = doc.getXPathObject("allowed_values", statusVarXPath->nodesetval->nodeTab[0]);
+                xmlXPathObject_p allowedXPath = doc.getXPathObject("allowed_values", statusVarXPath->nodesetval->nodeTab[0]);
                 int allowedSize = allowedXPath->nodesetval ? allowedXPath->nodesetval->nodeNr : 0;
                 if (allowedSize == 1) {
                     statusVarUse = getXmlProp(allowedXPath->nodesetval->nodeTab[0], "use");

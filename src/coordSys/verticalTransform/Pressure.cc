@@ -29,7 +29,7 @@
 
 namespace MetNoFimex {
 
-VerticalConverterPtr Pressure::getPressureConverter(CDMReader_p reader, CoordSysPtr cs) const
+VerticalConverter_p Pressure::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
     return IdentityConverter::createConverterForVarName(reader, cs, pressure, "hPa");
 }

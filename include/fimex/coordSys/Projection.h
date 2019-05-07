@@ -27,10 +27,10 @@
 #ifndef PROJECTION_H_
 #define PROJECTION_H_
 
-#include <vector>
-#include <iosfwd>
-#include <boost/shared_ptr.hpp>
+#include "CoordSysDecl.h"
 #include "fimex/CDMAttribute.h"
+
+#include <iosfwd>
 
 namespace MetNoFimex
 {
@@ -91,9 +91,10 @@ public:
      */
     virtual bool operator==(const  Projection& b) const;
     /** create a projection from some CDMAttributes */
-    static boost::shared_ptr<Projection> create(std::vector<CDMAttribute>);
+    static Projection_p create(std::vector<CDMAttribute>);
     /** create a projection from a proj4 string */
-    static boost::shared_ptr<Projection> createByProj4(const std::string& projStr);
+    static Projection_p createByProj4(const std::string& projStr);
+
 protected:
     Projection() {};
 };

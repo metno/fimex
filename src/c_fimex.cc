@@ -62,7 +62,7 @@ using namespace std;
  * This is the C-wrapper for the C-API to fimex.
  */
 
-static LoggerPtr logger = getLogger("c_fimex");
+static Logger_p logger = getLogger("c_fimex");
 
 static const char EMPTY_C_STR[] = "";
 
@@ -351,7 +351,7 @@ int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char
 mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName)
 {
     try {
-        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(reader->csVec_, varName);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(reader->csVec_, varName);
         if (cs.get()) {
             boost::shared_ptr<SliceBuilder> sb(new CoordinateSystemSliceBuilder(reader->reader_->getCDM(), cs));
             return new mifi_slicebuilder(sb, cs);
@@ -436,8 +436,7 @@ static std::string do_mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
     if (mifi_slicebuilder_has_CS(sb) == 1) {
         CoordinateSystemSliceBuilder* csb = dynamic_cast<CoordinateSystemSliceBuilder*>(sb->sb_.get());
         assert(csb != 0);
-        boost::shared_ptr<const Projection> pr = csb->getCoordinateSystem()->getProjection();
-        if (pr.get() != 0) {
+        if (Projection_cp pr = csb->getCoordinateSystem()->getProjection()) {
             retVal = pr->getProj4String();
         }
     }

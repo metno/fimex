@@ -10,13 +10,12 @@ int main(int argc, char* args[]) {
     boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", "coordTest.nc");
     //boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader("coordRefTimeTest.nc"));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
 
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    CoordinateSystem_cp_v::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt != coordSys.end()) {
         if ((*varSysIt)->isSimpleSpatialGridded()) {
             CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon

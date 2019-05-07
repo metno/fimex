@@ -69,11 +69,9 @@ using namespace MetNoFimex;
 
 namespace {
 
-LoggerPtr logger = getLogger("fimex");
+Logger_p logger = getLogger("fimex");
 po::options_description config_file_options;
 CDMReader_p applyFimexStreamTasks(const po::variables_map& vm, CDMReader_p dataReader);
-
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 
 void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config)
 {
@@ -342,7 +340,7 @@ void printReaderStatements(const string& readerName, const po::variables_map& vm
     }
     if (vm.count(readerName+".printCS")) {
         cout << readerName + " CoordinateSystems: ";
-        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader);
+        CoordinateSystem_cp_v csVec = listCoordinateSystems(reader);
         cout << csVec.size() << ": ";
         cout << joinPtr(csVec.begin(), csVec.end(), " | ");
         cout << endl;
@@ -817,7 +815,7 @@ CDMReader_p getCDMMerger(const po::variables_map& vm, CDMReader_p dataReader)
                 try {
                     int transition = boost::lexical_cast<int>(what[1]);
                     int border     = boost::lexical_cast<int>(what[2]);
-                    merger->setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory(transition, border)));
+                    merger->setSmoothing(CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory(transition, border)));
                 } catch (boost::bad_lexical_cast&) {
                     throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
                 }

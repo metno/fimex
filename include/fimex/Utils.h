@@ -24,17 +24,19 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#include <vector>
-#include <utility>
-#include <iterator>
-#include <sstream>
-#include <cmath>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/regex.hpp>
-#include <limits>
 #include "fimex/CDMException.h"
 #include "fimex/UnitsConverter.h"
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
+
+#include <cmath>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -522,15 +524,21 @@ private:
     IN oldFill_;
     double oldScale_;
     double oldOffset_;
-    boost::shared_ptr<UnitsConverter> uconv_;
+    UnitsConverter_p uconv_;
     OUT newFill_;
     double newScaleInv_;
     double newOffset_;
 public:
-    ScaleValueUnits(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> uconv, double newFill, double newScale, double newOffset) :
-        oldFill_(static_cast<IN>(oldFill)), oldScale_(oldScale), oldOffset_(oldOffset),
-        uconv_(uconv),
-        newFill_(static_cast<OUT>(newFill)), newScaleInv_(1/newScale), newOffset_(newOffset) {}
+    ScaleValueUnits(double oldFill, double oldScale, double oldOffset, UnitsConverter_p uconv, double newFill, double newScale, double newOffset)
+        : oldFill_(static_cast<IN>(oldFill))
+        , oldScale_(oldScale)
+        , oldOffset_(oldOffset)
+        , uconv_(uconv)
+        , newFill_(static_cast<OUT>(newFill))
+        , newScaleInv_(1 / newScale)
+        , newOffset_(newOffset)
+    {
+    }
     OUT operator()(const IN& in) const {
         return (in == oldFill_ || mifi_isnan<IN>(in))
                 ? newFill_

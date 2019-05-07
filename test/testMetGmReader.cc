@@ -87,12 +87,11 @@ BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
     const string fileName = pathTest("sample_ed1.gm");
     CDMReader_p metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(metgmReaderEd1);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(metgmReaderEd1);
     const CDM& cdm = metgmReaderEd1->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature_GND";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    CoordinateSystem_cp_v::iterator csIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (csIt == coordSys.end()) BOOST_CHECK(false);
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
     vector<string> dimNames = sb.getDimensionNames();

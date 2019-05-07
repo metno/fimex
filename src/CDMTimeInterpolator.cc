@@ -43,27 +43,26 @@ namespace MetNoFimex
 
 using namespace std;
 
-static LoggerPtr logger = getLogger("fimex.CDMTimeInterpolator");
+static Logger_p logger = getLogger("fimex.CDMTimeInterpolator");
 
-typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
 // TODO: this function is mostly copied from CDM::getTimeAxis
 //       CDM.h should provide a thread-safe version of getTimeAxis
-static std::string getTimeAxis(const CoordSysList& cs, const std::string& varName)
+static std::string getTimeAxis(const CoordinateSystem_cp_v& cs, const std::string& varName)
 {
     // check if variable is its own axis (coord-axis don't have coordinate system)
-    for (CoordSysList::const_iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
-        CoordinateSystem::ConstAxisPtr timeAxis = (*csIt)->getTimeAxis();
+    for (CoordinateSystem_cp_v::const_iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
+        CoordinateAxis_cp timeAxis = (*csIt)->getTimeAxis();
         if (timeAxis.get() != 0 && timeAxis->getName() == varName) {
             return varName;
         }
     }
 
     // search for coordinate system for varName
-    boost::shared_ptr<const CoordinateSystem> ccs = findCompleteCoordinateSystemFor(cs, varName);
+    CoordinateSystem_cp ccs = findCompleteCoordinateSystemFor(cs, varName);
     if (!ccs.get()) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = ccs->getTimeAxis();
+    CoordinateAxis_cp axis = ccs->getTimeAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
 

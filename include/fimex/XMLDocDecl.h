@@ -1,7 +1,7 @@
 /*
- * Fimex, LnPressure.cc
+ * Fimex
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -19,22 +19,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
- *
- *  Created on: Aug 8, 2013
- *      Author: heikok
  */
 
-#include "fimex/coordSys/verticalTransform/LnPressure.h"
-#include "fimex/coordSys/verticalTransform/LnPressureToPressureConverter.h"
+#ifndef XMLDOCDECL_H_
+#define XMLDOCDECL_H_
 
-#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex {
 
-VerticalConverter_p LnPressure::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
-{
-    return boost::make_shared<LnPressureToPressureConverter>(reader, cs, lev, p0);
-}
+class XMLDoc;
+typedef boost::shared_ptr<XMLDoc> XMLDoc_p;
 
 } // namespace MetNoFimex
 
+#endif /*XMLDOCDECL_H_*/

@@ -26,6 +26,8 @@
 #ifndef UNITSCONVERTER_H_
 #define UNITSCONVERTER_H_
 
+#include "fimex/UnitsConverterDecl.h"
+
 namespace MetNoFimex
 {
 

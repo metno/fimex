@@ -42,13 +42,13 @@ namespace MetNoFimex {
 
         boost::shared_ptr<MetGmXTag> XTag;
 
-        const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+        const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
-        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
         if (cs.get()) {
             if(cs->isSimpleSpatialGridded()) {
 
-                CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+                CoordinateAxis_cp xAxis = cs->getGeoXAxis();
 
                 if(!xAxis.get()) {
                     return boost::shared_ptr<MetGmXTag>();
@@ -85,13 +85,13 @@ namespace MetNoFimex {
 
         boost::shared_ptr<MetGmYTag> YTag;
 
-        const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+        const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
 
-        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
         if (cs.get()) {
             if(cs->isSimpleSpatialGridded()) {
 
-                CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+                CoordinateAxis_cp yAxis = cs->getGeoYAxis();
 
                 if(!yAxis.get()) {
                     return boost::shared_ptr<MetGmYTag>();

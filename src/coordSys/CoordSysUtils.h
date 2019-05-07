@@ -27,11 +27,13 @@
 #ifndef COORDSYSUTILS_H_
 #define COORDSYSUTILS_H_
 
-#include "fimex/CDMReader.h"
-#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CDMReaderDecl.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 
 namespace MetNoFimex
 {
+class CDM;
+
 /**
  * Get the axes of a simple (1-dim x,y,z,t) coordinate-system. The t-axis might be omitted or unlimited,
  * the order of the axes must be as written above (x,y order might be reversed).
@@ -42,22 +44,12 @@ namespace MetNoFimex
  * @param nx,ny,nz,nt output sizes
  * @param tIsUnlimited indicate if t-axis is unlimited axes
  */
-void getSimpleAxes(const boost::shared_ptr<const CoordinateSystem>& cs, const CDM& cdm,
-        CoordinateSystem::ConstAxisPtr& xAxis,
-        CoordinateSystem::ConstAxisPtr& yAxis,
-        CoordinateSystem::ConstAxisPtr& zAxis,
-        CoordinateSystem::ConstAxisPtr& tAxis,
-        size_t& nx, size_t& ny, size_t& nz, size_t& nt,
-        bool& tIsUnlimited);
+void getSimpleAxes(const CoordinateSystem_cp& cs, const CDM& cdm, CoordinateAxis_cp& xAxis, CoordinateAxis_cp& yAxis, CoordinateAxis_cp& zAxis,
+                   CoordinateAxis_cp& tAxis, size_t& nx, size_t& ny, size_t& nz, size_t& nt, bool& tIsUnlimited);
 
 //! simlilar to getSimpleAxes, but sets t0 and t1 if time dimension is unlimited
-void getSimpleAxes(const boost::shared_ptr<const CoordinateSystem>& cs, const CDM& cdm,
-        CoordinateSystem::ConstAxisPtr& xAxis,
-        CoordinateSystem::ConstAxisPtr& yAxis,
-        CoordinateSystem::ConstAxisPtr& zAxis,
-        CoordinateSystem::ConstAxisPtr& tAxis,
-        size_t& nx, size_t& ny, size_t& nz, size_t& nt,
-        size_t& t0, size_t unLimDimPos);
+void getSimpleAxes(const CoordinateSystem_cp& cs, const CDM& cdm, CoordinateAxis_cp& xAxis, CoordinateAxis_cp& yAxis, CoordinateAxis_cp& zAxis,
+                   CoordinateAxis_cp& tAxis, size_t& nx, size_t& ny, size_t& nz, size_t& nt, size_t& t0, size_t unLimDimPos);
 
 } // namespace MetNoFimex
 

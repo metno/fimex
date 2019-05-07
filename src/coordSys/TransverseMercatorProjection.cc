@@ -25,29 +25,30 @@
  */
 
 #include "fimex/coordSys/TransverseMercatorProjection.h"
-#include <boost/regex.hpp>
-#include <proj_api.h>
+
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-namespace MetNoFimex
-{
-    using namespace std;
+#include <boost/regex.hpp>
 
-static LoggerPtr logger = getLogger("fimex.TransverseMercatorProjection");
+#include <proj_api.h>
+
+namespace MetNoFimex {
+
+using namespace std;
+
+static Logger_p logger = getLogger("fimex.TransverseMercatorProjection");
 
 TransverseMercatorProjection::TransverseMercatorProjection()
-: ProjectionImpl("transverse_mercator", false)
-{}
+    : ProjectionImpl("transverse_mercator", false)
+{
+}
 
-TransverseMercatorProjection::~TransverseMercatorProjection()
-{}
+TransverseMercatorProjection::~TransverseMercatorProjection() {}
 
 bool TransverseMercatorProjection::acceptsProj4(const std::string& proj4Str)
 {
-    return proj4ProjectionMatchesName(proj4Str, "tmerc") ||
-           proj4ProjectionMatchesName(proj4Str, "utm") ||
-           proj4ProjectionMatchesName(proj4Str, "gstmerc") ||
+    return proj4ProjectionMatchesName(proj4Str, "tmerc") || proj4ProjectionMatchesName(proj4Str, "utm") || proj4ProjectionMatchesName(proj4Str, "gstmerc") ||
            proj4ProjectionMatchesName(proj4Str, "etmerc");
 }
 
@@ -124,4 +125,4 @@ std::ostream& TransverseMercatorProjection::getProj4ProjectionPart(std::ostream&
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

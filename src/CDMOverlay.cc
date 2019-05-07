@@ -25,9 +25,13 @@
  */
 
 #include "fimex/CDMOverlay.h"
+
+#include "fimex/CDM.h"
+#include "fimex/CDMInterpolator.h"
 #include "fimex/Data.h"
-#include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
+
 #include "CDMMergeUtils.h"
 
 using namespace std;
@@ -41,7 +45,7 @@ namespace MetNoFimex {
 struct CDMOverlayPrivate {
     CDMReader_p readerB;
     CDMReader_p readerT;
-    CDMInterpolatorPtr interpolatedB;
+    CDMInterpolator_p interpolatedB;
 
     CDM init(int gridInterpolationMethod, bool keepOuterVariables);
 };

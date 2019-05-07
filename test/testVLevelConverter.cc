@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
     typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
-    CoordSysPtr cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
     BOOST_REQUIRE(cs);
 
     VerticalTransformation_cp vt = cs->getVerticalTransformation();
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
     }
 
     {
-        VerticalConverterPtr altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
+        VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
         BOOST_REQUIRE(altivc);
 
         const std::vector<std::string> shape_ac = altivc->getShape();
@@ -130,14 +130,13 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator_up)
     boost::shared_ptr<CDMVerticalInterpolator> reader = boost::make_shared<CDMVerticalInterpolator>(ncreader, "pressure", "log");
     reader->interpolateToFixed(vi_level1);
 
-    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor
-            (MetNoFimex::listCoordinateSystems(reader), "air_temperature_ml");
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "air_temperature_ml");
     BOOST_REQUIRE(cs);
 
     boost::shared_ptr<const VerticalTransformation> vt = cs->getVerticalTransformation();
     BOOST_REQUIRE(vt);
 
-    VerticalConverterPtr altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
+    VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
     BOOST_REQUIRE(altivc);
 
     const std::vector<std::string> shape_ac = altivc->getShape();

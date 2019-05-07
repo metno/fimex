@@ -26,23 +26,19 @@
 
 #include "CoordSysUtils.h"
 
+#include "fimex/CDMReader.h"
+#include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
-typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
-void getSimpleAxes(const CoordSysPtr& cs,
-        const CDM& cdm,
-        CoordinateSystem::ConstAxisPtr& xAxis,
-        CoordinateSystem::ConstAxisPtr& yAxis,
-        CoordinateSystem::ConstAxisPtr& zAxis,
-        CoordinateSystem::ConstAxisPtr& tAxis,
-        size_t& nx, size_t& ny, size_t& nz, size_t& nt,
-        bool& tIsUnlimited)
+void getSimpleAxes(const CoordinateSystem_cp& cs, const CDM& cdm, CoordinateAxis_cp& xAxis, CoordinateAxis_cp& yAxis, CoordinateAxis_cp& zAxis,
+                   CoordinateAxis_cp& tAxis, size_t& nx, size_t& ny, size_t& nz, size_t& nt, bool& tIsUnlimited)
 {
     zAxis = cs->getGeoZAxis();
     assert(zAxis.get() != 0); // defined by construction of cs
@@ -96,13 +92,8 @@ void getSimpleAxes(const CoordSysPtr& cs,
     }
 }
 
-void getSimpleAxes(const boost::shared_ptr<const CoordinateSystem>& cs, const CDM& cdm,
-        CoordinateSystem::ConstAxisPtr& xAxis,
-        CoordinateSystem::ConstAxisPtr& yAxis,
-        CoordinateSystem::ConstAxisPtr& zAxis,
-        CoordinateSystem::ConstAxisPtr& tAxis,
-        size_t& nx, size_t& ny, size_t& nz,
-        size_t& t0, size_t& t1, size_t unLimDimPos)
+void getSimpleAxes(const CoordinateSystem_cp& cs, const CDM& cdm, CoordinateAxis_cp& xAxis, CoordinateAxis_cp& yAxis, CoordinateAxis_cp& zAxis,
+                   CoordinateAxis_cp& tAxis, size_t& nx, size_t& ny, size_t& nz, size_t& t0, size_t& t1, size_t unLimDimPos)
 {
     bool tIsUnlimited;
     getSimpleAxes(cs, cdm,

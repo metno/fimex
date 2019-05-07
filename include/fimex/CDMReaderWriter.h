@@ -28,6 +28,7 @@
 #define CDMREADERWRITER_H_
 
 #include "fimex/CDMReader.h"
+#include "fimex/UnitsConverterDecl.h"
 
 namespace MetNoFimex
 {
@@ -43,7 +44,6 @@ class CDMReaderWriter : public MetNoFimex::CDMReader
 public:
     CDMReaderWriter();
     virtual ~CDMReaderWriter();
-
 
     /**
      * @brief flush data to disc
@@ -125,7 +125,7 @@ public:
 
 private:
     DataPtr unscaleDataOf(const std::string& varName, DataPtr data, double unitScale=1, double unitOffset=0);
-    DataPtr unscaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc);
+    DataPtr unscaleDataOf(const std::string& varName, DataPtr data, UnitsConverter_p uc);
     DataPtr unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit);
 }; /* class */
 

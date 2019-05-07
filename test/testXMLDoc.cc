@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
 {
     XMLDoc doc(pathTest("testXMLDoc.xml"));
     {
-        XPathObjPtr xpathObj = doc.getXPathObject("/cdmQualityConfig");
+        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdmQualityConfig");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         BOOST_CHECK(size == 1);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
         string nodeDoc = doc.toString(xpathObj->nodesetval->nodeTab[0]);
         BOOST_CHECK(nodeDoc == "<?xml version=\"1.0\"?>\n<allowed_values>1,2,...,6</allowed_values>\n");
 
-        boost::shared_ptr<XMLDoc> valueDoc = XMLDoc::fromString(nodeDoc, "");
+        XMLDoc_p valueDoc = XMLDoc::fromString(nodeDoc, "");
         xpathObj = valueDoc->getXPathObject("/allowed_values");
         string values = getXmlContent(xpathObj->nodesetval->nodeTab[0]);
         BOOST_CHECK("1,2,...,6" == values);

@@ -44,7 +44,7 @@ namespace MetNoFimex
 using namespace std;
 
 namespace {
-LoggerPtr logger = getLogger("fimex.NcmlAggregationReader");
+Logger_p logger = getLogger("fimex.NcmlAggregationReader");
 }
 
 static void getFileTypeConfig(const string& location, string& file, string& type, string& config)
@@ -57,11 +57,11 @@ static void getFileTypeConfig(const string& location, string& file, string& type
 
 NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
 {
-    boost::shared_ptr<XMLDoc> doc;
+    XMLDoc_p doc;
     if (!ncml.isEmpty()) {
         doc = ncml.getXMLDoc();
         doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
-        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+        xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr != 1) {
             throw CDMException("config "+ncml.id()+" is not a ncml document with root /nc:netcdf");
@@ -70,12 +70,12 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
 
     // warn if multiple aggregations, joinNew aggregations
     // and get a global file if no aggregations
-    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:aggregation");
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:aggregation");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size == 0) {
         LOG4FIMEX(logger, Logger::DEBUG, "found no ncml-aggregations in "<< ncml.id());
-        XPathObjPtr xpathObjL = doc->getXPathObject("/nc:netcdf[@location]");
+        xmlXPathObject_p xpathObjL = doc->getXPathObject("/nc:netcdf[@location]");
         xmlNodeSetPtr nodesL = xpathObjL->nodesetval;
         if (nodesL->nodeNr != 1) {
             LOG4FIMEX(logger, Logger::INFO, "config " << ncml.id() << " does not contain location-attribute, only ncml initialization");
@@ -99,7 +99,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             LOG4FIMEX(logger, Logger::WARN, "found several ncml-aggregations in " << ncml.id() << ", using 1st");
         }
         // find sources from location, scan, ...
-        XPathObjPtr xpathObjNc = doc->getXPathObject("./nc:netcdf", nodes->nodeTab[0]);
+        xmlXPathObject_p xpathObjNc = doc->getXPathObject("./nc:netcdf", nodes->nodeTab[0]);
         xmlNodeSetPtr nodesNc = xpathObjNc->nodesetval;
         int sizeNc = (nodesNc) ? nodesNc->nodeNr : 0;
         for (int i = 0; i < sizeNc; i++) {
@@ -111,7 +111,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
 
         aggType_ = getXmlProp(nodes->nodeTab[0], "type");
         // open reader by scan
-        XPathObjPtr xpathObjScan = doc->getXPathObject("./nc:scan", nodes->nodeTab[0]);
+        xmlXPathObject_p xpathObjScan = doc->getXPathObject("./nc:scan", nodes->nodeTab[0]);
         xmlNodeSetPtr nodesScan = xpathObjScan->nodesetval;
         int sizeScan = (nodesScan) ? nodesScan->nodeNr : 0;
         for (int i = 0; i < sizeScan; i++) {

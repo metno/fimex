@@ -72,14 +72,14 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
 {
     boost::shared_ptr<MetGmTimeTag> TTag;
 
-    const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
     const CDM& cdmRef = pCdmReader->getCDM();
 
-    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
     if (cs.get()) {
         if(cs->isSimpleSpatialGridded()) {
 
-            CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis();
+            CoordinateAxis_cp tAxis = cs->getTimeAxis();
 
             if(!tAxis.get()) {
                 return boost::shared_ptr<MetGmTimeTag>();

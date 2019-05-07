@@ -64,7 +64,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
     LOG4FIMEX(logger, Logger::DEBUG, "setProjection(" << varName << ")");
     const CDM& cdm = cdmReader->getCDM();
     // TODO: detect more projections
-    boost::shared_ptr<const Projection> proj = cdm.getProjectionOf(varName);
+    Projection_cp proj = cdm.getProjectionOf(varName);
     if (proj.get() != 0) {
         CDM::AttrVec projAttrs = proj->getParameters();
         const std::string projection(proj->getName());
@@ -368,7 +368,7 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
         verticalAxisXPath += "[@standard_name=\"\"]";
     }
     verticalAxisXPath += "/grib" + type2string(gribVersion);
-    XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
+    xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
     xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size == 1) {

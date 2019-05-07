@@ -25,12 +25,15 @@
 #define DATA_H_
 
 #include "fimex/DataDecl.h"
-#include <boost/shared_array.hpp>
-#include <string>
-#include <algorithm>
-#include <iosfwd>
+#include "fimex/UnitsConverterDecl.h"
+
 #include "fimex/CDMDataType.h"
 
+#include <boost/shared_array.hpp>
+
+#include <algorithm>
+#include <iosfwd>
+#include <string>
 #include <vector>
 
 namespace MetNoFimex
@@ -38,8 +41,6 @@ namespace MetNoFimex
     /**
      * @headerfile fimex/Data.h
      */
-    // forward decl.
-    class UnitsConverter;
 
     /**
      * General class for storing different basic array pointers plus length
@@ -156,7 +157,8 @@ namespace MetNoFimex
          */
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
 
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitConverter, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
+        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
+                                        double newScale, double newOffset) = 0;
 
         /**
          * return the CDMDataType of this data

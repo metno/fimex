@@ -30,11 +30,13 @@
 namespace MetNoFimex
 {
 
-boost::shared_ptr<XMLDoc> XMLInputFile::getXMLDoc() const {
+XMLDoc_p XMLInputFile::getXMLDoc() const
+{
     return XMLDoc::fromFile(filename_);
 }
 
-boost::shared_ptr<XMLDoc> XMLInputString::getXMLDoc() const {
+XMLDoc_p XMLInputString::getXMLDoc() const
+{
     return XMLDoc::fromString(content_, url_);
 }
 

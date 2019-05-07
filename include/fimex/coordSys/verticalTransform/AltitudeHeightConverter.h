@@ -1,3 +1,33 @@
+/*
+  Fimex, include/fimex/coordSys/verticalTransform/AltitudeHeightConverter.h
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #ifndef ALTITUDEHEIGHTCONVERTER_H
 #define ALTITUDEHEIGHTCONVERTER_H
 
@@ -11,22 +41,27 @@ namespace MetNoFimex {
  */
 class AltitudeHeightConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createToHeightConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr altitude)
-        { return createConverter(reader, cs, altitude, false); }
+    static VerticalConverter_p createToHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitude)
+    {
+        return createConverter(reader, cs, altitude, false);
+    }
 
-    static VerticalConverterPtr createToAltitudeConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr height)
-        { return createConverter(reader, cs, height, true); }
+    static VerticalConverter_p createToAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p height)
+    {
+        return createConverter(reader, cs, height, true);
+    }
 
-    AltitudeHeightConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, const std::string& topography, bool addTopography);
+    AltitudeHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight, const std::string& topography,
+                            bool addTopography);
 
     std::vector<std::string> getShape() const;
     DataPtr getDataSlice(const SliceBuilder& sb) const;
 
 private:
-    static VerticalConverterPtr createConverter(CDMReader_p reader, CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, bool addTopography);
+    static VerticalConverter_p createConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight, bool addTopography);
 
 private:
-    VerticalConverterPtr altitudeOrHeight_;
+    VerticalConverter_p altitudeOrHeight_;
     std::string topography_;
     std::string topographyUnit_;
     float topographyFactor_;

@@ -24,17 +24,16 @@
  *      Author: Heiko Klein
  */
 
-#include "coordSys/CF1_xCoordSysBuilder.h"
-#include "fimex/coordSys/CoordinateSystem.h"
+#include "CF1_xCoordSysBuilder.h"
+
 #include "fimex/CDM.h"
-#include "fimex/CDMReader.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Logger.h"
-#include "fimex/Utils.h"
 #include "fimex/Units.h"
-#include <set>
-#include <boost/regex.hpp>
-#include <boost/make_shared.hpp>
+#include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
 #include <fimex/coordSys/verticalTransform/Depth.h>
 #include <fimex/coordSys/verticalTransform/Height.h>
@@ -45,11 +44,15 @@
 #include <fimex/coordSys/verticalTransform/OceanSG2.h>
 #include <fimex/coordSys/verticalTransform/Pressure.h>
 
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+
+#include <set>
 
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CF1_xCoordSysBuilder");
+static Logger_p logger = getLogger("fimex.CF1_xCoordSysBuilder");
 
 using namespace std;
 
@@ -230,7 +233,7 @@ static string getPtrName(const boost::shared_ptr<const CDMNamedEntity>& ptr)
     return ptr->getName();
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
+CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDMReader_p reader)
 {
     return listCoordinateSystems(reader->getInternalCDM());
 }
@@ -240,7 +243,7 @@ static bool isCSForTerm(const CDM& cdm, const CoordinateSystem& cs, const std::s
     if (term.empty())
         return true;
 
-    CoordinateSystem::ConstAxisList csAxesPtr = cs.getAxes();
+    CoordinateAxis_cp_v csAxesPtr = cs.getAxes();
     set<string> csAxes;
     transform(csAxesPtr.begin(), csAxesPtr.end(), inserter(csAxes, csAxes.begin()), getPtrName);
 
@@ -260,11 +263,10 @@ static bool isCSForTerm(const CDM& cdm, const CoordinateSystem& cs, const std::s
     return true;
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
+CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {
-    typedef CoordinateSystem::AxisPtr AxisPtr;
     // step 1: find all coordinate axes, that are dimensions and coordinates
-    map<string, AxisPtr> coordinateAxes;
+    map<string, CoordinateAxis_p> coordinateAxes;
     {
         set<string> tmpCoordinateAxes;
         const CDM::DimVec& dims = cdm.getDimensions();
@@ -279,11 +281,11 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         // create CoordinateAxis
         for (set<string>::iterator coord = tmpCoordinateAxes.begin(); coord != tmpCoordinateAxes.end(); ++coord) {
             if (cdm.hasVariable(*coord)) {
-                coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(cdm.getVariable(*coord)));
+                coordinateAxes[*coord] = boost::make_shared<CoordinateAxis>(cdm.getVariable(*coord));
             } else {
                 // add a dimension without a variable with a 'virtual' variable
                 vector<string> shape(1, *coord);
-                coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(CDMVariable(*coord, CDM_INT, shape)));
+                coordinateAxes[*coord] = boost::make_shared<CoordinateAxis>(CDMVariable(*coord, CDM_INT, shape));
             }
         }
     }
@@ -291,8 +293,8 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     // step 2: set the axis type of the axes of each coordinate system
     {
         const CDM::DimVec& dims = cdm.getDimensions();
-        for (map<string, AxisPtr >::iterator ca = coordinateAxes.begin(); ca != coordinateAxes.end(); ++ca) {
-            AxisPtr& axis = ca->second;
+        for (map<string, CoordinateAxis_p>::iterator ca = coordinateAxes.begin(); ca != coordinateAxes.end(); ++ca) {
+            CoordinateAxis_p& axis = ca->second;
             CoordinateAxis::AxisType type = getAxisTypeCF1_x(cdm, axis->getName());
             axis->setAxisType(type);
 
@@ -304,7 +306,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     // step 3: find all used coordinate systems, that are distinct combinations
     // of axes, CoordinateSystem's less operator makes sure of that in the set
     // the coordinateSystems here are intermediate, since the axes still don't have types
-    map<string, CoordinateSystem> coordSystems;
+    map<string, CoordinateSystem_p> coordSystems;
     {
         const CDM::VarVec& vars = cdm.getVariables();
         for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
@@ -314,21 +316,21 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                 set<string> axes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 set<string> coords = getCoordinateNamesCF1_x(cdm, *varIt);
                 if (axes.size()) {
-                    CoordinateSystem cs("CF-1.X");
+                    CoordinateSystem_p cs = boost::make_shared<CoordinateSystem>("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
-                        map<string, AxisPtr >::iterator foundAxis = coordinateAxes.find(*axis);
+                        map<string, CoordinateAxis_p>::iterator foundAxis = coordinateAxes.find(*axis);
                         if (foundAxis != coordinateAxes.end()) {
                             // only dims with variable can be coordinate axis
                             if (coords.find(foundAxis->second->getName()) == coords.end()) {
                                 // dimension
-                                cs.setAxis(foundAxis->second);
+                                cs->setAxis(foundAxis->second);
                             } else {
                                 // coordinates
-                                cs.setAuxiliaryAxis(foundAxis->second);
+                                cs->setAuxiliaryAxis(foundAxis->second);
                             }
                         }
                     }
-                    coordSystems.insert(make_pair(cs.id(), cs));
+                    coordSystems.insert(make_pair(cs->id(), cs));
                 }
             }
         }
@@ -340,8 +342,9 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     // isComplete, isCSFor
     {
         const CDM::VarVec& vars = cdm.getVariables();
-        for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-            CoordinateSystem::ConstAxisList csAxesPtr = cit->second.getAxes();
+        for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+            CoordinateSystem_p& cs = cit->second;
+            CoordinateAxis_cp_v csAxesPtr = cs->getAxes();
             set<string> csAxes;
             transform(csAxesPtr.begin(), csAxesPtr.end(), inserter(csAxes, csAxes.begin()), getPtrName);
             for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
@@ -352,17 +355,17 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                 // all varAxes part of csAxes
                 bool is_cs_for = includes(csAxes.begin(), csAxes.end(),
                                           varAxes.begin(), varAxes.end());
-                cit->second.setComplete(varIt->getName(), is_complete);
-                cit->second.setCSFor(varIt->getName(), is_cs_for);
+                cs->setComplete(varIt->getName(), is_complete);
+                cs->setCSFor(varIt->getName(), is_cs_for);
             }
         }
     }
     // isSimpleSpatialGridded
     {
-        for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-            CoordinateSystem& cs = cit->second;
-            CoordinateSystem::ConstAxisPtr xAxis = cs.getGeoXAxis();
-            CoordinateSystem::ConstAxisPtr yAxis = cs.getGeoYAxis();
+        for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+            CoordinateSystem_p& cs = cit->second;
+            CoordinateAxis_cp xAxis = cs->getGeoXAxis();
+            CoordinateAxis_cp yAxis = cs->getGeoYAxis();
             bool simpleX = false;
             bool simpleY = false;
             if (xAxis.get() != 0) {
@@ -375,37 +378,35 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                     simpleY = true;
                 }
             }
-            cs.setSimpleSpatialGridded(simpleX && simpleY);
+            cs->setSimpleSpatialGridded(simpleX && simpleY);
         }
     }
 
     // horizontal transformations
     {
         const CDM::VarVec& vars = cdm.getVariables();
-        for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-            CoordinateSystem& cs = cit->second;
+        for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+            CoordinateSystem_p& cs = cit->second;
             // set the projection of the first matching var
-            for (CDM::VarVec::const_iterator var = vars.begin(); (var != vars.end() && !cs.hasProjection()); ++var) {
-                if (cs.isCSFor(var->getName()) && cs.isComplete(var->getName())) {
+            for (CDM::VarVec::const_iterator var = vars.begin(); (var != vars.end() && !cs->hasProjection()); ++var) {
+                if (cs->isCSFor(var->getName()) && cs->isComplete(var->getName())) {
                     CDMAttribute mappingAttr;
                     if (cdm.getAttribute(var->getName(), "grid_mapping", mappingAttr)) {
                         std::string varName = mappingAttr.getStringValue();
                         if (cdm.hasVariable(varName)) {
-                            boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
-                            cs.setProjection(proj);
-                            cs.addDependencyVariable(varName);
+                            Projection_p proj = Projection::create(cdm.getAttributes(varName));
+                            cs->setProjection(proj);
+                            cs->addDependencyVariable(varName);
                         }
                     } else {
                         // LON/LAT systems don't need  grid_mapping, detect by lat/lon axes
                         // lat/lon must be axes (i.e. 'simple') otherwise not a projection
-                        if (cs.isSimpleSpatialGridded() &&
-                            cs.hasAxisType(CoordinateAxis::Lon) && cs.hasAxisType(CoordinateAxis::Lat)) {
-                            if ( cs.getGeoXAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lon)->getName() &&
-                                 cs.getGeoYAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lat)->getName() ) {
+                        if (cs->isSimpleSpatialGridded() && cs->hasAxisType(CoordinateAxis::Lon) && cs->hasAxisType(CoordinateAxis::Lat)) {
+                            if (cs->getGeoXAxis()->getName() == cs->findAxisOfType(CoordinateAxis::Lon)->getName() &&
+                                cs->getGeoYAxis()->getName() == cs->findAxisOfType(CoordinateAxis::Lat)->getName()) {
                                 CDMAttribute grid_mapping("grid_mapping_name", "latitude_longitude");
                                 vector<CDMAttribute> attrs(1, grid_mapping);
-                                boost::shared_ptr<Projection> proj = Projection::create(attrs);
-                                cs.setProjection(proj);
+                                cs->setProjection(Projection::create(attrs));
                             }
                         }
                     }
@@ -415,24 +416,21 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     }
 
     // vertical transformations
-    for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-        CoordinateSystem& cs = cit->second;
-        CoordinateSystem::ConstAxisPtr zAxis = cs.getGeoZAxis();
+    for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+        CoordinateSystem_p& cs = cit->second;
+        CoordinateAxis_cp zAxis = cs->getGeoZAxis();
         if (zAxis.get() != 0) {
             if (cdm.hasVariable(zAxis->getName())) {
                 LOG4FIMEX(logger, Logger::DEBUG, "z axis '" << zAxis->getName() << "' has type " << zAxis->getAxisTypeStr());
                 switch (zAxis->getAxisType()) {
                 case CoordinateAxis::Height:
-                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                        new Height(zAxis->getName())));
+                    cs->setVerticalTransformation(boost::make_shared<Height>(zAxis->getName()));
                     break;
                 case CoordinateAxis::Depth:
-                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                        new Depth(zAxis->getName())));
+                    cs->setVerticalTransformation(boost::make_shared<Depth>(zAxis->getName()));
                     break;
                 case CoordinateAxis::Pressure:
-                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                        new Pressure(zAxis->getName())));
+                    cs->setVerticalTransformation(boost::make_shared<Pressure>(zAxis->getName()));
                     break;
                 default:
                     CDMAttribute formula;
@@ -445,7 +443,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                             string term(what[1].first, what[1].second);
                             string var(what[2].first, what[2].second);
                             if (!var.empty() && cdm.hasVariable(var)) {
-                                cs.addDependencyVariable(var);
+                                cs->addDependencyVariable(var);
                                 terms[term] = var;
                             } else {
                                 LOG4FIMEX(logger, Logger::WARN, "formula term '" << term << "' specifies unknown variable '" << var << "'");
@@ -461,34 +459,34 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                         // * problem: surface fields often have their own z axis, which makes isCSFor return false!
 
                         if (standardNameValue == "atmosphere_hybrid_sigma_pressure_coordinate") {
-                            if (!(isCSForTerm(cdm, cs, terms["p"]) && isCSForTerm(cdm, cs, terms["ps"]) && isCSForTerm(cdm, cs, terms["p0"])))
+                            if (!(isCSForTerm(cdm, *cs, terms["p"]) && isCSForTerm(cdm, *cs, terms["ps"]) && isCSForTerm(cdm, *cs, terms["p0"])))
                                 continue;
                             if (terms["ap"] == "") {
-                                if (!isCSForTerm(cdm, cs, terms["a"]))
+                                if (!isCSForTerm(cdm, *cs, terms["a"]))
                                     continue;
-                                cs.setVerticalTransformation(boost::make_shared<HybridSigmaPressure2>(terms["a"], terms["b"], terms["ps"], terms["p0"]));
+                                cs->setVerticalTransformation(boost::make_shared<HybridSigmaPressure2>(terms["a"], terms["b"], terms["ps"], terms["p0"]));
                             } else {
-                                if (!isCSForTerm(cdm, cs, terms["ap"]))
+                                if (!isCSForTerm(cdm, *cs, terms["ap"]))
                                     continue;
-                                cs.setVerticalTransformation(boost::make_shared<HybridSigmaPressure1>(terms["ap"], terms["b"], terms["ps"], terms["p0"]));
+                                cs->setVerticalTransformation(boost::make_shared<HybridSigmaPressure1>(terms["ap"], terms["b"], terms["ps"], terms["p0"]));
                             }
                         } else if (standardNameValue == LnPressure::NAME()) {
-                            if (!(isCSForTerm(cdm, cs, terms["lev"]) && isCSForTerm(cdm, cs, terms["p0"])))
+                            if (!(isCSForTerm(cdm, *cs, terms["lev"]) && isCSForTerm(cdm, *cs, terms["p0"])))
                                 continue;
-                            cs.setVerticalTransformation(boost::make_shared<LnPressure>(terms["lev"], terms["p0"]));
+                            cs->setVerticalTransformation(boost::make_shared<LnPressure>(terms["lev"], terms["p0"]));
                         } else if (standardNameValue == AtmosphereSigma::NAME()) {
-                            if (!(isCSForTerm(cdm, cs, terms["sigma"]) && isCSForTerm(cdm, cs, terms["ptop"]) && isCSForTerm(cdm, cs, terms["ps"])))
+                            if (!(isCSForTerm(cdm, *cs, terms["sigma"]) && isCSForTerm(cdm, *cs, terms["ptop"]) && isCSForTerm(cdm, *cs, terms["ps"])))
                                 continue;
-                            cs.setVerticalTransformation(boost::make_shared<AtmosphereSigma>(terms["sigma"], terms["ptop"], terms["ps"]));
+                            cs->setVerticalTransformation(boost::make_shared<AtmosphereSigma>(terms["sigma"], terms["ptop"], terms["ps"]));
                         } else if (standardNameValue == OceanSG1::NAME() || standardNameValue == OceanSG2::NAME()) {
-                            if (!(isCSForTerm(cdm, cs, terms["s"]) && isCSForTerm(cdm, cs, terms["C"]) && isCSForTerm(cdm, cs, terms["depth"])
-                                  && isCSForTerm(cdm, cs, terms["depth_c"]) && isCSForTerm(cdm, cs, terms["eta"])))
+                            if (!(isCSForTerm(cdm, *cs, terms["s"]) && isCSForTerm(cdm, *cs, terms["C"]) && isCSForTerm(cdm, *cs, terms["depth"]) &&
+                                  isCSForTerm(cdm, *cs, terms["depth_c"]) && isCSForTerm(cdm, *cs, terms["eta"])))
                                 continue;
                             const OceanSGVars vars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"]);
                             if (standardNameValue == OceanSG1::NAME())
-                                cs.setVerticalTransformation(boost::make_shared<OceanSG1>(vars));
+                                cs->setVerticalTransformation(boost::make_shared<OceanSG1>(vars));
                             else // if (standardNameValue == OceanSG2::NAME())
-                                cs.setVerticalTransformation(boost::make_shared<OceanSG2>(vars));
+                                cs->setVerticalTransformation(boost::make_shared<OceanSG2>(vars));
                         } else {
                             LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }
@@ -500,25 +498,25 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     }
 
     // axis-bounds
-    for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-        CoordinateSystem& cs = cit->second;
-        CoordinateSystem::ConstAxisList axes = cs.getAxes();
-        for (CoordinateSystem::ConstAxisList::iterator aIt = axes.begin(); aIt != axes.end(); ++aIt) {
+    for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+        CoordinateSystem_p& cs = cit->second;
+        CoordinateAxis_cp_v axes = cs->getAxes();
+        for (CoordinateAxis_cp_v::iterator aIt = axes.begin(); aIt != axes.end(); ++aIt) {
             string axis = (*aIt)->getName();
             if (cdm.hasVariable(axis)) {
                 CDMAttribute bound;
                 if (cdm.getAttribute(axis, "bounds", bound)) {
                     if (cdm.hasVariable(bound.getStringValue())) {
-                        cs.addDependencyVariable(bound.getStringValue());
+                        cs->addDependencyVariable(bound.getStringValue());
                     }
                 }
             }
         }
     }
-    // return a const casted version of the coordSystems
-    vector<boost::shared_ptr<const CoordinateSystem> > outCSs;
-    for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
-        outCSs.push_back(boost::shared_ptr<const CoordinateSystem>(new CoordinateSystem(cit->second)));
+
+    CoordinateSystem_cp_v outCSs;
+    for (map<string, CoordinateSystem_p>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+        outCSs.push_back(cit->second);
     }
     return outCSs;
 }

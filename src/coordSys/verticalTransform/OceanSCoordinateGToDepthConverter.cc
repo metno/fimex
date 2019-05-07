@@ -46,8 +46,8 @@ namespace MetNoFimex {
 
 static const double ZERO = 0;
 
-OceanSCoordinateGToDepthConverter::OceanSCoordinateGToDepthConverter(CDMReader_p reader, CoordSysPtr cs,
-                                                                     const OceanSGVars& vars, heightconversion_t func)
+OceanSCoordinateGToDepthConverter::OceanSCoordinateGToDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs, const OceanSGVars& vars,
+                                                                     heightconversion_t func)
     : BasicVerticalConverter(reader, cs)
     , vars_(vars)
     , func_(func)

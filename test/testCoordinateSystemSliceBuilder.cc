@@ -41,12 +41,11 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
 {
     CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordTest.nc"));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    CoordinateSystem_cp_v::iterator csIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (csIt == coordSys.end()) BOOST_CHECK(false);
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
     sb.setReferenceTimePos(1);
@@ -66,13 +65,12 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
     CDMReader_p reader = CDMFileReaderFactory::create("netcdf", pathTest("coordRefTimeTest.nc"));
     BOOST_CHECK(reader.get() != 0);
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     BOOST_CHECK(coordSys.size() > 0);
     const CDM& cdm = reader->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    CoordinateSystem_cp_v::iterator csIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (csIt == coordSys.end()) BOOST_CHECK(false);
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
     sb.setReferenceTimePos(1);

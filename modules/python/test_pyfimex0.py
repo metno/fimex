@@ -71,6 +71,32 @@ class TestReader(unittest.TestCase):
         r_vars = r_cdm.getVariableNames()
         self.assertTrue('surface_geopotential' in r_vars)
 
+    def test_DataString(self):
+        d = pyfimex0.createData("hello")
+        self.assertEqual(pyfimex0.CDMDataType.STRING, d.getDataType())
+        self.assertEqual(5, d.size())
+        self.assertEqual("hello", d.values())
+
+        d = pyfimex0.createData(pyfimex0.CDMDataType.STRING, "values")
+        self.assertEqual(pyfimex0.CDMDataType.STRING, d.getDataType())
+        self.assertEqual(6, d.size())
+        self.assertEqual("values", d.values())
+
+    def test_DataFloat(self):
+        d = pyfimex0.createData(pyfimex0.CDMDataType.FLOAT, [1, 2, 3])
+        self.assertEqual(pyfimex0.CDMDataType.FLOAT, d.getDataType())
+        self.assertEqual(3, d.size())
+        self.assertEqual(numpy.float32, d.values().dtype)
+
+    def test_DataChar(self):
+        d = pyfimex0.createData(pyfimex0.CDMDataType.CHAR, range(5))
+        self.assertEqual(pyfimex0.CDMDataType.CHAR, d.getDataType())
+        self.assertEqual(5, d.size())
+
+    def test_DataUChar(self):
+        d = pyfimex0.createData(pyfimex0.CDMDataType.UCHAR, range(5))
+        self.assertEqual(pyfimex0.CDMDataType.UCHAR, d.getDataType())
+
     def test_Attributes(self):
         test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
         r = pyfimex0.createFileReader('netcdf', test_ncfile)

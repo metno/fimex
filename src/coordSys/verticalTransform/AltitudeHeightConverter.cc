@@ -1,3 +1,33 @@
+/*
+  Fimex, src/coordSys/verticalTransform/AltitudeHeightConverter.cc
+
+  Copyright (C) 2019 met.no
+
+  Contact information:
+  Norwegian Meteorological Institute
+  Box 43 Blindern
+  0313 OSLO
+  NORWAY
+  email: diana@met.no
+
+  Project Info:  https://wiki.met.no/fimex/start
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation; either version 2.1 of the License, or
+  (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+  License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+  USA.
+*/
+
 #include "fimex/coordSys/verticalTransform/AltitudeHeightConverter.h"
 
 #include "fimex/CDM.h"
@@ -17,17 +47,17 @@
 
 namespace MetNoFimex {
 
-static LoggerPtr logger = getLogger("fimex.AltitudeHeightConverter");
+static Logger_p logger = getLogger("fimex.AltitudeHeightConverter");
 
-VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReader_p reader,
-        CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, bool addTopography)
+VerticalConverter_p AltitudeHeightConverter::createConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight,
+                                                             bool addTopography)
 {
     using namespace std;
 
-    const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
-    const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+    const CoordinateAxis_cp xAxis = cs->getGeoXAxis();
+    const CoordinateAxis_cp yAxis = cs->getGeoYAxis();
     if (!xAxis || !yAxis)
-        return boost::shared_ptr<AltitudeHeightConverter>();
+        return VerticalConverter_p();
 
     vector<string> dims;
     dims.push_back(xAxis->getShape()[0]);
@@ -37,10 +67,10 @@ VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReader_p reader
 
     std::string topoVar;
     const vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
-    std::vector<CoordSysPtr> allCS = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v allCS = listCoordinateSystems(reader);
     for (vector<string>::const_iterator it = topoVars.begin(); it != topoVars.end(); ++it) {
-        if (CoordSysPtr topoCS = findCompleteCoordinateSystemFor(allCS, *it)) {
-            if (CoordinateSystem::ConstAxisPtr zax = topoCS->getGeoZAxis()) {
+        if (CoordinateSystem_cp topoCS = findCompleteCoordinateSystemFor(allCS, *it)) {
+            if (CoordinateAxis_cp zax = topoCS->getGeoZAxis()) {
                 if (reader->getCDM().getDimension(zax->getShape().front()).getLength() != 1) {
                     LOG4FIMEX(logger, Logger::INFO, "topo var '" << *it << "' has z axis '" << zax->getName() << "' with length != 1, skipping");
                     continue;
@@ -52,15 +82,15 @@ VerticalConverterPtr AltitudeHeightConverter::createConverter(CDMReader_p reader
     }
     if (topoVar.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "no topography/altitude found to retrieve height");
-        return boost::shared_ptr<AltitudeHeightConverter>();
+        return VerticalConverter_p();
     }
 
     LOG4FIMEX(logger, Logger::INFO, "using altitude " << topoVar << " to retrieve height");
     return boost::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
 }
 
-AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordSysPtr cs,
-        VerticalConverterPtr altitudeOrHeight, const std::string& topography, bool addTopography)
+AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight,
+                                                 const std::string& topography, bool addTopography)
     : BasicVerticalConverter(reader, cs)
     , altitudeOrHeight_(altitudeOrHeight)
     , topography_(topography)

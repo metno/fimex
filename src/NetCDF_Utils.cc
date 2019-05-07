@@ -40,7 +40,7 @@ extern "C" {
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.NetCDF_Utils");
+static Logger_p logger = getLogger("fimex.NetCDF_Utils");
 // hdf5 lib is usually not thread-safe, so reading from one file and writing to another fails
 static MutexType ncMutex;
 

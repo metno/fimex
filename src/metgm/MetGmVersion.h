@@ -65,7 +65,7 @@ namespace MetNoFimex {
             mgm_version version = MGM_Edition1;
 
             if(doc.get()) {
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/meta_data/attribute");
+                xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm/meta_data/attribute");
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 size_t size = (nodes) ? nodes->nodeNr : 0;
                 for (size_t i = 0; i < size; ++i) {

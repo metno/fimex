@@ -46,7 +46,7 @@
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.CDMPressureConversions");
+static Logger_p logger = getLogger("fimex.CDMPressureConversions");
 
 using namespace std;
 
@@ -87,10 +87,6 @@ const float relative_humidity_scale_factor = 25000;
 
 typedef std::map<std::string, std::string> string_string_m;
 
-typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-typedef std::vector<CoordSysPtr> CoordSysPtr_v;
-
-
 const string ADD_OFFSET = "add_offset";
 const string COORDINATES = "coordinates";
 const string LONG_NAME = "long_name";
@@ -125,8 +121,8 @@ public:
 private:
     std::string varName_;
 };
-typedef boost::shared_ptr<Converter> ConverterPtr;
-typedef std::vector<ConverterPtr> ConverterPtr_v;
+typedef boost::shared_ptr<Converter> Converter_p;
+typedef std::vector<Converter_p> Converter_pv;
 
 Converter::~Converter()
 {
@@ -138,7 +134,7 @@ struct ConverterFactory {
     struct Environment {
         CDMReader_p inputReader;
         const CDM& inputCDM;
-        const CoordSysPtr_v inputCoordSys;
+        const CoordinateSystem_cp_v inputCoordSys;
 
         boost::shared_ptr<CDM> outputCDM;
 
@@ -160,7 +156,7 @@ struct ConverterFactory {
     virtual ~ConverterFactory() { }
     virtual const std::string name() const = 0;
     virtual int match(const Environment& env, const std::string& conversion) const = 0;
-    virtual ConverterPtr_v createConverter(Environment& env, const Operation& oper) const = 0;
+    virtual Converter_pv createConverter(Environment& env, const Operation& oper) const = 0;
 };
 typedef boost::shared_ptr<ConverterFactory> ConverterFactoryPtr;
 
@@ -212,14 +208,19 @@ std::string deriveVariableName(const ConverterFactory::Operation& oper, const st
 
 class ThetaTemperatureConverter : public Converter {
 public:
-    ThetaTemperatureConverter(const std::string& temperature, CDMReader_p reader, CoordSysPtr cs, const std::string& theta)
-        : Converter(temperature), reader_(reader), cs_(cs), theta_(theta) { }
+    ThetaTemperatureConverter(const std::string& temperature, CDMReader_p reader, CoordinateSystem_cp cs, const std::string& theta)
+        : Converter(temperature)
+        , reader_(reader)
+        , cs_(cs)
+        , theta_(theta)
+    {
+    }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
     CDMReader_p reader_;
-    CoordSysPtr cs_;
+    CoordinateSystem_cp cs_;
     const std::string& theta_;
 };
 
@@ -254,15 +255,15 @@ public:
     int match(const Environment& env, const std::string& conversion) const
         { return conversion == "theta2T" ? 1 : 0; }
 
-    ConverterPtr_v createConverter(Environment& env, const Operation& oper) const;
+    Converter_pv createConverter(Environment& env, const Operation& oper) const;
 };
 
-ConverterPtr_v ThetaTemperatureConverterFactory::createConverter(Environment& env, const Operation& oper) const
+Converter_pv ThetaTemperatureConverterFactory::createConverter(Environment& env, const Operation& oper) const
 {
-    ConverterPtr_v converters;
+    Converter_pv converters;
     const vector<string> thetaV = findVariables(env, oper, AIR_POTENTIAL_TEMPERATURE);
     for (vector<string>::const_iterator itTheta = thetaV.begin(); itTheta != thetaV.end(); ++itTheta) {
-        CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itTheta);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itTheta);
         if (!cs) {
             LOG4FIMEX(logger, Logger::WARN, "no coordinate system for " << *itTheta << " found");
             continue;
@@ -298,14 +299,20 @@ ConverterPtr_v ThetaTemperatureConverterFactory::createConverter(Environment& en
 
 class HumidityConverter : public Converter {
 public:
-    HumidityConverter(const std::string& relative, CDMReader_p reader, CoordSysPtr cs, const std::string& specific, const std::string& temperature)
-        : Converter(relative), reader_(reader), cs_(cs), specific_(specific), temperature_(temperature) { }
+    HumidityConverter(const std::string& relative, CDMReader_p reader, CoordinateSystem_cp cs, const std::string& specific, const std::string& temperature)
+        : Converter(relative)
+        , reader_(reader)
+        , cs_(cs)
+        , specific_(specific)
+        , temperature_(temperature)
+    {
+    }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
     CDMReader_p reader_;
-    CoordSysPtr cs_;
+    CoordinateSystem_cp cs_;
     std::string specific_;
     std::string temperature_;
 };
@@ -342,17 +349,17 @@ public:
     int match(const Environment& env, const std::string& conversion) const
         { return conversion == "specific2relative" ? 1 : 0; }
 
-    ConverterPtr_v createConverter(Environment& env, const Operation& oper) const;
+    Converter_pv createConverter(Environment& env, const Operation& oper) const;
 };
 
-ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const Operation& oper) const
+Converter_pv HumidityConverterFactory::createConverter(Environment& env, const Operation& oper) const
 {
     const vector<string> shV = findVariables(env, oper, SPECIFIC_HUMIDITY);
     const vector<string> tempV = findVariables(env, oper, AIR_TEMPERATURE);
 
-    ConverterPtr_v converters;
+    Converter_pv converters;
     for (vector<string>::const_iterator itSpecific = shV.begin(); itSpecific != shV.end(); ++itSpecific) {
-        CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itSpecific);
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itSpecific);
         if (!cs.get()) {
             LOG4FIMEX(logger, Logger::WARN, "no coordinate system for '" << *itSpecific << "' found");
             continue;
@@ -402,14 +409,20 @@ ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const
 
 class OmegaVerticalConverter : public Converter {
 public:
-    OmegaVerticalConverter(const std::string& vwind, CDMReader_p reader, CoordSysPtr cs, const std::string& omega, const std::string& temperature)
-        : Converter(vwind), reader_(reader), cs_(cs), omega_(omega), temperature_(temperature) { }
+    OmegaVerticalConverter(const std::string& vwind, CDMReader_p reader, CoordinateSystem_cp cs, const std::string& omega, const std::string& temperature)
+        : Converter(vwind)
+        , reader_(reader)
+        , cs_(cs)
+        , omega_(omega)
+        , temperature_(temperature)
+    {
+    }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
     CDMReader_p reader_;
-    CoordSysPtr cs_;
+    CoordinateSystem_cp cs_;
     std::string omega_;
     std::string temperature_;
 };
@@ -436,35 +449,35 @@ public:
     int match(const Environment& env, const std::string& conversion) const
         { return conversion == "omega2vwind" ? 1 : 0; }
 
-    std::vector<ConverterPtr> createConverter(Environment& env, const Operation& oper) const;
+    std::vector<Converter_p> createConverter(Environment& env, const Operation& oper) const;
 };
 
-ConverterPtr_v OmegaVerticalConverterFactory::createConverter(Environment& env, const Operation& oper) const
+Converter_pv OmegaVerticalConverterFactory::createConverter(Environment& env, const Operation& oper) const
 {
     const vector<string> omegaV = findVariables(env, oper, "omega", OMEGA_REGEX);
     if (omegaV.size() != 1) {
         LOG4FIMEX(logger, Logger::WARN, "found no, or more than one, variables " << OMEGA_REGEX);
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
     const vector<string> tempV = findVariables(env, oper, AIR_TEMPERATURE);
     if (tempV.size() != 1) {
         LOG4FIMEX(logger, Logger::WARN, "found no, or more than one, variables " << AIR_TEMPERATURE);
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
     const std::string& omega = omegaV.front(), temperature = tempV.front();
 
-    CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, omega);
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(env.inputCoordSys, omega);
     if (!cs || !cs->isCSAndCompleteFor(temperature)) {
         LOG4FIMEX(logger, Logger::WARN, "no coordinate system for '" << omega << "' and '" << temperature << "'' found");
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
     const string verticalWindName = deriveVariableName(oper, UPWARD_AIR_VELOCITY, omega, OMEGA_REGEX, UPWARD_AIR_VELOCITY);
     if (env.outputCDM->hasVariable(verticalWindName)) {
         LOG4FIMEX(logger, Logger::WARN, "variable '" << verticalWindName << "' exists, not adding conversion");
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
     const vector<string>& shape = env.inputCDM.getVariable(omega).getShape();
@@ -477,22 +490,26 @@ ConverterPtr_v OmegaVerticalConverterFactory::createConverter(Environment& env, 
     }
     env.outputCDM->removeVariable(omega); // why?
 
-    return ConverterPtr_v(1, boost::make_shared<OmegaVerticalConverter>(verticalWindName, env.inputReader, cs, omega, temperature));
+    return Converter_pv(1, boost::make_shared<OmegaVerticalConverter>(verticalWindName, env.inputReader, cs, omega, temperature));
 }
 
 // ------------------------------------------------------------------------------------------------
 
 class AddPressure4DConverter : public Converter {
 public:
-    AddPressure4DConverter(const std::string& pressure4d, CDMReader_p reader,
-                           VerticalConverterPtr vc, const std::vector<std::string>& shape4d)
-        : Converter(pressure4d), reader_(reader), vc_(vc), shape4d_(shape4d) { }
+    AddPressure4DConverter(const std::string& pressure4d, CDMReader_p reader, VerticalConverter_p vc, const std::vector<std::string>& shape4d)
+        : Converter(pressure4d)
+        , reader_(reader)
+        , vc_(vc)
+        , shape4d_(shape4d)
+    {
+    }
 
     DataPtr getDataSlice(size_t unLimDimPos);
 
 private:
     CDMReader_p reader_;
-    VerticalConverterPtr vc_;
+    VerticalConverter_p vc_;
     std::vector<std::string> shape4d_;
 };
 
@@ -517,26 +534,26 @@ public:
     int match(const Environment& env, const std::string& conversion) const
         { return conversion == "add4Dpressure" ? 1 : 0; }
 
-    std::vector<ConverterPtr> createConverter(Environment& env, const Operation& oper) const;
+    std::vector<Converter_p> createConverter(Environment& env, const Operation& oper) const;
 };
 
-ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, const Operation& oper) const
+Converter_pv AddPressure4DConverterFactory::createConverter(Environment& env, const Operation& oper) const
 {
     const std::string& pressureName = oper.option(AIR_PRESSURE4D);
     if (env.outputCDM->hasVariable(pressureName)) {
         LOG4FIMEX(logger, Logger::WARN, "variable '" << pressureName << "' exists, not adding conversion");
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
-    VerticalConverterPtr vc;
+    VerticalConverter_p vc;
     size_t dimsizeOld = 0;
     vector<string> shape4d;
-    for (CoordSysPtr_v::const_iterator it = env.inputCoordSys.begin(); it != env.inputCoordSys.end(); ++it) {
-        CoordSysPtr csi = *it;
-        CoordinateSystem::ConstAxisPtr csiX = csi->getGeoXAxis();
-        CoordinateSystem::ConstAxisPtr csiY = csi->getGeoYAxis();
-        CoordinateSystem::ConstAxisPtr csiZ = csi->getGeoZAxis();
-        CoordinateSystem::ConstAxisPtr csiT = csi->getTimeAxis();
+    for (CoordinateSystem_cp_v::const_iterator it = env.inputCoordSys.begin(); it != env.inputCoordSys.end(); ++it) {
+        CoordinateSystem_cp csi = *it;
+        CoordinateAxis_cp csiX = csi->getGeoXAxis();
+        CoordinateAxis_cp csiY = csi->getGeoYAxis();
+        CoordinateAxis_cp csiZ = csi->getGeoZAxis();
+        CoordinateAxis_cp csiT = csi->getTimeAxis();
         if (!(csiX && csiY && csiZ && csiT))
             continue;
 
@@ -548,7 +565,7 @@ ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, 
         if (!csi->hasVerticalTransformation())
             continue;
 
-        VerticalConverterPtr vconv;
+        VerticalConverter_p vconv;
         try {
             vconv = csi->getVerticalTransformation()->getConverter(env.inputReader, csi, MIFI_VINT_PRESSURE);
             if (!vconv)
@@ -585,20 +602,20 @@ ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, 
     }
     if (!vc) {
         throw CDMException("no x,y,z,t 4D-coordinate system found");
-        return ConverterPtr_v();
+        return Converter_pv();
     }
 
     env.outputCDM->addVariable(CDMVariable(pressureName, CDM_FLOAT, shape4d));
     env.outputCDM->addAttribute(pressureName, CDMAttribute(UNITS, "hPa"));
     env.outputCDM->addAttribute(pressureName, CDMAttribute(STANDARD_NAME, AIR_PRESSURE));
 
-    return ConverterPtr_v(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, vc, shape4d));
+    return Converter_pv(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, vc, shape4d));
 }
 
 } // anonymous namespace
 
 struct CDMPressureConversionsImpl {
-    std::map<std::string, ConverterPtr> converters;
+    std::map<std::string, Converter_p> converters;
 };
 
 namespace {
@@ -667,8 +684,8 @@ CDMPressureConversions::CDMPressureConversions(CDMReader_p dataReader, std::vect
         if (best_factory) {
             LOG4FIMEX(logger, Logger::DEBUG, "factory: '" << best_factory->name() << "'");
 
-            ConverterPtr_v convs = best_factory->createConverter(env, oper);
-            for (ConverterPtr_v::const_iterator itC = convs.begin(); itC != convs.end(); ++itC) {
+            Converter_pv convs = best_factory->createConverter(env, oper);
+            for (Converter_pv::const_iterator itC = convs.begin(); itC != convs.end(); ++itC) {
                 const std::string& varName = (*itC)->getName();
                 p_->converters.insert(std::make_pair(varName, *itC));
             }
@@ -680,7 +697,7 @@ CDMPressureConversions::CDMPressureConversions(CDMReader_p dataReader, std::vect
 
 DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    std::map<std::string, ConverterPtr>::const_iterator itC = p_->converters.find(varName);
+    std::map<std::string, Converter_p>::const_iterator itC = p_->converters.find(varName);
     if (itC == p_->converters.end()) {
         return dataReader_->getDataSlice(varName, unLimDimPos);
     } else {
