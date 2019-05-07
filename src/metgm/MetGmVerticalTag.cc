@@ -151,12 +151,4 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
     {
         points_ = data->asFloat();
     }
-
-    void MetGmVerticalTag::dump() {
-        std::cerr << "dumping Z profile [START]" << std::endl;
-        for(size_t index = 0; index < nz_; ++index) {
-            std::cerr << "[" << index << "] = " << points_[index] << std::endl;
-        }
-        std::cerr << "dumping Z profile [END]"   << std::endl;
-    }
 }

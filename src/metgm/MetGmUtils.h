@@ -25,19 +25,7 @@
 //
 #include "metgm.h"
 
-// fimex
-//
-#include "fimex/CDMException.h"
-
-// boost
-//
-#include <boost/lexical_cast.hpp>
-
-// standard
-//
-#include <sstream>
-#include <iostream>
-#include <time.h>
+#include <string>
 
 #ifndef METGM_UTILS_H
 #define METGM_UTILS_H
@@ -60,21 +48,9 @@ public:
         end_ = start_;
     }
 
-    timespec elapsed()
-    {
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_);
-        timespec delta = diff(start_, end_);
-        start_ = end_;
-        return delta;
-    }
+    timespec elapsed();
 
-    std::string elapsedToString()
-    {
-        timespec delta = elapsed();
-        std::string ss; ss.clear();
-        ss.append("[sec = ").append(boost::lexical_cast<std::string>(delta.tv_sec)).append(":").append("msec = ").append(boost::lexical_cast<std::string>(delta.tv_nsec / 1000000)).append("]");
-        return ss;
-    }
+    std::string elapsedToString();
 
 protected:
     inline timespec diff(timespec start, timespec end)
@@ -98,20 +74,12 @@ protected:
 class MetGmProfilingTimerOnDestruction : public MetGmProfilingTimer
 {
 public:
-    inline MetGmProfilingTimerOnDestruction() : MetGmProfilingTimer()
+    inline MetGmProfilingTimerOnDestruction()
+        : MetGmProfilingTimer()
     {
-
     }
 
-    inline ~MetGmProfilingTimerOnDestruction()
-    {
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_);
-        timespec elapsed = diff(start_, end_);
-        std::cerr << "[sec = " << elapsed.tv_sec
-                  << ":"
-                  << "msec = " << elapsed.tv_nsec / 1000000 << "]"
-                  << std::endl;
-    }
+    ~MetGmProfilingTimerOnDestruction();
 };
 
 #define MGM_THROW_ON_ERROR(expression)                            \

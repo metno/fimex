@@ -384,11 +384,7 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
 
         MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
 
-//        MetGmProfilingTimer timer;
-
         MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, profile.pTags_->data().get()));
-
-//        MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(profile.pTags_->totalDataSize() * sizeof(float) / 1024)).append("\n"))
     }
 
     void MetGmCDMWriterImpl::init()
@@ -397,8 +393,6 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
         for(xmlPidView::const_iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
 
             MetGmConfigurationMappings entry = *pIt;
-
-//            MGM_MESSAGE_POINT(std::string(" writing parameter with pid = ").append(boost::lexical_cast<std::string>(entry.p_id_)))
 
             MetGmTagsPtr tags;
 
@@ -415,7 +409,6 @@ void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
             assert(tags.get());
 
             if(tags->data().get() == 0) {
-//                MGM_MESSAGE_POINT(" EMPTY DATA -- not writing this wariable to mgm")
                 continue;
             }
 

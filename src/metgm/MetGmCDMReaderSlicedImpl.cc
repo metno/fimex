@@ -132,9 +132,6 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-//            DataPtr data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
-//            var.setData(data);
-
             cdm_->addVariable(var);
 
             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {

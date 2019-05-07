@@ -54,8 +54,6 @@ namespace MetNoFimex {
         inline unsigned int                pz()       { return pz_; }
         inline boost::shared_array<float>& points()   { return points_; }
 
-        void dump();
-
     protected:
 
         inline MetGmVerticalTag() : nz_(0), pr_(0), pz_(0) { }

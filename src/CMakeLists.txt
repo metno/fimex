@@ -353,6 +353,7 @@ if(ENABLE_METGM)
     metgm/MetGmTags.h
     metgm/MetGmTimeTag.cc
     metgm/MetGmTimeTag.h
+    metgm/MetGmUtils.cc
     metgm/MetGmUtils.h
     metgm/MetGmVersion.h
     metgm/MetGmVerticalTag.cc

@@ -179,12 +179,6 @@ struct data_caster<OUT, std::string> {
     OUT operator()(const std::string& in) { return string2type<OUT>(in); }
 };
 
-//template<>
-//char data_caster<char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
-//template<>
-//unsigned char data_caster<unsigned char, std::string>::operator()(const std::string& in) { return boost::lexical_cast<int>(in); }
-
-
 /** Round a double orr float to integer, and if the value is outside a range, replace with an "invalid" value.
  */
 struct RoundAndClamp {

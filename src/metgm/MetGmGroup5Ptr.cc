@@ -36,7 +36,6 @@
 #include "fimex/Units.h"
 
 // standard
-#include <cstdio>
 #include <cmath>
 
 namespace MetNoFimex {
@@ -311,9 +310,11 @@ std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(c
     case MetGmHDTag::HD_1D:
     case MetGmHDTag::HD_1D_T:
     case MetGmHDTag::HD_3D:
-    default:
-        throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdTag->asString() +
-                           " for p_id =" + boost::lexical_cast<std::string>(gp3->p_id()));
+    default: {
+        std::ostringstream msg;
+        msg << __FUNCTION__ << ": dimensionality not supported yet :" << hdTag->asString() << " for p_id =" << gp3->p_id();
+        throw CDMException(msg.str());
+    }
     }
 
     return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
@@ -345,11 +346,11 @@ std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(c
             case MetGmHDTag::HD_1D:
             case MetGmHDTag::HD_1D_T:
             case MetGmHDTag::HD_3D:
-            default:
-                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
-                                   + hdTag->asString()
-                                   + " for p_id ="
-                                   + boost::lexical_cast<std::string>(gp3->p_id()));
+            default: {
+                std::ostringstream msg;
+                msg << __FUNCTION__ << ": dimensionality not supported yet :" << hdTag->asString() << " for p_id =" << gp3->p_id();
+                throw CDMException(msg.str());
+            }
         }
 
         return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));

@@ -69,8 +69,6 @@ namespace MetNoFimex {
 
             MetGmConfigurationMappings entry = *pIt;
 
-//            MGM_MESSAGE_POINT(std::string(" writing parameter with pid = ").append(boost::lexical_cast<std::string>(entry.p_id_)))
-
             MetGmTagsPtr tags;
 
             cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
@@ -115,8 +113,6 @@ namespace MetNoFimex {
 
         MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
 
-//        MGM_MESSAGE_POINT(std::string("variable name=").append(pVar->getName()))
-
         assert(profile.pTags_.get());
 
         size_t total_num_of_slices = 0;
@@ -133,7 +129,6 @@ namespace MetNoFimex {
             boost::shared_array<float> slice_to_write = raw_slice->asFloat();
             profile.pTags_->sliceToMetGmLayout(slice_to_write);
             MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));
-//            MGM_MESSAGE_POINT(std::string(" slice # written: ").append(boost::lexical_cast<std::string>(cSlicePos)))
         }
     }
 }
