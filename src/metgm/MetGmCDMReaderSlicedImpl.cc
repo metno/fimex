@@ -57,6 +57,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <regex>
+#include <tuple>
 
 // libxml2
 //
@@ -265,7 +266,7 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 //                    strUnit = entry.units_;
             } else {
                 xmlPidView::iterator ic0, ic1;
-                boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->p_id());
+                std::tie(ic0, ic1) = pidView.equal_range(tags->p_id());
                 for(; ic0 != ic1; ++ic0) {
                     if(!ic0->units_.empty() && ic0->units_ == strUnit) {
                         kildeName = ic0->cdmName_;

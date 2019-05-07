@@ -51,7 +51,6 @@
 
 // boost
 //
-#include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -62,6 +61,7 @@
 #include <libxml/xpathInternals.h>
 
 #include <regex>
+#include <tuple>
 
 //#define GXDEBUG 1
 
@@ -728,7 +728,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
 //                    strUnit = entry.units_;
             } else {
                 xmlPidView::iterator ic0, ic1;
-                boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->p_id());
+                std::tie(ic0, ic1) = pidView.equal_range(tags->p_id());
                 for(; ic0 != ic1; ++ic0) {
                     if(!ic0->units_.empty() && ic0->units_ == strUnit) {
                         kildeName = ic0->cdmName_;

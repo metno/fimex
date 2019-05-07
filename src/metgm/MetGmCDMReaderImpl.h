@@ -50,12 +50,11 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index_container.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <memory>
 
 // standard
 //
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <vector>
 
