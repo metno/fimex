@@ -39,13 +39,12 @@
 
 // boost
 //
-#include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_array.hpp>
-#include <memory>
 
 // standard
 //
+#include <memory>
 #include <numeric>
 
 namespace MetNoFimex {
@@ -173,7 +172,7 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
 
     bool MetGmTimeTag::hasNegativeTimePoints()
     {
-        return std::find_if(points_.begin(), points_.end(), boost::bind( std::less<float>() , _1, 0 ) ) != points_.end();
+        return std::find_if(points_.begin(), points_.end(), [](float f) { return f < 0; }) != points_.end();
     }
 
     bool MetGmTimeTag::hasNonEquidistantTimePoints()

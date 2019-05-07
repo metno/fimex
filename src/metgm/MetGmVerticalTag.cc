@@ -42,7 +42,6 @@
 
 // boost
 //
-#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace MetNoFimex {
@@ -145,8 +144,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
     }
 
     bool MetGmVerticalTag::hasNegativePoints() {
-        std::less_equal<float> leq;
-        return std::find_if(&points_[0], &points_[nz_], boost::bind( leq, _1, 0 ) ) != &points_[nz_];
+        return std::find_if(&points_[0], &points_[nz_], [](float f) { return f <= 0; }) != &points_[nz_];
     }
 
     void MetGmVerticalTag::extractVerticalPoints(const DataPtr& data)

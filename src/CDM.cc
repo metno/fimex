@@ -31,8 +31,6 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -220,7 +218,7 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
     return false;
 }
 
-/** object function for CDMVariable::checkDimension  (problems with boost::bind and std::not1, boost v 1.32 has no ! operator)*/
+/** object function for CDMVariable::checkDimension */
 class VariableDimensionCheck : public std::unary_function<std::string, bool>
 {
     const CDMVariable& variable;

@@ -29,7 +29,6 @@
 #include "Felt_Array2.h"
 #include "Felt_File2.h"
 #include "Felt_File_Error.h"
-#include "boost/date_time/gregorian/gregorian.hpp"
 #include "felt/FeltGridDefinition.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
@@ -38,8 +37,10 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
+
+#include <boost/date_time/gregorian/gregorian.hpp>
+
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <cassert>
 #include <cstdlib>
 #include <functional>

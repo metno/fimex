@@ -43,18 +43,17 @@
 
 // boost
 //
-#include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_array.hpp>
-#include <memory>
 
 // standard
 //
+#include <algorithm>
 #include <ctime>
+#include <memory>
+#include <numeric>
 #include <string>
 #include <vector>
-#include <numeric>
-#include <algorithm>
 
 namespace MetNoFimex {
 
