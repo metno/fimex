@@ -21,10 +21,11 @@
  * USA.
  */
 
-#include <cmath>
-#include "fimex/Utils.h"
 #include "fimex/Units.h"
+
 #include "fimex/Logger.h"
+#include "fimex/UnitsException.h"
+#include "fimex/Utils.h"
 
 #include "boost/shared_ptr.hpp"
 #include "MutexLock.h"
@@ -39,6 +40,8 @@ extern "C" {
 // add forgotten utIsInit fom udunits
 extern "C" int utIsInit();
 #endif // UDUNITS2
+
+#include <cmath>
 
 namespace MetNoFimex
 {

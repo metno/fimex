@@ -33,6 +33,7 @@
 // fimex
 //
 #include "fimex/DataTypeChanger.h"
+#include "fimex/Units.h"
 
 // boost
 //

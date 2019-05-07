@@ -125,6 +125,7 @@ SET(libfimex_SOURCES
   ${INCF}/TimeSpec.h
   Units.cc
   ${INCF}/Units.h
+  ${INCF}/UnitsException.h
   Utils.cc
   ${INCF}/Utils.h
   XMLDoc.cc

@@ -22,20 +22,24 @@
  */
 
 #include "fimex/CDMExtractor.h"
-#include "fimex/Data.h"
+
 #include "fimex/CDM.h"
-#include "fimex/SliceBuilder.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDMReaderUtils.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/SliceBuilder.h"
+#include "fimex/Units.h"
 #include "fimex/Utils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+
 #include "CDMMergeUtils.h"
-#include <vector>
-#include <set>
+
 #include <algorithm>
 #include <functional>
-#include <numeric>
 #include <iterator>
+#include <numeric>
+#include <set>
+#include <vector>
 
 namespace MetNoFimex
 {

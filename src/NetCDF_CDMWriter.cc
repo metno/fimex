@@ -22,6 +22,7 @@
  */
 
 #include "fimex/NetCDF_CDMWriter.h"
+
 #include "fimex_config.h"
 #ifndef HAVE_NETCDF_HDF5_LIB
 #undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
@@ -37,24 +38,29 @@ extern "C" {
 }
 #endif
 
-#include <iostream>
-#include <boost/make_shared.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/scoped_array.hpp>
-#include <numeric>
-#include <functional>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
-#include "fimex/mifi_constants.h"
 #include "fimex/CDMDataType.h"
+#include "fimex/Data.h"
 #include "fimex/DataTypeChanger.h"
-#include "fimex/Units.h"
-#include "fimex/Utils.h"
-#include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/Data.h"
+#include "fimex/Units.h"
+#include "fimex/UnitsException.h"
+#include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
+#include "fimex/mifi_constants.h"
+
 #include "NetCDF_Utils.h"
+
+#include <boost/make_shared.hpp>
+#include <boost/scoped_array.hpp>
+#include <boost/shared_array.hpp>
+
+#include <functional>
+#include <iostream>
+#include <numeric>
+
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 namespace MetNoFimex
 {

@@ -21,10 +21,15 @@
  * USA.
  */
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
-#include "MutexLock.h"
+
+#include "fimex/Units.h"
 #include "fimex/Utils.h"
+
+#include "MutexLock.h"
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <limits>
 
 #include "fimex_config.h"
@@ -183,6 +188,7 @@ void void_ut_free(void* ptr) {
 
 void TimeUnit::init(const std::string& timeUnitString)
 {
+    Units units; // unit initialization
     if (!units.isTime(timeUnitString)) {
         throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
     } else {
@@ -221,6 +227,7 @@ double TimeUnit::epochSeconds2unitTime(double epochSeconds) const
 }
 FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
 {
+    Units units; // unit initialization
     FimexTime fiTime;
     float second;
     int year, month, mday, hour, minute;
@@ -251,6 +258,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
 }
 boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 {
+    Units units; // unit initialization
     float second;
     int year, month, mday, hour, minute;
     ScopedCritical lock(getUnitsMutex());
@@ -274,6 +282,7 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
 {
+    Units units; // unit initialization
     float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
     double unitTime;
     ScopedCritical lock(getUnitsMutex());
@@ -295,6 +304,7 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
 
 double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const
 {
+    Units units; // unit initialization
     boost::gregorian::date pDate = pTime.date();
     boost::posix_time::time_duration pTimeDur = pTime.time_of_day();
     double unitTime;

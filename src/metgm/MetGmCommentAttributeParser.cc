@@ -30,6 +30,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/Units.h"
 #include "fimex/XMLDoc.h"
 
 // libxml2

@@ -32,7 +32,6 @@
 #include <map>
 #include "fimex/CDM.h"
 #include "fimex/CDMReader.h"
-#include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"

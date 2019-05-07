@@ -34,15 +34,6 @@
 namespace MetNoFimex
 {
 
-class UnitException : public CDMException
-{
-public:
-    UnitException(const std::string& message)
-        : CDMException(message)
-    {
-    }
-};
-
 /**
  * @headerfile fimex/Units.h
  */

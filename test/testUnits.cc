@@ -24,9 +24,10 @@
 #include "testinghelpers.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include "fimex/Utils.h"
-#include "fimex/Units.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Units.h"
+#include "fimex/UnitsException.h"
+#include "fimex/Utils.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cmath>
 
