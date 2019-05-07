@@ -79,6 +79,7 @@ void getSimpleAxes(const CoordSysPtr& cs,
     }
 
     // detect time axis
+    tIsUnlimited = false;
     tAxis = cs->getTimeAxis();
     nt = 1;
     if (tAxis.get() != 0) {
