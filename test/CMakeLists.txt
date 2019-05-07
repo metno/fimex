@@ -16,30 +16,32 @@ IF (NOT (EXISTS "${TEST_EXTRADATA_DIR}/flth00.dat"))
 ENDIF ()
 
 SET(CC_TESTS
-  testInterpolation
-  testVerticalCoordinates
   testBinaryConstants
-  testUtils
-  testTimeSpec
-  testSpatialAxisSpec
-  testData
-  testProjections
-  testUnits
-  testFileReaderFactory
   testCDM
-  testSliceBuilder
-  testXMLDoc
+  testData
   testFeltReader
+  testFileReaderFactory
+  testInterpolation
+  testInterpolator
+  testProcessor
+  testProjections
+  testQualityExtractor
+  testSliceBuilder
+  testSpatialAxisSpec
+  testTimeSpec
+  testUnits
+  testUtils
+  testVerticalCoordinates
+  testXMLDoc
 )
 
 IF(ENABLE_FELT)
   LIST(APPEND CC_TESTS
-    testQualityExtractor
-    )
+    testExtractor
+  )
+
   SET(NETCDF_MI_TESTS
     testNetcdfWriter
-    testExtractor
-    testInterpolator
     testTimeInterpolator
     )
 
@@ -59,9 +61,6 @@ IF((ENABLE_FELT) AND (ENABLE_NETCDF))
   SET(C_TESTS
     test_c_consumer
     )
-  SET(GRIBAPI_NC_TESTS
-    testGribReader
-    )
 ENDIF()
 
 IF(ENABLE_NETCDF)
@@ -71,7 +70,6 @@ IF(ENABLE_NETCDF)
     testCoordinateSystemSliceBuilder
     testNcmlReader
     testNcmlAggregationReader
-    testProcessor
     testMerger
     testNetCDFReaderWriter
     testFillWriter
@@ -112,6 +110,7 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   LIST(APPEND CC_TESTS 
     ${GRIBAPI_MI_TESTS}
     ${GRIBAPI_NC_TESTS}
+    testGribReader
     )
   CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
   ADD_TEST(NAME testGrib2SomeUndefined.sh COMMAND testGrib2SomeUndefined.sh)

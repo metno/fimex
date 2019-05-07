@@ -54,5 +54,5 @@ TEST4FIMEX_TEST_CASE(test_write_hirlam12_nc)
     // from metgm reader write again to nc file and compare:
     // hirlam12.nc and hirlam12.mgm.nc
     const std::string newNcFile("hirlam12.mgm.nc");
-    MetNoFimex::createWriter(mgmReader, "null", newNcFile);
+    MetNoFimex::createWriter(mgmReader, "netcdf", newNcFile);
 }

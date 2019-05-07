@@ -41,19 +41,13 @@
 using namespace std;
 using namespace MetNoFimex;
 
-#ifdef HAVE_NETCDF_H
-static const std::string writertype = "netcdf";
-#else
-static const std::string writertype = "null";
-#endif
-
 TEST4FIMEX_TEST_CASE(test_read_sample_ed1)
 {
     const string fileName = pathTest("sample_ed1.gm");
 
     defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd1 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
-    CDMFileReaderFactory::createWriter(metgmReaderEd1, writertype, "testMetgmReadEd1.nc");
+    writeToFile(metgmReaderEd1, "testMetgmReadEd1.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_read_metgm2)
@@ -62,7 +56,7 @@ TEST4FIMEX_TEST_CASE(test_read_metgm2)
 
     defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd2 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
-    CDMFileReaderFactory::createWriter(metgmReaderEd2, writertype, "testMetgmReadEd2.nc");
+    writeToFile(metgmReaderEd2, "testMetgmReadEd2.nc");
 }
 
 TEST4FIMEX_TEST_CASE(test_slicebuilder_metgm1)

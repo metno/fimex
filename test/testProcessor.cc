@@ -39,6 +39,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
+#ifdef HAVE_NETCDF_H
 TEST4FIMEX_TEST_CASE(test_accumulate)
 {
 //    defaultLogLevel(Logger::DEBUG);
@@ -91,7 +92,9 @@ TEST4FIMEX_TEST_CASE(test_rotate)
         TEST4FIMEX_CHECK_NE(yn, yo);
         TEST4FIMEX_CHECK_CLOSE(xn * xn + yn * yn, xo * xo + yo * yo, 1e-4);
 }
+#endif // HAVE_NETCDF_H
 
+#ifdef HAVE_FELT
 TEST4FIMEX_TEST_CASE(interpolator_vectorlatlon)
 {
     if (!hasTestExtra())
@@ -170,3 +173,4 @@ TEST4FIMEX_TEST_CASE(interpolator_vectorlatlon)
         }
     }
 }
+#endif // HAVE_FELT

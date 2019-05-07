@@ -21,6 +21,7 @@
  * USA.
  */
 
+#include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
@@ -31,6 +32,7 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Type2String.h"
 #include "fimex/interpolation.h"
+
 #include "testinghelpers.h"
 
 using namespace std;
@@ -38,6 +40,7 @@ using namespace MetNoFimex;
 
 static const int DEBUG = 0;
 
+#if defined(HAVE_NETCDF_H)
 static CDMReader_p createFeltReader()
 {
     if (!hasTestExtra())
@@ -73,7 +76,7 @@ TEST4FIMEX_TEST_CASE(interpolator)
     }
     TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 
-    NetCDF_CDMWriter(interpolator, "test_interpolator.nc");
+    writeToFile(interpolator, "test_interpolator.nc");
 }
 
 TEST4FIMEX_TEST_CASE(interpolatorKDTree)
@@ -105,6 +108,23 @@ TEST4FIMEX_TEST_CASE(interpolatorKDTree)
     TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 }
 
+TEST4FIMEX_TEST_CASE(interpolatorRelative)
+{
+    if (DEBUG)
+        defaultLogLevel(Logger::DEBUG);
+    CDMReader_p feltReader = createFeltReader();
+    if (!feltReader)
+        return;
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
+    interpolator->changeProjection(MIFI_INTERPOL_BILINEAR,
+                                   "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=" + type2string(MIFI_EARTH_RADIUS_M) + " +e=0",
+                                   "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("x")->size(), 297);
+    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("y")->size(), 286);
+}
+#endif // HAVE_FELT
+
+#if defined(HAVE_NETCDF_H)
 TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
@@ -130,7 +150,7 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
     TEST4FIMEX_CHECK_EQ(cmaData2->size(), cmaData->size());
 }
 
-TEST4FIMEX_TEST_CASE(test_interpolator2coords)
+TEST4FIMEX_TEST_CASE(interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
@@ -178,19 +198,6 @@ TEST4FIMEX_TEST_CASE(test_interpolator2coords)
         }
         TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
     }
-}
-
-TEST4FIMEX_TEST_CASE(interpolatorRelative)
-{
-    if (DEBUG)
-        defaultLogLevel(Logger::DEBUG);
-    CDMReader_p feltReader = createFeltReader();
-    if (!feltReader)
-        return;
-    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
-    interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
-    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("x")->size(), 297);
-    TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("y")->size(), 286);
 }
 
 TEST4FIMEX_TEST_CASE(interpolator_template)
@@ -251,7 +258,7 @@ TEST4FIMEX_TEST_CASE(interpolator_wrongaxes_latlon)
 
     const string ncmlFileName = pathTest("c11.ncml");
     const string ncFileName = pathTest("c11.nc");
-    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
+    CDMReader_p ncReader = CDMFileReaderFactory::create("netcdf", ncFileName);
     CDMReader_p ncmlReader = std::make_shared<NcmlCDMReader>(ncReader, XMLInputFile(ncmlFileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncmlReader);
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
@@ -378,7 +385,7 @@ TEST4FIMEX_TEST_CASE(interpolator_vcross)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
-    CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
+    CDMReader_p ncReader = CDMFileReaderFactory::create("netcdf", ncFileName);
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
 
     vector<CrossSectionDefinition> vc;
@@ -431,3 +438,4 @@ TEST4FIMEX_TEST_CASE(interpolator_forward)
     }
     TEST4FIMEX_CHECK_EQ(0, bad);
 }
+#endif // HAVE_NETCDF_H

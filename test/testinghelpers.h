@@ -32,6 +32,8 @@
 #ifndef FIMEX_TESTINGHELPERS_H
 #define FIMEX_TESTINGHELPERS_H 1
 
+#include "fimex/CDMReaderDecl.h"
+
 #include <string>
 
 #include "fimex_config.h"
@@ -52,6 +54,9 @@ bool hasTestExtra();
 std::string pathTestExtra(const std::string& filename);
 
 void copyFile(const std::string& from, const std::string& to);
+
+/*! Write to netcdf file, if compiledwith netcdf support, else "write" to null file. */
+bool writeToFile(CDMReader_p input, const std::string& fileName);
 
 } // namespace MetNoFimex
 

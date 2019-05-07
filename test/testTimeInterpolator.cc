@@ -35,6 +35,7 @@
 using namespace std;
 using namespace MetNoFimex;
 
+#if defined(HAVE_FELT) && defined(HAVE_NETCDF_H)
 TEST4FIMEX_TEST_CASE(test_timeInterpolator)
 {
     //defaultLogLevel(Logger::DEBUG);
@@ -101,3 +102,4 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
     TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
     }
 }
+#endif // HAVE_FELT && HAVE_NETCDF_H

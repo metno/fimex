@@ -37,6 +37,8 @@
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
 #include "testinghelpers.h"
 
+#include "fimex/CDMFileReaderFactory.h"
+
 #include <stdexcept>
 #include <fstream>
 
@@ -109,6 +111,16 @@ void copyFile(const std::string& from, const std::string& to)
     std::ifstream  src(from.c_str());
     std::ofstream  dst(to.c_str());
     dst << src.rdbuf();
+}
+
+bool writeToFile(CDMReader_p input, const std::string& fileName)
+{
+#ifdef HAVE_NETCDF_H
+    MetNoFimex::createWriter(input, "netcdf", fileName);
+    return exists(fileName);
+#else
+    MetNoFimex::createWriter(qe, "null", "");
+#endif /* NETCDF */
 }
 
 } // namespace MetNoFimex
