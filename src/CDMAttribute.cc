@@ -180,17 +180,4 @@ void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
     data = createData(values.size(), array);
 }
 
-
-std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
-{
-    boost::shared_ptr<Projection> proj = Projection::createByProj4(projStr);
-    return proj->getParameters();
-}
-
-std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
-{
-    return Projection::create(attrs)->getProj4String();
-}
-
-
 }

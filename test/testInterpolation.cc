@@ -653,35 +653,6 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
     BOOST_CHECK_CLOSE(135, angles[4 + oy*4], 1);
 }
 
-
-BOOST_AUTO_TEST_CASE( test_Utils )
-{
-    std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-    int found = 4;
-    for (std::vector<MetNoFimex::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
-        if (it->getName() == "grid_mapping_name") {
-            found--;
-#if 0
-            std::cerr << it->getStringValue() << ":" << std::endl;
-#endif
-            BOOST_CHECK((it->getStringValue() == "stereographic") || (it->getStringValue() == "polar_stereographic"));
-        }
-        if (it->getName() == "scale_factor_at_projection_origin") {
-            found--;
-            BOOST_CHECK(near(it->getData()->asDouble()[0], 0.93301, 0.00001));
-        }
-        if ((it->getName() == "longitude_of_projection_origin") || (it->getName() == "straight_vertical_longitude_from_pole")) {
-            found--;
-            BOOST_CHECK(near(it->getData()->asDouble()[0], -32, 0.00001));
-        }
-        if (it->getName() == "latitude_of_projection_origin") {
-            found--;
-            BOOST_CHECK(near(it->getData()->asDouble()[0], 90, 0.00001));
-        }
-    }
-    BOOST_CHECK(found == 0);
-}
-
 BOOST_AUTO_TEST_CASE(test_linear_no_extrapol)
 {
     const float in0 = 200, in1 = 300;

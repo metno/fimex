@@ -88,23 +88,6 @@ private:
     void initDataArray(const std::vector<std::string>& values);
 };
 
-/**
- * @brief convert a proj4 string to a list of CDMAttributes usable for CF-1.0 projection variable
- *
- * currently, projStrings of the form +proj=[stere] +lat_0=? +lon_0=? +lat_ts=?
- * @deprecated use Projection::createByProj4() and Projection::getParameters()
- */
-MIFI_DEPRECATED(std::vector<CDMAttribute> projStringToAttributes(std::string projStr));
-/**
- * @brief convert attributes of a projection-variable to a projString
- *
- * @deprecated use Projection::create() with Projection::getProj4String() instead
- * @param attrs attributes of the projection variable
- * @return proj4 string
- */
-MIFI_DEPRECATED(std::string attributesToProjString(const std::vector<CDMAttribute>& attrs));
-
-
 }
 
 #endif /*CDMATTRIBUTE_H_*/
