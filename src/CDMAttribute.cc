@@ -33,123 +33,115 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-CDMAttribute::CDMAttribute()
-: name(""), datatype(CDM_NAT)
+namespace {
+/* init data arrays for all types */
+template <typename T>
+DataPtr initDataArray(const std::vector<std::string>& values)
 {
+    boost::shared_array<T> array(new T[values.size()]);
+    std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
+    return createData(values.size(), array);
 }
 
-CDMAttribute::CDMAttribute(std::string name, std::string value)
-: name(name), datatype(CDM_STRING)
-{
-    boost::shared_array<char> cstr(new char [value.size()]);
-    for (size_t i = 0; i < value.size(); i++) {
-        cstr[i] = value.at(i);
-    }
-    data = createData(value.size(), cstr);
-}
-
-
-CDMAttribute::CDMAttribute(std::string name, double value)
-: name(name), datatype(CDM_DOUBLE)
-{
-    boost::shared_array<double> xvalue(new double[1]);
-    xvalue[0] = value;
-    data = createData(1, xvalue);
-}
-
-CDMAttribute::CDMAttribute(std::string name, int value)
-: name(name), datatype(CDM_INT)
-{
-    boost::shared_array<int> xvalue(new int[1]);
-    xvalue[0] = value;
-    data = createData(1, xvalue);
-}
-
-CDMAttribute::CDMAttribute(std::string name, short value)
-: name(name), datatype(CDM_SHORT)
-{
-    boost::shared_array<short> xvalue(new short[1]);
-    xvalue[0] = value;
-    data = createData(1, xvalue);
-}
-
-CDMAttribute::CDMAttribute(std::string name, char value)
-: name(name), datatype(CDM_CHAR)
-{
-    boost::shared_array<char> xvalue(new char[1]);
-    xvalue[0] = value;
-    data = createData(1, xvalue);
-}
-
-CDMAttribute::CDMAttribute(std::string name, float value)
-: name(name), datatype(CDM_FLOAT)
-{
-    boost::shared_array<float> xvalue(new float[1]);
-    xvalue[0] = value;
-    data = createData(1, xvalue);
-}
-
-CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, DataPtr data)
-: name(name), datatype(datatype), data(data)
-{
-}
-
-CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value)
-: name(name)
-{
-    this->datatype = string2datatype(datatype);
-    std::vector<std::string> vals;
-    vals.push_back(value);
-    initDataByArray(vals);
-}
-
-CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values)
-: name(name), datatype(datatype)
-{
-    initDataByArray(values);
-}
-
-void CDMAttribute::initDataByArray(const std::vector<std::string>& values)
+DataPtr initDataByArray(CDMDataType datatype, const std::vector<std::string>& values)
 {
     switch (datatype) {
-    case CDM_FLOAT: {
-        initDataArray<float>(values);
-        break;
-    }
-    case CDM_DOUBLE: {
-        initDataArray<double>(values);
-        break;
-    }
-    case CDM_INT:  {
-        initDataArray<int>(values);
-        break;
-    }
-    case CDM_SHORT: {
-        initDataArray<short>(values);
-        break;
-    }
-    case CDM_CHAR: {
-        initDataArray<char>(values);
-        break;
-    }
+    case CDM_FLOAT:
+        return initDataArray<float>(values);
+    case CDM_DOUBLE:
+        return initDataArray<double>(values);
+    case CDM_INT64:
+        return initDataArray<long long>(values);
+    case CDM_UINT64:
+        return initDataArray<unsigned long long>(values);
+    case CDM_INT:
+        return initDataArray<int>(values);
+    case CDM_UINT:
+        return initDataArray<unsigned int>(values);
+    case CDM_SHORT:
+        return initDataArray<short>(values);
+    case CDM_USHORT:
+        return initDataArray<unsigned short>(values);
+    case CDM_CHAR:
+        return initDataArray<char>(values);
+    case CDM_UCHAR:
+        return initDataArray<unsigned char>(values);
     case CDM_STRING: {
         /* string may only have one dimension */
-        *this = CDMAttribute(name, join(values.begin(), values.end(), " "));
-        break;
+        const std::string value = join(values.begin(), values.end(), " ");
+        return createData(CDM_STRING, value.begin(), value.end());
     }
     case CDM_STRINGS: {
         boost::shared_array<std::string> array(new std::string[values.size()]);
         std::copy(values.begin(), values.end(), &array[0]);
-        data = createData(values.size(), array);
-        break;
+        return createData(values.size(), array);
     }
-    default: {
-        throw CDMException("Unknown type to generate attribute " + name);
+    default:
+        throw CDMException("Unknown type to generate attribute");
     }
-    }
+}
+
+} // namespace
+
+CDMAttribute::CDMAttribute()
+    : data(createData(CDM_NAT, 0))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, std::string value)
+    : name(name)
+    , data(createData(value))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, double value)
+    : name(name)
+    , data(createData(CDM_DOUBLE, &value, (&value) + 1))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, int value)
+    : name(name)
+    , data(createData(CDM_INT, &value, (&value) + 1))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, short value)
+    : name(name)
+    , data(createData(CDM_SHORT, &value, (&value) + 1))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, char value)
+    : name(name)
+    , data(createData(CDM_CHAR, &value, (&value) + 1))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, float value)
+    : name(name)
+    , data(createData(CDM_FLOAT, &value, (&value) + 1))
+{
+}
+
+CDMAttribute::CDMAttribute(std::string name, DataPtr data)
+    : name(name)
+    , data(data)
+{
+}
+
+CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value)
+    : name(name)
+    , data(initDataByArray(string2datatype(datatype), std::vector<std::string>(1, value)))
+{
+}
+
+CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values)
+    : name(name)
+    , data(initDataByArray(datatype, values))
+{
 }
 
 CDMAttribute::~CDMAttribute()
@@ -167,17 +159,15 @@ const std::string CDMAttribute::getStringValue() const
         return "";
 }
 
+CDMDataType CDMAttribute::getDataType() const
+{
+    return data->getDataType();
+}
+
 void CDMAttribute::toXMLStream(std::ostream& out, const std::string& indent) const
 {
-    out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
+    out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />"
+        << std::endl;
 }
 
-/* init data arrays for all types */
-template<typename T>
-void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
-    boost::shared_array<T> array(new T[values.size()]);
-    std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
-    data = createData(values.size(), array);
-}
-
-}
+} // namespace MetNoFimex

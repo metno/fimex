@@ -203,7 +203,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             for (size_t i = 0; i < 7; i++) {
                 mask[i] = 1 << i;
             }
-            cdm_->addAttribute(stFlgNm, CDMAttribute("flag_masks", CDM_CHAR, createData(7, mask)));
+            cdm_->addAttribute(stFlgNm, CDMAttribute("flag_masks", createData(7, mask)));
             cdm_->addAttribute(stFlgNm, CDMAttribute("flag_meanings", "no_data low_elevation high_elevation blocked sea_clutter ground_clutter other_clutter"));
             string percFlgNm = string(cartesian->datatype) + "_block_percent_radar";
             cdm_->addAttribute(percFlgNm, CDMAttribute("units", "%"));

@@ -384,7 +384,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
             attr = CDMAttribute(newAttrName, attType, attValue);
         } else {
             const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
-            attr = CDMAttribute(newAttrName, oldAttr.getDataType(), oldAttr.getData());
+            attr = CDMAttribute(newAttrName, oldAttr.getData());
         }
         cdm.removeAttribute(varName, attName); // remove the attribute with the old name
         cdm.addAttribute(varName, attr); // set the attribute with the new name and data
@@ -529,9 +529,11 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap) {
             const CDMAttribute& attr = *ait;
             CDMDataType dt = attr.getDataType();
             switch (dt) {
-            case CDM_STRING: ;
-                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asChar().get() ));
+            case CDM_STRING: {
+                const std::string text = attr.getData()->asString();
+                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), text.size(), text.c_str()));
                 break;
+            }
             case CDM_CHAR:
                 ncCheck(nc_put_att_schar(ncFile->ncId, varId, attr.getName().c_str(), cdmDataType2ncType(dt), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asChar().get()) ));
                 break;

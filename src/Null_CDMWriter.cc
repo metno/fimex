@@ -44,16 +44,18 @@ static LoggerPtr logger = getLogger("fimex.Null_CDMWriter");
 static bool putRecData(CDMDataType dt, DataPtr data, size_t recNum) {
     if (data->size() == 0) return true;
 
+    // clang-format off
     switch (dt) {
     case CDM_NAT: return false;
-    case CDM_CHAR:
-    case CDM_STRING: data->asChar().get(); break;
+    case CDM_CHAR:   data->asChar().get(); break;
     case CDM_SHORT:  data->asShort().get(); break;
     case CDM_INT:    data->asInt().get(); break;
     case CDM_FLOAT:  data->asFloat().get(); break;
     case CDM_DOUBLE: data->asDouble().get(); break;
+    case CDM_STRING: data->asString(); break;
     default: return false;
     }
+    // clang-format on
     return true;
 
 }
@@ -69,16 +71,18 @@ static bool putVarData(CDMDataType dt, DataPtr data) {
         dim_size *= 3;
     }
 
+    // clang-format off
     switch (dt) {
     case CDM_NAT: return false;
-    case CDM_CHAR:
-    case CDM_STRING: data->asChar().get(); break;
+    case CDM_CHAR:   data->asChar().get(); break;
     case CDM_SHORT:  data->asShort().get(); break;
     case CDM_INT:    data->asInt().get(); break;
     case CDM_FLOAT:  data->asFloat().get(); break;
     case CDM_DOUBLE: data->asDouble().get(); break;
+    case CDM_STRING: data->asString(); break;
     default: return false;
     }
+    // clang-format on
     return true;
 }
 
@@ -122,6 +126,8 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
             CDMDataType dt = attr.getDataType();
             switch (dt) {
             case CDM_STRING:
+                attr.getData()->asString();
+                break;
             case CDM_CHAR:
                 attr.getData()->asChar().get();
                 break;

@@ -263,9 +263,8 @@ void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const
 {
     nc_type dtype;
     ncCheck(nc_inq_atttype(ncFile->ncId, varid, attName.c_str(), &dtype));
-    CDMDataType dt(ncType2cdmDataType(dtype));
     DataPtr attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
-    cdm_->addAttribute(varName, CDMAttribute(attName, dt, attrData));
+    cdm_->addAttribute(varName, CDMAttribute(attName, attrData));
 }
 
 

@@ -58,12 +58,14 @@ public:
     /// create a double attribute with a double array of length 1
     explicit CDMAttribute(std::string name, double value);
     /// create a attribute with the low level information
-    explicit CDMAttribute(std::string name, CDMDataType datatype, DataPtr data);
+    explicit CDMAttribute(std::string name, DataPtr data);
     /// create a attribute from a string representation
     explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value);
     /// create a attribute with a vector of values in string representation
     explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values);
+
     virtual ~CDMAttribute();
+
     /// retrieve the name of the attribute
     const std::string& getName() const {return name;}
     /// set the name of the attribute
@@ -75,17 +77,12 @@ public:
     /// set the data for this attribute
     void setData(DataPtr data) {this->data = data;}
     /// retrieve the datatype of the attribute
-    CDMDataType getDataType() const {return datatype;}
+    CDMDataType getDataType() const;
     void toXMLStream(std::ostream& out, const std::string& indent = "") const;
+
 private:
     std::string name;
-    CDMDataType datatype;
     DataPtr data;
-    /* datatype and name must be set to call this init function */
-    void initDataByArray(const std::vector<std::string>& values);
-    /* init data arrays for all types */
-    template<typename T>
-    void initDataArray(const std::vector<std::string>& values);
 };
 
 }

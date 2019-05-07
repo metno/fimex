@@ -165,16 +165,13 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
         return createData(attrLen, vals);
     }
     case NC_CHAR: {
-        boost::shared_array<char> vals(new char[attrLen]);
+        std::string vals(attrLen, '\0');
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         if (attrLen > 0 && vals[attrLen-1] == 0) {
             // remove terminating 0 character
-            boost::shared_array<char> valsX(new char[attrLen-1]);
-            std::copy(&vals[0], &vals[0] + attrLen -1, &valsX[0]);
-            vals = valsX;
-            attrLen--;
+            vals.erase(vals.size() - 1);
         }
-        return createData(attrLen, vals);
+        return createData(vals);
     }
     case NC_SHORT: {
         boost::shared_array<short> vals(new short[attrLen]);
@@ -248,8 +245,12 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
     }
 
     switch (dt) {
-    case NC_BYTE:
     case NC_CHAR: {
+        std::string vals(sliceLen, '\0');
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
+        return createData(vals);
+    }
+    case NC_BYTE: {
         boost::shared_array<char> vals(new char[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
@@ -332,8 +333,14 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
     }
 
     switch (type) {
-    case NC_BYTE:
     case NC_CHAR: {
+        // use general nc_put_vara here; nc_put_vara_schar will give problems with nc-internal data-checks
+        // in case of real characters != bytes
+        const std::string text = data->asString();
+        ncCheck(nc_put_vara(ncId, varId, start, count, text.c_str()));
+        break;
+    }
+    case NC_BYTE: {
         // use general nc_put_vara here; nc_put_vara_schar will give problems with nc-internal data-checks
         // in case of real characters != bytes
         ncCheck(nc_put_vara(ncId, varId, start, count, data->asChar().get()));

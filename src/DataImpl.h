@@ -327,10 +327,10 @@ namespace MetNoFimex
         throw CDMException("cannot convert unknown datatype");
     }
 
-    template<>
-    DataPtr DataImpl<std::string>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
+    template <>
+    DataPtr DataImpl<std::string>::convertDataType(double, double, double, CDMDataType, double, double, double)
     {
-        throw CDMException("cannot convert string datatype");
+        throw CDMException("cannot convert CDM_STRINGS datatype");
     }
 
     template<typename C>
@@ -356,10 +356,10 @@ namespace MetNoFimex
         throw CDMException("cannot convert unknown datatype");
     }
 
-    template<>
-    DataPtr DataImpl<std::string>::convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitsConverter, CDMDataType newType, double newFill, double newScale, double newOffset)
+    template <>
+    DataPtr DataImpl<std::string>::convertDataType(double, double, double, boost::shared_ptr<UnitsConverter>, CDMDataType, double, double, double)
     {
-        throw CDMException("cannot convert string datatype");
+        throw CDMException("cannot convert CDM_STRINGS datatype");
     }
 
     template<typename T1, typename T2>

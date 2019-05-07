@@ -22,12 +22,13 @@
  */
 
 #include "fimex/Data.h"
+
 #include "DataImpl.h"
+#include "StringData.h"
 
 #include <boost/make_shared.hpp>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 // pure abstract class, impl. required for linker
 Data::~Data() {}
@@ -57,7 +58,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
     case CDM_INT64:   return createDataT<long long>(length);
     case CDM_INT:     return createDataT<int>(length);
     case CDM_SHORT:   return createDataT<short>(length);
-    case CDM_STRING:
+    case CDM_STRING:  return createData(std::string(length, ' '));
     case CDM_CHAR:    return createDataT<char>(length);
     case CDM_UINT64:  return createDataT<unsigned long long>(length);
     case CDM_UINT:    return createDataT<unsigned int>(length);
@@ -113,6 +114,11 @@ DataPtr createData(CDMDataType datatype, size_t length, double val)
     return data;
 }
 
+DataPtr createData(const std::string& value)
+{
+    return boost::make_shared<StringData>(value);
+}
+
 DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)
 {
     DataPtr d;
@@ -123,7 +129,6 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
     case CDM_INT64:   d = createDataT<long long>         (length); break;
     case CDM_INT:     d = createDataT<int>               (length); break;
     case CDM_SHORT:   d = createDataT<short>             (length); break;
-    case CDM_STRING:
     case CDM_CHAR:    d = createDataT<char>              (length); break;
     case CDM_UINT64:  d = createDataT<unsigned long long>(length); break;
     case CDM_UINT:    d = createDataT<unsigned int>      (length); break;
@@ -131,6 +136,7 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
     case CDM_UCHAR:   d = createDataT<unsigned char>     (length); break;
     case CDM_STRINGS: d = createDataT<std::string>       (length); break;
     case CDM_NAT:     return createDataT<char>(0);
+    case CDM_STRING:
     default: throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
     }
     // clang-format on
@@ -184,8 +190,9 @@ void DataImpl<std::string>::setValues(size_t startPos, const Data& data, size_t 
 }
 
 // specializations of getDataType
+// clang-format off
 template<>
-CDMDataType DataImpl<char>::getDataType() const {return CDM_CHAR;}
+CDMDataType DataImpl<char>::getDataType() const { return CDM_CHAR; } // wrong, might also be CDM_STRING
 template<>
 CDMDataType DataImpl<short>::getDataType() const {return CDM_SHORT;}
 template<>
@@ -206,5 +213,5 @@ template<>
 CDMDataType DataImpl<double>::getDataType() const {return CDM_DOUBLE;}
 template<>
 CDMDataType DataImpl<std::string>::getDataType() const {return CDM_STRINGS;}
-
+// clang-format on
 }

@@ -117,6 +117,8 @@ SET(libfimex_SOURCES
   ${INCF}/SpatialAxisSpec.h
   SliceBuilder.cc
   ${INCF}/SliceBuilder.h
+  StringData.cc
+  StringData.h
   TimeUnit.cc
   ${INCF}/TimeUnit.h
   TimeSpec.cc

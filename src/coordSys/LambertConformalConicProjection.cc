@@ -60,7 +60,7 @@ std::vector<CDMAttribute> LambertConformalConicProjection::parametersFromProj4(c
             DataPtr stdParallels = createData(CDM_DOUBLE, 2);
             stdParallels->setValue(0, lat1);
             stdParallels->setValue(1, lat2);
-            attrs.push_back(CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels));
+            attrs.push_back(CDMAttribute("standard_parallel", stdParallels));
         } else {
             attrs.push_back(CDMAttribute("standard_parallel", lat1));
         }

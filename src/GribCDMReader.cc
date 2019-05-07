@@ -907,7 +907,7 @@ void GribCDMReader::initAddEnsembles()
             cdm_->addVariable(names);
             cdm_->addAttribute(names.getName(), CDMAttribute("long_name", "names of ensemble members"));
             // add the names as flags (needed by ADAGUC)
-            cdm_->addAttribute(p_->ensembleDimName, CDMAttribute("flag_values", CDM_INT, createData(CDM_INT, memberFlags.begin(), memberFlags.end())));
+            cdm_->addAttribute(p_->ensembleDimName, CDMAttribute("flag_values", createData(CDM_INT, memberFlags.begin(), memberFlags.end())));
             cdm_->addAttribute(p_->ensembleDimName, CDMAttribute("flag_meanings", join(members.begin(), members.end(), " ")));
         }
 

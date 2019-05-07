@@ -265,6 +265,14 @@ namespace MetNoFimex
     DataPtr createData(size_t length, boost::shared_array<std::string> array);
 
     /**
+     * @brief create a Data-pointer of type CDM_STRING
+     *
+     * @param value the text
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    DataPtr createData(const std::string& value);
+
+    /**
      * @brief create a Data-pointer of the datatype and fill with the data from the iterator
      *
      * @param datatype
@@ -290,6 +298,7 @@ namespace MetNoFimex
     DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last)
     {
         size_t length = std::distance(first, last);
+        // clang-format off
         switch (datatype) {
             case CDM_DOUBLE: { boost::shared_array<double> ary(new double[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
             case CDM_FLOAT:  { boost::shared_array<float> ary(new float[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
@@ -301,9 +310,11 @@ namespace MetNoFimex
             case CDM_UINT:    { boost::shared_array<unsigned int> ary(new unsigned int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
             case CDM_USHORT:  { boost::shared_array<unsigned short> ary(new unsigned short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
             case CDM_UCHAR:   { boost::shared_array<unsigned char> ary(new unsigned char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
+            case CDM_STRING:  { return createData(std::string(first, last)); }
             case CDM_NAT:
             default: break;
          }
+         // clang-format on
          return createData(0, boost::shared_array<char>(new char[0])); // a dummy dataset
     }
 
