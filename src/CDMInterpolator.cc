@@ -48,10 +48,6 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #endif
 
-// boost
-//
-#include <boost/algorithm/string.hpp>
-
 // PROJ.4
 //
 #include "proj_api.h"
@@ -675,11 +671,10 @@ void CDMInterpolator::changeProjection(int method, CDMReader_p tmplReader, const
            if(!tmplCdmRef.getLatitudeLongitude(tmplRefVarName, tmplLatName, tmplLonName)) {
                MetNoFimex::CDMAttribute coordsAtt;
                if(tmplCdmRef.getAttribute(tmplRefVarName, "coordinates", coordsAtt)) {
-                   std::vector<std::string> coords;
-                   boost::split(coords, coordsAtt.getStringValue(), boost::is_any_of(" "));
+                   std::vector<std::string> coords = split_any(coordsAtt.getStringValue(), " ");
                    if(coords.size() == 2){
-                       tmplLonName = boost::algorithm::trim_copy(coords[0]);
-                       tmplLatName = boost::algorithm::trim_copy(coords[1]);
+                       tmplLonName = trim(coords[0], " ");
+                       tmplLatName = trim(coords[1], " ");
                    }
                }
            }

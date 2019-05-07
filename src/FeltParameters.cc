@@ -27,8 +27,6 @@
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-#include <boost/tokenizer.hpp>
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -158,25 +156,19 @@ std::array<short, 16> FeltParameters::diana2feltparameters(const std::string& di
         diana2feltParameters[i] = ANY_VALUE();
     }
 
-    boost::char_separator<char> colonSep(":");
-    boost::char_separator<char> commaSep(",");
-    boost::tokenizer<boost::char_separator<char> > tok(dianaString, colonSep);
-    boost::tokenizer<boost::char_separator<char> >::iterator tokIt = tok.begin();
+    const std::vector<std::string> dianaStrings = MetNoFimex::split_any(dianaString, ":");
 
-    boost::tokenizer<boost::char_separator<char> > tok2(*tokIt, commaSep);
-    boost::tokenizer<boost::char_separator<char> >::iterator tok2It = tok2.begin();
-    for (int i = 0; tok2It != tok2.end(); ++tok2It, ++i) {
-        short value(std::atoi((*tok2It).c_str()));
-        //cerr << value << endl;
-        switch (i) {
+    int i = 0;
+    for (const std::string& ii : MetNoFimex::split_any(dianaStrings.front(), ",")) {
+        short value(std::atoi(ii.c_str()));
+        switch (i++) {
             case 0: diana2feltParameters[11] = value; break; // param
             case 1: diana2feltParameters[10] = value; break; // v.coord
             case 2: diana2feltParameters[12] = value; break; // level
         }
     }
 
-    ++tokIt;
-    for (;tokIt != tok.end(); ++tokIt) {
+    for (std::vector<std::string>::const_iterator tokIt = ++dianaStrings.begin(); tokIt != dianaStrings.end(); ++tokIt) {
         if (std::regex_match(*tokIt, what, equalSeparatedRegex)) {
             short id(std::atoi(what[2].str().c_str()));
             //cerr << what[1].str() << ": " << id << endl;

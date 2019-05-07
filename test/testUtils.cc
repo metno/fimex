@@ -40,6 +40,44 @@ TEST4FIMEX_TEST_CASE(test_scaleValue)
     TEST4FIMEX_CHECK_CLOSE(2., sv(1), delta);
 }
 
+#ifndef HAVE_BOOST_UNIT_TEST_FRAMEWORK // seems to have problems with ostream << vector<string>
+
+TEST4FIMEX_TEST_CASE(test_split)
+{
+    typedef std::vector<std::string> string_v;
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), split_any("hei ho", " "));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), split_any("hei:ho", ":"));
+
+    TEST4FIMEX_CHECK_EQ((string_v{"h:e:i", "h:o"}), split_any("h:e:i,h:o", ","));
+    TEST4FIMEX_CHECK_EQ((string_v{"h", "e", "i,h", "o"}), split_any("h:e:i,h:o", ":"));
+
+    TEST4FIMEX_CHECK_EQ((string_v{""}), split_any("", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"", ""}), split_any(":", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei"}), split_any("hei", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", ""}), split_any("hei:", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"", "hei"}), split_any(":hei", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "", "ho"}), split_any("hei::ho", ":"));
+}
+
+TEST4FIMEX_TEST_CASE(test_tokenize)
+{
+    typedef std::vector<std::string> string_v;
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), tokenize("hei ho", " "));
+
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), tokenize("hei:ho", ":"));
+
+    TEST4FIMEX_CHECK_EQ((string_v{"h:e:i", "h:o"}), tokenize("h:e:i,h:o", ","));
+    TEST4FIMEX_CHECK_EQ((string_v{"h", "e", "i,h", "o"}), tokenize("h:e:i,h:o", ":"));
+
+    TEST4FIMEX_CHECK_EQ((string_v{}), tokenize("", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{}), tokenize(":", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei"}), tokenize("hei", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei"}), tokenize("hei:", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei"}), tokenize(":hei", ":"));
+    TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), tokenize("hei::ho", ":"));
+}
+#endif
+
 TEST4FIMEX_TEST_CASE(test_tokenizeDotted)
 {
     vector<int> pos = tokenizeDotted<int>("12");
@@ -182,4 +220,26 @@ TEST4FIMEX_TEST_CASE(test_starts_ends_width)
     TEST4FIMEX_CHECK(ends_with("fimex", "mex"));
     TEST4FIMEX_CHECK(ends_with("fimex", "fimex"));
     TEST4FIMEX_CHECK(!ends_with("fimex", "no"));
+}
+
+TEST4FIMEX_TEST_CASE(test_trim)
+{
+    TEST4FIMEX_CHECK_EQ("x", trim("   x"));
+    TEST4FIMEX_CHECK_EQ("x", trim("x "));
+    TEST4FIMEX_CHECK_EQ("x", trim("   x "));
+    TEST4FIMEX_CHECK_EQ("x", trim("   x"));
+    TEST4FIMEX_CHECK_EQ("x", trim("x "));
+
+    TEST4FIMEX_CHECK_EQ("hei", trim("   hei "));
+    TEST4FIMEX_CHECK_EQ("hei", trim("   hei"));
+    TEST4FIMEX_CHECK_EQ("hei", trim("hei "));
+
+    TEST4FIMEX_CHECK_EQ("hei hei", trim("  hei hei"));
+    TEST4FIMEX_CHECK_EQ("", trim("    "));
+}
+
+TEST4FIMEX_TEST_CASE(test_replace_all_copy)
+{
+    TEST4FIMEX_CHECK_EQ("hei hei", replace_all_copy("hek hek", 'k', 'i'));
+    TEST4FIMEX_CHECK_EQ("hei hei", replace_all_copy("hei hei", 'k', 'i'));
 }

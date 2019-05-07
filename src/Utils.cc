@@ -76,10 +76,16 @@ int RoundAndClamp::clamped(int r) const
     return invalid;
 }
 
-std::string trim(const std::string& str) {
-    int pos1 = str.find_first_not_of(" ");
-    int pos2 = str.find_last_not_of(" ");
-    return str.substr(pos1, pos2+1);
+std::string trim(const std::string& str, const std::string& ws)
+{
+    const size_t begin = str.find_first_not_of(ws);
+    if (begin == std::string::npos)
+        return std::string();
+    const size_t end = str.find_last_not_of(ws);
+    if (end == std::string::npos)
+        return str.substr(begin);
+    else
+        return str.substr(begin, end + 1 - begin);
 }
 
 std::string string2lowerCase(const std::string& str)
@@ -108,6 +114,13 @@ bool starts_with(const std::string& txt, const std::string& start)
 bool ends_with(const std::string& txt, const std::string& end)
 {
     return startsOrEndsWith(txt, end, ((int)txt.size()) - ((int)end.size()));
+}
+
+std::string replace_all_copy(const std::string& in, char thys, char that)
+{
+    std::string out = in;
+    std::replace(out.begin(), out.end(), thys, that);
+    return out;
 }
 
 template <>
@@ -329,6 +342,13 @@ std::vector<std::string> tokenize(const std::string& str, const std::string& del
         pos = str.find_first_of(delimiters, lastPos);
     }
     return tokens;
+}
+
+std::vector<std::string> split_any(const std::string& str, const std::string& delims)
+{
+    std::vector<std::string> out;
+    split_any(std::back_inserter(out), str, delims);
+    return out;
 }
 
 static boost::posix_time::ptime epochBase(boost::gregorian::date(1970, boost::date_time::Jan, 1));

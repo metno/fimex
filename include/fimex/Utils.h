@@ -197,7 +197,7 @@ struct RoundAndClamp {
  * Remove leading and trailing spaces.
  * @param str string to trim
  */
-std::string trim(const std::string& str);
+std::string trim(const std::string& str, const std::string& ws = " \t\n\r");
 
 template<class T>
 struct DefaultFormatter {
@@ -365,6 +365,18 @@ std::string joinPtr(InputIterator start, InputIterator end, std::string delim = 
  */
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters = " ");
 
+template <class OutputIterator>
+void split_any(OutputIterator out, const std::string& str, const std::string& delims)
+{
+    std::size_t previous = 0, current;
+    while ((current = str.find_first_of(delims, previous)) != std::string::npos) {
+        *(out++) = str.substr(previous, current - previous);
+        previous = current + 1;
+    }
+    *(out++) = str.substr(previous);
+}
+
+std::vector<std::string> split_any(const std::string& str, const std::string& delims);
 
 /**
  * convert a string to lowercase
@@ -373,6 +385,8 @@ std::string string2lowerCase(const std::string& str);
 
 bool starts_with(const std::string& txt, const std::string& start);
 bool ends_with(const std::string& txt, const std::string& end);
+
+std::string replace_all_copy(const std::string& in, char thys, char that);
 
 /**
  * Typesafe varargs implementation, for pre-C11 variadic functions
