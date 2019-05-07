@@ -1,3 +1,9 @@
+fimex-1.0 (1.0.0-1xenial+met1) xenial; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 07 May 2019 08:00:08 +0200
+
 fimex-0.67 (0.67.2-1xenial+met1) xenial; urgency=low
 
   * new fimex version
