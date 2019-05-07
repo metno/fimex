@@ -399,6 +399,10 @@ extern int mifi_get_values_log_f(const float* infieldA, const float* infieldB, f
  */
 extern int mifi_get_values_log_log_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 
+extern int ascendingDoubleComparator(double a, double b);
+extern int descendingDoubleComparator(double a, double b);
+extern int bsearchDoubleIndex(const double key, const double* base, int num, int (*comparator)(double, double));
+
 /**
  *  @brief find position in array of position in projection
  *

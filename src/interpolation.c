@@ -100,18 +100,17 @@ int mifi_string_to_interpolation_method(const char* mString)
     return method;
 }
 
-
-static inline int ascendingDoubleComparator(const void * a, const void * b)
+int ascendingDoubleComparator(double a, double b)
 {
-    double x = *(double*)a;
-    double y = *(double*)b;
-    if (x == y) {}
-    if ( *(double*)a >  *(double*)b ) return 1;
-    else if ( *(double*)a == *(double*)b ) return 0;
-    else return -1;
+    if (a == b)
+        return 0;
+    else if (a > b)
+        return 1;
+    else
+        return -1;
 }
 
-static inline int descendingDoubleComparator(const void * a, const void * b)
+int descendingDoubleComparator(double a, double b)
 {
     return -1 * ascendingDoubleComparator(a,b);
 }
@@ -121,36 +120,39 @@ static inline int descendingDoubleComparator(const void * a, const void * b)
  * of the found element rather than the element
  * In addition, it returns -1 + (-1 * (smallest element > key)) if key cannot be found
  */
-static int bsearchDoubleIndex(const double key, const double* base, int num, int ( * comparator ) ( const void *, const void * ))
+int bsearchDoubleIndex(const double key, const double* base, int num, int (*comparator)(double, double))
 {
-// Initialize first and last variables.
     int first = 0;
     int last = num - 1;
-
     int pos = 0;
     int comp = 0;
-      while(first <= last) {
+    while (first <= last) {
         pos = (first + last)/2;
-           comp = comparator(&key, &base[pos]);
-        if(comp > 0) {
+        comp = comparator(key, base[pos]);
+        if (comp == 0) {
+            break;
+        } else if (comp > 0) {
             first = pos + 1;
-        } else if (comp < 0) {
-            last = pos - 1;
         } else {
-              first = last + 1; // found, break loop
+            last = pos - 1;
         }
-      }
-      if (comp == 0) return pos;
-      else if (comp > 0) return (-1 + (-1 * (pos+1)));
-      else return (-1 + (-1 * pos));
+    }
+    if (comp == 0)
+        return pos;
+    else if (comp > 0)
+        return (-1 + (-1 * (pos + 1)));
+    else
+        return (-1 + (-1 * pos));
 }
 
 int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type)
 {
     int circularLongitude = 0;
-    int (*comparator)(const void * a, const void * b);
-    if (axis[0] < axis[num-1]) comparator = ascendingDoubleComparator;
-    else comparator = descendingDoubleComparator;
+    int (*comparator)(double a, double b);
+    if (axis[0] < axis[num - 1])
+        comparator = ascendingDoubleComparator;
+    else
+        comparator = descendingDoubleComparator;
 
     if (axis_type == MIFI_LONGITUDE) {
         // decide if longitude axis is -180 to 180
@@ -215,6 +217,7 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
     }
     return MIFI_OK;
 }
+
 /*
  * copy or convert array from degree to rad if required, otherwise just copy
  */

@@ -703,4 +703,12 @@ BOOST_AUTO_TEST_CASE(test_linear)
     mifi_get_values_linear_f(&in0, &in1, &out, 1, a, b, 4.5); BOOST_CHECK(near(out, 450, 0.01));
 }
 
+BOOST_AUTO_TEST_CASE(binary_search)
+{
+    const int N = 10;
+    const double values[N] = {1, 3, 5, 7, 9, 13, 17, 21, 24, 28};
+    BOOST_CHECK_EQUAL(3, bsearchDoubleIndex(7, values, N, ascendingDoubleComparator));
+    BOOST_CHECK_EQUAL(-5, bsearchDoubleIndex(8, values, N, ascendingDoubleComparator));
+}
+
 #endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
