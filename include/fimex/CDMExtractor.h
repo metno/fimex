@@ -24,27 +24,28 @@
 #ifndef CDMEXTRACTOR_H_
 #define CDMEXTRACTOR_H_
 
-#include <map>
-#include <memory>
-#include <set>
-
 #include "fimex/CDMReader.h"
-#include "fimex/CDMDataType.h"
-#include "fimex/TimeUnit.h"
 #include "fimex/coordSys/CoordinateAxis.h"
+
+#include <map>
+#include <set>
+#include <string>
 
 namespace MetNoFimex
 {
 
+class FimexTime;
+
 /**
  * @headerfile fimex/CDMExtractor.h
  */
-class CDMExtractor : public MetNoFimex::CDMReader
+class CDMExtractor : public CDMReader
 {
 private:
     CDMReader_p dataReader_;
     typedef std::map<std::string, std::vector<size_t> > DimSlicesMap;
     DimSlicesMap dimSlices_;
+
     /**
      * Helper functions to read slices of slices from the input-reader. Slices might be build with reduce-dimension
      * or similar, and then reduced further through the getDataSlice(string, SliceBuilder) interface. The slices should be
@@ -55,18 +56,16 @@ private:
      * @param slices return value, list of subslices building all data requested
      */
     DataPtr getDataSlice_(const std::string& varName, const SliceBuilder& sb);
-    /**
-     * all extractors need to have another Reader with input-data
-     */
-    CDMExtractor();
+
+    //! all extractors need to have another Reader with input-data
+    CDMExtractor() = delete;
 
 public:
     CDMExtractor(CDMReader_p dataReader);
-    virtual ~CDMExtractor();
+    ~CDMExtractor();
 
-//    using CDMReader::getDataSlice;
-    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
-    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
 
     /**
      * @brief Remove a variable from the CDM
@@ -74,7 +73,8 @@ public:
      * @param varName name of the variable
      * @warning ignores removal of non-existing variable
      */
-    virtual void removeVariable(std::string varName);
+    virtual void removeVariable(const std::string& varName);
+
     /**
      * @brief select only a set of variables
      *
@@ -87,6 +87,7 @@ public:
      * @warning ignores selection of non-existing variable
      */
     virtual void selectVariables(std::set<std::string> variables, bool keepLogical = false);
+
     /**
       * @brief Reduce a dimension of the file
       *
@@ -94,7 +95,8 @@ public:
       * @param slices  slices to pick from the original dimension
       * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
       */
-     void reduceDimension(std::string dimName, const std::set<std::size_t>& slices);
+    void reduceDimension(const std::string& dimName, const std::set<std::size_t>& slices);
+
     /**
      * @brief Reduce a dimension of the file
      *
@@ -103,7 +105,8 @@ public:
      * @param length  size of the new dimension
      * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
      */
-    virtual void reduceDimension(std::string dimName, size_t start, size_t length);
+    virtual void reduceDimension(const std::string& dimName, size_t start, size_t length);
+
     /**
      * @brief Reduce a dimension of the file
      *
@@ -112,7 +115,8 @@ public:
      * @param end end-position of dimension, 0 means full size, negative values start from end
      * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
      */
-    virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long long end = 0);
+    virtual void reduceDimensionStartEnd(const std::string& dimName, size_t start = 0, long long end = 0);
+
     /**
      * @brief reduce the axes of a file with an explicit unit
      *
@@ -126,6 +130,7 @@ public:
      *
      */
     virtual void reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal);
+
     /**
      * @brief reduce the time explicitly by a timestamp
      *

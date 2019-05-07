@@ -26,6 +26,7 @@
 
 #include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
+#include "fimex/TimeUnit.h"
 
 #include "pyfimex0_helpers.h"
 
