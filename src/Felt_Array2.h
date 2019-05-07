@@ -24,15 +24,15 @@
 #ifndef FELT_ARRAY2_H_
 #define FELT_ARRAY2_H_
 
-#include <fimex/Felt_Types.h>
+#include "fimex/Felt_Types.h"
+#include "fimex/TimeUtils.h"
+
 #include "Felt_File_Error.h"
-
 #include "felt/FeltTypes.h"
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <array>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -52,7 +52,7 @@ private:
     // sorted container for level -> field associations
     typedef map<LevelPair, std::shared_ptr<felt::FeltField>, LevelPairLess> LevelFieldMap;
     // container for all available times and levels (ordered by time and level)
-    typedef map<boost::posix_time::ptime, LevelFieldMap > TimeLevelFieldMap;
+    typedef std::map<MetNoFimex::FimexTime, LevelFieldMap> TimeLevelFieldMap;
     string feltArrayName_;
     const std::shared_ptr<felt::FeltField> defaultField_; // this is also one of the feltFields
     string dataType_;
@@ -93,21 +93,21 @@ public:
      * @return the scaleFactor as tenth exponent of this field (grid * 10^scaleFactor)
      * @throws Felt_File_Error if the gridDefinition (gridType or gridParameters) change
      */
-    int getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut);
+    int getGrid(const MetNoFimex::FimexTime& time, LevelPair levelPair, vector<short>& gridOut);
     /**
      * same as getGrid, but the gridParameters to
      * change up to the value provided in gridParameterDelta
      */
-    int getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const std::array<float, 6>& gridParameterDelta);
+    int getGridAllowDelta(const MetNoFimex::FimexTime& time, LevelPair levelPair, vector<short>& gridOut, const std::array<float, 6>& gridParameterDelta);
     /// get the felt level type of this array
     int getLevelType() const;
     /** return the changed fill used in #Felt_File::getScaledDataSlice */
     double getFillValue() const {return fillValue_;}
 
     /** return the times available for this parameter, sorted */
-    vector<boost::posix_time::ptime> getTimes() const;
+    vector<MetNoFimex::FimexTime> getTimes() const;
     /** return the reference-times for this parameter, sorted by getTimes() */
-    vector<boost::posix_time::ptime> getReferenceTimes() const;
+    vector<MetNoFimex::FimexTime> getReferenceTimes() const;
 
     /**
      * return the level pairs (niveau 1, niveau 2) for this parameter as used by hybrid levels
@@ -122,7 +122,7 @@ public:
      * get the ident19 parameter from the data-header, throw error if levelPair/time doesn't exists
      *  @warning only ident19 of data already read will be taken into account
      */
-    int getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const;
+    int getIdent19(const MetNoFimex::FimexTime& time, LevelPair levelPair) const;
 
     /** @return x/longitude size */
     int getX() const;
@@ -140,7 +140,7 @@ public:
      * fetch a field from the felt-array
      * @throw NoSuchField_Felt_File_Error
      */
-    const std::shared_ptr<felt::FeltField> getField(boost::posix_time::ptime time, LevelPair levelPair) const;
+    const std::shared_ptr<felt::FeltField> getField(const MetNoFimex::FimexTime& time, LevelPair levelPair) const;
 };
 
 } // end namespace MetNoFelt

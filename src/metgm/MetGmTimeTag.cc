@@ -39,7 +39,6 @@
 
 // boost
 //
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_array.hpp>
 
 // standard
@@ -135,7 +134,7 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
         TTag->analysis_t = pGroup1->analysisTime();
         TTag->start_t = pGroup1->startTime();
         TTag->points_.push_back(TTag->start_t + TTag->nT_ * TTag->dT_);
-        TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(0)));
+        TTag->pointsAsTimePoints_.push_back(make_time_from_timet(TTag->points_.at(0)));
         TTag->pointsAsDouble_.push_back(TTag->points_.at(0));
     } else {
         TTag->dT_ = pGroup3->dt();
@@ -144,7 +143,7 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
         TTag->start_t = pGroup1->startTime();
         for(size_t step = 0; step < TTag->nT_; ++step) {
             TTag->points_.push_back(TTag->start_t + step * TTag->dT_);
-            TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(step)));
+            TTag->pointsAsTimePoints_.push_back(make_time_from_timet(TTag->points_.at(step)));
             TTag->pointsAsDouble_.push_back(TTag->points_.at(step));
         }
     }
@@ -155,18 +154,18 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
     {
         const CDM& cdmRef = pCdmReader->getCDM();
         CDMAttribute metgmAnalysisDateTimeAttribute;
-        boost::posix_time::ptime analysisTime;
+        FimexTime analysisTime;
         std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
         if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
-            analysisTime = getUniqueForecastReferenceTime(pCdmReader);
+            analysisTime = getUniqueForecastReferenceTimeFT(pCdmReader);
         } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
-            analysisTime = boost::posix_time::from_iso_string(metgmAnalysisDateTimeAttribute.getStringValue());
+            analysisTime = string2FimexTime(metgmAnalysisDateTimeAttribute.getStringValue());
         } else {
-            analysisTime = boost::posix_time::second_clock::universal_time();
+            analysisTime = make_fimextime_utc_now();
         }
 
         const TimeUnit tu("seconds since 1970-01-01 00:00:00");
-        double unit_time = tu.posixTime2unitTime(analysisTime);
+        double unit_time = tu.fimexTime2unitTime(analysisTime);
         analysis_t = tu.unitTime2epochSeconds(unit_time);
     }
 

@@ -192,9 +192,8 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
             // change cdm timeAxis values
             cdm_->addOrReplaceAttribute(timeDimName, CDMAttribute("units", ts.getUnitString()));
             boost::shared_array<double> timeData(new double[newTimes.size()]);
-            TimeUnit newTU(ts.getUnitString());
-            transform(newTimes.begin(), newTimes.end(), timeData.get(),
-                      bind1st(mem_fun_ref(&TimeUnit::fimexTime2unitTimeX),newTU));
+            const TimeUnit newTU(ts.getUnitString());
+            std::transform(newTimes.begin(), newTimes.end(), timeData.get(), [newTU](const FimexTime& ft) { return newTU.fimexTime2unitTime(ft); });
             cdm_->getVariable(timeDimName).setData(createData(newTimes.size(), timeData));
             cdm_->getDimension(timeDimName).setLength(newTimes.size());
 

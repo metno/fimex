@@ -25,13 +25,13 @@
  */
 
 #include "fimex/GribFileIndex.h"
-#include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Logger.h"
+#include "fimex/TimeUtils.h"
+#include "fimex/Utils.h"
 #include "fimex/XMLUtils.h"
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <date/date.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -886,7 +886,7 @@ const std::string& GribFileMessage::getShortName() const
 {
     return shortName_;
 }
-boost::posix_time::ptime GribFileMessage::getReferenceTime() const
+FimexTime GribFileMessage::getReferenceTime() const
 {
     long year = dataDate_ / 10000;
     long month = (dataDate_ - year*10000) / 100;
@@ -895,53 +895,46 @@ boost::posix_time::ptime GribFileMessage::getReferenceTime() const
     long hour = dataTime_ / 100;
     long minutes = dataTime_ % 100;
 
-    try {
-        boost::gregorian::date date(year, month, day);
-        boost::posix_time::time_duration clock(hour, minutes, 0);
-        boost::posix_time::ptime reference(date, clock);
-        return reference;
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::INFO, "invalid reference time: " << dataDate_ << " " << dataTime_ << " mapping to date-free field");
-    }
-    return boost::posix_time::not_a_date_time;
+    return FimexTime(year, month, day, hour, minutes, 0);
 }
-boost::posix_time::ptime GribFileMessage::getValidTime() const
+
+FimexTime GribFileMessage::getValidTime() const
 {
-    boost::posix_time::ptime reference = getReferenceTime();
-    if (reference == boost::posix_time::not_a_date_time) return boost::posix_time::not_a_date_time;
-    boost::posix_time::time_duration timeOffset(0,0,0);
-    long days(0);
-    long months(0);
-    long years(0);
+    FimexTime reference = getReferenceTime();
+    if (is_invalid_time_point(reference))
+        return reference;
+
+    std::chrono::seconds timeOffset;
     // add step offset:
     if (stepUnits_ == "s") {
-        timeOffset = boost::posix_time::time_duration(0,0, stepEnd_);
+        timeOffset = std::chrono::seconds(stepEnd_);
     } else if (stepUnits_ == "m") {
-        timeOffset =  boost::posix_time::time_duration(0,stepEnd_, 0);
+        timeOffset = std::chrono::minutes(stepEnd_);
     } else if (stepUnits_ == "h") {
-        timeOffset =  boost::posix_time::time_duration(stepEnd_, 0, 0);
+        timeOffset = std::chrono::minutes(stepEnd_);
     } else if (stepUnits_ == "3h") {
-        timeOffset =  boost::posix_time::time_duration(3*stepEnd_, 0, 0);
+        timeOffset = std::chrono::minutes(3 * stepEnd_);
     } else if (stepUnits_ == "6h") {
-        timeOffset =  boost::posix_time::time_duration(6*stepEnd_, 0, 0);
+        timeOffset = std::chrono::minutes(6 * stepEnd_);
     } else if (stepUnits_ == "12h") {
-        timeOffset =  boost::posix_time::time_duration(12*stepEnd_, 0, 0);
+        timeOffset = std::chrono::minutes(12 * stepEnd_);
     } else if (stepUnits_ == "D") {
-        days = stepEnd_;
+        timeOffset = date::days(stepEnd_);
     } else if (stepUnits_ == "M") {
-        months = stepEnd_;
+        timeOffset = date::months(stepEnd_);
     } else if (stepUnits_ == "Y") {
-        years = stepEnd_;
+        timeOffset = date::years(stepEnd_);
     } else if (stepUnits_ == "10Y") {
-        years = 10*stepEnd_;
+        timeOffset = date::years(10 * stepEnd_);
     } else if (stepUnits_ == "30Y") {
-        years = 30*stepEnd_;
+        timeOffset = date::years(30 * stepEnd_);
     } else if (stepUnits_ == "C") {
-        years = 100*stepEnd_;
+        timeOffset = date::years(100 * stepEnd_);
+
     } else {
         throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_);
     }
-    return reference + timeOffset + boost::gregorian::days(days) + boost::gregorian::months(months) + boost::gregorian::years(years);
+    return fromTimePoint(asTimePoint(reference) + timeOffset);
 }
 
 long GribFileMessage::getTimeRangeIndicator() const

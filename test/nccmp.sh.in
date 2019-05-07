@@ -33,6 +33,7 @@ fi
 nc5sum() {
     $NCDUMP -f c -n anonymous -p 8,15 "$1" \
         | grep -v '^\s\+:_NCProperties = "' \
+        | grep -v '^\s\+:history = "[0-9:T.-]\{19\} creation by fimex" ;$' \
         | $MD5SUM | cut -d' ' -f1
 }
 

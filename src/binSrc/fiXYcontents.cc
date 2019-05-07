@@ -37,10 +37,10 @@
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 
 #include <functional>
+#include <iostream>
 #include <numeric>
 
 namespace po = boost::program_options;
@@ -175,7 +175,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
         vector<CoordinateSystemSliceBuilder> csbs;
         DataPtr tData;
         DataPtr zData;
-        boost::posix_time::ptime refTime = boost::posix_time::not_a_date_time;
+        FimexTime refTime(FimexTime::max_date_time);
         map<string, DataPtr> dimData; // hours since refTime
 
         CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *varIt);
@@ -214,7 +214,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 CoordinateSystemSliceBuilder sb(cdm, cs);
                 // handling of time
                 try {
-                    refTime = getUniqueForecastReferenceTime(reader);
+                    refTime = getUniqueForecastReferenceTimeFT(reader);
                 } catch (runtime_error& rex) {
                     // ignore
                 }
@@ -227,15 +227,16 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                         /* do something with the refTimes and select the wanted Position */
                         size_t refTimePos = refTimes->size()-1; /* choose latest refTime */
                         sb.setReferenceTimePos(refTimePos);
-                        refTime = tu.unitTime2fimexTime(refTimes->asDouble()[refTimes->size()-1]).asPosixTime();
+                        refTime = tu.unitTime2fimexTime(refTimes->asDouble()[refTimes->size() - 1]);
                     }
-                    if (refTime == boost::posix_time::not_a_date_time) {
+                    if (is_invalid_time_point(refTime)) {
                         // use first time-stamp
                         TimeUnit tu("minutes since 1970-01-01 00:00:00 +00:00");
                         tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "minutes since 1970-01-01 00:00:00 +00:00", sb.getTimeVariableSliceBuilder());
-                        refTime = tu.unitTime2fimexTime(tData->asDouble()[0]).asPosixTime();
+                        refTime = tu.unitTime2fimexTime(tData->asDouble()[0]);
                     }
-                    tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "hours since "+boost::posix_time::to_iso_extended_string(refTime), sb.getTimeVariableSliceBuilder());
+                    tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "hours since " + make_time_string_extended(refTime),
+                                                             sb.getTimeVariableSliceBuilder());
                     boost::shared_array<float> tArray = tData->asFloat();
                     set<long> forecastTimes60;
                     if (vm.count("forecastTime")) {
@@ -322,7 +323,8 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                 stdName = attr.getStringValue();
             }
             unit = cdm.getUnits(*varIt);
-            printf("Var: %17s %17s %10s %15s %ldx%ld: %ld\n", varIt->c_str(), stdName.c_str(), unit.c_str(), boost::posix_time::to_iso_string(refTime).c_str(), xSize, ySize, csbs.size());
+            printf("Var: %17s %17s %10s %15s %ldx%ld: %ld\n", varIt->c_str(), stdName.c_str(), unit.c_str(), make_time_string(refTime).c_str(), xSize, ySize,
+                   csbs.size());
             boost::shared_array<float> tArray, zArray;
             if (tData.get() != 0) tArray = tData->asFloat();
             if (zData.get() != 0) zArray = zData->asFloat();

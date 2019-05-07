@@ -32,8 +32,6 @@
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
@@ -51,6 +49,20 @@ namespace MetNoFelt {
 using namespace MetNoFimex;
 
 static Logger_p logger = getLogger("fimex.Felt_File2");
+
+namespace {
+
+struct FimexFeltLogger : public felt::FeltLogger
+{
+    FimexFeltLogger(Logger_p fl)
+        : fl_(fl)
+    {
+    }
+    void log(const std::string& message) override { LOG4FIMEX(fl_, Logger::DEBUG, message); }
+    Logger_p fl_;
+};
+
+} // namespace
 
 Felt_File2::Felt_File2(const string& filename)
     : filename_(filename)
@@ -122,7 +134,10 @@ void Felt_File2::init()
 {
     try {
         feltFile_ = std::make_shared<felt::FeltFile>(filename_);
-        feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
+        if (logger->isEnabledFor(Logger::DEBUG))
+            feltFile_->setLogStream(std::unique_ptr<FimexFeltLogger>(new FimexFeltLogger(logger)));
+        else
+            feltFile_->setLogStream(0);
         LOG4FIMEX(logger, Logger::DEBUG, "FeltParameters: " << feltParameters_);
         LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());
         for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit
@@ -159,7 +174,9 @@ bool Felt_File2::findOrCreateFeltArray(std::shared_ptr<felt::FeltField> field)
     string dataType = feltParameters_.getParameterDatatype(name);
     map<string, std::shared_ptr<Felt_Array2>>::iterator it = feltArrayMap_.find(name);
     if (it == feltArrayMap_.end()) {
-        LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name) << " vTime: " << field->validTime());
+        LOG4FIMEX(logger, Logger::DEBUG,
+                  "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name)
+                                   << " vTime: " << make_time_string(field->validTime()));
         std::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters_.getParameterFillValue(name)));
         feltArrayMap_[name] = fa;   // copy to map
         return false; // reference from map
@@ -209,7 +226,7 @@ std::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, 
     return MetNoFimex::createData(indata.size(), data);
 }
 
-std::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(std::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time,
+std::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(std::shared_ptr<Felt_Array2> feltArray, const MetNoFimex::FimexTime& time,
                                                                  const LevelPair level)
 {
     size_t dataSize = feltArray->getX() * feltArray->getY();
@@ -257,11 +274,11 @@ std::vector<short> Felt_File2::getEnsembleMembers() const {
     return std::vector<short>(ensembles.begin(), ensembles.end());
 }
 
-std::shared_ptr<boost::posix_time::ptime> Felt_File2::getUniqueReferenceTime() const
+FimexTime Felt_File2::getUniqueReferenceTime() const
 {
-    std::set<boost::posix_time::ptime> refTimes;
+    std::set<FimexTime> refTimes;
     for (std::map<std::string, std::shared_ptr<Felt_Array2>>::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-        std::vector<boost::posix_time::ptime> feltRefTimes = fait->second->getReferenceTimes();
+        std::vector<FimexTime> feltRefTimes = fait->second->getReferenceTimes();
         refTimes.insert(feltRefTimes.begin(), feltRefTimes.end());
     }
     if (refTimes.size() != 1) {
@@ -269,16 +286,17 @@ std::shared_ptr<boost::posix_time::ptime> Felt_File2::getUniqueReferenceTime() c
         throw Felt_File_Error("no unique reference time found");
     }
     // unique element, return shared ptr of it
-    return std::shared_ptr<boost::posix_time::ptime>(new boost::posix_time::ptime(*(refTimes.begin())));
+    return *refTimes.begin();
 }
 
-std::vector<boost::posix_time::ptime> Felt_File2::getFeltTimes() const {
-    std::set<boost::posix_time::ptime> times;
+std::vector<MetNoFimex::FimexTime> Felt_File2::getFeltTimes() const
+{
+    std::set<MetNoFimex::FimexTime> times;
     for (std::map<std::string, std::shared_ptr<Felt_Array2>>::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-        vector<boost::posix_time::ptime> fa_times = fait->second->getTimes();
+        vector<MetNoFimex::FimexTime> fa_times = fait->second->getTimes();
         times.insert(fa_times.begin(), fa_times.end());
     }	// times automatically unique and sorted due to set
-    std::vector<boost::posix_time::ptime> sortedTimes(times.begin(), times.end());
+    std::vector<MetNoFimex::FimexTime> sortedTimes(times.begin(), times.end());
     return sortedTimes;
 }
 

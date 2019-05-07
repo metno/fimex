@@ -1,6 +1,6 @@
 
-LINK_DIRECTORIES(${PC_LIBRARY_DIRS} # for proj
-  ${Boost_LIBRARY_DIRS})
+LINK_DIRECTORIES(
+)
 
 LIST(APPEND libfelt_SOURCES
   FeltField.cpp
@@ -10,18 +10,11 @@ LIST(APPEND libfelt_SOURCES
   )
 
 SET (libfelt_INCLUDE_DIRS
-  ${Boost_INCLUDE_DIRS}
-  ${PC_INCLUDE_DIRS} # for proj
-  ${proj_INC_DIR}
-  ${CMAKE_SOURCE_DIR}/include
+  "${CMAKE_SOURCE_DIR}/include"
+  "${date_INC_DIR}"
 )
 
 SET (libfelt_LIBS
-  ${PC_LIBRARIES} # for proj
-  ${proj_LIB}
-  ${Boost_DATE_TIME_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
 )
 
 FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_LIBS}" "${libfelt_INCLUDE_DIRS}" "" "")

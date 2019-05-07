@@ -52,7 +52,7 @@
 
 // boost
 //
-#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/lexical_cast.hpp>
 
 // libxml2
 //
@@ -90,7 +90,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
 
     std::string MetGmCDMReaderImpl::spaceToUnderscore(const std::string& name)
     {
-        return boost::algorithm::replace_all_copy(name, " ", "_");
+        return replace_all_copy(name, ' ', '_');
     }
 
     void MetGmCDMReaderImpl::configure(const XMLDoc_p& doc)
@@ -201,13 +201,13 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
         CDMAttribute cdmConventionsAttribute("Conventions", "string", hcConventions);
         CDMAttribute cdmInstitutionAttribute("institution", "string", hcInstitution);
 
-        boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
+        const time_point now = make_time_utc_now();
 
         std::string strHistory("");
         strHistory.append("analysis time: ").append(pGroup1_->analysisTimeAsIsoExtendedString());
         strHistory.append(" start time: ").append(pGroup1_->startTimeAsIsoExtendedString());
         strHistory.append(" created by Fimex on ");
-        strHistory.append(boost::gregorian::to_iso_extended_string(now.date()));
+        strHistory.append(make_time_string_extended(now)); // FIXME date-only
         CDMAttribute cdmHistoryAttribute("history", "string", strHistory);
 
         CDMAttribute cdmSourceAttribute("source", "string", "unknown");

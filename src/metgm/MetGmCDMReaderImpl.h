@@ -42,10 +42,6 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/XMLInput.h"
 
-// boost
-//
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 // standard
 //
 #include <memory>

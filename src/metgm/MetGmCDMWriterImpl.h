@@ -35,10 +35,6 @@
 #include "fimex/CDM.h"
 #include "fimex/XMLDoc.h"
 
-// boost
-//
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 // standard
 //
 #include <map>
@@ -126,7 +122,7 @@ namespace MetNoFimex {
         std::shared_ptr<MetGmFileHandlePtr> metgmFileHandle_;
         std::shared_ptr<MetGmTimeTag> metgmTimeTag_;
 
-        boost::posix_time::ptime                    analysisTime_;
+        time_point analysisTime_;
 
         xml_configuration                           xmlConfiguration_;
         cdm_configuration                           cdmConfiguration_;

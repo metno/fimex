@@ -28,12 +28,12 @@
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
 #include "fimex/GribUtils.h"
+#include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <grib_api.h>
 
@@ -47,8 +47,9 @@
 #include <cstring>
 #include <functional>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
+static Logger_p logger = getLogger("fimex.GribApi_CDMWriter");
 
 /** helper classes Scale and UnScale to transform double vectors */
 class Scale : public std::unary_function<std::string, bool>
@@ -71,8 +72,6 @@ public:
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile), gribVersion(gribVersion), configFile(configFile), xmlConfig(new XMLDoc(configFile))
 {
-    logger = getLogger("fimex.GribApi_CDMWriter");
-
     {
         std::string templXPath("/cdm_gribwriter_config/template_file");
         xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
@@ -132,7 +131,6 @@ GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 void GribApiCDMWriter_ImplAbstract::run()
 {
     using namespace std;
-    using namespace boost::posix_time;
     LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
 
     // default to grid_second_order
@@ -185,7 +183,7 @@ void GribApiCDMWriter_ImplAbstract::run()
             sb.setAll(xAxis->getName());
             sb.setAll(yAxis->getName());
             // handling of time
-            vector<ptime> refTimes;
+            vector<FimexTime> refTimes;
             vector<FimexTime> vTimes;
             if (tAxis.get() != 0) {
                 // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
@@ -197,24 +195,19 @@ void GribApiCDMWriter_ImplAbstract::run()
                     size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
                     sb.setReferenceTimePos(refTimePos);
                     TimeUnit tu("seconds since 1970-01-01 00:00:00");
-                    transform(&refs[0],
-                            &refs[0] + refTimesD->size(),
-                            back_inserter(refTimes),
-                            bind1st(mem_fun_ref(&TimeUnit::unitTime2posixTime), tu));
+                    transform(&refs[0], &refs[0] + refTimesD->size(), back_inserter(refTimes), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
                 } else {
                     try {
-                        refTimes.push_back(getUniqueForecastReferenceTime(cdmReader));
+                        refTimes.push_back(getUniqueForecastReferenceTimeFT(cdmReader));
                     } catch (CDMException& ex) {
-                        refTimes.push_back(not_a_date_time);
+                        refTimes.push_back(FimexTime(FimexTime::max_date_time));
                     }
                 }
                 stringstream ss;
-                if (refTimes.at(0) == not_a_date_time) {
+                if (refTimes.at(0).invalid()) {
                     ss << "seconds since 1970-01-01 00:00:00";
                 } else {
-                    time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
-                    ss.imbue(locale(ss.getloc(), facet));
-                    ss << "seconds since " << refTimes[0];
+                    ss << "seconds since " << make_time_string_extended(refTimes[0]);
                 }
                 DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                 boost::shared_array<long long> timesA = times->asInt64();
@@ -230,14 +223,14 @@ void GribApiCDMWriter_ImplAbstract::run()
                 sb.setTimeStartAndSize(0, 1); // default is all of ReferenceTimePos
             } else {
                 // no times found
+                FimexTime refTime;
                 try {
-                    ptime refTime = getUniqueForecastReferenceTime(cdmReader);
-                    refTimes.push_back(refTime);
-                    vTimes.push_back(FimexTime(refTime.date().year(), refTime.date().month(), refTime.date().day(), refTime.time_of_day().hours(), refTime.time_of_day().minutes(), refTime.time_of_day().seconds()));
+                    refTime = getUniqueForecastReferenceTimeFT(cdmReader);
                 } catch (CDMException& ex) {
-                    refTimes.push_back(not_a_date_time);
-                    vTimes.push_back(FimexTime(FimexTime::min_date_time));
+                    // ignore
                 }
+                refTimes.push_back(refTime);
+                vTimes.push_back(refTime);
             }
 
             // fetch the levels from first variable
@@ -257,14 +250,12 @@ void GribApiCDMWriter_ImplAbstract::run()
             // loops over ref-times, times, variables and levels
             map<string, string> variableWarnings;
             size_t rtPos = 0;
-            for (vector<ptime>::iterator rTime = refTimes.begin(); rTime != refTimes.end(); ++rTime, ++rtPos) {
+            for (const FimexTime& rTime : refTimes) {
                 if (refTimes.size() > 1) {
                     vTimes.clear(); // will be filled anew
                     sb.setReferenceTimePos(rtPos);
                     stringstream ss;
-                    time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
-                    ss.imbue(locale(ss.getloc(), facet));
-                    ss << "seconds since " << *rTime;
+                    ss << "seconds since " << make_time_string_extended(rTime);
                     DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                     boost::shared_array<long long> timesA = times->asInt64();
                     TimeUnit tu(ss.str());
@@ -282,7 +273,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                         sb.setTimeStartAndSize(vtPos, 1);
                     }
                     for (vector<string>::iterator var = csVars.begin(); var != csVars.end(); ++var) {
-                        setTime(*var, *rTime, *vTime, stepUnit);
+                        setTime(*var, rTime, *vTime, stepUnit);
                         for (size_t levelPos = 0; levelPos < levels.size(); ++levelPos) {
                             if (zAxis.get() != 0) {
                                 sb.setStartAndSize(zAxis, levelPos, 1);
@@ -368,20 +359,21 @@ void GribApiCDMWriter_ImplAbstract::setData(const DataPtr& data)
     GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
 }
 
-void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const boost::posix_time::ptime& rtime, const FimexTime& vTime, const std::string& stepUnits)
+void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& rtime, const FimexTime& vTime, const std::string& stepUnits)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << rtime << ", " << vTime << ")" );
+    // LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << rtime << ", " << vTime << ")" );
     long date, time, startStep, endStep;
-    if (rtime == boost::date_time::not_a_date_time) {
+    if (is_invalid_time_point(rtime)) {
         // no reference-time, using time itself as reference-time
         date = vTime.getYear() * 10000 + vTime.getMonth() * 100 + vTime.getMDay();
         time = vTime.getHour() * 100 + vTime.getMinute();
         startStep = 0;
         endStep = 0;
     } else {
-        date = rtime.date().year() * 10000 + rtime.date().month() * 100 + rtime.date().day();
-        time = rtime.time_of_day().hours() * 100 + rtime.time_of_day().minutes();
-        long steps =  static_cast<long>(.5 + ((vTime.asPosixTime() - rtime).total_seconds() / gribStepUnits2seconds(stepUnits)));
+        const FimexTime& ft = rtime;
+        date = ft.getYear() * 10000 + ft.getMonth() * 100 + ft.getMDay();
+        time = ft.getHour() * 100 + ft.getMinute();
+        long steps = static_cast<long>(.5 + ((asTimePoint(vTime) - asTimePoint(rtime)).count() / gribStepUnits2seconds(stepUnits)));
         startStep = steps;
         // TODO: step length should be determined by bounds
         endStep = steps;
@@ -600,5 +592,4 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, d
     return node;
 }
 
-
-}
+} // namespace MetNoFimex

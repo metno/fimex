@@ -28,9 +28,8 @@
 #define GRIBFILEINDEX_H_
 
 #include "fimex/GridDefinition.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <cstdio>
 #include <iosfwd>
@@ -43,8 +42,8 @@
 // forward decl of grib_api
 struct grib_handle;
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 class GribFileMessage
 {
 public:
@@ -76,8 +75,8 @@ public:
     size_t getMessageNumber() const;
     const std::string& getName() const;
     const std::string& getShortName() const;
-    boost::posix_time::ptime getValidTime() const;
-    boost::posix_time::ptime getReferenceTime() const;
+    FimexTime getValidTime() const;
+    FimexTime getReferenceTime() const;
     /// return gribs timeRangeIndicator (0=instant, 2,4=accumulated)
     long getTimeRangeIndicator() const;
     long getLevelNumber() const;
@@ -144,30 +143,6 @@ private:
     std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };
-
-/// Functor to find Messages with equal time
-class GribFileMessageEqualTime : public std::unary_function<bool, const GribFileMessage&> {
-public:
-    GribFileMessageEqualTime(boost::posix_time::ptime time) : time_(time) {}
-    ~GribFileMessageEqualTime() {}
-    bool operator()(const GribFileMessage& gfm) { return gfm.getValidTime() == time_; }
-private:
-    boost::posix_time::ptime time_;
-};
-
-/// Functor to find messages with equal level and time
-class GribFileMessageEqualLevelTime : public std::unary_function<bool, const GribFileMessage&> {
-public:
-    GribFileMessageEqualLevelTime(long edition, long levelType, long levelNo, boost::posix_time::ptime time) : edition_(edition), levelType_(levelType), levelNo_(levelNo), time_(time) {}
-    ~GribFileMessageEqualLevelTime() {}
-    bool operator()(const GribFileMessage& gfm) { return (gfm.getEdition() == edition_) && (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getValidTime() == time_); }
-private:
-    long edition_;
-    long levelType_;
-    long levelNo_;
-    boost::posix_time::ptime time_;
-};
-
 
 class GribFileIndex
 {

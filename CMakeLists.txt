@@ -49,7 +49,6 @@ OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib
 #OPTION(ENABLE_PYTHON "Use python" ON)
 
 FIND_PACKAGE(Boost REQUIRED COMPONENTS
-  date_time
   program_options
   #unit_test_framework
 )
@@ -126,6 +125,20 @@ IF(ENABLE_NETCDF)
   CHECK_NETCDF_HAS_HDF5(HAVE_NETCDF_HDF5_LIB)
 ENDIF()
 
+# github/HowardHinnant/date
+IF (NOT date_INC_DIR)
+  SET (DATE_3RDPARTY "third_party/date")
+  IF ((NOT date_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/CMakeLists.txt"))
+    SET (date_INC_DIR "${DATE_3RDPARTY}/include")
+  ELSE ()
+    FIND_PACKAGE(date REQUIRED)
+    SET (date_LIB date_interface) # just a header file, therefore '..._interface'
+  ENDIF ()
+ELSEIF (NOT (EXISTS "${date_INC_DIR}/date/date.h"))
+  MESSAGE (SEND_ERROR "Missing '${date_INC_DIR}/date/date.h'")
+ELSE()
+  MESSAGE (STATUS "Using '${date_INC_DIR}/date/date.h'")
+ENDIF ()
 
 IF(ENABLE_FIMEX_VERSIONNUMBERED)
   SET(MINUS_FIMEX_VERSION "-${FIMEX_VERSION}")
@@ -160,6 +173,7 @@ ADD_SUBDIRECTORY(src)
 IF(ENABLE_FORTRAN)
   ADD_SUBDIRECTORY(modules/F90)
 ENDIF()
+
 #IF(ENABLE_PYTHON)
 #  ADD_SUBDIRECTORY(modules/python)
 #ENDIF()

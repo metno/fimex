@@ -54,6 +54,7 @@
 #include <libxml/xpath.h>
 
 // boost
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 
 // standard

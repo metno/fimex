@@ -25,8 +25,10 @@
  */
 
 #include "testinghelpers.h"
-#include "fimex/TimeSpec.h"
+
 #include "fimex/Logger.h"
+#include "fimex/TimeSpec.h"
+#include "fimex/TimeUtils.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -68,4 +70,60 @@ TEST4FIMEX_TEST_CASE(test_TimeSpec)
         TEST4FIMEX_CHECK_EQ(fTimes2[10].getHour(), 6);
         TEST4FIMEX_CHECK_EQ(fTimes2[11].getMDay(), 3);
         TEST4FIMEX_CHECK_EQ(fTimes2[11].getHour(), 9);
+}
+
+TEST4FIMEX_TEST_CASE(test_time_point)
+{
+    {
+        const time_point tp = make_time_point(1970, 1, 1, 2, 0, 0);
+        TEST4FIMEX_CHECK_EQ("1970-01-01T02:00:00", make_time_string_extended(tp));
+        TEST4FIMEX_CHECK(!is_invalid_time_point(tp));
+
+        const time_point tp6 = tp - std::chrono::hours(6);
+        TEST4FIMEX_CHECK_EQ("19691231T200000", make_time_string(tp6));
+    }
+    {
+        const time_point tp = make_time_point(1820, 2, 28, 12, 13, 14);
+        TEST4FIMEX_CHECK_EQ("1820-02-28T12:13:14", make_time_string_extended(tp));
+    }
+    {
+        const time_point tp = make_time_point(1970, 1, 1, 0, 0, 0);
+        TEST4FIMEX_CHECK_EQ(0, std::chrono::system_clock::to_time_t(tp));
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_time_point_from_iso9601)
+{
+    const time_point epoch = make_time_point(1970, 1, 1, 0, 0, 0);
+    TEST4FIMEX_CHECK(epoch == make_time_from_string("1970-01-01 00:00:00"));
+    TEST4FIMEX_CHECK(epoch == make_time_from_string("1970-01-01T00:00:00"));
+}
+
+TEST4FIMEX_TEST_CASE(fimextime_from_iso8601)
+{
+    FimexTime ft;
+    TEST4FIMEX_CHECK(ft.parseISO8601("2019-01-02 03:04:05.006"));
+    TEST4FIMEX_CHECK_EQ(FimexTime(2019, 1, 2, 3, 4, 5, 6), ft);
+
+    TEST4FIMEX_CHECK(ft.parseISO8601("2019-01-02 03:04:05"));
+    TEST4FIMEX_CHECK_EQ(FimexTime(2019, 1, 2, 3, 4, 5, 0), ft);
+
+    TEST4FIMEX_CHECK(ft.parseISO8601("2019-01-02 03:04"));
+    TEST4FIMEX_CHECK_EQ(FimexTime(2019, 1, 2, 3, 4, 0, 0), ft);
+
+    TEST4FIMEX_CHECK(ft.parseISO8601("2019-02-03 04:08:16"));
+    TEST4FIMEX_CHECK_EQ(FimexTime(2019, 2, 3, 4, 8, 16), ft);
+
+    TEST4FIMEX_CHECK(ft.parseISO8601("2019-01-02"));
+    TEST4FIMEX_CHECK_EQ(FimexTime(2019, 1, 2, 0, 0, 0), ft);
+}
+
+TEST4FIMEX_TEST_CASE(fimextime_timepoint_conversion)
+{
+    const time_point tp1 = make_time_point(1820, 2, 28, 12, 13, 14);
+    const FimexTime ft1 = fromTimePoint(tp1);
+    TEST4FIMEX_CHECK_EQ(FimexTime(1820, 2, 28, 12, 13, 14), ft1);
+
+    const time_point tp1f = asTimePoint(ft1);
+    TEST4FIMEX_CHECK(tp1f == tp1);
 }

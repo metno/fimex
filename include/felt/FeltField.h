@@ -31,8 +31,9 @@
 #include "FeltConstants.h"
 #include "FeltGridDefinition.h"
 
+#include <fimex/TimeUnit.h>
+
 #include <boost/shared_array.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <array>
 #include <string>
@@ -61,8 +62,8 @@ public:
     int producer() const { return header_[0]; }
     int gridArea() const { return header_[1]; }
 
-    boost::posix_time::ptime referenceTime() const;
-    boost::posix_time::ptime validTime() const;
+    MetNoFimex::FimexTime referenceTime() const;
+    MetNoFimex::FimexTime validTime() const;
 
     /**
      * Get the parameter value. This is the logical value, which means that if

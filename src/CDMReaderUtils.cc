@@ -28,42 +28,40 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <boost/shared_array.hpp>
+
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 
-//void noDelete(CDMReader* r) {}
-
-boost::posix_time::ptime
-getUniqueForecastReferenceTime(CDMReader_p reader)
+FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
 {
     const CDM& cdm = reader->getCDM();
     // try CF-1.x forecast_reference_time
-    vector<string> refVarnames = cdm.findVariables("standard_name", "forecast_reference_time");
-    set<boost::posix_time::ptime> refTimes;
-    for (vector<string>::iterator varname = refVarnames.begin(); varname != refVarnames.end(); ++varname) {
-        string units = cdm.getUnits(*varname);
+    const vector<string> refVarnames = cdm.findVariables("standard_name", "forecast_reference_time");
+    set<FimexTime> refTimes;
+    for (const string& varname : refVarnames) {
+        const string units = cdm.getUnits(varname);
         TimeUnit tu(units);
-        DataPtr timeData = reader->getData(*varname);
+        DataPtr timeData = reader->getData(varname);
         boost::shared_array<double> times = timeData->asDouble();
         const double* tPtr = &times[0];
         const double* end = tPtr + timeData->size();
         while (tPtr != end) {
-            refTimes.insert(tu.unitTime2posixTime(*tPtr++));
+            refTimes.insert(tu.unitTime2fimexTime(*tPtr++));
         }
     }
-    if (refTimes.size() == 0) {
+    if (refTimes.empty()) {
         // try WRF-Convention SIMULATION_START_DATE attribute
         CDMAttribute attr;
         if (cdm.getAttribute(cdm.globalAttributeNS(), "SIMULATION_START_DATE", attr)) {
@@ -72,16 +70,15 @@ getUniqueForecastReferenceTime(CDMReader_p reader)
             if (sd.find("_") != string::npos) {
                 sd = sd.replace(sd.find("_"), 1, " ");
             }
-            boost::posix_time::ptime pt(boost::posix_time::time_from_string(sd));
-            refTimes.insert(pt);
+            refTimes.insert(string2FimexTime(sd));
         }
     }
-    if (refTimes.size() == 0) {
+    if (refTimes.empty()) {
         throw CDMException("no forecast reference time found");
     } else if (refTimes.size() > 1) {
         throw CDMException("forecast reference time not unique");
     }
-    return *(refTimes.begin());
+    return *refTimes.begin();
 }
 
 vector<double> getDataSliceInUnit(CDMReader_p reader, const string& var, const string& unit, int unLimDimPos)

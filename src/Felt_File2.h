@@ -27,16 +27,18 @@
 #include "FeltParameters.h"
 #include "Felt_File_Error.h"
 #include "felt/FeltTypes.h"
+
 #include "fimex/Data.h"
 #include "fimex/Felt_Types.h"
 #include "fimex/Logger.h"
+#include "fimex/TimeUtils.h"
+
 #include <boost/shared_array.hpp>
+
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace MetNoFelt {
 
@@ -89,7 +91,7 @@ public:
      * @param time time of slice
      * @param level level of slice
      */
-    MetNoFimex::DataPtr getScaledDataSlice(std::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
+    MetNoFimex::DataPtr getScaledDataSlice(std::shared_ptr<Felt_Array2> feltArray, const MetNoFimex::FimexTime& time, const LevelPair level);
 
     /**
      *  retrieve all felt arrays
@@ -112,13 +114,13 @@ public:
     std::vector<short> getEnsembleMembers() const;
     const std::map<LevelPair, int>& getHybridLevels() const {return hybridLevels_;}
     /// all time values, sorted
-    std::vector<boost::posix_time::ptime> getFeltTimes() const;
+    std::vector<MetNoFimex::FimexTime> getFeltTimes() const;
     /**
      * get the unique reference time of the felt file
      * @return a unique reference time
      * @throw exception if no unique reference time exists
      */
-    std::shared_ptr<boost::posix_time::ptime> getUniqueReferenceTime() const;
+    MetNoFimex::FimexTime getUniqueReferenceTime() const;
     /// get size in x direction
     int getNX() const;
     /// get size in y direction

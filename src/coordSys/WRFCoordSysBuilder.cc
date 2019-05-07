@@ -25,23 +25,23 @@
  */
 
 #include "WRFCoordSysBuilder.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
-#include "fimex/CDMReader.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Data.h"
-#include "fimex/mifi_constants.h"
 #include "fimex/Logger.h"
-#include "fimex/interpolation.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Utils.h"
-#include "proj_api.h"
-#include <cmath>
-#include <vector>
-#include <map>
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/interpolation.h"
+#include "fimex/mifi_constants.h"
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <proj_api.h>
+
+#include <cmath>
+#include <map>
 #include <memory>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -327,7 +327,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
             string units;
             size_t dimSize = cdm.getDimension(Time).getLength();
             boost::shared_array<float> vals(new float[dimSize]);
-            if (reader.get() == 0) {
+            if (reader) {
                 // try to guess the time-steps
                 string start = cdm.getAttribute(cdm.globalAttributeNS(),
                         "START_DATE").getStringValue();
@@ -337,8 +337,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
 
                 float timeStep = 180.;
                 CDMAttribute timeStepAttr;
-                if (cdm.getAttribute(cdm.globalAttributeNS(), "TIME_STEP_MN",
-                        timeStepAttr)) {
+                if (cdm.getAttribute(cdm.globalAttributeNS(), "TIME_STEP_MN", timeStepAttr)) {
                     // attribute from ncml
                     timeStep = timeStepAttr.getData()->asFloat()[0];
                 } else {
@@ -355,7 +354,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
                 if (cdm.hasVariable("Times")) {
                     SliceBuilder sb(cdm, "Times");
                     size_t timeSize = cdm.getDimension("Time").getLength();
-                    boost::posix_time::ptime ptFirst;
+                    time_point ptFirst;
                     for (size_t i = 0; i < timeSize; ++i) {
                         sb.setStartAndSize("Time", i, 1);
                         DataPtr data = reader->getDataSlice("Times", sb);
@@ -364,18 +363,12 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
                         if (thisTime.find("_") != string::npos) {
                             thisTime = thisTime.replace(thisTime.find("_"), 1, " "); // replace _ with space
                         }
-                        boost::posix_time::ptime pt(boost::posix_time::time_from_string(thisTime));
+                        time_point pt = make_time_from_string(thisTime);
                         if (i == 0) {
                             ptFirst = pt;
-                            boost::posix_time::time_facet* time_output =
-                                    new boost::posix_time::time_facet("hours since %Y-%m-%d %H:%M:%S");
-                            stringstream ss;
-                            ss.imbue(std::locale(ss.getloc(), time_output));
-                            ss << ptFirst;
-                            units = ss.str();
+                            units = "hours since " + make_time_string_extended(ptFirst);
                         }
-                        boost::posix_time::time_duration td(pt - ptFirst);
-                        vals[i] = td.hours() + td.minutes() / 60. + td.seconds() / 3600.;
+                        vals[i] = std::chrono::duration_cast<std::chrono::seconds>(pt - ptFirst).count() / 3600.0;
                     }
                 } else {
                     LOG4FIMEX(logger, Logger::ERROR, "no 'Times' variable in WRF found, time-dimension will give wrong results");

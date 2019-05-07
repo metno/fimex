@@ -24,13 +24,10 @@
 #ifndef METGM_GROUP1PTR_H
 #define METGM_GROUP1PTR_H
 
-// boost
-//
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <memory>
+#include "fimex/CDMReaderDecl.h"
+#include "fimex/TimeUtils.h"
 
-// standard
-//
+#include <memory>
 #include <string>
 
     namespace MetNoFimex {
@@ -55,12 +52,12 @@
             std::string productNation() { return productNation_; }
             time_t      startTime()     { return start_t; }
             time_t      analysisTime()  { return analysis_t; }
-            boost::posix_time::ptime    startTimeAsBoostPosix()     { return boost::posix_time::from_time_t(start_t); }
-            boost::posix_time::ptime    analysisTimeAsBoostPosix()  { return boost::posix_time::from_time_t(analysis_t); }
-            std::string    startTimeAsIsoString()                   { return boost::posix_time::to_iso_string(startTimeAsBoostPosix()); }
-            std::string    analysisTimeAsIsoString()                { return boost::posix_time::to_iso_string(analysisTimeAsBoostPosix()); }
-            std::string    startTimeAsIsoExtendedString()           { return boost::posix_time::to_iso_extended_string(startTimeAsBoostPosix()); }
-            std::string    analysisTimeAsIsoExtendedString()        { return boost::posix_time::to_iso_extended_string(analysisTimeAsBoostPosix()); }
+            time_point startTimeAsTimePoint() { return make_time_from_timet(start_t); }
+            time_point analysisTimeAsTimePoint() { return make_time_from_timet(analysis_t); }
+            std::string startTimeAsIsoString() { return make_time_string(startTimeAsTimePoint()); }
+            std::string analysisTimeAsIsoString() { return make_time_string(analysisTimeAsTimePoint()); }
+            std::string startTimeAsIsoExtendedString() { return make_time_string_extended(startTimeAsTimePoint()); }
+            std::string analysisTimeAsIsoExtendedString() { return make_time_string_extended(analysisTimeAsTimePoint()); }
             const std::shared_ptr<MetGmHandlePtr>& mgmHandle() { return this->pHandle_; }
 
         private:

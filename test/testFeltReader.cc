@@ -27,9 +27,8 @@
 #include "Felt_Array2.h"
 #include "Felt_File2.h"
 #include "felt/FeltGridDefinition.h"
+
 #include <array>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <cassert>
 #include <cmath>
 #include <ctime>
@@ -60,7 +59,7 @@ TEST4FIMEX_TEST_CASE(test_feltfile)
 {
     if (!hasTestExtra())
         return;
-    typedef vector<boost::posix_time::ptime> timeVec;
+    typedef vector<FimexTime> timeVec;
     //defaultLogLevel(Logger::DEBUG);
 
     Felt_File2 ff(pathTestExtra("flth00.dat"), pathTest("diana.setup"));
@@ -90,7 +89,7 @@ TEST4FIMEX_TEST_CASE(test_feltfile)
     timeVec fa_times = fa.getTimes();
     for (timeVec::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
         if (find(ff_times.begin(), ff_times.end(), *it) == ff_times.end()) {
-            TEST4FIMEX_FAIL("time '" << boost::posix_time::to_iso_extended_string(*it) << "' not found");
+            TEST4FIMEX_FAIL("time '" << make_time_string_extended(*it) << "' not found");
         }
     }
 

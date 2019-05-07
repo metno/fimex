@@ -25,14 +25,13 @@
 #include "FeltParameters.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
+
 #include "felt/FeltField.h"
-#include <sstream>
 
 #include <algorithm>
-#include <iostream>
 #include <cmath>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
+#include <iostream>
+#include <sstream>
 
 namespace MetNoFelt {
 
@@ -56,14 +55,16 @@ Felt_Array2::~Felt_Array2()
 // add field to feltFields, check first for non-existence
 void Felt_Array2::addField_(const std::shared_ptr<felt::FeltField> field)
 {
-    boost::posix_time::ptime time = field->validTime();
+    MetNoFimex::FimexTime time = field->validTime();
     LevelPair level;
     if (field->isEpsRunParameter()) {
         level = make_pair(field->level1(), field->dataVersion());
     } else {
         level = make_pair(field->level1(), field->level2());
     }
-    LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "adding field to param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second << "," << field->miscField());
+    LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG,
+              "adding field to param " << getName() << " vtime: " << MetNoFimex::make_time_string(time) << " level: " << level.first << "," << level.second
+                                       << "," << field->miscField());
 
     TimeLevelFieldMap::iterator timeSliceIt = feltFields_.find(time);
     if (timeSliceIt != feltFields_.end()) {
@@ -71,12 +72,15 @@ void Felt_Array2::addField_(const std::shared_ptr<felt::FeltField> field)
         if (timeLevelIt != timeSliceIt->second.end()) {
             if (timeLevelIt->second->dataType() == field->dataType()) {
                 ostringstream msg;
-                msg << "level " << level.first << ","<< level.second << " and time " << boost::posix_time::to_simple_string(time) << " already exists for " << getName();
+                msg << "level " << level.first << "," << level.second << " and time " << MetNoFimex::make_time_string(time) << " already exists for "
+                    << getName();
                 throw Felt_File_Error(msg.str());
             } else {
                 // overwrite existing field with the new datatype field
                 timeSliceIt->second[level] = field;
-                LOG4FIMEX(logger, MetNoFimex::Logger::INFO, "overwriting field of param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second << " with data of datatype: " << field->dataType());
+                LOG4FIMEX(logger, MetNoFimex::Logger::INFO,
+                          "overwriting field of param " << getName() << " vtime: " << MetNoFimex::make_time_string(time) << " level: " << level.first << ","
+                                                        << level.second << " with data of datatype: " << field->dataType());
             }
         } else {
             LevelFieldMap& lfm = timeSliceIt->second;
@@ -109,8 +113,9 @@ void Felt_Array2::addInformationByField(const std::shared_ptr<felt::FeltField> f
     addField_(field);
 }
 
-vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
-    vector<boost::posix_time::ptime> refTimes = vector<boost::posix_time::ptime>();
+vector<MetNoFimex::FimexTime> Felt_Array2::getReferenceTimes() const
+{
+    vector<MetNoFimex::FimexTime> refTimes;
     refTimes.reserve(feltFields_.size());
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
@@ -121,8 +126,9 @@ vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
     return refTimes;
 }
 
-vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
-    vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
+vector<MetNoFimex::FimexTime> Felt_Array2::getTimes() const
+{
+    vector<MetNoFimex::FimexTime> vTimes;
     if (!hasTime()) return vTimes;
 
     vTimes.reserve(feltFields_.size());
@@ -163,7 +169,7 @@ vector<short> Felt_Array2::getEnsembleMembers() const {
     return vector<short>(ensembleMembers.begin(), ensembleMembers.end());
 }
 
-const std::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const
+const std::shared_ptr<felt::FeltField> Felt_Array2::getField(const MetNoFimex::FimexTime& time, LevelPair levelPair) const
 {
     TimeLevelFieldMap::const_iterator tlm;
     if (hasTime()) {
@@ -180,7 +186,7 @@ const std::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::
     throw NoSuchField_Felt_File_Error("time/pair value not found in field");
 }
 
-int Felt_Array2::getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const
+int Felt_Array2::getIdent19(const MetNoFimex::FimexTime& time, LevelPair levelPair) const
 {
     return getField(time, levelPair)->miscField();
 }
@@ -215,14 +221,15 @@ int Felt_Array2::getY() const
 {
     return defaultField_->yNum();
 }
-int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut)
+int Felt_Array2::getGrid(const MetNoFimex::FimexTime& time, LevelPair levelPair, vector<short>& gridOut)
 {
     std::array<float, 6> nullDelta;
     for (int i = 0; i < 6; i++) nullDelta[i] = 0;
     return getGridAllowDelta(time, levelPair, gridOut, nullDelta);
 }
 
-int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const std::array<float, 6>& gridParameterDelta)
+int Felt_Array2::getGridAllowDelta(const MetNoFimex::FimexTime& time, LevelPair levelPair, vector<short>& gridOut,
+                                   const std::array<float, 6>& gridParameterDelta)
 {
     const std::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
 

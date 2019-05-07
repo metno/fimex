@@ -38,8 +38,6 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
@@ -210,13 +208,13 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
     feltfile_ = std::shared_ptr<MetNoFelt::Felt_File2>(new MetNoFelt::Felt_File2(filename, knownFeltIds, options));
     {
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
-        vector<boost::posix_time::ptime> feltTimes = feltfile_->getFeltTimes();
-        if (feltTimes.size() > 0) {
+        vector<MetNoFimex::FimexTime> feltTimes = feltfile_->getFeltTimes();
+        if (!feltTimes.empty()) {
             templateReplacementAttributes["MIN_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(feltTimes[0])));
             size_t lastTime = (feltTimes.size() > 1) ? (feltTimes.size() - 1) : 0;
             templateReplacementAttributes["MAX_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[lastTime])));
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(feltTimes[lastTime])));
         }
     }
 
@@ -326,9 +324,10 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
             cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
         }
     }
+    // FIXME -- same as GribCDMReader
     if (!cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", std::regex(".*"))) {
-        boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
-        cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
+        const std::string now = make_time_string_extended(make_time_utc_now());
+        cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", now + " creation by fimex"));
     }
 }
 
@@ -372,9 +371,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
     timeVec = feltfile_->getFeltTimes();
     vector<double> timeUnitVec;
     TimeUnit tu(timeUnits);
-    transform(timeVec.begin(), timeVec.end(),
-              back_inserter(timeUnitVec),
-              bind1st(mem_fun(&TimeUnit::posixTime2unitTime), &tu));
+    std::transform(timeVec.begin(), timeVec.end(), std::back_inserter(timeUnitVec), [tu](const FimexTime& tp) { return tu.fimexTime2unitTime(tp); });
     DataPtr timeData = createData(timeDataType, timeUnitVec.begin(), timeUnitVec.end());
     timeVar.setData(timeData);
     cdm_->addVariable(timeVar);
@@ -386,14 +383,14 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 
     // add the unique reference time, if exists
     try {
-        std::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
-        if (refTime.get() != 0) {
+        FimexTime refTime = feltfile_->getUniqueReferenceTime();
+        if (!refTime.invalid()) {
             // TODO: move reference time name to config
             string referenceTime = "forecast_reference_time";
             vector<string> nullShape;
             CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
             DataPtr timeData = createData(timeDataType, 1);
-            timeData->setValue(0, tu.posixTime2unitTime(*refTime));
+            timeData->setValue(0, tu.fimexTime2unitTime(refTime));
             refTimeVar.setData(timeData);
             cdm_->addVariable(refTimeVar);
             cdm_->addAttribute(referenceTime, CDMAttribute("units", timeUnits));
@@ -716,13 +713,13 @@ DataPtr FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) 
             std::shared_ptr<MetNoFelt::Felt_Array2> fa(feltfile_->getFeltArray(foundId->second));
 
             // test for availability of the current time in the variable (getSlice will get data for every time)
-            vector<boost::posix_time::ptime> faTimes = fa->getTimes();
+            vector<MetNoFimex::FimexTime> faTimes = fa->getTimes();
             short contains = false;
             if (faTimes.size() == 0) {
                 // time-less variable, time-check irrelevant
                 contains = true;
             } else {
-                for (vector<boost::posix_time::ptime>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
+                for (vector<MetNoFimex::FimexTime>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
                     if (*it == timeVec[unLimDimPos]) {
                         contains = true;
                     }
@@ -767,8 +764,8 @@ DataPtr FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) 
             unsigned int xDim = fa->getX();
             unsigned int yDim = fa->getY();
             for (vector<LevelPair>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
-                // get the posix-time, if available
-                boost::posix_time::ptime t;
+                // get the time, if available
+                MetNoFimex::FimexTime t;
                 if (timeVec.size() > 0) {
                     t = timeVec[unLimDimPos];
                 }

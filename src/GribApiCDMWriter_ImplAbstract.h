@@ -25,15 +25,13 @@
 #ifndef GRIBAPICDMWRITER_IMPLABSTRACT_H_
 #define GRIBAPICDMWRITER_IMPLABSTRACT_H_
 
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include "fimex/Logger.h"
 #include "fimex/CDMWriter.h"
-#include "fimex/XMLDoc.h"
+
 #include "fimex/CDMException.h"
 #include "fimex/TimeUnit.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "fimex/XMLDoc.h"
+
+#include <fstream>
 
 // forward declaration
 struct grib_handle;
@@ -80,7 +78,7 @@ protected:
      */
     virtual void setProjection(const std::string& varName) = 0;
     virtual void setParameter(const std::string& varName, double levelValue) = 0;
-    virtual void setTime(const std::string& varName, const boost::posix_time::ptime& rTime, const FimexTime& vTime, const std::string& stepUnit);
+    virtual void setTime(const std::string& varName, const FimexTime& rTime, const FimexTime& vTime, const std::string& stepUnit);
     virtual void setLevel(const std::string& varName, double levelValue) = 0;
     /**
      * get the levels from the cdm scaled to values used in grib (units/scale-factor)
@@ -121,13 +119,11 @@ protected:
     const std::string configFile;
     const XMLDoc_p xmlConfig;
     std::shared_ptr<grib_handle> gribHandle;
-    Logger_p logger;
 
 private:
     std::ofstream gribFile;
-
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* GRIBAPICDMWRITER_IMPLABSTRACT_H_ */

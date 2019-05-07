@@ -21,24 +21,30 @@
  * USA.
  */
 
-#include <cmath>
-#include <grib_api.h>
-#include "proj_api.h"
 #include "GribApiCDMWriter_Impl1.h"
+
 #include "fimex/CDM.h"
+#include "fimex/Data.h"
+#include "fimex/Logger.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
-#include "fimex/Data.h"
+
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-namespace MetNoFimex
-{
+#include <grib_api.h>
+
+#include "proj_api.h"
+
+#include <cmath>
+
+namespace MetNoFimex {
+
+static Logger_p logger = getLogger("fimex.GribApi_CDMWriter.Impl1");
 
 GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
 : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
 {
-    logger = getLogger("fimex.GribApi_CDMWriter.Impl1");
 }
 
 GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()

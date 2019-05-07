@@ -37,12 +37,12 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-#include <memory>
-
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <regex>
 #include <set>
 

@@ -52,8 +52,7 @@
 
 // boost
 //
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <regex>
 #include <tuple>

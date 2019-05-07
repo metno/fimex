@@ -32,7 +32,8 @@
 #include "FeltConstants.h"
 #include "FeltTypes.h"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "fimex/TimeUtils.h"
+
 #include <boost/shared_array.hpp>
 
 #include <iosfwd>
@@ -41,6 +42,13 @@
 
 namespace felt
 {
+
+class FeltLogger
+{
+public:
+    virtual ~FeltLogger();
+    virtual void log(const std::string& message) = 0;
+};
 
 class FeltFile
 {
@@ -59,10 +67,10 @@ public:
 
     std::string information() const;
 
-    boost::posix_time::ptime lastUpdateTime() const;
-    boost::posix_time::ptime referenceTime() const;
-    boost::posix_time::ptime firstTime() const;
-    boost::posix_time::ptime lastTime() const;
+    MetNoFimex::FimexTime lastUpdateTime() const;
+    MetNoFimex::FimexTime referenceTime() const;
+    MetNoFimex::FimexTime firstTime() const;
+    MetNoFimex::FimexTime lastTime() const;
 
     typedef std::shared_ptr<FeltField> FeltFieldPtr;
 
@@ -78,13 +86,11 @@ public:
     /// throws std::out_of_range if idx is too large.
     const FeltField & at(size_t idx) const;
 
-
-
     // simple log facility
     static void log(const std::string& msg);
-    static void setLogStream(std::ostream& o);
-    static void setLogging(bool enableLogging);
+    static void setLogStream(std::unique_ptr<FeltLogger>&& l);
     static bool isLogging();
+
 private:
 
     /// Is the "not ready yet" flag set to false?

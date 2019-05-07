@@ -23,12 +23,14 @@
 
 // METGM C Lib
 //
-#include "metgm.h"
-
-#include <string>
 
 #ifndef METGM_UTILS_H
 #define METGM_UTILS_H
+
+#include "metgm.h"
+
+#include <iostream>
+#include <string>
 
 class MetGmProfilingTimer
 {

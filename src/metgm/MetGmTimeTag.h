@@ -29,12 +29,9 @@
 #define METGM_TIMETAG_H
 
 #include "fimex/CDMReaderDecl.h"
+#include "fimex/TimeUtils.h"
 
-// boost
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <memory>
-
-// standard
 #include <vector>
 
 namespace MetNoFimex {
@@ -60,7 +57,7 @@ namespace MetNoFimex {
         inline time_t              startTime()    { return start_t; }
         inline std::vector<time_t>&                   pointsAsSystemTime() { return points_; }
         inline std::vector<double>&                   pointsAsDouble()     { return pointsAsDouble_; }
-        inline std::vector<boost::posix_time::ptime>& pointsAsBoostPosix() { return pointsAsBoostPosix_; }
+        inline std::vector<time_point>& pointsAsTimePoints() { return pointsAsTimePoints_; }
 
     private:
 
@@ -84,7 +81,7 @@ namespace MetNoFimex {
         unsigned int        nT_;
         std::vector<time_t> points_;
         std::vector<double> pointsAsDouble_;
-        std::vector<boost::posix_time::ptime> pointsAsBoostPosix_;
+        std::vector<time_point> pointsAsTimePoints_;
     };
 }
 

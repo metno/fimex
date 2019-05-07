@@ -28,12 +28,13 @@
 #define CDMREADERUTILS_H_
 
 #include "fimex/CDMReader.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include "fimex/TimeUnit.h"
+
 #include <memory>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMReaderUtils.h
@@ -62,7 +63,7 @@ struct null_deleter
  * @throw CDMException if eithern no reference time has been found, or if more than 1 different reference
  *        times have been found
  */
-boost::posix_time::ptime getUniqueForecastReferenceTime(CDMReader_p reader);
+FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader);
 
 /**
  * This is the same function as CDMReader::getScaledDataSliceInUnit, but it converts

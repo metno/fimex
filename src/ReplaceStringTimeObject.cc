@@ -27,7 +27,6 @@
 namespace MetNoFimex
 {
 
-// implementation before boost::date_time 1.33
 std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto)
 {
 	using namespace std;

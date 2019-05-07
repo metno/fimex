@@ -38,11 +38,12 @@
     CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
 #endif
 
-#include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
+#include "fimex/GribFileIndex.h"
 #include "fimex/ReplaceStringObject.h"
-#include "fimex/XMLInput.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInput.h"
 
 #include <vector>
 
@@ -116,7 +117,7 @@ private:
      * @param gfm
      * @return time or not_a_date_time
      */
-    boost::posix_time::ptime getVariableValidTime(const GribFileMessage& gfm) const;
+    FimexTime getVariableValidTime(const GribFileMessage& gfm) const;
 
     size_t getVariableMaxEnsembles(std::string varName) const;
 

@@ -35,6 +35,8 @@
 #include "fimex/DataTypeChanger.h"
 #include "fimex/Units.h"
 
+#include <boost/lexical_cast.hpp>
+
 // standard
 #include <cmath>
 

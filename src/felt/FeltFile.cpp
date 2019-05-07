@@ -32,9 +32,8 @@
 #include "felt/FeltTypeConversion.h"
 #include "felt/FeltField.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <fstream>
+#include <mutex>
 #include <sstream>
 
 using namespace std;
@@ -74,27 +73,28 @@ FeltFile::~FeltFile()
 }
 
 // simple logging
-std::ostream* logStream = &std::cerr;
-bool isLogging_ = false;
-void FeltFile::setLogStream(std::ostream& o)
+FeltLogger::~FeltLogger() {}
+
+static std::mutex logger_mutex;
+static std::unique_ptr<FeltLogger> logStream;
+
+void FeltFile::setLogStream(std::unique_ptr<FeltLogger>&& l)
 {
-    logStream = &o;
-}
-void FeltFile::setLogging(bool enableLogging)
-{
-    isLogging_ = enableLogging;
-}
-bool FeltFile::isLogging()
-{
-    return isLogging_;
-}
-void FeltFile::log(const std::string& message)
-{
-    if (isLogging_ && logStream->good()) {
-        *logStream << message;
-    }
+    std::lock_guard<std::mutex> lock(logger_mutex);
+    logStream = std::move(l);
 }
 
+bool FeltFile::isLogging()
+{
+    return static_cast<bool>(logStream);
+}
+
+void FeltFile::log(const std::string& message)
+{
+    std::lock_guard<std::mutex> lock(logger_mutex);
+    if (logStream)
+        logStream->log(message);
+}
 
 FeltFile::size_type FeltFile::size() const
 {
@@ -106,8 +106,8 @@ std::string FeltFile::information() const
 {
     std::ostringstream cont;
     cont << "File type\t\t" << block1_[0] << "\n";
-    cont << "Time a\t\t\t" << lastUpdateTime() << "\n";
-    cont << "Time b\t\t\t" << referenceTime() << "\n";
+    //    cont << "Time a\t\t\t" << lastUpdateTime() << "\n";
+    //    cont << "Time b\t\t\t" << referenceTime() << "\n";
     cont << "M\t\t\t" << block1_[7] << "\n";
     cont << "N\t\t\t" << block1_[8] << "\n";
     cont << "K\t\t\t" << block1_[9] << "\n";
@@ -116,8 +116,8 @@ std::string FeltFile::information() const
     cont << "Last word last block\t" << block1_[12] << "\n";
     cont << "storage type\t\t" << block1_[13] << "\n";
     cont << "Update status\t\t" << block1_[14] << "\n";
-    cont << "Arch time a\t\t" << firstTime() << "\n";
-    cont << "Arch time b\t\t" << lastTime() << "\n";
+    //    cont << "Arch time a\t\t" << firstTime() << "\n";
+    //    cont << "Arch time b\t\t" << lastTime() << "\n";
     cont << "Termins\t\t\t" << block1_[25] << "\n";
     cont << "Indexes/term\t\t" << block1_[26] << "\n";
     cont << "Producer\t\t" << block1_[27] << "\n";
@@ -127,22 +127,22 @@ std::string FeltFile::information() const
     return cont.str();
 }
 
-boost::posix_time::ptime FeltFile::lastUpdateTime() const
+MetNoFimex::FimexTime FeltFile::lastUpdateTime() const
 {
     return parseTimeNoThrow(block1_.get() +1);
 }
 
-boost::posix_time::ptime FeltFile::referenceTime() const
+MetNoFimex::FimexTime FeltFile::referenceTime() const
 {
     return parseTimeNoThrow(block1_.get() +4);
 }
 
-boost::posix_time::ptime FeltFile::firstTime() const
+MetNoFimex::FimexTime FeltFile::firstTime() const
 {
     return parseTimeNoThrow(block1_.get() +19);
 }
 
-boost::posix_time::ptime FeltFile::lastTime() const
+MetNoFimex::FimexTime FeltFile::lastTime() const
 {
     return parseTimeNoThrow(block1_.get() +22);
 }

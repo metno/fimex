@@ -557,7 +557,7 @@ double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const ch
     double retVal;
     try {
         TimeUnit tu(units);
-        retVal = tu.posixTime2unitTime(getUniqueForecastReferenceTime(reader->reader_));
+        retVal = tu.fimexTime2unitTime(getUniqueForecastReferenceTimeFT(reader->reader_));
     } catch (CDMException& ex) {
         return MIFI_UNDEFINED_D;
     }

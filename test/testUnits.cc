@@ -21,12 +21,13 @@
  * USA.
  */
 
-#include "testinghelpers.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Units.h"
 #include "fimex/UnitsException.h"
 #include "fimex/Utils.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "testinghelpers.h"
+
 #include <cmath>
 
 using namespace std;
@@ -95,10 +96,8 @@ TEST4FIMEX_TEST_CASE(test_TimeUnit)
     TEST4FIMEX_CHECK_EQ(ft.getSecond(), 0);
 
     ft.setMSecond(11);
-    // std::cerr << type2string(ft) << std::endl;
-    TEST4FIMEX_CHECK_EQ(type2string(ft), "1970-02-03 01:00:00.011");
-    // std::cerr << type2string(string2FimexTime(type2string(ft))) << std::endl;
-    TEST4FIMEX_CHECK_EQ(type2string(string2FimexTime(type2string(ft))), "1970-02-03 01:00:00.011");
+    TEST4FIMEX_CHECK_EQ(type2string(ft), "1970-02-03T01:00:00.011");
+    TEST4FIMEX_CHECK_EQ(type2string(string2FimexTime(type2string(ft))), "1970-02-03T01:00:00.011");
 
     // check comparison
     FimexTime ft2 = string2FimexTime(type2string(ft));
@@ -114,9 +113,8 @@ TEST4FIMEX_TEST_CASE(test_TimeUnit)
     ft.setMDay(1);
     ft.setMSecond(0);
     TEST4FIMEX_CHECK(fabs(tu.fimexTime2unitTime(ft)) < 1e-5);
-
-    boost::posix_time::ptime ptime(boost::gregorian::date(1970,1,1), boost::posix_time::time_duration(2,0,0));
-    double unitTime = tu.posixTime2unitTime(ptime);
+    const time_point ptime = make_time_point(1970, 1, 1, 2, 0, 0);
+    double unitTime = tu.fimexTime2unitTime(fromTimePoint(ptime));
     TEST4FIMEX_CHECK(abs(unitTime - (60 * 60)) < 1e-5);
 
     FimexTime minTime(FimexTime::min_date_time);

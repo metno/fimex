@@ -41,8 +41,9 @@
 #include "fimex/CDMReader.h"
 #include "fimex/Felt_Types.h"
 #include "fimex/ReplaceStringObject.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/XMLInput.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include <map>
 #include <memory>
 #include <string>
@@ -52,8 +53,8 @@ namespace MetNoFelt {
     class Felt_File2; // forward decl.
 }
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 class XMLDoc; // declaration without import
 
 class FeltCDMReader2 : public CDMReader
@@ -74,7 +75,7 @@ private:
     CDMDimension xDim;
     CDMDimension yDim;
     std::map<std::string, std::string> varNameFeltIdMap;
-    std::vector<boost::posix_time::ptime> timeVec;
+    std::vector<FimexTime> timeVec;
     std::map<std::string, std::vector<MetNoFelt::LevelPair> > levelVecMap;
     /**
      * config attributes may contain template parameters marked with %PARAM%

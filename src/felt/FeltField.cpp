@@ -29,11 +29,10 @@
 #include "felt/FeltField.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltTypeConversion.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "fimex/TimeUtils.h"
+
 #include <sstream>
 #include <stdexcept>
-
-#include <iostream>
 
 using namespace std;
 
@@ -59,14 +58,14 @@ FeltField::~FeltField()
 {
 }
 
-boost::posix_time::ptime FeltField::referenceTime() const
+MetNoFimex::FimexTime FeltField::referenceTime() const
 {
 	return parseTime(header_.data() + 2);
 }
 
-boost::posix_time::ptime FeltField::validTime() const
+MetNoFimex::FimexTime FeltField::validTime() const
 {
-	return referenceTime() + boost::posix_time::hours(header_[9]);
+    return MetNoFimex::fromTimePoint(MetNoFimex::asTimePoint(referenceTime()) + std::chrono::hours(header_[9]));
 }
 
 int FeltField::parameter() const
@@ -123,8 +122,8 @@ std::string FeltField::information() const
 //	cont << index_ << ":\n";
 	cont << "\tProducer\t" << header_[0] << "\n";
 	cont << "\tGrid area\t" << header_[1] << "\n";
-	cont << "\tTime\t\t" << referenceTime() << "\n";
-	cont << "\tN - block no\t" << header_[5] << "\n";
+        //	cont << "\tTime\t\t" << referenceTime() << "\n";
+        cont << "\tN - block no\t" << header_[5] << "\n";
 	cont << "\tWord no\t\t" << header_[6] << "\n";
 	cont << "\tData length\t" << header_[7] << "\n";
 	cont << "\tData type\t" << header_[8] << "\n";

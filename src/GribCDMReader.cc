@@ -37,6 +37,7 @@
 #include "fimex/ReplaceStringTemplateObject.h"
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
@@ -44,8 +45,6 @@
 #include "CDM_XMLConfigHelper.h"
 #include "MutexLock.h"
 #include "fimex_config.h"
-
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <algorithm>
 #include <limits>
@@ -81,7 +80,7 @@ struct GribCDMReader::Impl
     vector<pair<string, std::regex>> ensembleMemberIds;
     size_t maxEnsembles;
     // store ptimes of all times
-    vector<boost::posix_time::ptime> times;
+    vector<FimexTime> times;
 
     map<string, std::pair<double, double> > varPrecision;
     // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
@@ -214,9 +213,6 @@ std::string GribCDMReader::getConfigExtraKeys(XMLDoc_p doc)
     return join(extraKeys.begin(), extraKeys.end(), ",");
 }
 
-
-
-
 void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
 {
     for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
@@ -249,9 +245,9 @@ void GribCDMReader::initPostIndices()
         // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
         if (p_->times.size() > 0) {
             p_->templateReplacementAttributes["MIN_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(0))));
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(p_->times.at(0))));
             p_->templateReplacementAttributes["MAX_DATETIME"] =
-                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(p_->times.size() - 1))));
+                std::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(fimexTime2epochTime(p_->times.at(p_->times.size() - 1))));
         }
 
         initAddGlobalAttributes();
@@ -403,8 +399,8 @@ void GribCDMReader::initAddGlobalAttributes()
         }
     }
     if (!cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", std::regex(".*"))) {
-        boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
-        cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex"));
+        const std::string now = make_time_string_extended(make_time_utc_now());
+        cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", now + " creation by fimex"));
     }
 }
 
@@ -682,14 +678,14 @@ void GribCDMReader::initAddTimeDimension()
 {
     // get all times, unique and sorted
     {
-        set<boost::posix_time::ptime> timesSet;
+        set<FimexTime> timesSet;
         for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-            boost::posix_time::ptime vt(getVariableValidTime(*gfmIt));
-            if (vt != boost::posix_time::not_a_date_time) {
+            const FimexTime vt = getVariableValidTime(*gfmIt);
+            if (!is_invalid_time_point(vt)) {
                 timesSet.insert(vt);
             }
         }
-        p_->times = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
+        p_->times = vector<FimexTime>(timesSet.begin(), timesSet.end());
     }
 
     xmlXPathObject_p xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:axes/gr:time");
@@ -722,28 +718,25 @@ void GribCDMReader::initAddTimeDimension()
         tunit = CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00");
         cdm_->addAttribute(timeVar.getName(), tunit);
     }
-    TimeUnit tu(tunit.getStringValue());
+    const TimeUnit tu(tunit.getStringValue());
     vector<double> timeVecLong;
-    transform(p_->times.begin(),
-              p_->times.end(),
-              back_inserter(timeVecLong),
-              bind1st(mem_fun(&TimeUnit::posixTime2unitTime), &tu));
+    std::transform(p_->times.begin(), p_->times.end(), std::back_inserter(timeVecLong), [tu](const FimexTime& tp) { return tu.fimexTime2unitTime(tp); });
     DataPtr timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
     cdm_->getVariable(timeVar.getName()).setData(timeData);
 
     // TODO check if reference time changes, assuming they are all alike
-    boost::posix_time::ptime refTime(boost::posix_time::not_a_date_time);
-    for (size_t i = 0; (refTime == boost::posix_time::not_a_date_time) && (i < p_->indices.size()); ++i) {
+    FimexTime refTime;
+    for (size_t i = 0; is_invalid_time_point(refTime) && (i < p_->indices.size()); ++i) {
         refTime = p_->indices.at(i).getReferenceTime();
     }
-    if (refTime != boost::posix_time::not_a_date_time) {
+    if (!is_invalid_time_point(refTime)) {
         // TODO: move reference time name to config
         string referenceTime = "forecast_reference_time";
         vector<string> nullShape;
         CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
         DataPtr refTimeData = createData(timeDataType, 1);
         // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
-        refTimeData->setValue(0, posixTime2epochTime(refTime));
+        refTimeData->setValue(0, fimexTime2epochTime(refTime));
         refTimeVar.setData(refTimeData);
         cdm_->addVariable(refTimeVar);
         cdm_->addAttribute(referenceTime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
@@ -766,18 +759,13 @@ string GribCDMReader::getVariableName(const GribFileMessage& gfm) const
     return varName;
 }
 
-boost::posix_time::ptime GribCDMReader::getVariableValidTime(const GribFileMessage& gfm) const
+FimexTime GribCDMReader::getVariableValidTime(const GribFileMessage& gfm) const
 {
     xmlNodePtr node = findVariableXMLNode(gfm);
-    if (node == 0) {
+    if (node && getXmlProp(node, "constantTime") == "true")
+        return FimexTime();
+    else
         return gfm.getValidTime();
-    } else {
-        if (getXmlProp(node, "constantTime") == "true") {
-            return boost::date_time::not_a_date_time;
-        } else {
-            return gfm.getValidTime();
-        }
-    }
 }
 
 // IN1 and IN2 should both be collections
@@ -807,10 +795,10 @@ void GribCDMReader::initCreateGFIBoxes()
     int pos = 0;
     for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt, ++pos) {
         string varName = getVariableName(*gfmIt);
-        boost::posix_time::ptime valTime(getVariableValidTime(*gfmIt));
+        FimexTime valTime = getVariableValidTime(*gfmIt);
         size_t unlimDimPos = std::numeric_limits<std::size_t>::max();
-        if (valTime != boost::posix_time::not_a_date_time) {
-            vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), valTime);
+        if (!is_invalid_time_point(valTime)) {
+            vector<FimexTime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), valTime);
             assert(pTimesIt != p_->times.end());
             unlimDimPos = distance(p_->times.begin(), pTimesIt);
         }
@@ -1136,7 +1124,7 @@ void GribCDMReader::initAddVariables()
 
              string levelDimName = p_->levelDimNames[levelTypePos.first].at(levelTypePos.second);
              shape.push_back(levelDimName);
-             if (getVariableValidTime(*gfmIt) != boost::posix_time::not_a_date_time) {
+             if (!is_invalid_time_point(getVariableValidTime(*gfmIt))) {
                  shape.push_back(p_->timeDimName);
              }
 

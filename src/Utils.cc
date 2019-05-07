@@ -24,8 +24,6 @@
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -349,12 +347,6 @@ std::vector<std::string> split_any(const std::string& str, const std::string& de
     std::vector<std::string> out;
     split_any(std::back_inserter(out), str, delims);
     return out;
-}
-
-static boost::posix_time::ptime epochBase(boost::gregorian::date(1970, boost::date_time::Jan, 1));
-epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time)
-{
-    return (time - epochBase).total_seconds();
 }
 
 } // namespace MetNoFimex

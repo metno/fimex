@@ -28,15 +28,16 @@
 
 #include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Utils.h"
 
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 #include <regex>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 

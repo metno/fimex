@@ -37,10 +37,9 @@
 #include "fimex/TimeUnit.h"
 
 // boost
-#include <boost/date_time.hpp>
+#include <boost/lexical_cast.hpp>
 
 // standard
-//
 #include <iostream>
 
 namespace MetNoFimex {
@@ -74,11 +73,11 @@ std::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(c
     // set analysis date time
     if(!gp1->parser_->analysisDateTime().empty()) {
 
-        std::string a_date(gp1->parser_->analysisDateTime());
-        boost::posix_time::ptime analysis_posix = boost::posix_time::from_iso_string(a_date);
+        const std::string a_date(gp1->parser_->analysisDateTime());
+        const FimexTime analysis = string2FimexTime(a_date);
 
         TimeUnit tu("seconds since 1970-01-01 00:00:00");
-        double unit_time = tu.posixTime2unitTime(analysis_posix);
+        double unit_time = tu.fimexTime2unitTime(analysis);
         gp1->analysis_t = tu.unitTime2epochSeconds(unit_time);
     } else {
         gp1->analysis_t = gp1->tTag_->analysisTime();

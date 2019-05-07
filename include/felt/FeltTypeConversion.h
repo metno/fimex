@@ -1,7 +1,7 @@
 /*
  wdb
 
- Copyright (C) 2007 met.no
+ Copyright (C) 2007-2019 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -30,21 +30,20 @@
 #define FELTTYPECONVERSION_H_
 
 #include "FeltConstants.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <fimex/TimeUnit.h>
 
-namespace felt
-{
+namespace felt {
+
 template<typename T>
 T get(word w)
 {
 	return (T) w;
 }
 
-boost::posix_time::ptime parseTime(const word * data);
+MetNoFimex::FimexTime parseTime(const word* data);
 
-boost::posix_time::ptime parseTimeNoThrow(const word * data);
+MetNoFimex::FimexTime parseTimeNoThrow(const word* data);
 
-
-}
+} // namespace felt
 
 #endif /*FELTTYPECONVERSION_H_*/

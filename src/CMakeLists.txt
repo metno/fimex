@@ -11,7 +11,9 @@ SET(libfimex_INCLUDE_DIRECTORIES
   ${udunits2_INC_DIR}
   ${ECCODES_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${date_INC_DIR}
 )
+
 SET(libfimex_COMPILE_OPTIONS
   ${PC_CFLAGS_OTHER}
   )
@@ -94,6 +96,8 @@ SET(libfimex_SOURCES
   ${INCF}/DataTypeChanger.h
   FillWriter.cc
   ${INCF}/FillWriter.h
+  FimexTime.cc
+  ${INCF}/FimexTime.h
   GridDefinition.cc
   ${INCF}/GridDefinition.h
   IndexedData.cc
@@ -121,6 +125,8 @@ SET(libfimex_SOURCES
   StringData.h
   TimeUnit.cc
   ${INCF}/TimeUnit.h
+  TimeUtils.cc
+  ${INCF}/TimeUtils.h
   TimeSpec.cc
   ${INCF}/TimeSpec.h
   Units.cc
@@ -391,7 +397,7 @@ SET(libfimex_LIBS
   ${udunits2_LIB}
   ${eccodes_LIB}
   ${Boost_LIBRARIES}
-  ${CXX_LIBRARIES}
+  ${date_LIB}
 )
 
 FIMEX_ADD_LIBRARY(fimex "${libfimex_ALL_SOURCES}" "${libfimex_LIBS}" "${libfimex_INCLUDE_DIRECTORIES}" "${libfimex_COMPILE_DEFINITIONS}" "${libfimex_COMPILE_OPTIONS}")

@@ -33,11 +33,6 @@
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
-#if HAVE_BOOST_UNIT_TEST_FRAMEWORK
-// for message formatting
-#include "boost/date_time/posix_time/posix_time_io.hpp"
-#endif
-
 #include <numeric>
 
 using namespace std;
@@ -211,8 +206,8 @@ TEST4FIMEX_TEST_CASE(test_coordSys)
     }
 
     // check reference time
-    boost::posix_time::ptime refTime = getUniqueForecastReferenceTime(reader);
-    TEST4FIMEX_CHECK_EQ(refTime, boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1), boost::posix_time::time_duration(10, 0, 0)));
+    const FimexTime refTime = getUniqueForecastReferenceTimeFT(reader);
+    TEST4FIMEX_CHECK_EQ(refTime, FimexTime(2000, 1, 1, 10, 0, 0));
 }
 
 TEST4FIMEX_TEST_CASE(test_vTrans)
