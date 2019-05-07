@@ -32,10 +32,13 @@
 #include "CDMMergeUtils.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/String2Type.h"
+#include "fimex/StringUtils.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
@@ -315,6 +318,25 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
     }
 
     return cdmI;
+}
+
+CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string& specification)
+{
+    if (starts_with(specification, "LINEAR")) {
+        std::smatch what;
+        if (std::regex_match(specification, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
+            try {
+                int transition = string2type<int>(what[1]);
+                int border = string2type<int>(what[2]);
+                return std::make_shared<CDMBorderSmoothing_LinearFactory>(transition, border);
+            } catch (std::runtime_error&) {
+                throw CDMException("problem parsing parameters for linear smoothing: " + specification);
+            }
+        } else {
+            throw CDMException("malformed linear smoothing specification: " + specification);
+        }
+    }
+    throw CDMException("unknown smoothing: " + specification);
 }
 
 } // namespace MetNoFimex

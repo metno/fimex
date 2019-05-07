@@ -63,14 +63,16 @@ public:
     /**
      * Retrieve the cdm structure of this reader.
      */
-    virtual const CDM& getCDM() const;
+    const CDM& getCDM() const;
 
     /**
      * Retrieve the cdm structure of this reader, non-constant.
      *
      * Only in rare cases, this might be required.
      */
-    virtual CDM& getInternalCDM();
+    CDM& getInternalCDM();
+
+    void setInternalCDM(const CDM& cdm);
 
     /**
      * @brief Read the sizes of the dimensions belonging to a variable.
@@ -87,7 +89,7 @@ public:
      * @param varName the variables name
      * @return a vector with the dimension sizes usable with MetNoFimex::Index
      */
-    virtual std::vector<std::size_t> getDims(const std::string& varName);
+    std::vector<std::size_t> getDims(const std::string& varName);
 
     /**
      * @brief data-reading function to be called from the CDMWriter

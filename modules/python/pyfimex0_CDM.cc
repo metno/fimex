@@ -31,25 +31,22 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/copy_const_reference.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/return_value_policy.hpp>
+#include "pyfimex0_helpers.h"
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
-bp::list CDM__getAttributeNames(const CDM& cdm, const std::string& varName)
+py::list CDM__getAttributeNames(const CDM& cdm, const std::string& varName)
 {
     const std::vector<CDMAttribute>& atts = cdm.getAttributes(varName);
-    bp::list names;
+    py::list names;
     for (size_t i=0; i<atts.size(); ++i)
         names.append(atts[i].getName());
     return names;
 }
-bp::list CDM__getGlobalAttributeNames(const CDM& cdm)
+py::list CDM__getGlobalAttributeNames(const CDM& cdm)
 {
     return CDM__getAttributeNames(cdm, CDM::globalAttributeNS());
 }
@@ -62,10 +59,10 @@ const CDMAttribute& CDM__getGlobalAttribute(const CDM& cdm, const std::string& a
     return cdm.getAttribute(CDM::globalAttributeNS(), attrName);
 }
 
-bp::list CDM__getVariableNames(const CDM& cdm)
+py::list CDM__getVariableNames(const CDM& cdm)
 {
     const CDM::VarVec& vars = cdm.getVariables();
-    bp::list names;
+    py::list names;
     for (size_t i=0; i<vars.size(); ++i)
         names.append(vars[i].getName());
     return names;
@@ -75,10 +72,10 @@ const CDMVariable& CDM__getVariable(const CDM& cdm, const std::string& varName)
     return cdm.getVariable(varName);
 }
 
-bp::list CDM__getDimensionNames(const CDM& cdm)
+py::list CDM__getDimensionNames(const CDM& cdm)
 {
     const CDM::DimVec& dims = cdm.getDimensions();
-    bp::list names;
+    py::list names;
     for (size_t i=0; i<dims.size(); ++i)
         names.append(dims[i].getName());
     return names;
@@ -87,45 +84,67 @@ const CDMDimension& CDM__getDimension(const CDM& cdm, const std::string& dimName
 {
     return cdm.getDimension(dimName);
 }
-
-bp::list CDMVariable__getShape(const CDMVariable& var)
+bool CDM__removeDimension(CDM& cdm, const std::string& dimName)
 {
-    const std::vector<std::string>& shape = var.getShape();
-    bp::list py_shape;
-    for (size_t i=0; i<shape.size(); ++i)
-        py_shape.append(shape[i]);
-    return py_shape;
+    return cdm.removeDimension(dimName);
 }
+bool CDM__removeDimensionIIU(CDM& cdm, const std::string& dimName, bool iiu)
+{
+    return cdm.removeDimension(dimName, iiu);
+}
+
 } // namespace
 
-void pyfimex0_CDM()
+void pyfimex0_CDM(py::module m)
 {
-    bp::class_<CDMAttribute, boost::noncopyable>("_CDMAttribute", bp::no_init)
-            .def("getName", &CDMDimension::getName, bp::return_value_policy<bp::copy_const_reference>())
-            .def("getData", &CDMAttribute::getData)
-            .def("getStringValue", &CDMAttribute::getStringValue);
-            ;
+    py::class_<CDMAttribute>(m, "CDMAttribute")
+        .def(py::init<std::string, std::string>())
+        .def(py::init<std::string, std::string, std::string>())
+        .def(py::init<std::string, DataPtr>())
+        .def("getName", &CDMAttribute::getName)
+        .def("setName", &CDMAttribute::setName)
+        .def("getStringValue", &CDMAttribute::getStringValue)
+        .def("getData", &CDMAttribute::getData)
+        .def("setData", &CDMAttribute::setData)
+        .def("getDataType", &CDMAttribute::getDataType);
 
-    bp::class_<CDMDimension, boost::noncopyable>("_CDMDimension", bp::no_init)
-            .def("getName", &CDMDimension::getName, bp::return_value_policy<bp::copy_const_reference>())
-            .def("getLength", &CDMDimension::getLength)
-            .def("isUnlimited", &CDMDimension::isUnlimited)
-            ;
+    py::class_<CDMDimension>(m, "CDMDimension")
+        .def(py::init<std::string, long>())
+        .def("getName", &CDMDimension::getName)
+        .def("setName", &CDMDimension::setName)
+        .def("getLength", &CDMDimension::getLength)
+        .def("setLength", &CDMDimension::setLength)
+        .def("isUnlimited", &CDMDimension::isUnlimited)
+        .def("setUnlimited", &CDMDimension::setUnlimited);
 
-    bp::class_<CDMVariable, boost::noncopyable>("_CDMVariable", bp::no_init)
-            .def("getName", &CDMVariable::getName, bp::return_value_policy<bp::copy_const_reference>())
-            .def("getShape", CDMVariable__getShape)
-            ;
+    py::class_<CDMVariable>(m, "CDMVariable")
+        .def(py::init<std::string, CDMDataType, std::vector<std::string>>())
+        .def("getName", &CDMVariable::getName)
+        .def("setName", &CDMVariable::setName)
+        .def("getShape", &CDMVariable::getShape)
+        .def("setShape", &CDMVariable::setShape)
+        .def("checkDimension", &CDMVariable::checkDimension)
+        .def("getData", &CDMVariable::getData)
+        .def("setData", &CDMVariable::setData);
 
-    bp::class_<CDM, boost::noncopyable>("_CDM", bp::no_init)
-            .def("getVariableNames", CDM__getVariableNames)
-            .def("getVariable", CDM__getVariable, bp::return_internal_reference<1>())
-            .def("getAttributeNames", CDM__getAttributeNames)
-            .def("getAttribute", CDM__getAttribute, bp::return_internal_reference<1>())
-            .def("getGlobalAttributeNames", CDM__getGlobalAttributeNames)
-            .def("getGlobalAttribute", CDM__getGlobalAttribute, bp::return_internal_reference<1>())
-            .def("getDimension", CDM__getDimension, bp::return_internal_reference<1>())
-            .def("getDimensionNames", CDM__getDimensionNames)
-            .def("hasDimension", &CDM::hasDimension)
-            ;
+    py::class_<CDM> pyCDM(m, "CDM");
+    pyCDM.def(py::init<>()).def(py::init<const CDM&>());
+    pyCDM.def("getVariableNames", CDM__getVariableNames)
+        .def("getVariable", CDM__getVariable, py::return_value_policy::reference_internal)
+        .def("hasVariable", &CDM::hasVariable)
+        .def("addVariable", &CDM::addVariable)
+        .def("removeVariable", &CDM::removeVariable);
+    pyCDM.def("getAttributeNames", CDM__getAttributeNames)
+        .def("hasAttribute", &CDM::hasAttribute)
+        .def("getAttribute", CDM__getAttribute, py::return_value_policy::reference_internal)
+        .def("addAttribute", &CDM::addAttribute)
+        .def("removeAttribute", &CDM::removeAttribute)
+        .def("getGlobalAttributeNames", CDM__getGlobalAttributeNames)
+        .def("getGlobalAttribute", CDM__getGlobalAttribute);
+    pyCDM.def("getDimension", CDM__getDimension, py::return_value_policy::reference_internal)
+        .def("hasDimension", &CDM::hasDimension)
+        .def("addDimension", &CDM::addDimension)
+        .def("removeDimension", CDM__removeDimension)
+        .def("removeDimension", CDM__removeDimensionIIU)
+        .def("getDimensionNames", CDM__getDimensionNames);
 }

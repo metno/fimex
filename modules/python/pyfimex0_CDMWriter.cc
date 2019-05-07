@@ -28,16 +28,17 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMWriter.h"
 
-#include <boost/python.hpp>
+#include "pyfimex0_helpers.h"
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
 // wrappers for default arguments
 void createFileWriter4(CDMReader_p reader, const std::string& fileType, const std::string& fileName, const std::string& configFile)
 {
+    py::gil_scoped_release release;
     createWriter(reader, fileType, fileName, configFile);
 }
 
@@ -48,12 +49,10 @@ void createFileWriter3(CDMReader_p reader, const std::string& fileType, const st
 
 } // namespace
 
-void pyfimex0_CDMWriter()
+void pyfimex0_CDMWriter(py::module m)
 {
-    bp::class_<CDMWriter, boost::noncopyable>("_CDMWriter", bp::no_init)
-            ;
-    bp::register_ptr_to_python<CDMWriter_p>();
+    py::class_<CDMWriter>(m, "_CDMWriter");
 
-    bp::def("createFileWriter", createFileWriter4);
-    bp::def("createFileWriter", createFileWriter3);
+    m.def("createFileWriter", createFileWriter4);
+    m.def("createFileWriter", createFileWriter3);
 }

@@ -46,7 +46,7 @@ LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${proj_PC})
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 
-#OPTION(ENABLE_PYTHON "Use python" ON)
+OPTION(ENABLE_PYTHON "Use python" ON)
 
 OPTION(USE_BOOST_UNIT_TEST "Use boost unit_test_framework" OFF)
 IF (USE_BOOST_UNIT_TEST)
@@ -181,9 +181,17 @@ IF(ENABLE_FORTRAN)
   ADD_SUBDIRECTORY(modules/F90)
 ENDIF()
 
-#IF(ENABLE_PYTHON)
-#  ADD_SUBDIRECTORY(modules/python)
-#ENDIF()
+IF(ENABLE_PYTHON)
+  SET (PYBIND11_3RDPARTY "third_party/pybind11")
+  IF ((NOT pybind11_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${PYBIND11_3RDPARTY}/CMakeLists.txt"))
+    MESSAGE(STATUS "Including pybind11 project from ${PYBIND11_3RDPARTY}")
+    ADD_SUBDIRECTORY(${PYBIND11_3RDPARTY})
+  ELSE ()
+    FIND_PACKAGE(pybind11 REQUIRED)
+  ENDIF ()
+
+  ADD_SUBDIRECTORY(modules/python)
+ENDIF()
 
 IF (NOT USE_BOOST_UNIT_TEST)
   SET (MI_CPPTEST_3RDPARTY "third_party/mi-cpptest")

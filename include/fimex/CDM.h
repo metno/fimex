@@ -269,6 +269,7 @@ public:
      * @throw CDMException if varName attrName combination doesn't exists
      */
     CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName);
+
     /**
      * @brief get a const. attribute
      * @param varName name of variable
@@ -276,6 +277,7 @@ public:
      * @throw CDMException if varName attrName combination doesn't exists
      */
     const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const;
+
     /**
      * @brief get an attribute without throwing an error
      *
@@ -288,6 +290,16 @@ public:
      * @return true when attribute has been found and set
      */
     bool getAttribute(const std::string& varName, const std::string& attrName, CDMAttribute& retAttribute) const;
+
+    /**
+     * @brief check if a variable has an attribute
+     *
+     * @param varName name of variable
+     * @param attrName name of attribute
+     * @return true when attribute has been found
+     */
+    bool hasAttribute(const std::string& varName, const std::string& attrName) const;
+
     /**
      * get the fill value of an variable (_FillValue attribute)
      *

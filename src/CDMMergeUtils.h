@@ -32,6 +32,7 @@
 #ifndef fimex_CDMMergeUtils_h
 #define fimex_CDMMergeUtils_h
 
+#include "fimex/CDMBorderSmoothing.h"
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
 #include "fimex/coordSys/CoordSysDecl.h"
@@ -80,6 +81,8 @@ values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const s
 
 CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolationMethod, CDMInterpolator_p& interpolatedO, std::string& nameX,
                   std::string& nameY, bool keepAllOuter = false);
+
+CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string& specification);
 
 } // namespace MetNoFimex
 

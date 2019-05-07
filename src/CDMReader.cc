@@ -47,12 +47,17 @@ CDMReader::~CDMReader() {}
 
 const CDM& CDMReader::getCDM() const
 {
-    return *(cdm_.get());
+    return *cdm_;
 }
 
 CDM& CDMReader::getInternalCDM()
 {
     return const_cast<CDM&>(getCDM());
+}
+
+void CDMReader::setInternalCDM(const CDM& cdm)
+{
+    *cdm_ = cdm;
 }
 
 std::vector<std::size_t> CDMReader::getDims(const std::string& varName)

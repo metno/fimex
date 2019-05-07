@@ -2,6 +2,7 @@ Source: fimex-0.23
 Priority: extra
 Maintainer: MET Norway <fimex@met.no>
 Build-Depends: debhelper (>= 9),
+ dh-python,
  cmake,
  quilt,
  pkg-config,
@@ -9,6 +10,7 @@ Build-Depends: debhelper (>= 9),
  fakeroot,
  python3-dev,
  python3-numpy,
+ pybind11-dev (>= 2.2.4),
  libmi-cpptest-dev,
  libmi-programoptions-dev,
  libgithub-howardhinnant-date-cpp11-dev,
@@ -128,7 +130,9 @@ Description: library for geo-spatial gridded data
 Package: python3-pyfimex0-0.23
 Section: python
 Architecture: i386 amd64 ia64 powerpc
-Depends: ${shlibs:Depends},
+Depends: python3,
+ ${python:Depends},
+ ${shlibs:Depends},
  ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version})
 Provides: python3-pyfimex0

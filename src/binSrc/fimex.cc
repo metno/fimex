@@ -22,7 +22,6 @@
  */
 
 #include "fimex/CDM.h"
-#include "fimex/CDMBorderSmoothing_Linear.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -821,23 +820,7 @@ CDMReader_p getCDMMerger(const po::value_set& vm, CDMReader_p dataReader)
     CDMMerger_p merger = std::make_shared<CDMMerger>(readerI, dataReader);
 
     if (vm.is_set(op_merge_smoothing)) {
-        const string& v = vm.value(op_merge_smoothing);
-        if (starts_with(v, "LINEAR")) {
-            std::smatch what;
-            if (std::regex_match(v, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
-                try {
-                    int transition = string2type<int>(what[1]);
-                    int border = string2type<int>(what[2]);
-                    merger->setSmoothing(CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory(transition, border)));
-                } catch (std::runtime_error&) {
-                    throw CDMException("problem parsing parameters for linear smoothing: " + vm.value(op_merge_smoothing));
-                }
-            } else {
-                throw CDMException("malformed linear smoothing specification: " + vm.value(op_merge_smoothing));
-            }
-        } else {
-            throw CDMException("unknown smoothing: " + vm.value(op_merge_smoothing));
-        }
+        merger->setSmoothing(createSmoothingFactory(vm.value(op_merge_smoothing)));
     } else {
         LOG4FIMEX(logger, Logger::DEBUG, "no merge.smoothing given, using default as defined by CDMMerger");
     }

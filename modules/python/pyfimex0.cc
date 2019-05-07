@@ -30,45 +30,42 @@
 
 #include "fimex/CDMconstants.h"
 
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
 
-namespace bp = boost::python;
+namespace py = pybind11;
 
-void pyfimex0_logging();
-void pyfimex0_numpy(); // in pyfimex0_Data.cc
-void pyfimex0_Data();
-void pyfimex0_CDM();
-void pyfimex0_CDMInterpolator();
-void pyfimex0_CDMExtractor();
-void pyfimex0_CDMReader();
-void pyfimex0_CDMReaderWriter();
-void pyfimex0_CDMWriter();
-void pyfimex0_CoordinateSystem();
-void pyfimex0_NetCDF_CDMWriter();
+void pyfimex0_logging(py::module m);
+void pyfimex0_Data(py::module m);
+void pyfimex0_CDM(py::module m);
+void pyfimex0_CDMInterpolator(py::module m);
+void pyfimex0_CDMExtractor(py::module m);
+void pyfimex0_CDMMerger(py::module m);
+void pyfimex0_CDMReader(py::module m);
+void pyfimex0_CDMReaderWriter(py::module m);
+void pyfimex0_CDMWriter(py::module m);
+void pyfimex0_CoordinateSystem(py::module m);
+void pyfimex0_NetCDF_CDMWriter(py::module m);
 
 namespace {
-bp::object mifi_version()
+py::object mifi_version()
 {
-    return bp::make_tuple(mifi_version_major(),
-                          mifi_version_minor(),
-                          mifi_version_patch(),
-                          mifi_version_status());
+    return py::make_tuple(mifi_version_major(), mifi_version_minor(), mifi_version_patch(), mifi_version_status());
 }
 } // namespace
 
-BOOST_PYTHON_MODULE(pyfimex0)
+PYBIND11_MODULE(pyfimex0, m)
 {
-    pyfimex0_numpy();
-    pyfimex0_logging();
-    pyfimex0_Data();
-    pyfimex0_CDM();
-    pyfimex0_CDMReader();
-    pyfimex0_CDMReaderWriter();
-    pyfimex0_CDMWriter();
-    pyfimex0_CDMInterpolator();
-    pyfimex0_CDMExtractor();
-    pyfimex0_CoordinateSystem();
-    pyfimex0_NetCDF_CDMWriter();
+    pyfimex0_logging(m);
+    pyfimex0_Data(m);
+    pyfimex0_CDM(m);
+    pyfimex0_CDMReader(m);
+    pyfimex0_CDMReaderWriter(m);
+    pyfimex0_CDMWriter(m);
+    pyfimex0_CDMInterpolator(m);
+    pyfimex0_CDMExtractor(m);
+    pyfimex0_CDMMerger(m);
+    pyfimex0_CoordinateSystem(m);
+    pyfimex0_NetCDF_CDMWriter(m);
 
-    bp::def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
+    m.def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
 }

@@ -460,6 +460,12 @@ bool CDM::getAttribute(const std::string& varName, const std::string& attrName, 
     return true;
 }
 
+bool CDM::hasAttribute(const std::string& varName, const std::string& attrName) const
+{
+    CDMAttribute attr;
+    return getAttribute(varName, attrName, attr);
+}
+
 std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const
 {
     std::vector<CDMAttribute> results;

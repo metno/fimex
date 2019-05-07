@@ -29,10 +29,10 @@
 #include "fimex/CDMReaderWriter.h"
 #include "fimex/Data.h"
 
-#include <boost/python.hpp>
+#include "pyfimex0_helpers.h"
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
@@ -72,15 +72,14 @@ CDMReaderWriter_p createFileReaderWriter2(const std::string& fileType, const std
 
 } // namespace
 
-void pyfimex0_CDMReaderWriter()
+void pyfimex0_CDMReaderWriter(py::module m)
 {
-    bp::class_<CDMReaderWriter, bp::bases<CDMReader>, boost::noncopyable>("_CDMReaderWriter", bp::no_init)
+    py::class_<CDMReaderWriter, CDMReaderWriter_p, CDMReader>(m, "_CDMReaderWriter")
         .def("putDataSlice", CDMReaderWriter__putDataSlice2)
         .def("putScaledDataSlice", CDMReaderWriter__putScaledDataSlice2)
         .def("putScaledDataSliceInUnit", CDMReaderWriter__putScaledDataSliceInUnit2);
-    bp::register_ptr_to_python<CDMReaderWriter_p>();
 
-    bp::def("createFileReaderWriter", createFileReaderWriter4);
-    bp::def("createFileReaderWriter", createFileReaderWriter3);
-    bp::def("createFileReaderWriter", createFileReaderWriter2);
+    m.def("createFileReaderWriter", createFileReaderWriter4);
+    m.def("createFileReaderWriter", createFileReaderWriter3);
+    m.def("createFileReaderWriter", createFileReaderWriter2);
 }

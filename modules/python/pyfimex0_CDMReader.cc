@@ -25,33 +25,69 @@
  */
 
 #include "fimex/CDM.h"
-#include "fimex/CDMReader.h"
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/SliceBuilder.h"
 
-#include <boost/python.hpp>
+#include "pyfimex0_helpers.h"
+
+#define PY_GIL_ACQUIRE py::gil_scoped_acquire acquire
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
+void SliceBuilder__setStartAndSizeDN(SliceBuilder& sb, const std::string& dimName, size_t start, size_t size)
+{
+    sb.setStartAndSize(dimName, start, size);
+}
+
+py::object SliceBuilder__getDimensionStartPositions(const SliceBuilder& sb)
+{
+    py::list pystart;
+    for (size_t s : sb.getDimensionStartPositions())
+        pystart.append(s);
+    return std::move(pystart);
+}
+
+py::object SliceBuilder__getDimensionSizes(const SliceBuilder& sb)
+{
+    py::list pysize;
+    for (size_t s : sb.getDimensionSizes())
+        pysize.append(s);
+    return std::move(pysize);
+}
+
 // wrapper for overload
-DataPtr CDMReader__getDataSlice2(CDMReader_p reader, const std::string& varName, size_t unLimDimPos)
+DataPtr CDMReader__getDataSliceUL(CDMReader_p reader, const std::string& varName, int unLimDimPos)
 {
     return reader->getDataSlice(varName, unLimDimPos);
 }
-
-// wrapper for overload
-DataPtr CDMReader__getScaledDataSlice2(CDMReader_p reader, const std::string& varName, size_t unLimDimPos)
+DataPtr CDMReader__getDataSliceSB(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb)
 {
-    return reader->getScaledDataSlice(varName, unLimDimPos);
+    return reader->getDataSlice(varName, sb);
 }
 
 // wrapper for overload
-DataPtr CDMReader__getScaledDataSliceInUnit2(CDMReader_p reader, const std::string& varName, const std::string& unit, size_t unLimDimPos)
+DataPtr CDMReader__getScaledDataSliceUL(CDMReader_p reader, const std::string& varName, int unLimDimPos)
+{
+    return reader->getScaledDataSlice(varName, unLimDimPos);
+}
+DataPtr CDMReader__getScaledDataSliceSB(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb)
+{
+    return reader->getScaledDataSlice(varName, sb);
+}
+
+// wrapper for overload
+DataPtr CDMReader__getScaledDataSliceInUnitUL(CDMReader_p reader, const std::string& varName, const std::string& unit, int unLimDimPos)
 {
     return reader->getScaledDataSliceInUnit(varName, unit, unLimDimPos);
+}
+DataPtr CDMReader__getScaledDataSliceInUnitSB(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sb)
+{
+    return reader->getScaledDataSliceInUnit(varName, unit, sb);
 }
 
 // wrappers for default arguments
@@ -70,19 +106,96 @@ CDMReader_p createFileReader2(const std::string& fileType, const std::string& fi
     return CDMFileReaderFactory::create(fileType, fileName);
 }
 
+// see https://pybind11.readthedocs.io/en/stable/advanced/classes.html
+class PyCDMReader : public CDMReader
+{
+public:
+    PyCDMReader()
+        : CDMReader()
+    {
+    }
+
+    DataPtr getData(const std::string& varName) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD(DataPtr, CDMReader, getData, varName);
+    }
+    DataPtr getScaledData(const std::string& varName) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD(DataPtr, CDMReader, getScaledData, varName);
+    }
+    DataPtr getScaledDataInUnit(const std::string& varName, const std::string& unit) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD(DataPtr, CDMReader, getScaledDataInUnit, varName, unit);
+    }
+
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD_PURE(DataPtr, CDMReader, getDataSlice, varName, unLimDimPos);
+    }
+    DataPtr getScaledDataSlice(const std::string& varName, size_t unLimDimPos) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD(DataPtr, CDMReader, getScaledDataSlice, varName, unLimDimPos);
+    }
+    DataPtr getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD(DataPtr, CDMReader, getScaledDataSliceInUnit, varName, unit, unLimDimPos);
+    }
+
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD_NAME(DataPtr, CDMReader, "getDataSliceSB", getDataSlice, varName, sb);
+    }
+    DataPtr getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD_NAME(DataPtr, CDMReader, "getScaledDataSliceSB", getScaledDataSlice, varName, sb);
+    }
+    DataPtr getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb) override
+    {
+        PY_GIL_ACQUIRE;
+        PYBIND11_OVERLOAD_NAME(DataPtr, CDMReader, "getScaledDataSliceInUnitSB", getScaledDataSliceInUnit, varName, unit, sb);
+    }
+};
+
 } // namespace
 
-void pyfimex0_CDMReader()
+void pyfimex0_CDMReader(py::module m)
 {
-    bp::class_<CDMReader, boost::noncopyable>("_CDMReader", bp::no_init)
-            .def("getDataSlice", CDMReader__getDataSlice2)
-            .def("getScaledDataSlice", CDMReader__getScaledDataSlice2)
-            .def("getScaledDataSliceInUnit", CDMReader__getScaledDataSliceInUnit2)
-            .def("getCDM", &CDMReader::getCDM, bp::return_internal_reference<1>())
-            ;
-    bp::register_ptr_to_python<CDMReader_p>();
+    py::class_<SliceBuilder>(m, "SliceBuilder")
+        .def(py::init<const CDM&, std::string, bool>())
+        .def("getStartAndSize",
+             [](const SliceBuilder& sb, const std::string& dim) {
+                 size_t st, n;
+                 sb.getStartAndSize(dim, st, n);
+                 return py::make_tuple(st, n);
+             })
+        .def("setStartAndSize", SliceBuilder__setStartAndSizeDN)
+        .def("getDimensionStartPositions", SliceBuilder__getDimensionStartPositions)
+        .def("getDimensionSizes", SliceBuilder__getDimensionSizes);
 
-    bp::def("createFileReader", createFileReader4);
-    bp::def("createFileReader", createFileReader3);
-    bp::def("createFileReader", createFileReader2);
+    py::class_<CDMReader, PyCDMReader, CDMReader_p>(m, "CDMReader")
+        .def(py::init<>())
+        .def("getData", &CDMReader::getData)
+        .def("getScaledData", &CDMReader::getScaledData)
+        .def("getScaledDataInUnit", &CDMReader::getScaledDataInUnit)
+        .def("getDataSlice", CDMReader__getDataSliceUL)
+        .def("getScaledDataSlice", CDMReader__getScaledDataSliceUL)
+        .def("getScaledDataSliceInUnit", CDMReader__getScaledDataSliceInUnitUL)
+        .def("getDataSliceSB", CDMReader__getDataSliceSB)
+        .def("getScaledDataSliceSB", CDMReader__getScaledDataSliceSB)
+        .def("getScaledDataSliceInUnitSB", CDMReader__getScaledDataSliceInUnitSB)
+        .def("getCDM", &CDMReader::getCDM, py::return_value_policy::reference_internal)
+        .def("getInternalCDM", &CDMReader::getInternalCDM, py::return_value_policy::reference_internal)
+        .def("setInternalCDM", &CDMReader::setInternalCDM);
+
+    m.def("createFileReader", createFileReader4);
+    m.def("createFileReader", createFileReader3);
+    m.def("createFileReader", createFileReader2);
 }

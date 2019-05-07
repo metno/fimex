@@ -28,9 +28,8 @@
 
 #include "pyfimex0_helpers.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
+#include <pybind11/pybind11.h>
+
 #include <memory>
 
 namespace MetNoFimex {
@@ -38,7 +37,7 @@ typedef std::shared_ptr<NetCDF_CDMWriter> NetCDF_CDMWriter_p;
 } // namespace MetNoFimex
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
@@ -59,13 +58,11 @@ NetCDF_CDMWriter_p createNetCDFWriter_2(CDMReader_p reader, const std::string& f
 
 } // namespace
 
-void pyfimex0_NetCDF_CDMWriter()
+void pyfimex0_NetCDF_CDMWriter(py::module m)
 {
-    bp::class_<NetCDF_CDMWriter, bp::bases<CDMReader>, boost::noncopyable>("_NetCDF_CDMWriter", bp::no_init)
-            ;
-    bp::register_ptr_to_python<NetCDF_CDMWriter_p>();
+    py::class_<NetCDF_CDMWriter, CDMWriter>(m, "_NetCDF_CDMWriter");
 
-    bp::def("createNetCDFWriter", createNetCDFWriter_4);
-    bp::def("createNetCDFWriter", createNetCDFWriter_3);
-    bp::def("createNetCDFWriter", createNetCDFWriter_2);
+    m.def("createNetCDFWriter", createNetCDFWriter_4);
+    m.def("createNetCDFWriter", createNetCDFWriter_3);
+    m.def("createNetCDFWriter", createNetCDFWriter_2);
 }

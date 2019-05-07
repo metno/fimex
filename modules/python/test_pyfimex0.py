@@ -89,15 +89,15 @@ class TestReader(unittest.TestCase):
         self.assertEqual(numpy.float32, d.values().dtype)
 
     def test_DataChar(self):
-        d = pyfimex0.createData(pyfimex0.CDMDataType.CHAR, range(5))
+        d = pyfimex0.createData(numpy.arange(5, dtype=numpy.int8))
         self.assertEqual(pyfimex0.CDMDataType.CHAR, d.getDataType())
         self.assertEqual(5, d.size())
 
     def test_DataUChar(self):
-        d = pyfimex0.createData(pyfimex0.CDMDataType.UCHAR, range(5))
+        d = pyfimex0.createData(numpy.arange(5, dtype=numpy.uint8))
         self.assertEqual(pyfimex0.CDMDataType.UCHAR, d.getDataType())
 
-    def test_Attributes(self):
+    def test_AttributeFromFile(self):
         test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
         r = pyfimex0.createFileReader('netcdf', test_ncfile)
         r_cdm = r.getCDM()
@@ -110,7 +110,37 @@ class TestReader(unittest.TestCase):
         r_gatt = r_cdm.getGlobalAttribute('title')
         self.assertEqual("MEPS 2.5km", r_gatt.getStringValue())
 
-    def test_Variable(self):
+    def test_AttributeString(self):
+        att = pyfimex0.CDMAttribute("name", "value")
+        self.assertEqual("name", att.getName())
+        self.assertEqual("value", att.getStringValue())
+        self.assertEqual(pyfimex0.CDMDataType.STRING, att.getDataType())
+
+        att.setName("navn")
+        self.assertEqual("navn", att.getName())
+
+        att.setData(pyfimex0.createData("content"))
+        self.assertEqual("content", att.getStringValue())
+        self.assertEqual(pyfimex0.CDMDataType.STRING, att.getDataType())
+
+    def test_AttributeFloat(self):
+        att = pyfimex0.CDMAttribute("f", pyfimex0.createData(pyfimex0.CDMDataType.FLOAT, [1]))
+        self.assertEqual("f", att.getName())
+        self.assertEqual("1", att.getStringValue())
+        self.assertEqual([1.0], att.getData().values())
+        self.assertEqual(pyfimex0.CDMDataType.FLOAT, att.getDataType())
+
+    def test_AttributeUChar(self):
+        l = [0, 12, 234]
+        att = pyfimex0.CDMAttribute("u", pyfimex0.createData(pyfimex0.CDMDataType.UCHAR, l))
+        self.assertEqual(" ".join([str(x) for x in l]), att.getStringValue())
+        d = att.getData()
+        self.assertEqual(len(l), d.size())
+        v = d.values()
+        self.assertEqual(numpy.uint8, v.dtype)
+        self.assertEqual(l, list(v))
+
+    def test_VariableFromFile(self):
         test_ncfile = os.path.join(test_srcdir, 'testdata_vertical_ensemble_in.nc')
         r = pyfimex0.createFileReader('netcdf', test_ncfile)
         r_cdm = r.getCDM()
@@ -119,7 +149,26 @@ class TestReader(unittest.TestCase):
         v_xwind10m_name = v_xwind10m.getName()
         self.assertEqual('x_wind_10m', v_xwind10m_name)
 
-        self.assertEqual(['x', 'y', 'ensemble_member', 'height7', 'time'], v_xwind10m.getShape()) ;
+        self.assertEqual(['x', 'y', 'ensemble_member', 'height7', 'time'], v_xwind10m.getShape())
+
+    def test_VariableFloat(self):
+        shp = ['x', 'y', 'time']
+        var = pyfimex0.CDMVariable("f", pyfimex0.CDMDataType.FLOAT, shp)
+        self.assertEqual("f", var.getName())
+        self.assertEqual(shp, var.getShape())
+
+    def test_CDM_variables(self):
+        cdm = pyfimex0.CDM()
+        self.assertEqual(0, len(cdm.getVariableNames()))
+
+        cdm.addVariable(pyfimex0.CDMVariable("varf", pyfimex0.CDMDataType.FLOAT, ['x', 'y']))
+        self.assertEqual(['varf'], cdm.getVariableNames())
+
+        cdm.addAttribute('varf', pyfimex0.CDMAttribute('_FillValue', pyfimex0.createData(pyfimex0.CDMDataType.FLOAT, -1)))
+        self.assertEqual(1, len(cdm.getAttributeNames('varf')))
+
+        cdm.removeVariable('varf')
+        self.assertEqual(0, len(cdm.getVariableNames()))
 
 if __name__ == '__main__':
     unittest.main()

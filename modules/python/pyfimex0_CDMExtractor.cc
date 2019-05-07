@@ -30,17 +30,12 @@
 
 #include "pyfimex0_helpers.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <memory>
-
 namespace MetNoFimex {
 typedef std::shared_ptr<CDMExtractor> CDMExtractor_p;
 } // namespace MetNoFimex
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
@@ -68,7 +63,7 @@ void reduceDimensionStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& di
 }
 
 // wrapper for overload
-void reduceDimension_1(MetNoFimex::CDMExtractor_p e, const std::string& dimName, const bp::object& slices)
+void reduceDimension_1(MetNoFimex::CDMExtractor_p e, const std::string& dimName, py::iterable slices)
 {
     e->reduceDimension(dimName, to_std_container< std::set<std::size_t> >(slices));
 }
@@ -78,22 +73,22 @@ void reduceDimension_2(MetNoFimex::CDMExtractor_p e, const std::string& dimName,
     e->reduceDimension(dimName, start, length);
 }
 
-void selectVariables_2(MetNoFimex::CDMExtractor_p e, const bp::object variables, bool addAuxiliary)
+void selectVariables_2(MetNoFimex::CDMExtractor_p e, const py::iterable& variables, bool addAuxiliary)
 {
   const std::set<std::string> vars = to_std_container< std::set<std::string> >(variables);
   e->selectVariables(vars, addAuxiliary);
 }
 
-void selectVariables_1(MetNoFimex::CDMExtractor_p e, const bp::object variables)
+void selectVariables_1(MetNoFimex::CDMExtractor_p e, const py::iterable& variables)
 {
   selectVariables_2(e, variables, true);
 }
 
 } // namespace
 
-void pyfimex0_CDMExtractor()
+void pyfimex0_CDMExtractor(py::module m)
 {
-    bp::class_<CDMExtractor, bp::bases<CDMReader>, boost::noncopyable>("_CDMExtractor", bp::no_init)
+    py::class_<CDMExtractor, CDMExtractor_p, CDMReader>(m, "_CDMExtractor")
         .def("reduceDimension", reduceDimension_1,
              "Reduce a dimension\n\n"
              ":param dimName: dimension to change\n"
@@ -121,9 +116,7 @@ void pyfimex0_CDMExtractor()
         .def("selectVariables", selectVariables_1,
              "Remove all variables except the ones selected plus some"
              " auxiliary variables needed by the selected variables\n\n"
-             ":param variables: iterable specifying variables to select\n")
-            ;
-    bp::register_ptr_to_python<CDMExtractor_p>();
+             ":param variables: iterable specifying variables to select\n");
 
-    bp::def("createExtractor", createExtractor);
+    m.def("createExtractor", createExtractor);
 }

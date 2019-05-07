@@ -32,235 +32,156 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/enum.hpp>
-#include <boost/python/handle.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/object.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/stl_iterator.hpp>
-#include <boost/python/str.hpp>
-
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <numpy/ndarrayobject.h> // ensure you include this header
+#include "pyfimex0_helpers.h"
+#include <pybind11/numpy.h>
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
-template<typename T>
-struct numpy_type;
-
-template<>
-struct numpy_type<double> {
-    static int typenum() { return NPY_DOUBLE; }
-};
-
-template<>
-struct numpy_type<float> {
-    static int typenum() { return NPY_FLOAT; }
-};
-
-template<>
-struct numpy_type<short> {
-    static int typenum() { return NPY_SHORT; }
-};
-
-template <>
-struct numpy_type<unsigned short>
+// also see https://github.com/pybind/pybind11/issues/1389
+struct py_object_deleter
 {
-    static int typenum() { return NPY_USHORT; }
+    py_object_deleter(py::object po)
+        : po_(po)
+    {
+    }
+    void operator()(void*)
+    {
+        py::gil_scoped_acquire acquire;
+        po_ = py::none();
+    }
+
+    py::object po_;
 };
 
-template <>
-struct numpy_type<char>
+template <class T>
+py::array make_shared_nparray(MetNoFimex::shared_array<T> values, size_t count)
 {
-    static int typenum() { return NPY_BYTE; }
-};
-
-template <>
-struct numpy_type<unsigned char>
-{
-    static int typenum() { return NPY_UBYTE; }
-};
-
-template <>
-struct numpy_type<int>
-{
-    static int typenum() { return NPY_INT; }
-};
-
-template <>
-struct numpy_type<unsigned int>
-{
-    static int typenum() { return NPY_UINT; }
-};
-
-template <>
-struct numpy_type<long long>
-{
-    static int typenum() { return NPY_INT64; }
-};
-
-template <>
-struct numpy_type<unsigned long long>
-{
-    static int typenum() { return NPY_UINT64; }
-};
-
-template <>
-struct numpy_type<std::string>
-{
-    static int typenum() { return NPY_STRING; }
-};
-
-template<typename T>
-bp::object wrap(boost::shared_array<T> data, npy_intp size)
-{
-    if (!data)
-        return bp::object();
-
-    T* datacopy = new T[size];
-    std::copy(data.get(), data.get() + size, datacopy);
-
-    // based on https://stackoverflow.com/a/34023333/8337632
-    npy_intp shape[1] = { size }; // array size
-    PyObject* obj = PyArray_New(&PyArray_Type,
-            1, shape,
-            numpy_type<T>::typenum(), // data type
-            NULL, datacopy,
-            0, NPY_ARRAY_CARRAY_RO, // NPY_ARRAY_CARRAY_RO for readonly
-            NULL);
-    bp::handle<> array(obj);
-    return bp::object(array);
+    MetNoFimex::shared_array<T>* array_ref(new MetNoFimex::shared_array<T>(values));
+    py::capsule array_capsule(array_ref, [](void* ptr) { delete (MetNoFimex::shared_array<T>*)(ptr); });
+    return py::array_t<T>(count, array_ref->get(), array_capsule); // pass 'base' py::object to avoid copy
 }
 
-template<>
-bp::object wrap(boost::shared_array<std::string> data, npy_intp size)
-{
-    if (!data)
-        return bp::object();
-
-    bp::list strings;
-    for (npy_intp i=0; i<size; ++i)
-        strings.append(data[i]);
-    return strings;
-}
-
-bp::object Data_values(DataPtr data)
+py::object Data_values(DataPtr data)
 {
     switch (data->getDataType()) {
     case CDM_SHORT:
-        return wrap(data->asShort(), data->size());
+        return make_shared_nparray(data->asShort(), data->size());
     case CDM_USHORT:
-        return wrap(data->asUShort(), data->size());
+        return make_shared_nparray(data->asUShort(), data->size());
     case CDM_CHAR:
-        return wrap(data->asChar(), data->size());
+        return make_shared_nparray(data->asChar(), data->size());
     case CDM_UCHAR:
-        return wrap(data->asUChar(), data->size());
+        return make_shared_nparray(data->asUChar(), data->size());
     case CDM_INT:
-        return wrap(data->asInt(), data->size());
+        return make_shared_nparray(data->asInt(), data->size());
     case CDM_UINT:
-        return wrap(data->asUInt(), data->size());
+        return make_shared_nparray(data->asUInt(), data->size());
     case CDM_INT64:
-        return wrap(data->asInt64(), data->size());
+        return make_shared_nparray(data->asInt64(), data->size());
     case CDM_UINT64:
-        return wrap(data->asUInt64(), data->size());
+        return make_shared_nparray(data->asUInt64(), data->size());
     case CDM_FLOAT:
-        return wrap(data->asFloat(), data->size());
+        return make_shared_nparray(data->asFloat(), data->size());
     case CDM_DOUBLE:
-        return wrap(data->asDouble(), data->size());
+        return make_shared_nparray(data->asDouble(), data->size());
     case CDM_STRING:
-        return bp::object(data->asString());
-    case CDM_STRINGS:
-        return wrap(data->asStrings(), data->size());
+        return py::str(data->asString());
+    case CDM_STRINGS: {
+        shared_array<std::string> strings = data->asStrings();
+        py::list pystrings;
+        const size_t count = data->size();
+        for (size_t i = 0; i < count; ++i)
+            pystrings.append(strings[i]);
+        return std::move(pystrings);
+    }
     default:
         throw CDMException("datatype not supported in pyfimex0");
     }
 }
 
-template <typename T>
-DataPtr unwrap(const bp::object& values)
+template <class T>
+DataPtr create_NpArrayData(py::array_t<T> nparray)
 {
-    const size_t length = bp::len(values);
-    boost::shared_array<T> array(new T[length]);
-    typedef boost::python::stl_input_iterator<T> I;
-    std::copy(I(values), I(), &array[0]);
-    return createData(length, array);
+    py::buffer_info req = nparray.request();
+    shared_array<T> arr((T*)req.ptr, py_object_deleter(nparray));
+    return createData(req.size, arr);
 }
 
-template <>
-DataPtr unwrap<char>(const bp::object& values)
+DataPtr Data_createS(const std::string& text)
 {
-    const size_t length = bp::len(values);
-    boost::shared_array<char> array(new char[length]);
-    typedef boost::python::stl_input_iterator<int> I; // for some reason python-int => c++-char is not supported
-    std::copy(I(values), I(), &array[0]);
-    return createData(length, array);
+    return createData(text);
 }
 
-DataPtr Data_createTV(CDMDataType dataType, bp::object values)
+DataPtr Data_createTV(CDMDataType dataType, py::object values)
 {
     switch (dataType) {
-    case CDM_SHORT:
-        return unwrap<short>(values);
-    case CDM_USHORT:
-        return unwrap<unsigned short>(values);
-    case CDM_CHAR:
-        return unwrap<char>(values);
-    case CDM_UCHAR:
-        return unwrap<unsigned char>(values);
-    case CDM_INT:
-        return unwrap<int>(values);
-    case CDM_UINT:
-        return unwrap<unsigned int>(values);
-    case CDM_INT64:
-        return unwrap<long long>(values);
-    case CDM_UINT64:
-        return unwrap<unsigned long long>(values);
     case CDM_FLOAT:
-        return unwrap<float>(values);
+        return create_NpArrayData<float>(values);
     case CDM_DOUBLE:
-        return unwrap<double>(values);
+        return create_NpArrayData<double>(values);
+    case CDM_INT:
+        return create_NpArrayData<int>(values);
+    case CDM_UINT:
+        return create_NpArrayData<unsigned int>(values);
+    case CDM_SHORT:
+        return create_NpArrayData<short>(values);
+    case CDM_USHORT:
+        return create_NpArrayData<unsigned short>(values);
+    case CDM_CHAR:
+        return create_NpArrayData<char>(values);
+    case CDM_UCHAR:
+        return create_NpArrayData<unsigned char>(values);
+    case CDM_INT64:
+        return create_NpArrayData<long long>(values);
+    case CDM_UINT64:
+        return create_NpArrayData<unsigned long long>(values);
     case CDM_STRING:
-        return createData(bp::extract<std::string>(values));
-    case CDM_STRINGS:
-        return unwrap<std::string>(values);
+        return createData(values.cast<std::string>());
     default:
         throw CDMException("datatype not supported in pyfimex0");
     }
 }
 
-DataPtr Data_createS(const std::string& value)
+CDMDataType cdmDataTypeFromNP(py::object dtype)
 {
-    return createData(value);
+    // see https://github.com/pybind/pybind11/issues/1424
+    const std::string req_name = dtype.attr("name").cast<std::string>();
+
+#define CONVERT_TYPE(T, C)                                                                                                                                     \
+    do {                                                                                                                                                       \
+        static const std::string T_name = py::dtype::of<T>().attr("name").cast<std::string>();                                                                 \
+        if (req_name == T_name)                                                                                                                                \
+            return C;                                                                                                                                          \
+    } while (0)
+    CONVERT_TYPE(float, CDM_FLOAT);
+    CONVERT_TYPE(double, CDM_DOUBLE);
+    CONVERT_TYPE(int, CDM_INT);
+    CONVERT_TYPE(unsigned int, CDM_UINT);
+    CONVERT_TYPE(short, CDM_SHORT);
+    CONVERT_TYPE(unsigned short, CDM_USHORT);
+    CONVERT_TYPE(char, CDM_CHAR);
+    CONVERT_TYPE(unsigned char, CDM_UCHAR);
+    CONVERT_TYPE(long long, CDM_INT64);
+    CONVERT_TYPE(unsigned long long, CDM_UINT64);
+#undef CONVERT_TYPE
+
+    return CDM_NAT;
 }
 
-#if PY_MAJOR_VERSION >= 3
-void* init_numpy()
+DataPtr Data_createNP(py::array nparray)
 {
-    import_array();
-    return 0;
+    return Data_createTV(cdmDataTypeFromNP(nparray.dtype()), nparray);
 }
-#else // PY_MAJOR_VERSION < 3
-void init_numpy()
-{
-    import_array();
-}
-#endif
 
 } // namespace
 
-void pyfimex0_numpy()
+void pyfimex0_Data(py::module m)
 {
-    init_numpy();
-}
-
-void pyfimex0_Data()
-{
-  bp::enum_<CDMDataType>("CDMDataType")
+    // clang-format off
+  py::enum_<CDMDataType>(m, "CDMDataType")
       .value("NAT", CDM_NAT)
       .value("CHAR", CDM_CHAR)
       .value("SHORT", CDM_SHORT)
@@ -276,10 +197,15 @@ void pyfimex0_Data()
       .value("STRINGS", CDM_STRINGS)
       ;
 
-  bp::class_<Data, boost::noncopyable>("_Data", bp::no_init).def("size", &Data::size).def("values", Data_values).def("getDataType", &Data::getDataType);
-  ;
-  bp::register_ptr_to_python<DataPtr>();
+  py::class_<Data, DataPtr>(m, "_Data")
+      .def("size", &Data::size)
+      .def("values", Data_values)
+      .def("getDataType", &Data::getDataType);
+    // clang-format on
 
-  bp::def("createData", Data_createS, "create Data with datatype CDM_STRING");
-  bp::def("createData", Data_createTV, "create Data with given datatype and values (not CDM_STRING)");
+    m.def("createData", Data_createNP, "create Data with datatype based on the numpy array type");
+    m.def("createData", Data_createS, "create Data with datatype CDM_STRING");
+    m.def("createData", Data_createTV, "create Data with given datatype and values (not CDM_STRING)");
+
+    m.def("cdmDataTypeFromNP", cdmDataTypeFromNP);
 }

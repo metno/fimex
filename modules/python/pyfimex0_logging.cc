@@ -30,10 +30,12 @@
 
 #include "fimex/Logger.h"
 
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
+
+#define PY_GIL_ACQUIRE py::gil_scoped_acquire acquire
 
 using namespace MetNoFimex;
-namespace bp = boost::python;
+namespace py = pybind11;
 
 namespace {
 
@@ -62,33 +64,26 @@ int toPythonLevel(Logger::LogLevel level)
 
 class PythonLoggingImpl : public LoggerImpl {
 public:
-    PythonLoggingImpl(const bp::object& log);
+    PythonLoggingImpl(const py::object& log);
     bool isEnabledFor(Logger::LogLevel level) /* override */;
     void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) /* override */;
 
 private:
-    bp::object log_;
+    py::module log_;
 };
 
-PythonLoggingImpl::PythonLoggingImpl(const bp::object& log)
+PythonLoggingImpl::PythonLoggingImpl(const py::object& log)
 {
-#ifdef _OPENMP
-#pragma omp critical(pyfimex0_log)
-#endif
+    PY_GIL_ACQUIRE;
     log_ = log;
 }
 
 bool PythonLoggingImpl::isEnabledFor(Logger::LogLevel level)
 {
-    bool enabled = false;
     const int pylevel = toPythonLevel(level);
-#ifdef _OPENMP
-#pragma omp critical(pyfimex0_log)
-#endif
-    {
-        enabled = log_.attr("isEnabledFor")(pylevel);
-    }
-    return enabled;
+
+    PY_GIL_ACQUIRE;
+    return log_.attr("isEnabledFor")(pylevel).cast<bool>();
 }
 
 void PythonLoggingImpl::log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
@@ -100,9 +95,7 @@ void PythonLoggingImpl::log(Logger::LogLevel level, const std::string& message, 
     const std::string py_msg = py_message.str();
     const int pylevel = toPythonLevel(level);
 
-#ifdef _OPENMP
-#pragma omp critical(pyfimex0_log)
-#endif
+    PY_GIL_ACQUIRE;
     log_.attr("log")(pylevel, py_msg);
 }
 
@@ -110,33 +103,32 @@ class PythonLoggingClass : public LoggerClass {
 public:
     PythonLoggingClass();
     LoggerImpl* loggerFor(Logger* logger, const std::string& className) /* override */;
-    bp::object python_logging;
+    py::object python_logging;
 };
 
 PythonLoggingClass::PythonLoggingClass()
 {
-#ifdef _OPENMP
-#pragma omp critical(pyfimex0_log)
-#endif
-    python_logging = bp::import("logging");
+    PY_GIL_ACQUIRE;
+    python_logging = py::module::import("logging");
 }
 
 LoggerImpl* PythonLoggingClass::loggerFor(Logger* logger, const std::string& className)
 {
     remember(logger);
-    bp::object py_logger = python_logging.attr("getLogger")(className);
-#ifdef _OPENMP
-#pragma omp critical(pyfimex0_log)
-#endif
-    {
-        py_logger = python_logging.attr("getLogger")(className);
-    }
+    PY_GIL_ACQUIRE;
+    py::object py_logger = python_logging.attr("getLogger")(className);
     return new PythonLoggingImpl(py_logger);
 }
 
 } // namespace
 
-void pyfimex0_logging()
+void pyfimex0_logging(py::module m)
 {
     Logger::setClass(new PythonLoggingClass);
+
+    // see https://pybind11.readthedocs.io/en/master/advanced/misc.html#module-destructors
+    py::cpp_function reset_logger([]() { Logger::setClass(nullptr); });
+    m.add_object("_cleanup", py::capsule(reset_logger));
+    if (auto atexit = py::module::import("atexit"))
+        atexit.attr("register")(reset_logger);
 }
