@@ -69,6 +69,10 @@ inline std::string string2type<std::string>(const std::string& s)
     return s;
 }
 
+//! recognize on/true/1 as true, off,0,false as false
+template <>
+bool string2type<bool>(const std::string& s);
+
 } // namespace MetNoFimex
 
 #endif // FIMEX_STRING2TYPE_H_

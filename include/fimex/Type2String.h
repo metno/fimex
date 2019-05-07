@@ -74,6 +74,13 @@ inline std::string type2string<std::string>(std::string in)
     return in;
 }
 
+//! recognize on/true/1 as true, off,0,false as false
+template <>
+inline std::string type2string<bool>(bool b)
+{
+    return b ? "1" : "0";
+}
+
 } // namespace MetNoFimex
 
 #endif // FIMEX_TYPE2STRING_H_

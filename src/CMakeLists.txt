@@ -130,6 +130,7 @@ SET(libfimex_SOURCES
   Units.cc
   ${INCF}/Units.h
   ${INCF}/UnitsException.h
+  String2Type.cc
   ${INCF}/String2Type.h
   Type2String.cc
   ${INCF}/Type2String.h

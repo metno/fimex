@@ -305,6 +305,16 @@ TEST4FIMEX_TEST_CASE(test_string2type)
 
     CHECK_THROW(int, "55.5");
     CHECK_THROW(int, "hei");
+
+    CHECK_EQ(bool, true, "1");
+    CHECK_EQ(bool, true, "ON");
+    CHECK_EQ(bool, true, "True");
+    CHECK_EQ(bool, true, "2");
+    CHECK_EQ(bool, false, "off");
+    CHECK_EQ(bool, false, "fAlSe");
+    CHECK_THROW(bool, "ja");
+    CHECK_THROW(bool, "");
+    CHECK_THROW(bool, "ok");
 }
 
 TEST4FIMEX_TEST_CASE(test_min_max_element)
