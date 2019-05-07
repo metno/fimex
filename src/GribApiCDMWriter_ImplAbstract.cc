@@ -243,7 +243,7 @@ void GribApiCDMWriter_ImplAbstract::run()
             // reducing all unset dimensions to the first slice
             vector<string> dims = sb.getUnsetDimensionNames();
             for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
-                LOG4FIMEX(logger, Logger::WARN, "unknown dimension in grib-writer: '" << *dim << "' using first slice" )
+                LOG4FIMEX(logger, Logger::WARN, "unknown dimension in grib-writer: '" << *dim << "' using first slice");
                 sb.setStartAndSize(*dim, 0, 1);
             }
 

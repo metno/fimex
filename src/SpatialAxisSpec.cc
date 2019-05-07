@@ -77,7 +77,7 @@ public:
         } else {
             retVal = "...";
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "translateRelativeAxis(" << value << "," << startOffset << ","<<finalValue << ")="<<retVal)
+        LOG4FIMEX(logger, Logger::DEBUG, "translateRelativeAxis(" << value << "," << startOffset << "," << finalValue << ")=" << retVal);
         return retVal;
     }
 };

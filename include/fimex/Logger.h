@@ -156,11 +156,14 @@ extern void defaultLogLevel(Logger::LogLevel);
  * @param level a fimex LogLevel, i.e. OFF, FATAL, ERROR, WARN, INFO, DEBUG
  * @param message the message to log
  */
-#define LOG4FIMEX(logger, level, message) { \
-    if (logger->isEnabledFor(level)) {\
-        std::ostringstream buffer; \
-        buffer << message; \
-        logger->forcedLog(level, buffer.str(), __FILE__, __LINE__);}}
+#define LOG4FIMEX(logger, level, message) \
+    do {                                  \
+      if (logger->isEnabledFor(level)) {  \
+        std::ostringstream buffer;        \
+        buffer << message;                \
+        logger->forcedLog(level, buffer.str(), __FILE__, __LINE__); \
+      }                                   \
+    } while(0)
 
 typedef std::shared_ptr<Logger> Logger_p;
 
