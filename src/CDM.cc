@@ -94,28 +94,6 @@ public:
     }
 };
 
-/** test if attributes string value is comparable to the initialized one */
-class CDMAttributeEquals : public std::unary_function<std::string, bool>
-{
-    const CDM& cdm;
-    const std::string& attrName;
-    boost::regex attrRegex;
-public:
-    CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName) {attrRegex = boost::regex("\\Q"+attrValue+"\\E");}
-    CDMAttributeEquals(const CDM& cdm, const std::string& attrName, boost::regex attrValue) : cdm(cdm), attrName(attrName), attrRegex(attrValue) {}
-    bool operator() (const std::string& varName) const
-    {
-        try {
-            const CDMAttribute& unitAttr = cdm.getAttribute(varName, attrName);
-            std::string testAttrVal(unitAttr.getData()->asString());
-            return boost::regex_match(testAttrVal, attrRegex);
-        } catch (CDMException& ex) {
-            // nothing to do
-        }
-        return false;
-    }
-};
-
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 typedef std::vector<CoordSysPtr> CoordSysList;
 
