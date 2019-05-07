@@ -64,7 +64,7 @@ namespace MetNoFimex {
 
         bool operator<(const MetGmCDMVariableProfile& profile) const {return cdmName_ < profile.cdmName_;}
 
-        const short hd() const { return pTags_->hd(); }
+        short hd() const { return pTags_->hd(); }
 
         short                         p_id_;
         std::string                   cdmName_;
@@ -82,32 +82,17 @@ namespace MetNoFimex {
     struct cdm_hd_index        {};
 
     typedef boost::multi_index::multi_index_container<
-      MetGmCDMVariableProfile,
-      boost::multi_index::indexed_by<
-        boost::multi_index::ordered_unique<
-         boost::multi_index::identity<MetGmCDMVariableProfile>
-        >,
-        boost::multi_index::ordered_non_unique<
-          boost::multi_index::tag<cdm_pid_index>,
-          boost::multi_index::member<
-            MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::p_id_
-          >
-        >,
-        boost::multi_index::hashed_unique<
-          boost::multi_index::tag<cdm_name_index>,
-          boost::multi_index::member<
-            MetGmCDMVariableProfile, std::string, &MetGmCDMVariableProfile::cdmName_
-          >
-        >,
-        boost::multi_index::ordered_non_unique<
-          boost::multi_index::tag<cdm_hd_index>,
-          boost::multi_index::const_mem_fun<
-           MetGmCDMVariableProfile, const short, &MetGmCDMVariableProfile::hd
-          >,
-          std::greater<short>
-        >
-      >
-    > cdm_configuration;
+        MetGmCDMVariableProfile,
+        boost::multi_index::indexed_by<
+            boost::multi_index::ordered_unique<boost::multi_index::identity<MetGmCDMVariableProfile>>,
+            boost::multi_index::ordered_non_unique<boost::multi_index::tag<cdm_pid_index>,
+                                                   boost::multi_index::member<MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::p_id_>>,
+            boost::multi_index::hashed_unique<boost::multi_index::tag<cdm_name_index>,
+                                              boost::multi_index::member<MetGmCDMVariableProfile, std::string, &MetGmCDMVariableProfile::cdmName_>>,
+            boost::multi_index::ordered_non_unique<boost::multi_index::tag<cdm_hd_index>,
+                                                   boost::multi_index::const_mem_fun<MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::hd>,
+                                                   std::greater<short>>>>
+        cdm_configuration;
 
     typedef cdm_configuration::index<cdm_pid_index>::type       cdmPidView;
     typedef cdm_configuration::index<cdm_name_index>::type      cdmNameView;
