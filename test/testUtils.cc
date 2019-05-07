@@ -35,6 +35,7 @@
 #endif
 
 #include <cctype>
+#include <numeric>
 #include <type_traits>
 
 using namespace std;

@@ -207,7 +207,9 @@ TEST4FIMEX_TEST_CASE(interpolator_template)
     TEST4FIMEX_CHECK_EQ(interpolator->getDataSlice("longitude")->size(), interpolator->getDataSlice("latitude")->size());
     TEST4FIMEX_REQUIRE(interpolator->getCDM().hasVariable("ga_skt"));
     DataPtr data = interpolator->getData("ga_skt");
+    TEST4FIMEX_REQUIRE(data);
     boost::shared_array<double> array = data->asDouble();
+    TEST4FIMEX_REQUIRE(array);
     for (size_t i = 0; i < 7; ++i) { // only first 7 datapoints are defined
         TEST4FIMEX_CHECK((!mifi_isnan(array[i])) && (array[i] < 280) && (array[i] > 270));
     }

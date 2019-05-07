@@ -47,10 +47,10 @@ TEST4FIMEX_TEST_CASE(test_merger)
     merger->setTargetGridFromInner();
 
     DataPtr sliceM = merger->getDataSlice("ga_2t_1", 0);
-    TEST4FIMEX_CHECK(sliceM);
+    TEST4FIMEX_REQUIRE(sliceM);
 
     const int NLON = 61, NLAT = 113;
-    TEST4FIMEX_CHECK_EQ(sliceM->size(), NLON * NLAT);
+    TEST4FIMEX_REQUIRE_EQ( sliceM->size(), NLON*NLAT );
 
     // test values: middle, transition, outer
     const int iLon[] = { 28, 24,  8, -1 };
