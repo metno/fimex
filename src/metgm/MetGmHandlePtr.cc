@@ -73,7 +73,9 @@ std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForWriting(std:
 
 MetGmHandlePtr::~MetGmHandlePtr()
 {
-    MGM_THROW_ON_ERROR(mgm_free_handle(handle_));
+    if (mgm_free_handle(handle_) != MGM_OK) {
+        // FIXME hmm, what now?
+    }
 }
 
 } // namespace MetNoFimex
