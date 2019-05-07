@@ -75,6 +75,8 @@ CDMBorderSmoothing::CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer, int
     *cdm_ = p->makeCDM();
 }
 
+CDMBorderSmoothing::~CDMBorderSmoothing() {}
+
 // ------------------------------------------------------------------------
 
 void CDMBorderSmoothing::setSmoothing(SmoothingFactory_p smoothingFactory)

@@ -63,7 +63,8 @@ struct ProjectionInfo {
     string gridMapping;
 };
 
-struct GribCDMReaderImpl {
+struct GribCDMReader::Impl
+{
     string configId;
     vector<GribFileMessage> indices;
     XMLDoc_p doc;
@@ -142,8 +143,8 @@ bool operator>=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(lhs < rh
 bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs);}
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
-GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
-    : p_(new GribCDMReaderImpl())
+GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members)
+    : p_(new Impl())
 {
     initXMLAndMembers(configXML, members);
     std::map<std::string, std::string> options;
@@ -159,8 +160,8 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     initPostIndices();
 }
 
-GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
-    : p_(new GribCDMReaderImpl())
+GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members)
+    : p_(new Impl())
 {
     initXMLAndMembers(configXML, members);
 

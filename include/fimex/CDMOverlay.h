@@ -53,12 +53,13 @@ public:
      */
     CDMOverlay(CDMReader_p base, CDMReader_p top,
             int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR, bool keepOuterVariables = false);
+    ~CDMOverlay();
 
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:
-    std::auto_ptr<CDMOverlayPrivate> p;
+    std::unique_ptr<CDMOverlayPrivate> p;
 };
 
 typedef boost::shared_ptr<CDMOverlay> CDMOverlay_p;

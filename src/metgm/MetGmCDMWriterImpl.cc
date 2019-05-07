@@ -62,12 +62,12 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
-#include <auto_ptr.h>
-#include <map>
-#include <set>
 #include <deque>
-#include <numeric>
 #include <limits>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <set>
 
 namespace MetNoFimex {
 
@@ -81,7 +81,7 @@ namespace MetNoFimex {
 
     typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-    void MetGmCDMWriterImpl::configure(const std::auto_ptr<XMLDoc>& doc)
+    void MetGmCDMWriterImpl::configure(const std::unique_ptr<XMLDoc>& doc)
     {
         if(!doc.get())
             throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
@@ -451,11 +451,9 @@ namespace MetNoFimex {
                     )
                         : CDMWriter(cdmReader, outputFile), configFileName_(configFile)
     {
-        std::auto_ptr<XMLDoc> xmlDoc;
-        if (configFileName_ == std::string()) {
-            xmlDoc = std::auto_ptr<XMLDoc>(0);
-        } else {
-            xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
+        std::unique_ptr<XMLDoc> xmlDoc;
+        if (!configFileName_.empty()) {
+            xmlDoc.reset(new XMLDoc(configFileName_));
         }
 
         metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTagGlobal(cdmReader);

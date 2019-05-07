@@ -104,6 +104,11 @@ struct CDMImpl {
     CDM::DimVec dimensions;
     bool coordsInitialized;
     CoordinateSystem_cp_v coordSystems;
+
+    CDMImpl()
+        : coordsInitialized(false)
+    {
+    }
 };
 
 static void enhance(CDMImpl* pimpl, const CDM& cdm)
@@ -117,26 +122,24 @@ static void enhance(CDMImpl* pimpl, const CDM& cdm)
     }
 }
 
-CDM::CDM() : pimpl_(new CDMImpl())
+CDM::CDM()
+    : pimpl_(new CDMImpl())
 {
-    pimpl_->coordsInitialized = false;
 }
 
-CDM::CDM(const CDM& rhs) : pimpl_(new CDMImpl())
+CDM::CDM(const CDM& rhs)
+    : pimpl_(new CDMImpl(*rhs.pimpl_))
 {
-    *pimpl_ = *rhs.pimpl_;
 }
 
 CDM::~CDM()
 {
-    delete pimpl_;
 }
 
 CDM& CDM::operator=(const CDM& rhs)
 {
-    if (this == &rhs) return *this;
-    delete pimpl_;
-    pimpl_ = new CDMImpl(*rhs.pimpl_);
+    if (this != &rhs)
+        pimpl_.reset(new CDMImpl(*rhs.pimpl_));
     return *this;
 }
 
@@ -734,7 +737,7 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
 
 Projection_cp CDM::getProjectionOf(std::string varName) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
     if (cs.get() == 0) {
         return Projection_cp();
@@ -744,7 +747,7 @@ Projection_cp CDM::getProjectionOf(std::string varName) const
 
 std::string CDM::getHorizontalXAxis(std::string varName) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
 
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
     if (cs.get() == 0) {
@@ -756,7 +759,7 @@ std::string CDM::getHorizontalXAxis(std::string varName) const
 
 std::string CDM::getHorizontalYAxis(std::string varName) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
 
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
     if (cs.get() == 0) {
@@ -768,7 +771,7 @@ std::string CDM::getHorizontalYAxis(std::string varName) const
 
 bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::string& longitude) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
 
     CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
     if (cs.get() == 0) {
@@ -786,7 +789,7 @@ bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::
 
 std::string CDM::getTimeAxis(std::string varName) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
 
     const CoordinateSystem_cp_v& csList = pimpl_->coordSystems;
 
@@ -809,7 +812,7 @@ std::string CDM::getTimeAxis(std::string varName) const
 
 std::string CDM::getVerticalAxis(std::string varName) const
 {
-    enhance(this->pimpl_, *this);
+    enhance(pimpl_.get(), *this);
 
     const CoordinateSystem_cp_v& csList = pimpl_->coordSystems;
 

@@ -213,7 +213,7 @@ private:
     CoordinateSystem& operator=(const CoordinateSystem&); // not implemented
 
 private:
-    std::auto_ptr<CoordSysImpl> pimpl_;
+    std::unique_ptr<CoordSysImpl> pimpl_;
 };
 
 /**

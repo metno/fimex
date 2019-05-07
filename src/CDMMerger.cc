@@ -91,6 +91,8 @@ CDMMerger::CDMMerger(CDMReader_p inner, CDMReader_p outer)
     p->keepOuterVariables = false;
 }
 
+CDMMerger::~CDMMerger() {}
+
 // ------------------------------------------------------------------------
 
 void CDMMerger::setSmoothing(CDMBorderSmoothing::SmoothingFactory_p smoothingFactory)

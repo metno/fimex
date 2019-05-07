@@ -143,8 +143,9 @@ private:
 
     std::string configId;
     XMLDoc_p doc;
-    std::auto_ptr<MutexType> mutex_;
+    std::unique_ptr<MutexType> mutex_;
     CDMReader_p dataReader;
+
     /*
      * maps containing the changes. The key will reflect
      * this CDM, while the value references to dataReader->cdm

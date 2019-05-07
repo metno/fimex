@@ -56,12 +56,14 @@ public:
      * @warning the routine does not handle invalid values, except float/double nans
      */
     CDMPressureConversions(CDMReader_p dataReader, std::vector<std::string> operations);
-    virtual ~CDMPressureConversions() {}
+    ~CDMPressureConversions();
+
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+
 private:
     CDMReader_p dataReader_;
-    boost::shared_ptr<CDMPressureConversionsImpl> p_;
+    std::unique_ptr<CDMPressureConversionsImpl> p_;
 };
 
 }

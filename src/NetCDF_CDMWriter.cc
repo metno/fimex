@@ -69,7 +69,7 @@ namespace {
 
 Logger_p logger = getLogger("fimex.NetCDF_CDMWriter");
 
-int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
+int getNcVersion(int version, std::unique_ptr<XMLDoc>& doc)
 {
     int retVal = NC_CLOBBER;
     switch (version) {
@@ -114,7 +114,7 @@ int ncDimId(int ncId, const CDMDimension* unLimDim)
     return unLimDimId;
 }
 
-void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
+void checkDoc(std::unique_ptr<XMLDoc>& doc, const std::string& filename)
 {
     xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -126,13 +126,12 @@ void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 } // namespace
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& outputFile, std::string configFile, int version)
-: CDMWriter(cdmReader, outputFile), ncFile(std::auto_ptr<Nc>(new Nc()))
+    : CDMWriter(cdmReader, outputFile)
+    , ncFile(new Nc())
 {
-    std::auto_ptr<XMLDoc> doc;
-    if (configFile == "") {
-        doc = std::auto_ptr<XMLDoc>(0);
-    } else {
-        doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
+    std::unique_ptr<XMLDoc> doc;
+    if (!configFile.empty()) {
+        doc.reset(new XMLDoc(configFile));
         checkDoc(doc, configFile);
     }
     int ncVersion = getNcVersion(version, doc);
@@ -179,7 +178,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p cdmReader, const std::string& out
     init();
 }
 
-void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initNcmlReader(std::unique_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
@@ -194,7 +193,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
     cdm = cdmReader->getCDM();
 }
 
-void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
 {
     bool autoRemoveDims = true;
     if (doc.get() != 0) {
@@ -264,7 +263,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameDimension(std::unique_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
@@ -293,7 +292,7 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
         xmlXPathObject_p xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
@@ -358,7 +357,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameAttribute(std::unique_ptr<XMLDoc>& doc)
 {
     // make a complete copy of the original attributes
     if (doc.get() != 0) {

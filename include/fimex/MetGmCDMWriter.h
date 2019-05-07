@@ -24,14 +24,12 @@
 #ifndef METGM_CDMWRITER_HPP
 #define METGM_CDMWRITER_HPP
 
-// fimex
 #include "fimex/CDMWriter.h"
 
 namespace MetNoFimex {
 
     /* forward declarations */
     class MetGmCDMWriterImpl;
-    class CDMReader;
 
     class MetGmCDMWriter : public CDMWriter
     {
@@ -40,7 +38,7 @@ namespace MetNoFimex {
             ~MetGmCDMWriter();
 
     protected:
-            boost::shared_ptr<MetGmCDMWriterImpl> d_ptr;
+        std::unique_ptr<MetGmCDMWriterImpl> d_ptr;
     };
 
 }

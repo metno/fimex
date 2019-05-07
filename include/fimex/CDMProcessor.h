@@ -28,13 +28,9 @@
 #define CDMPROCESSOR_H_
 
 #include "fimex/CDMReader.h"
-#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
 {
-
-// forward decl
-struct CDMProcessorImpl;
 
 /**
  * @headerfile fimex/CDMProcessor.h
@@ -43,7 +39,7 @@ struct CDMProcessorImpl;
  * The CDMProcessor is a class for various smaller data-manipulations.
  * Examples are deaccumulation along the time-axis, ...
  */
-class CDMProcessor: public MetNoFimex::CDMReader
+class CDMProcessor : public CDMReader
 {
 public:
     CDMProcessor(CDMReader_p dataReader);
@@ -89,11 +85,12 @@ public:
     void rotateDirectionToLatLon(bool toLatLon, const std::vector<std::string>& varNames);
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
-private:
-    // pimpl
-    boost::shared_ptr<CDMProcessorImpl> p_;
 
+private:
+    struct CDMProcessorImpl;
+    std::unique_ptr<CDMProcessorImpl> p_;
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* CDMPROCESSOR_H_ */

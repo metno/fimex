@@ -36,10 +36,9 @@ namespace MetNoFimex {
     static MutexType mutex;
 
     MetGmCDMReader::MetGmCDMReader(const std::string& metgmsource, const XMLInput& configXML)
-        : CDMReader()
     {
         try {
-            d_ptr = boost::shared_ptr<MetGmCDMReaderSlicedImpl>(new MetGmCDMReaderSlicedImpl(metgmsource, configXML, cdm_));
+            d_ptr.reset(new MetGmCDMReaderSlicedImpl(metgmsource, configXML, cdm_));
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("METGM_CDMReader error: ") + exp.what());
         }

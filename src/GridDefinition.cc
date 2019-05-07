@@ -25,170 +25,71 @@
  */
 
 #include "fimex/GridDefinition.h"
+
 #include <cmath>
 #include <sstream>
 
 namespace MetNoFimex
 {
 
-struct GridDefImpl {
-    std::string projDefinition;
-    bool isDegree;
-    size_t xSize;
-    size_t ySize;
-    double xIncr;
-    double yIncr;
-    double xStart;
-    double yStart;
-    GridDefinition::Orientation orientation;
-};
-
-
-
 GridDefinition::GridDefinition()
-: gridDef(new GridDefImpl())
-{
-    gridDef->projDefinition = "";
-    gridDef->isDegree = true;
-    gridDef->xSize = 0;
-    gridDef->ySize = 0;
-    gridDef->xIncr = 0.;
-    gridDef->yIncr = 0.;
-    gridDef->xStart = 0.;
-    gridDef->yStart = 0.;
-    gridDef->orientation = GridDefinition::LeftLowerHorizontal;
-}
-GridDefinition::GridDefinition(
-        std::string projDefinition,
-        bool isDegree,
-        size_t xSize,
-        size_t ySize,
-        double xIncr,
-        double yIncr,
-        double xStart,
-        double yStart,
-        Orientation orient)
-: gridDef(new GridDefImpl())
-{
-            gridDef->projDefinition = projDefinition;
-            gridDef->isDegree = isDegree;
-            gridDef->xSize = xSize;
-            gridDef->ySize = ySize;
-            gridDef->xIncr = xIncr;
-            gridDef->yIncr = yIncr;
-            gridDef->xStart = xStart;
-            gridDef->yStart = yStart;
-            gridDef->orientation = orient;
-}
-GridDefinition::~GridDefinition()
+    : isDegree_(true)
+    , xSize_(0)
+    , ySize_(0)
+    , xIncr_(0.)
+    , yIncr_(0.)
+    , xStart_(0.)
+    , yStart_(0.)
+    , orientation_(GridDefinition::LeftLowerHorizontal)
 {
 }
 
-std::string GridDefinition::getProjDefinition() const
+GridDefinition::GridDefinition(std::string projDefinition, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
+                               Orientation orient)
+    : projDefinition_(projDefinition)
+    , isDegree_(isDegree)
+    , xSize_(xSize)
+    , ySize_(ySize)
+    , xIncr_(xIncr)
+    , yIncr_(yIncr)
+    , xStart_(xStart)
+    , yStart_(yStart)
+    , orientation_(orient)
 {
-    return gridDef->projDefinition;
 }
-void GridDefinition::setProjDefinition(std::string proj)
-{
-    gridDef->projDefinition = proj;
-}
-
-bool GridDefinition::isDegree() const
-{
-    return gridDef->isDegree;
-}
-void GridDefinition::setDegree(bool isDegree)
-{
-    gridDef->isDegree = isDegree;
-}
-
-size_t GridDefinition::getXSize() const
-{
-    return gridDef->xSize;
-}
-void GridDefinition::setXSize(size_t xSize)
-{
-    gridDef->xSize = xSize;
-}
-
-size_t GridDefinition::getYSize() const
-{
-    return gridDef->ySize;
-
-}
-void GridDefinition::setYSize(size_t ySize)
-{
-    gridDef->ySize = ySize;
-}
-double GridDefinition::getXIncrement() const
-{
-    return gridDef->xIncr;
-}
-void GridDefinition::setXIncrement(double xIncr)
-{
-    gridDef->xIncr = xIncr;
-}
-double GridDefinition::getYIncrement() const
-{
-    return gridDef->yIncr;
-}
-void GridDefinition::setYIncrement(double yIncr)
-{
-    gridDef->yIncr = yIncr;
-}
-double GridDefinition::getXStart() const
-{
-    return gridDef->xStart;
-
-}
-void GridDefinition::setXStart(double xStart)
-{
-    gridDef->xStart = xStart;
-}
-double GridDefinition::getYStart() const
-{
-    return gridDef->yStart;
-
-}
-void GridDefinition::setYStart(double yStart)
-{
-    gridDef->yStart = yStart;
-}
-GridDefinition::Orientation GridDefinition::getScanMode() const
-{
-    return gridDef->orientation;
-}
-void GridDefinition::setScanMode(Orientation orient)
-{
-    gridDef->orientation = orient;
-}
-
 
 static bool deltaCompare(double a, double b, double delta)
 {
     return (a == 0) ? (fabs(b) <= delta) : (fabs(1-b/a) <= delta);
 }
+
 bool GridDefinition::comparableTo(const GridDefinition& rhs, double delta) const
 {
-    if (gridDef->xSize != rhs.gridDef->xSize) return false;
-    if (gridDef->ySize != rhs.gridDef->ySize) return false;
-    if (!deltaCompare(gridDef->xIncr, rhs.gridDef->xIncr, delta)) return false;
-    if (!deltaCompare(gridDef->yIncr, rhs.gridDef->yIncr, delta)) return false;
-    if (!deltaCompare(gridDef->xStart, rhs.gridDef->xStart, delta)) return false;
-    if (!deltaCompare(gridDef->yStart, rhs.gridDef->yStart, delta)) return false;
+    if (xSize_ != rhs.xSize_)
+        return false;
+    if (ySize_ != rhs.ySize_)
+        return false;
+    if (!deltaCompare(xIncr_, rhs.xIncr_, delta))
+        return false;
+    if (!deltaCompare(yIncr_, rhs.yIncr_, delta))
+        return false;
+    if (!deltaCompare(xStart_, rhs.xStart_, delta))
+        return false;
+    if (!deltaCompare(yStart_, rhs.yStart_, delta))
+        return false;
     return true;
 }
 
 std::string GridDefinition::id() const
 {
     std::stringstream ss;
-    ss << gridDef->projDefinition << "_";
-    ss << gridDef->xSize << "_";
-    ss << gridDef->ySize << "_";
-    ss << static_cast<long long>(gridDef->xIncr * 1000LL) << "_";
-    ss << static_cast<long long>(gridDef->yIncr * 1000LL) << "_";
-    ss << static_cast<long long>(gridDef->xStart * 1000LL) << "_";
-    ss << static_cast<long long>(gridDef->yStart * 1000LL);
+    ss << projDefinition_ << "_";
+    ss << xSize_ << "_";
+    ss << ySize_ << "_";
+    ss << static_cast<long long>(xIncr_ * 1000LL) << "_";
+    ss << static_cast<long long>(yIncr_ * 1000LL) << "_";
+    ss << static_cast<long long>(xStart_ * 1000LL) << "_";
+    ss << static_cast<long long>(yStart_ * 1000LL);
     return ss.str();
 }
 

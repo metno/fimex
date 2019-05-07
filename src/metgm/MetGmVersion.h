@@ -60,7 +60,8 @@ namespace MetNoFimex {
             return pVersion;
         }
 
-        static boost::shared_ptr<MetGmVersion> createMetGmVersion(const std::auto_ptr<XMLDoc>& doc) {
+        static boost::shared_ptr<MetGmVersion> createMetGmVersion(const std::unique_ptr<XMLDoc>& doc)
+        {
 
             mgm_version version = MGM_Edition1;
 

@@ -74,7 +74,8 @@ using namespace std;
 typedef boost::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
 typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojection_p;
 
-struct CDMInterpolatorInternals {
+struct CDMInterpolator::Impl
+{
     CDMReader_p dataReader;
     double maxDistance; // negative = undefined
     std::string latitudeName;
@@ -97,7 +98,7 @@ Logger_p logger = getLogger("fimex.CDMInterpolator");
 } // namespace
 
 CDMInterpolator::CDMInterpolator(CDMReader_p dataReader)
-: p_(new CDMInterpolatorInternals())
+    : p_(new Impl())
 {
     p_->dataReader = dataReader;
     p_->maxDistance = -1;
@@ -179,7 +180,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
         return p_->dataReader->getDataSlice(varName, sb);
     } else {
         const string& horizontalId = p_->projectionVariables.find(varName)->second;
-        CDMInterpolatorInternals::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
+        Impl::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
         if (itCI == p_->cachedInterpolation.end()) {
             throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
         }
@@ -243,7 +244,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         return p_->dataReader->getDataSlice(varName, unLimDimPos);
     } else {
         const string& horizontalId = p_->projectionVariables.find(varName)->second;
-        CDMInterpolatorInternals::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
+        Impl::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
         if (itCI == p_->cachedInterpolation.end()) {
             throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
         }

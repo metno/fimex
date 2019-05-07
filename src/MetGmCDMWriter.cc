@@ -31,22 +31,15 @@
 
 namespace MetNoFimex {
 
-    MetGmCDMWriter::MetGmCDMWriter
-            (
-                const CDMReader_p cdmReader,
-                const std::string& outputFile,
-                const std::string& configFile
-            ) : CDMWriter(cdmReader, outputFile)
-    {
-//        d_ptr = boost::shared_ptr<MetGmCDMWriterImpl>(new MetGmCDMWriterImpl(cdmReader, outputFile, configFile));
-
-        d_ptr = boost::shared_ptr<MetGmCDMWriterSlicedImpl>(new MetGmCDMWriterSlicedImpl(cdmReader, outputFile, configFile));
+MetGmCDMWriter::MetGmCDMWriter(const CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
+    : CDMWriter(cdmReader, outputFile)
+    , d_ptr(new MetGmCDMWriterSlicedImpl(cdmReader, outputFile, configFile))
+{
     }
 
 
     MetGmCDMWriter::~MetGmCDMWriter()
     {
-
     }
 
 } // end namespace

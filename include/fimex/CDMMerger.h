@@ -57,6 +57,8 @@ public:
      */
     CDMMerger(CDMReader_p inner, CDMReader_p outer);
 
+    ~CDMMerger();
+
     /** Set the smooting function factory to be used.
      * Must be called before setting target grid.
      * \parameter smoothingFactory a factory for smoothing functors
@@ -103,7 +105,7 @@ public:
     virtual DataPtr getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:
-    std::auto_ptr<CDMMergerPrivate> p;
+    std::unique_ptr<CDMMergerPrivate> p;
 };
 
 typedef boost::shared_ptr<CDMMerger> CDMMerger_p;

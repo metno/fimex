@@ -28,14 +28,12 @@
 #define GRIDDEFINITION_H_
 
 #include "fimex/binaryConstants.h"
+
+#include <memory>
 #include <string>
-#include "boost/shared_ptr.hpp"
 
 namespace MetNoFimex
 {
-
-// forward declaration
-struct GridDefImpl;
 
 class GridDefinition
 {
@@ -74,43 +72,43 @@ public:
     };
 
     GridDefinition();
-    GridDefinition(
-            std::string projDefinition,
-            bool isDegree,
-            size_t xSize,
-            size_t ySize,
-            double xIncr,
-            double yIncr,
-            double xStart,
-            double yStart,
-            Orientation orient);
-    virtual ~GridDefinition();
+    GridDefinition(std::string projDefinition_, bool isDegree, size_t xSize_, size_t ySize_, double xIncr_, double yIncr_, double xStart_, double yStart_,
+                   Orientation orient);
+
     /// return a proj4 string
-    virtual std::string getProjDefinition() const;
-    virtual void setProjDefinition(std::string proj);
+    std::string getProjDefinition() const { return projDefinition_; }
+    void setProjDefinition(const std::string& proj) { projDefinition_ = proj; }
+
     // check if start and increment are degree or metric
-    virtual bool isDegree() const;
-    virtual void setDegree(bool isDegree);
+    bool isDegree() const { return isDegree_; }
+    void setDegree(bool isDegree) { isDegree_ = isDegree; }
+
     /// number of points in x or longitude direction
-    virtual size_t getXSize() const;
-    virtual void setXSize(size_t xSize);
+    size_t getXSize() const { return xSize_; }
+    void setXSize(size_t xSize) { xSize_ = xSize; }
+
     /// number of points in y or latitude direction
-    virtual size_t getYSize() const;
-    virtual void setYSize(size_t ySize);
+    size_t getYSize() const { return ySize_; }
+    void setYSize(size_t ySize) { ySize_ = ySize; }
+
     /// x or longitude increment in m or degree
-    virtual double getXIncrement() const;
-    virtual void setXIncrement(double xIncr);
+    double getXIncrement() const { return xIncr_; }
+    void setXIncrement(double xIncr) { xIncr_ = xIncr; }
+
     /// y or latitude increment in m or degree
-    virtual double getYIncrement() const;
-    virtual void setYIncrement(double yIncr);
+    double getYIncrement() const { return yIncr_; }
+    void setYIncrement(double yIncr) { yIncr_ = yIncr; }
+
     /// x or longitude start in m or degree
-    virtual double getXStart() const;
-    virtual void setXStart(double startX);
+    double getXStart() const { return xStart_; }
+    void setXStart(double xStart) { xStart_ = xStart; }
+
     /// y or latitude start in m or degree
-    virtual double getYStart() const;
-    virtual void setYStart(double startY);
-    virtual Orientation getScanMode() const;
-    virtual void setScanMode(Orientation orient);
+    double getYStart() const { return yStart_; }
+    void setYStart(double yStart) { yStart_ = yStart; }
+
+    Orientation getScanMode() const { return orientation_; }
+    void setScanMode(Orientation orient) { orientation_ = orient; }
 
     /**
      * Compare two GridDefinitions. They are comparable if they have
@@ -138,8 +136,15 @@ public:
     bool operator<(const GridDefinition& rhs) const;
 
 private:
-    boost::shared_ptr<GridDefImpl> gridDef;
-
+    std::string projDefinition_;
+    bool isDegree_;
+    size_t xSize_;
+    size_t ySize_;
+    double xIncr_;
+    double yIncr_;
+    double xStart_;
+    double yStart_;
+    Orientation orientation_;
 };
 
 }

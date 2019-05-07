@@ -48,7 +48,7 @@ namespace MetNoFimex {
     {
         configFileName_ = configFile;
         if (configFileName_ == "") throw CDMException("metgm requires configFile");
-        std::auto_ptr<XMLDoc> xmlDoc(new XMLDoc(configFileName_));
+        std::unique_ptr<XMLDoc> xmlDoc(new XMLDoc(configFileName_));
 
         metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTagGlobal(cdmReader);
         metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);

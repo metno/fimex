@@ -71,12 +71,12 @@ public:
 
 private:
     void init();
-    void initNcmlReader(std::auto_ptr<XMLDoc>& doc);
-    void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc);
-    void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc);
-    void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc);
+    void initNcmlReader(std::unique_ptr<XMLDoc>& doc);
+    void initFillRenameDimension(std::unique_ptr<XMLDoc>& doc);
+    void initFillRenameVariable(std::unique_ptr<XMLDoc>& doc);
+    void initFillRenameAttribute(std::unique_ptr<XMLDoc>& doc);
     /** clear all fields to remove */
-    void initRemove(std::auto_ptr<XMLDoc>& doc);
+    void initRemove(std::unique_ptr<XMLDoc>& doc);
     /** test if the variable exists in the cdmReader or throw an CDMException */
     void testVariableExists(const std::string& varName);
 
@@ -87,7 +87,7 @@ private:
     double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
     double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
     CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
-    std::auto_ptr<Nc> ncFile;
+    std::unique_ptr<Nc> ncFile;
     std::map<std::string, std::string> variableNameChanges;
     std::map<std::string, CDMDataType> variableTypeChanges;
     std::map<std::string, unsigned int> variableCompression;

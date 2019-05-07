@@ -61,6 +61,8 @@ CDMOverlay::CDMOverlay(CDMReader_p base, CDMReader_p top, int grim, bool keepOut
     *cdm_ = p->init(grim, keepOuterVariables);
 }
 
+CDMOverlay::~CDMOverlay() {}
+
 // ------------------------------------------------------------------------
 
 DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)

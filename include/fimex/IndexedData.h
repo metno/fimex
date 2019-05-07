@@ -34,9 +34,6 @@
 namespace MetNoFimex
 {
 
-// forward decl
-class IndexedDataImpl;
-
 /**
  * @headerfile fimex/IndexedData.h
  */
@@ -49,7 +46,7 @@ public:
      * @param data
      * @param dimSizes
      */
-    explicit IndexedData(DataPtr data, std::vector<std::size_t> dimSizes);
+    explicit IndexedData(DataPtr data, const std::vector<std::size_t>& dimSizes);
     ~IndexedData();
     /**
      *  @brief set the dimension sizes of data
@@ -98,10 +95,12 @@ public:
     double getLongLong(size_t a, size_t b, size_t c) const {return getLongLong(idx().getPos(a,b,c));}
     /// shortcut for 4d
     double getLongLong(size_t a, size_t b, size_t c, size_t d) const {return getLongLong(idx().getPos(a,b,c,d));}
-private:
-    boost::shared_ptr<IndexedDataImpl> p_;
-    void init(DataPtr data, std::vector<std::size_t> dimSizes);
 
+private:
+    void init(DataPtr data, const std::vector<std::size_t>& dimSizes);
+
+    class Impl;
+    std::unique_ptr<Impl> p_;
 };
 
 } /* namespace MetNoFimex */

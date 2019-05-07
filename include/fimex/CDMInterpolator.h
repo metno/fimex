@@ -37,7 +37,6 @@
 
 namespace MetNoFimex
 {
-struct CDMInterpolatorInternals;
 
 /**
  * @headerfile fimex/CDMInterpolator.h
@@ -100,8 +99,8 @@ typedef boost::shared_ptr<InterpolatorProcess2d> InterpolatorProcess2d_p;
 class CDMInterpolator : public CDMReader
 {
 private:
-    // the pimpl
-    class boost::shared_ptr<CDMInterpolatorInternals> p_;
+    struct Impl;
+    std::unique_ptr<Impl> p_;
 
     /** converter for axes-strings */
     void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);

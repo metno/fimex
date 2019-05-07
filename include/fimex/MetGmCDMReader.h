@@ -35,14 +35,10 @@
     CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
 #endif
 
-
-// fimex
 #include "fimex/CDMReader.h"
 #include "fimex/XMLInput.h"
 
-
-// boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MetNoFimex {
 
@@ -58,7 +54,7 @@ namespace MetNoFimex {
         DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 
     private:
-        boost::shared_ptr<MetGmCDMReaderImpl> d_ptr;
+        std::unique_ptr<MetGmCDMReaderImpl> d_ptr;
     };
 
 } // end namespace

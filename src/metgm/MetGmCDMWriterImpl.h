@@ -102,7 +102,7 @@ namespace MetNoFimex {
 
         explicit MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile);
 
-        void configure(const std::auto_ptr<XMLDoc>& doc);
+        void configure(const std::unique_ptr<XMLDoc>& doc);
 
         void writeGroup0Data();
         void writeGroup1Data();

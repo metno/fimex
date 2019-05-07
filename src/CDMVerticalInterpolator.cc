@@ -119,7 +119,8 @@ void replaceZaxis(CDM& cdm, CoordinateSystem_cp cs, const std::string& varName, 
 
 using namespace std;
 
-struct VIntPimpl {
+struct CDMVerticalInterpolator::Impl
+{
     int verticalType;
     mifi_vertical_interpol_method verticalInterpolationMethod;
     vector<double> level1;
@@ -137,7 +138,7 @@ struct VIntPimpl {
 
 CDMVerticalInterpolator::CDMVerticalInterpolator(CDMReader_p dataReader, const string& verticalType, const string& verticalInterpolationMethod)
     : dataReader_(dataReader)
-    , pimpl_(new VIntPimpl())
+    , pimpl_(new Impl())
 {
     *cdm_ = dataReader->getCDM();
     const CDM::VarVec& variables = cdm_->getVariables();

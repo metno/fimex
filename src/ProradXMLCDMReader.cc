@@ -51,9 +51,13 @@ namespace MetNoFimex
 static MutexType mutex;
 static Logger_p logger = getLogger("fimex.ProradXMLCDMReader");
 
-class ProradXMLImpl {
+class ProradXMLCDMReader::Impl
+{
 public:
-    ProradXMLImpl() : meta(boost::shared_ptr<td_radarprod_meta_st>(new td_radarprod_meta_st, free_td_radarprod_meta_st)) {}
+    Impl()
+        : meta(boost::shared_ptr<td_radarprod_meta_st>(new td_radarprod_meta_st, free_td_radarprod_meta_st))
+    {
+    }
     boost::shared_ptr<td_radarprod_meta_st> meta;
     std::string varNm;
     std::string xname;
@@ -61,9 +65,8 @@ public:
     std::string time;
 };
 
-
 ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
-: CDMReader(), pimpl_(new ProradXMLImpl())
+    : pimpl_(new Impl())
 {
     using namespace std;
     LOG4FIMEX(logger, Logger::DEBUG, "reading file "+ source );
@@ -230,6 +233,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
     }
 }
 
+ProradXMLCDMReader::~ProradXMLCDMReader() {}
 
 #define PRGETDATAFLAG(XXX, YYY) if (varName.find(std::string("_") + XXX +"_radar") != std::string::npos) { \
     td_cartesian_st* cartesian = pimpl_->meta->cartesian_st; \

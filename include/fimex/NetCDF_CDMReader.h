@@ -49,7 +49,8 @@ class Nc;
 
 class NetCDF_CDMReader : public MetNoFimex::CDMReaderWriter
 {
-    const std::auto_ptr<Nc> ncFile;
+    const std::unique_ptr<Nc> ncFile;
+
 public:
     NetCDF_CDMReader(const std::string& fileName, bool writable = false);
     virtual ~NetCDF_CDMReader();

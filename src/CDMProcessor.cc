@@ -84,7 +84,8 @@ struct VerticalVelocityComps {
     bool geopotNotDefined() {return geopotData.get() == 0;}
 };
 
-struct CDMProcessorImpl {
+struct CDMProcessor::CDMProcessorImpl
+{
     CDMReader_p dataReader;
     set<string> deaccumulateVars;
     set<string> accumulateVars;

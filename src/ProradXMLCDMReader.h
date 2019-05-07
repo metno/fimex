@@ -26,15 +26,12 @@
 #ifndef PRORADXMLCDMREADER_H_
 #define PRORADXMLCDMREADER_H_
 
-#include <fimex/CDMReader.h>
+#include "fimex/CDMReader.h"
 
 namespace MetNoFimex
 {
 
-// forward decl.
-class ProradXMLImpl;
-
-class ProradXMLCDMReader: public MetNoFimex::CDMReader
+class ProradXMLCDMReader : public CDMReader
 {
 public:
     /**
@@ -43,10 +40,13 @@ public:
      * @param source file-source, readable by libxml2
      */
     ProradXMLCDMReader(const std::string& source);
-    virtual ~ProradXMLCDMReader() {}
+    ~ProradXMLCDMReader();
+
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+
 private:
-   boost::shared_ptr<ProradXMLImpl> pimpl_;
+    class Impl;
+    std::unique_ptr<Impl> pimpl_;
 };
 
 } /* namespace MetNoFimex */

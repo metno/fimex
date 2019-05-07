@@ -695,6 +695,8 @@ CDMPressureConversions::CDMPressureConversions(CDMReader_p dataReader, std::vect
     }
 }
 
+CDMPressureConversions::~CDMPressureConversions() {}
+
 DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     std::map<std::string, Converter_p>::const_iterator itC = p_->converters.find(varName);

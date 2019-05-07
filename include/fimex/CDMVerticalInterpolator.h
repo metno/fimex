@@ -37,10 +37,6 @@
 namespace MetNoFimex
 {
 
-// forward declaration
-struct VIntPimpl;
-class CoordinateSystem;
-
 /**
  * @headerfile fimex/CDMVerticalInterpolator.h
  */
@@ -88,7 +84,9 @@ private:
 
 private:
     CDMReader_p dataReader_;
-    boost::shared_ptr<VIntPimpl> pimpl_;
+
+    struct Impl;
+    std::unique_ptr<Impl> pimpl_;
 };
 
 }

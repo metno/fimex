@@ -82,6 +82,7 @@ public:
     //! Smooth transition to 'outer' from inner's data. Returns data on inner grid.
     CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer,
             int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR);
+    ~CDMBorderSmoothing();
 
     //! Change the smooting function factory.
     void setSmoothing(SmoothingFactory_p smoothingFactory);
@@ -93,7 +94,7 @@ public:
     virtual DataPtr getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:
-    std::auto_ptr<CDMBorderSmoothingPrivate> p;
+    std::unique_ptr<CDMBorderSmoothingPrivate> p;
 };
 
 typedef boost::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothing_p;

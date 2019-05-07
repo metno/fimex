@@ -429,7 +429,7 @@ public:
     std::string getVerticalAxis(std::string varName) const;
 
 private:
-    CDMImpl* pimpl_;
+    std::unique_ptr<CDMImpl> pimpl_;
 };
 
 }

@@ -28,6 +28,7 @@
 #define GRIBUTILS_H_
 
 #include "fimex/GridDefinition.h"
+#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
 

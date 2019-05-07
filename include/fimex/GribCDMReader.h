@@ -38,13 +38,13 @@
     CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
 #endif
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/XMLInput.h"
 #include "fimex/XMLDoc.h"
+
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -52,7 +52,6 @@ namespace MetNoFimex
 // forward decl.
 class CDM;
 class CDMDimension;
-struct GribCDMReaderImpl;
 
 class GribCDMReader: public MetNoFimex::CDMReader
 {
@@ -80,8 +79,8 @@ public:
     static std::string getConfigExtraKeys(XMLDoc_p doc);
 
 private:
-    // pimpl
-    boost::shared_ptr<GribCDMReaderImpl> p_;
+    struct Impl;
+    std::unique_ptr<Impl> p_;
 
     /**
      * init xmlNodeIdx1 and xmlNodeIdx2, used for faster lookups in xml-tree

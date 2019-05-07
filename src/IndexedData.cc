@@ -35,7 +35,8 @@
 namespace MetNoFimex
 {
 
-class IndexedDataImpl {
+class IndexedData::Impl
+{
 public:
     DataPtr data;
     DataIndex idx;
@@ -46,7 +47,7 @@ IndexedData::IndexedData()
     init(createData(CDM_NAT,0,0.), std::vector<size_t>(0));
 }
 
-IndexedData::IndexedData(DataPtr data, std::vector<std::size_t> dims)
+IndexedData::IndexedData(DataPtr data, const std::vector<std::size_t>& dims)
 {
     init(data, dims);
 }
@@ -54,9 +55,9 @@ IndexedData::IndexedData(DataPtr data, std::vector<std::size_t> dims)
 IndexedData::~IndexedData()
 {}
 
-void IndexedData::init(DataPtr data, std::vector<std::size_t> dims)
+void IndexedData::init(DataPtr data, const std::vector<std::size_t>& dims)
 {
-    p_ = boost::shared_ptr<IndexedDataImpl>(new IndexedDataImpl());
+    p_.reset(new Impl());
     p_->data = data;
     setDims(dims);
 }

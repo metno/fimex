@@ -41,7 +41,7 @@ using namespace std;
 static Logger_p logger = getLogger("fimex.NetCDF_CDMReader");
 
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
-: ncFile(std::auto_ptr<Nc>(new Nc()))
+    : ncFile(new Nc())
 {
     ScopedCritical lock(Nc::getMutex());
     char* fimexSlotsChar = getenv("FIMEX_CHUNK_CACHE_SLOTS");
