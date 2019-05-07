@@ -32,6 +32,7 @@
 #include "fimex/interpolation.h"
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <iostream>
 #include <regex>
@@ -681,8 +682,8 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     const CDMVariable& yVar = getVariable(yDim);
     assert(xVar.hasData());
     assert(yVar.hasData());
-    boost::shared_array<double> xData = xVar.getData()->asDouble();
-    boost::shared_array<double> yData = yVar.getData()->asDouble();
+    shared_array<double> xData = xVar.getData()->asDouble();
+    shared_array<double> yData = yVar.getData()->asDouble();
     size_t xDimLength = getDimension(xDim).getLength();
     size_t yDimLength = getDimension(yDim).getLength();
     assert(xDimLength == xVar.getData()->size());
@@ -690,20 +691,20 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     std::string xUnits = getUnits(xDim);
     if (std::regex_match(xUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
-        boost::shared_array<double> newXData(new double[xDimLength]);
+        shared_array<double> newXData(new double[xDimLength]);
         std::transform(&xData[0], &xData[0]+xDimLength, &newXData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
         xData = newXData;
     }
     std::string yUnits = getUnits(yDim);
     if (std::regex_match(yUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
-        boost::shared_array<double> newYData(new double[yDimLength]);
+        shared_array<double> newYData(new double[yDimLength]);
         std::transform(&yData[0], &yData[0]+yDimLength, &newYData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
         yData = newYData;
     }
     size_t fieldSize = xDimLength * yDimLength;
-    boost::shared_array<double> longVal(new double[fieldSize]);
-    boost::shared_array<double> latVal(new double[fieldSize]);
+    shared_array<double> longVal(new double[fieldSize]);
+    shared_array<double> latVal(new double[fieldSize]);
     std::string lonLatProj(MIFI_WGS84_LATLON_PROJ4);
     assert(projection.get() != 0);
     std::string projStr = projection->getProj4String();

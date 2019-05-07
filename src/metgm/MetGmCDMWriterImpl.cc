@@ -43,6 +43,7 @@
 //
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/SharedArray.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
@@ -54,11 +55,9 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-// boost
-#include <boost/shared_array.hpp>
-
 // standard
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <deque>

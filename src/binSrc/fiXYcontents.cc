@@ -93,7 +93,7 @@ static map<string, double> calcStats(DataPtr data) {
     size_t undefs = 0;
     { // count and remove undefs
         vec.reserve(data->size());
-        boost::shared_array<double> array = data->asDouble();
+        shared_array<double> array = data->asDouble();
         for (size_t i = 0; i < data->size(); i++) {
             if (mifi_isnan(array[i])) {
                 undefs++;
@@ -237,7 +237,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                     }
                     tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "hours since " + make_time_string_extended(refTime),
                                                              sb.getTimeVariableSliceBuilder());
-                    boost::shared_array<float> tArray = tData->asFloat();
+                    shared_array<float> tArray = tData->asFloat();
                     set<long> forecastTimes60;
                     if (vm.count("forecastTime")) {
                         vector<float> ft = tokenizeDotted<float>(vm["forecastTime"].as<string>(), ",");
@@ -278,7 +278,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
                         transform(lp.begin(), lp.end(), lp.begin(), bind1st(multiplies<float>(),10.));
                         layerVal10.insert(lp.begin(), lp.end());
                     }
-                    boost::shared_array<float> zArray = zData->asFloat();
+                    shared_array<float> zArray = zData->asFloat();
                     for (vector<CoordinateSystemSliceBuilder>::iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
                         for (size_t i = 0; i < zData->size(); i++) {
                             if (layerPos.size() && layerPos.find(i) == layerPos.end()) continue;
@@ -325,7 +325,7 @@ static void runStats(po::variables_map& vm, CDMReader_p reader)
             unit = cdm.getUnits(*varIt);
             printf("Var: %17s %17s %10s %15s %ldx%ld: %ld\n", varIt->c_str(), stdName.c_str(), unit.c_str(), make_time_string(refTime).c_str(), xSize, ySize,
                    csbs.size());
-            boost::shared_array<float> tArray, zArray;
+            shared_array<float> tArray, zArray;
             if (tData.get() != 0) tArray = tData->asFloat();
             if (zData.get() != 0) zArray = zData->asFloat();
             for (vector<CoordinateSystemSliceBuilder>::const_iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {

@@ -37,6 +37,7 @@
 #include "CDMMergeUtils.h"
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <iterator>
 #include <numeric>
@@ -333,7 +334,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
             usedDimensions.insert(shape[0]);
             DataPtr vData = dataReader_->getScaledData((*va)->getName());
             if (vData->size() > 0) {
-                boost::shared_array<double> vArray = vData->asDouble();
+                shared_array<double> vArray = vData->asDouble();
                 // calculate everything in the original unit
                 string vaUnits = cdm.getUnits((*va)->getName());
                 double offset,slope;
@@ -453,8 +454,8 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
             continue;
 
         // reproject grid to lon-lat
-        boost::shared_array<double> xArray = xData->asDouble();
-        boost::shared_array<double> yArray = yData->asDouble();
+        shared_array<double> xArray = xData->asDouble();
+        shared_array<double> yArray = yData->asDouble();
         vector<double> xLonVals(nx*ny), yLatVals(nx*ny);
         for (size_t ix = 0, i = 0; ix < nx; ++ix) {
             for (size_t iy = 0; iy < ny; ++iy, ++i) {

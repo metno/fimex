@@ -32,8 +32,6 @@
 //
 #include "MetGmHandlePtr.h"
 
-// boost
-//
 #include <memory>
 
 namespace MetNoFimex {

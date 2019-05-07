@@ -52,16 +52,18 @@ using namespace std;
 
 namespace {
 
-template<class T>
-boost::shared_array<T> dataAs(DataPtr data);
+template <class T>
+shared_array<T> dataAs(DataPtr data);
 
-template<>
-boost::shared_array<float> dataAs<float>(DataPtr data) {
+template <>
+shared_array<float> dataAs<float>(DataPtr data)
+{
     return data->asFloat();
 }
 
-template<>
-boost::shared_array<double> dataAs<double>(DataPtr data) {
+template <>
+shared_array<double> dataAs<double>(DataPtr data)
+{
     return data->asDouble();
 }
 
@@ -81,7 +83,7 @@ void convert_omega_to_vertical_wind<float>(size_t size, const float* o, const fl
 }
 
 typedef float VerticalData_t;
-typedef boost::shared_array<VerticalData_t> VerticalDataArray;
+typedef shared_array<VerticalData_t> VerticalDataArray;
 
 const float relative_humidity_scale_factor = 25000;
 
@@ -232,11 +234,11 @@ private:
 DataPtr ThetaTemperatureConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
 
     const float add_offset = reader_->getCDM().getAddOffset(theta_);
-    boost::shared_array<float> thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
+    shared_array<float> thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
 
     const float cp = 1004.; // J/kgK
     const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
@@ -325,12 +327,12 @@ private:
 DataPtr HumidityConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
 
-    boost::shared_array<float> shValues = checkData(reader_->getScaledDataSliceInUnit(specific_, "1", unLimDimPos), size, specific_)->asFloat();
-    boost::shared_array<float> airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
-    boost::shared_array<short> rhValues(new short[size]);
+    shared_array<float> shValues = checkData(reader_->getScaledDataSliceInUnit(specific_, "1", unLimDimPos), size, specific_)->asFloat();
+    shared_array<float> airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
+    shared_array<short> rhValues(new short[size]);
     for (size_t i = 0; i < size; i++) {
         // we have pressure in hPa and need Pa for
         // mifi_specific_to_relative_humidity, we must multiply our
@@ -435,7 +437,7 @@ private:
 DataPtr OmegaVerticalConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData); // unit: hPa
+    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData); // unit: hPa
     const size_t size = pressureData->size();
     VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_));
     VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(omega_, "hPa/s", unLimDimPos), size, omega_));

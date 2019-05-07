@@ -32,6 +32,7 @@
 #include "felt/FeltTypeConversion.h"
 #include "felt/FeltField.h"
 
+#include <algorithm>
 #include <fstream>
 #include <mutex>
 #include <sstream>

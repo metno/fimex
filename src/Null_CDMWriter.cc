@@ -22,13 +22,14 @@
  */
 
 #include "fimex/Null_CDMWriter.h"
-#include <boost/shared_array.hpp>
 #include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
-#include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "MutexLock.h"
 #include "fimex/Logger.h"
+#include "fimex/SharedArray.h"
+#include "fimex/Utils.h"
+
+#include "MutexLock.h"
 
 #include "fimex_config.h"
 #ifdef HAVE_MPI

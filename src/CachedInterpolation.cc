@@ -171,12 +171,12 @@ CachedInterpolation::CachedInterpolation(const std::string& xDimName, const std:
     createReducedDomain(xDimName, yDimName);
 }
 
-boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
+shared_array<float> CachedInterpolation::interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const
 {
     const size_t outLayerSize = outX * outY;
     const size_t inZ = size / (inX*inY);
     newSize = outLayerSize*inZ;
-    boost::shared_array<float> outfield(new float[newSize]);
+    shared_array<float> outfield(new float[newSize]);
 
 #ifdef _OPENMP
 #pragma omp parallel default(shared)
@@ -311,14 +311,14 @@ CachedNNInterpolation::CachedNNInterpolation(const std::string& xDimName, const 
     }
 }
 
-boost::shared_array<float> CachedNNInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
+shared_array<float> CachedNNInterpolation::interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const
 {
     const size_t outLayerSize = outX * outY;
     const size_t inLayerSize = inX * inY;
     const size_t inZ = size / inLayerSize;
     newSize = outLayerSize * inZ;
 
-    boost::shared_array<float> outData(new float[newSize]);
+    shared_array<float> outData(new float[newSize]);
     std::fill(outData.get(), outData.get() + newSize, MIFI_UNDEFINED_F);
 
     for (size_t z = 0; z < inZ; ++z) {

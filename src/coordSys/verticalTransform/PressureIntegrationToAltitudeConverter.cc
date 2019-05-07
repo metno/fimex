@@ -39,9 +39,9 @@
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
 #include "fimex/vertical_coordinate_transformations.h"
-
 #include "fimex/ArrayLoop.h"
 
+#include <cassert>
 #include <memory>
 
 namespace MetNoFimex {
@@ -141,7 +141,7 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     }
     DataPtr pressColumnData = pressure_->getDataSlice(sbPressColumn);
     assert(pressColumnData->size() == n_z);
-    boost::shared_array<float> pColumnVal = pressColumnData->asFloat();
+    shared_array<float> pColumnVal = pressColumnData->asFloat();
     const ptrdiff_t z_last = int(n_z)-1;
     assert(z_last > 0);
     const float p_first = pColumnVal[0];
@@ -188,7 +188,7 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     group.add(sap.dims).add(sgp.dims).add(airt.dims).add(pressure.dims).add(soAltitude);
 
     ArrayDims siSHum;
-    boost::shared_array<float> shVal;
+    shared_array<float> shVal;
     if (!specific_humidity_.empty()) {
         SliceBuilder sbSHum = adaptSliceBuilder(rcdm, specific_humidity_, sb);
         if (DataPtr shData = getSliceData(reader_, sbSHum, specific_humidity_, "1")) {
@@ -205,7 +205,7 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     const size_t dZSHum = siSHum.delta(zName), dZAlti = soAltitude.delta(zName);
 
     const size_t size = soAltitude.volume();
-    boost::shared_array<double> altiVal(new double[size]);
+    shared_array<double> altiVal(new double[size]);
 
     // 4)
 #if 0 && defined(_OPENMP)

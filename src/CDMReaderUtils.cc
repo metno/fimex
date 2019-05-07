@@ -27,14 +27,14 @@
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/SharedArray.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeUtils.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 
-#include <boost/shared_array.hpp>
-
+#include <cassert>
 #include <map>
 #include <memory>
 #include <set>
@@ -54,7 +54,7 @@ FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
         const string units = cdm.getUnits(varname);
         TimeUnit tu(units);
         DataPtr timeData = reader->getData(varname);
-        boost::shared_array<double> times = timeData->asDouble();
+        shared_array<double> times = timeData->asDouble();
         const double* tPtr = &times[0];
         const double* end = tPtr + timeData->size();
         while (tPtr != end) {
@@ -84,7 +84,7 @@ FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
 vector<double> getDataSliceInUnit(CDMReader_p reader, const string& var, const string& unit, int unLimDimPos)
 {
     DataPtr data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
-    boost::shared_array<double> array = data->asDouble();
+    shared_array<double> array = data->asDouble();
     return vector<double>(&array[0], &array[0] + data->size());
 }
 

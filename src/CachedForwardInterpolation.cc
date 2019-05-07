@@ -128,12 +128,12 @@ float AggMedian::get_and_reset()
 }
 
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
-CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, boost::shared_array<double> pOnX,
-                                                       boost::shared_array<double> pOnY, size_t inx, size_t iny, size_t outx, size_t outy)
+CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, shared_array<double> pOnX,
+                                                       shared_array<double> pOnY, size_t inx, size_t iny, size_t outx, size_t outy)
     : CachedInterpolationInterface(xDimName, yDimName, inx, iny, outx, outy)
 {
     const size_t outLayerSize = outX * outY;
-    pointsInIn = boost::shared_array<vector<size_t>>(new vector<size_t>[outLayerSize]);
+    pointsInIn = shared_array<vector<size_t>>(new vector<size_t>[outLayerSize]);
     size_t minInX = inX, maxInX = 0, minInY = inY, maxInY = 0;
     maxPointsInIn = 0;
     const RoundAndClamp roundX(0, outX - 1, INVALID);
@@ -202,13 +202,13 @@ CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimNa
 
 CachedForwardInterpolation::~CachedForwardInterpolation() {}
 
-boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
+shared_array<float> CachedForwardInterpolation::interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const
 {
     size_t outLayerSize = outX*outY;
     size_t inLayerSize = inX * inY;
     size_t inZ = size / inLayerSize;
     newSize = outLayerSize*inZ;
-    boost::shared_array<float> outData(new float[newSize]);
+    shared_array<float> outData(new float[newSize]);
     for (size_t z = 0; z < inZ; ++z) {
         float* outDataIt = &outData[z*outLayerSize];
         for (size_t i = 0; i < outLayerSize; i++) {

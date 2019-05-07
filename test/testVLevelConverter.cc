@@ -93,7 +93,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator)
             DataPtr vd = altivc->getDataSlice(sb);
             TEST4FIMEX_REQUIRE(vd);
             TEST4FIMEX_REQUIRE(2 == vd->size());
-            boost::shared_array<float> va = vd->asFloat();
+            shared_array<float> va = vd->asFloat();
             TEST4FIMEX_REQUIRE(va);
             TEST4FIMEX_CHECK_CLOSE(29910, va[0], 1);
             TEST4FIMEX_CHECK_CLOSE(23210, va[1], 1);
@@ -103,7 +103,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator)
             DataPtr vd = altivc->getDataSlice(sb);
             TEST4FIMEX_REQUIRE(vd);
             TEST4FIMEX_REQUIRE_EQ(2, vd->size());
-            boost::shared_array<float> va = vd->asFloat();
+            shared_array<float> va = vd->asFloat();
             TEST4FIMEX_REQUIRE(va);
             TEST4FIMEX_CHECK_CLOSE(198, va[0], 1);
             TEST4FIMEX_CHECK_CLOSE(173, va[1], 1);
@@ -153,7 +153,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
     TEST4FIMEX_REQUIRE_EQ(6, vd->size());
-    boost::shared_array<float> va = vd->asFloat();
+    shared_array<float> va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
     TEST4FIMEX_CHECK_CLOSE(12.1, va[0], 1);
     TEST4FIMEX_CHECK_CLOSE(12.4, va[1], 1);

@@ -48,9 +48,9 @@ static MutexType ncMutex;
 
 namespace {
 
-DataPtr createDataStringsFromNc(boost::shared_array<char*> cvals, size_t len)
+DataPtr createDataStringsFromNc(shared_array<char*> cvals, size_t len)
 {
-    boost::shared_array<std::string> vals(new std::string[len]);
+    shared_array<std::string> vals(new std::string[len]);
     for (size_t i=0; i<len; ++i) {
         vals[i] = cvals[i];
     }
@@ -162,7 +162,7 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
     ncCheck(nc_inq_attlen (ncId, varId, attName.c_str(), &attrLen));
     switch (dt) {
     case NC_BYTE: {
-        boost::shared_array<char> vals(new char[attrLen]);
+        shared_array<char> vals(new char[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
@@ -176,59 +176,60 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
         return createData(vals);
     }
     case NC_SHORT: {
-        boost::shared_array<short> vals(new short[attrLen]);
+        shared_array<short> vals(new short[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_INT: {
-        boost::shared_array<int> vals(new int[attrLen]);
+        shared_array<int> vals(new int[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_FLOAT: {
-        boost::shared_array<float> vals(new float[attrLen]);
+        shared_array<float> vals(new float[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_DOUBLE: {
-        boost::shared_array<double> vals(new double[attrLen]);
+        shared_array<double> vals(new double[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
 #ifdef NC_NETCDF4
     case NC_UBYTE: {
-        boost::shared_array<unsigned char> vals(new unsigned char[attrLen]);
+        shared_array<unsigned char> vals(new unsigned char[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_USHORT: {
-        boost::shared_array<unsigned short> vals(new unsigned short[attrLen]);
+        shared_array<unsigned short> vals(new unsigned short[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_UINT: {
-        boost::shared_array<unsigned int> vals(new unsigned int[attrLen]);
+        shared_array<unsigned int> vals(new unsigned int[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_INT64: {
-        boost::shared_array<long long> vals(new long long[attrLen]);
+        shared_array<long long> vals(new long long[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_UINT64: {
-        boost::shared_array<unsigned long long> vals(new unsigned long long[attrLen]);
+        shared_array<unsigned long long> vals(new unsigned long long[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_STRING: {
-        boost::shared_array<char*> cvals(new char*[attrLen]);
+        shared_array<char*> cvals(new char*[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&cvals[0])));
         return createDataStringsFromNc(cvals, attrLen);
     }
 #endif
     case NC_NAT:
-    default: return createData(0, boost::shared_array<int>(new int[0]));
+    default:
+        return createData(0, shared_array<int>(new int[0]));
     }
 }
 
@@ -253,65 +254,66 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         return createData(vals);
     }
     case NC_BYTE: {
-        boost::shared_array<char> vals(new char[sliceLen]);
+        shared_array<char> vals(new char[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_SHORT: {
-        boost::shared_array<short> vals(new short[sliceLen]);
+        shared_array<short> vals(new short[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT: {
-        boost::shared_array<int> vals(new int[sliceLen]);
+        shared_array<int> vals(new int[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_FLOAT: {
-        boost::shared_array<float> vals(new float[sliceLen]);
+        shared_array<float> vals(new float[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_DOUBLE: {
-        boost::shared_array<double> vals(new double[sliceLen]);
+        shared_array<double> vals(new double[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
 #ifdef NC_NETCDF4
     case NC_UBYTE: {
-        boost::shared_array<unsigned char> vals(new unsigned char[sliceLen]);
+        shared_array<unsigned char> vals(new unsigned char[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_USHORT: {
-        boost::shared_array<unsigned short> vals(new unsigned short[sliceLen]);
+        shared_array<unsigned short> vals(new unsigned short[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT: {
-        boost::shared_array<unsigned int> vals(new unsigned int[sliceLen]);
+        shared_array<unsigned int> vals(new unsigned int[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT64: {
-        boost::shared_array<long long> vals(new long long[sliceLen]);
+        shared_array<long long> vals(new long long[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT64: {
-        boost::shared_array<unsigned long long> vals(new unsigned long long[sliceLen]);
+        shared_array<unsigned long long> vals(new unsigned long long[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_STRING: {
         // this will fail if NetCDF file does not support NC_STRING, e.g. for NetCDF 3 or NetCDF 4 classic
-        boost::shared_array<char*> cvals(new char*[sliceLen]);
+        shared_array<char*> cvals(new char*[sliceLen]);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&cvals[0])));
         return createDataStringsFromNc(cvals, sliceLen);
     }
 #endif
     case NC_NAT:
-    default: return createData(0, boost::shared_array<int>(new int[0]));
+    default:
+        return createData(0, shared_array<int>(new int[0]));
     }
 }
 
@@ -367,8 +369,8 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
 #if NC_NETCDF4
     case NC_STRING: {
         const size_t dataLen = data->size();
-        boost::shared_array<std::string> svals = data->asStrings();
-        boost::shared_array<const char*> cvals(new const char*[dataLen]);
+        shared_array<std::string> svals = data->asStrings();
+        shared_array<const char*> cvals(new const char*[dataLen]);
         for (size_t i=0; i<dataLen; ++i)
             cvals[i] = svals[i].c_str();
         ncCheck(nc_put_vara(ncId, varId, start, count, &cvals[0]));

@@ -31,9 +31,8 @@
 #include "fimex/Data.h"
 #include "fimex/Felt_Types.h"
 #include "fimex/Logger.h"
+#include "fimex/SharedArray.h"
 #include "fimex/TimeUtils.h"
-
-#include <boost/shared_array.hpp>
 
 #include <map>
 #include <memory>

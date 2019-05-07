@@ -25,12 +25,10 @@
 #define METGM_TAGS_H
 
 #include "fimex/CDMReaderDecl.h"
-
-// boost
-#include <boost/shared_array.hpp>
-#include <memory>
+#include "fimex/SharedArray.h"
 
 // standard
+#include <memory>
 #include <string>
 
 namespace MetNoFimex {
@@ -90,17 +88,16 @@ namespace MetNoFimex {
 
         const unsigned long totalDataSize();
         const unsigned long sliceDataSize();
-        const boost::shared_array<float>& data();
+        const shared_array<float>& data();
 
         std::shared_ptr<MetGmXTag>& xTag();
         std::shared_ptr<MetGmYTag>& yTag();
         std::shared_ptr<MetGmVerticalTag>& zTag();
         std::shared_ptr<MetGmTimeTag>& tTag();
 
-        void sliceToMetGmLayout(boost::shared_array<float>& slice);
+        void sliceToMetGmLayout(shared_array<float>& slice);
 
-        boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
-//        void slicesToMetGmLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
+        shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
 
     private:
         MetGmTags() { }

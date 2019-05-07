@@ -60,7 +60,7 @@ values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const s
     if (not axisData or axisData->size() < 2)
         THROW("no data for axis '" << name << "'");
 
-    boost::shared_array<double> array = axisData->asDouble();
+    shared_array<double> array = axisData->asDouble();
     return values_v(array.get(), array.get() + axisData->size());
 }
 

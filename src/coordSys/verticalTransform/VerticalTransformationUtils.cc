@@ -263,12 +263,12 @@ DataPtr getSliceData(CDMReader_p reader, const SliceBuilder& sbOrig, const std::
     return reader->getScaledDataSliceInUnit(varName, unit, sbVar);
 }
 
-boost::shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
+shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
 {
     return getSliceData(reader, sbOrig, varName, unit)->asFloat();
 }
 
-boost::shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
+shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit)
 {
     return getSliceData(reader, sbOrig, varName, unit)->asDouble();
 }
@@ -419,25 +419,25 @@ Var::Var(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& 
 
 VarFloat::VarFloat(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
     : Var(reader, varName, unit, sbOrig)
-    , values(data ? data->asFloat() : boost::shared_array<float>())
+    , values(data ? data->asFloat() : shared_array<float>())
 {
 }
 
 VarFloat::VarFloat(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
-    , values(data ? data->asFloat() : boost::shared_array<float>())
+    , values(data ? data->asFloat() : shared_array<float>())
 {
 }
 
 VarDouble::VarDouble(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig)
     : Var(reader, varName, unit, sbOrig)
-    , values(data ? data->asDouble() : boost::shared_array<double>())
+    , values(data ? data->asDouble() : shared_array<double>())
 {
 }
 
 VarDouble::VarDouble(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig)
     : Var(reader, converter, sbOrig)
-    , values(data ? data->asDouble() : boost::shared_array<double>())
+    , values(data ? data->asDouble() : shared_array<double>())
 {
 }
 

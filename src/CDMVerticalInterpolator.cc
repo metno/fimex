@@ -221,7 +221,7 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
 
     cdm_->addDimension(CDMDimension(pimpl_->vAxis, level1.size()));
     CDMVariable var(pimpl_->vAxis, CDM_DOUBLE, vector<string>(1, pimpl_->vAxis));
-    boost::shared_array<double> level1d(new double[level1.size()]);
+    shared_array<double> level1d(new double[level1.size()]);
     copy(level1.begin(), level1.end(), &level1d[0]);
     var.setData(createData(level1.size(), level1d));
     cdm_->addVariable(var);
@@ -363,7 +363,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     ArrayGroup group = ArrayGroup().add(siData).add(siVertical).add(soData).add(soVertical);
     group.minimizeShared(0); // we have to treat each value separately
 
-    boost::shared_array<double> valueMin, valueMax;
+    shared_array<double> valueMin, valueMax;
     size_t VALID_MIN = 0, VALID_MAX = 0;
     if (pimpl_->templateCS) {
         if (!pimpl_->ignoreValidityMax) {
@@ -431,11 +431,11 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
 
     DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
     const double badValue = cdm_->getFillValue(varName);
-    boost::shared_array<float> iData = data2InterpolationArray(data, badValue);
+    shared_array<float> iData = data2InterpolationArray(data, badValue);
     const size_t oSize = soData.volume();
-    boost::shared_array<float> oData(new float[oSize]);
-    boost::shared_array<float> iVerticalValues = iVerticalData->asFloat();
-    boost::shared_array<float> oVerticalValues;
+    shared_array<float> oData(new float[oSize]);
+    shared_array<float> iVerticalValues = iVerticalData->asFloat();
+    shared_array<float> oVerticalValues;
     if (pimpl_->templateCS)
         oVerticalValues = oVerticalData->asFloat();
 

@@ -35,8 +35,8 @@ Data::~Data() {}
 
 namespace {
 
-template<typename T>
-DataPtr createDataT(size_t length, boost::shared_array<T> array)
+template <typename T>
+DataPtr createDataT(size_t length, shared_array<T> array)
 {
     typedef DataImpl<T> Impl;
     return std::make_shared<Impl>(array, length);
@@ -74,37 +74,37 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
 
 } // namespace
 
-DataPtr createData(size_t length, boost::shared_array<double> array)
+DataPtr createData(size_t length, shared_array<double> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<float> array)
+DataPtr createData(size_t length, shared_array<float> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<int> array)
+DataPtr createData(size_t length, shared_array<int> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<short> array)
+DataPtr createData(size_t length, shared_array<short> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<char> array)
+DataPtr createData(size_t length, shared_array<char> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<unsigned int> array)
+DataPtr createData(size_t length, shared_array<unsigned int> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<unsigned short> array)
+DataPtr createData(size_t length, shared_array<unsigned short> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<unsigned char> array)
+DataPtr createData(size_t length, shared_array<unsigned char> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<long long> array)
+DataPtr createData(size_t length, shared_array<long long> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<unsigned long long> array)
+DataPtr createData(size_t length, shared_array<unsigned long long> array)
 { return createDataT(length, array); }
 
-DataPtr createData(size_t length, boost::shared_array<std::string> array)
+DataPtr createData(size_t length, shared_array<std::string> array)
 { return createDataT(length, array); }
 
 DataPtr createData(CDMDataType datatype, size_t length, double val)

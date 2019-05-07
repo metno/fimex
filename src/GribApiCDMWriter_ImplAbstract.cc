@@ -41,9 +41,9 @@
 #include <libxml/xpath.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cerrno>
 #include <cmath>
-#include <cstdio>
 #include <cstring>
 #include <functional>
 
@@ -190,7 +190,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                 if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
                     CoordinateAxis_cp rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
                     DataPtr refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
-                    boost::shared_array<unsigned long long> refs = refTimesD->asUInt64();
+                    shared_array<unsigned long long> refs = refTimesD->asUInt64();
                     /* do something with the refTimes and select the wanted Position */
                     size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
                     sb.setReferenceTimePos(refTimePos);
@@ -210,7 +210,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                     ss << "seconds since " << make_time_string_extended(refTimes[0]);
                 }
                 DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
-                boost::shared_array<long long> timesA = times->asInt64();
+                shared_array<long long> timesA = times->asInt64();
                 TimeUnit tu(ss.str());
                 transform(&timesA[0],
                         &timesA[0] + times->size(),
@@ -257,7 +257,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                     stringstream ss;
                     ss << "seconds since " << make_time_string_extended(rTime);
                     DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
-                    boost::shared_array<long long> timesA = times->asInt64();
+                    shared_array<long long> timesA = times->asInt64();
                     TimeUnit tu(ss.str());
                     transform(&timesA[0],
                             &timesA[0] + times->size(),
@@ -285,7 +285,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                                 setParameter(*var, levelVal);
                                 DataPtr data = cdmReader->getDataSlice(*var, sb);
                                 if (data->size() != 0) {
-                                    boost::shared_array<double> da = data->asDouble();
+                                    shared_array<double> da = data->asDouble();
                                     size_t countMissing = count(&da[0], &da[0] + data->size(), cdm.getFillValue(*var));
                                     if (countMissing < data->size()) {
                                         data = handleTypeScaleAndMissingData(*var, levelVal, data);
@@ -403,7 +403,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
     std::string unit;
     if (verticalAxis != ""){
         DataPtr myLevelData = cdmReader->getData(verticalAxis);
-        const boost::shared_array<double> levelDataArray = myLevelData->asDouble();
+        const shared_array<double> levelDataArray = myLevelData->asDouble();
         levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
         CDMAttribute attr;
         if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {
@@ -489,7 +489,7 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
     std::vector<FimexTime> timeData;
     std::vector<double> timeDataVector;
     if (time != "") {
-        const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+        const shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
         timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
     } else {
         // find a somewhat useful default, wild guess: first time in first time-axis found
@@ -497,7 +497,7 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
             CoordinateAxis_cp timeAxis = (*csit)->getTimeAxis();
             if (timeAxis.get() != 0) {
                 time = timeAxis->getName();
-                const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+                const shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
                 timeDataVector.insert(timeDataVector.begin(), timeDataArray[0]);
             }
         }

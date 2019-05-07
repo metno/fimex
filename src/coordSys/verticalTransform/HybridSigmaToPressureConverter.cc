@@ -69,7 +69,7 @@ DataPtr HybridSigmaToPressureConverter::getDataSlice(const SliceBuilder& sb) con
     VarDouble b(reader_, b_, "", sb);
 
     ArrayDims out_dims = makeArrayDims(sb);
-    boost::shared_array<double> out_values(new double[out_dims.volume()]);
+    shared_array<double> out_values(new double[out_dims.volume()]);
 
     enum { PS, A, B, OUT };
     ArrayGroup group;

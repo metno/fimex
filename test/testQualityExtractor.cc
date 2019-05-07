@@ -22,8 +22,6 @@
  */
 
 #include "testinghelpers.h"
-#include <boost/shared_array.hpp>
-#include <memory>
 
 #ifdef HAVE_FELT
 #include "FeltCDMReader2.h"
@@ -37,9 +35,12 @@
 #else
 #include "fimex/Null_CDMWriter.h"
 #endif
-#include "fimex/Logger.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
+#include "fimex/SharedArray.h"
 #include "fimex/mifi_constants.h"
+
+#include <memory>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -116,7 +117,7 @@ TEST4FIMEX_TEST_CASE(test_qualityExtract_mask)
 
     const int NXSI = 21, NETA = 16, N_SRHO=35;
     TEST4FIMEX_CHECK_EQ(sliceM->size(), N_SRHO * NXSI * NETA);
-    boost::shared_array<double> valuesM = sliceM->asDouble();
+    shared_array<double> valuesM = sliceM->asDouble();
     const int offset0 = 0, offset1 = 12+NXSI*12;
     TEST4FIMEX_CHECK(valuesM[offset0] > 1e36);
     TEST4FIMEX_CHECK(fabs(valuesM[offset1] - 35.114) < 0.001);

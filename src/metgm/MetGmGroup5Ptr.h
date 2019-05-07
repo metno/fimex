@@ -41,10 +41,7 @@
 //
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVariable.h"
-
-// boost
-//
-#include <boost/shared_array.hpp>
+#include "fimex/SharedArray.h"
 
 #include <memory>
 
@@ -66,25 +63,25 @@ namespace MetNoFimex {
         static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
                                                                                     const std::shared_ptr<MetGmGroup3Ptr> gp3);
 
-        void sliceToMetGmLayout(boost::shared_array<float>& slice);
+        void sliceToMetGmLayout(shared_array<float>& slice);
 
-        boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
+        shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
 
         void dumpFimexLayout();
         void dumpMetGmLayout();
 
-        boost::shared_array<float>& data() { return data_; }
+        shared_array<float>& data() { return data_; }
         std::string units() {return units_; }
 
     private:
 
         void toFimexLayout();
-        void slicesToFimexLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
+        void slicesToFimexLayout(shared_array<float>& slices, size_t numberOfSlices);
 
         // reorder z-axis and set fill-values
         void toMetGmLayout();
 
-        explicit MetGmGroup5Ptr(const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::shared_ptr<MetGmHDTag> hdTag, const boost::shared_array<float> data,
+        explicit MetGmGroup5Ptr(const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::shared_ptr<MetGmHDTag> hdTag, const shared_array<float> data,
                                 const std::string fillValue = std::string());
 
         const std::shared_ptr<MetGmGroup3Ptr> pGp3_;
@@ -92,7 +89,7 @@ namespace MetNoFimex {
 
         long sOffset_;
         long eOffset_;
-        boost::shared_array<float>    data_;
+        shared_array<float> data_;
         std::string                   fillValue_;
         std::string                   units_;
     };

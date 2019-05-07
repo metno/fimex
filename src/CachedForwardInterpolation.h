@@ -36,16 +36,16 @@ struct Aggregator;
 class CachedForwardInterpolation : public CachedInterpolationInterface
 {
 private:
-    boost::shared_array<std::vector<size_t>> pointsInIn;
+    shared_array<std::vector<size_t>> pointsInIn;
     size_t maxPointsInIn;
     std::unique_ptr<Aggregator> agg;
     bool undefAggr;
 
 public:
-    CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, boost::shared_array<double> pointsOnXAxis,
-                               boost::shared_array<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    CachedForwardInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, shared_array<double> pointsOnXAxis,
+                               shared_array<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
     ~CachedForwardInterpolation();
-    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
+    shared_array<float> interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const override;
 };
 
 } // namespace MetNoFimex

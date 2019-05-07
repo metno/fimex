@@ -51,29 +51,29 @@ public:
 
     void toStream(std::ostream& out, const std::string&) const { out << text_; };
 
-    boost::shared_array<char> asChar() const { throw CDMException("cannot convert string data to char"); }
+    shared_array<char> asChar() const { throw CDMException("cannot convert string data to char"); }
 
-    boost::shared_array<short> asShort() const { throw CDMException("cannot convert string data to short"); }
+    shared_array<short> asShort() const { throw CDMException("cannot convert string data to short"); }
 
-    boost::shared_array<int> asInt() const { throw CDMException("cannot convert string data to int"); }
+    shared_array<int> asInt() const { throw CDMException("cannot convert string data to int"); }
 
-    boost::shared_array<long long> asInt64() const { throw CDMException("cannot convert string data to long long"); }
+    shared_array<long long> asInt64() const { throw CDMException("cannot convert string data to long long"); }
 
-    boost::shared_array<unsigned char> asUChar() const { throw CDMException("cannot convert string data to unsigned char"); }
+    shared_array<unsigned char> asUChar() const { throw CDMException("cannot convert string data to unsigned char"); }
 
-    boost::shared_array<unsigned short> asUShort() const { throw CDMException("cannot convert string data to unsigned short"); }
+    shared_array<unsigned short> asUShort() const { throw CDMException("cannot convert string data to unsigned short"); }
 
-    boost::shared_array<unsigned int> asUInt() const { throw CDMException("cannot convert string data to unsigned int"); }
+    shared_array<unsigned int> asUInt() const { throw CDMException("cannot convert string data to unsigned int"); }
 
-    boost::shared_array<unsigned long long> asUInt64() const { throw CDMException("cannot convert string data to unsigned long long"); }
+    shared_array<unsigned long long> asUInt64() const { throw CDMException("cannot convert string data to unsigned long long"); }
 
-    boost::shared_array<float> asFloat() const { throw CDMException("cannot convert string data to float"); }
+    shared_array<float> asFloat() const { throw CDMException("cannot convert string data to float"); }
 
-    boost::shared_array<double> asDouble() const { throw CDMException("cannot convert string data to double"); }
+    shared_array<double> asDouble() const { throw CDMException("cannot convert string data to double"); }
 
-    boost::shared_array<std::string> asStrings() const
+    shared_array<std::string> asStrings() const
     {
-        boost::shared_array<std::string> strings(new std::string[1]);
+        shared_array<std::string> strings(new std::string[1]);
         strings[0] = text_;
         return strings;
     }

@@ -115,8 +115,8 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
                 double p0 = 100000;
                 const CDMVariable& ap = getCDM().getVariable("ap");
                 const CDMVariable& b = getCDM().getVariable("b");
-                boost::shared_array<double> apData = ap.getData()->asDouble();
-                boost::shared_array<double> bData = b.getData()->asDouble();
+                shared_array<double> apData = ap.getData()->asDouble();
+                shared_array<double> bData = b.getData()->asDouble();
                 for (size_t i = 0; i < ap.getData()->size(); ++i) {
                     retValues.push_back(apData[i]/p0 + bData[i]);
                 }

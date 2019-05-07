@@ -27,17 +27,19 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/GribUtils.h"
+#include "fimex/SharedArray.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
 
 #include <boost/program_options.hpp>
-#include <boost/shared_array.hpp>
 
+#include <cassert>
 #include <cstdio>
 #include <fstream>
-#include <grib_api.h>
 #include <iostream>
 #include <memory>
+
+#include <grib_api.h>
 
 namespace po = boost::program_options;
 
@@ -158,7 +160,7 @@ static std::shared_ptr<grib_handle> cutBoundingBox(const std::shared_ptr<grib_ha
             if (nv != static_cast<unsigned long>(latN*lonN)) {
                 throw runtime_error("numberOfValues ("+type2string(nv) + ") != latN*lonN ("+type2string(latN)+"*"+type2string(lonN)+")");
             }
-            boost::shared_array<double> array(new double[nv]);
+            shared_array<double> array(new double[nv]);
             if (debug) cerr << "reading " << nv << " values" << endl;
             MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &array[0], &nv), 0);
             if (debug) cerr << "got " << nv << " values" << endl;
@@ -195,7 +197,7 @@ static std::shared_ptr<grib_handle> cutBoundingBox(const std::shared_ptr<grib_ha
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Ni", (lonFirstLast.second-lonFirstLast.first)),0);
 
             // set the data
-            boost::shared_array<double> outArray = outData->asDouble();
+            shared_array<double> outArray = outData->asDouble();
             if (debug) cerr << "setting new data" << endl;
             MIFI_GRIB_CHECK(grib_set_double_array(newGh.get(), "values", &outArray[0], outData->size()), 0);
 

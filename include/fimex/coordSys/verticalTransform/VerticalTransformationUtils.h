@@ -31,17 +31,15 @@
 #ifndef VERTICALTRANSFORMATIONUTILS_H
 #define VERTICALTRANSFORMATIONUTILS_H
 
+#include "fimex/ArrayLoop.h"
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/DataDecl.h"
+#include "fimex/SharedArray.h"
+#include "fimex/SliceBuilder.h"
 #include "fimex/coordSys/CoordSysDecl.h"
 
-#include <fimex/SliceBuilder.h>
-#include <fimex/ArrayLoop.h>
-
-#include <boost/shared_array.hpp>
-#include <memory>
-
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -96,8 +94,8 @@ SliceBuilder adaptSliceBuilder(const CDM& cdm, const std::string& varName, const
 SliceBuilder adaptSliceBuilder(const CDM& cdm, VerticalConverter_p converter, const SliceBuilder& sb);
 
 DataPtr getSliceData(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
-boost::shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
-boost::shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
+shared_array<float> getSliceFloats(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
+shared_array<double> getSliceDoubles(CDMReader_p reader, const SliceBuilder& sbOrig, const std::string& varName, const std::string& unit);
 
 std::vector<size_t> getDimSizes(const CDM& cdm, const std::vector<std::string>& dimNames);
 
@@ -138,14 +136,14 @@ struct VarFloat : public Var {
     VarFloat(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
     VarFloat(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig);
 
-    boost::shared_array<float> values;
+    shared_array<float> values;
 };
 
 struct VarDouble : public Var {
     VarDouble(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
     VarDouble(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig);
 
-    boost::shared_array<double> values;
+    shared_array<double> values;
 };
 
 } // namespace MetNoFimex

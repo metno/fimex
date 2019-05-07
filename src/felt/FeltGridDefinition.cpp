@@ -27,13 +27,14 @@
  */
 
 #include "felt/FeltGridDefinition.h"
-#include "felt/FeltFile.h"
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-#include <stdexcept>
-#include <cmath>
 #include "felt/FeltConstants.h"
+#include "felt/FeltFile.h"
+
+#include <cassert>
+#include <cmath>
+#include <sstream>
+#include <stdexcept>
+
 #include "proj_api.h"
 
 namespace felt {

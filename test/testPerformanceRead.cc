@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < 67; ++i) {
         data = reader->getScaledDataSliceInUnit("air_temperature_pl", "mK", i);
     }
-    boost::shared_array<double> da = data->asDouble();
+    shared_array<double> da = data->asDouble();
     double sum = accumulate(&da[0], &da[0]+data->size(), 0.);
     cerr << "sum: " << sum << endl;
     return 0;

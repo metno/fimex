@@ -46,6 +46,7 @@
 #include "fimex_config.h"
 
 #include <algorithm>
+#include <cassert>
 #include <limits>
 #include <map>
 #include <regex>
@@ -532,7 +533,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             } else if (mode == "extraLevel1" || mode == "extraLevel2") {
                 vector<double> pv = readVarPv_(exampleVar);
                 size_t offset = (mode == "extraLevel1") ? 0 : pv.size()/2;
-                boost::shared_array<unsigned int> lv = levelData->asUInt();
+                shared_array<unsigned int> lv = levelData->asUInt();
                 for (size_t i = 0; i < levelData->size(); i++) {
                     size_t pos = offset + lv[i];
                     if (pos < pv.size()) {
@@ -546,7 +547,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             } else if (mode == "extraHalvLevel1" || mode == "extraHalvLevel2") {
                 bool asimofHeader = false;
                 vector<double> pv = readVarPv_(exampleVar,asimofHeader);
-                boost::shared_array<unsigned int> lv = levelData->asUInt();
+                shared_array<unsigned int> lv = levelData->asUInt();
                 if (pv.size()/2 < levelData->size()) {
                     // reread pv, try asimof header
                     asimofHeader=true;
@@ -592,15 +593,15 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                 const CDMVariable& p0 = getCDM().getVariable("p0"+ extension);
                 const CDMVariable& ap = getCDM().getVariable("ap" + extension);
                 const CDMVariable& b = getCDM().getVariable("b" + extension);
-                boost::shared_array<double> p0Data = p0.getData()->asDouble();
-                boost::shared_array<double> apData = ap.getData()->asDouble();
-                boost::shared_array<double> bData = b.getData()->asDouble();
+                shared_array<double> p0Data = p0.getData()->asDouble();
+                shared_array<double> apData = ap.getData()->asDouble();
+                shared_array<double> bData = b.getData()->asDouble();
                 for (size_t i = 0; i < ap.getData()->size(); ++i) {
                     retValues.push_back(apData[i]/p0Data[0] + bData[i]);
                 }
             } else {
                 LOG4FIMEX(logger, Logger::WARN, "unkown mode '"+ mode +"' to extract level-data for variable '" + exampleVar + "' using some dummy values");
-                boost::shared_array<double> d = levelData->asDouble();
+                shared_array<double> d = levelData->asDouble();
                 retValues = vector<double>(&d[0], &d[0]+levelData->size());
             }
             string sscale = getXmlProp(node, "scale_factor");
@@ -612,7 +613,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
         }
     }
     if (size == 0) {
-        boost::shared_array<double> d = levelData->asDouble();
+        shared_array<double> d = levelData->asDouble();
         retValues = vector<double>(&d[0], &d[0]+levelData->size());
     }
     return retValues;
@@ -888,7 +889,7 @@ void GribCDMReader::initAddEnsembles()
             nameShape.push_back(charDim);
             nameShape.push_back(p_->ensembleDimName);
             CDMVariable names(p_->ensembleDimName + "_names", CDM_STRING, nameShape);
-            boost::shared_array<char> namesAry(new char[maxLen*p_->maxEnsembles]());
+            shared_array<char> namesAry(new char[maxLen * p_->maxEnsembles]());
             vector<string> members;
             vector<int> memberFlags;
             for (size_t i = 0; i < p_->ensembleMemberIds.size(); ++i) {
@@ -1171,8 +1172,8 @@ public:
     }
 };
 
-template<typename T>
-DataPtr roundData(boost::shared_array<T> array, size_t n, double scale, double initialMissing, double finalMissing)
+template <typename T>
+DataPtr roundData(shared_array<T> array, size_t n, double scale, double initialMissing, double finalMissing)
 {
     transform(array.get(), array.get()+n, array.get(), RoundValue<T>(scale, initialMissing, finalMissing));
     return createData(n, array);
@@ -1285,7 +1286,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     size_t maxXySize = maxSizes.at(0) * maxSizes.at(1);
 
     // storage for complete data
-    boost::shared_array<double> doubleArray(new double[sliceSize]);
+    shared_array<double> doubleArray(new double[sliceSize]);
     // prefill with missing values
 
     double missingValue = cdm_->getFillValue(varName);
@@ -1322,7 +1323,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
                 newSizes.push_back(dimSizes.at(0));
                 newSizes.push_back(dimSizes.at(1));
                 tempData = tempData->slice(orgSizes, newStart, newSizes);
-                boost::shared_array<double> da = tempData->asDouble();
+                shared_array<double> da = tempData->asDouble();
                 copy(da.get(), da.get()+tempData->size(), &doubleArray[dataCurrentPos]);
             } else {
                 // copy complete vector

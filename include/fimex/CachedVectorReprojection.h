@@ -24,7 +24,7 @@
 #ifndef CACHEDVECTORREPROJECTION_H_
 #define CACHEDVECTORREPROJECTION_H_
 
-#include <boost/shared_array.hpp>
+#include "fimex/SharedArray.h"
 
 namespace MetNoFimex {
 
@@ -33,7 +33,13 @@ class CachedVectorReprojection
 public:
     CachedVectorReprojection() = delete;
 
-    CachedVectorReprojection(int method, boost::shared_array<double> matrix, int ox, int oy) : method(method), matrix(matrix), ox(ox), oy(oy) {}
+    CachedVectorReprojection(int method, shared_array<double> matrix, int ox, int oy)
+        : method(method)
+        , matrix(matrix)
+        , ox(ox)
+        , oy(oy)
+    {
+    }
     virtual ~CachedVectorReprojection() {}
     /**
      *  reproject the vector values
@@ -42,13 +48,13 @@ public:
      * @param vValues the values in y-direction. These will be changed in-place.
      * @param size the size of both arrays
      */
-    void reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const;
+    void reprojectValues(shared_array<float>& uValues, shared_array<float>& vValues, size_t size) const;
     /**
      * reproject directions given in angles in degree
      * @param angles direction of vector in each grid-cell, given in degree
      * @param size the size of the angles-array
      */
-    void reprojectDirectionValues(boost::shared_array<float>& angles, size_t size) const;
+    void reprojectDirectionValues(shared_array<float>& angles, size_t size) const;
     // @return size of the spatial plane in x-direction
     size_t getXSize() const {return ox;}
     // @return size of the spatial plane in y-direction
@@ -56,7 +62,7 @@ public:
 
 private:
     int method;
-    boost::shared_array<double> matrix;
+    shared_array<double> matrix;
     size_t ox;
     size_t oy;
 };

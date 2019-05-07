@@ -81,11 +81,6 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWri
         }
     } else {
         /* vertical coordinate not found */
-//            VTag->nz_ = 1;
-//            VTag->pr_ = 0;
-//            VTag->pz_ = 1;
-//            VTag->points_ = boost::shared_array<float>(new float[1]);
-//            VTag->points_[0] = 0;
     }
 
     return VTag;
@@ -108,7 +103,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
         VTag->pr_ = pGp3->pr();
 
         // but take the data from prev
-        VTag->points().reset(new float[VTag->nz()]);
+        VTag->points() = make_shared_array<float>(VTag->nz());
 
         memcpy(VTag->points().get(), prevTag->points().get(), prevTag->nz() * sizeof(float));
 
@@ -121,7 +116,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
         VTag->pr_ = 0;
         VTag->pz_ = 1;
 
-        VTag->points_.reset(new float[VTag->nz()]);
+        VTag->points_ = make_shared_array<float>(VTag->nz());
         VTag->points_[0] = 0.0;
 
         MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
@@ -132,7 +127,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
     VTag->pz_ = pGp3->pz();
     VTag->pr_ = pGp3->pr();
 
-    VTag->points_.reset(new float[VTag->nz()]);
+    VTag->points_ = make_shared_array<float>(VTag->nz());
 
     MGM_THROW_ON_ERROR(mgm_read_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle(), VTag->points_.get()))
 

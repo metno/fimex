@@ -78,13 +78,13 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     VarDouble depth(reader_, vars_.depth, "m", sb);
 
     ArrayDims dimsZ = makeArrayDims(sb);
-    boost::shared_array<double> z_values(new double[dimsZ.volume()]);
+    shared_array<double> z_values(new double[dimsZ.volume()]);
 
     enum { S, C, DEPTH, Z, ETA }; // ETA must be last as it is optional
     ArrayGroup group = ArrayGroup().add(s.dims).add(c.dims).add(depth.dims).add(dimsZ);
 
     ArrayDims dimsEta;
-    boost::shared_array<double> eta_values;
+    shared_array<double> eta_values;
     if (!vars_.eta.empty()) {
         eta_values = getSliceDoubles(reader_, sb, vars_.eta, "m");
         dimsEta = makeArrayDims(adaptSliceBuilder(cdm, vars_.eta, sb));

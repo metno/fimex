@@ -55,6 +55,7 @@
 
 // standard
 #include <algorithm>
+#include <cassert>
 #include <ctime>
 #include <fstream>
 #include <functional>
@@ -132,13 +133,15 @@ CDMInterpolator::~CDMInterpolator()
 {
 }
 
-boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue) {
-    boost::shared_array<float> array = inData->asFloat();
+shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue)
+{
+    shared_array<float> array = inData->asFloat();
     mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
     return array;
 }
 
-DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue) {
+DataPtr interpolationArray2Data(CDMDataType newType, shared_array<float> iData, size_t size, double badValue)
+{
     DataPtr d = createData(size, iData);
     return d->convertDataType(MIFI_UNDEFINED_F, 1., 0., newType, badValue, 1., 0.);
 }
@@ -203,12 +206,12 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
         return data;
 
     const double badValue = cdm_->getFillValue(varName);
-    boost::shared_array<float> array = data2InterpolationArray(data, badValue);
+    shared_array<float> array = data2InterpolationArray(data, badValue);
     processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
 
     size_t newSize = 0;
     LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(slicebuilder)");
-    boost::shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
+    shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
 
     if (variable.isSpatialVector()) {
         // vector in x/y direction
@@ -223,11 +226,11 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
                     CachedVectorReprojection_p cvr = itV->second;
                     // fetch and transpose vector-data
                     // transposing needed once for each direction (or caching, but that needs to much memory)
-                    boost::shared_array<float> counterPartArray =
+                    shared_array<float> counterPartArray =
                         data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
                     processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
                     LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(slicebuilder)");
-                    boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
+                    shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
                     if (dir == CDMVariable::SPATIAL_VECTOR_X)
                         cvr->reprojectValues(iArray, counterpartiArray, newSize);
                     else
@@ -331,15 +334,15 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         const vector<string> dims = cdm_->getVariable(latitude).getShape();
         DataPtr lonData = p_->dataReader->getScaledData(longitude);
         DataPtr latData = p_->dataReader->getScaledData(latitude);
-        boost::shared_array<double> latVals = latData->asDouble();
-        boost::shared_array<double> lonVals = lonData->asDouble();
+        shared_array<double> latVals = latData->asDouble();
+        shared_array<double> lonVals = lonData->asDouble();
         size_t latSize = latData->size();
         size_t lonSize = lonData->size();
         if (latSize != lonSize) {
             // latData/lonData are not 2d-coordinate-variable, but 1d axes
             // making latVals/lonVals 2d with size latSize*lonSize
-            boost::shared_array<double>lxVals(new double[latSize*lonSize]);
-            boost::shared_array<double>lyVals(new double[latSize*lonSize]);
+            shared_array<double> lxVals(new double[latSize * lonSize]);
+            shared_array<double> lyVals(new double[latSize * lonSize]);
             for (size_t i=0; i < lonSize; i++) {
                 for (size_t j=0; j<latSize; j++) {
                     lxVals[i+lonSize*j] = lonVals[i];
@@ -442,8 +445,8 @@ void CDMInterpolator::changeProjection(int method,
     case MIFI_INTERPOL_NEAREST_NEIGHBOR:
     case MIFI_INTERPOL_BILINEAR:
     case MIFI_INTERPOL_BICUBIC: {
-        boost::shared_array<float> tmplLatVals(new float[latVals.size()]);
-        boost::shared_array<float> tmplLonVals(new float[lonVals.size()]);
+        shared_array<float> tmplLatVals(new float[latVals.size()]);
+        shared_array<float> tmplLonVals(new float[lonVals.size()]);
 
         std::transform(latVals.begin(), latVals.end(), &tmplLatVals[0],
                 double_to_float_cast());
@@ -503,7 +506,7 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     if (xData->size() < 2 || yData->size() < 2) {
         throw CDMException("x- or y-axis sizes < 2 elements, not possible to interpolate");
     }
-    boost::shared_array<double> d = xData->asDouble();
+    shared_array<double> d = xData->asDouble();
     double dx = d[1] - d[0];
     d = yData->asDouble();
     double dy = d[1] - d[0];
@@ -570,7 +573,7 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     shape.push_back("nvcross_strlen");
     shape.push_back("nvcross");
     CDMVariable vcross("vcross_name", CDM_STRING, shape);
-    boost::shared_array<char> vcrossNamesAry(new char[strlen*nvcross]());
+    shared_array<char> vcrossNamesAry(new char[strlen * nvcross]());
     for (size_t i = 0; i < nvcross; ++i) {
         const char* name = csNames.at(i).c_str();
         size_t strLen = csNames.at(i).size();
@@ -586,7 +589,7 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     shape.push_back("nvcross");
     CDMVariable vcrossBnds("vcross_bnds", CDM_INT, shape);
     assert(nvcross == startPositions.size());
-    boost::shared_array<int> vcrossBndsAry(new int[2*nvcross]);
+    shared_array<int> vcrossBndsAry(new int[2 * nvcross]);
     for (size_t i = 0; i < (nvcross-1); ++i) {
         vcrossBndsAry[i*2] = startPositions.at(i);
         vcrossBndsAry[i*2+1] = startPositions.at(i+1)-1;
@@ -665,8 +668,8 @@ void CDMInterpolator::changeProjection(int method, CDMReader_p tmplReader, const
            std::string tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
            DataPtr tmplXData = tmplReader->getScaledData(tmplXName);
            DataPtr tmplYData = tmplReader->getScaledData(tmplYName);
-           boost::shared_array<double> tmplXArray = tmplXData->asDouble();
-           boost::shared_array<double> tmplYArray = tmplYData->asDouble();
+           shared_array<double> tmplXArray = tmplXData->asDouble();
+           shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
 
@@ -1193,10 +1196,10 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
  * convert latVals and lonVals to matrices
  * @return lonVals in size (lonSize*latSize)
  */
-void lonLatVals2Matrix(boost::shared_array<double>& lonVals, boost::shared_array<double>& latVals, size_t lonSize, size_t latSize)
+void lonLatVals2Matrix(shared_array<double>& lonVals, shared_array<double>& latVals, size_t lonSize, size_t latSize)
 {
-    boost::shared_array<double> matrixLatVals(new double[lonSize * latSize]);
-    boost::shared_array<double> matrixLonVals(new double[lonSize * latSize]);
+    shared_array<double> matrixLatVals(new double[lonSize * latSize]);
+    shared_array<double> matrixLonVals(new double[lonSize * latSize]);
     for (size_t ix = 0; ix < lonSize; ix++) {
         for (size_t iy = 0; iy < latSize; iy++) {
             size_t pos = ix+iy*lonSize;
@@ -1208,7 +1211,7 @@ void lonLatVals2Matrix(boost::shared_array<double>& lonVals, boost::shared_array
     latVals = matrixLatVals;
 }
 
-void extractValues(DataPtr data, boost::shared_array<double>& values, size_t& size)
+void extractValues(DataPtr data, shared_array<double>& values, size_t& size)
 {
     values = data->asDouble();
     size = data->size();
@@ -1261,7 +1264,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         const string& latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         const string& longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
 
-        boost::shared_array<double> orgXVals, orgYVals;
+        shared_array<double> orgXVals, orgYVals;
         size_t orgXYSize, orgXSize;
         extractValues(p_->dataReader->getScaledData(longitude), orgXVals, orgXSize);
         extractValues(p_->dataReader->getScaledData(latitude), orgYVals, orgXYSize);
@@ -1348,7 +1351,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         const std::string& latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         const std::string& longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
 
-        boost::shared_array<double> latVals, lonVals;
+        shared_array<double> latVals, lonVals;
         size_t latSize, lonSize;
         extractValues(p_->dataReader->getScaledData(latitude), latVals, latSize);
         extractValues(p_->dataReader->getScaledData(longitude), lonVals, lonSize);
@@ -1439,7 +1442,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         const std::string& orgXAxisName = cs->getGeoXAxis()->getName();
         const std::string& orgYAxisName = cs->getGeoYAxis()->getName();
 
-        boost::shared_array<double> orgXAxisValsArray, orgYAxisValsArray;
+        shared_array<double> orgXAxisValsArray, orgYAxisValsArray;
         size_t orgXAxisSize, orgYAxisSize;
         extractValues(p_->dataReader->getScaledDataInUnit(orgXAxisName, orgUnit), orgXAxisValsArray, orgXAxisSize);
         extractValues(p_->dataReader->getScaledDataInUnit(orgYAxisName, orgUnit), orgYAxisValsArray, orgYAxisSize);
@@ -1482,7 +1485,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             LOG4FIMEX(logger, Logger::DEBUG,
                       "creating cached vector projection interpolation matrix " << orgXAxisSize << "x" << orgYAxisSize << " => " << out_x_axis.size() << "x"
                                                                                 << out_y_axis.size());
-            boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
+            shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
             mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] =
@@ -1744,15 +1747,15 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         if (!csp)
             continue;
 
-        boost::shared_array<double> orgXAxisArray = def.xAxisData->asDouble();
-        boost::shared_array<double> orgYAxisArray = def.yAxisData->asDouble();
+        shared_array<double> orgXAxisArray = def.xAxisData->asDouble();
+        shared_array<double> orgYAxisArray = def.yAxisData->asDouble();
 
         const std::string& orgProjStr = csp->getProj4String();
 
         // store projection changes to be used in data-section
         // as template data is in degrees we have to do deg2rad
-        boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
-        boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
+        shared_array<double> tmplLatArray = tmplLatVals->asDouble();
+        shared_array<double> tmplLonArray = tmplLonVals->asDouble();
         vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
         vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
         transform_deg2rad(&latY[0], &latY[0] + tmplLatVals->size());
@@ -1795,8 +1798,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
         if (hasXYSpatialVectors()) {
             // as template data is in degrees we have to do deg2rad
-            boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
-            boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
+            shared_array<double> tmplLatArray = tmplLatVals->asDouble();
+            shared_array<double> tmplLonArray = tmplLonVals->asDouble();
             vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
             vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
             transform_deg2rad(&latY[0], &latY[0] + tmplLatVals->size());
@@ -1805,7 +1808,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
             // std::string orgUnit = csi->second->getProjection()->isDegree() ? "rad" : "m";
             LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
             size_t outSize = tmplLatVals->size();
-            boost::shared_array<double> matrix(new double[outSize * 4]);
+            shared_array<double> matrix(new double[outSize * 4]);
             // prepare interpolation of vectors
             mifi_get_vector_reproject_matrix_points(orgProjStr.c_str(), MIFI_WGS84_LATLON_PROJ4, csp->isDegree() ? 0 : 1, &lonX[0], &latY[0], outSize,
                                                     matrix.get());

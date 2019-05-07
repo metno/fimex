@@ -36,6 +36,8 @@
 //
 #include "metgm.h"
 
+#include <cassert>
+
 namespace MetNoFimex {
 
 std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForReading(const std::string& source)
@@ -51,26 +53,27 @@ std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForReading(cons
     pHandle->pVersion_ = MetGmVersion::createMetGmVersion(mgm_get_version(*pHandle));
 
     return pHandle;
-    }
-
-    std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForWriting(std::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
-                                                                                std::shared_ptr<MetGmVersion>& pVersion)
-    {
-        assert(pFileHandle.get());
-        assert(pVersion.get());
-
-        std::shared_ptr<MetGmHandlePtr> pHandle = std::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
-
-        assert(pHandle.get());
-
-        pHandle->pFileHandle_ = pFileHandle;
-        pHandle->pVersion_    = pVersion;
-
-        return pHandle;
-    }
-
-    MetGmHandlePtr::~MetGmHandlePtr()
-    {
-        MGM_THROW_ON_ERROR(mgm_free_handle(handle_));
-    }
 }
+
+std::shared_ptr<MetGmHandlePtr> MetGmHandlePtr::createMetGmHandleForWriting(std::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
+                                                                            std::shared_ptr<MetGmVersion>& pVersion)
+{
+    assert(pFileHandle.get());
+    assert(pVersion.get());
+
+    std::shared_ptr<MetGmHandlePtr> pHandle = std::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
+
+    assert(pHandle.get());
+
+    pHandle->pFileHandle_ = pFileHandle;
+    pHandle->pVersion_ = pVersion;
+
+    return pHandle;
+}
+
+MetGmHandlePtr::~MetGmHandlePtr()
+{
+    MGM_THROW_ON_ERROR(mgm_free_handle(handle_));
+}
+
+} // namespace MetNoFimex

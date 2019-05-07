@@ -33,8 +33,6 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-// boost
-//
 #include <memory>
 
 namespace MetNoFimex {

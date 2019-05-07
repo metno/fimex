@@ -50,6 +50,7 @@
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 
+#include <cassert>
 #include <regex>
 #include <tuple>
 

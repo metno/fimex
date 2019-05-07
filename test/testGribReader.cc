@@ -52,7 +52,7 @@ TEST4FIMEX_TEST_CASE(test_read_grb1)
     //grbReader->getCDM().toXMLStream(cout);
     TEST4FIMEX_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     DataPtr data = grbReader->getDataSlice("x_wind_10m", 0);
-    boost::shared_array<float> dataFlt = data->asFloat();
+    shared_array<float> dataFlt = data->asFloat();
     for (int i = 85*229+50; i < 85*229+150; i++) {
         // check data-range
         TEST4FIMEX_CHECK(fabs(dataFlt[i]) < 15);

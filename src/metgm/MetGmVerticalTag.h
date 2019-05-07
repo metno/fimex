@@ -29,10 +29,9 @@
 #define METGM_VERTICALTAG_H
 
 #include "fimex/CDMReaderDecl.h"
-
-// boost
 #include "fimex/DataDecl.h"
-#include <boost/shared_array.hpp>
+#include "fimex/SharedArray.h"
+
 #include <memory>
 
 namespace MetNoFimex {
@@ -52,7 +51,7 @@ namespace MetNoFimex {
         inline unsigned int                nz()       { return nz_; }
         inline unsigned int                pr()       { return pr_;}
         inline unsigned int                pz()       { return pz_; }
-        inline boost::shared_array<float>& points()   { return points_; }
+        inline shared_array<float>& points() { return points_; }
 
     protected:
 
@@ -64,7 +63,7 @@ namespace MetNoFimex {
         unsigned int                nz_;
         unsigned int                pr_;
         unsigned int                pz_;
-        boost::shared_array<float>  points_;
+        shared_array<float> points_;
     };
 
 } // eons

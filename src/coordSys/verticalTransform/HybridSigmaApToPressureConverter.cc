@@ -75,22 +75,11 @@ DataPtr HybridSigmaApToPressureConverter::getDataSlice(const SliceBuilder& sb) c
     VarDouble b(reader_, b_, "", sb);
 
     ArrayDims out_dims = makeArrayDims(sb);
-    boost::shared_array<double> out_values(new double[out_dims.volume()]);
+    shared_array<double> out_values(new double[out_dims.volume()]);
 
     enum { PS, AP, B, OUT/*, IN_P0*/ };
     ArrayGroup group;
     group.add(ps.dims).add(ap.dims).add(b.dims).add(out_dims);
-
-//    ArrayDims p0_dims;
-//    boost::shared_array<float> p0_values;
-//    if (!p0_.empty()) {
-//        SliceBuilder p0_sb = adaptSliceBuilder(rcdm, p0_, sb);
-//        if (DataPtr p0_data = getSliceData(reader_, p0_sb, p0_, "hPa")) {
-//            p0_values = p0_data->asFloat();
-//            p0_dims = makeArrayDims(p0_sb);
-//            group.add(p0_dims);
-//        }
-//    }
 
     const size_t shared = group.sharedVolume();
     Loop loop(group);

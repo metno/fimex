@@ -52,6 +52,7 @@
 #include "fimex/mifi_constants.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <vector>
 
@@ -476,7 +477,7 @@ int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size
             *size = 0;
             return -1;
         }
-        boost::shared_array<double> vArray = vData->asDouble();
+        shared_array<double> vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {
@@ -496,7 +497,7 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
             *size = 0;
             return -1;
         }
-        boost::shared_array<double> vArray = vData->asDouble();
+        shared_array<double> vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {
@@ -521,7 +522,7 @@ int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varNa
             vData = reader->reader_->getScaledDataSlice(varName, *(sb->sb_));
         }
         *size = vData->size();
-        boost::shared_array<double> vArray = vData->asDouble();
+        shared_array<double> vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], data);
         return 0;
     } catch (exception& ex) {
@@ -543,7 +544,7 @@ int mifi_write_scaled_double_dataslice(mifi_cdm_reader* rwreader, const char* va
         return -98; // not a readerwriter
     }
     try {
-        boost::shared_array<double> dptr(data, null_deleter());
+        shared_array<double> dptr(data, null_deleter());
         DataPtr d = createData(size, dptr);
         rw->putScaledDataSliceInUnit(varName, units, *(sb->sb_), d);
         return 0;

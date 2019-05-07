@@ -23,6 +23,8 @@
 
 #include "MetGmCDMWriterSlicedImpl.h"
 
+#include "fimex/CDMException.h"
+
 // private/implementation code
 //
 #include "MetGmTags.h"
@@ -35,7 +37,8 @@
 #include "MetGmGroup5Ptr.h"
 #include "MetGmFileHandlePtr.h"
 #include "MetGmConfigurationMappings.h"
-#include "fimex/CDMException.h"
+
+#include <cassert>
 
 namespace MetNoFimex {
     MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl
@@ -126,7 +129,7 @@ namespace MetNoFimex {
         {
             size_t cSlicePos = -1;
             DataPtr raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
-            boost::shared_array<float> slice_to_write = raw_slice->asFloat();
+            shared_array<float> slice_to_write = raw_slice->asFloat();
             profile.pTags_->sliceToMetGmLayout(slice_to_write);
             MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));
         }

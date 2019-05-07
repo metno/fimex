@@ -50,8 +50,6 @@ extern "C" {
 
 #include "NetCDF_Utils.h"
 
-#include <boost/shared_array.hpp>
-
 #include <functional>
 #include <memory>
 #include <numeric>
@@ -549,7 +547,7 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap)
                 break;
 #ifdef NC_NETCDF4
             case CDM_STRINGS: {
-                boost::shared_array<std::string> svals = attrData->asStrings();
+                shared_array<std::string> svals = attrData->asStrings();
                 if (ncFile->supports_nc_string()) {
                     std::unique_ptr<const char* []> cvals(new const char*[attrLen]);
                     for (size_t i=0; i<attrLen; ++i)

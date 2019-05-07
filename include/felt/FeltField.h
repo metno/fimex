@@ -33,9 +33,8 @@
 
 #include <fimex/TimeUnit.h>
 
-#include <boost/shared_array.hpp>
-
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 

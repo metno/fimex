@@ -24,12 +24,9 @@
 #ifndef METGM_GROUP2PTR_H
 #define METGM_GROUP2PTR_H
 
-// boost
-//
-#include <memory>
-
 // standard
 //
+#include <memory>
 #include <set>
 
 namespace MetNoFimex {

@@ -32,7 +32,7 @@ namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.CachedVectorReprojection");
 
-void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const
+void CachedVectorReprojection::reprojectValues(shared_array<float>& uValues, shared_array<float>& vValues, size_t size) const
 {
     if (ox == 0 || oy == 0 || matrix.get() == 0) {
         LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
@@ -43,7 +43,7 @@ void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValu
     if (errcode != MIFI_OK)	throw CDMException("Error during reprojection of vector-values");
 }
 
-void CachedVectorReprojection::reprojectDirectionValues(boost::shared_array<float>& angles, size_t size) const
+void CachedVectorReprojection::reprojectDirectionValues(shared_array<float>& angles, size_t size) const
 {
     if (ox == 0 || oy == 0 || matrix.get() == 0) {
         LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");

@@ -220,7 +220,7 @@ private:
 template <typename T>
 std::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, double newFillValue, double scalingFactor)
 {
-    boost::shared_array<T> data(new T[indata.size()]);
+    shared_array<T> data(new T[indata.size()]);
     Scale<T> scale(newFillValue, scalingFactor);
     std::transform(&indata[0], &indata[0]+indata.size(), &data[0], scale);
     return MetNoFimex::createData(indata.size(), data);

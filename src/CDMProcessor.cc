@@ -39,9 +39,10 @@
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
 
-#include <set>
 #include <algorithm>
+#include <cassert>
 #include <functional>
+#include <set>
 
 namespace MetNoFimex
 {
@@ -75,8 +76,8 @@ struct VerticalVelocityComps {
     size_t nz;
     double dx;
     double dy;
-    boost::shared_array<float> gridDistX;
-    boost::shared_array<float> gridDistY;
+    shared_array<float> gridDistX;
+    shared_array<float> gridDistY;
     DataPtr geopotData;
     bool tempNotDefined() {return temp == "";}
     bool geopotNotDefined() {return geopotData.get() == 0;}
@@ -119,14 +120,14 @@ CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, 
     }
     size_t xAxisSize = xAxisData->size();
     size_t yAxisSize = yAxisData->size();
-    boost::shared_array<double> xAxisD = xAxisData->asDouble();
-    boost::shared_array<double> yAxisD = yAxisData->asDouble();
+    shared_array<double> xAxisD = xAxisData->asDouble();
+    shared_array<double> yAxisD = yAxisData->asDouble();
 
     LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
-    boost::shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
+    shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
     if (toLatLon) {
-        boost::shared_array<double> inXField(new double[xAxisSize*yAxisSize]);
-        boost::shared_array<double> inYField(new double[xAxisSize*yAxisSize]);
+        shared_array<double> inXField(new double[xAxisSize * yAxisSize]);
+        shared_array<double> inYField(new double[xAxisSize * yAxisSize]);
         for (size_t i = 0; i < xAxisSize; i++) {
             for (size_t j = 0; j < yAxisSize; j++) {
                 inXField[xAxisSize*j + i] = xAxisD[i];
@@ -183,9 +184,9 @@ void CDMProcessor::addVerticalVelocity()
                 vvc.nx = cdm_->getDimension(cs->getGeoXAxis()->getName()).getLength();
                 vvc.ny = cdm_->getDimension(cs->getGeoYAxis()->getName()).getLength();
                 vvc.nz = cdm_->getDimension(cs->getGeoZAxis()->getName()).getLength();
-                boost::shared_array<double> xValues = p_->dataReader->getData(cs->getGeoXAxis()->getName())->asDouble();
+                shared_array<double> xValues = p_->dataReader->getData(cs->getGeoXAxis()->getName())->asDouble();
                 vvc.dx = fabs(xValues[1] - xValues[0]);
-                boost::shared_array<double> yValues = p_->dataReader->getData(cs->getGeoYAxis()->getName())->asDouble();
+                shared_array<double> yValues = p_->dataReader->getData(cs->getGeoYAxis()->getName())->asDouble();
                 vvc.dy = fabs(yValues[1] - yValues[0]);
 
                 vvc.yWind = p_->dataReader->getCDM().getVariable(*xw).getSpatialVectorCounterpart();
@@ -275,13 +276,13 @@ void CDMProcessor::addVerticalVelocity()
     // get 2d coordinates
     DataPtr lonVals = p_->dataReader->getScaledDataInUnit(lon, "degree");
     DataPtr latVals = p_->dataReader->getScaledDataInUnit(lat, "degree");
-    boost::shared_array<double> lonlon;
-    boost::shared_array<double> latlat;
+    shared_array<double> lonlon;
+    shared_array<double> latlat;
     if (cdm_->getVariable(lon).getShape().size() == 1) {
-        lonlon = boost::shared_array<double>(new double[nx*ny]);
-        latlat = boost::shared_array<double>(new double[nx*ny]);
-        boost::shared_array<double> lat = latVals->asDouble();
-        boost::shared_array<double> lon = lonVals->asDouble();
+        lonlon = shared_array<double>(new double[nx * ny]);
+        latlat = shared_array<double>(new double[nx * ny]);
+        shared_array<double> lat = latVals->asDouble();
+        shared_array<double> lon = lonVals->asDouble();
         assert(lonVals->size() == nx);
         assert(latVals->size() == ny);
         for (size_t j = 0; j < ny; j++) {
@@ -295,8 +296,8 @@ void CDMProcessor::addVerticalVelocity()
         latlat = latVals->asDouble();
     }
 
-    boost::shared_array<float> gridDistX(new float[nx*ny]);
-    boost::shared_array<float> gridDistY(new float[nx*ny]);
+    shared_array<float> gridDistX(new float[nx * ny]);
+    shared_array<float> gridDistY(new float[nx * ny]);
     if (MIFI_OK != mifi_griddistance(nx, ny, lonlon.get(), latlat.get(), gridDistX.get(), gridDistY.get())) {
         throw CDMException("addVerticalVelocity: cannot calculate griddistance");
     }
@@ -469,7 +470,7 @@ struct UnScaleOffset : public std::unary_function<double, T>
     }
 };
 
-static void replaceNanWith0(boost::shared_array<double> dp, size_t n)
+static void replaceNanWith0(shared_array<double> dp, size_t n)
 {
     mifi_nand2bad(&dp[0], &dp[0]+n, 0);
 }
@@ -478,8 +479,8 @@ static void replaceNanWith0(boost::shared_array<double> dp, size_t n)
 static void addDataP2Data(DataPtr& data, DataPtr& dataP, bool addingFirstTimeStep) {
     if ((data->size() != 0) && (dataP->size() != 0)) {
         assert(data->size() == dataP->size());
-        boost::shared_array<double> d = data->asDouble();
-        boost::shared_array<double> dp = dataP->asDouble();
+        shared_array<double> d = data->asDouble();
+        shared_array<double> dp = dataP->asDouble();
         if (addingFirstTimeStep) {
             // in step 0, replace undef with 0
             replaceNanWith0(dp, dataP->size());
@@ -521,7 +522,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
 
         // output
-        boost::shared_array<float> w(new float[nx*ny*nz]);
+        shared_array<float> w(new float[nx * ny * nz]);
         if (MIFI_OK != mifi_compute_vertical_velocity(nx, ny, nz, p_->vvComp.dx, p_->vvComp.dy, p_->vvComp.gridDistX.get(), p_->vvComp.gridDistY.get(),
                                                       apD->asDouble().get(), bD->asDouble().get(), zsD->asFloat().get(), psD->asFloat().get(),
                                                       uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()))
@@ -566,8 +567,8 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             DataPtr dataP = p_->dataReader->getDataSlice(varName, unLimDimPos-1);
             if ((data->size() != 0) && (dataP->size() != 0)) {
                 assert(data->size() == dataP->size());
-                boost::shared_array<double> d = data->asDouble();
-                boost::shared_array<double> dp = dataP->asDouble();
+                shared_array<double> d = data->asDouble();
+                shared_array<double> dp = dataP->asDouble();
                 if (unLimDimPos == 1) {
                     // in step 0, replace undef with 0
                     replaceNanWith0(dp, dataP->size());
@@ -605,8 +606,8 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             csId = p_->rotateLatLonVectorY[varName].second;
         }
         CachedVectorReprojection_p cvr = p_->cachedVectorReprojection[csId];
-        boost::shared_array<float> xArray = data2InterpolationArray(xData, getCDM().getFillValue(xVar));
-        boost::shared_array<float> yArray = data2InterpolationArray(yData, getCDM().getFillValue(yVar));
+        shared_array<float> xArray = data2InterpolationArray(xData, getCDM().getFillValue(xVar));
+        shared_array<float> yArray = data2InterpolationArray(yData, getCDM().getFillValue(yVar));
         if (xData->size() != yData->size()) {
             throw CDMException("xData != yData in vectorInterpolation");
         }
@@ -627,7 +628,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         LOG4FIMEX(logger, Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
         assert(p_->cachedVectorReprojection.find(csId) != p_->cachedVectorReprojection.end());
         CachedVectorReprojection_p cvr = p_->cachedVectorReprojection[csId];
-        boost::shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));
+        shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));
         double addOffset = 0.;
         double scaleFactor = 1.;
         getScaleAndOffsetOf(varName, scaleFactor, addOffset);

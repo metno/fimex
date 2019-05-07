@@ -28,7 +28,7 @@
 #include "fimex/DataDecl.h"
 #include "fimex/SliceBuilder.h"
 
-#include <boost/shared_array.hpp>
+#include "fimex/SharedArray.h"
 
 namespace MetNoFimex
 {
@@ -58,7 +58,7 @@ public:
     CachedInterpolationInterface(const std::string& xDimName, const std::string& yDimName, size_t inX, size_t inY, size_t outX, size_t outY);
     virtual ~CachedInterpolationInterface();
 
-    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
+    virtual shared_array<float> interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const = 0;
 
     /** @return x-size of input array */
     size_t getInX() const { return inX; }
@@ -148,7 +148,7 @@ public:
      * @param size the size of the input data array
      * @param newSize return the size of the output-array
      */
-    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
+    shared_array<float> interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const override;
 
 private:
     /**
@@ -186,7 +186,7 @@ public:
      * @param size the size of the input data array
      * @param newSize return the size of the output-array
      */
-    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const override;
+    shared_array<float> interpolateValues(shared_array<float> inData, size_t size, size_t& newSize) const override;
 };
 
 } // namespace MetNoFimex

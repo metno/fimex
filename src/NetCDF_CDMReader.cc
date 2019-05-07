@@ -27,9 +27,13 @@
 #include "fimex/Data.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
-#include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
+
+#include "NetCDF_Utils.h"
+
+#include <cassert>
 #include <cstdlib>
+
 extern "C" {
 #include "netcdf.h"
 }

@@ -55,7 +55,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("altitude")->size(), 50 * 50);
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 50 * 50 * 12);
     TEST4FIMEX_CHECK_EQ(extract->getData("air_temperature")->size(), 50 * 50 * 12);
-    boost::shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
+    shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
     NetCDF_CDMWriter(extract, "test_extract_1.nc");
 
     // test chunked reading
@@ -71,12 +71,9 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("x")->size(), 2);
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 12);
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 4 * 2 * 12);
-    boost::shared_array<float> precData2 = extract->getData("air_temperature")->asFloat();
-    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
+    shared_array<float> precData2 = extract->getData("air_temperature")->asFloat();
     for (size_t t = 0; t < 12; t++) {
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 0, t, 2, 4, 12)]);
-        //        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(1,0,t,2,4,12)] << endl;
-        //        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,2,4,12)] << endl;;
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(1, 0, t, 2, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 1, t, 2, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(1, 1, t, 2, 4, 12)]);
@@ -96,17 +93,13 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("y")->size(), 4);
     TEST4FIMEX_CHECK_EQ(extract->getData("x")->size(), 50);
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 12);
-    //cerr << extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0] << endl;
     TEST4FIMEX_CHECK_EQ(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0], 0);
     TEST4FIMEX_CHECK_EQ(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[4], 4);
     TEST4FIMEX_CHECK_EQ(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[11], 11);
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 4 * 50 * 12);
     precData2 = extract->getData("air_temperature")->asFloat();
-    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
     for (size_t t = 0; t < 12; t++) {
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 0, t, 50, 4, 12)]);
-        //        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(3,0,t,50,4,12)] << endl;
-        //        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,50,4,12)] << endl;;
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(3, 0, t, 50, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 1, t, 50, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(3, 1, t, 50, 4, 12)]);
@@ -123,7 +116,6 @@ TEST4FIMEX_TEST_CASE(test_extract)
     extract->reduceDimension("y", slices);
     TEST4FIMEX_CHECK_EQ(extract->getData("y")->size(), 4);
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 12);
-    //cerr << extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0] << endl;
     SliceBuilder sb(extract->getCDM(), "air_temperature");
     sb.setStartAndSize("x", 80, 50);
 
@@ -131,11 +123,8 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(airTemp->size(), 4 * 50 * 12);
     precData2 = airTemp->asFloat();
 
-    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
     for (size_t t = 0; t < 12; t++) {
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 0, t, 50, 4, 12)]);
-        //        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(3,0,t,50,4,12)] << endl;
-        //        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,50,4,12)] << endl;;
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(3, 0, t, 50, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 1, t, 50, 4, 12)]);
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 1, t, 50, 50, 12)], precData2[mifi_3d_array_position(3, 1, t, 50, 4, 12)]);
@@ -179,7 +168,6 @@ TEST4FIMEX_TEST_CASE(test_extract)
     extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     extract->reduceDimension("time", 0, 1);
     extract->reduceLatLonBoundingBox(55.,65., 5, 15);
-    //cerr << "sizes: " << extract->getData("x")->size() << " " << extract->getData("y")->size() << endl;
     TEST4FIMEX_CHECK_EQ(extract->getData("x")->size(), 15);
     TEST4FIMEX_CHECK_EQ(extract->getData("y")->size(), 24);
 

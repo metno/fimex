@@ -120,7 +120,7 @@ DataPtr AltitudeHeightConverter::getDataSlice(const SliceBuilder& sb) const
     VarDouble altiOrHeight(reader_, altitudeOrHeight_, sb);
 
     ArrayDims out_dims = makeArrayDims(sb);
-    boost::shared_array<double> out_values(new double[out_dims.volume()]);
+    shared_array<double> out_values(new double[out_dims.volume()]);
 
     enum { TOPO, IN_ALTI, OUT_HEIGHT };
     ArrayGroup group = ArrayGroup().add(topo.dims).add(altiOrHeight.dims).add(out_dims);

@@ -35,6 +35,7 @@
 #include "fimex/XMLDoc.h"
 #include "fimex_config.h"
 
+#include <cassert>
 #include <memory>
 #include <regex>
 

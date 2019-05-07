@@ -25,6 +25,7 @@
  */
 
 #include "WRFCoordSysBuilder.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMReader.h"
@@ -38,6 +39,7 @@
 
 #include <proj_api.h>
 
+#include <cassert>
 #include <cmath>
 #include <map>
 #include <memory>
@@ -177,7 +179,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = startX + i * dx;
             }
@@ -205,7 +207,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = startX + i * dx;
             }
@@ -233,7 +235,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = startY + i * dy;
             }
@@ -263,7 +265,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = startY + i * dy;
             }
@@ -288,7 +290,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         shape.push_back("bottom_top");
         if (!cdm.hasVariable(shape.at(0))) {
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = i;
             }
@@ -305,7 +307,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         shape.push_back("bottom_top_stag");
         if (!cdm.hasVariable(shape.at(0))) {
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             for (size_t i = 0; i < dimSize; i++) {
                 vals[i] = i;
             }
@@ -326,7 +328,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         if (!cdm.hasVariable(Time)) {
             string units;
             size_t dimSize = cdm.getDimension(Time).getLength();
-            boost::shared_array<float> vals(new float[dimSize]);
+            shared_array<float> vals(new float[dimSize]);
             if (reader) {
                 // try to guess the time-steps
                 string start = cdm.getAttribute(cdm.globalAttributeNS(),
@@ -390,7 +392,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
                     + refdatetime.at(1) + " +0000";
             cdm.addAttribute(reftime, CDMAttribute("units", refunits));
             cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
-            boost::shared_array<float> refvals(new float[1]);
+            shared_array<float> refvals(new float[1]);
             refvals[0] = 0;
             cdm.getVariable(reftime).setData(createData(1, refvals));
         }
@@ -433,7 +435,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
                             vector<string> myshape(1, *dimIt);
                             cdm.addVariable(CDMVariable(*dimIt, CDM_INT, myshape));
                             size_t dimSize = cdm.getDimension(*dimIt).getLength();
-                            boost::shared_array<float> vals(new float[dimSize]);
+                            shared_array<float> vals(new float[dimSize]);
                             for (size_t i = 0; i < dimSize; i++) {
                                 vals[i] = i;
                             }

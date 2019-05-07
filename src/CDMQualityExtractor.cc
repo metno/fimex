@@ -83,7 +83,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
         }
     } else {
         const CDMAttribute& attr = cdm.getAttribute(statusVarName, statusAttrName);
-        boost::shared_array<double> validData = attr.getData()->asDouble();
+        shared_array<double> validData = attr.getData()->asDouble();
         size_t validSize = attr.getData()->size();
         if (validSize > 0) {
             if (autoConfString == "all") {
@@ -282,7 +282,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
         }
         const double sizeRatio = double(sizeD)/sizeS;
         if (sizeRatio == int(sizeRatio) && sizeRatio >= 1) {
-            boost::shared_array<double> sd = statusData->asDouble();
+            shared_array<double> sd = statusData->asDouble();
             vector<double> useVals;
             if (variableValues.find(varName) != variableValues.end()) {
                 useVals = variableValues[varName];

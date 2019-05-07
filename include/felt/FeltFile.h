@@ -32,11 +32,9 @@
 #include "FeltConstants.h"
 #include "FeltTypes.h"
 
+#include "fimex/SharedArray.h"
 #include "fimex/TimeUtils.h"
 
-#include <boost/shared_array.hpp>
-
-#include <iosfwd>
 #include <memory>
 #include <vector>
 
@@ -96,7 +94,7 @@ private:
     /// Is the "not ready yet" flag set to false?
     bool complete() const;
 
-    typedef boost::shared_array<word> Block;
+    typedef MetNoFimex::shared_array<word> Block;
 
     Block getBlock_(size_type blockNo) const;
 

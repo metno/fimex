@@ -24,14 +24,14 @@
  *      Author: Heiko Klein
  */
 
-#include "testinghelpers.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include <boost/shared_array.hpp>
+#include "fimex/SharedArray.h"
+#include "testinghelpers.h"
 #include <memory>
 
 using namespace std;
@@ -48,7 +48,7 @@ TEST4FIMEX_TEST_CASE(test_accumulate)
         proc->deAccumulate("time");
 
         DataPtr data = proc->getData("time");
-        boost::shared_array<double> time = data->asDouble();
+        shared_array<double> time = data->asDouble();
         TEST4FIMEX_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
         TEST4FIMEX_CHECK_CLOSE(time[1], 3600., 1e-5);
         TEST4FIMEX_CHECK_CLOSE(time[2], 3600., 1e-5);
@@ -58,7 +58,7 @@ TEST4FIMEX_TEST_CASE(test_accumulate)
         std::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
         proc->accumulate("time");
         DataPtr data = proc->getData("time");
-        boost::shared_array<double> time = data->asDouble();
+        shared_array<double> time = data->asDouble();
         TEST4FIMEX_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
         TEST4FIMEX_CHECK_CLOSE(time[1], time[0] + t0 + 3600., 1e-5);
         TEST4FIMEX_CHECK_CLOSE(time[2], time[1] + t0 + 2 * 3600., 1e-5);

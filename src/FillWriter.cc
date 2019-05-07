@@ -89,8 +89,8 @@ FillWriter::FillWriter(CDMReader_p in, CDMReaderWriter_p io, std::string configF
         }
         if (iCdm.hasVariable(iDimsIt->getName()) && oCdm.hasVariable(oDimsIt->getName())) {
             // rewrite coordinate-variables
-            boost::shared_array<double> iDimData = in->getScaledData(iDimsIt->getName())->asDouble();
-            boost::shared_array<double> oDimData = io->getScaledData(iDimsIt->getName())->asDouble();
+            shared_array<double> iDimData = in->getScaledData(iDimsIt->getName())->asDouble();
+            shared_array<double> oDimData = io->getScaledData(iDimsIt->getName())->asDouble();
             size_t changes = 0;
             size_t unLimCount = 0;
             map<size_t, size_t> currentSlices;

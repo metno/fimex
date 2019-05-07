@@ -30,16 +30,13 @@
 // fimex
 //
 #include "fimex/CDM.h"
-#include "fimex/Data.h"
-#include "fimex/TimeUnit.h"
 #include "fimex/CDMReader.h"
-#include "fimex/CDMVariable.h"
 #include "fimex/CDMReaderUtils.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/Data.h"
+#include "fimex/SharedArray.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-
-// boost
-//
-#include <boost/shared_array.hpp>
 
 // standard
 //
@@ -95,7 +92,7 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const C
             const std::string t_unit = tUnitAttribute.getStringValue();
             const TimeUnit kilde_tu(t_unit);
 
-            const boost::shared_array<double> tArray = data->asDouble();
+            const shared_array<double> tArray = data->asDouble();
 
             for(size_t index = 0; index < data->size(); ++index) {
                 time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
@@ -202,7 +199,7 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
         const std::string t_unit = tUnitAttribute.getStringValue();
         const TimeUnit kilde_tu(t_unit);
 
-        const boost::shared_array<double> tArray = tData->asDouble();
+        const shared_array<double> tArray = tData->asDouble();
 
         for(size_t index = 0; index < tData->size(); ++index) {
             time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);

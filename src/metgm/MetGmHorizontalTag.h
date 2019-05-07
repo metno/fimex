@@ -31,19 +31,16 @@
 // fimex
 //
 #include "fimex/CDM.h"
-#include "fimex/Data.h"
-#include "fimex/TimeUnit.h"
-#include "fimex/CDMReader.h"
-#include "fimex/CDMVariable.h"
-#include "fimex/CDMDimension.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMDimension.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CDMReaderUtils.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/Data.h"
+#include "fimex/SharedArray.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-
-// boost
-//
-#include <boost/shared_array.hpp>
 
 // standard
 //
@@ -83,7 +80,7 @@ namespace MetNoFimex {
             if(data->size() <= 1)
                 throw CDMException("horizontal axis has one point can't determine distance needed for MetGm");
 
-            const boost::shared_array<double> hArray = data->asDouble();
+            const shared_array<double> hArray = data->asDouble();
 
             horizontalPoints_ = std::vector<double>(&hArray[0], &hArray[data->size()]);
         }

@@ -35,6 +35,8 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
+#include <cassert>
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -82,7 +84,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
     //cerr << "got data" << endl;
 
     float gInv = 1 / 9.806;
-    boost::shared_array<float> zs = zsD->asFloat();
+    shared_array<float> zs = zsD->asFloat();
     transform(&zs[0], &zs[0]+(nx*ny), &zs[0], std::bind1st(multiplies<float>(), gInv));
 
     //cerr << "transformed zs" << endl;
@@ -95,17 +97,17 @@ TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
     //cerr << lat << " " << lon << endl;
     DataPtr lonVals = reader->getScaledDataInUnit(lon, "degree");
     DataPtr latVals = reader->getScaledDataInUnit(lat, "degree");
-    boost::shared_array<float> gridDistX(new float[nx*ny]());
-    boost::shared_array<float> gridDistY(new float[nx*ny]());
+    shared_array<float> gridDistX(new float[nx * ny]());
+    shared_array<float> gridDistY(new float[nx * ny]());
     TEST4FIMEX_CHECK_EQ(MIFI_OK, mifi_griddistance(nx, ny, lonVals->asDouble().get(), latVals->asDouble().get(), gridDistX.get(), gridDistY.get()));
     //cerr << "got gridDistance" << endl;
-    boost::shared_array<float> w(new float[nx*ny*nz]());
+    shared_array<float> w(new float[nx * ny * nz]());
     TEST4FIMEX_CHECK_EQ(MIFI_OK,
                         mifi_compute_vertical_velocity(nx, ny, nz, dx, dy, gridDistX.get(), gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(),
                                                        zs.get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()));
 
     DataPtr hyD = reader->getScaledData("hybrid0");
-    boost::shared_array<float> hy = hyD->asFloat();
+    shared_array<float> hy = hyD->asFloat();
     for (size_t k = 0; k < nz; ++k) {
         pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
         TEST4FIMEX_CHECK(*minMax.first > -4);
@@ -140,9 +142,9 @@ TEST4FIMEX_TEST_CASE(test_cdmprocessor_addverticalvelocity)
     size_t nt = proc->getData(tAxis->getName())->size();
 
     DataPtr hyD = proc->getScaledData("hybrid0");
-    boost::shared_array<float> hy = hyD->asFloat();
+    shared_array<float> hy = hyD->asFloat();
     for (size_t t = 0; t < nt; ++t) {
-        boost::shared_array<float> w = proc->getScaledDataSliceInUnit("upward_air_velocity_ml", "m/s", t)->asFloat();
+        shared_array<float> w = proc->getScaledDataSliceInUnit("upward_air_velocity_ml", "m/s", t)->asFloat();
         for (size_t k = 0; k < nz; ++k) {
             pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
             TEST4FIMEX_CHECK(*minMax.first > -4);

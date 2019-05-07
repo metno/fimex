@@ -297,7 +297,7 @@ public:
  * @param badValue
  * @return
  */
-extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue);
+extern shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue);
 
 /**
  * convert the data from an interpolation-array (with NaNs) to one used as DataPtr, e.g. correct datatype and badvalue/fillvalue
@@ -307,7 +307,7 @@ extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData,
  * @param badValue
  * @return
  */
-extern DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue);
+extern DataPtr interpolationArray2Data(CDMDataType newType, shared_array<float> iData, size_t size, double badValue);
 
 typedef std::shared_ptr<CDMInterpolator> CDMInterpolator_p;
 

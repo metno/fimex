@@ -84,7 +84,7 @@ vector<double> ToVLevelConverterAdapter::operator()(size_t x, size_t y, size_t t
     const SliceBuilder sb = prepareSliceBuilder(x, y, t);
 
     DataPtr data = converter_->getDataSlice(sb);
-    boost::shared_array<double> array = data->asDouble();
+    shared_array<double> array = data->asDouble();
     return vector<double>(&array[0], &array[0] + data->size());
 }
 

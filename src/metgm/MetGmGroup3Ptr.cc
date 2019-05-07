@@ -33,7 +33,7 @@
 
 // standard
 //
-#include <iostream>
+#include <cassert>
 
 namespace MetNoFimex {
 

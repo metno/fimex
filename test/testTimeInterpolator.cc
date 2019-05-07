@@ -49,7 +49,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolator)
         timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
         TEST4FIMEX_CHECK_EQ(times->size(), 5);
-        boost::shared_array<float> timeAry = times->asFloat();
+        shared_array<float> timeAry = times->asFloat();
         TEST4FIMEX_CHECK_EQ(timeAry[0], 10);
         TEST4FIMEX_CHECK_EQ(timeAry[4], 10 + 12);
         string airTemp = "air_temperature";
@@ -62,7 +62,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolator)
         CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
         DataPtr ncTimes = ncReader->getData("time");
         TEST4FIMEX_CHECK_EQ(ncTimes->size(), 5);
-        boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
+        shared_array<float> ncTimeAry = ncTimes->asFloat();
         TEST4FIMEX_CHECK_EQ(ncTimeAry[0], 10);
         TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10 + 12);
     }
@@ -82,7 +82,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
         timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
         DataPtr times = timeInterpol->getCDM().getVariable("time").getData();
         TEST4FIMEX_CHECK_EQ(times->size(), 21);
-        boost::shared_array<float> timeAry = times->asFloat();
+        shared_array<float> timeAry = times->asFloat();
         TEST4FIMEX_CHECK_EQ(timeAry[0], -2);
         TEST4FIMEX_CHECK_EQ(timeAry[4], 10);
         string airTemp = "air_temperature";
@@ -95,7 +95,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
         CDMReader_p ncReader = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, outputName);
         DataPtr ncTimes = ncReader->getData("time");
         TEST4FIMEX_CHECK_EQ(ncTimes->size(), 21);
-        boost::shared_array<float> ncTimeAry = ncTimes->asFloat();
+        shared_array<float> ncTimeAry = ncTimes->asFloat();
         TEST4FIMEX_CHECK_EQ(ncTimeAry[0], -2);
         TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
     }

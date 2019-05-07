@@ -29,6 +29,7 @@
 #include "fimex/Utils.h"
 #include "fimex/mifi_constants.h"
 
+#include <cassert>
 #include <functional>
 #include <numeric>
 

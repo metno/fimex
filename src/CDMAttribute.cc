@@ -41,7 +41,7 @@ namespace {
 template <typename T>
 DataPtr initDataArray(const std::vector<std::string>& values)
 {
-    boost::shared_array<T> array(new T[values.size()]);
+    shared_array<T> array(new T[values.size()]);
     std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
     return createData(values.size(), array);
 }
@@ -75,7 +75,7 @@ DataPtr initDataByArray(CDMDataType datatype, const std::vector<std::string>& va
         return createData(CDM_STRING, value.begin(), value.end());
     }
     case CDM_STRINGS: {
-        boost::shared_array<std::string> array(new std::string[values.size()]);
+        shared_array<std::string> array(new std::string[values.size()]);
         std::copy(values.begin(), values.end(), &array[0]);
         return createData(values.size(), array);
     }

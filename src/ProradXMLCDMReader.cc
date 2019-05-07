@@ -30,18 +30,19 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/SharedArray.h"
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 
 #include "MutexLock.h"
 
-#include <boost/shared_array.hpp>
 
 #include <proradxmlrw.h>
 #include <prorad-radarprod.h>
 
 #include <libxml/xinclude.h>
 
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -90,7 +91,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             vector<string> tshape;
             tshape.push_back(pimpl_->time);
             CDMVariable tVar(pimpl_->time, CDM_INT, tshape);
-            boost::shared_array<int> t(new int[1]());
+            shared_array<int> t(new int[1]());
             t[0] = pimpl_->meta->product_epoch;
             tVar.setData(createData(1, t));
             cdm_->addVariable(tVar);
@@ -140,8 +141,8 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
         }
         {
             // axes values
-            boost::shared_array<double> xvals(new double[cartesian->x_size]());
-            boost::shared_array<double> yvals(new double[cartesian->y_size]());
+            shared_array<double> xvals(new double[cartesian->x_size]());
+            shared_array<double> yvals(new double[cartesian->y_size]());
             for (size_t i = 0; i < cartesian->x_size; ++i) {
                 xvals[i] = cartesian->west_ucs + i*cartesian->x_pix_size;
             }
@@ -185,7 +186,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
                 cdm_->addAttribute(pimpl_->varNm, CDMAttribute("coordinates", coordinates));
             }
             cdm_->addAttribute(pimpl_->varNm, CDMAttribute("grid_mapping", proj->getName()));
-            boost::shared_array<short> d(new short[cartesian->buffer_size]());
+            shared_array<short> d(new short[cartesian->buffer_size]());
             for (size_t i = 0; i < cartesian->buffer_size; ++i) {
                 if (cartesian->flags[i].is_nodata) {
                     d[i] = -32767;
@@ -209,7 +210,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             }
             string stFlgNm = string(cartesian->datatype) + "_status_flag_radar";
             cdm_->addAttribute(stFlgNm, CDMAttribute("standard_name", pimpl_->varNm + " status_flag")); // should link to standard_name, not varNm
-            boost::shared_array<char> mask(new char[7]);
+            shared_array<char> mask(new char[7]);
             for (size_t i = 0; i < 7; i++) {
                 mask[i] = 1 << i;
             }
@@ -237,7 +238,7 @@ ProradXMLCDMReader::~ProradXMLCDMReader() {}
 
 #define PRGETDATAFLAG(XXX, YYY) if (varName.find(std::string("_") + XXX +"_radar") != std::string::npos) { \
     td_cartesian_st* cartesian = pimpl_->meta->cartesian_st; \
-    boost::shared_array<char> d(new char[cartesian->buffer_size]()); \
+    shared_array<char> d(new char[cartesian->buffer_size]()); \
     for (size_t i = 0; i < cartesian->buffer_size; ++i) { \
         d[i] = cartesian->flags[i].YYY ; \
     } \
@@ -280,7 +281,7 @@ DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLi
     PRGETDATAFLAG("clutter_probability", clutter_probability)
     if (varName.find("status_flag_radar") != std::string::npos) {
         td_cartesian_st* cartesian = pimpl_->meta->cartesian_st;
-        boost::shared_array<char> d(new char[cartesian->buffer_size]());
+        shared_array<char> d(new char[cartesian->buffer_size]());
         for (size_t i = 0; i < cartesian->buffer_size; ++i) {
             td_flags_st flag = cartesian->flags[i];
             d[i] = flag.is_nodata | (flag.is_lowele << 1) | (flag.is_highele << 2) |

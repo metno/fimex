@@ -247,7 +247,7 @@ values_v CDMMergerPrivate::extendInnerAxis(CoordinateAxis_cp axisI, CoordinateAx
     if( !axisDataO || axisDataO->size() < 2 )
         THROW("no data for axis '" << nameO << "' in outer");
 
-    boost::shared_array<double> valuesI = axisDataI->asDouble(), valuesO = axisDataO->asDouble();
+    shared_array<double> valuesI = axisDataI->asDouble(), valuesO = axisDataO->asDouble();
     const double stepI = valuesI[1] - valuesI[0], stepO = valuesO[1] - valuesO[0];
 
     for(size_t i=2; i<axisDataI->size(); ++i) {

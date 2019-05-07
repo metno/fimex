@@ -168,7 +168,7 @@ TEST4FIMEX_TEST_CASE(test_slice_asym)
     newDimSize[2] = sigma;
     DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
     TEST4FIMEX_CHECK_EQ(slice->size(), newDimSize[0] * newDimSize[1] * newDimSize[2]);
-    boost::shared_array<int> intSlice = slice->asInt();
+    shared_array<int> intSlice = slice->asInt();
     for (size_t i = 0; i < newDimSize[2]; i++)
         for (size_t j = 0; j < newDimSize[1]; j++)
             for (size_t k = 0; k < newDimSize[0]; k++) {
@@ -212,9 +212,9 @@ TEST4FIMEX_TEST_CASE(test_rounding)
         dataDouble->setValue(j, i*0.1);
     }
     DataPtr dataShort = dataDouble->convertDataType(1e30, 1, 0, CDM_SHORT, -32768, 1, 0);
-    boost::shared_array<short> asS = dataShort->asShort();
+    shared_array<short> asS = dataShort->asShort();
 
-    boost::shared_array<int> asI = dataDouble->asInt();
+    shared_array<int> asI = dataDouble->asInt();
     for (int i = -20; i < 20; i++) {
         const int j = i+20;
         int expect;

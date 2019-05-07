@@ -36,12 +36,9 @@
 #include "MetGmCDMReaderImpl.h"
 #include "fimex/XMLInput.h"
 
-// boost
-//
-#include <memory>
-
 // standard
 //
+#include <memory>
 #include <string>
 
 namespace MetNoFimex {

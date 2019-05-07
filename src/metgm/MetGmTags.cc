@@ -133,19 +133,20 @@ std::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_
     const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
     const unsigned long MetGmTags::sliceDataSize() { return dimTag_->sliceSize(); }
 
-    void MetGmTags::sliceToMetGmLayout(boost::shared_array<float>& slice) { pGp5_->sliceToMetGmLayout(slice); }
+    void MetGmTags::sliceToMetGmLayout(shared_array<float>& slice)
+    {
+        pGp5_->sliceToMetGmLayout(slice);
+    }
 
-    boost::shared_array<float> MetGmTags::readDataSlices(size_t pos, size_t numberOfSlices)
+    shared_array<float> MetGmTags::readDataSlices(size_t pos, size_t numberOfSlices)
     {
         return pGp5_->readDataSlices(pos, numberOfSlices);
     }
 
-//    void MetGmTags::slicesToMetGmLayout(boost::shared_array<float>& slices, size_t numberOfSlices)
-//    {
-//        pGp5_->slicesToMetGmLayout(slices, numberOfSlices);
-//    }
-
-    const boost::shared_array<float>& MetGmTags::data() { return pGp5_->data(); }
+    const shared_array<float>& MetGmTags::data()
+    {
+        return pGp5_->data();
+    }
     const std::string MetGmTags::units() const { return pGp5_->units(); }
 }
 

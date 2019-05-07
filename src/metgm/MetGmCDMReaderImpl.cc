@@ -55,6 +55,7 @@
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
 
+#include <cassert>
 #include <regex>
 #include <tuple>
 
@@ -454,7 +455,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
                         continue;
                     } else {
                         const CDMVariable& var = cdm_->getVariable(dim.getName());
-                        boost::shared_array<float> vertical_data = var.getData()->asFloat();
+                        shared_array<float> vertical_data = var.getData()->asFloat();
                         if(memcmp(vertical_data.get(), profile.pTags_->zTag()->points().get(), profile.pTags_->zTag()->nz() * sizeof(float)) == 0) {
                             profile.zDimensionName_ = dim.getName();
                             pidView.replace(pidIt, profile);
