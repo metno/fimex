@@ -30,7 +30,7 @@ Section: libs
 
 Package: libfimex-0.23-dev
 Section: libdevel
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version}),
  libxml2-dev,
@@ -42,7 +42,7 @@ Description: library for geo-spatial gridded data
 
 Package: libfimex-dev
 Section: libdevel
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfimex-0.23-dev (= ${binary:Version})
 Description: library for geo-spatial gridded data
@@ -51,7 +51,7 @@ Description: library for geo-spatial gridded data
 
 Package: libfimex-0.23-0
 Section: libs
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
  fimex-0.23-share,
@@ -62,7 +62,7 @@ Description: library for geo-spatial gridded data
 
 Package: fimex-0.23-dbg
 Section: debug
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version})
 Description: command line utility for geo-spatial gridded data
@@ -71,7 +71,7 @@ Description: command line utility for geo-spatial gridded data
 
 Package: fimex-0.23-bin
 Section: science
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version})
@@ -90,7 +90,7 @@ Description: shared files required for fimex-bin and libfimex
 
 Package: libfelt-0.23-0
 Section: libs
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends}
 Description: C++ library for reading met.no's felt-files
@@ -99,7 +99,7 @@ Description: C++ library for reading met.no's felt-files
 
 Package: libfelt-0.23-dev
 Section: libdevel
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfelt-0.23-0 (= ${binary:Version})
 Description: C++ library for reading met.no's felt-files
@@ -108,7 +108,7 @@ Description: C++ library for reading met.no's felt-files
 
 Package: libfimexf-0.23-0
 Section: libs
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version}),
@@ -119,7 +119,7 @@ Description: library for geo-spatial gridded data
 
 Package: libfimexf-0.23-dev
 Section: libdevel
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfimexf-0.23-0 (= ${binary:Version}),
  libfimex-0.23-dev (= ${binary:Version})
@@ -129,7 +129,7 @@ Description: library for geo-spatial gridded data
 
 Package: python3-pyfimex0-0.23
 Section: python
-Architecture: i386 amd64 ia64 powerpc
+Architecture: amd64 ia64 powerpc
 Depends: python3,
  ${python:Depends},
  ${shlibs:Depends},
