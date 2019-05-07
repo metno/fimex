@@ -22,17 +22,21 @@
  */
 
 #include "fimex/CDM.h"
-#include "fimex/interpolation.h"
-#include "proj_api.h"
+
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
-#include "fimex/Units.h"
-#include "fimex/coordSys/Projection.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/Projection.h"
+#include "fimex/interpolation.h"
+
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
-#include <functional>
+
+#include "proj_api.h"
+
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <set>
 

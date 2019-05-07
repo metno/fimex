@@ -32,7 +32,6 @@
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
-#include "fimex/CDMException.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
 

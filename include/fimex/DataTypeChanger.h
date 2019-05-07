@@ -26,7 +26,6 @@
 #include "fimex/DataDecl.h"
 #include "fimex/CDMDataType.h"
 #include "boost/shared_ptr.hpp"
-#include "fimex/CDMException.h"
 
 namespace MetNoFimex
 {

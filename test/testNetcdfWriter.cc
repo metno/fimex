@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include "FeltCDMReader2.h"
 
+#include "fimex/CDMException.h"
 #include "fimex/NetCDF_CDMWriter.h"
 
 using namespace std;

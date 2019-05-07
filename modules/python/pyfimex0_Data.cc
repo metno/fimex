@@ -29,6 +29,7 @@
 #endif // HAVE_CONFIG_H
 
 #include "fimex/CDMDataType.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 
 #include <boost/python/class.hpp>

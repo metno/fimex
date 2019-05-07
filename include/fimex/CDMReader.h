@@ -27,7 +27,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include "fimex/DataDecl.h"
-#include "fimex/CDMException.h"
 #include "fimex/CDMReaderDecl.h"
 #include "fimex/SliceBuilder.h"
 

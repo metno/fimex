@@ -26,7 +26,6 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
-#include "fimex/CDMException.h"
 
 //forward decl;
 struct _xmlDoc;

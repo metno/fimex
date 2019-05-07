@@ -27,6 +27,7 @@
 #include "CoordSysUtils.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex
 {

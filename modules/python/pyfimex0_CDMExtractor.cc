@@ -24,6 +24,7 @@
  *      Author: Alexander Bürger
  */
 
+#include "fimex/CDMException.h"
 #include "fimex/CDMExtractor.h"
 
 #include "pyfimex0_helpers.h"

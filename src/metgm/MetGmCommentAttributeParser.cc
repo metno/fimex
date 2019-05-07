@@ -28,8 +28,9 @@
 // fimex
 //
 #include "fimex/CDM.h"
-#include "fimex/XMLDoc.h"
+#include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/XMLDoc.h"
 
 // libxml2
 //

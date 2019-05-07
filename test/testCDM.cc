@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 

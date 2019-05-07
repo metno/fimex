@@ -32,6 +32,8 @@
 
 #include "fimex/Data.h"
 
+#include "fimex/CDMException.h"
+
 namespace MetNoFimex {
 
 class StringData : public Data

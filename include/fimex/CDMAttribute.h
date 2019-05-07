@@ -31,7 +31,6 @@
 #include "fimex/DataDecl.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
-#include "fimex/CDMException.h"
 #include "fimex/deprecated.h"
 
 namespace MetNoFimex

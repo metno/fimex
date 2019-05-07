@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <iosfwd>
 #include "fimex/CDMDataType.h"
-#include "fimex/CDMException.h"
 
 #include <vector>
 

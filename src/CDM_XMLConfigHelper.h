@@ -27,13 +27,14 @@
 #ifndef CDM_XMLCONFIGHELPER_H_
 #define CDM_XMLCONFIGHELPER_H_
 
-#include <map>
-#include <vector>
 #include <boost/shared_ptr.hpp>
+
 #include <libxml/xinclude.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include "fimex/CDMException.h"
+
+#include <map>
+#include <vector>
 
 namespace MetNoFimex
 {

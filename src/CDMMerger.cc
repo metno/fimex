@@ -25,23 +25,26 @@
  */
 
 #include "fimex/CDMMerger.h"
-#include "fimex/CDMBorderSmoothing_Linear.h"
-#include "fimex/CDMOverlay.h"
-
-#define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
 
 #include "fimex/CDM.h"
-#include "fimex/CDMconstants.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMInterpolator.h"
-#include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/CDMOverlay.h"
+#include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
+#include "fimex/coordSys/CoordinateAxis.h"
+
+#include "CDMMergeUtils.h"
 
 #include <boost/foreach.hpp>
 
-#include "CDMMergeUtils.h"
+// clang-format off
+#define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
+// clang-format on
 
 using namespace MetNoFimex;
 using namespace std;

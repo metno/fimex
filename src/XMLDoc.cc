@@ -22,6 +22,9 @@
  */
 
 #include "fimex/XMLDoc.h"
+
+#include "fimex/CDMException.h"
+
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
 

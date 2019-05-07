@@ -28,6 +28,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include <fimex/SliceBuilder.h>
 
 using namespace std;

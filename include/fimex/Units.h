@@ -24,22 +24,23 @@
 #ifndef UNITS_H_
 #define UNITS_H_
 
-#include <string>
 #include "fimex/CDMException.h"
 #include "fimex/UnitsConverter.h"
+
 #include <boost/shared_ptr.hpp>
+
+#include <string>
 
 namespace MetNoFimex
 {
 
-/**
- * @headerfile fimex/Units.h
- */
 class UnitException : public CDMException
 {
 public:
-    UnitException() {}
-    UnitException(std::string message) : CDMException(message) {}
+    UnitException(const std::string& message)
+        : CDMException(message)
+    {
+    }
 };
 
 /**

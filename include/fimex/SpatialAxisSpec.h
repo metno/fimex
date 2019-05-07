@@ -27,8 +27,6 @@
 #ifndef TIMESPEC_H_
 #define TIMESPEC_H_
 
-#include "fimex/TimeUnit.h"
-#include "fimex/CDMException.h"
 #include <vector>
 #include <string>
 

@@ -26,7 +26,6 @@
 
 #include "boost/shared_ptr.hpp"
 #include "fimex/Units.h"
-#include "fimex/CDMException.h"
 #include <iosfwd>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 

@@ -26,6 +26,8 @@
 
 #include "fimex/CDMBorderSmoothing_Linear.h"
 
+#include "fimex/CDMException.h"
+
 #include <boost/make_shared.hpp>
 
 namespace { // anonymous
