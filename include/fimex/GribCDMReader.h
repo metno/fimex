@@ -53,6 +53,7 @@ namespace MetNoFimex
 // forward decl.
 class CDM;
 class CDMDimension;
+class GribFileMessage;
 
 class GribCDMReader: public MetNoFimex::CDMReader
 {
@@ -112,6 +113,7 @@ private:
      */
     xmlNodePtr findVariableXMLNode(const GribFileMessage& msg) const;
     std::string getVariableName(const GribFileMessage& gfm) const;
+
     /**
      * Find the valid time of the gfm, or not_a_date_time if variable is defined to be constant.
      * @param gfm
@@ -139,6 +141,6 @@ private:
     void initSpecialLevels_(xmlNodePtr node, const std::string& extension, const std::string& levelType, std::size_t levelPos, const std::vector<std::string>& levelShape, DataPtr& levelData);
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* GRIBCDMREADER_H_ */
