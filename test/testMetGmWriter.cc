@@ -28,7 +28,6 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/MetGmCDMReader.h"
 #include "fimex/MetGmCDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
@@ -55,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
     BOOST_CHECK(true); // made it so far
 
     // create metgm reader to read newly writen mgm file
-    CDMReader_p mgmReader(new MetGmCDMReader(mgmFile, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml"))));
+    CDMReader_p mgmReader = CDMFileReaderFactory::create(MIFI_FILETYPE_METGM, mgmFile, pathShareEtc("cdmMetGmReaderConfig.xml"));
     BOOST_CHECK(true); // made it so far
 
     // from metgm reader write again to nc file and compare:
