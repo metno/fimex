@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include "fimex/CDM.h"
+#include "fimex/Data.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 using namespace std;
@@ -70,6 +71,58 @@ BOOST_AUTO_TEST_CASE( test_variable) {
 
     cdm.removeVariable(newName);
     BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_CASE(test_attribute_types)
+{
+    BOOST_CHECK_EQUAL(CDM_FLOAT, CDMAttribute("att1", 1.0f).getDataType());
+    BOOST_CHECK_EQUAL(CDM_DOUBLE, CDMAttribute("att1", 1.0).getDataType());
+
+    BOOST_CHECK_EQUAL(CDM_CHAR, CDMAttribute("att1", ' ').getDataType());
+    BOOST_CHECK_EQUAL(CDM_STRING, CDMAttribute("att1", "value").getDataType());
+
+    std::vector<std::string> v_1_2;
+    v_1_2.push_back("1");
+    v_1_2.push_back("2");
+
+    {
+        const CDMAttribute a("att", CDM_CHAR, v_1_2);
+        BOOST_CHECK_EQUAL(CDM_CHAR, a.getDataType());
+        const DataPtr d = a.getData();
+        BOOST_REQUIRE(d);
+        BOOST_CHECK_EQUAL(2, d->size());
+        const boost::shared_array<char> v = d->asChar();
+        BOOST_CHECK_EQUAL('1', v[0]);
+        BOOST_CHECK_EQUAL('2', v[1]);
+    }
+    {
+        const CDMAttribute a("att", CDM_DOUBLE, v_1_2);
+        BOOST_CHECK_EQUAL(CDM_DOUBLE, a.getDataType());
+        const DataPtr d = a.getData();
+        BOOST_REQUIRE(d);
+        BOOST_CHECK_EQUAL(2, d->size());
+        const boost::shared_array<double> v = d->asDouble();
+        BOOST_CHECK_EQUAL(1.0, v[0]);
+        BOOST_CHECK_EQUAL(2.0, v[1]);
+        BOOST_CHECK_EQUAL("1 2", a.getStringValue());
+    }
+    {
+        const CDMAttribute a("att", "char", "A");
+        BOOST_CHECK_EQUAL(CDM_CHAR, a.getDataType());
+        BOOST_CHECK_EQUAL("A", a.getStringValue());
+        BOOST_CHECK_EQUAL(65, a.getData()->getDouble(0));
+    }
+    {
+        const CDMAttribute a("att", "double", "1.25");
+        BOOST_CHECK_EQUAL(CDM_DOUBLE, a.getDataType());
+        BOOST_CHECK_EQUAL("1.25", a.getStringValue());
+        BOOST_CHECK_EQUAL(1.25, a.getData()->getDouble(0));
+    }
+    {
+        const CDMAttribute a_string("att", "string", "hello");
+        BOOST_CHECK_EQUAL(CDM_STRING, a_string.getDataType());
+        BOOST_CHECK_EQUAL("hello", a_string.getStringValue());
+    }
 }
 
 BOOST_AUTO_TEST_CASE( test_attributes)
