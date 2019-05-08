@@ -629,7 +629,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
     // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
     // use unLimDimPos = -1 for variables without unlimited dimension
 
-#if !defined(__INTEL_COMPILER) // openmp gives currently segfaults with intel compilers
+#if !defined(__INTEL_COMPILER) || (__INTEL_COMPILER >= 1800)
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap)
 #endif
