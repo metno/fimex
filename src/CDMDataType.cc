@@ -78,7 +78,9 @@ std::string datatype2string(CDMDataType type)
     case CDM_UINT64:  return S_UINT64;
     case CDM_STRING:  return S_STRING;
     case CDM_STRINGS: return S_STRINGS;
-    case CDM_NAT:     return S_NAT; // not a type
+    case CDM_NAT:
+    default:
+        return S_NAT; // not a type
     }
 }
 

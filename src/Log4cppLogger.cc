@@ -41,7 +41,9 @@ Priority::Value logLevel2cppPriority(Logger::LogLevel level)
     case Logger::WARN: return Priority::WARN;
     case Logger::INFO: return Priority::INFO;
     case Logger::DEBUG: return Priority::DEBUG;
-    case Logger::OFF: return Priority::NOTSET;
+    case Logger::OFF:
+    default:
+        return Priority::NOTSET;
     }
 }
 
