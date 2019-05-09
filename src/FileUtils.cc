@@ -48,7 +48,7 @@
 #warning "using boost::filesystem"
 #include <boost/filesystem.hpp>
 #else
-#warning "using stat/dirent"
+// #warning "using stat/dirent"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
