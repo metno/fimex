@@ -218,6 +218,17 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
     return MIFI_OK;
 }
 
+static inline int mifi_3d_array_pos(int x, int y, int z, int ix, int iy, int iz)
+{
+    (void)iz; // suppress compiler warning
+    return (z*iy + y)*ix + x;
+}
+
+int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
+{
+    return mifi_3d_array_pos(x, y, z, ix, iy, iz);
+}
+
 /*
  * copy or convert array from degree to rad if required, otherwise just copy
  */
@@ -271,7 +282,7 @@ static int mifi_interpolate_f_functional(int (*func)(const float* infield, float
         for (int x = 0; x < ox; ++x) {
             if (func(infield, zValues, pointsX[y*ox+x], pointsY[y*ox+x], ix, iy, iz) != MIFI_ERROR) {
                 for (int z = 0; z < iz; ++z) {
-                    outfield[mifi_3d_array_position(x, y, z, ox, oy, iz)] = zValues[z];
+                    outfield[mifi_3d_array_pos(x, y, z, ox, oy, iz)] = zValues[z];
                 }
             }
         }
@@ -869,7 +880,7 @@ static int mifi_get_values_f(const float* infield, float* outvalues, const doubl
     int ry = lround(y);
     if (rx >= 0 && rx < ix && ry >= 0 && ry < iy) { // pos in range
         for (int z = 0; z < iz; ++z) {
-            outvalues[z] = infield[mifi_3d_array_position(rx,ry,z,ix,iy,iz)];
+            outvalues[z] = infield[mifi_3d_array_pos(rx,ry,z,ix,iy,iz)];
         }
     } else {
         for (int z = 0; z < iz; ++z) {
@@ -890,7 +901,7 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
     if ((0 <= x0) && (x1 < ix)) {
         if ((0 <= y0) && (y1 < iy)) {
             // pos in range
-            size_t pos = mifi_3d_array_position(x0, y0, 0, ix, iy, iz);
+            size_t pos = mifi_3d_array_pos(x0, y0, 0, ix, iy, iz);
             for (int z = 0; z < iz; ++z) {
                 float s00 = infield[pos];
                 float s01 = infield[pos+1];
@@ -905,7 +916,7 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
             y0 = lround(y);
             if ((0 <= y0) && (y0 < iy)) {
                 // linear interpolation in x, nearest-neighbor in y
-                size_t pos = mifi_3d_array_position(x0, y0, 0, ix, iy, iz);
+                size_t pos = mifi_3d_array_pos(x0, y0, 0, ix, iy, iz);
                 for (int z = 0; z < iz; ++z) {
                     float s00 = infield[pos];
                     float s01 = infield[pos+1];
@@ -925,7 +936,7 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
             // nearest neighbor in x
             if ((0 <= y0) && (y1 < iy)) {
                 // linear in y
-                size_t pos = mifi_3d_array_position(x0, y0, 0, ix, iy, iz);
+                size_t pos = mifi_3d_array_pos(x0, y0, 0, ix, iy, iz);
                 for (int z = 0; z < iz; ++z) {
                     float s00 = infield[pos];
                     float s10 = infield[pos+ix];
@@ -936,7 +947,7 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
                 y0 = lround(y);
                 if ((0 <= y0) && (y0 <= iy)) {
                     // nearest neighbor in y
-                    size_t pos = mifi_3d_array_position(x0, y0, 0, ix, iy, iz);
+                    size_t pos = mifi_3d_array_pos(x0, y0, 0, ix, iy, iz);
                     for (int z = 0; z < iz; ++z) {
                         outvalues[z] = infield[pos];
                         pos += iy*ix;
@@ -1006,7 +1017,7 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
             outvalues[z] = 0;
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
-                    F[i][j] = infield[mifi_3d_array_position(x0+i-1, y0+j-1, z, ix, iy, iz)];
+                    F[i][j] = infield[mifi_3d_array_pos(x0+i-1, y0+j-1, z, ix, iy, iz)];
                 }
             }
 

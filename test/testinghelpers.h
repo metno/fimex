@@ -123,4 +123,9 @@ bool writeToFile(CDMReader_p input, const std::string& fileName);
 #define TEST4FIMEX_CHECK_NO_THROW(x) MI_CPPTEST_CHECK_NO_THROW(x)
 #endif // !HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
+extern "C" {
+// implemented in interpolation.c
+extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
+}
+
 #endif // FIMEX_TESTINGHELPERS_H

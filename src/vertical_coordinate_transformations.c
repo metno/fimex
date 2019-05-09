@@ -111,7 +111,7 @@ float mifi_virtual_temperature(float spec_humidity, float T)
 }
 
 //! helper function for specific <-> relative humidity conversion
-inline float mifi_humidity_es(float t)
+static inline float mifi_humidity_es(float t)
 {
     const float c1 = 610.78;
     const float c2 = 17.269;

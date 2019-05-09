@@ -408,19 +408,6 @@ extern int bsearchDoubleIndex(const double key, const double* base, int num, int
  */
 extern int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type);
 
-
-/**
- * gives the position of an fortran like array of size ix, iy, iz
- *
- *  @return the position of x, y, z
- */
-inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
-{
-    (void)iz; // suppress compiler warning
-    return (z*iy + y)*ix + x;
-}
-
-
 /**
  * @brief project values so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
  *
