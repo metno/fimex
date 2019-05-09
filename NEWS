@@ -1,4 +1,4 @@
-  * start fimex-1.0.0
+  * 2019-05-08 fimex-1.0.0
     * drop RFimex and perl modules
     * remove wdb support
     * better handling of CDM_STRING and CDM_CHAR
