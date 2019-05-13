@@ -910,35 +910,34 @@ FimexTime GribFileMessage::getValidTime() const
     if (is_invalid_time_point(reference))
         return reference;
 
+    // add step offset
     std::chrono::seconds timeOffset;
-    // add step offset:
-    if (stepUnits_ == "s") {
-        timeOffset = std::chrono::seconds(stepEnd_);
-    } else if (stepUnits_ == "m") {
-        timeOffset = std::chrono::minutes(stepEnd_);
-    } else if (stepUnits_ == "h") {
-        timeOffset = std::chrono::minutes(stepEnd_);
-    } else if (stepUnits_ == "3h") {
-        timeOffset = std::chrono::minutes(3 * stepEnd_);
-    } else if (stepUnits_ == "6h") {
-        timeOffset = std::chrono::minutes(6 * stepEnd_);
-    } else if (stepUnits_ == "12h") {
-        timeOffset = std::chrono::minutes(12 * stepEnd_);
-    } else if (stepUnits_ == "D") {
-        timeOffset = date::days(stepEnd_);
-    } else if (stepUnits_ == "M") {
-        timeOffset = date::months(stepEnd_);
-    } else if (stepUnits_ == "Y") {
-        timeOffset = date::years(stepEnd_);
-    } else if (stepUnits_ == "10Y") {
-        timeOffset = date::years(10 * stepEnd_);
-    } else if (stepUnits_ == "30Y") {
-        timeOffset = date::years(30 * stepEnd_);
-    } else if (stepUnits_ == "C") {
-        timeOffset = date::years(100 * stepEnd_);
-
+    static const std::regex re_stepUnits("(\\d+)?(.)");
+    std::smatch what;
+    if (std::regex_match(stepUnits_, what, re_stepUnits)) {
+        int factor = 1;
+        if (what[1].matched)
+            factor = string2type<int>(what[1].str());
+        const std::string& units = what[2].str();
+        if (units == "s") {
+            timeOffset = std::chrono::seconds(factor*stepEnd_);
+        } else if (units == "m") {
+            timeOffset = std::chrono::minutes(factor*stepEnd_);
+        } else if (units == "h") {
+            timeOffset = std::chrono::hours(factor * stepEnd_);
+        } else if (units == "D") {
+            timeOffset = date::days(factor * stepEnd_);
+        } else if (units == "M") {
+            timeOffset = date::months(factor * stepEnd_);
+        } else if (units == "Y") {
+            timeOffset = date::years(factor * stepEnd_);
+        } else if (units == "C") {
+            timeOffset = date::years(100 * factor * stepEnd_);
+        } else {
+            throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_ + " (" + units + ")");
+        }
     } else {
-        throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_);
+        throw CDMException("found incomprehensible stepUnits in gribReader: " + stepUnits_);
     }
     return fromTimePoint(asTimePoint(reference) + timeOffset);
 }
