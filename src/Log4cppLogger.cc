@@ -27,11 +27,15 @@
 #include "Log4cppLogger.h"
 #ifdef HAVE_LOG4CPP
 
+#include "MutexLock.h"
+
 #include "log4cpp/CategoryStream.hh"
 
 namespace MetNoFimex {
 
 using namespace log4cpp;
+
+static OmpMutex log4cppMutex;
 
 Priority::Value logLevel2cppPriority(Logger::LogLevel level)
 {
@@ -47,6 +51,12 @@ Priority::Value logLevel2cppPriority(Logger::LogLevel level)
     }
 }
 
+inline log4cpp::Category& getlog(const std::string& className)
+{
+    OmpScopedLock lock(log4cppMutex);
+    return log4cpp::Category::getInstance(className);
+}
+
 Log4cppLogger::Log4cppLogger(const std::string& className)
     : log_(log4cpp::Category::getInstance(className))
 {
@@ -55,12 +65,15 @@ Log4cppLogger::Log4cppLogger(const std::string& className)
 bool Log4cppLogger::isEnabledFor(Logger::LogLevel level)
 {
     Priority::Value prio = logLevel2cppPriority(level);
+    OmpScopedLock lock(log4cppMutex);
     return log_.isPriorityEnabled(prio);
 }
 
 void Log4cppLogger::log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
 {
-    log_.getStream(logLevel2cppPriority(level))
+    Priority::Value prio = logLevel2cppPriority(level);
+    OmpScopedLock lock(log4cppMutex);
+    log_.getStream(prio)
             << message
             << " in " << filename
             << " at line " << lineNumber;
@@ -75,6 +88,7 @@ LoggerImpl* Log4cppClass::loggerFor(Logger* logger, const std::string& className
 // static
 void Log4cppClass::configureMinimal(Logger::LogLevel logLevel)
 {
+    OmpScopedLock lock(log4cppMutex);
     log4cpp::Category& root = log4cpp::Category::getRoot();
     log4cpp::Category& fimex = log4cpp::Category::getInstance("fimex");
     if (root.getAllAppenders().empty() && fimex.getAllAppenders().empty()) {

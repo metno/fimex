@@ -25,12 +25,15 @@
 #include "Log4cppLogger.h"
 
 #include "fimex_config.h"
+#include "MutexLock.h"
 
 #include <algorithm>
 #include <iostream>
 #include <memory>
 
 namespace MetNoFimex {
+
+static OmpMutex loggerMutex;
 
 // the standard implementation of Logger
 class Log2StderrLogger : public LoggerImpl {
@@ -95,9 +98,13 @@ static LoggerClass* loggerClass_ = 0;
 
 bool Logger::setClass(LoggerClass* lc)
 {
-    delete loggerClass_;
-    loggerClass_ = lc;
-    return (lc != 0);
+    const bool hasLogger = (lc != 0);
+    {
+        OmpScopedLock lock(loggerMutex);
+        std::swap(lc, loggerClass_);
+    }
+    delete lc; // calls reset() -> calls LoggerImpl::reset() -> calls forget() -> locks
+    return hasLogger;
 }
 
 bool Logger::setClass(LogClass logClass)
@@ -114,7 +121,9 @@ bool Logger::setClass(LogClass logClass)
 
 LoggerClass* getLoggerClass()
 {
+    // FIXME should lock here ...
     if (!loggerClass_)
+        // ... and unlock here
         Logger::setClass(Logger::LOG4CPP);
     return loggerClass_;
 }
@@ -132,18 +141,23 @@ LoggerClass::~LoggerClass()
 
 void LoggerClass::remember(Logger* logger)
 {
+    OmpScopedLock lock(loggerMutex);
     loggers_.push_back(logger);
 }
 
 void LoggerClass::forget(Logger* logger)
 {
+    OmpScopedLock lock(loggerMutex);
     loggers_.erase(std::remove(loggers_.begin(), loggers_.end(), logger), loggers_.end());
 }
 
 void LoggerClass::reset()
 {
     loggers_t oldloggers;
-    std::swap(loggers_, oldloggers);
+    {
+        OmpScopedLock lock(loggerMutex);
+        std::swap(loggers_, oldloggers);
+    }
     for (loggers_t::iterator it = oldloggers.begin(); it != oldloggers.end(); ++it)
         (*it)->reset();
 }
@@ -163,35 +177,30 @@ Logger::~Logger()
 
 LoggerImpl* Logger::impl()
 {
-    LoggerImpl* i;
-#ifdef _OPENMP
-#pragma omp critical (MIFI_LOGGER)
-    {
-#endif
+    OmpScopedLock lock(loggerMutex);
     if (!pimpl_) {
-        pimpl_ = getLoggerClass()->loggerFor(this, className_);
+        LoggerImpl* i;
+        {
+            OmpScopedUnlock unlock(loggerMutex);
+            i = getLoggerClass()->loggerFor(this, className_);
+        }
+        if (!pimpl_)
+            pimpl_ = i;
     }
-    i = pimpl_ ;
-#ifdef _OPENMP
-    }
-#endif
-    return i;
+    return pimpl_;
 }
 
 void Logger::reset()
 {
-#ifdef _OPENMP
-#pragma omp critical (MIFI_LOGGER)
-    {
-#endif
-        if (pimpl_) {
+    OmpScopedLock lock(loggerMutex);
+    if (pimpl_) {
+        {
+            OmpScopedUnlock unlock(loggerMutex);
             getLoggerClass()->forget(this);
-            delete pimpl_;
-            pimpl_ = 0;
         }
-#ifdef _OPENMP
+        delete pimpl_;
+        pimpl_ = 0;
     }
-#endif
 }
 
 bool Logger::isEnabledFor(LogLevel level)
