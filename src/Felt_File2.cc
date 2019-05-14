@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -52,6 +52,11 @@ namespace MetNoFelt {
 using namespace MetNoFimex;
 
 static Logger_p logger = getLogger("fimex.Felt_File2");
+
+static MetNoFimex::FimexTime toFimexTime(const felt::FeltTime& time)
+{
+    return MetNoFimex::FimexTime(time.year, time.month, time.day, time.hour, time.minute, time.second);
+}
 
 namespace {
 
@@ -179,7 +184,7 @@ bool Felt_File2::findOrCreateFeltArray(std::shared_ptr<felt::FeltField> field)
     if (it == feltArrayMap_.end()) {
         LOG4FIMEX(logger, Logger::DEBUG,
                   "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name)
-                                   << " vTime: " << make_time_string(field->validTime()));
+                                   << " vTime: " << make_time_string(toFimexTime(field->validTime())));
         std::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters_.getParameterFillValue(name)));
         feltArrayMap_[name] = fa;   // copy to map
         return false; // reference from map

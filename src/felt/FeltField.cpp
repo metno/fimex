@@ -29,7 +29,6 @@
 #include "felt/FeltField.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltTypeConversion.h"
-#include "fimex/TimeUtils.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -58,14 +57,14 @@ FeltField::~FeltField()
 {
 }
 
-MetNoFimex::FimexTime FeltField::referenceTime() const
+FeltTime FeltField::referenceTime() const
 {
 	return parseTime(header_.data() + 2);
 }
 
-MetNoFimex::FimexTime FeltField::validTime() const
+FeltTime FeltField::validTime() const
 {
-    return MetNoFimex::fromTimePoint(MetNoFimex::asTimePoint(referenceTime()) + std::chrono::hours(header_[9]));
+    return referenceTime().addHours(header_[9]);
 }
 
 int FeltField::parameter() const

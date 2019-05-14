@@ -5,8 +5,8 @@ LINK_DIRECTORIES(
 LIST(APPEND libfelt_SOURCES
   FeltField.cpp
   FeltFile.cpp
+  FeltTime.cpp
   FeltGridDefinition.cpp
-  FeltTypeConversion.cpp
   )
 
 SET (libfelt_INCLUDE_DIRS

@@ -30,10 +30,8 @@
 #define FELTFILE_H_
 
 #include "FeltConstants.h"
+#include "FeltTime.h"
 #include "FeltTypes.h"
-
-#include "fimex/SharedArray.h"
-#include "fimex/TimeUtils.h"
 
 #include <memory>
 #include <vector>
@@ -65,10 +63,10 @@ public:
 
     std::string information() const;
 
-    MetNoFimex::FimexTime lastUpdateTime() const;
-    MetNoFimex::FimexTime referenceTime() const;
-    MetNoFimex::FimexTime firstTime() const;
-    MetNoFimex::FimexTime lastTime() const;
+    FeltTime lastUpdateTime() const;
+    FeltTime referenceTime() const;
+    FeltTime firstTime() const;
+    FeltTime lastTime() const;
 
     typedef std::shared_ptr<FeltField> FeltFieldPtr;
 
@@ -94,7 +92,7 @@ private:
     /// Is the "not ready yet" flag set to false?
     bool complete() const;
 
-    typedef MetNoFimex::shared_array<word> Block;
+    typedef std::unique_ptr<word[]> Block;
 
     Block getBlock_(size_type blockNo) const;
 
@@ -125,5 +123,6 @@ private:
     friend class FeltField;
 };
 
-}
+} // namespace felt
+
 #endif /*FELTFILE_H_*/

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -39,6 +39,11 @@ using MetNoFimex::type2string;
 
 static MetNoFimex::Logger_p logger = MetNoFimex::getLogger("fimex.Felt_Array2");
 
+static MetNoFimex::FimexTime toFimexTime(const felt::FeltTime& time)
+{
+    return MetNoFimex::FimexTime(time.year, time.month, time.day, time.hour, time.minute, time.second);
+}
+
 Felt_Array2::Felt_Array2(const string name, const std::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
     : feltArrayName_(name)
     , defaultField_(feltField)
@@ -55,7 +60,7 @@ Felt_Array2::~Felt_Array2()
 // add field to feltFields, check first for non-existence
 void Felt_Array2::addField_(const std::shared_ptr<felt::FeltField> field)
 {
-    MetNoFimex::FimexTime time = field->validTime();
+    MetNoFimex::FimexTime time = toFimexTime(field->validTime());
     LevelPair level;
     if (field->isEpsRunParameter()) {
         level = make_pair(field->level1(), field->dataVersion());
@@ -120,7 +125,7 @@ vector<MetNoFimex::FimexTime> Felt_Array2::getReferenceTimes() const
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
             std::shared_ptr<felt::FeltField> field = lm->second;
-            refTimes.push_back(field->referenceTime());
+            refTimes.push_back(toFimexTime(field->referenceTime()));
         }
     }
     return refTimes;

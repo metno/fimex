@@ -30,8 +30,7 @@
 
 #include "FeltConstants.h"
 #include "FeltGridDefinition.h"
-
-#include <fimex/TimeUnit.h>
+#include "FeltTime.h"
 
 #include <array>
 #include <memory>
@@ -61,8 +60,8 @@ public:
     int producer() const { return header_[0]; }
     int gridArea() const { return header_[1]; }
 
-    MetNoFimex::FimexTime referenceTime() const;
-    MetNoFimex::FimexTime validTime() const;
+    FeltTime referenceTime() const;
+    FeltTime validTime() const;
 
     /**
      * Get the parameter value. This is the logical value, which means that if

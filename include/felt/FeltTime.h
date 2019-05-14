@@ -26,19 +26,28 @@
  MA  02110-1301, USA
  */
 
-#ifndef FELTTYPECONVERSION_H_
-#define FELTTYPECONVERSION_H_
+#ifndef FELT_FELTTIME_H
+#define FELT_FELTTIME_H
 
 #include "FeltConstants.h"
 
 namespace felt {
 
-template<typename T>
-T get(word w)
-{
-	return (T) w;
-}
+struct FeltTime {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+    bool invalid() const { return month <= 0; }
+    FeltTime& addHours(int hours);
+};
+
+FeltTime parseTime(const word* data);
+
+FeltTime parseTimeNoThrow(const word* data);
 
 } // namespace felt
 
-#endif /*FELTTYPECONVERSION_H_*/
+#endif /*FELT_FELTTIME_H*/

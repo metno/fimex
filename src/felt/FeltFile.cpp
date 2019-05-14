@@ -126,24 +126,24 @@ std::string FeltFile::information() const
     return cont.str();
 }
 
-MetNoFimex::FimexTime FeltFile::lastUpdateTime() const
+FeltTime FeltFile::lastUpdateTime() const
 {
     return parseTimeNoThrow(block1_.get() +1);
 }
 
-MetNoFimex::FimexTime FeltFile::referenceTime() const
+FeltTime FeltFile::referenceTime() const
 {
     return parseTimeNoThrow(block1_.get() +4);
 }
 
-MetNoFimex::FimexTime FeltFile::firstTime() const
+FeltTime FeltFile::firstTime() const
 {
     return parseTimeNoThrow(block1_.get() +19);
 }
 
-MetNoFimex::FimexTime FeltFile::lastTime() const
+FeltTime FeltFile::lastTime() const
 {
-    return parseTimeNoThrow(block1_.get() +22);
+    return parseTimeNoThrow(block1_.get() + 22);
 }
 
 FeltFile::iterator FeltFile::begin()
@@ -194,7 +194,6 @@ FeltFile::Block FeltFile::getBlock_(size_type blockNo) const
         for_each(ret.get(), ret.get() + blockWords, swapByteOrder);
 
     return ret;
-
 }
 
 void FeltFile::get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const
@@ -214,4 +213,4 @@ const FeltField & FeltFile::at(size_t idx) const
     return * fields_.at(idx);
 }
 
-}
+} // namespace felt

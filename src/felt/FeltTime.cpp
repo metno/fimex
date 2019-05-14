@@ -26,23 +26,47 @@
  MA  02110-1301, USA
  */
 
-#include "felt/FeltTypeConversion.h"
+#include "felt/FeltTime.h"
+
+#include <date/date.h>
 
 #include <stdexcept>
 
 namespace felt {
 
-MetNoFimex::FimexTime parseTime(const word data[3])
+using time_duration = std::chrono::seconds;
+using time_point = std::chrono::time_point<std::chrono::system_clock, time_duration>;
+
+FeltTime& FeltTime::addHours(int add_hours)
 {
-    return MetNoFimex::FimexTime(data[0], data[1] / 100, data[1] % 100, data[2] / 100, data[2] % 100, 0);
+    date::year_month_day d = date::year(year) / date::month(month) / date::day(day);
+    time_point tp = date::sys_days(d) + std::chrono::hours(hour) + std::chrono::minutes(minute) + std::chrono::seconds(second);
+
+    tp += std::chrono::hours(add_hours);
+
+    const time_t tt = std::chrono::system_clock::to_time_t(tp);
+    const tm utc = *std::gmtime(&tt);
+    year = 1900 + utc.tm_year;
+    month = 1 + utc.tm_mon;
+    day = utc.tm_mday;
+    hour = utc.tm_hour;
+    minute = utc.tm_min;
+    second = utc.tm_sec;
+
+    return *this;
 }
 
-MetNoFimex::FimexTime parseTimeNoThrow(const word* data)
+FeltTime parseTime(const word data[3])
+{
+    return FeltTime { data[0], data[1] / 100, data[1] % 100, data[2] / 100, data[2] % 100, 0 };
+}
+
+FeltTime parseTimeNoThrow(const word* data)
 {
     try {
         return parseTime(data);
     } catch (std::exception&) {
-        return MetNoFimex::FimexTime();
+        return FeltTime { 0, -1, -1, -1, -1, -1 };
     }
 }
 
