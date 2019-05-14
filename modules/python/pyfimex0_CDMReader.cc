@@ -33,6 +33,7 @@
 #include "pyfimex0_helpers.h"
 
 #define PY_GIL_ACQUIRE py::gil_scoped_acquire acquire
+#define PY_GIL_RELEASE py::gil_scoped_release release
 
 using namespace MetNoFimex;
 namespace py = pybind11;
@@ -60,33 +61,57 @@ py::object SliceBuilder__getDimensionSizes(const SliceBuilder& sb)
     return std::move(pysize);
 }
 
+DataPtr CDMReader__getData(CDMReader_p reader, const std::string& varName)
+{
+    PY_GIL_RELEASE;
+    return reader->getData(varName);
+}
+
+DataPtr CDMReader__getScaledData(CDMReader_p reader, const std::string& varName)
+{
+    PY_GIL_RELEASE;
+    return reader->getScaledData(varName);
+}
+
+DataPtr CDMReader__getScaledDataInUnit(CDMReader_p reader, const std::string& varName, const std::string& unit)
+{
+    PY_GIL_RELEASE;
+    return reader->getScaledDataInUnit(varName, unit);
+}
+
 // wrapper for overload
 DataPtr CDMReader__getDataSliceUL(CDMReader_p reader, const std::string& varName, int unLimDimPos)
 {
+    PY_GIL_RELEASE;
     return reader->getDataSlice(varName, unLimDimPos);
 }
 DataPtr CDMReader__getDataSliceSB(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb)
 {
+    PY_GIL_RELEASE;
     return reader->getDataSlice(varName, sb);
 }
 
 // wrapper for overload
 DataPtr CDMReader__getScaledDataSliceUL(CDMReader_p reader, const std::string& varName, int unLimDimPos)
 {
+    PY_GIL_RELEASE;
     return reader->getScaledDataSlice(varName, unLimDimPos);
 }
 DataPtr CDMReader__getScaledDataSliceSB(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb)
 {
+    PY_GIL_RELEASE;
     return reader->getScaledDataSlice(varName, sb);
 }
 
 // wrapper for overload
 DataPtr CDMReader__getScaledDataSliceInUnitUL(CDMReader_p reader, const std::string& varName, const std::string& unit, int unLimDimPos)
 {
+    PY_GIL_RELEASE;
     return reader->getScaledDataSliceInUnit(varName, unit, unLimDimPos);
 }
 DataPtr CDMReader__getScaledDataSliceInUnitSB(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sb)
 {
+    PY_GIL_RELEASE;
     return reader->getScaledDataSliceInUnit(varName, unit, sb);
 }
 
@@ -182,9 +207,9 @@ void pyfimex0_CDMReader(py::module m)
 
     py::class_<CDMReader, PyCDMReader, CDMReader_p>(m, "CDMReader")
         .def(py::init<>())
-        .def("getData", &CDMReader::getData)
-        .def("getScaledData", &CDMReader::getScaledData)
-        .def("getScaledDataInUnit", &CDMReader::getScaledDataInUnit)
+        .def("getData", CDMReader__getData)
+        .def("getScaledData", CDMReader__getScaledData)
+        .def("getScaledDataInUnit", CDMReader__getScaledDataInUnit)
         .def("getDataSlice", CDMReader__getDataSliceUL)
         .def("getScaledDataSlice", CDMReader__getScaledDataSliceUL)
         .def("getScaledDataSliceInUnit", CDMReader__getScaledDataSliceInUnitUL)
