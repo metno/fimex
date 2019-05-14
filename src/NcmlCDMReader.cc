@@ -35,13 +35,7 @@
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
-
-#include "fimex_config.h"
-#ifdef HAVE_NETCDF_H
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/NetCDF_CDMReader.h"
-#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#endif
+#include "fimex/XMLInput.h"
 
 #include "MutexLock.h"
 #include "NcmlAggregationReader.h"

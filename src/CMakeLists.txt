@@ -86,6 +86,8 @@ SET(libfimex_SOURCES
   DataImpl.h
   DataIndex.cc
   ${INCF}/DataIndex.h
+  AggregationReader.cc
+  ${INCF}/AggregationReader.h
   ArrayLoop.cc
   ${INCF}/ArrayLoop.h
   FillWriter.cc

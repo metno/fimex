@@ -43,6 +43,7 @@ void pyfimex0_CDMMerger(py::module m);
 void pyfimex0_CDMReader(py::module m);
 void pyfimex0_CDMReaderWriter(py::module m);
 void pyfimex0_CDMWriter(py::module m);
+void pyfimex0_AggregationReader(py::module m);
 void pyfimex0_CoordinateSystem(py::module m);
 void pyfimex0_NetCDF_CDMWriter(py::module m);
 
@@ -65,6 +66,7 @@ PYBIND11_MODULE(pyfimex0, m)
     pyfimex0_CDMExtractor(m);
     pyfimex0_CDMMerger(m);
     pyfimex0_CoordinateSystem(m);
+    pyfimex0_AggregationReader(m);
     pyfimex0_NetCDF_CDMWriter(m);
 
     m.def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
