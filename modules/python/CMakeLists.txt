@@ -46,6 +46,7 @@ SET(pyfimex0_SOURCES
   pyfimex0_logging.cc
   pyfimex0_CDM.cc
   pyfimex0_CDMInterpolator.cc
+  pyfimex0_CDMTimeInterpolator.cc
   pyfimex0_CDMExtractor.cc
   pyfimex0_CDMMerger.cc
   pyfimex0_CDMReader.cc

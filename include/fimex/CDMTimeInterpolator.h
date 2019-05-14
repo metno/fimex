@@ -24,17 +24,16 @@
  *      Author: heikok
  */
 
-#ifndef CDMTIMEINTERPOLATOR_H_
-#define CDMTIMEINTERPOLATOR_H_
-
+#ifndef FIMEX_CDMTIMEINTERPOLATOR_H_
+#define FIMEX_CDMTIMEINTERPOLATOR_H_
 
 #include "CDMReader.h"
+#include "fimex/coordSys/CoordSysDecl.h"
+
 #include <map>
 #include <vector>
-#include "fimex/coordSys/CoordinateSystem.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMTimeInterpolator.h
@@ -43,34 +42,39 @@ class CDMTimeInterpolator: public MetNoFimex::CDMReader
 {
 public:
     CDMTimeInterpolator(CDMReader_p dataReader);
-    virtual ~CDMTimeInterpolator();
+    ~CDMTimeInterpolator();
+
     using CDMReader::getDataSlice;
+
     /**
      * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
      *
      * @param varName name of variable
      * @param unLimDimPos position of the unlimited dimension, most commonly time-position of the output as set in #changeTimeAxis
      */
-    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
+
     /**
      * change the time-axis from from the one given to a new specification
      * @param timeSpec string of time-specification
      * @throws CDMException on unparsable timeSpec
      * @see MetNoFimex::TimeSpec
      */
-    virtual void changeTimeAxis(std::string timeSpec);
+    virtual void changeTimeAxis(const std::string& timeSpec);
 
 private:
     CDMReader_p dataReader_;
+
     // map each new time-position to the closest time-positions in the old times
     typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
     TimeChangeMap timeChangeMap_;
+
     CoordinateSystem_cp_v coordSystems_;
+
     // store the datareaders times as doubles of the new units
     std::map<std::string, std::vector<double> > dataReaderTimesInNewUnits_;
 };
 
-} /* MetNoFimex */
+} // namespace MetNoFimex
 
-
-#endif /* CDMTIMEINTERPOLATOR_H_ */
+#endif /* FIMEX_CDMTIMEINTERPOLATOR_H_ */

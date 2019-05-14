@@ -33,6 +33,7 @@
 #include "fimex/Logger.h"
 #include "fimex/TimeSpec.h"
 #include "fimex/Units.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 
 #include <algorithm>
@@ -41,8 +42,7 @@
 #include <set>
 #include <utility>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 
@@ -53,20 +53,20 @@ static Logger_p logger = getLogger("fimex.CDMTimeInterpolator");
 static std::string getTimeAxis(const CoordinateSystem_cp_v& cs, const std::string& varName)
 {
     // check if variable is its own axis (coord-axis don't have coordinate system)
-    for (CoordinateSystem_cp_v::const_iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
-        CoordinateAxis_cp timeAxis = (*csIt)->getTimeAxis();
-        if (timeAxis.get() != 0 && timeAxis->getName() == varName) {
+    for (CoordinateSystem_cp c : cs) {
+        CoordinateAxis_cp timeAxis = c->getTimeAxis();
+        if (timeAxis && timeAxis->getName() == varName) {
             return varName;
         }
     }
 
     // search for coordinate system for varName
-    CoordinateSystem_cp ccs = findCompleteCoordinateSystemFor(cs, varName);
-    if (!ccs.get()) {
-        return "";
+    if (CoordinateSystem_cp ccs = findCompleteCoordinateSystemFor(cs, varName)) {
+        if (CoordinateAxis_cp axis = ccs->getTimeAxis())
+            return axis->getName();
     }
-    CoordinateAxis_cp axis = ccs->getTimeAxis();
-    return (axis.get() == 0) ? "" : axis->getName();
+
+    return std::string();
 }
 
 CDMTimeInterpolator::CDMTimeInterpolator(CDMReader_p dataReader)
@@ -76,11 +76,10 @@ CDMTimeInterpolator::CDMTimeInterpolator(CDMReader_p dataReader)
     *cdm_ = dataReader_->getCDM();
     // removing all time-dependant data in cdm
     // just to be sure it's read from the dataReader_ or assigned in #changeTimeAxis
-    const CDM::VarVec& variables = cdm_->getVariables();
-    for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-        std::string timeDimName = getTimeAxis(coordSystems_, it->getName());
-        if (timeDimName != "") {
-            cdm_->getVariable(it->getName()).setData(DataPtr());
+    for (const CDMVariable& var : cdm_->getVariables()) {
+        const std::string timeDimName = getTimeAxis(coordSystems_, var.getName());
+        if (!timeDimName.empty()) {
+            cdm_->getVariable(var.getName()).setData(DataPtr());
         }
     }
 }
@@ -91,9 +90,9 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 
 DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    std::string timeAxis = getTimeAxis(coordSystems_, varName);
+    const std::string timeAxis = getTimeAxis(coordSystems_, varName);
     LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
-    if (timeAxis == "" || (dataReaderTimesInNewUnits_.find(timeAxis)->second.size() == 0)) {
+    if (timeAxis.empty() || (dataReaderTimesInNewUnits_.find(timeAxis)->second.size() == 0)) {
         // not time-axis or "changeTimeAxis" never called
         // no changes, simply forward
         return dataReader_->getDataSlice(varName, unLimDimPos);
@@ -108,7 +107,7 @@ DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unL
     DataPtr data;
 
     // if unlimdim = time-axis, fetch all needed original slices
-    CDMDimension timeDim = cdm_->getDimension(timeAxis);
+    const CDMDimension& timeDim = cdm_->getDimension(timeAxis);
     if (timeDim.isUnlimited()) {
         double currentTime = getDataSliceFromMemory(cdm_->getVariable(timeAxis), unLimDimPos)->asDouble()[0];
         // interpolate and return the time-slices
@@ -139,7 +138,7 @@ DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unL
     return data;
 }
 
-void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
+void CDMTimeInterpolator::changeTimeAxis(const string& timeSpec)
 {
     // changing time-axes
     const CDM& orgCDM = dataReader_->getCDM();
@@ -147,12 +146,12 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
     set<string> changedTimes;
     for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
         // change all different time-axes
-        std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
-        if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
+        const std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
+        if (!timeDimName.empty() && changedTimes.find(timeDimName) == changedTimes.end()) {
             changedTimes.insert(timeDimName); // avoid double changes
             DataPtr times = dataReader_->getScaledData(timeDimName);
             string unit = cdm_->getUnits(timeDimName);
-            TimeUnit tu(unit);
+            const TimeUnit tu(unit);
             vector<FimexTime> oldTimes;
             shared_array<double> oldTimesPtr = times->asDouble();
             size_t nEl = times->size();
@@ -160,7 +159,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
                       oldTimesPtr.get()+nEl,
                       back_inserter(oldTimes),
                       bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime),tu));
-            TimeSpec ts(timeSpec, oldTimes[0], oldTimes[nEl-1]);
+            const TimeSpec ts(timeSpec, oldTimes[0], oldTimes[nEl - 1]);
 
             // create mapping of new time value positions to old time values (per time-axis)
             const vector<FimexTime>& newTimes = ts.getTimeSteps();
@@ -213,4 +212,4 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
     }
 }
 
-} /* MetNoFimex */
+} // namespace MetNoFimex
