@@ -1,7 +1,7 @@
 /*
  * Fimex, GribFileIndex.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *

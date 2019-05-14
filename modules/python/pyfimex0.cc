@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0.cc
  *
- * (C) Copyright 2017, met.no
+ * (C) Copyright 2017-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMTimeInterpolator.cpp
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *

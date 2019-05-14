@@ -1,7 +1,7 @@
 /*
  * Fimex, Log4cppLogger.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *

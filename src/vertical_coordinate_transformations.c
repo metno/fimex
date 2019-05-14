@@ -1,7 +1,7 @@
 /*
  * Fimex, vertical_coordinate_transformations.c
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
