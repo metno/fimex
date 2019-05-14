@@ -35,9 +35,7 @@ Section: libdevel
 Architecture: amd64 ia64 powerpc
 Depends: ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version}),
- libxml2-dev,
- libboost-dev,
- libboost-date-time-dev
+ libxml2-dev
 Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
