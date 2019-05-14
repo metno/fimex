@@ -1,3 +1,8 @@
+  * 2019-05-14 fimex-1.1.0
+    * split NcmlAggregationReader
+    * extended python binding
+  * 2019-05-13 fimex-1.0.1
+    * bugfixes
   * 2019-05-08 fimex-1.0.0
     * drop RFimex and perl modules
     * remove wdb support
