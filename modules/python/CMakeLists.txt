@@ -54,6 +54,7 @@ SET(pyfimex0_SOURCES
   pyfimex0_CDMWriter.cc
   pyfimex0_CoordinateSystem.cc
   pyfimex0_Data.cc
+  pyfimex0_NcmlCDMReader.cc
   pyfimex0_NetCDF_CDMWriter.cc
   pyfimex0_AggregationReader.cc
   pyfimex0.cc
