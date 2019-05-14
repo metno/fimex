@@ -16,7 +16,10 @@ FUNCTION(ADD_EXE name_ includes_ libs_)
 ENDFUNCTION()
 
 LINK_DIRECTORIES(${PC_LIBRARY_DIRS})
-INCLUDE_DIRECTORIES(${PC_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${PC_INCLUDE_DIRS}
+  "${CMAKE_SOURCE_DIR}/src" # for CDMMergeUtils.h, ...
+  "${CMAKE_BINARY_DIR}/src" # for fimex_config.h
+)
 
 ADD_EXE(fimex "" "${PC_LIBRARIES}")
 ADD_EXE(fiXYcontents "" "")

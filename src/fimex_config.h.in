@@ -4,6 +4,8 @@
 // required libraries, always defined
 #define HAVE_UDUNITS2_H 1
 
+#define FIMEX_DATADIR "@FIMEX_DATADIR@"
+
 // defined if configured
 #cmakedefine HAVE_FELT 1
 #cmakedefine HAVE_GRIB_API_H 1

@@ -10,14 +10,13 @@ LIST(APPEND libfelt_SOURCES
   )
 
 SET (libfelt_INCLUDE_DIRS
-  "${CMAKE_SOURCE_DIR}/include"
   "${date_INC_DIR}"
 )
 
 SET (libfelt_LIBS
 )
 
-FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_LIBS}" "${libfelt_INCLUDE_DIRS}" "" "")
+FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_LIBS}" "${libfelt_INCLUDE_DIRS}" "")
 
 IF(TARGET libfelt)
   TARGET_INCLUDE_DIRECTORIES(libfelt PRIVATE "${CMAKE_BINARY_DIR}/src")

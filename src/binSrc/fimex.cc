@@ -396,7 +396,7 @@ void printReaderStatements(const string& readerName, const po::value_set& vm, CD
     }
 }
 
-const string FELT_VARIABLES = (string(PKGDATADIR) + "/felt2nc_variables.xml");
+const string FELT_VARIABLES = (string(FIMEX_DATADIR) + "/felt2nc_variables.xml");
 
 CDMReader_p getCDMFileReader(const po::value_set& vm, const string& io = "input")
 {

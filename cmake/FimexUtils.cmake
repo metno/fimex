@@ -144,23 +144,20 @@ FUNCTION(FIMEX_HEADERS headers sources source_suffix header_suffix)
 ENDFUNCTION()
 
 
-FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
-  IF(BUILD_SHARED_LIBS OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
+FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes options)
+  IF(BUILD_SHARED_LIBS)
     SET(shared_lib lib${name})
     ADD_LIBRARY(${shared_lib} SHARED ${sources})
     TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${libs})
     TARGET_INCLUDE_DIRECTORIES(${shared_lib}
       PUBLIC
       $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
       $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
       PRIVATE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
       ${includes}
       )
-    IF(definitions)
-      TARGET_COMPILE_DEFINITIONS(${shared_lib} PUBLIC ${definitions})
-    ENDIF()
     IF(options)
       TARGET_COMPILE_OPTIONS(${shared_lib} PUBLIC ${options})
     ENDIF()
@@ -170,7 +167,7 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
       OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
       )
     INSTALL(TARGETS ${shared_lib}
-      EXPORT fimex
+      EXPORT ${name}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
   ENDIF()
@@ -185,17 +182,16 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes definitions options)
       $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
       PRIVATE
-      ${CMAKE_CURRENT_BINARY_DIR}
-      ${CMAKE_CURRENT_SOURCE_DIR}
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
       ${includes}
       )
-    IF(definitions)
-      TARGET_COMPILE_DEFINITIONS(${static_lib} PUBLIC ${definitions})
-    ENDIF()
     SET_TARGET_PROPERTIES(${static_lib} PROPERTIES
       OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
       )
     INSTALL(TARGETS ${static_lib}
+      # disabled: fimex needs libfelt, find_package(fimex) fails unless preceded by find_package(felt)
+      # EXPORT ${name}
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       )
   ENDIF()

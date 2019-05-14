@@ -1,10 +1,7 @@
 
-INCLUDE_DIRECTORIES(
-  "${CMAKE_SOURCE_DIR}/include"
-  "${CMAKE_SOURCE_DIR}/src" ## for FeltCDMReader2.h
-  ${CMAKE_CURRENT_BINARY_DIR} ## for test_config.h
+LINK_DIRECTORIES(${PC_LIBRARY_DIRS}
+  ${BOOST_LIBRARY_DIRS} # if using boost unit_test_framework
 )
-LINK_DIRECTORIES(${PC_LIBRARY_DIRS} ${BOOST_LIBRARY_DIRS})
 
 IF (NOT TEST_EXTRADATA_DIR)
   SET (TEST_EXTRADATA_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -156,8 +153,12 @@ ADD_LIBRARY(testinghelpers STATIC
   testinghelpers.cc
   testinghelpers.h
 )
-TARGET_INCLUDE_DIRECTORIES(testinghelpers PRIVATE
-  "${CMAKE_BINARY_DIR}/src" # for fimex_config.h
+TARGET_INCLUDE_DIRECTORIES(testinghelpers
+ PUBLIC
+  "${CMAKE_BINARY_DIR}/src"   # for fimex_config.h
+  ${CMAKE_CURRENT_BINARY_DIR} # for test_config.h
+ PRIVATE
+  "${CMAKE_SOURCE_DIR}/include"
 )
 TARGET_COMPILE_DEFINITIONS(testinghelpers PRIVATE
   -DTOP_SRCDIR="${CMAKE_SOURCE_DIR}"
@@ -185,6 +186,15 @@ FOREACH(T ${C_TESTS})
   TARGET_LINK_LIBRARIES(${T} libfimex)
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
+
+TARGET_INCLUDE_DIRECTORIES(testUtils
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/src" # for leap_iterator.h
+)
+TARGET_INCLUDE_DIRECTORIES(testFeltReader
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/src" # for FeltCDMReader2.h
+)
 
 FOREACH(T ${SH_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")

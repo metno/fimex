@@ -1,2 +1,2 @@
 get_filename_component(SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-include(${SELF_DIR}/fimex@MINUS_FIMEX_VERSION@-targets.cmake)
+include(${SELF_DIR}/@EXPORTNAME@@MINUS_FIMEX_VERSION@-targets.cmake)

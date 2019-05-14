@@ -36,6 +36,8 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/XMLInputFile.h"
 
+#include "fimex_config.h"
+
 namespace MetNoFimex {
 
 namespace {
@@ -45,7 +47,7 @@ bool isFeltType(const std::string& type)
     return (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2");
 }
 
-const std::string FELT_VARIABLES = (std::string(PKGDATADIR) + "/felt2nc_variables.xml");
+const std::string FELT_VARIABLES = (std::string(FIMEX_DATADIR) + "/felt2nc_variables.xml");
 
 const bool installed = IoFactory::install("felt", std::make_shared<FeltIoFactory>());
 

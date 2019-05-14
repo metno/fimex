@@ -2,4 +2,4 @@ usr/include/fimex-0.23/fimex/*
 usr/lib/*/libfimex-0.23.a
 usr/lib/*/libfimex-0.23.so
 usr/lib/*/pkgconfig/fimex-0.23.pc
-usr/lib/*/cmake/fimex-0.23
+usr/lib/*/cmake/fimex-0.23/fimex-0.23*.cmake

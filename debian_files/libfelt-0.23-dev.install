@@ -1,3 +1,4 @@
 usr/include/fimex-0.23/felt/*
 usr/lib/*/libfelt-0.23.a
 usr/lib/*/libfelt-0.23.so
+usr/lib/*/cmake/fimex-0.23/felt-0.23*.cmake
