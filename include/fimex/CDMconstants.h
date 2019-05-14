@@ -54,7 +54,7 @@
  * touch configure.ac after changing these numbers
  */
 #define MIFI_VERSION_MAJOR  1
-#define MIFI_VERSION_MINOR  1
+#define MIFI_VERSION_MINOR  2
 #define MIFI_VERSION_PATCH  0
 #define MIFI_VERSION_STATUS 0xF0
 
