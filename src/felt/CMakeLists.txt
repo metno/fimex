@@ -14,6 +14,7 @@ SET (libfelt_INCLUDE_DIRS
 )
 
 SET (libfelt_LIBS
+  ${date_LIB}
 )
 
 FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_LIBS}" "${libfelt_INCLUDE_DIRS}" "")
