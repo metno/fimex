@@ -30,7 +30,36 @@
 
 namespace MetNoFimex {
 
+// based on https://stackoverflow.com/a/1055563
 template <typename T>
+struct TypeNameTraits;
+#define TYPENAMETRAITS2(X, Y) template <> struct TypeNameTraits<X> \
+    { static std::string name() { return Y; } };
+#define TYPENAMETRAITS1(X) TYPENAMETRAITS2(X, #X)
+TYPENAMETRAITS1(char);
+TYPENAMETRAITS1(short);
+TYPENAMETRAITS1(int);
+TYPENAMETRAITS1(long);
+TYPENAMETRAITS1(long long);
+TYPENAMETRAITS1(unsigned char);
+TYPENAMETRAITS1(unsigned int);
+TYPENAMETRAITS1(unsigned short);
+TYPENAMETRAITS1(unsigned long);
+TYPENAMETRAITS1(unsigned long long);
+TYPENAMETRAITS1(double);
+TYPENAMETRAITS1(float);
+#undef TYPENAMETRAITS1
+#undef TYPENAMETRAITS2
+
+class string2type_error : public std::runtime_error {
+public:
+    string2type_error(const std::string& t, const std::string& tn, const std::string& info = std::string())
+        : std::runtime_error("could not parse all of '" + t + "' as " + tn + info)
+        , text(t), type_name(tn) {}
+    const std::string text, type_name;
+};
+
+template <typename T, typename R = T>
 T string2type(const std::string& s)
 {
     T retVal;
@@ -46,7 +75,7 @@ T string2type(const std::string& s)
         ok = buffer.eof() && !buffer.fail();
     }
     if (!ok)
-        throw std::runtime_error("could not convert '" + s + "'");
+        throw string2type_error(s, TypeNameTraits<R>::name());
     return retVal;
 }
 
@@ -54,14 +83,14 @@ T string2type(const std::string& s)
 template <>
 inline char string2type(const std::string& s)
 {
-    return static_cast<char>(string2type<int>(s));
+    return static_cast<char>(string2type<int, char>(s));
 }
 
 //! convert unsigned char to digits, not bytes
 template <>
 inline unsigned char string2type(const std::string& s)
 {
-    return static_cast<unsigned char>(string2type<unsigned int>(s));
+    return static_cast<unsigned char>(string2type<unsigned int, unsigned char>(s));
 }
 
 //! no conversion for std::string
@@ -71,17 +100,17 @@ inline std::string string2type<std::string>(const std::string& s)
     return s;
 }
 
-//! recognize on/true/1 as true, off,0,false as false
+//! recognize on,true,1 as true and off,false,0 as false
 template <>
 bool string2type<bool>(const std::string& s);
 
-template <typename T>
+template <typename T, typename R = T>
 std::vector<T> strings2types(const std::vector<std::string>& values)
 {
     std::vector<T> t;
     t.reserve(values.size());
     for (const std::string& v : values)
-        t.push_back(string2type<T>(v));
+        t.push_back(string2type<T, R>(v));
     return t;
 }
 

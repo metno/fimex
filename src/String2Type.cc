@@ -48,7 +48,8 @@ bool string2type<bool>(const std::string& s)
         return true;
     else if (l == "off" || l == "false")
         return false;
-    return string2type<int>(s);
+
+    throw string2type_error(s, "bool", " (accepting on,true,1 as true and off,false,0 as false)");
 }
 
 } // namespace MetNoFimex

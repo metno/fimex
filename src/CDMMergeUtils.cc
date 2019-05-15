@@ -329,8 +329,8 @@ CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string&
                 int transition = string2type<int>(what[1]);
                 int border = string2type<int>(what[2]);
                 return std::make_shared<CDMBorderSmoothing_LinearFactory>(transition, border);
-            } catch (std::runtime_error&) {
-                throw CDMException("problem parsing parameters for linear smoothing: " + specification);
+            } catch (string2type_error& ex) {
+                throw CDMException("problem parsing parameters for linear smoothing: '" + specification + "', error is: " + ex.what());
             }
         } else {
             throw CDMException("malformed linear smoothing specification: " + specification);

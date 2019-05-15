@@ -36,6 +36,8 @@
 
 #include "leap_iterator.h"
 
+#include <iostream>
+
 //#define COMPARE_WITH_BOOST_LEXICAL_CAST
 #ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
 #include <boost/lexical_cast.hpp>
@@ -306,15 +308,21 @@ TEST4FIMEX_TEST_CASE(test_string2type)
     CHECK_THROW(int, "55.5");
     CHECK_THROW(int, "hei");
 
+    try {
+        string2type<unsigned short>("55.5");
+    } catch (string2type_error& s2te) {
+        TEST4FIMEX_CHECK_EQ("unsigned short", s2te.type_name);
+    }
+
     CHECK_EQ(bool, true, "1");
     CHECK_EQ(bool, true, "ON");
     CHECK_EQ(bool, true, "True");
-    CHECK_EQ(bool, true, "2");
     CHECK_EQ(bool, false, "off");
     CHECK_EQ(bool, false, "fAlSe");
     CHECK_THROW(bool, "ja");
     CHECK_THROW(bool, "");
     CHECK_THROW(bool, "ok");
+    CHECK_THROW(bool, "2");
 }
 
 TEST4FIMEX_TEST_CASE(test_min_max_element)
