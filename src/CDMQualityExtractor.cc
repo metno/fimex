@@ -41,8 +41,7 @@
 
 using namespace std;
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.CDMQualityExtractor");
 
@@ -221,7 +220,7 @@ static double findDefinedExtreme(double* begin, double* end, const double& (*min
     double extreme = MIFI_UNDEFINED_D;
     double* pos = begin;
     // forward to first defined element
-    while ((pos != end) && (!isnan(*pos))) {
+    while ((pos != end) && (!std::isnan(*pos))) {
         ++pos;
     }
     if (pos == end) {
@@ -229,7 +228,7 @@ static double findDefinedExtreme(double* begin, double* end, const double& (*min
     } else {
         extreme = *pos;
         while (pos != end) {
-            if (!isnan(*pos)) {
+            if (!std::isnan(*pos)) {
                 extreme = minmax(extreme, *pos);
             }
         }
@@ -302,7 +301,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     minFlag = attr.getData()->asDouble()[0];
                     maxFlag = attr.getData()->asDouble()[1];
                 }
-                if (!isnan(minFlag)) {
+                if (!std::isnan(minFlag)) {
                     double* sdIt = &sd[0];
                     while (sdIt != &sd[sizeS]) {
                         if (*sdIt < minFlag) {
@@ -311,7 +310,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                         sdIt++;
                     }
                 }
-                if (!isnan(maxFlag)) {
+                if (!std::isnan(maxFlag)) {
                     double* sdIt = &sd[0];
                     while (sdIt != &sd[sizeS]) {
                         if (*sdIt > maxFlag) {
@@ -320,7 +319,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                         sdIt++;
                     }
                 }
-                if (!isnan(statusFill)) {
+                if (!std::isnan(statusFill)) {
                     double* sdIt = &sd[0];
                     while (sdIt != &sd[sizeS]) {
                         if (*sdIt == statusFill) {
@@ -356,10 +355,12 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     LOG4FIMEX(logger, Logger::DEBUG, "using min="<<min<<" for statusVar "<<statusVar<< " on var "<< varName << ": removed points: " << count);
                 } else if (flag == "highest") {
                     double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &max<double>);
-                    if (!isnan(testVal)) useVals.push_back(testVal);
+                    if (!std::isnan(testVal))
+                        useVals.push_back(testVal);
                 } else if (flag == "lowest") {
                     double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &min<double>);
-                    if (!isnan(testVal)) useVals.push_back(testVal);
+                    if (!std::isnan(testVal))
+                        useVals.push_back(testVal);
                 } else {
                     throw CDMException("undefined quality-flag: "+flag+" for variable: "+varName);
                 }
@@ -378,7 +379,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
             for(size_t iD = 0; iD < sizeD; ) {
                 double *sdIt = &sd[0];
                 for (size_t iS = 0; iS < sizeS; ++iS, ++iD) {
-                    if (isnan(*sdIt)) {
+                    if (std::isnan(*sdIt)) {
                         data->setValue(iD, fillValue);
                     }
                     ++sdIt;

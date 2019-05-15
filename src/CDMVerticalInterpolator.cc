@@ -50,8 +50,7 @@
 #include <string>
 #include <vector>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 namespace {
 
@@ -496,11 +495,11 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     // correct data going out of bounds
     const double valid_min = cdm_->getValidMin(varName);
     const double valid_max = cdm_->getValidMax(varName);
-    if (!isnan(valid_min)) {
+    if (!std::isnan(valid_min)) {
         float minVal = static_cast<float>(valid_min);
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(less<float>(), minVal), minVal);
     }
-    if (!isnan(valid_max)) {
+    if (!std::isnan(valid_max)) {
         float maxVal = static_cast<float>(valid_max);
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
     }

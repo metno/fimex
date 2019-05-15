@@ -25,6 +25,7 @@
 #define FIMEX_STRING2TYPE_H_
 
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 namespace MetNoFimex {

@@ -65,8 +65,8 @@
 #include <set>
 #include <string>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 using namespace std;
 
 typedef std::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
@@ -970,7 +970,7 @@ void flannTranslatePointsToClosestInputCell(double maxDist, vector<double>& poin
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             size_t pos = ix+iy*orgXDimSize;
-            if (!(mifi_isnan(latVals[pos]) || mifi_isnan(lonVals[pos]))) {
+            if (!(std::isnan(latVals[pos]) || std::isnan(lonVals[pos]))) {
                 double sinLat = sin(latVals[pos]);
                 double cosLat = cos(latVals[pos]);
                 double sinLon = sin(lonVals[pos]);
@@ -1047,7 +1047,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
         size_t samplePos = ik * stepSize;
         double lon0 = lonVals[samplePos];
         double lat0 = latVals[samplePos];
-        if (!(isnan(lon0) || isnan(lat0))) {
+        if (!(std::isnan(lon0) || std::isnan(lat0))) {
             double min_cos_d = -2; // max possible distance on unit-sphere has cos_d -1 -> d= pi * r
             for (size_t ix = 0; ix < orgXDimSize; ix++) {
                 for (size_t iy = 0; iy < orgYDimSize; iy++) {
@@ -1056,7 +1056,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
                     if (pos != samplePos) {
                         double lon1 = lonVals[pos];
                         double lat1 = latVals[pos];
-                        if (!(isnan(lon1) || isnan(lat1))) {
+                        if (!(std::isnan(lon1) || std::isnan(lat1))) {
 
                             double dlon = lon0 - lon1;
 
@@ -1117,7 +1117,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             size_t pos = ix+iy*orgXDimSize;
-            if (!(isnan(lonVals[pos]) || isnan(latVals[pos]))) {
+            if (!(std::isnan(lonVals[pos]) || std::isnan(latVals[pos]))) {
                 latlons.push_back(LL_POINT(latVals[pos],lonVals[pos], ix, iy));
             }
         }

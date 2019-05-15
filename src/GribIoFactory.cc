@@ -38,6 +38,8 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/StringUtils.h"
 
+#include <cstring>
+
 namespace MetNoFimex {
 
 namespace {
