@@ -9,12 +9,13 @@ between different formats and projections.
 Fimex requires at least the following libraries to be installed for
 compilation
 
- * c99/c++ compiler
+ * c99/c++11 compiler
  * libxml2 >= 2.6.0
- * boost library
-   * tested with 1.48, 1.54, 1.58, and a few other versions
  * proj-4 >= 4.4.9
  * udunits2 (>= 2.1.9)
+ * [https://github.com/metno/mi-cpptest](mi-cpptest)
+ * [https://github.com/metno/mi-programoptions](mi-programoptions)
+ * [https://github.com/HowardHinnant/date](date)
 
 To configure the different file formats it requires:
 
@@ -23,8 +24,8 @@ To configure the different file formats it requires:
 
 To build the python interface, it requires:
 
- * python development files (>= 3.4)
- * python numpy development files
+ * pybind11 (>= 2.2.4)
+ * python numpy (for the unit tests)
 
 ## Installation
 
@@ -125,3 +126,25 @@ Converting a model output from felt to NetCDF:
  6. Run
 
         fimex -c fimex_example.cfg
+
+
+### Library usage
+
+To use the fimex >= 1.2 from CMake projects, please use
+
+    -Dfimex_DIR=.../lib/cmake/fimex
+
+and
+
+    find_package(fimex "1.2" REQUIRED)
+
+or, if you want a specific version
+
+    -Dfimex-1.0_DIR=.../lib/cmake/fimex-1.0
+    find_package(fimex-1.0 REQUIRED)
+
+In both cases, include paths etc are set implicitly when using
+
+    target_link_libraries(libfimex)
+
+This functionality is not yet supported for static fimex libraries.
