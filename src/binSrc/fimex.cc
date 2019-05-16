@@ -119,7 +119,7 @@ const po::option op_process_rotateVector_y = po::option("process.rotateVector.y"
 const po::option op_process_rotateVector_stdNameY = po::option("process.rotateVector.stdNameY",
         "new standard_name for the rotated vector").set_composing();
 const po::option op_process_rotateVector_all = po::option("process.rotateVector.all",
-        "rotate all known vectors (e.g. standard_name) to given direction");
+        "rotate all known vectors (e.g. standard_name) to given direction").set_narg(0);
 const po::option op_process_addVerticalVelocity = po::option("process.addVerticalVelocity",
         "calculate upward_air_velocity_ml");
 const po::option op_process_printNcML = po::option("process.printNcML",
