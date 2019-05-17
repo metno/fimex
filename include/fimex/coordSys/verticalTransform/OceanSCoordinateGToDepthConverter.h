@@ -52,6 +52,13 @@ struct OceanSGVars {
     //! time-varying free surface, might be 0 / empty
     std::string eta;
 
+    /**
+     * @param s k-dependent sigma coordinate
+     * @param C k-dependent stretching function
+     * @param depth ocean-depth, might be time-varying for sediment applications
+     * @param depth_c critical depth (~ min(h(x,y)))
+     * @param eta time-varying free surface, might be 0
+     */
     OceanSGVars(const std::string& s, const std::string& C, const std::string& depth,
                      const std::string& depth_c, const std::string& eta)
         : s(s), C(C), depth(depth), depth_c(depth_c), eta(eta) { }
@@ -70,12 +77,6 @@ public:
     typedef int (*heightconversion_t)(size_t, double, double, double, const double*, const double*, double*);
 
     /**
-     * @param s k-dependent sigma coordinate
-     * @param C k-dependent stretching function
-     * @param depth_c critical depth (~ min(h(x,y)))
-     * @param eta time-varying free surface, might be 0
-     * @param depth ocean-depth, might be time-varying for sediment applications
-     * @param nx,ny,nk,nt array sizes
      * @param func either mifi_ocean_s_g1_z() or mifi_ocean_s_g2_z()
      */
     OceanSCoordinateGToDepthConverter(CDMReader_p reader, CoordinateSystem_cp cs, const OceanSGVars& vars, heightconversion_t func);

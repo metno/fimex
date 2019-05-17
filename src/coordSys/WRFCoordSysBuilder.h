@@ -51,7 +51,6 @@ public:
     /**
      * List the CoordinateSystems belonging to WRF convention. This will actually
      * change the cdm and require some data from the reader.
-     * @param reader
      * @return
      * @warning listCoordinateSystems can currently not be called several times on the same reader
      */

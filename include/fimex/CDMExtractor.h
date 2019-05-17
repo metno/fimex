@@ -53,7 +53,7 @@ private:
      *
      * @param varName the variable name to fetch data from
      * @param sb the request of the dataslice
-     * @param slices return value, list of subslices building all data requested
+     * @return slices return value, list of subslices building all data requested
      */
     DataPtr getDataSlice_(const std::string& varName, const SliceBuilder& sb);
 

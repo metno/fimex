@@ -46,7 +46,7 @@ public:
      * Constructor of the general writer. It should be called during
      * construction of derived classes.
      *
-     * @warn remember to call run to actually do something
+     * @warning remember to call run to actually do something
      */
     GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
     virtual ~GribApiCDMWriter_ImplAbstract();
@@ -110,7 +110,7 @@ protected:
      * get the node belonging to varName, level and time from the
      * config file
      * @param varName name of the variable
-     * @param level curent level
+     * @param levelValue curent level
      */
     xmlNode* getNodePtr(const std::string& varName, double levelValue);
 

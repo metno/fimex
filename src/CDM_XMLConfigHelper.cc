@@ -70,9 +70,6 @@ static string replaceTemplateAttribute(string value, const map<string, std::shar
     return value;
 }
 
-/**
- * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
- */
 void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
                                   const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
@@ -89,16 +86,6 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
     fillAttributeListFromXMLNode(attributes, node->next, templateReplacements);
 }
 
-/**
- * read a xml-node retrieved by the xpathString and extract the nodes attributes and all <attributes> sub-elements with name, value and type
- *
- * @param doc the document to read from
- * @param xpathString the string leading to the node
- * @param xmlAttributes returns all attributes of the first node matched
- * @param varAttributes returns all <attribute .../> sub elements of this node
- * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) which are replaced by these values
- * @return number of nodes matched (only the first has been read)
- */
 int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes,
                                    std::vector<CDMAttribute>& varAttributes, const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {

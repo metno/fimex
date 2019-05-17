@@ -91,15 +91,12 @@ private:
 
     /**
      * initialize the member information and the configXML document
-     * @param fileNames
      * @param configXML
      * @param members
      */
     void initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members);
     /**
      * initialize everything after the internal indices have been read from the grbml-file or the grbml-files
-     * @param configXML
-     * @param members
      */
     void initPostIndices();
 

@@ -44,7 +44,7 @@ public:
     static VerticalConverter_p createConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure);
 
     /**
-     * @param presConv another ToVLevelConverter converting to pressure
+     * another ToVLevelConverter converting to pressure
      */
     PressureIntegrationToAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p pressure, const std::string& air_temperature,
                                            const std::string& specific_humidity, const std::string& surface_air_pressure,

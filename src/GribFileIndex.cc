@@ -59,7 +59,7 @@ static Logger_p logger = getLogger("fimex.GribFileIndex");
 static Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
 
 /**
- * @warn This variable is only for functions inside the GribFileIndex initialization.
+ * @warning This variable is only for functions inside the GribFileIndex initialization.
  *       Don't use otherwise.
  */
 static std::string earthFigure_ = "";

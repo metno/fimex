@@ -50,12 +50,6 @@ public:
 
     /**
      * Initialize OceanSG1 with formula as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
-     *
-     * @param s fractional vertical stretching coordinate sigma(k)
-     * @param C free surface C(x,y,t)
-     * @param depth unperturbed ocean-depth depth(x,y)
-     * @param depth_c critical depth, usually min(depth(x,y))
-     * @param eta time-varying free surface eta(x,y,z) (often also called zeta)
      */
     OceanSG1(const OceanSGVars& vars);
 
