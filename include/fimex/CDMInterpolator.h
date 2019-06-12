@@ -130,8 +130,6 @@ private:
     /**
      * check if the spatial vectors in x/y direction have all the same horizontal domain (e.g. not staggered)
      * @param horizontalId horizontal id to check
-     * @param exampleVar1 Output set if false. First part of a vector with horizontalId mismatch.
-     * @param exampleVar2 Output set if false. Second part of a vector with horizontalId mismatch.
      * @return false if one example with horizontaId mismatch is found. true if all vectors share same horizontalId. Also true if no vectors exists.
      */
     void warnUnlessAllXYSpatialVectorsHaveSameHorizontalId(const std::string& horizontalId) const;

@@ -243,11 +243,11 @@ private:
      *
      * @param orgData pointer to the current postion of the original array
      * @param newData pointer to the current position of the new array
-     * @orgDimSize the original dimensions of orgData
-     * @orgSliceSize helper-array with orgSliceSize[0] = 1; orgSliceSize[n] = orgDimSize[n] * orgSliceSize[n-1]
-     * @newStart the start positions in the new data
-     * @newSize the dimensions of the newData
-     * @currentDim the dimension currently under work, should be between (orgData.size()-1) and 0
+     * @param orgDimSize the original dimensions of orgData
+     * @param orgSliceSize helper-array with orgSliceSize[0] = 1; orgSliceSize[n] = orgDimSize[n] * orgSliceSize[n-1]
+     * @param newStart the start positions in the new data
+     * @param newSize the dimensions of the newData
+     * @param currentDim the dimension currently under work, should be between (orgData.size()-1) and 0
      *
      */
     template<typename C>

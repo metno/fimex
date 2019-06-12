@@ -51,18 +51,18 @@ using namespace std;
  */
 
 /**
- * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
+ * read all `<attribute .../>` subnodes of this node and add them to attributes, replace values by templateReplacements as needed
  */
 void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
                                   const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements);
 
 /**
- * read a xml-node retrieved by the xpathString and extract the nodes attributes and all <attributes> sub-elements with name, value and type
+ * read a xml-node retrieved by the xpathString and extract the nodes attributes and all `<attributes>` sub-elements with name, value and type
  *
  * @param doc the document to read from
  * @param xpathString the string leading to the node
  * @param xmlAttributes returns all attributes of the first node matched
- * @param varAttributes returns all <attribute .../> sub elements of this node
+ * @param varAttributes returns all `<attribute .../>` sub elements of this node
  * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */

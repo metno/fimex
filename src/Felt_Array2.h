@@ -66,7 +66,7 @@ public:
     /**
      * constructor applying the parameter name and the felt description from the first feltField
      * \param name parameter name
-     * \param field a field added to this constructor
+     * \param feltField a field added to this constructor
      * \param dataType short|float|double datatype used for autoscaling, getScalingFactor() will be always return 1 for float and double
      * \param fillValue fillValue of the datatype, usually -32767
      */

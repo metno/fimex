@@ -162,7 +162,6 @@ public:
      *
      * @param gribFilePath path to first filename
      * @param members translation of members to filenames
-     * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
     GribFileIndex(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
@@ -186,7 +185,6 @@ public:
      * @param gribFilePath path to first filename (or empty)
      * @param grbmlFilePath path to gribml to append information from
      * @param members translation of members to filenames
-     * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
     GribFileIndex(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,

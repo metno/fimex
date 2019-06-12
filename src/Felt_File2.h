@@ -69,7 +69,7 @@ public:
     explicit Felt_File2(const std::string& filename, const string& filenameSetup);
     /**
      * open and read toc of a felt file
-     * \param paramList a list of known parameters (in diana format, e.g. 17,2,1000:prod=74), only the known parameters will be read
+     * \param dianaParamList a list of known parameters (in diana format, e.g. 17,2,1000:prod=74), only the known parameters will be read
      * \warning The diana format is extended by dataType=short|float|double and fillValue=(number in short|float|double) to add the return type of the data.
      * Autoscaling will be turned on for 'getDataSlice'. default is dataType=short:fillValue=-32767
      */
@@ -86,7 +86,6 @@ public:
     /**
      * retrieve the data prescaled (if float or double) and replaced with the new fill value
      *
-     * @param compName parameter name of felt file
      * @param time time of slice
      * @param level level of slice
      */

@@ -14,9 +14,6 @@
 !!     INTERPOL_NEAREST_NEIGHBOR = 0, INTERPOL_BILINEAR, INTERPOL_BICUBIC, INTERPOL_COORD_NN,
 !!      INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,
 !!      INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
-!! FILETYPE_UNKNOWN=-1, FILETYPE_FELT, FILETYPE_NETCDF,&
-!!      FILETYPE_NCML, FILETYPE_GRIB, FILETYPE_METGM,&
-!!      FILETYPE_RW=1024
 !!
 !! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
@@ -34,21 +31,14 @@ MODULE Fimex
     ENUMERATOR :: AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,&
      AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime, AXIS_Realization
   END ENUM
-  !> @enum Interpolation methods
+  !> Interpolation methods
   !! These are the same definintions as #mifi_interpol_method in mifi_constants.h
   ENUM, BIND(C)
     ENUMERATOR :: INTERPOL_NEAREST_NEIGHBOR = 0, INTERPOL_BILINEAR, INTERPOL_BICUBIC, INTERPOL_COORD_NN,&
       INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,&
       INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
   END ENUM
-  !> @enum Filetypes
-  !! These are the same definintions as #mifi_filetype in CDMconstants.h
-  ENUM, BIND(C)
-    ENUMERATOR ::     FILETYPE_UNKNOWN=-1, FILETYPE_FELT, FILETYPE_NETCDF,&
-      FILETYPE_NCML, FILETYPE_GRIB, FILETYPE_METGM,&
-      FILETYPE_RW=1024
-  END ENUM
-  !> @enum Variable data-type methods
+  !> Variable data-type methods
   !! These are the same definintions as #CDMDataType in CDMDataType.h
   !! @warning The datatype-numbers are different from the NC_* constants of netcdf.h, both in number and interpretation
   ENUM, BIND(C)
@@ -726,8 +716,7 @@ MODULE Fimex
 
  !> Get the name of the variable with longitude values for the variable
   !! varName
-  !! @varName the data-variable
-  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @param varName the data-variable
   !! @return name of variable with longitude values, this might be 1d or 2d
   !!         depending on projection (even more for e.g. sattelite-swath (3d))
   FUNCTION get_var_longitude(this, varName)
@@ -753,8 +742,7 @@ MODULE Fimex
 
  !> Get the name of the variable with latitude values for the variable
   !! varName
-  !! @varName the data-variable
-  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @param varName the data-variable
   !! @return name of variable with latitude values, this might be 1d or 2d
   !!         depending on projection (even more for e.g. sattelite-swath (3d))
   FUNCTION get_var_latitude(this, varName)

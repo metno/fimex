@@ -45,9 +45,6 @@ public:
      * @param sigma vector of size n containing the sigma parameters (dimensionless) of sigma-hybrid
      * @param ptop top of atmosphere in hPa
      * @param ps array of size nx*ny*nt containing the surface-pressure
-     * @param nx x-size of ps
-     * @param ny y-size of ps
-     * @param nt t-size of ps
      */
     SigmaToPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs, const std::string& sigma, const std::string& ptop, const std::string& ps)
         : BasicVerticalConverter(reader, cs)

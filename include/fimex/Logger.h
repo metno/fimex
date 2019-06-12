@@ -111,7 +111,7 @@ public:
      * Ownership of lc is transferred. To destroy the LoggerClass,
      * e.g. before exit, it is necessary to call setClass(0).
      *
-     * @param lc, ownership is transferred; deletes the present loggerclass instance
+     * @param lc ownership is transferred; deletes the present loggerclass instance
      * @return false if lc is null
      */
     static bool setClass(LoggerClass* lc);
