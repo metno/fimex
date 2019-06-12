@@ -61,8 +61,6 @@ public:
      * @param dataReader the data-source
      * @param verticalType must be 'pressure' (hPa), 'height' (m) or 'depth' (m)
      * @param verticalInterpolationMethod one of 'linear', 'log', 'loglog'
-     * @param level1 the new vertical levels, for 'pressure', that is pressure in hPa
-     * @param level2 only required for hybrid levels, not yet supported
      */
     CDMVerticalInterpolator(CDMReader_p dataReader, const std::string& verticalType, const std::string& verticalInterpolationMethod);
     ~CDMVerticalInterpolator();

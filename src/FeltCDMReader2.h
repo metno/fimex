@@ -99,7 +99,6 @@ private:
     /**
      * add additional axis from the xml-file to this cdm
      *
-     * @param xpathCtx xpath context of the file
      * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
      * @param templateReplacements replacements for template parameters
      */

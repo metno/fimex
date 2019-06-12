@@ -61,7 +61,7 @@ public:
 
     /** Set the smooting function factory to be used.
      * Must be called before setting target grid.
-     * \parameter smoothingFactory a factory for smoothing functors
+     * \param smoothingFactory a factory for smoothing functors
      */
     void setSmoothing(CDMBorderSmoothing::SmoothingFactory_p smoothingFactory);
 
@@ -78,7 +78,7 @@ public:
 
     /** Set grid interpolation method.
      * Must be called before setting target grid.
-     * \parameter method one of MIFI_INTERPOL_*
+     * \param method one of MIFI_INTERPOL_*
      */
     void setGridInterpolationMethod(int method);
 

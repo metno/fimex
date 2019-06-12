@@ -62,7 +62,6 @@ namespace MetNoFimex {
          * @param cdmReader dataSource
          * @param outputFile file-name to write to
          * @param configFile xml-configuration
-         * @param METGM version, can be Edition 1 or Edition 2;
          */
         explicit MetGmCDMWriterImpl
                 (

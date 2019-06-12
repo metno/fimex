@@ -1,6 +1,5 @@
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
-                                      FILETYPE_RW
+  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
