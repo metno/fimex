@@ -602,7 +602,7 @@ CDMReader_p getCDMQualityExtractor(const string& version, const po::value_set& v
 CDMReader_p getCDMTimeInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     string timeSpec;
-    if (!getOption("timeInterpolate.timeSpec", vm, timeSpec)) {
+    if (!getOption(op_timeInterpolate_timeSpec, vm, timeSpec)) {
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << timeSpec);
@@ -616,7 +616,7 @@ CDMReader_p getCDMTimeInterpolator(const po::value_set& vm, CDMReader_p dataRead
 CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     vector<string> operations;
-    if (getOptions("verticalInterpolate.dataConversion", vm, operations)) {
+    if (getOptions(op_verticalInterpolate_dataConversion, vm, operations)) {
         try {
             dataReader = std::make_shared<CDMPressureConversions>(dataReader, operations);
         } catch (CDMException& ex) {
@@ -625,33 +625,33 @@ CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p data
         }
     }
     string vtype, vmethod;
-    if (!getOption("verticalInterpolate.type", vm, vtype) || !getOption("verticalInterpolate.method", vm, vmethod)) {
+    if (!getOption(op_verticalInterpolate_type, vm, vtype) || !getOption(op_verticalInterpolate_method, vm, vmethod)) {
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
     std::shared_ptr<CDMVerticalInterpolator> verticalReader = std::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod);
     string template_var;
-    if (getOption("verticalInterpolate.templateVar", vm, template_var)) {
+    if (getOption(op_verticalInterpolate_templateVar, vm, template_var)) {
         LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate to template var");
         verticalReader->interpolateByTemplateVariable(template_var);
     } else {
         string level1_text, level2_text;
-        if (!getOption("verticalInterpolate.level1", vm, level1_text)) {
+        if (!getOption(op_verticalInterpolate_level1, vm, level1_text)) {
             LOG4FIMEX(logger, Logger::FATAL, "verticalInterpolate needs level1");
             exit(1);
         }
         vector<double> level1 = tokenizeDotted<double>(level1_text,",");
-        if (getOption("verticalInterpolate.level2", vm, level2_text)) {
+        if (getOption(op_verticalInterpolate_level2, vm, level2_text)) {
             LOG4FIMEX(logger, Logger::WARN, "verticalInterpolate level2 ignored");
         }
         verticalReader->interpolateToFixed(level1);
     }
     bool ignoreValidityMin;
-    if (getOption("verticalInterpolate.ignoreValidityMin", vm, ignoreValidityMin)) {
+    if (getOption(op_verticalInterpolate_ignoreValidityMin, vm, ignoreValidityMin)) {
         verticalReader->ignoreValidityMin(ignoreValidityMin);
     }
     bool ignoreValidityMax;
-    if (getOption("verticalInterpolate.ignoreValidityMax", vm, ignoreValidityMax)) {
+    if (getOption(op_verticalInterpolate_ignoreValidityMax, vm, ignoreValidityMax)) {
         verticalReader->ignoreValidityMax(ignoreValidityMax);
     }
     printReaderStatements("verticalInterpolate", vm, verticalReader);
@@ -691,17 +691,17 @@ CDMInterpolator_p createCDMInterpolator(const po::value_set& vm, CDMReader_p dat
 {
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(dataReader);
     string value;
-    if (getOption("interpolate.latitudeName", vm, value)) {
+    if (getOption(op_interpolate_latitudeName, vm, value)) {
         interpolator->setLatitudeName(value);
     }
-    if (getOption("interpolate.longitudeName", vm, value)) {
+    if (getOption(op_interpolate_longitudeName, vm, value)) {
         interpolator->setLongitudeName(value);
     }
 
-    if (getOption("interpolate.preprocess", vm, value)) {
+    if (getOption(op_interpolate_preprocess, vm, value)) {
         interpolator->addPreprocess(parseProcess(value, "preprocess"));
     }
-    if (getOption("interpolate.postprocess", vm, value)) {
+    if (getOption(op_interpolate_postprocess, vm, value)) {
         interpolator->addPostprocess(parseProcess(value, "postprocess"));
     }
     return interpolator;
@@ -713,13 +713,13 @@ CDMReader_p getCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
     int method = getInterpolationMethod(vm, "interpolate.method");
 
     string proj4;
-    if (getOption("interpolate.projString", vm, proj4)) {
+    if (getOption(op_interpolate_projString, vm, proj4)) {
         string xAxisUnit, yAxisUnit, xAxisValues, yAxisValues;
-        if (!(getOption("interpolate.xAxisUnit", vm, xAxisUnit) && getOption("interpolate.yAxisUnit", vm, yAxisUnit))) {
+        if (!(getOption(op_interpolate_xAxisUnit, vm, xAxisUnit) && getOption(op_interpolate_yAxisUnit, vm, yAxisUnit))) {
             LOG4FIMEX(logger, Logger::FATAL, "xAxisUnit and yAxisUnit required");
             exit(1);
         }
-        if (!(getOption("interpolate.xAxisValues", vm, xAxisValues) && getOption("interpolate.yAxisValues", vm, yAxisValues))) {
+        if (!(getOption(op_interpolate_xAxisValues, vm, xAxisValues) && getOption(op_interpolate_yAxisValues, vm, yAxisValues))) {
             LOG4FIMEX(logger, Logger::FATAL, "xAxisValues and yAxisValues required");
             exit(1);
         }
@@ -866,7 +866,7 @@ CDMReader_p applyFimexStreamTasks(const po::value_set& vm, CDMReader_p dataReade
 void fillWriteCDM(CDMReader_p dataReader, po::value_set& vm)
 {
     string fillFile;
-    if (!getOption("output.fillFile", vm, fillFile))
+    if (!getOption(op_output_fillFile, vm, fillFile))
         return;
     const string type = getType("output", vm);
     const string config = getConfig("output", vm);
@@ -880,7 +880,7 @@ void writeCDM(CDMReader_p dataReader, const po::value_set& vm)
 {
     printReaderStatements("output", vm, dataReader);
     string fileName;
-    if (!getOption("output.file", vm, fileName)) {
+    if (!getOption(op_output_file, vm, fileName)) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
     }
