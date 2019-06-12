@@ -30,6 +30,7 @@
 #include "fimex/DataUtils.h"
 #include "fimex/FileUtils.h"
 #include "fimex/FindNeighborElements.h"
+#include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/min_max.h"
@@ -37,6 +38,8 @@
 #include "leap_iterator.h"
 
 #include <iostream>
+
+//#define TEST_DEBUG
 
 //#define COMPARE_WITH_BOOST_LEXICAL_CAST
 #ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
@@ -202,17 +205,30 @@ TEST4FIMEX_TEST_CASE(test_scanFiles)
 
 TEST4FIMEX_TEST_CASE(test_globFiles)
 {
-    vector<string> files;
-    string glob = topSrcDir() + "/**stUti??.cc";
-    globFiles(files, glob);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
-    files.clear();
+#ifdef TEST_DEBUG
+    defaultLogLevel(Logger::DEBUG);
+#endif
+    {
+        vector<string> files;
+        globFiles(files, topSrcDir() + "/**stUti??.cc");
+        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
+        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    }
+    {
+        vector<string> files;
+        globFiles(files, topSrcDir() + "/test/*stUti??.cc");
+        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
+        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    }
+    {
+        vector<string> files;
+        globFiles(files, topSrcDir() + "/test/fi??le+with*name.txt"); // '?' is not optional, 'fi??le' should not match
+        TEST4FIMEX_REQUIRE_EQ(files.size(), 0);
 
-    string glob2 = topSrcDir() + "/test/*stUti??.cc";
-    globFiles(files, glob2);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+        globFiles(files, topSrcDir() + "/test/file+with*n??e.txt");
+        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
+        TEST4FIMEX_CHECK(files.at(0).find("test/file+with+plus+in+name.txt") != string::npos);
+    }
 }
 
 TEST4FIMEX_TEST_CASE(test_type2string)

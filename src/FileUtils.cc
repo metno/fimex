@@ -209,7 +209,7 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
     for (size_t i = 0; i < reg.size(); i++) {
         char charI = reg[i];
         if (charI == '?') {
-            output << "[^/]?";
+            output << "[^/]";
         } else if (charI == '*') {
             if (i + 1 < reg.size() && reg[i + 1] == '*') {
                 i++;
