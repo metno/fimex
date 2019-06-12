@@ -130,7 +130,7 @@ const po::option op_extract_removeVariable = po::option("extract.removeVariable"
         "remove variables").set_composing();
 const po::option op_extract_selectVariables = po::option("extract.selectVariables",
         "select only those variables").set_composing();
-const po::option op_extract_selectVariables_noAuxiliary = po::option("extract.selectVariables.noAuxiliary", "don't add auxiliary variables");
+const po::option op_extract_selectVariables_noAuxiliary = po::option("extract.selectVariables.noAuxiliary", "don't add auxiliary variables").set_narg(0);
 const po::option op_extract_reduceDimension_name = po::option("extract.reduceDimension.name", "name of a dimension to reduce").set_composing();
 const po::option op_extract_reduceDimension_start = po::option("extract.reduceDimension.start", "start position of the dimension to reduce (>=0)").set_composing();
 const po::option op_extract_reduceDimension_end = po::option("extract.reduceDimension.end", "end position of the dimension to reduce").set_composing();
@@ -184,7 +184,8 @@ const po::option op_merge_inner_type = po::option("merge.inner.type", "filetype 
 const po::option op_merge_inner_config = po::option("merge.inner.config", "non-standard configuration for inner merge file");
 const po::option op_merge_inner_cfg = po::option("merge.inner.cfg", "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging");
 const po::option op_merge_smoothing = po::option("merge.smoothing", "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border");
-const po::option op_merge_keepOuterVariables = po::option("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer");
+const po::option op_merge_keepOuterVariables =
+    po::option("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer").set_narg(0);
 const po::option op_merge_method = po::option("merge.method", "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
         " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum");
 const po::option op_merge_projString = po::option("merge.projString", "proj4 input string describing the new projection, default: use inner projection extended to outer grid");
