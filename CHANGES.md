@@ -12,6 +12,13 @@ after numbers had previously been ignored sometimes (sometimes not),
 now the text may not contain anything else but the number. In
 particular, `f` or `L` suffixes that had previously been ignored in
 GRIB reader configuration files will cause errors in fimex 1.0.
+Using a command like
+
+    find . -name "*ml" | xargs -r sed -i -e 's,\([0-9]\+\)[fL]",\1",g'
+
+on the configuration files should do most of the work, but the
+original files should be backed up before starting these automatic
+changes, and the result should be checked before use.
 
 As part of the transition to `std::regex`, the regex format has
 changed slightly. They are no longer 'perl' format but 'modified
