@@ -67,7 +67,6 @@ CoordinateAxis_cp CoordinateSyste__findAxisOfType2(CoordinateSystem_cp cs, const
 
 void pyfimex0_CoordinateSystem(py::module m)
 {
-
     py::enum_<CoordinateAxis::AxisType>(m, "CoordinateAxisType")
         .value("Undefined", CoordinateAxis::Undefined)
         .value("GeoX", CoordinateAxis::GeoX)
