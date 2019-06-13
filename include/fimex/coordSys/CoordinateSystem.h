@@ -162,13 +162,13 @@ public:
      */
     virtual CoordinateAxis_cp findAxisOfType(const std::vector<CoordinateAxis::AxisType>& types) const;
     /**
-     * get the geographical x/lon-axis, that is one of
+     * Get the geographical x axis, that is one of
      * GeoX, Longitude (in that order if several exist)
      * @return an axis or null
      */
     virtual CoordinateAxis_cp getGeoXAxis() const;
     /**
-     * Set/overwrite the geographic y axis, that is one of
+     * Get the geographic y axis, that is one of
      * GeoY, Latitude (in that order if several exist)
      * @return an axis or null
      */
