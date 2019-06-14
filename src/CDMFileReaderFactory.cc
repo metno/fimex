@@ -83,7 +83,7 @@ IoFactory_p findFactoryFromMagic(const std::string& fileName)
 
     std::ifstream fs(fileName.c_str());
     if (!fs.is_open())
-        throw CDMException("cannot open file "+fileName);
+        throw CDMException("cannot open file '" + fileName + "'");
     std::unique_ptr<char[]> magic(new char[magicSize]);
     fs.read(magic.get(), magicSize);
     const size_t actualMagicSize = fs.gcount();
@@ -109,13 +109,15 @@ IoFactory_p findFactoryFromFileName(const std::string& fileName)
     return factory;
 }
 
-IoFactory_p findFactory(const std::string& fileTypeName, const std::string& fileName)
+IoFactory_p findFactory(const std::string& fileTypeName, const std::string& fileName, bool write)
 {
     if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
         return f;
 
-    if (IoFactory_p f = findFactoryFromMagic(fileName))
-        return f;
+    if (!write) {
+        if (IoFactory_p f = findFactoryFromMagic(fileName))
+            return f;
+    }
 
     return findFactoryFromFileName(fileName);
 }
@@ -142,7 +144,7 @@ XMLInputDoc createXMLInput(const std::string& configXML)
 CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                                                            const std::vector<std::string>& args)
 {
-    if (IoFactory_p factory = findFactory(fileTypeName, fileName))
+    if (IoFactory_p factory = findFactory(fileTypeName, fileName, false))
         return factory->createReaderWriter(fileTypeName, fileName, config, args);
     throw CDMException("cannot create reader-writer for type '" + fileTypeName + "' and file '" + fileName + "'");
 }
@@ -159,7 +161,7 @@ CDMReaderWriter_p CDMFileReaderFactory::createReaderWriter(const std::string& fi
 CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML,
                                          const std::vector<std::string>& args)
 {
-    if (IoFactory_p factory = findFactory(fileTypeName, fileName))
+    if (IoFactory_p factory = findFactory(fileTypeName, fileName, false))
         return factory->createReader(fileTypeName, fileName, configXML, args);
     throw CDMException("cannot create reader for type '" + fileTypeName + "' and file '" + fileName + "'");
 }
@@ -174,7 +176,7 @@ CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const 
 // static
 void CDMFileReaderFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile)
 {
-    if (IoFactory_p factory = findFactory(fileTypeName, fileName))
+    if (IoFactory_p factory = findFactory(fileTypeName, fileName, true))
         return factory->createWriter(input, fileTypeName, fileName, configFile);
     throw CDMException("cannot create writer for type '" + fileTypeName + "' and file '" + fileName + "'");
 }
