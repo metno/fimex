@@ -110,7 +110,8 @@ DataPtr createData(size_t length, shared_array<std::string> array)
 DataPtr createData(CDMDataType datatype, size_t length, double val)
 {
     DataPtr data = createDataPtr_(datatype, length);
-    data->setAllValues(val);
+    if (datatype != CDM_STRING || val != 0)
+        data->setAllValues(val);
     return data;
 }
 

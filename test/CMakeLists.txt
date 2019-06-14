@@ -83,6 +83,7 @@ IF(ENABLE_NETCDF)
     testCharNc.sh
     testInterpolatorFill.sh
     testInterpolation2DataFillValue.sh
+    testPrintSize.sh
     testVerticalInterpolatorPressureToPressure.sh
     testVerticalInterpolatorSigmaHybridToPressure.sh
     testVerticalInterpolatorSigmaHybridFromPressure.sh
