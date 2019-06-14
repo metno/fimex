@@ -43,7 +43,6 @@ public:
     int matchMagic(const char* magic, size_t count) override;
 
     int matchFileTypeName(const std::string& type) override;
-    int matchFileName(const std::string& fileName) override;
 
     CDMReader_p createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                              const std::vector<std::string>& args) override;

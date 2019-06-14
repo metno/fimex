@@ -44,6 +44,8 @@ namespace MetNoFimex {
 
 namespace {
 
+const char GRBML[] = "grbml";
+
 bool isGrib2Type(const std::string& type)
 {
     return (type == "grb2" || type == "grib2");
@@ -97,19 +99,17 @@ int GribIoFactory::matchMagic(const char* magic, size_t count)
 
 int GribIoFactory::matchFileTypeName(const std::string& type)
 {
-    return (type == "grib" || type == "grib2" || type == "grbml") ? 1 : 0;
-}
-
-int GribIoFactory::matchFileName(const std::string& fileName)
-{
-    const std::string ext = getExtension(fileName);
-    return (isGribType(ext) || ext == "grbml") ? 1 : 0;
+    if (type == GRBML) {
+        // actually correct only for reading
+        return 1;
+    }
+    return isGribType(type) ? 1 : 0;
 }
 
 CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML,
                                         const std::vector<std::string>& args)
 {
-    if (fileTypeName == "grbml" || getExtension(fileName) == "grbml") {
+    if (fileTypeName == GRBML || getExtension(fileName) == GRBML) {
         std::vector<std::pair<std::string, std::string>> members;
         std::vector<std::string> files; // files not used for grbml
         parseGribArgs(args, members, files);
@@ -138,7 +138,7 @@ CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const s
 
 void GribIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile)
 {
-    if (fileTypeName == "grbml" || getExtension(fileName) == "grbml")
+    if (fileTypeName == GRBML || getExtension(fileName) == GRBML)
         throw CDMException("cannot write grbml-files");
 
     int gribVersion = 0;
