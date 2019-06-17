@@ -45,6 +45,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
+#include "fimex/min_max.h"
 
 #include "nanoflann/nanoflann.hpp"
 
@@ -516,9 +517,11 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     vector<double> lonVals, latVals;
     vector<size_t> startPositions;
     vector<string> csNames;
+    size_t maxNameLen = 80;
     for (vector<CrossSectionDefinition>::const_iterator csIt = crossSections.begin(); csIt != crossSections.end(); ++csIt) {
         if (csIt->lonLatCoordinates.size() > 0) {
             csNames.push_back(csIt->name);
+            maximize(maxNameLen, csIt->name.length() + 1);
             startPositions.push_back(lonVals.size());
             if (csIt->lonLatCoordinates.size() == 1) {
                 lonVals.push_back(csIt->lonLatCoordinates.at(0).first);
@@ -565,20 +568,19 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     size_t nvcross = csNames.size();
     cdm_->addDimension(CDMDimension("two", 2));
     cdm_->addDimension(CDMDimension("nvcross", nvcross));
-    size_t strlen = 80;
-    cdm_->addDimension(CDMDimension("nvcross_strlen", strlen));
+    cdm_->addDimension(CDMDimension("nvcross_strlen", maxNameLen));
     // vcross-names
     vector<string> shape;
     shape.push_back("nvcross_strlen");
     shape.push_back("nvcross");
     CDMVariable vcross("vcross_name", CDM_STRING, shape);
-    shared_array<char> vcrossNamesAry(new char[strlen * nvcross]());
+    std::string vcrossNames(maxNameLen * nvcross, 0);
     for (size_t i = 0; i < nvcross; ++i) {
-        const char* name = csNames.at(i).c_str();
-        size_t strLen = csNames.at(i).size();
-        copy(name, name+strLen, vcrossNamesAry.get()+(i*strlen));
+        const std::string& name = csNames[i];
+        const size_t nameLen = std::min(maxNameLen - 1, name.size());
+        vcrossNames.replace(i * maxNameLen, nameLen, name);
     }
-    vcross.setData(createData(strlen*nvcross, vcrossNamesAry));
+    vcross.setData(createData(vcrossNames));
     cdm_->addVariable(vcross);
     cdm_->addAttribute(vcross.getName(), CDMAttribute("bounds", "vcross_bnds"));
 

@@ -400,10 +400,25 @@ TEST4FIMEX_TEST_CASE(interpolator_vcross)
     lonLat.push_back(make_pair<double,double>(10.74,59.9)); // Oslo
     vc.push_back(CrossSectionDefinition("BergenOslo", lonLat));
     interpolator->changeProjectionToCrossSections(MIFI_INTERPOL_BILINEAR, vc);
-    TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("vcross_name"));
-    TEST4FIMEX_CHECK(interpolator->getCDM().hasDimension("nvcross"));
-    TEST4FIMEX_CHECK_EQ(interpolator->getCDM().getDimension("nvcross").getLength(), 2);
-    TEST4FIMEX_CHECK(interpolator->getCDM().getDimension("x").getLength() > 5);
+
+    const CDM& cdm = interpolator->getCDM();
+
+    TEST4FIMEX_CHECK(cdm.hasDimension("nvcross_strlen"));
+    const int vcross_strlen = cdm.getDimension("nvcross_strlen").getLength();
+
+    TEST4FIMEX_CHECK(cdm.hasVariable("vcross_name"));
+    DataPtr vcross_name_data = interpolator->getData("vcross_name");
+    TEST4FIMEX_CHECK(vcross_name_data);
+    TEST4FIMEX_CHECK_EQ(vcross_name_data->getDataType(), CDM_STRING);
+    TEST4FIMEX_CHECK_EQ(vcross_name_data->size(), 2u * vcross_strlen);
+    const std::string vcross_names = vcross_name_data->asString();
+    TEST4FIMEX_CHECK_EQ(vcross_names.substr(0, 19), "OsloTrondheimTromso");
+    TEST4FIMEX_CHECK_EQ(vcross_names.substr(vcross_strlen, 10), "BergenOslo");
+
+    TEST4FIMEX_CHECK(cdm.hasDimension("nvcross"));
+    TEST4FIMEX_CHECK_EQ(cdm.getDimension("nvcross").getLength(), 2);
+    TEST4FIMEX_CHECK(cdm.hasDimension("x"));
+    TEST4FIMEX_CHECK(cdm.getDimension("x").getLength() > 5);
 }
 
 namespace {
