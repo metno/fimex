@@ -802,8 +802,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
         newProjection = "projection_"+newProj;
         int i = 0;
         while (cdm.hasVariable(newProjection)) newProjection = "projection_"+newProj+type2string(++i);
-        CDMVariable projVar(newProjection, CDM_NAT, std::vector<std::string>());
-        projVar.setData(createData(CDM_NAT, 0)); // define empty data
+        CDMVariable projVar(newProjection, CDM_INT, std::vector<std::string>());
+        projVar.setData(createData(CDM_INT, 0)); // define empty data
         cdm.addVariable(projVar);
         std::vector<CDMAttribute> projAttrs = Projection::createByProj4(proj_input)->getParameters();
         for (std::vector<CDMAttribute>::iterator it = projAttrs.begin(); it != projAttrs.end(); ++it) {
@@ -860,8 +860,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", xUnit));
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", yUnit));
-    cdm.getVariable(newXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
-    cdm.getVariable(newYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
+    cdm.getVariable(newXAxis).setData(createData(xAxisType, out_x_axis.begin(), out_x_axis.end()));
+    cdm.getVariable(newYAxis).setData(createData(yAxisType, out_y_axis.begin(), out_y_axis.end()));
 
     cdm.getDimension(newXAxis).setLength(out_x_axis.size());
     cdm.getDimension(newYAxis).setLength(out_y_axis.size());
@@ -1602,7 +1602,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
         cdm.addOrReplaceAttribute(xTemplAxis, CDMAttribute("long_name", xLongName));
         cdm.addOrReplaceAttribute(xTemplAxis, CDMAttribute("standard_name", xStandardName));
         cdm.addOrReplaceAttribute(xTemplAxis, CDMAttribute("units", out_x_axis_unit));
-        cdm.getVariable(xTemplAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
+        cdm.getVariable(xTemplAxis).setData(createData(xAxisType, out_x_axis.begin(), out_x_axis.end()));
         cdm.addDimension(CDMDimension(xTemplAxis, out_x_axis.size()));
     } else {
         cdm.getVariable(newXAxis).setDataType(xAxisType);
@@ -1610,7 +1610,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
         cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("long_name", xLongName));
         cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("standard_name", xStandardName));
         cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", out_x_axis_unit));
-        cdm.getVariable(newXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
+        cdm.getVariable(newXAxis).setData(createData(xAxisType, out_x_axis.begin(), out_x_axis.end()));
         cdm.getDimension(newXAxis).setLength(out_x_axis.size());
     }
 
@@ -1623,7 +1623,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
         cdm.addOrReplaceAttribute(yTemplAxis, CDMAttribute("long_name", yLongName));
         cdm.addOrReplaceAttribute(yTemplAxis, CDMAttribute("standard_name", yStandardName));
         cdm.addOrReplaceAttribute(yTemplAxis, CDMAttribute("units", out_y_axis_unit));
-        cdm.getVariable(yTemplAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
+        cdm.getVariable(yTemplAxis).setData(createData(yAxisType, out_y_axis.begin(), out_y_axis.end()));
         cdm.addDimension(CDMDimension(yTemplAxis, out_y_axis.size()));
     } else {
         cdm.getVariable(newYAxis).setDataType(yAxisType);
@@ -1631,7 +1631,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
         cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("long_name", yLongName));
         cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
         cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", out_y_axis_unit));
-        cdm.getVariable(newYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
+        cdm.getVariable(newYAxis).setData(createData(yAxisType, out_y_axis.begin(), out_y_axis.end()));
         cdm.getDimension(newYAxis).setLength(out_y_axis.size());
     }
 

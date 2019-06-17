@@ -24,6 +24,7 @@
 #include "fimex/Data.h"
 
 #include "DataImpl.h"
+#include "NativeData.h"
 #include "StringData.h"
 
 #include <memory>
@@ -65,7 +66,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
     case CDM_USHORT:  return createDataT<unsigned short>(length);
     case CDM_UCHAR:   return createDataT<unsigned char>(length);
     case CDM_STRINGS: return createDataT<std::string>(length);
-    case CDM_NAT:     return createDataT<char>(length);
+    case CDM_NAT:     return std::make_shared<NativeData>(length);
     default: break;
     }
     // clang-format on
@@ -110,8 +111,7 @@ DataPtr createData(size_t length, shared_array<std::string> array)
 DataPtr createData(CDMDataType datatype, size_t length, double val)
 {
     DataPtr data = createDataPtr_(datatype, length);
-    if (datatype != CDM_STRING || val != 0)
-        data->setAllValues(val);
+    data->setAllValues(val);
     return data;
 }
 
@@ -136,13 +136,20 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
     case CDM_USHORT:  d = createDataT<unsigned short>    (length); break;
     case CDM_UCHAR:   d = createDataT<unsigned char>     (length); break;
     case CDM_STRINGS: d = createDataT<std::string>       (length); break;
-    case CDM_NAT:     return createDataT<char>(0);
+    case CDM_NAT:
     case CDM_STRING:
     default: throw CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype));
     }
     // clang-format on
     d->setValues(0, data, dataStartPos, dataStartPos + length);
     return d;
+}
+
+template <class C>
+DataPtr DataImpl<C>::clone() const
+{
+    typedef DataImpl<C> Impl;
+    return std::shared_ptr<Impl>(new Impl(*this));
 }
 
 template<>
@@ -193,7 +200,7 @@ void DataImpl<std::string>::setValues(size_t startPos, const Data& data, size_t 
 // specializations of getDataType
 // clang-format off
 template<>
-CDMDataType DataImpl<char>::getDataType() const { return CDM_CHAR; } // wrong, might also be CDM_STRING
+CDMDataType DataImpl<char>::getDataType() const { return CDM_CHAR; }
 template<>
 CDMDataType DataImpl<short>::getDataType() const {return CDM_SHORT;}
 template<>

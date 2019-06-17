@@ -453,7 +453,7 @@ void GribCDMReader::initLevels()
             cdm_->addVariable(levelVar);
 
             // add level variable data
-            DataPtr levelData = createData(CDM_INT, lit->second.at(i).begin(), lit->second.at(i).end());
+            DataPtr levelData = createData(levelDataType, lit->second.at(i).begin(), lit->second.at(i).end());
             // add special data for hybrid levels
             if (node != 0) {
                 initSpecialLevels_(node, myExtension, lit->first, i, levelShape, levelData);

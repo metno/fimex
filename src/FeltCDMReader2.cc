@@ -507,11 +507,11 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
         }
         string xName(xXmlAttributes["name"]);
         xDim = CDMDimension(xName, feltfile_->getNX());
-        CDMDataType xDataType = string2datatype(xXmlAttributes["type"]);
         vector<string> xDimShape;
         xDimShape.push_back(xDim.getName());
-        CDMVariable xVar(xName, xDataType, xDimShape);
-        xVar.setData(feltfile_->getXData());
+        DataPtr xData = feltfile_->getXData();
+        CDMVariable xVar(xName, xData->getDataType(), xDimShape);
+        xVar.setData(xData);
         cdm_->addDimension(xDim);
         cdm_->addVariable(xVar);
         for (vector<CDMAttribute>::iterator attrIt = xVarAttributes.begin(); attrIt != xVarAttributes.end(); ++attrIt) {
@@ -529,11 +529,11 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
         }
         string yName(yXmlAttributes["name"]);
         yDim = CDMDimension(yName, feltfile_->getNY());
-        CDMDataType yDataType = string2datatype(yXmlAttributes["type"]);
         vector<string> yDimShape;
         yDimShape.push_back(yDim.getName());
-        CDMVariable yVar(yName, yDataType, yDimShape);
-        yVar.setData(feltfile_->getYData());
+        DataPtr yData = feltfile_->getYData();
+        CDMVariable yVar(yName, yData->getDataType(), yDimShape);
+        yVar.setData(yData);
         cdm_->addDimension(yDim);
         cdm_->addVariable(yVar);
         for (vector<CDMAttribute>::iterator attrIt = yVarAttributes.begin(); attrIt != yVarAttributes.end(); ++attrIt) {

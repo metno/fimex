@@ -134,13 +134,13 @@ private:
         virtual void setValue(size_t pos, double val) {theData[pos] = data_caster<C, double>()(val);}
         virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
         virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, data_caster<C, double>()(val));}
-        virtual DataPtr clone() const { return DataPtr(new DataImpl<C>(*this)); } // private ctor => no std::make_shared
+        virtual DataPtr clone() const;
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
                                         double newScale, double newOffset);
         // specialized for each known type in Data.cc
-        virtual CDMDataType getDataType() const {return CDM_NAT;}
+        virtual CDMDataType getDataType() const;
 
         /**
          * set the values of the data by the input-iterator

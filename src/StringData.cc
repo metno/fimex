@@ -49,9 +49,21 @@ void StringData::setValues(size_t startPos, const Data& data, size_t first, size
     text_.replace(startPos, n, text, first, n);
 }
 
+void StringData::setAllValues(double d)
+{
+    text_.replace(0, text_.size(), text_.size(), static_cast<char>(d));
+}
+
 DataPtr StringData::clone() const
 {
     return std::make_shared<StringData>(text_);
+}
+
+DataPtr StringData::slice(std::vector<size_t> max_dim_sizes, std::vector<size_t> /*dim_start_positions*/, std::vector<size_t> dim_sizes)
+{
+    if (max_dim_sizes != dim_sizes)
+        throw CDMException("cannot sclice string data");
+    return clone();
 }
 
 DataPtr StringData::convertDataType(double, double, double, CDMDataType newType, double, double, double)

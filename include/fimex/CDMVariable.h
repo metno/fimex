@@ -50,7 +50,7 @@ public:
     const std::string& getName() const {return name;}
     void setName(const std::string& newName) { name = newName; }
     CDMDataType getDataType() const {return datatype;}
-    void setDataType(CDMDataType type) {datatype = type;}
+    void setDataType(CDMDataType type);
     const std::vector<std::string>& getShape() const {return shape;}
     void setShape(const std::vector<std::string>& newShape) { shape = newShape; }
 
@@ -88,7 +88,7 @@ public:
     void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const;
 
     /// add data to the variable
-    void setData(DataPtr data) {this->data = data;}
+    void setData(DataPtr data);
 
     /**
      * @brief retrieve volatile data from this variable

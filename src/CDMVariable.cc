@@ -23,6 +23,8 @@
 
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/CDMException.h"
+#include "fimex/Data.h"
 
 #include <algorithm>
 #include <ostream>
@@ -69,6 +71,21 @@ void CDMVariable::setAsSpatialVector(const std::string& counterpart, SpatialVect
     spatialVectorDirection = direction;
 }
 
+void CDMVariable::setDataType(CDMDataType type)
+{
+    datatype = type;
+    if (data && datatype != data->getDataType())
+        data = DataPtr();
+}
+
+void CDMVariable::setData(DataPtr d)
+{
+    if (d && datatype != d->getDataType()) {
+        throw CDMException("variable '" + getName() + "' with datatype " + datatype2string(datatype) + " cannot store data with datatype " +
+                           datatype2string(d->getDataType()));
+    }
+    data = d;
+}
 
 void CDMVariable::shapeToXMLStream(std::ostream& out) const
 {

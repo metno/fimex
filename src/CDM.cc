@@ -558,8 +558,10 @@ double CDM::getScaleFactor(const std::string& varName) const
 std::string CDM::getUnits(const std::string& varName) const
 {
     CDMAttribute attr;
-    getAttribute(varName, "units", attr); // no test, default attr-value is ""
-    return attr.getStringValue();
+    if (getAttribute(varName, "units", attr))
+        return attr.getStringValue();
+    else
+        return "";
 }
 
 void CDM::toXMLStream(std::ostream& out) const

@@ -103,6 +103,8 @@ SET(libfimex_SOURCES
   Log4cppLogger.cc
   Log4cppLogger.h
   MutexLock.h
+  NativeData.cc
+  NativeData.h
   NcmlCDMReader.cc
   ${INCF}/NcmlCDMReader.h
   NcmlIoFactory.cc

@@ -88,11 +88,11 @@ public:
 
     void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1);
 
-    void setAllValues(double) { throw CDMException("cannot set string data from double"); }
+    void setAllValues(double);
 
     DataPtr clone() const;
 
-    DataPtr slice(std::vector<size_t>, std::vector<size_t>, std::vector<size_t>) { throw CDMException("cannot sclice string data"); }
+    DataPtr slice(std::vector<size_t>, std::vector<size_t>, std::vector<size_t>);
 
     DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double);
 
