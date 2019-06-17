@@ -46,8 +46,8 @@ public:
 
 public:
     explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape);
-    virtual ~CDMVariable();
-    const std::string& getName() const {return name;}
+    ~CDMVariable();
+    const std::string& getName() const override {return name;}
     void setName(const std::string& newName) { name = newName; }
     CDMDataType getDataType() const {return datatype;}
     void setDataType(CDMDataType type);

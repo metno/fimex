@@ -44,64 +44,64 @@ public:
     {
     }
 
-    size_t size() const { return text_.size(); }
-    int bytes_for_one() const { return 1; }
+    size_t size() const override { return text_.size(); }
+    int bytes_for_one() const override { return 1; }
 
-    void* getDataPtr() { return (void*)(text_.data()); }
+    void* getDataPtr() override { return (void*)(text_.data()); }
 
-    void toStream(std::ostream& out, const std::string&) const { out << text_; };
+    void toStream(std::ostream& out, const std::string&) const override { out << text_; };
 
-    shared_array<char> asChar() const { throw CDMException("cannot convert string data to char"); }
+    shared_array<char> asChar() const override { throw CDMException("cannot convert string data to char"); }
 
-    shared_array<short> asShort() const { throw CDMException("cannot convert string data to short"); }
+    shared_array<short> asShort() const override { throw CDMException("cannot convert string data to short"); }
 
-    shared_array<int> asInt() const { throw CDMException("cannot convert string data to int"); }
+    shared_array<int> asInt() const override { throw CDMException("cannot convert string data to int"); }
 
-    shared_array<long long> asInt64() const { throw CDMException("cannot convert string data to long long"); }
+    shared_array<long long> asInt64() const override { throw CDMException("cannot convert string data to long long"); }
 
-    shared_array<unsigned char> asUChar() const { throw CDMException("cannot convert string data to unsigned char"); }
+    shared_array<unsigned char> asUChar() const override { throw CDMException("cannot convert string data to unsigned char"); }
 
-    shared_array<unsigned short> asUShort() const { throw CDMException("cannot convert string data to unsigned short"); }
+    shared_array<unsigned short> asUShort() const override { throw CDMException("cannot convert string data to unsigned short"); }
 
-    shared_array<unsigned int> asUInt() const { throw CDMException("cannot convert string data to unsigned int"); }
+    shared_array<unsigned int> asUInt() const override { throw CDMException("cannot convert string data to unsigned int"); }
 
-    shared_array<unsigned long long> asUInt64() const { throw CDMException("cannot convert string data to unsigned long long"); }
+    shared_array<unsigned long long> asUInt64() const override { throw CDMException("cannot convert string data to unsigned long long"); }
 
-    shared_array<float> asFloat() const { throw CDMException("cannot convert string data to float"); }
+    shared_array<float> asFloat() const override { throw CDMException("cannot convert string data to float"); }
 
-    shared_array<double> asDouble() const { throw CDMException("cannot convert string data to double"); }
+    shared_array<double> asDouble() const override { throw CDMException("cannot convert string data to double"); }
 
-    shared_array<std::string> asStrings() const
+    shared_array<std::string> asStrings() const override
     {
         shared_array<std::string> strings(new std::string[1]);
         strings[0] = text_;
         return strings;
     }
 
-    std::string asString(const std::string&) const { return text_; }
+    std::string asString(const std::string&) const override { return text_; }
 
-    double getDouble(size_t) { throw CDMException("cannot get string data as double"); }
+    double getDouble(size_t) override { throw CDMException("cannot get string data as double"); }
 
-    long long getLongLong(size_t) { throw CDMException("cannot get string data as long long"); }
+    long long getLongLong(size_t) override { throw CDMException("cannot get string data as long long"); }
 
-    void setValue(size_t, double) { throw CDMException("cannot set string data from double"); }
+    void setValue(size_t, double) override { throw CDMException("cannot set string data from double"); }
 
-    void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1);
+    void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) override;
 
-    void setAllValues(double);
+    void setAllValues(double) override;
 
-    DataPtr clone() const;
+    DataPtr clone() const override;
 
-    DataPtr slice(std::vector<size_t>, std::vector<size_t>, std::vector<size_t>);
+    DataPtr slice(const std::vector<size_t>&, const std::vector<size_t>&, const std::vector<size_t>&) override;
 
-    DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double);
+    DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double) override;
 
-    DataPtr convertDataType(double, double, double, UnitsConverter_p, CDMDataType newType, double, double, double)
+    DataPtr convertDataType(double, double, double, UnitsConverter_p, CDMDataType newType, double, double, double) override
     {
         return convertDataType(0, 0, 0, newType, 0, 0, 0);
     }
 
-    CDMDataType getDataType() const { return CDM_STRING; }
+    CDMDataType getDataType() const override { return CDM_STRING; }
 
 private:
     std::string text_;

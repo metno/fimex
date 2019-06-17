@@ -55,7 +55,7 @@ DataPtr NativeData::clone() const
     return std::make_shared<NativeData>(size_, cloned_data);
 }
 
-DataPtr NativeData::slice(std::vector<size_t> max_dim_sizes, std::vector<size_t> /*dim_start_positions*/, std::vector<size_t> dim_sizes)
+DataPtr NativeData::slice(const std::vector<size_t>& max_dim_sizes, const std::vector<size_t>& /*dim_start_positions*/, const std::vector<size_t>& dim_sizes)
 {
     if (max_dim_sizes != dim_sizes)
         throw CDMException("cannot sclice native data");

@@ -53,59 +53,59 @@ public:
     {
     }
 
-    size_t size() const { return size_; }
-    int bytes_for_one() const { return 1; }
+    size_t size() const override { return size_; }
+    int bytes_for_one() const override { return 1; }
 
-    void* getDataPtr() { return (void*)(data_.get()); }
+    void* getDataPtr() override { return (void*)(data_.get()); }
 
-    void toStream(std::ostream& out, const std::string&) const { throw CDMException("cannot stream native data"); };
+    void toStream(std::ostream&, const std::string&) const override { throw CDMException("cannot stream native data"); };
 
-    shared_array<char> asChar() const { throw CDMException("cannot convert native data to char"); }
+    shared_array<char> asChar() const override { throw CDMException("cannot convert native data to char"); }
 
-    shared_array<short> asShort() const { throw CDMException("cannot convert native data to short"); }
+    shared_array<short> asShort() const override { throw CDMException("cannot convert native data to short"); }
 
-    shared_array<int> asInt() const { throw CDMException("cannot convert native data to int"); }
+    shared_array<int> asInt() const override { throw CDMException("cannot convert native data to int"); }
 
-    shared_array<long long> asInt64() const { throw CDMException("cannot convert native data to long long"); }
+    shared_array<long long> asInt64() const override { throw CDMException("cannot convert native data to long long"); }
 
-    shared_array<unsigned char> asUChar() const { return data_; }
+    shared_array<unsigned char> asUChar() const override { return data_; }
 
-    shared_array<unsigned short> asUShort() const { throw CDMException("cannot convert native data to unsigned short"); }
+    shared_array<unsigned short> asUShort() const override { throw CDMException("cannot convert native data to unsigned short"); }
 
-    shared_array<unsigned int> asUInt() const { throw CDMException("cannot convert native data to unsigned int"); }
+    shared_array<unsigned int> asUInt() const override { throw CDMException("cannot convert native data to unsigned int"); }
 
-    shared_array<unsigned long long> asUInt64() const { throw CDMException("cannot convert native data to unsigned long long"); }
+    shared_array<unsigned long long> asUInt64() const override { throw CDMException("cannot convert native data to unsigned long long"); }
 
-    shared_array<float> asFloat() const { throw CDMException("cannot convert native data to float"); }
+    shared_array<float> asFloat() const override { throw CDMException("cannot convert native data to float"); }
 
-    shared_array<double> asDouble() const { throw CDMException("cannot convert native data to double"); }
+    shared_array<double> asDouble() const override { throw CDMException("cannot convert native data to double"); }
 
-    shared_array<std::string> asStrings() const { throw CDMException("cannot convert native data to strings"); }
+    shared_array<std::string> asStrings() const override { throw CDMException("cannot convert native data to strings"); }
 
-    std::string asString(const std::string&) const { throw CDMException("cannot convert native data to string"); }
+    std::string asString(const std::string&) const override { throw CDMException("cannot convert native data to string"); }
 
-    double getDouble(size_t) { throw CDMException("cannot get native data as double"); }
+    double getDouble(size_t) override { throw CDMException("cannot get native data as double"); }
 
-    long long getLongLong(size_t) { throw CDMException("cannot get native data as long long"); }
+    long long getLongLong(size_t) override { throw CDMException("cannot get native data as long long"); }
 
-    void setValue(size_t, double) { throw CDMException("cannot set native data from double"); }
+    void setValue(size_t, double) override { throw CDMException("cannot set native data from double"); }
 
-    void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1);
+    void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) override;
 
-    void setAllValues(double);
+    void setAllValues(double) override;
 
-    DataPtr clone() const;
+    DataPtr clone() const override;
 
-    DataPtr slice(std::vector<size_t>, std::vector<size_t>, std::vector<size_t>);
+    DataPtr slice(const std::vector<size_t>&, const std::vector<size_t>&, const std::vector<size_t>&) override;
 
-    DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double);
+    DataPtr convertDataType(double, double, double, CDMDataType newType, double, double, double) override;
 
-    DataPtr convertDataType(double, double, double, UnitsConverter_p, CDMDataType newType, double, double, double)
+    DataPtr convertDataType(double, double, double, UnitsConverter_p, CDMDataType newType, double, double, double) override
     {
         return convertDataType(0, 0, 0, newType, 0, 0, 0);
     }
 
-    CDMDataType getDataType() const { return CDM_NAT; }
+    CDMDataType getDataType() const override { return CDM_NAT; }
 
 private:
     size_t size_;

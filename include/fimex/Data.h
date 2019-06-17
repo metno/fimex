@@ -150,7 +150,7 @@ namespace MetNoFimex
          *
          * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
          */
-        virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) = 0;
+        virtual DataPtr slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) = 0;
 
         /**
          * @brief convert the datatype from one type,fill,scale,offset to another

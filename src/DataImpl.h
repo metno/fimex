@@ -91,12 +91,12 @@ private:
             , theData(array)
         {
         }
-        virtual ~DataImpl() {}
+        ~DataImpl() {}
 
-        virtual size_t size() const {return length;}
-        virtual int bytes_for_one() const {return sizeof(C);}
-        virtual void* getDataPtr() {return &theData[0];}
-        virtual void toStream(std::ostream& os, const std::string& separator = "") const;
+        size_t size() const override {return length;}
+        int bytes_for_one() const override {return sizeof(C);}
+        void* getDataPtr() override {return &theData[0];}
+        void toStream(std::ostream& os, const std::string& separator = "") const override;
 
         /**
          *  @brief get the datapointer of the data
@@ -116,31 +116,31 @@ private:
             return ArrayTypeConverter<T, C>(theData, length)();
         }
         // conversion function
-        virtual shared_array<char> asChar() const { return as<char>(); }
-        virtual shared_array<short> asShort() const { return as<short>(); }
-        virtual shared_array<int> asInt() const { return as<int>(); }
-        virtual shared_array<long long> asInt64() const { return as<long long>(); }
-        virtual shared_array<unsigned char> asUChar() const { return as<unsigned char>(); }
-        virtual shared_array<unsigned short> asUShort() const { return as<unsigned short>(); }
-        virtual shared_array<unsigned int> asUInt() const { return as<unsigned int>(); }
-        virtual shared_array<unsigned long long> asUInt64() const { return as<unsigned long long>(); }
-        virtual shared_array<std::string> asStrings() const { return as<std::string>(); }
-        virtual shared_array<float> asFloat() const { return as<float>(); }
-        virtual shared_array<double> asDouble() const { return as<double>(); }
-        virtual std::string asString(const std::string& separator = "") const;
+        shared_array<char> asChar() const override { return as<char>(); }
+        shared_array<short> asShort() const override { return as<short>(); }
+        shared_array<int> asInt() const override { return as<int>(); }
+        shared_array<long long> asInt64() const override { return as<long long>(); }
+        shared_array<unsigned char> asUChar() const override { return as<unsigned char>(); }
+        shared_array<unsigned short> asUShort() const override { return as<unsigned short>(); }
+        shared_array<unsigned int> asUInt() const override { return as<unsigned int>(); }
+        shared_array<unsigned long long> asUInt64() const override { return as<unsigned long long>(); }
+        shared_array<std::string> asStrings() const override { return as<std::string>(); }
+        shared_array<float> asFloat() const override { return as<float>(); }
+        shared_array<double> asDouble() const override { return as<double>(); }
+        std::string asString(const std::string& separator = "") const override;
 
-        virtual double getDouble(size_t pos) {return data_caster<double, C>()(theData[pos]);}
-        virtual long long getLongLong(size_t pos) {return data_caster<long long, C>()(theData[pos]);}
-        virtual void setValue(size_t pos, double val) {theData[pos] = data_caster<C, double>()(val);}
-        virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
-        virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, data_caster<C, double>()(val));}
-        virtual DataPtr clone() const;
-        virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
-                                        double newScale, double newOffset);
+        double getDouble(size_t pos) override {return data_caster<double, C>()(theData[pos]);}
+        long long getLongLong(size_t pos) override {return data_caster<long long, C>()(theData[pos]);}
+        void setValue(size_t pos, double val) override {theData[pos] = data_caster<C, double>()(val);}
+        void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) override;
+        void setAllValues(double val) override {std::fill(&theData[0], (&theData[0])+length, data_caster<C, double>()(val));}
+        DataPtr clone() const override;
+        DataPtr slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) override;
+        DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) override;
+        DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
+                                        double newScale, double newOffset) override;
         // specialized for each known type in Data.cc
-        virtual CDMDataType getDataType() const;
+        CDMDataType getDataType() const override;
 
         /**
          * set the values of the data by the input-iterator
@@ -265,7 +265,7 @@ private:
     }
 
     template<typename C>
-    DataPtr DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) {
+    DataPtr DataImpl<C>::slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) {
         // handle scalar data
         if (orgDimSize.size() == 0) {
             return clone();
