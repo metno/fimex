@@ -38,105 +38,105 @@
 
 namespace MetNoFimex
 {
-    /**
+/**
      * @headerfile fimex/Data.h
      */
 
-    /**
+/**
      * General class for storing different basic array pointers plus length
      */
-    class Data
-    {
-    public:
-        virtual ~Data() = 0;
+class Data
+{
+public:
+    virtual ~Data() = 0;
 
-        /// @brief size of the data
-        virtual size_t size() const = 0;
+    /// @brief size of the data
+    virtual size_t size() const = 0;
 
-        /// @brief sizeof the data-impl datatype
-        virtual int bytes_for_one() const = 0;
+    /// @brief sizeof the data-impl datatype
+    virtual int bytes_for_one() const = 0;
 
-        virtual void* getDataPtr() = 0;
+    virtual void* getDataPtr() = 0;
 
-        /// @brief printing of the current data to ostream, with optional separator
-        virtual void toStream(std::ostream&, const std::string& separator = "") const = 0;
+    /// @brief printing of the current data to ostream, with optional separator
+    virtual void toStream(std::ostream&, const std::string& separator = "") const = 0;
 
-        /// @brief retrieve data as char
-        virtual shared_array<char> asChar() const = 0;
+    /// @brief retrieve data as char
+    virtual shared_array<char> asChar() const = 0;
 
-        /// @brief retrieve data as short
-        virtual shared_array<short> asShort() const = 0;
+    /// @brief retrieve data as short
+    virtual shared_array<short> asShort() const = 0;
 
-        /// @brief retrieve data as int
-        virtual shared_array<int> asInt() const = 0;
+    /// @brief retrieve data as int
+    virtual shared_array<int> asInt() const = 0;
 
-        /// @brief retrieve data as int64
-        virtual shared_array<long long> asInt64() const = 0;
+    /// @brief retrieve data as int64
+    virtual shared_array<long long> asInt64() const = 0;
 
-        /// @brief retrieve data as uchar
-        virtual shared_array<unsigned char> asUChar() const = 0;
+    /// @brief retrieve data as uchar
+    virtual shared_array<unsigned char> asUChar() const = 0;
 
-        /// @brief retrieve data as short
-        virtual shared_array<unsigned short> asUShort() const = 0;
+    /// @brief retrieve data as short
+    virtual shared_array<unsigned short> asUShort() const = 0;
 
-        /// @brief retrieve data as uint
-        virtual shared_array<unsigned int> asUInt() const = 0;
+    /// @brief retrieve data as uint
+    virtual shared_array<unsigned int> asUInt() const = 0;
 
-        /// @brief retrieve data as uint64
-        virtual shared_array<unsigned long long> asUInt64() const = 0;
+    /// @brief retrieve data as uint64
+    virtual shared_array<unsigned long long> asUInt64() const = 0;
 
-        /// @brief retrieve data as float (eventually copy)
-        virtual shared_array<float> asFloat() const = 0;
+    /// @brief retrieve data as float (eventually copy)
+    virtual shared_array<float> asFloat() const = 0;
 
-        /// @brief retrieve data as double
-        virtual shared_array<double> asDouble() const = 0;
+    /// @brief retrieve data as double
+    virtual shared_array<double> asDouble() const = 0;
 
-        /// @brief retrieve data as array of strings
-        virtual shared_array<std::string> asStrings() const = 0;
+    /// @brief retrieve data as array of strings
+    virtual shared_array<std::string> asStrings() const = 0;
 
-        /// @brief retrieve the whole array as a string (with possible separator)
-        virtual std::string asString(const std::string& separator = "") const = 0;
+    /// @brief retrieve the whole array as a string (with possible separator)
+    virtual std::string asString(const std::string& separator = "") const = 0;
 
-        /**
+    /**
          *  @brief get a value at the desired position
          *
          *  Usefull in combination with MetNoFimex::Index and getDims().
          */
-        virtual double getDouble(size_t pos) = 0;
-        /**
+    virtual double getDouble(size_t pos) = 0;
+    /**
          *  @brief get a value at the desired position
          *
          *  Usefull in combination with MetNoFimex::Index and getDims().
          */
-        virtual long long getLongLong(size_t pos) = 0;
+    virtual long long getLongLong(size_t pos) = 0;
 
-        /// @brief set a value at the desired position
-        virtual void setValue(size_t pos, double val) = 0;
+    /// @brief set a value at the desired position
+    virtual void setValue(size_t pos, double val) = 0;
 
-        /**
+    /**
          * set the values from another Data implementation
          * @param startPos the first position the data should be written to
          * @param data the other data-source
          * @param first the first data-entry
          * @param end the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
          */
-        virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) = 0;
+    virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) = 0;
 
-        /**
+    /**
          * set all values to the submitted value
          * @param val value to set
          */
-        virtual void setAllValues(double val) = 0;
+    virtual void setAllValues(double val) = 0;
 
-        /**
+    /**
          * @brief duplicate the data
          *
          * The clone operation generates a real duplicate
          * of the data. The internal array-data will be copied.
          */
-        virtual DataPtr clone() const = 0;
+    virtual DataPtr clone() const = 0;
 
-        /**
+    /**
          * @brief get a multi-dimensional slice of the data
          *
          * This slices a multidimensional chunk out of the data.
@@ -150,23 +150,23 @@ namespace MetNoFimex
          *
          * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
          */
-        virtual DataPtr slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) = 0;
-
-        /**
-         * @brief convert the datatype from one type,fill,scale,offset to another
-         */
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
-
-        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
-                                        double newScale, double newOffset) = 0;
-
-        /**
-         * return the CDMDataType of this data
-         */
-        virtual CDMDataType getDataType() const = 0;
-    };
+    virtual DataPtr slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) = 0;
 
     /**
+         * @brief convert the datatype from one type,fill,scale,offset to another
+         */
+    virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
+
+    virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, UnitsConverter_p unitConverter, CDMDataType newType, double newFill,
+                                    double newScale, double newOffset) = 0;
+
+    /**
+         * return the CDMDataType of this data
+         */
+    virtual CDMDataType getDataType() const = 0;
+};
+
+/**
      * @brief create a Data-pointer of the datatype
      *
      * @param datatype
@@ -174,106 +174,106 @@ namespace MetNoFimex
      * @param val default value for data elements, 0 by default
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(CDMDataType datatype, size_t length, double val = 0);
+DataPtr createData(CDMDataType datatype, size_t length, double val = 0);
 
-    /**
+/**
      * @brief create a Data-pointer of type CDM_DOUBLE
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<double> array);
-    /**
+DataPtr createData(size_t length, shared_array<double> array);
+/**
      * @brief create a Data-pointer of type CDM_FLOAT
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<float> array);
-    /**
+DataPtr createData(size_t length, shared_array<float> array);
+/**
      * @brief create a Data-pointer of type CDM_INT
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<int> array);
-    /**
+DataPtr createData(size_t length, shared_array<int> array);
+/**
      * @brief create a Data-pointer of type CDM_SHORT
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<short> array);
-    /**
+DataPtr createData(size_t length, shared_array<short> array);
+/**
      * @brief create a Data-pointer of type CDM_CHAR
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<char> array);
-    /**
+DataPtr createData(size_t length, shared_array<char> array);
+/**
      * @brief create a Data-pointer of type CDM_UINT
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<unsigned int> array);
-    /**
+DataPtr createData(size_t length, shared_array<unsigned int> array);
+/**
      * @brief create a Data-pointer of type CDM_INT64
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<long long> array);
-    /**
+DataPtr createData(size_t length, shared_array<long long> array);
+/**
      * @brief create a Data-pointer of type CDM_UINT64
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<unsigned long long> array);
-    /**
+DataPtr createData(size_t length, shared_array<unsigned long long> array);
+/**
      * @brief create a Data-pointer of type CDM_USHORT
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<unsigned short> array);
-    /**
+DataPtr createData(size_t length, shared_array<unsigned short> array);
+/**
      * @brief create a Data-pointer of type CDM_UCHAR
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<unsigned char> array);
-    /**
+DataPtr createData(size_t length, shared_array<unsigned char> array);
+/**
      * @brief create a Data-pointer of type CDM_STRINGS
      *
      * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(size_t length, shared_array<std::string> array);
+DataPtr createData(size_t length, shared_array<std::string> array);
 
-    /**
+/**
      * @brief create a Data-pointer of type CDM_STRING
      *
      * @param value the text
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    DataPtr createData(const std::string& value);
+DataPtr createData(const std::string& value);
 
-    /**
+/**
      * @brief create a Data-pointer of the datatype and fill with the data from the iterator
      *
      * @param datatype
@@ -281,10 +281,10 @@ namespace MetNoFimex
      * @param last end (excluded) of the container containing the data to fill the array with
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    template<class InputIterator>
-    DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last);
+template<class InputIterator>
+DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last);
 
-    /**
+/**
      * @brief create a one-dimensional dataslice from another Data object
      *
      * @param datatype of the return-data
@@ -292,14 +292,14 @@ namespace MetNoFimex
      * @param dataStartPos the first element of data to fetch
      * @param dataSize the size of the data
      */
-    DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
+DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
 
-    /* BELOW follow template implementations */
-    template<class InputIterator>
-    DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last)
-    {
-        size_t length = std::distance(first, last);
-        // clang-format off
+/* BELOW follow template implementations */
+template<class InputIterator>
+DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last)
+{
+    size_t length = std::distance(first, last);
+    // clang-format off
         switch (datatype) {
             case CDM_DOUBLE: { shared_array<double> ary(new double[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
             case CDM_FLOAT:  { shared_array<float> ary(new float[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
@@ -315,11 +315,11 @@ namespace MetNoFimex
             case CDM_NAT:
             default: break;
          }
-         // clang-format on
-         return createData(0, shared_array<char>(new char[0])); // a dummy dataset
-    }
+    // clang-format on
+    return createData(0, shared_array<char>(new char[0])); // a dummy dataset
+}
 
-    DataPtr convertValues(const Data& data, CDMDataType newType);
+DataPtr convertValues(const Data& data, CDMDataType newType);
 
 } // namespace MetNoFimex
 
