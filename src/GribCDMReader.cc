@@ -300,32 +300,34 @@ void GribCDMReader::initXMLNodeIdx() {
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
 {
     const vector<long>& pars = msg.getParameterIds();
+    if (pars.size() < 3)
+        return 0;
     map<string, long> optionals;
     optionals["typeOfLevel"] = msg.getLevelType();
     optionals["levelNo"] = msg.getLevelNumber();
     optionals["timeRangeIndicator"] = msg.getTimeRangeIndicator();
     vector<xmlNodePtr> nodes;
+    const long param = pars.front();
     if (msg.getEdition() == 1) {
-        nodes = p_->nodeIdx1[pars.at(0)];
-        optionals["gribTablesVersionNo"] = pars.at(1);
-        optionals["identificationOfOriginatingGeneratingCentre"] = pars.at(2);
+        nodes = p_->nodeIdx1[param];
+        optionals["gribTablesVersionNo"] = pars[1];
+        optionals["identificationOfOriginatingGeneratingCentre"] = pars[2];
     } else {
-        nodes = p_->nodeIdx2[pars.at(0)];
-        optionals["parameterCategory"] = pars.at(1);
-        optionals["discipline"] = pars.at(2);
+        nodes = p_->nodeIdx2[param];
+        optionals["parameterCategory"] = pars[1];
+        optionals["discipline"] = pars[2];
     }
 
-    if (nodes.size() >= 1) {
+    if (!nodes.empty()) {
         LOG4FIMEX(logger, Logger::DEBUG, "found parameter for edition " << msg.getEdition() << " and id " << pars.at(0));
         vector<xmlNodePtr> matchingNodes;
-        for (size_t i = 0; i < nodes.size(); ++i) {
-            xmlNodePtr node = nodes.at(i);
+        for (xmlNodePtr node : nodes) {
             bool allOptionalsMatch = true;
-            for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
-                string optVal = getXmlProp(node, opt->first);
-                if (optVal != "") {
+            for (const auto& opt : optionals) {
+                const string optVal = getXmlProp(node, opt.first);
+                if (!optVal.empty()) {
                     vector<long> optVals = tokenizeDotted<long>(optVal, ",");
-                    if (find(optVals.begin(), optVals.end(), opt->second) == optVals.end()) {
+                    if (find(optVals.begin(), optVals.end(), opt.second) == optVals.end()) {
                         // opt->second not found
                         // optional set and not the same as this message value, don't use
                         allOptionalsMatch = false;
@@ -333,14 +335,14 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
                 }
             }
             // check the options from msg.getOtherKeys()
-            for (map<string, long>::const_iterator opt = msg.getOtherKeys().begin(); opt != msg.getOtherKeys().end(); ++opt) {
-                string xpathStr = "gr:extraKey[@name='" + opt->first + "']";
+            for (const auto& opt : msg.getOtherKeys()) {
+                string xpathStr = "gr:extraKey[@name='" + opt.first + "']";
                 xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathStr, node);
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 size_t size = (nodes) ? nodes->nodeNr : 0;
                 if (size != 0) {
                     long val = string2type<long>(getXmlProp(nodes->nodeTab[0], "value"));
-                    if (val != opt->second) {
+                    if (val != opt.second) {
                         allOptionalsMatch = false;
                     }
                 }
@@ -351,13 +353,16 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             }
         }
 
-        if (matchingNodes.size() >= 1) {
-            stringstream opt_ss;
-            for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
-                opt_ss << opt->first << "=" << opt->second << ", ";
+        if (!matchingNodes.empty()) {
+            if (matchingNodes.size() > 1) {
+                stringstream opt_ss;
+                for (const auto& opt : optionals) {
+                    opt_ss << opt.first << "=" << opt.second << ", ";
+                }
+                LOG4FIMEX(logger, Logger::INFO, "using first of several parameters for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "' and "
+                                                                                                  << opt_ss.str());
             }
-            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::INFO, "using first of several parameters for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "' and " << opt_ss.str());
-            return matchingNodes.at(0); // return the parent, since xpath looks for grib1/2 node
+            return matchingNodes.front(); // return the parent, since xpath looks for grib1/2 node
         }
     }
     LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "'");
@@ -393,8 +398,7 @@ void GribCDMReader::initAddGlobalAttributes()
         throw CDMException("unable to find " + xpathString + " in config: " + p_->configId);
     }
     for (int i = 0; i < size; ++i) {
-        xmlNodePtr node = nodes->nodeTab[i];
-        assert(node->type == XML_ELEMENT_NODE);
+        assert(nodes->nodeTab[i]->type == XML_ELEMENT_NODE);
         vector<CDMAttribute> globAttributes;
         fillAttributeListFromXMLNode(globAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
         for (vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
@@ -421,21 +425,21 @@ void GribCDMReader::initLevels()
         if (size > 1) {
             throw CDMException("more than one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
         }
-        string levelName, levelId, levelType;
+        string levelName, levelId;
+        CDMDataType levelDataType;
         xmlNodePtr node = 0;
         if (size == 0) {
             LOG4FIMEX(logger, Logger::INFO, "no definition for vertical axis " + type2string(typeId) + " found, using default");
             levelName = "grib"+type2string(edition) +"_vLevel" + type2string(typeId);
             levelId = levelName;
-            levelType = "float";
+            levelDataType = CDM_FLOAT;
         } else {
             node = nodes->nodeTab[0];
             assert(node->type == XML_ELEMENT_NODE);
             levelName = getXmlProp(node, "name");
             levelId = getXmlProp(node, "id");
-            levelType = getXmlProp(node, "type");
+            levelDataType = string2datatype(getXmlProp(node, "type"));
         }
-        CDMDataType levelDataType = string2datatype(levelType);
         vector<string> dimNames(lit->second.size());
         for (size_t i = 0; i < lit->second.size(); ++i) {
             string myExtension = (lit->second.size() > 1  ? type2string(i) : "");
@@ -574,17 +578,19 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                     } else {
                         pos = offset + 2*i;
                     }
-                    //cerr  << "pos: " << pos << " lv[i]: " << lv[i] << ",i: " << i << endl;
+                    LOG4FIMEX(logger, Logger::DEBUG, "pos: " << pos << " lv[" << i << "]=" << lv[i]);
                     if (pos < pv.size()) {
                         double value;
                         if (!asimofHeader) {
-                            value = ((pos+1) < pv.size()) ? (pv.at(pos) + pv.at(pos+1))/2 : pv.at(pv.size()-1);
+                            if (pos+1 < pv.size())
+                                value = (pv[pos] + pv[pos+1])/2;
+                            else
+                                value = pv.back();
                         } else {
-                            if ((pos == 0)||(pos == 1)) {
-                                value = pv.at(pos);
-                            } else {
-                                value = (pv.at(pos) + pv.at(pos-2))/2;
-                            }
+                            if (pos < 2)
+                                value = pv[pos];
+                            else
+                                value = (pv[pos] + pv[pos-2])/2;
                         }
                         retValues.push_back(value);
                     } else {
@@ -682,8 +688,8 @@ void GribCDMReader::initAddTimeDimension()
     // get all times, unique and sorted
     {
         set<FimexTime> timesSet;
-        for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-            const FimexTime vt = getVariableValidTime(*gfmIt);
+        for (const GribFileMessage& gfm : p_->indices) {
+            const FimexTime vt = getVariableValidTime(gfm);
             if (!is_invalid_time_point(vt)) {
                 timesSet.insert(vt);
             }
