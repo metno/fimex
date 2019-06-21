@@ -129,7 +129,7 @@ ENDIF()
 IF (NOT date_INC_DIR)
   SET (DATE_3RDPARTY "third_party/date")
   IF ((NOT date_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/CMakeLists.txt"))
-    SET (date_INC_DIR "${DATE_3RDPARTY}/include")
+    SET (date_INC_DIR "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/include")
   ELSE ()
     FIND_PACKAGE(date REQUIRED)
     SET (date_LIB date_interface) # just a header file, therefore '..._interface'
