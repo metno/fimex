@@ -131,24 +131,36 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     // TODO part of the following is only necessary if the request is for a part of the vertical axis
 
     // 2) TODO this can be cached
-    SliceBuilder sbPressColumn = adaptSliceBuilder(rcdm, pressure_, sbOut);
-    const std::vector<std::string> sbPressDims = sbPressColumn.getDimensionNames();
-    for (size_t i = 0; i < sbPressDims.size(); ++i) {
-        if (sbPressDims[i] == zName)
-            sbPressColumn.setAll(zName);
-        else
-            sbPressColumn.setStartAndSize(sbPressDims[i], 0, 1);
+    SliceBuilder sbPressure = adaptSliceBuilder(rcdm, pressure_, sbOut);
+    sbPressure.setAll(zName);
+    VarFloat pressure(reader_, pressure_, sbPressure);
+    const size_t dZPressure = pressure.dims.delta(zName);
+
+    bool start_high_p;
+    {
+        ArrayDims dimsP = pressure.dims;
+        ArrayGroup groupP;
+        groupP.add(dimsP);
+        set_not_shared(zName, dimsP);
+        groupP.minimizeShared(0);
+        LOG4FIMEX(logger, Logger::DEBUG, "groupP rank=" << groupP.rank());
+        Loop loopP(groupP);
+        bool have_p_direction = false;
+        do {
+            const float p_first = pressure.values[loopP[0]];
+            const float p_last = pressure.values[loopP[0] + (n_z-1)*dZPressure];
+            LOG4FIMEX(logger, Logger::DEBUG, "p_first=" << p_first << " p_last=" << p_last);
+            if (p_first > 0 && p_last > 0) {
+                start_high_p = (p_first > p_last);
+                have_p_direction = true;
+            }
+
+        } while (!have_p_direction && loopP.next());
+        if (!have_p_direction) {
+            LOG4FIMEX(logger, Logger::ERROR, "unable to determine pressure axis direction, probably all points are undefined, giving up");
+            return DataPtr();
+        }
     }
-    DataPtr pressColumnData = pressure_->getDataSlice(sbPressColumn);
-    assert(pressColumnData->size() == n_z);
-    shared_array<float> pColumnVal = pressColumnData->asFloat();
-    const ptrdiff_t z_last = int(n_z)-1;
-    assert(z_last > 0);
-    const float p_first = pColumnVal[0];
-    const float p_last = pColumnVal[z_last];
-    assert(p_first > 0 && p_last > 0);
-    // FIXME this does not work if the column we chose has undefined values
-    const bool start_high_p = (p_first > p_last);
 
     // 3)
     int iz_step, iz_in_0, iz_out_0;
@@ -163,8 +175,8 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
         sb_z_begin = sb_out_z_start;
         sb_z_size = n_z - sb_z_begin;
         iz_step = -1;              // decreasing l => increasing altitude
-        iz_in_0 = sb_z_size - 1;   // start on surface
-        iz_out_0 = iz_in_0;
+        iz_in_0 = n_z - 1;   // start on surface
+        iz_out_0 = sb_z_size - 1;
     }
     SliceBuilder sb = sbOut;
     sb.setStartAndSize(zName, sb_z_begin, sb_z_size);
@@ -172,7 +184,6 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     VarFloat sap(reader_, surface_air_pressure_, "hPa", sb);
     VarFloat sgp(reader_, surface_geopotential_, "m^2/s^2", sb);
     VarFloat airt(reader_, air_temperature_, "K", sb);
-    VarFloat pressure(reader_, pressure_, sb);
 
     if (!sap.data || !sgp.data || !airt.data || !pressure.data) {
         LOG4FIMEX(logger, Logger::INFO, "hypsometric no data");
@@ -201,7 +212,7 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
 
     group.minimizeShared(0); // FIXME do not treat each value separately
 
-    const size_t dZPressure = pressure.dims.delta(zName), dZAirT = airt.dims.delta(zName);
+    const size_t dZAirT = airt.dims.delta(zName);
     const size_t dZSHum = siSHum.delta(zName), dZAlti = soAltitude.delta(zName);
 
     const size_t size = soAltitude.volume();
@@ -227,10 +238,8 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
             const double lt = mifi_barometric_layer_thickness(p_low_alti, p_high_alti, Tv);
             a += lt;
             // 5)
-            if (iz_out >= 0 && iz_out < sb_out_z_size) {
-                LOG4FIMEX(logger, Logger::DEBUG, "storing alti=" << a);
+            if (iz_out >= 0 && iz_out < (int)sb_out_z_size)
                 altiVal[loop[OUT_ALTITUDE] + iz_out*dZAlti] = a;
-            }
 
             p_low_alti = p_high_alti;
         }

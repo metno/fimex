@@ -40,8 +40,11 @@
 
 using namespace MetNoFimex;
 
+static const int DEBUG = 0;
+
 TEST4FIMEX_TEST_CASE(test_pressure_integrator)
 {
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const std::string fileName = pathTest("testdata_arome_vc.nc");
 
     typedef std::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
