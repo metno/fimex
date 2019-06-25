@@ -40,77 +40,159 @@
 
 using namespace MetNoFimex;
 
-static const int DEBUG = 0;
+namespace {
 
-TEST4FIMEX_TEST_CASE(test_pressure_integrator)
+const int DEBUG = 0;
+Logger_p logger = getLogger("fimex.testVLevelConverter");
+
+struct tst_t
+{
+    CDMReader_p r;
+    CoordinateSystem_cp cs;
+    VerticalTransformation_cp vt;
+};
+
+tst_t createVerticalTransformationForTest()
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    const std::string fileName = pathTest("testdata_arome_vc.nc");
 
-    typedef std::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
-    typedef std::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
+    tst_t tst;
+    tst.r = CDMFileReaderFactory::create("netcdf", pathTest("testdata_arome_vc.nc"));
+    tst.cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(tst.r), "x_wind_ml");
+    TEST4FIMEX_REQUIRE(tst.cs);
 
-    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
-    TEST4FIMEX_REQUIRE(cs);
+    tst.vt = tst.cs->getVerticalTransformation();
+    TEST4FIMEX_REQUIRE(tst.vt);
+    return tst;
+}
 
-    VerticalTransformation_cp vt = cs->getVerticalTransformation();
-    TEST4FIMEX_REQUIRE(vt);
+} // namespace
 
-    ToVLevelConverter_p pressc = vt->getConverter(reader, MIFI_VINT_PRESSURE, 0, cs);
+TEST4FIMEX_TEST_CASE(test_vlevelconverter_pressure)
+{
+    tst_t tst = createVerticalTransformationForTest();
+
+    ToVLevelConverter_p pressc = tst.vt->getConverter(tst.r, MIFI_VINT_PRESSURE, 0, tst.cs);
     TEST4FIMEX_REQUIRE(pressc);
 
     const std::vector<double> pressures = (*pressc)(1, 0, 0);
     TEST4FIMEX_REQUIRE(pressures.size() == 65);
     TEST4FIMEX_CHECK_CLOSE(10, pressures[0], 1);
     TEST4FIMEX_CHECK_CLOSE(980, pressures[64], 1);
+}
 
-    if (1) {
-        ToVLevelConverter_p altic = vt->getConverter(reader, MIFI_VINT_ALTITUDE, 0, cs);
-        TEST4FIMEX_REQUIRE(altic);
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_compat)
+{
+    tst_t tst = createVerticalTransformationForTest();
 
-        const std::vector<double> altitudes = (*altic)(1, 0, 0);
-        TEST4FIMEX_REQUIRE(altitudes.size() == 65);
-        TEST4FIMEX_CHECK_CLOSE(29910, altitudes[0], 1);
-        TEST4FIMEX_CHECK_CLOSE(23210, altitudes[1], 1);
-        TEST4FIMEX_CHECK_CLOSE(198, altitudes[63], 1);
-        TEST4FIMEX_CHECK_CLOSE(173, altitudes[64], 1);
+    ToVLevelConverter_p altic = tst.vt->getConverter(tst.r, MIFI_VINT_ALTITUDE, 0, tst.cs);
+    TEST4FIMEX_REQUIRE(altic);
+
+    const std::vector<double> altitudes = (*altic)(1, 0, 0);
+    TEST4FIMEX_REQUIRE(altitudes.size() == 65);
+    TEST4FIMEX_CHECK_CLOSE(29910, altitudes[0], 1);
+    TEST4FIMEX_CHECK_CLOSE(23210, altitudes[1], 1);
+    TEST4FIMEX_CHECK_CLOSE(198, altitudes[63], 1);
+    TEST4FIMEX_CHECK_CLOSE(173, altitudes[64], 1);
+}
+
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_shape)
+{
+    tst_t tst = createVerticalTransformationForTest();
+    VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
+
+    const std::vector<std::string> shape_ac = altivc->getShape();
+    TEST4FIMEX_REQUIRE_EQ(4, shape_ac.size());
+    TEST4FIMEX_CHECK_EQ("x", shape_ac[0]);
+    TEST4FIMEX_CHECK_EQ("y", shape_ac[1]);
+    TEST4FIMEX_CHECK_EQ("hybrid", shape_ac[2]);
+    TEST4FIMEX_CHECK_EQ("time", shape_ac[3]);
+}
+
+#if 1
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_entire_atmosphere)
+{
+    tst_t tst = createVerticalTransformationForTest();
+    VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
+
+    SliceBuilder sb = createSliceBuilder(tst.r->getCDM(), altivc);
+    sb.setStartAndSize("x", 1, 1);
+    sb.setStartAndSize("time", 0, 1);
+    sb.setAll("hybrid");
+
+    DataPtr vd = altivc->getDataSlice(sb);
+    TEST4FIMEX_REQUIRE(vd);
+    shared_array<float> va = vd->asFloat();
+    TEST4FIMEX_REQUIRE(va);
+    for (size_t i = 0; i < vd->size(); ++i) {
+        LOG4FIMEX(logger, Logger::DEBUG, "va[" << i << "]=" << va[i]);
     }
+}
+#endif
 
-    {
-        VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
-        TEST4FIMEX_REQUIRE(altivc);
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_top_of_atmosphere)
+{
+    tst_t tst = createVerticalTransformationForTest();
+    VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
 
-        const std::vector<std::string> shape_ac = altivc->getShape();
-        TEST4FIMEX_REQUIRE(4 == shape_ac.size());
-        TEST4FIMEX_CHECK_EQ("x", shape_ac[0]);
-        TEST4FIMEX_CHECK_EQ("y", shape_ac[1]);
-        TEST4FIMEX_CHECK_EQ("hybrid", shape_ac[2]);
-        TEST4FIMEX_CHECK_EQ("time", shape_ac[3]);
+    const int N = 2;
+    SliceBuilder sb = createSliceBuilder(tst.r->getCDM(), altivc);
+    sb.setStartAndSize("x", 1, 1);
+    sb.setStartAndSize("time", 0, 1);
+    sb.setStartAndSize("hybrid", 0, N);
+    DataPtr vd = altivc->getDataSlice(sb);
+    TEST4FIMEX_REQUIRE(vd);
+    TEST4FIMEX_REQUIRE_EQ(N, vd->size());
+    shared_array<float> va = vd->asFloat();
+    TEST4FIMEX_REQUIRE(va);
+    TEST4FIMEX_CHECK_CLOSE(29910, va[0], 1);
+    TEST4FIMEX_CHECK_CLOSE(23210, va[1], 1);
+}
 
-        SliceBuilder sb = createSliceBuilder(reader->getCDM(), altivc);
-        sb.setStartAndSize("x", 1, 1);
-        sb.setStartAndSize("time", 0, 1);
-        if (1) {
-            sb.setStartAndSize("hybrid", 0, 2);
-            DataPtr vd = altivc->getDataSlice(sb);
-            TEST4FIMEX_REQUIRE(vd);
-            TEST4FIMEX_REQUIRE(2 == vd->size());
-            shared_array<float> va = vd->asFloat();
-            TEST4FIMEX_REQUIRE(va);
-            TEST4FIMEX_CHECK_CLOSE(29910, va[0], 1);
-            TEST4FIMEX_CHECK_CLOSE(23210, va[1], 1);
-        }
-        if (1) {
-            sb.setStartAndSize("hybrid", 63, 2);
-            DataPtr vd = altivc->getDataSlice(sb);
-            TEST4FIMEX_REQUIRE(vd);
-            TEST4FIMEX_REQUIRE_EQ(2, vd->size());
-            shared_array<float> va = vd->asFloat();
-            TEST4FIMEX_REQUIRE(va);
-            TEST4FIMEX_CHECK_CLOSE(198, va[0], 1);
-            TEST4FIMEX_CHECK_CLOSE(173, va[1], 1);
-        }
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_mid_of_atmosphere)
+{
+    tst_t tst = createVerticalTransformationForTest();
+    VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
+
+    const int N = 7;
+    SliceBuilder sb = createSliceBuilder(tst.r->getCDM(), altivc);
+    sb.setStartAndSize("x", 1, 1);
+    sb.setStartAndSize("time", 0, 1);
+    sb.setStartAndSize("hybrid", 17, N);
+    DataPtr vd = altivc->getDataSlice(sb);
+    TEST4FIMEX_REQUIRE(vd);
+    TEST4FIMEX_REQUIRE_EQ(N, vd->size());
+    shared_array<float> va = vd->asFloat();
+    TEST4FIMEX_REQUIRE(va);
+    const float expected[N] = {7372.33, 6982.44, 6610.17, 6253.85, 5912.13, 5584.08, 5269.03};
+    for (size_t i = 0; i < N; ++i) {
+        TEST4FIMEX_CHECK_CLOSE(expected[i], va[i], 0.1);
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_pressure_integrator_bottom_of_atmosphere)
+{
+    tst_t tst = createVerticalTransformationForTest();
+    VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
+
+    const int N = 4;
+    SliceBuilder sb = createSliceBuilder(tst.r->getCDM(), altivc);
+    sb.setStartAndSize("x", 1, 1);
+    sb.setStartAndSize("time", 0, 1);
+    sb.setStartAndSize("hybrid", 65 - N, N);
+    DataPtr vd = altivc->getDataSlice(sb);
+    TEST4FIMEX_REQUIRE(vd);
+    TEST4FIMEX_REQUIRE_EQ(N, vd->size());
+    shared_array<float> va = vd->asFloat();
+    TEST4FIMEX_REQUIRE(va);
+    const float expected[N] = {247.4, 222.2, 197.7, 173.6};
+    for (size_t i = 0; i < N; ++i) {
+        TEST4FIMEX_CHECK_CLOSE(expected[i], va[i], 0.1);
     }
 }
 
@@ -119,6 +201,8 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator)
  */
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
 {
+    if (DEBUG)
+        defaultLogLevel(Logger::DEBUG);
     const std::string fileName = pathTest("testdata_arome_vc.nc");
     CDMReader_p ncreader(CDMFileReaderFactory::create("netcdf", fileName));
 

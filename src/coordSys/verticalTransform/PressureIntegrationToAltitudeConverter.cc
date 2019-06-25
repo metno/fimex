@@ -163,20 +163,20 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     }
 
     // 3)
-    int iz_step, iz_in_0, iz_out_0;
+    int iz_step, iz_p_in_0, iz_in_0, iz_out_0;
     size_t sb_z_begin, sb_z_size;
     if (start_high_p) {
         sb_z_begin = 0;
         sb_z_size = sb_out_z_end - sb_z_begin;
         iz_step = 1;               // increasing l => increasing altitude
-        iz_in_0 = 0;               // start on surface
+        iz_p_in_0 = iz_in_0 = 0;   // start on surface
         iz_out_0 = -sb_out_z_start;
     } else {
         sb_z_begin = sb_out_z_start;
         sb_z_size = n_z - sb_z_begin;
         iz_step = -1;              // decreasing l => increasing altitude
-        iz_in_0 = n_z - 1;   // start on surface
-        iz_out_0 = sb_z_size - 1;
+        iz_p_in_0 = n_z - 1;       // start on surface
+        iz_in_0 = iz_out_0 = sb_z_size - 1;
     }
     SliceBuilder sb = sbOut;
     sb.setStartAndSize(zName, sb_z_begin, sb_z_size);
@@ -226,9 +226,9 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     do { // sharedVolume() == 1 because we called minimizeShared before
         double a = sgp.values[loop[IN_SGP]] / MIFI_EARTH_GRAVITY;
         float p_low_alti = sap.values[loop[IN_SAP]];
-        int iz_in = iz_in_0, iz_out = iz_out_0;
-        for (size_t i = 0; i < sb_z_size; i += 1, iz_in += iz_step, iz_out += iz_step) {
-            const float p_high_alti = pressure.values[loop[IN_PRESSURE] + iz_in*dZPressure];
+        int iz_p_in = iz_p_in_0, iz_in = iz_in_0, iz_out = iz_out_0;
+        for (size_t i = 0; i < sb_z_size; i += 1, iz_p_in += iz_step, iz_in += iz_step, iz_out += iz_step) {
+            const float p_high_alti = pressure.values[loop[IN_PRESSURE] + iz_p_in * dZPressure];
 
             float Tv = airt.values[loop[IN_AIRT] + iz_in*dZAirT];
             if (shVal) {
