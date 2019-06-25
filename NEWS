@@ -1,4 +1,6 @@
-  * 2019-06-17 fimex-1.3.1
+  * 2019-06-25 fimex-1.3.2
+    * bugfix PressureIntegrationToAltitudeConverter
+  * 2019-06-24 fimex-1.3.1
     * bugfix PressureIntegrationToAltitudeConverter
   * 2019-06-17 fimex-1.3.0
     * bugfixes
