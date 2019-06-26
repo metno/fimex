@@ -262,17 +262,15 @@ void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxi
 void CDMExtractor::reduceDimension(const std::string& dimName, const std::set<std::size_t>& slices)
 {
     CDMDimension& dim = cdm_->getDimension(dimName);
-    std::set<std::size_t> useSlices;
     for (size_t sz : slices) {
         if (sz > dim.getLength())
             throw CDMException("can't select slice of dimension '" + dimName + "': " + type2string(sz) + " out of bounds: " + type2string(dim.getLength()));
-        useSlices.insert(sz);
     }
 
     // keep track of changes
-    dim.setLength(useSlices.size());
-    dimSlices_[dimName] = std::vector<size_t>(useSlices.begin(), useSlices.end());
-    LOG4FIMEX(logger,Logger::DEBUG, "reducing dimension '" << dimName << "' to: " << join(useSlices.begin(), useSlices.end(), ",") );
+    dim.setLength(slices.size());
+    dimSlices_[dimName] = std::vector<size_t>(slices.begin(), slices.end());
+    LOG4FIMEX(logger, Logger::DEBUG, "reducing dimension '" << dimName << "' to: " << join(slices.begin(), slices.end(), ","));
 
     // removing all data containing this dimension, just to be sure it's read from the dataReader_
     for (const CDMVariable& v : cdm_->getVariables()) {
