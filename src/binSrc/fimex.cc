@@ -416,14 +416,14 @@ CDMReader_p getCDMFileReader(const po::value_set& vm, const string& io = "input"
     exit(1);
 }
 
-int getInterpolationMethod(const po::value_set& vm, const string& key)
+int getInterpolationMethod(const po::value_set& vm, const po::option& opt)
 {
     int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-    if (po::option_cx opt = vm.find(key)) {
+    if (vm.is_set(opt)) {
         const string& m = vm.value(opt);
         method = mifi_string_to_interpolation_method(m.c_str());
         if (method == MIFI_INTERPOL_UNKNOWN) {
-            LOG4FIMEX(logger, Logger::WARN, "unknown " << key << ": " << m << " using nearestneighbor");
+            LOG4FIMEX(logger, Logger::WARN, "unknown " << opt.key() << ": " << m << " using nearestneighbor");
             method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
         }
     }
@@ -460,8 +460,8 @@ CDMReader_p getCDMProcessor(const po::value_set& vm, CDMReader_p dataReader)
         if (vm.is_set(op_process_rotateVector_x) && vm.is_set(op_process_rotateVector_y)) {
             const vector<string>& xvars = vm.values(op_process_rotateVector_x);
             const vector<string>& yvars = vm.values(op_process_rotateVector_y);
-            vector<string> stdX = getOptions<string>("process.rotateVector.stdNameX", vm);
-            vector<string> stdY = getOptions<string>("process.rotateVector.stdNameY", vm);
+            vector<string> stdX = getOptions<string>(op_process_rotateVector_stdNameX, vm);
+            vector<string> stdY = getOptions<string>(op_process_rotateVector_stdNameY, vm);
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
         } else if (vm.is_set(op_process_rotateVector_all)) {
             processor->rotateAllVectorsToLatLon(toLatLon);
@@ -494,8 +494,8 @@ CDMReader_p getCDMExtractor(const po::value_set& vm, CDMReader_p dataReader)
     std::shared_ptr<CDMExtractor> extractor(new CDMExtractor(dataReader));
     if (vm.is_set(op_extract_reduceDimension_name)) {
         vector<string> vars = vm.values(op_extract_reduceDimension_name);
-        vector<int> startPos = getOptions<int>("extract.reduceDimension.start", vm);
-        vector<int> endPos = getOptions<int>("extract.reduceDimension.end", vm);
+        vector<int> startPos = getOptions<int>(op_extract_reduceDimension_start, vm);
+        vector<int> endPos = getOptions<int>(op_extract_reduceDimension_end, vm);
         if (startPos.size() != vars.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.reduceDimension.start has different number of elements than extract.reduceDimension.name; "
                                              "use start = 0 if you don't want to reduce the start-position");
@@ -515,7 +515,7 @@ CDMReader_p getCDMExtractor(const po::value_set& vm, CDMReader_p dataReader)
     }
     if (vm.is_set(op_extract_pickDimension_name)) {
         const vector<string>& dims = vm.values(op_extract_pickDimension_name);
-        vector<string> lists = getOptions<string>("extract.pickDimension.list", vm);
+        vector<string> lists = getOptions<string>(op_extract_pickDimension_list, vm);
         if (dims.size() != lists.size()) {
             LOG4FIMEX(logger, Logger::ERROR, "extract.pickDimension.name has different number of elements than extract.pickDimension.list");
         }
@@ -710,7 +710,7 @@ CDMInterpolator_p createCDMInterpolator(const po::value_set& vm, CDMReader_p dat
 CDMReader_p getCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
     CDMInterpolator_p interpolator;
-    int method = getInterpolationMethod(vm, "interpolate.method");
+    int method = getInterpolationMethod(vm, op_interpolate_method);
 
     string proj4;
     if (getOption(op_interpolate_projString, vm, proj4)) {
@@ -829,7 +829,7 @@ CDMReader_p getCDMMerger(const po::value_set& vm, CDMReader_p dataReader)
     if (vm.is_set(op_merge_keepOuterVariables)) {
         merger->setKeepOuterVariables(true);
     }
-    int method = getInterpolationMethod(vm, "merge.method");
+    int method = getInterpolationMethod(vm, op_merge_method);
     merger->setGridInterpolationMethod(method);
 
     if (vm.is_set(op_merge_projString)) {
