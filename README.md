@@ -13,9 +13,9 @@ compilation
  * libxml2 >= 2.6.0
  * proj-4 >= 4.4.9
  * udunits2 (>= 2.1.9)
- * [https://github.com/metno/mi-cpptest](mi-cpptest)
- * [https://github.com/metno/mi-programoptions](mi-programoptions)
- * [https://github.com/HowardHinnant/date](date)
+ * [https://github.com/metno/mi-cpptest](https://github.com/metno/mi-cpptest)
+ * [https://github.com/metno/mi-programoptions](https://github.com/metno/mi-programoptions)
+ * [https://github.com/HowardHinnant/date](https://github.com/HowardHinnant/date)
 
 To configure the different file formats it requires:
 
