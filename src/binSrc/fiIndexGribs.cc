@@ -46,29 +46,36 @@
 
 namespace po = miutil::program_options;
 using namespace std;
+using namespace MetNoFimex;
 
-static void writeUsage(ostream& out, const po::option_set& options)
+namespace {
+
+static Logger_p logger = getLogger("fiIndexGribs");
+
+void writeUsage(ostream& out, const po::option_set& options)
 {
-    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME | --appendFile GRMBL_NAME] [-c] -i gribFile" << endl;
+    out << "usage: fiIndexGribs -o/--outputFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile [[-i] gribFile2 [...]]" << endl;
+    out << "  When creating, one or more input file(s) must be specified." << endl;
+    out << "usage: fiIndexGribs -a/--appendFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile" << endl;
+    out << "  When appending, exactly one input file must be specified." << endl;
     out << endl;
     options.help(out);
 }
 
-void indexGrib(const std::string& input, const std::string& append, const std::string& output, vector<string> extraKeys, string config,
-               vector<string> memberOptions)
+void initOptions(std::map<std::string, std::string>& options,
+                 std::vector<std::pair<std::string, std::regex>>& members,
+                 vector<string> extraKeys, string config, vector<string> memberOptions)
 {
-    std::map<std::string, std::string> options;
-    if (config != "") {
+    if (!config.empty()) {
         using namespace MetNoFimex;
         XMLDoc_p doc = GribCDMReader::initXMLConfig(XMLInputFile(config));
         options["earthfigure"] = GribCDMReader::getConfigEarthFigure(doc);
         extraKeys.push_back(GribCDMReader::getConfigExtraKeys(doc));
     }
-    if (extraKeys.size() > 0) {
+    if (!extraKeys.empty()) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
-    std::vector<std::pair<std::string, std::regex>> members;
-    if (memberOptions.size() > 0) {
+    if (!memberOptions.empty()) {
         vector<pair<string, string> > memberStrings;
         vector<string> files;
         MetNoFimex::parseGribArgs(memberOptions, memberStrings, files);
@@ -76,11 +83,59 @@ void indexGrib(const std::string& input, const std::string& append, const std::s
             members.push_back(make_pair(memIt->first, std::regex(memIt->second)));
         }
     }
-    MetNoFimex::GribFileIndex gfi(input, append, members, options);
-
-    std::ofstream outStream(output, std::ios::binary);
-    outStream << gfi;
 }
+
+struct GribIndexWriter {
+    GribIndexWriter(const string& output, const std::string& url);
+    ~GribIndexWriter();
+
+    std::ofstream os;
+};
+
+GribIndexWriter::GribIndexWriter(const std::string& output, const std::string& url)
+    : os(output, std::ios::binary)
+{
+    os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+    os << "<gribFileIndex url=\"" << url << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << endl;
+}
+
+GribIndexWriter::~GribIndexWriter()
+{
+    os << "</gribFileIndex>" << endl;
+}
+
+void indexGribs(const std::vector<std::string>& inputs, const std::string& output, vector<string> extraKeys, string config,
+                vector<string> memberOptions)
+{
+    std::map<std::string, std::string> options;
+    std::vector<std::pair<std::string, std::regex>> members;
+    initOptions(options, members, extraKeys, config, memberOptions);
+
+    GribIndexWriter w(output, "file:" + inputs.front());
+    for (const auto& input : inputs) {
+        LOG4FIMEX(logger, Logger::DEBUG, "Start processing '" << input << "'");
+        const GribFileIndex gfi(input, "", members, options);
+        for (const auto& gfm : gfi.listMessages())
+            w.os << gfm;
+    }
+}
+
+void indexGribAppend(const std::string& input, const std::string& append, vector<string> extraKeys, string config, vector<string> memberOptions)
+{
+    std::map<std::string, std::string> options;
+    std::vector<std::pair<std::string, std::regex>> members;
+    initOptions(options, members, extraKeys, config, memberOptions);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "Reading '" << append << "' and processing '" << input << "'");
+    const GribFileIndex gfi(input, append, members, options);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "Writing to '" << append << "'");
+    GribIndexWriter w(append, "file:" + input);
+    for (const auto& gfm : gfi.listMessages())
+        w.os << gfm;
+}
+
+} // namespace
 
 int main(int argc, char* args[])
 {
@@ -91,9 +146,9 @@ int main(int argc, char* args[])
     const po::option op_debug = po::option("debug", "debug option").set_narg(0);
     const po::option op_version = po::option("version", "program version").set_narg(0);
     const po::option op_extraKey = po::option("extraKey", "multiple extraKey to index").set_composing();
-    const po::option op_readerConfig = po::option("readerConfig", "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.");
+    const po::option op_readerConfig = po::option("readerConfig", "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.").set_shortkey("c");
     const po::option op_outputFile = po::option("outputFile", "output grbml file").set_shortkey("o");
-    const po::option op_inputFile = po::option("inputFile", "input gribFile").set_shortkey("i");
+    const po::option op_inputFile = po::option("inputFile", "input gribFile").set_shortkey("i").set_composing();
     const po::option op_input_optional = po::option("input.optional", "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs").set_composing();
     const po::option op_appendFile = po::option("appendFile", "append output new index to a grbml-file").set_shortkey("a");
 
@@ -125,16 +180,17 @@ int main(int argc, char* args[])
         cout << "fiIndexGribs version " << fimexVersion() << endl;
         return 0;
     }
-    if (!vm.is_set(op_inputFile)) {
-        cerr << "missing input file" << endl;
-        writeUsage(cout, options);
-        return 1;
-    }
-    const std::string& inputFile = vm.value(op_inputFile);
 
-    std::string outputFile = inputFile + ".grbml";
+    vector<string> inputs;
+    if (vm.is_set(op_inputFile))
+        inputs = vm.values(op_inputFile);
+    inputs.insert(inputs.end(), positional.begin(), positional.end());
+
+    std::string outputFile;
     if (vm.is_set(op_outputFile))
         outputFile = vm.value(op_outputFile);
+    else if (!inputs.empty())
+        outputFile = inputs.front() + ".grbml";
 
     vector<string> extraKeys;
     if (vm.is_set(op_extraKey)) {
@@ -150,8 +206,20 @@ int main(int argc, char* args[])
     }
     std::string appendFile;
     if (vm.is_set(op_appendFile)) {
+        if (inputs.size() != 1) {
+            cerr << "When appending, exactly one input file must be specified." << endl;
+            writeUsage(cout, options);
+            return 1;
+        }
         outputFile = appendFile = vm.value(op_appendFile);
+        indexGribAppend(inputs.front(), appendFile, extraKeys, readerConfig, members);
+    } else {
+        if (inputs.empty()) {
+            cerr << "missing input file" << endl;
+            writeUsage(cout, options);
+            return 1;
+        }
+        indexGribs(inputs, outputFile, extraKeys, readerConfig, members);
     }
-    indexGrib(inputFile, appendFile, outputFile, extraKeys, readerConfig, members);
     return 0;
 }
