@@ -50,6 +50,11 @@
 #include <libxml/xpath.h>
 
 #include "grib_api.h"
+
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#endif
+
 #include "proj_api.h"
 
 namespace MetNoFimex
