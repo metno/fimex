@@ -22,6 +22,11 @@
  */
 
 #include "fimex/interpolation.h"
+
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#endif
+
 #include "proj_api.h"
 #include <string.h>
 #include <stdio.h>
