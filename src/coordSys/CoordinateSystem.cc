@@ -93,8 +93,7 @@ CoordinateAxis_cp findTypeInAxes(CoordinateAxis::AxisType type, CoordinateAxis_c
     if (axis != axes.end()) {
         return *axis;
     }
-    // return 0/NULL Ptr
-    return CoordinateAxis_cp();
+    return nullptr;
 }
 
 void removeAxis(CoordinateAxis_cp_v& axes, const std::string& axisname)
@@ -261,7 +260,7 @@ bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
 CoordinateAxis_cp CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
 {
     CoordinateAxis_cp axis = findTypeInAxes(type, pimpl_->axes_);
-    if (axis.get() == 0) {
+    if (!axis) {
         axis = findTypeInAxes(type, pimpl_->auxiliaryAxes_);
     }
     return axis;
@@ -269,45 +268,31 @@ CoordinateAxis_cp CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type
 
 CoordinateAxis_cp CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
 {
-    for (vector<CoordinateAxis::AxisType>::const_iterator typeIt = types.begin(); typeIt != types.end(); ++typeIt) {
-        CoordinateAxis_cp axis = findAxisOfType(*typeIt);
-        if (axis.get() != 0)
+    for (const auto at : types) {
+        if (CoordinateAxis_cp axis = findAxisOfType(at))
             return axis;
     }
-    // return 0/NULL Ptr
-    return CoordinateAxis_cp();
+    return nullptr;
 }
 
 CoordinateAxis_cp CoordinateSystem::getGeoXAxis() const
 {
-    vector<CoordinateAxis::AxisType> types;
-    types.push_back(CoordinateAxis::GeoX);
-    types.push_back(CoordinateAxis::Lon);
-    return findAxisOfType(types);
+    return findAxisOfType(vector<CoordinateAxis::AxisType> {CoordinateAxis::GeoX, CoordinateAxis::Lon});
 }
 
 CoordinateAxis_cp CoordinateSystem::getGeoYAxis() const
 {
-    vector<CoordinateAxis::AxisType> types;
-    types.push_back(CoordinateAxis::GeoY);
-    types.push_back(CoordinateAxis::Lat);
-    return findAxisOfType(types);
+    return findAxisOfType(vector<CoordinateAxis::AxisType> {CoordinateAxis::GeoY, CoordinateAxis::Lat});
 }
 
 CoordinateAxis_cp CoordinateSystem::getGeoZAxis() const
 {
-    vector<CoordinateAxis::AxisType> types;
-    types.push_back(CoordinateAxis::GeoZ);
-    types.push_back(CoordinateAxis::Height);
-    types.push_back(CoordinateAxis::Depth);
-    types.push_back(CoordinateAxis::Pressure);
-    return findAxisOfType(types);
+    return findAxisOfType(vector<CoordinateAxis::AxisType> {CoordinateAxis::GeoZ, CoordinateAxis::Height,CoordinateAxis::Depth,CoordinateAxis::Pressure});
 }
 
 CoordinateAxis_cp CoordinateSystem::getTimeAxis() const
 {
-    vector<CoordinateAxis::AxisType> types(1, CoordinateAxis::Time);
-    return findAxisOfType(types);
+    return findAxisOfType(vector<CoordinateAxis::AxisType> {CoordinateAxis::Time});
 }
 
 CoordinateAxis_cp_v CoordinateSystem::getAxes() const
@@ -381,12 +366,12 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
     CoordSysMap coordSysMap;
     CoordinateSystem_cp_v coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
-    for (CoordinateSystem_cp_v::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
-        if (((!withProjection) || ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection())) &&
-              (withProjection || ((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
-            coordSysMap[(*cs)->horizontalId()] = *cs;
+    for (CoordinateSystem_cp cs : coordSys) {
+        if (((!withProjection) || (cs->isSimpleSpatialGridded() && cs->hasProjection())) &&
+              (withProjection || (cs->hasAxisType(CoordinateAxis::Lat) && cs->hasAxisType(CoordinateAxis::Lon)))) {
+            coordSysMap[cs->horizontalId()] = cs;
         } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "CS dropped: simpleSpatialGrid="<<(*cs)->isSimpleSpatialGridded() << " projection=" << (*cs)->hasProjection() << " lon="<<(*cs)->hasAxisType(CoordinateAxis::Lon)<< " lat="<<(*cs)->hasAxisType(CoordinateAxis::Lat));
+            LOG4FIMEX(logger, Logger::DEBUG, "CS dropped: simpleSpatialGrid="<< cs->isSimpleSpatialGridded() << " projection=" << cs->hasProjection() << " lon="<< cs->hasAxisType(CoordinateAxis::Lon)<< " lat="<<cs->hasAxisType(CoordinateAxis::Lat));
         }
     }
     if (coordSysMap.empty()) {
@@ -408,25 +393,25 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
     // but which share geographical-dimensions (x,y,lon,lat) with the system
     for (CoordSysMap::iterator csmi = coordSysMap.begin(); csmi != coordSysMap.end(); ++csmi){
         set<std::string> geoDimensions;
-        vector<string>  xShape = cdm.getVariable(csmi->second->getGeoXAxis()->getName()).getShape();
-        vector<string>  yShape = cdm.getVariable(csmi->second->getGeoYAxis()->getName()).getShape();
+        const vector<string>& xShape = cdm.getVariable(csmi->second->getGeoXAxis()->getName()).getShape();
+        const vector<string>& yShape = cdm.getVariable(csmi->second->getGeoYAxis()->getName()).getShape();
         geoDimensions.insert(xShape.begin(), xShape.end());
         geoDimensions.insert(yShape.begin(), yShape.end());
         CDM::VarVec vars = cdm.getVariables();
         CoordinateAxis_cp_v axes = csmi->second->getAxes();
-        for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-            if ((axes.end() == find_if(axes.begin(), axes.end(), CDMNameEqualPtr(v->getName()))) &&
-                (variables.end() == variables.find(v->getName()))) {
+        for (CDMVariable&  v : vars) {
+            if ((axes.end() == find_if(axes.begin(), axes.end(), CDMNameEqualPtr(v.getName()))) &&
+                (variables.end() == variables.find(v.getName()))) {
                 // v is not an axis
                 // v is not a projectionVariable
-                vector<string> vShape = cdm.getVariable(v->getName()).getShape();
+                vector<string> vShape = cdm.getVariable(v.getName()).getShape();
                 sort(vShape.begin(), vShape.end());
                 vector<string> intersect;
                 set_intersection(geoDimensions.begin(), geoDimensions.end(),
                                  vShape.begin(), vShape.end(),
                                  back_inserter(intersect));
-                if (intersect.size() > 0) {
-                    incompatibleVariables.push_back(v->getName());
+                if (!intersect.empty()) {
+                    incompatibleVariables.push_back(v.getName());
                 }
             }
         }
@@ -457,11 +442,11 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
             }
         }
 
-        LOG4FIMEX(logger, Logger::DEBUG, "interpolator of cs " << *cs);
+        LOG4FIMEX(logger, Logger::DEBUG, "found cs " << *cs);
         systems[csmi->first] = cs;
     }
-    for (CoordSysMap::iterator csIt = systems.begin(); csIt != systems.end(); ++csIt) {
-        assert(csIt->second.get() != 0);
+    for (const auto csys : systems) {
+        assert(csys.second != nullptr);
     }
     return systems.size();
 }

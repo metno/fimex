@@ -98,7 +98,7 @@ CDMBorderSmoothing_LinearFactory::CDMBorderSmoothing_LinearFactory(size_t transi
 
 CDMBorderSmoothing::Smoothing_p CDMBorderSmoothing_LinearFactory::operator()(const std::string& /*varName*/)
 {
-    return CDMBorderSmoothing::Smoothing_p(new CDMBorderSmoothing_Linear(transitionWidth_, borderWidth_));
+    return std::make_shared<CDMBorderSmoothing_Linear>(transitionWidth_, borderWidth_);
 }
 
 } // namespace MetNoFimex

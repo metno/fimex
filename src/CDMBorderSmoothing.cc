@@ -70,7 +70,7 @@ CDMBorderSmoothing::CDMBorderSmoothing(CDMReader_p inner, CDMReader_p outer, int
     p->readerO = outer;
 
     p->useOuterIfInnerUndefined = true;
-    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactory_p(new CDMBorderSmoothing_LinearFactory());
+    p->smoothingFactory = std::make_shared<CDMBorderSmoothing_LinearFactory>();
     p->gridInterpolationMethod = grim;
 
     *cdm_ = p->makeCDM();

@@ -740,51 +740,45 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
 Projection_cp CDM::getProjectionOf(std::string varName) const
 {
     enhance(pimpl_.get(), *this);
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
-    if (cs.get() == 0) {
-        return Projection_cp();
-    }
-    return cs->getProjection();
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName))
+        return cs->getProjection();
+    return nullptr;
 }
 
 std::string CDM::getHorizontalXAxis(std::string varName) const
 {
     enhance(pimpl_.get(), *this);
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
-    if (cs.get() == 0) {
-        return "";
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName)) {
+        if (CoordinateAxis_cp axis = cs->getGeoXAxis())
+            return axis->getName();
     }
-    CoordinateAxis_cp axis = cs->getGeoXAxis();
-    return (axis.get() == 0) ? "" : axis->getName();
+    return std::string();
 }
 
 std::string CDM::getHorizontalYAxis(std::string varName) const
 {
     enhance(pimpl_.get(), *this);
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
-    if (cs.get() == 0) {
-        return "";
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName)) {
+        if (CoordinateAxis_cp axis = cs->getGeoYAxis())
+            return axis->getName();
     }
-    CoordinateAxis_cp axis = cs->getGeoYAxis();
-    return (axis.get() == 0) ? "" : axis->getName();
+    return std::string();
 }
 
 bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::string& longitude) const
 {
     enhance(pimpl_.get(), *this);
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
-    if (cs.get() == 0) {
-        return false;
-    }
-    CoordinateAxis_cp latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
-    CoordinateAxis_cp lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
-    if (latAxis.get() != 0 && lonAxis.get() != 0) {
-        latitude = latAxis->getName();
-        longitude = lonAxis->getName();
-        return true;
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName)) {
+        CoordinateAxis_cp latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
+        CoordinateAxis_cp lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
+        if (latAxis && lonAxis) {
+            latitude = latAxis->getName();
+            longitude = lonAxis->getName();
+            return true;
+        }
     }
     return false;
 }
@@ -796,20 +790,18 @@ std::string CDM::getTimeAxis(std::string varName) const
     const CoordinateSystem_cp_v& csList = pimpl_->coordSystems;
 
     // check if variable is its own axis (coord-axis don't have coordinate system)
-    for (CoordinateSystem_cp_v::const_iterator csIt = csList.begin(); csIt != csList.end(); ++csIt) {
-        CoordinateAxis_cp timeAxis = (*csIt)->getTimeAxis();
-        if (timeAxis.get() != 0 && timeAxis->getName() == varName) {
-            return varName;
-        }
+    for (CoordinateSystem_cp cs : csList) {
+        if (CoordinateAxis_cp timeAxis = cs->getTimeAxis())
+            if (timeAxis->getName() == varName)
+                return varName;
     }
 
     // search for coordinate system for varName
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(csList, varName);
-    if (cs.get() == 0) {
-        return "";
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(csList, varName)) {
+        if (CoordinateAxis_cp axis = cs->getTimeAxis())
+            return axis->getName();
     }
-    CoordinateAxis_cp axis = cs->getTimeAxis();
-    return (axis.get() == 0) ? "" : axis->getName();
+    return std::string();
 }
 
 std::string CDM::getVerticalAxis(std::string varName) const
@@ -819,19 +811,17 @@ std::string CDM::getVerticalAxis(std::string varName) const
     const CoordinateSystem_cp_v& csList = pimpl_->coordSystems;
 
     // check if variable is its own axis (coord-axis don't have coordinate system)
-    for (CoordinateSystem_cp_v::const_iterator csIt = csList.begin(); csIt != csList.end(); ++csIt) {
-        CoordinateAxis_cp vAxis = (*csIt)->getGeoZAxis();
-        if (vAxis.get() != 0 && vAxis->getName() == varName) {
-            return varName;
-        }
+    for (CoordinateSystem_cp cs : csList) {
+        if (CoordinateAxis_cp vAxis = cs->getGeoZAxis())
+            if (vAxis->getName() == varName)
+                return varName;
     }
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(csList, varName);
-    if (cs.get() == 0) {
-        return "";
+    if (CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(csList, varName)) {
+        if (CoordinateAxis_cp axis = cs->getGeoZAxis())
+            return axis->getName();
     }
-    CoordinateAxis_cp axis = cs->getGeoZAxis();
-    return (axis.get() == 0) ? "" : axis->getName();
+    return std::string();
 }
 
 }
