@@ -45,6 +45,7 @@
 #include "fimex/coordSys/OrthographicProjection.h"
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
+#include "fimex/coordSys/SinusoidalProjection.h"
 #include "fimex/coordSys/StereographicProjection.h"
 #include "fimex/coordSys/TransverseMercatorProjection.h"
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
@@ -61,7 +62,6 @@ bool Projection::operator==(const  Projection& b) const
 {
     return toString() == b.toString();
 }
-
 
 std::ostream& operator<<(std::ostream& out, const Projection& proj)
 {
@@ -159,6 +159,8 @@ Projection_p Projection::create(const std::vector<CDMAttribute>& attrs)
             proj = std::make_shared<PolarStereographicProjection>();
         } else if (projName == "rotated_latitude_longitude") {
             proj = std::make_shared<RotatedLatitudeLongitudeProjection>();
+        } else if (projName == "sinusoidal") {
+            proj = std::make_shared<SinusoidalProjection>();
         } else if (projName == "stereographic") {
             proj = std::make_shared<StereographicProjection>();
         } else if (projName == "transverse_mercator") {
@@ -202,6 +204,8 @@ Projection_p Projection::createByProj4(const std::string& projStr)
         attrs = PolarStereographicProjection::parametersFromProj4(projStr);
     } else if (RotatedLatitudeLongitudeProjection::acceptsProj4(projStr)) {
         attrs = RotatedLatitudeLongitudeProjection::parametersFromProj4(projStr);
+    } else if (SinusoidalProjection::acceptsProj4(projStr)) {
+        attrs = SinusoidalProjection::parametersFromProj4(projStr);
     } else if (StereographicProjection::acceptsProj4(projStr)) {
         attrs = StereographicProjection::parametersFromProj4(projStr);
     } else if (TransverseMercatorProjection::acceptsProj4(projStr)) {

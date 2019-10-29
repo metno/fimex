@@ -199,6 +199,8 @@ SET(libfimex_SOURCES
   coordSys/RotatedLatitudeLongitudeProjection.cc
   ${INCF}/coordSys/RotatedLatitudeLongitudeProjection.h
   coordSys/StereographicProjection.cc
+  ${INCF}/coordSys/SinusoidalProjection.h
+  coordSys/SinusoidalProjection.cc
   ${INCF}/coordSys/StereographicProjection.h
   coordSys/TransverseMercatorProjection.cc
   ${INCF}/coordSys/TransverseMercatorProjection.h

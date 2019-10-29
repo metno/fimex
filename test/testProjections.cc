@@ -78,6 +78,19 @@ TEST4FIMEX_TEST_CASE(test_projection_geostationary)
     TEST4FIMEX_CHECK_EQ(projs2_geos->getName(), "geostationary");
 }
 
+TEST4FIMEX_TEST_CASE(test_projection_sinusoidal)
+{
+    const string proj4 = "+proj=sinu +lon_0=0 ";
+    Projection_p proj = Projection::createByProj4(proj4);
+    TEST4FIMEX_CHECK_EQ(proj->getName(), "sinusoidal");
+    TEST4FIMEX_CHECK_EQ(proj->isDegree(), false);
+
+    std::vector<CDMAttribute> proj_attrs = proj->getParameters();
+    // generate another projection
+    Projection_p proj2 = Projection::create(proj_attrs);
+    TEST4FIMEX_CHECK_EQ(proj2->getName(), proj->getName());
+}
+
 // TODO: test other projections
 
 TEST4FIMEX_TEST_CASE(test_conversion)
