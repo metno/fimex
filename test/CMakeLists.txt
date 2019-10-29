@@ -4,12 +4,17 @@ LINK_DIRECTORIES(${PC_LIBRARY_DIRS}
 )
 
 IF (NOT TEST_EXTRADATA_DIR)
-  SET (TEST_EXTRADATA_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  SET (TEST_EXTRADATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fimex-test-data)
 ENDIF ()
 MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
-IF (NOT (EXISTS "${TEST_EXTRADATA_DIR}/flth00.dat"))
-  MESSAGE (STATUS "No extra data for tests in '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
+IF (EXISTS "${TEST_EXTRADATA_DIR}/VERSION")
+  FILE (STRINGS "${TEST_EXTRADATA_DIR}/VERSION" TEST_EXTRADATA_VERSION)
+  IF ("${TEST_EXTRADATA_VERSION}" STRLESS "20191024T1600")
+    MESSAGE (WARNING "Unxpected test data version '${TEST_EXTRADATA_VERSION}' in '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
+  ENDIF ()
+ELSE ()
+  MESSAGE (WARNING "No extra test data seem to be present '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
 ENDIF ()
 
 SET(CC_TESTS
@@ -82,6 +87,7 @@ IF(ENABLE_NETCDF)
     ${NETCDF_MI_SH_TESTS}
     testCharNc.sh
     testInterpolatorFill.sh
+    testInterpolatorLonLat2D.sh
     testInterpolation2DataFillValue.sh
     testPrintSize.sh
     testVerticalInterpolatorPressureToPressure.sh
