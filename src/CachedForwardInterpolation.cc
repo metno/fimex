@@ -1,7 +1,7 @@
 /*
  * Fimex, ForwardInterpolation.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -136,7 +136,7 @@ CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimNa
 {
     const size_t outLayerSize = outX * outY;
     pointsInIn = shared_array<vector<size_t>>(new vector<size_t>[outLayerSize]);
-    size_t minInX = inX, maxInX = 0, minInY = inY, maxInY = 0;
+    size_t minInX = 0, maxInX = 0, minInY = 0, maxInY = 0;
     maxPointsInIn = 0;
     const RoundAndClamp roundX(0, outX - 1, INVALID);
     const RoundAndClamp roundY(0, outY - 1, INVALID);
@@ -145,12 +145,16 @@ CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimNa
             const size_t i = iy * inX + ix;
             const size_t px = roundX(pOnX[i]), py = roundY(pOnY[i]);
             if (px != INVALID && py != INVALID) {
+                if (maxPointsInIn == 0) {
+                    minInX = maxInX = ix;
+                    minInY = maxInY = iy;
+                } else {
+                    minimaximize(minInY, maxInY, iy);
+                    minimaximize(minInX, maxInX, ix);
+                }
                 std::vector<size_t>& pi = pointsInIn[py * outX + px];
-                minimaximize(minInY, maxInY, iy);
-                minimaximize(minInX, maxInX, ix);
                 pi.push_back(i);
-                if (pi.size() > maxPointsInIn)
-                    maxPointsInIn = pi.size();
+                maximize(maxPointsInIn, pi.size());
             }
         }
     }
