@@ -495,7 +495,7 @@ static double defaultFillValue_(CDMDataType dt)
 double CDM::getFillValue(const std::string& varName) const
 {
     CDMAttribute attr;
-    if (getAttribute(varName, "_FillValue", attr)) {
+    if (getAttribute(varName, "_FillValue", attr) || getAttribute(varName, "missing_value", attr)) {
         CDMVariable var = getVariable(varName);
         if (var.getDataType() != attr.getDataType())
             throw CDMException("variable '" + varName + "' has type " + datatype2string(var.getDataType())
