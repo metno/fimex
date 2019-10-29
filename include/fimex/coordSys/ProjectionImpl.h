@@ -1,7 +1,7 @@
 /*
  * Fimex, ProjectionImpl.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -32,8 +32,7 @@
  * @headerfile "fimex/coordSys/ProjectionImpl.h"
  */
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * ProjectionImpl is a next to complete implementation of
@@ -52,8 +51,10 @@ public:
     virtual void addParameter(CDMAttribute attribute);
     virtual void addParameters(std::vector<CDMAttribute> attributes);
     virtual void removeParameter(std::string paramName);
+
     /** get the projection name */
     virtual const std::string& getName() const;
+
     virtual bool isDegree() const;
 
     /**
@@ -64,28 +65,35 @@ public:
      * method
      */
     virtual std::string getProj4String() const;
+
     /**
      * get the parts of the proj4 string defining the earth.
      */
     virtual std::string getProj4EarthString() const;
+
     /** get a string representation */
     virtual std::string toString() const;
+
 protected:
     /** match the +proj= part of a proj4 string */
     static bool proj4ProjectionMatchesName(const std::string& proj4String, const std::string& name);
+
     /**
      * add the attributes describing the earth from a proj4-string to the outAttrs
      * @param proj4String string as used for proj4
      * @param attrList output list of CDMAttributes
      */
     static void proj4GetEarthAttributes(const std::string& proj4String, std::vector<CDMAttribute>& attrList);
+
     // set the name of the projection and assign the isDegree parameter
     explicit ProjectionImpl(std::string name, bool isDegree);
+
     /**
      * add the pure projection parameters for proj4 to the stream, i.e. no earth
      * definitions, and no +no_defs
      */
     virtual std::ostream& getProj4ProjectionPart(std::ostream&) const = 0;
+
     /**
      * Add the numeric value of a parameter named name as replaceName to oproj, e.g. name = false_easting, replaceName = +x_0, sets "+x_0=... "
      * Assume only one value at maximum
@@ -94,13 +102,15 @@ protected:
      * @param replaceName the name to use in the stream to the parameter, defaults to original name ("")
      * @return true if parameter found and set
      */
-    bool addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName = "") const;
+    bool addParameterToStream(std::ostream& outStream, const std::string& name, const std::string& replaceName = std::string()) const;
+
     std::vector<CDMAttribute> params_;
+
 private:
     const std::string name_;
     const bool isDegree_;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* PROJECTIONIMPL_H_ */

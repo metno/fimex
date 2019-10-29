@@ -1,7 +1,7 @@
 /*
  * Fimex, testProjections.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,12 +25,12 @@
  */
 
 #include "testinghelpers.h"
+
+#include "fimex/MathUtils.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
 #include <algorithm>
-
-#include <proj_api.h>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -99,8 +99,8 @@ TEST4FIMEX_TEST_CASE(test_conversion)
     std::vector<double> lonVals(xVals.begin(), xVals.end());
     std::vector<double> latVals(yVals.begin(), yVals.end());
     mifi_project_values(proj4stere.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
-    std::transform(lonVals.begin(), lonVals.end(), lonVals.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
-    std::transform(latVals.begin(), latVals.end(), latVals.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+    transform_rad_to_deg(lonVals);
+    transform_rad_to_deg(latVals);
 
     // calculate the values with projection
     std::vector<double> lonValsConv(xVals.begin(), xVals.end());
@@ -125,7 +125,7 @@ TEST4FIMEX_TEST_CASE(test_conversion)
 TEST4FIMEX_TEST_CASE(test_conversion_oblique_mercator)
 {
     string proj4omerc="+proj=omerc +lonc=5.34065 +lat_0=60.742 +alpha=19.0198 +no_rot   +a=6.37814e+06  +b=6.35675e+06 +no_defs +x_0=-3.86098e+06 +y_0=1.5594e+06";
-    Projection_p projom = Projection::createByProj4(proj4omerc);
+    Projection_p proj = Projection::createByProj4(proj4omerc);
 
     std::vector<double> xVals;
     std::vector<double> yVals;
@@ -138,36 +138,36 @@ TEST4FIMEX_TEST_CASE(test_conversion_oblique_mercator)
     }
 
     // create the expected values
-    std::vector<double> lonVals_omerc(xVals.begin(), xVals.end());
-    std::vector<double> latVals_omerc(yVals.begin(), yVals.end());
-    mifi_project_values(proj4omerc.c_str(), projLonLat.c_str(), &lonVals_omerc[0], &latVals_omerc[0], lonVals_omerc.size());
-    std::transform(lonVals_omerc.begin(), lonVals_omerc.end(), lonVals_omerc.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
-    std::transform(latVals_omerc.begin(), latVals_omerc.end(), latVals_omerc.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+    std::vector<double> lonVals(xVals.begin(), xVals.end());
+    std::vector<double> latVals(yVals.begin(), yVals.end());
+    mifi_project_values(proj4omerc.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
+    transform_rad_to_deg(lonVals);
+    transform_rad_to_deg(latVals);
 
     // calculate the values with projection
-    std::vector<double> lonValsConv_omerc(xVals.begin(), xVals.end());
-    std::vector<double> latValsConv_omerc(yVals.begin(), yVals.end());
+    std::vector<double> lonValsConv(xVals.begin(), xVals.end());
+    std::vector<double> latValsConv(yVals.begin(), yVals.end());
 
-    projom->convertToLonLat(lonValsConv_omerc, latValsConv_omerc);
+    proj->convertToLonLat(lonValsConv, latValsConv);
 
-    for (size_t i = 0; i < lonValsConv_omerc.size(); ++i) {
-        TEST4FIMEX_CHECK((latValsConv_omerc[i] <= 90.001) && (latValsConv_omerc[i] >= -90.001));
-        TEST4FIMEX_CHECK((lonValsConv_omerc[i] <= 180.001) && (lonValsConv_omerc[i] >= -180.001));
-        TEST4FIMEX_CHECK(fabs(lonValsConv_omerc[i] - lonVals_omerc[i]) < 1e-5);
-        TEST4FIMEX_CHECK(fabs(latValsConv_omerc[i] - latVals_omerc[i]) < 1e-5);
+    for (size_t i = 0; i < lonValsConv.size(); ++i) {
+        TEST4FIMEX_CHECK((latValsConv[i] <= 90.001) && (latValsConv[i] >= -90.001));
+        TEST4FIMEX_CHECK((lonValsConv[i] <= 180.001) && (lonValsConv[i] >= -180.001));
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - lonVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - latVals[i]) < 1e-5);
     }
 
-    projom->convertFromLonLat(lonValsConv_omerc, latValsConv_omerc);
-    for (size_t i = 0; i < lonValsConv_omerc.size(); ++i) {
-        TEST4FIMEX_CHECK(fabs(lonValsConv_omerc[i] - xVals[i]) < 1e-5);
-        TEST4FIMEX_CHECK(fabs(latValsConv_omerc[i] - yVals[i]) < 1e-5);
+    proj->convertFromLonLat(lonValsConv, latValsConv);
+    for (size_t i = 0; i < lonValsConv.size(); ++i) {
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - xVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - yVals[i]) < 1e-5);
     }
 }
 
 TEST4FIMEX_TEST_CASE(test_conversion_geostationary)
 {
     string proj4geos="+proj=geos +lon_0=0 +h=3.57858e+07  +a=6.37817e+06  +b=6.35658e+06 +no_defs +x_0=-2.2098e+06 +y_0=-3.50297e+06";
-    Projection_p projs_geos = Projection::createByProj4(proj4geos);
+    Projection_p proj = Projection::createByProj4(proj4geos);
 
     std::vector<double> xVals;
     std::vector<double> yVals;
@@ -180,28 +180,28 @@ TEST4FIMEX_TEST_CASE(test_conversion_geostationary)
     }
 
     // create the expected values
-    std::vector<double> lonVals_geos(xVals.begin(), xVals.end());
-    std::vector<double> latVals_geos(yVals.begin(), yVals.end());
-    mifi_project_values(proj4geos.c_str(), projLonLat.c_str(), &lonVals_geos[0], &latVals_geos[0], lonVals_geos.size());
-    std::transform(lonVals_geos.begin(), lonVals_geos.end(), lonVals_geos.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
-    std::transform(latVals_geos.begin(), latVals_geos.end(), latVals_geos.begin(), std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+    std::vector<double> lonVals(xVals.begin(), xVals.end());
+    std::vector<double> latVals(yVals.begin(), yVals.end());
+    mifi_project_values(proj4geos.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
+    transform_rad_to_deg(lonVals);
+    transform_rad_to_deg(latVals);
 
     // calculate the values with projection
-    std::vector<double> lonValsConv_geos(xVals.begin(), xVals.end());
-    std::vector<double> latValsConv_geos(yVals.begin(), yVals.end());
+    std::vector<double> lonValsConv(xVals.begin(), xVals.end());
+    std::vector<double> latValsConv(yVals.begin(), yVals.end());
 
-    projs_geos->convertToLonLat(lonValsConv_geos, latValsConv_geos);
+    proj->convertToLonLat(lonValsConv, latValsConv);
 
-    for (size_t i = 0; i < lonValsConv_geos.size(); ++i) {
-        TEST4FIMEX_CHECK((latValsConv_geos[i] <= 90.001) && (latValsConv_geos[i] >= -90.001));
-        TEST4FIMEX_CHECK((lonValsConv_geos[i] <= 180.001) && (lonValsConv_geos[i] >= -180.001));
-        TEST4FIMEX_CHECK(fabs(lonValsConv_geos[i] - lonVals_geos[i]) < 1e-5);
-        TEST4FIMEX_CHECK(fabs(latValsConv_geos[i] - latVals_geos[i]) < 1e-5);
+    for (size_t i = 0; i < lonValsConv.size(); ++i) {
+        TEST4FIMEX_CHECK((latValsConv[i] <= 90.001) && (latValsConv[i] >= -90.001));
+        TEST4FIMEX_CHECK((lonValsConv[i] <= 180.001) && (lonValsConv[i] >= -180.001));
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - lonVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - latVals[i]) < 1e-5);
     }
 
-    projs_geos->convertFromLonLat(lonValsConv_geos, latValsConv_geos);
-    for (size_t i = 0; i < lonValsConv_geos.size(); ++i) {
-        TEST4FIMEX_CHECK(fabs(lonValsConv_geos[i] - xVals[i]) < 1e-5);
-        TEST4FIMEX_CHECK(fabs(latValsConv_geos[i] - yVals[i]) < 1e-5);
+    proj->convertFromLonLat(lonValsConv, latValsConv);
+    for (size_t i = 0; i < lonValsConv.size(); ++i) {
+        TEST4FIMEX_CHECK(fabs(lonValsConv[i] - xVals[i]) < 1e-5);
+        TEST4FIMEX_CHECK(fabs(latValsConv[i] - yVals[i]) < 1e-5);
     }
 }

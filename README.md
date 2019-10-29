@@ -11,7 +11,7 @@ compilation
 
  * c99/c++11 compiler
  * libxml2 >= 2.6.0
- * proj-4 >= 4.4.9
+ * proj >= 4.4.9 and < 5.0.0 or >= 6.0.0 -- version 5 does not seem to work
  * udunits2 (>= 2.1.9)
  * [github.com/metno/mi-cpptest](https://github.com/metno/mi-cpptest)
  * [github.com/metno/mi-programoptions](https://github.com/metno/mi-programoptions)

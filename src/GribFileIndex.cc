@@ -36,6 +36,7 @@
 #include "fimex/TimeUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLUtils.h"
+#include "fimex/interpolation.h"
 
 #include <date/date.h>
 
@@ -50,7 +51,6 @@
 #include <libxml/xpath.h>
 
 #include "grib_api.h"
-#include "proj_api.h"
 
 namespace MetNoFimex
 {
@@ -64,37 +64,12 @@ static Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
  */
 static std::string earthFigure_ = "";
 
-/**
- * converts a point on earth to a projection plane
- * @param projStr projection definition for proj4
- * @param lon longitude in degree
- * @param lat latitude in degree
- * @param x output of proj (usually m, but dependent on projStr)
- * @param y output of proj
- * @throws runtime_error on proj-failure
- */
 static void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
 {
-    projPJ outputPJ;
-    if ( !(outputPJ = pj_init_plus(projStr.c_str())) ) {
-        std::string errorMsg(pj_strerrno(pj_errno));
-        throw std::runtime_error("Proj error: " + errorMsg);
-    }
-
-    projUV uv;
-    uv.u = lon * DEG_TO_RAD;
-    uv.v = lat * DEG_TO_RAD;
-
-    uv = pj_fwd(uv, outputPJ);
-    pj_free(outputPJ);
-
-    if (uv.u == HUGE_VAL) {
-        std::ostringstream errMsg;
-        errMsg <<  "projection fails:" << projStr << " (lon,lat)=(" << lon << "," << lat << ")";
-        throw std::runtime_error(errMsg.str());
-    }
-    x = uv.u;
-    y = uv.v;
+    if (mifi_reproject_point_from_lonlat(projStr.c_str(), &lon, &lat) != MIFI_OK)
+        throw std::runtime_error("point reprojection error");
+    x = lon;
+    y = lat;
 }
 
 std::string getEarthsOblateFigure(std::shared_ptr<grib_handle> gh, long factorToM)

@@ -22,6 +22,11 @@
  */
 
 #include "fimex/interpolation.h"
+
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#endif
+
 #include "proj_api.h"
 #include <string.h>
 #include <stdio.h>
@@ -236,9 +241,14 @@ static void convertAxis(const double* orgAxis, const int num, const int type, do
 {
     switch (type) {
         case MIFI_LONGITUDE:
-        case MIFI_LATITUDE: for (int i = 0; i < num; i++) *outAxis++ = DEG_TO_RAD * *orgAxis++; break;
+        case MIFI_LATITUDE:
+            for (int i = 0; i < num; i++)
+                *outAxis++ = DEG_TO_RAD * *orgAxis++;
+            break;
         case MIFI_PROJ_AXIS:
-        default: memcpy(outAxis, orgAxis, num * sizeof(double)); break;
+        default:
+            memcpy(outAxis, orgAxis, num * sizeof(double));
+            break;
     }
 }
 
@@ -872,6 +882,28 @@ int mifi_vector_reproject_values_f(int method,
     errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix, u_out, v_out, ox, oy, oz);
     free(matrix);
     return errcode;
+}
+
+int mifi_reproject_point_from_lonlat(const char* proj_output, double* lon_x, double* lat_y)
+{
+    projPJ outputPJ;
+    if (!(outputPJ = pj_init_plus(proj_output))) {
+        return MIFI_ERROR;
+    }
+
+    projUV uv;
+    uv.u = *lon_x * DEG_TO_RAD;
+    uv.v = *lat_y * DEG_TO_RAD;
+
+    uv = pj_fwd(uv, outputPJ);
+    pj_free(outputPJ);
+
+    if (uv.u == HUGE_VAL) {
+        return MIFI_ERROR;
+    }
+    *lon_x = uv.u;
+    *lat_y = uv.v;
+    return MIFI_OK;
 }
 
 static int mifi_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)

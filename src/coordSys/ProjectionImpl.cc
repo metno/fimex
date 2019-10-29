@@ -1,7 +1,7 @@
 /*
  * Fimex, ProjectionImpl.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -39,8 +39,7 @@
 #include <regex>
 #include <sstream>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 
@@ -115,7 +114,6 @@ bool ProjectionImpl::isDegree() const
     return isDegree_;
 }
 
-
 std::string ProjectionImpl::getProj4String() const
 {
     // check for proj4 parameter
@@ -172,18 +170,17 @@ struct MaxPrecisionFormatter {
 
 } // namespace
 
-bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName) const
+bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::string& name, const std::string& replaceName) const
 {
     std::vector<CDMAttribute>::const_iterator found = std::find_if(params_.begin(), params_.end(), CDMNameEqual(name));
     if (found != params_.end()) {
-        if (replaceName == "") replaceName = name;
+        const std::string& nm = replaceName.empty() ? name : replaceName;
         if (found->getDataType() == CDM_STRING) {
-            outStream << replaceName << found->getStringValue();
+            outStream << nm << found->getStringValue();
             return true;
         } else if (found->getData()->size() > 0) {
             shared_array<double> d = found->getData()->asDouble();
-            outStream << replaceName << join_formatted(&d[0], &d[0]+found->getData()->size(),
-                    MaxPrecisionFormatter<double>(), ",");
+            outStream << nm << join_formatted(&d[0], &d[0] + found->getData()->size(), MaxPrecisionFormatter<double>(), ",");
             return true;
         }
     }
@@ -308,4 +305,4 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
     }
 }
 
-}
+} // namespace MetNoFimex

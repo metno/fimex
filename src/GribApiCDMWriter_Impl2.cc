@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/String2Type.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
@@ -34,8 +35,6 @@
 #include <libxml/xpath.h>
 
 #include <grib_api.h>
-
-#include <proj_api.h>
 
 #include <cassert>
 #include <cmath>
@@ -126,7 +125,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
                     double scale = ait->getData()->asDouble()[0];
                     double x = 2*scale - 1;
                     if (x <= 1 || x >= -1) {
-                        latitudeWhereDxAndDyAreSpecifiedInDegrees = RAD_TO_DEG * asin(2*scale - 1);
+                        latitudeWhereDxAndDyAreSpecifiedInDegrees = rad_to_deg(asin(2 * scale - 1));
                     } else {
                         throw CDMException("scale_factor_at_projection_origin not defined properly: abs(2*scale-1) >= 1: " + type2string(x));
                     }

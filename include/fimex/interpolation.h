@@ -127,6 +127,16 @@ extern int mifi_vector_reproject_values_f(int method,
                         const double* out_x_axis, const double* out_y_axis,
                         int out_x_axis_type, int out_y_axis_type,
                         int ox, int oy, int oz);
+
+/**
+ * converts a point on earth to a projection plane
+ * @param projStr projection definition for proj4
+ * @param lon_x longitude in degree on input, x projection coordinate on output
+ * @param lat latitude in degree on input, y projection coordinate on output
+ * @return MIFI_OK or MIFI_ERROR
+ */
+extern int mifi_reproject_point_from_lonlat(const char* proj_output, double* lon_x, double* lat_y);
+
 /**
  * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
  * @param method (one of MIFI_VECTOR_KEEP_SIZE) (MIFI_VECTOR_RESIZE no longer available)

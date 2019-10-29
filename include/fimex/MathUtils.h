@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,6 +27,7 @@
 #include "fimex/String2Type.h"
 #include "fimex/Type2String.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <string>
@@ -146,6 +147,78 @@ T normalizeLongitude180(T in)
         in -= 360;
     }
     return in;
+}
+
+/**
+ * transform from degrees to radians
+ * @param degrees
+ * @return degrees transformed to radians
+ */
+template <typename C>
+C deg_to_rad(C degrees)
+{
+    const C DEG_TO_RAD = 0.017453292519943296;
+    return degrees * DEG_TO_RAD;
+}
+
+/**
+ * transform from degrees to radians
+ * @param degrees
+ * @param n count
+ */
+template <typename C>
+void transform_deg_to_rad(const C* degrees, size_t n, C* radians)
+{
+    std::transform(degrees, degrees + n, radians, deg_to_rad<double>);
+}
+
+template <typename C>
+void transform_deg_to_rad(C* angles, size_t n)
+{
+    transform_deg_to_rad(angles, n, angles);
+}
+
+template <class Container>
+void transform_deg_to_rad(Container& container)
+{
+    typedef typename Container::value_type value_type;
+    std::transform(container.begin(), container.end(), container.begin(), deg_to_rad<value_type>);
+}
+
+/**
+ * transform from radians to degrees
+ * @param radians
+ * @return radians transformed to degrees
+ */
+template <typename C>
+C rad_to_deg(C radians)
+{
+    const C RAD_TO_DEG = 57.295779513082321;
+    return radians * RAD_TO_DEG;
+}
+
+/**
+ * transform from radians to degrees
+ * @param radians
+ * @param n count
+ */
+template <typename C>
+void transform_rad_to_deg(const C* radians, size_t n, C* degrees)
+{
+    std::transform(radians, radians + n, degrees, rad_to_deg<double>);
+}
+
+template <typename C>
+void transform_rad_to_deg(C* angles, size_t n)
+{
+    transform_rad_to_deg(angles, n, angles);
+}
+
+template <class Container>
+void transform_rad_to_deg(Container& container)
+{
+    typedef typename Container::value_type value_type;
+    std::transform(container.begin(), container.end(), container.begin(), rad_to_deg<value_type>);
 }
 
 /**

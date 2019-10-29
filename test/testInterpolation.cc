@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,13 +26,11 @@
 
 #include "fimex/CDMAttribute.h"
 #include "fimex/Data.h"
+#include "fimex/MathUtils.h"
 
 #include <cmath>
 #include <fstream>
 #include <string>
-
-// definitions from proj_api.h
-#define RAD_TO_DEG      57.29577951308232
 
 using MetNoFimex::pathTest;
 
@@ -253,7 +251,7 @@ TEST4FIMEX_TEST_CASE(mifi_project_axes)
     TEST4FIMEX_CHECK_EQ(MIFI_OK, mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            TEST4FIMEX_CHECK((RAD_TO_DEG * outY[j + 3 * i]) > 89);
+            TEST4FIMEX_CHECK(MetNoFimex::rad_to_deg(outY[j + 3 * i]) > 89);
 }
 
 TEST4FIMEX_TEST_CASE(mifi_interpolate_f)

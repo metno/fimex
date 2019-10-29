@@ -1,7 +1,7 @@
 /*
  * Fimex, WRFCoordSysBuilder.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -38,8 +38,6 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 #include "fimex/mifi_constants.h"
-
-#include <proj_api.h>
 
 #include <cassert>
 #include <cmath>
@@ -138,7 +136,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         {
             double lon0 = (mifi_isnan(standardLon)) ? centralLon : standardLon;
             double lat0 = (mifi_isnan(centralLat)) ? lat2 : centralLat;
-            double k = (1+fabs(sin(DEG_TO_RAD*lat1)))/2.;
+            double k = (1 + fabs(sin(deg_to_rad(lat1)))) / 2.;
             proj4 << " +lon_0="<<lon0<<" +lat_0="<<lat0<<" +k="<<k;
         }
         break;
@@ -158,12 +156,12 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
     proj4 << " +R=" << R0 << " +no_defs";
     //cerr << proj4.str() << endl;
     Projection_p proj = Projection::createByProj4(proj4.str());
-    double centerX = centralLon * DEG_TO_RAD;
-    double centerY = centralLat * DEG_TO_RAD;
+    double centerX = deg_to_rad(centralLon);
+    double centerY = deg_to_rad(centralLat);
     mifi_project_values(MIFI_WGS84_LATLON_PROJ4, proj4.str().c_str(), &centerX, &centerY, 1);
     if (isLatLon) {
-        centerX /= DEG_TO_RAD;
-        centerY /= DEG_TO_RAD;
+        centerX = rad_to_deg(centerX);
+        centerY = rad_to_deg(centerY);
     }
 
     // TODO: the following variables might be called uninitialized when the coordinate-system
@@ -177,7 +175,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         if (!cdm.hasVariable(shape.at(0))) {
             float dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asFloat()[0];
             if (isLatLon) {
-                dx /= (R0 * DEG_TO_RAD);
+                dx = rad_to_deg(dx) / R0;
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
@@ -205,7 +203,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         if (!cdm.hasVariable(shape.at(0))) {
             float dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asFloat()[0];
             if (isLatLon) {
-                dx /= (R0 * DEG_TO_RAD);
+                dx = rad_to_deg(dx) / R0;
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
@@ -233,7 +231,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         if (!cdm.hasVariable(shape.at(0))) {
             float dy = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asFloat()[0];
             if (isLatLon) {
-                dy /= (R0 * DEG_TO_RAD);
+                dy = rad_to_deg(dy) / R0;
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;
@@ -263,7 +261,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         if (!cdm.hasVariable(shape.at(0))) {
             float dy = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asFloat()[0];
             if (isLatLon) {
-                dy /= (R0 * DEG_TO_RAD);
+                dy = rad_to_deg(dy) / R0;
             }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;

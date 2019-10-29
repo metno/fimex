@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/Units.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
@@ -36,8 +37,6 @@
 #include <functional>
 #include <regex>
 #include <set>
-
-#include "proj_api.h"
 
 namespace MetNoFimex
 {
@@ -697,14 +696,14 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     if (std::regex_match(xUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         shared_array<double> newXData(new double[xDimLength]);
-        std::transform(&xData[0], &xData[0]+xDimLength, &newXData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+        transform_deg_to_rad(xData.get(), xDimLength, newXData.get());
         xData = newXData;
     }
     std::string yUnits = getUnits(yDim);
     if (std::regex_match(yUnits, std::regex(".*degree.*"))) {
         // convert degrees to radians, create a new array so data in cdm does not get overwritten
         shared_array<double> newYData(new double[yDimLength]);
-        std::transform(&yData[0], &yData[0]+yDimLength, &newYData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+        transform_deg_to_rad(yData.get(), yDimLength, newYData.get());
         yData = newYData;
     }
     size_t fieldSize = xDimLength * yDimLength;
@@ -718,12 +717,8 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
         throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
     }
     // converting to Degree
-    double* longPos = longVal.get();
-    double* latPos = latVal.get();
-    for (size_t i = 0; i < fieldSize; ++i, ++latPos, ++longPos) {
-        *longPos *= RAD_TO_DEG;
-        *latPos  *= RAD_TO_DEG;
-    }
+    transform_rad_to_deg(longVal.get(), fieldSize);
+    transform_rad_to_deg(latVal.get(), fieldSize);
     std::vector<std::string> xyDims;
     xyDims.push_back(xDim);
     xyDims.push_back(yDim);

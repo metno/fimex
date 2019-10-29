@@ -1,7 +1,7 @@
 /*
  * Fimex, TransverseMercatorProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,8 +30,6 @@
 #include "fimex/String2Type.h"
 
 #include <regex>
-
-#include <proj_api.h>
 
 namespace MetNoFimex {
 using namespace std;

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -153,7 +153,7 @@ const po::option op_qualityExtract_config = po::option("qualityExtract.config", 
 const po::option op_qualityExtract_printNcML = po::option("qualityExtract.printNcML", "print NcML description of extractor").set_implicit_value("-");
 const po::option op_qualityExtract_printCS = po::option("qualityExtract.printCS", "print CoordinateSystems of extractor").set_narg(0);
 const po::option op_qualityExtract_printSize = po::option("qualityExtract.printSize", "print size estimate").set_narg(0);
-const po::option op_interpolate_projString = po::option("interpolate.projString", "proj4 input string describing the new projection");
+const po::option op_interpolate_projString = po::option("interpolate.projString", "proj init string describing the new projection");
 const po::option op_interpolate_method = po::option("interpolate.method", "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_*");
 const po::option op_interpolate_xAxisValues = po::option("interpolate.xAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
 const po::option op_interpolate_yAxisValues = po::option("interpolate.yAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
@@ -188,7 +188,7 @@ const po::option op_merge_keepOuterVariables =
     po::option("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer").set_narg(0);
 const po::option op_merge_method = po::option("merge.method", "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
         " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum");
-const po::option op_merge_projString = po::option("merge.projString", "proj4 input string describing the new projection, default: use inner projection extended to outer grid");
+const po::option op_merge_projString = po::option("merge.projString", "proj init string describing the new projection, default: use inner projection extended to outer grid");
 const po::option op_merge_xAxisValues = po::option("merge.xAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
 const po::option op_merge_yAxisValues = po::option("merge.yAxisValues", "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition");
 const po::option op_merge_xAxisUnit = po::option("merge.xAxisUnit", "unit of x-Axis given as udunits string, i.e. m or degrees_east");
@@ -712,8 +712,8 @@ CDMReader_p getCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
     CDMInterpolator_p interpolator;
     int method = getInterpolationMethod(vm, op_interpolate_method);
 
-    string proj4;
-    if (getOption(op_interpolate_projString, vm, proj4)) {
+    string proj_init;
+    if (getOption(op_interpolate_projString, vm, proj_init)) {
         string xAxisUnit, yAxisUnit, xAxisValues, yAxisValues;
         if (!(getOption(op_interpolate_xAxisUnit, vm, xAxisUnit) && getOption(op_interpolate_yAxisUnit, vm, yAxisUnit))) {
             LOG4FIMEX(logger, Logger::FATAL, "xAxisUnit and yAxisUnit required");
@@ -727,7 +727,7 @@ CDMReader_p getCDMInterpolator(const po::value_set& vm, CDMReader_p dataReader)
         if (vm.is_set(op_interpolate_distanceOfInterest)) {
             interpolator->setDistanceOfInterest(string2type<double>(vm.value(op_interpolate_distanceOfInterest)));
         }
-        interpolator->changeProjection(method, proj4, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit, vm.value(op_interpolate_xAxisType),
+        interpolator->changeProjection(method, proj_init, xAxisValues, yAxisValues, xAxisUnit, yAxisUnit, vm.value(op_interpolate_xAxisType),
                                        vm.value(op_interpolate_yAxisType));
     } else if (vm.is_set(op_interpolate_template)) {
         interpolator = createCDMInterpolator(vm, dataReader);

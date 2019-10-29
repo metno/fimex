@@ -1,7 +1,7 @@
 /*
  * Fimex, Projection.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -45,13 +45,11 @@ namespace MetNoFimex
 class Projection : public CDMNamedEntity
 {
 public:
-    virtual ~Projection() {}
+    ~Projection();
     virtual std::vector<CDMAttribute> getParameters() const = 0;
     virtual void addParameter(CDMAttribute attribute) = 0;
     virtual void addParameters(std::vector<CDMAttribute> attributes) = 0;
     virtual void removeParameter(std::string paramName) = 0;
-    /** get the projection name */
-    virtual const std::string& getName() const = 0;
     /** check if the coordinates belonging to this projection are in degree (otherwise metrical) */
     virtual bool isDegree() const = 0;
     /** get a proj4 string */
@@ -90,13 +88,15 @@ public:
      * This function does not guarantee that two projections are physically equal.
      */
     virtual bool operator==(const  Projection& b) const;
+
     /** create a projection from some CDMAttributes */
-    static Projection_p create(std::vector<CDMAttribute>);
+    static Projection_p create(const std::vector<CDMAttribute>&);
+
     /** create a projection from a proj4 string */
     static Projection_p createByProj4(const std::string& projStr);
 
 protected:
-    Projection() {};
+    Projection() {}
 };
 
 /** output-stream for projections, implemented using toString() */
