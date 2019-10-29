@@ -1239,36 +1239,45 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
     for (map<string, CoordinateSystem_cp>::iterator csIt = csMap.begin(); csIt != csMap.end(); ++csIt) {
         CoordinateSystem_cp cs = csIt->second;
-        const string& latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
-        const string& longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
+        const CoordinateAxis_cp axis_lat = cs->findAxisOfType(CoordinateAxis::Lat);
+        const CoordinateAxis_cp axis_lon = cs->findAxisOfType(CoordinateAxis::Lon);
+        const CoordinateAxis_cp axis_geo_y = cs->findAxisOfType(CoordinateAxis::GeoY);
+        const CoordinateAxis_cp axis_geo_x = cs->findAxisOfType(CoordinateAxis::GeoX);
+
+        const string& name_lat = axis_lat->getName();
+        const string& name_lon = axis_lon->getName();
+        const std::string name_geo_y = (axis_geo_y ? axis_geo_y->getName() : std::string());
+        const std::string name_geo_x = (axis_geo_x ? axis_geo_x->getName() : std::string());
 
         shared_array<double> orgLonVals, orgLatVals;
         size_t orgLatSize, orgLonSize;
-        extractValues(p_->dataReader->getScaledData(longitude), orgLonVals, orgLonSize);
-        extractValues(p_->dataReader->getScaledData(latitude), orgLatVals, orgLatSize);
+        extractValues(p_->dataReader->getScaledData(name_lon), orgLonVals, orgLonSize);
+        extractValues(p_->dataReader->getScaledData(name_lat), orgLatVals, orgLatSize);
         transform_deg_to_rad(orgLatVals.get(), orgLatSize);
         transform_deg_to_rad(orgLonVals.get(), orgLonSize);
 
-        // FIXME the following part also appears in "changeProjectionByCoordinates"
+        const std::vector<string>& shape_lat = p_->dataReader->getCDM().getVariable(name_lat).getShape();
+        const std::vector<string>& shape_lon = p_->dataReader->getCDM().getVariable(name_lon).getShape();
+        if (shape_lat != shape_lon)
+            throw CDMException("need lat and lon with identical shape");
+
         string orgXDimName, orgYDimName;
-        bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
-        if (!latLonProj && cs->getGeoYAxis()->getName() == latitude) {
+        if (!axis_geo_y || !axis_geo_x) {
             // x and y axis not properly defined, guessing
-            vector<string> latShape = p_->dataReader->getCDM().getVariable(latitude).getShape();
-            if (latShape.size() != 2) {
-                throw CDMException("latitude needs 2 dims for forward interpolation");
-            }
-            orgXDimName = latShape[0];
-            orgYDimName = latShape[1];
+            if (shape_lat.size() != 2)
+                throw CDMException("unable to guess x/y from latitude variable with " + type2string(shape_lat.size()) + " dimensions");
+            orgXDimName = shape_lat[0];
+            orgYDimName = shape_lat[1];
+            LOG4FIMEX(logger, Logger::INFO, "guessed x and y axis: " << orgXDimName << "," << orgYDimName);
         } else {
-            orgXDimName = cs->getGeoXAxis()->getName();
-            orgYDimName = cs->getGeoYAxis()->getName();
+            orgXDimName = name_geo_x;
+            orgYDimName = name_geo_y;
+            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis from GeoX/GeoY: " << orgXDimName << "," << orgYDimName);
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << orgXDimName << "," << orgYDimName);
         const size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
         const size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
         size_t orgXYSize;
-        if (latLonProj) {
+        if (shape_lat.size() == 1) {
             // create new latVals and lonVals as a matrix
             lonLatVals2Matrix(orgLonVals, orgLatVals, orgXDimSize, orgYDimSize);
             orgXYSize = orgLonSize * orgLatSize;
@@ -1277,7 +1286,6 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         } else {
             orgXYSize = orgLonSize;
         }
-        // FIXME end of identical part
 
         // translate all input points to output-coordinates, stored in lonVals and latVals
         LOG4FIMEX(logger, Logger::DEBUG, "start reprojection of coordinates");
