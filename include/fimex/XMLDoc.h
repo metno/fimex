@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -117,7 +117,12 @@ private:
  *
  * @return a string of the attribute, "" if attribute doesn't exist
  */
-std::string getXmlProp(const xmlNodePtr node, const std::string& attrName);
+std::string getXmlProp(const xmlNodePtr node, const char* attrName);
+
+inline std::string getXmlProp(const xmlNodePtr node, const std::string& attrName)
+{
+    return getXmlProp(node, attrName.c_str());
+}
 
 /**
  * a memory-save form of xmlGetName
@@ -125,6 +130,7 @@ std::string getXmlProp(const xmlNodePtr node, const std::string& attrName);
  * @return a string of the attribute, "" if attribute doesn't exist
  */
 std::string getXmlName(const xmlNodePtr node);
+
 /**
  * @brief get all text-contents of the node or underlying nodes
  *
@@ -134,7 +140,6 @@ std::string getXmlName(const xmlNodePtr node);
  */
 std::string getXmlContent(const xmlNodePtr node);
 
-
-}
+} // namespace MetNoFimex
 
 #endif /*XMLDOC_H_*/

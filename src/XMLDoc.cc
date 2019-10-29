@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,8 +28,19 @@
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
 
-namespace MetNoFimex
+namespace MetNoFimex {
+
+namespace {
+std::string make_string(xmlChar* xc)
 {
+    std::string retVal;
+    if (xc) {
+        retVal = std::string(reinterpret_cast<char*>(xc));
+        xmlFree(xc);
+    }
+    return retVal;
+}
+} // namespace
 
 XMLDoc::XMLDoc(const std::string& filename)
     :doc(0), xpathCtx(0)
@@ -79,17 +90,14 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
 
 std::string XMLDoc::toString(const xmlNodePtr node)
 {
-    xmlDocPtr ndoc = xmlNewDoc((const xmlChar*)"1.0");
-    xmlNodePtr retNode = xmlCopyNodeList(node);
-    xmlDocSetRootElement(ndoc, retNode);
+    std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ndoc(xmlNewDoc((const xmlChar*)"1.0"), &xmlFreeDoc);
+    xmlNodePtr retNode = xmlCopyNodeList(node); // points to new memory
+    xmlDocSetRootElement(ndoc.get(), retNode);  // transfer ownership
     xmlSetTreeDoc(retNode, doc);
     xmlChar* str;
     int size;
-    xmlDocDumpMemory(ndoc, &str, &size);
-    std::string retVal(reinterpret_cast<const char *>(str));
-    xmlFree(str);
-    xmlFreeDoc(ndoc);
-    return retVal;
+    xmlDocDumpMemory(ndoc.get(), &str, &size);
+    return make_string(str);
 }
 
 XMLDoc_p XMLDoc::fromFile(const std::string& filename)
@@ -146,32 +154,26 @@ xmlXPathObject_p XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr nod
 }
 
 /**
- * a memory-save form of xmlGetProp
+ * a memory-safe form of xmlGetProp
  *
  * @return a string of the attribute, "" if attribute doesn't exist
  */
-std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
-    std::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar*>(attrName.c_str())), xmlFree);
-    std::string retVal;
-    if (xChar.get() != 0) {
-        retVal = std::string(reinterpret_cast<char *>(xChar.get()));
-    }
-    return retVal;
+std::string getXmlProp(const xmlNodePtr node, const char* attrName)
+{
+    return make_string(xmlGetProp(node, reinterpret_cast<const xmlChar*>(attrName)));
 }
 
-std::string getXmlName(const xmlNodePtr node) {
-    return std::string (reinterpret_cast<const char *>(node->name));
+std::string getXmlName(const xmlNodePtr node)
+{
+    return std::string(reinterpret_cast<const char*>(node->name));
 }
+
 std::string getXmlContent(const xmlNodePtr node)
 {
-    if (node == 0) return "";
-    std::shared_ptr<xmlChar> xChar(xmlNodeGetContent(node), xmlFree);
     std::string retVal;
-    if (xChar.get() != 0) {
-        retVal = std::string(reinterpret_cast<char *>(xChar.get()));
-    }
+    if (node)
+        retVal = make_string(xmlNodeGetContent(node));
     return retVal;
 }
 
-
-}
+} // namespace MetNoFimex
