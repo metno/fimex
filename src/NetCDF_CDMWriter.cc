@@ -629,11 +629,13 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
     // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
     // use unLimDimPos = -1 for variables without unlimited dimension
 
-#if !defined(__INTEL_COMPILER) || (__INTEL_COMPILER >= 1800)
 #ifdef _OPENMP
+#if defined(__GNUC__) && __GNUC__ >= 9
+#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap, maxUnLim, unLimDimId)
+#elif !defined(__INTEL_COMPILER) || (__INTEL_COMPILER >= 1800)
 #pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap)
-#endif
-#endif //__INTEL_COMPILER
+#endif // __INTEL_COMPILER
+#endif // _OPENMP
     for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
 #ifdef HAVE_MPI
         if (using_mpi) {
@@ -719,13 +721,17 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                     start[unLimDimIdx] = unLimDimPos;
                 }
                 LOG4FIMEX(logger, Logger::DEBUG,
-                          "dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims) << " count=" << join(&count[0], &count[0] + n_dims));
+                          "writing variable " << varName << "dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims)
+                                              << " count=" << join(&count[0], &count[0] + n_dims));
+                OmpScopedLock ncLock(Nc::getMutex());
                 try {
-                    LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
-                    class OmpScopedLock ncLock(Nc::getMutex());
                     ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), n_dims, start.get(), count.get());
-                } catch (CDMException& ex) {
-                    throw CDMException(ex.what() + std::string(" while writing var ") + varName);
+                } catch (std::exception& ex) {
+                    OmpScopedUnlock ncUnlock(Nc::getMutex());
+                    LOG4FIMEX(logger, Logger::ERROR, "exception " << ex.what() << " while writing variable " << varName);
+                } catch (...) {
+                    OmpScopedUnlock ncUnlock(Nc::getMutex());
+                    LOG4FIMEX(logger, Logger::ERROR, "unknown exception while writing variable " << varName);
                 }
             }
         }
