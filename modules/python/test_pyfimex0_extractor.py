@@ -1,6 +1,6 @@
 # Fimex, modules/python/test_pyfimex0_extractor.py
 #
-# Copyright (C) 2018 met.no
+# Copyright (C) 2018-2019 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -82,6 +82,20 @@ class TestExtractor(unittest.TestCase):
         e_cdm = extra.getCDM()
         e_vars = e_cdm.getVariableNames()
         self.assertTrue('specific_humidity_ml' not in e_vars)
+
+        del extra
+        del r
+
+    def test_removeVariable(self):
+        test_ncfile = os.path.join(test_srcdir, 'erai.sfc.40N.0.75d.200301011200.nc')
+        r = pyfimex0.createFileReader('netcdf', test_ncfile)
+
+        self.assertTrue('ga_skt' in r.getCDM().getVariableNames())
+
+        extra = pyfimex0.createExtractor(r)
+        extra.removeVariable('ga_skt')
+
+        self.assertTrue('ga_skt' not in extra.getCDM().getVariableNames())
 
         del extra
         del r

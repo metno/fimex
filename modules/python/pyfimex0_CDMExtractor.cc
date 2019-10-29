@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_CDMExtractor.cc
  *
- * (C) Copyright 2017-2018, met.no
+ * (C) Copyright 2017-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -113,6 +113,9 @@ void pyfimex0_CDMExtractor(py::module m)
              ":param north: northern border\n"
              ":param west: western border\n"
              ":param east: eastern border")
+        .def("removeVariable", &CDMExtractor::removeVariable,
+             "Remove selected variable\n\n"
+             ":param variable: name of variable to remove\n")
         .def("selectVariables", selectVariables_1,
              "Remove all variables except the ones selected plus some"
              " auxiliary variables needed by the selected variables\n\n"
