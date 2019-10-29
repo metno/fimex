@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMQualityExtractor.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -105,7 +105,7 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
 {
     *cdm_.get() = dataReader->getCDM();
     const CDM& cdm = dataReader->getCDM();
-    if (autoConfString != "") {
+    if (!autoConfString.empty()) {
         // precheck allowed autoConfStrings, in case no variable is found, but string
         // is wrong
         set<string> allowedString;
@@ -126,12 +126,12 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
             }
         }
         vars = cdm.findVariables("flag_masks", ".*");
-        if (vars.size() > 0) {
+        if (!vars.empty()) {
             // TODO: implement
             LOG4FIMEX(logger, Logger::INFO, "flag_masks not implemented yet");
         }
     }
-    if (configFile != "") {
+    if (!configFile.empty()) {
         XMLDoc doc(configFile);
         xmlXPathObject_p xpathObj = doc.getXPathObject("/cdmQualityConfig");
         size_t size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
@@ -167,13 +167,14 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
                 statusVarType = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "type");
                 statusVarConfig = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "config");
             }
-            if (statusVarName == "") throw CDMException("could not find status_flag_variable for var: " + varName);
-            if (statusVarFile == "" && (statusVarConfig != "" || statusVarType != ""))
+            if (statusVarName.empty())
+                throw CDMException("could not find status_flag_variable for var: " + varName);
+            if (statusVarFile.empty() && (!statusVarConfig.empty() || !statusVarType.empty()))
                 throw CDMException("could not find status_flag_variable has type/config but no filename: " + varName);
             LOG4FIMEX(logger,Logger::DEBUG, "adding (variable,statusVar,use,vals): ("<<varName<<","<<statusVarName<<","<<statusVarUse<<","<<statusVarValues<<")");
             statusVariable[varName] = statusVarName;
             CDMReader_p sr = dataReader;
-            if (statusVarFile != "") {
+            if (!statusVarFile.empty()) {
                 // status var from a different reader
                 sr = CDMFileReaderFactory::create(statusVarType, statusVarFile, statusVarConfig);
                 statusReaders[varName] = sr;
@@ -201,22 +202,21 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
                 LOG4FIMEX(logger,Logger::INFO, "shapes of variable '" << varName << "' and statusVar '" << statusVarName
                           << "' are different but hopefully compatible");
             }
-            variableFill[varName] = (fillValStr == "") ? cdm.getFillValue(varName) : string2type<double>(fillValStr);
+            variableFill[varName] = fillValStr.empty() ? cdm.getFillValue(varName) : string2type<double>(fillValStr);
             vector<double> statusVarVals = tokenizeDotted<double>(statusVarValues);
-            if (statusVarVals.size() > 0) {
+            if (!statusVarVals.empty()) {
                 variableValues[varName] = statusVarVals;
-            } else if (statusVarUse != "") {
+            } else if (!statusVarUse.empty()) {
                 variableFlags[varName] = statusVarUse;
             } else {
                 throw CDMException("unable to quality-assure variable " + varName + ": no use or values given");
             }
         }
-
     }
-
 }
 
-static double findDefinedExtreme(double* begin, double* end, const double& (*minmax)(const double& a, const double& b)) {
+static double findDefinedExtreme(double* begin, double* end, const double& (*minmax)(const double& a, const double& b))
+{
     double extreme = MIFI_UNDEFINED_D;
     double* pos = begin;
     // forward to first defined element

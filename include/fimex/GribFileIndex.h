@@ -1,7 +1,7 @@
 /*
  * Fimex, GribFileIndex.h
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -41,13 +41,24 @@
 
 // forward decl of grib_api
 struct grib_handle;
+typedef std::shared_ptr<grib_handle> grib_handle_p;
 
 namespace MetNoFimex {
+
+extern const char GK_discipline[];
+extern const char GK_gribTablesVersionNo[];
+extern const char GK_identificationOfOriginatingGeneratingCentre[];
+extern const char GK_indicatorOfParameter[];
+extern const char GK_parameterCategory[];
+extern const char GK_stepType[];
+extern const char GK_timeRangeIndicator[];
+extern const char GK_typeOfStatisticalProcessing[];
 
 class GribFileMessage
 {
 public:
     GribFileMessage();
+
     /**
      * @param gh grib_handle
      * @param fileURL url of the input file
@@ -56,7 +67,7 @@ public:
      * @param members list of member-names -> filepath-regexp
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
-    GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
+    GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, long msgPos,
                     const std::vector<std::pair<std::string, std::regex>>& members = std::vector<std::pair<std::string, std::regex>>(),
                     const std::vector<std::string>& extraKeys = std::vector<std::string>());
     GribFileMessage(XMLDoc_p, std::string nsPrefix, xmlNodePtr node);
@@ -79,6 +90,8 @@ public:
     FimexTime getReferenceTime() const;
     /// return gribs timeRangeIndicator (0=instant, 2,4=accumulated)
     long getTimeRangeIndicator() const;
+    long getTypeOfStatisticalProcessing() const;
+    const std::string& getStepType() const;
     long getLevelNumber() const;
     long getLevelType() const;
     /**
@@ -110,7 +123,8 @@ public:
      * @param missingValue the missing- / fill-value the returned data will have
      * @return the actual amount of data read
      */
-    size_t readData(std::vector<double>& data, double missingValue) const;
+    size_t readData(double* data, std::size_t data_size, double missingValue) const;
+
     /**
      * Read the level-data from the underlying source to the vector levelData. In contrast to readData(), the
      * levelData does not need to be pre-allocated, since levelData usually are small (a few hundred (in grib1 limited to 256)).
@@ -119,6 +133,10 @@ public:
      * @return the actual amount of data read
      */
     size_t readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader=false) const;
+
+private:
+    grib_handle_p createGribHandle(bool asimofHeader) const;
+
 private:
     std::string fileURL_;
     off_t filePos_;
@@ -132,9 +150,11 @@ private:
     long dataTime_;
     long dataDate_;
     std::string stepUnits_;
+    std::string stepType_;
     long stepStart_;
     long stepEnd_;
     long timeRangeIndicator_;
+    long typeOfStatisticalProcessing_;
     long levelType_;
     long levelNo_;
     long perturbationNo_;
@@ -231,8 +251,6 @@ std::ostream& operator<<(std::ostream& os, const GribFileMessage& gfm);
 /// outputstream for a GribFileIndex
 std::ostream& operator<<(std::ostream& os, const GribFileIndex& gfm);
 
-
-}
-
+} // namespace MetNoFimex
 
 #endif /* GRIBFILEINDEX_H_ */

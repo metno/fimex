@@ -31,6 +31,8 @@
 #include "fimex/MathUtils.h"
 #include "fimex/Type2String.h"
 
+#include "RecursiveSliceCopy.h"
+
 #include <algorithm>
 #include <cmath>
 #include <iterator>
@@ -235,34 +237,6 @@ void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first
 template<>
 void DataImpl<std::string>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 
-/**
-     * recursively copy data by moving the newData and orgData pointers forward and copy the data at the current position
-     *
-     * it's assumed that the first dim in the vector is the fastest moving (fortran like)
-     *
-     * @param orgData pointer to the current postion of the original array
-     * @param newData pointer to the current position of the new array
-     * @param orgDimSize the original dimensions of orgData
-     * @param orgSliceSize helper-array with orgSliceSize[0] = 1; orgSliceSize[n] = orgDimSize[n] * orgSliceSize[n-1]
-     * @param newStart the start positions in the new data
-     * @param newSize the dimensions of the newData
-     * @param currentDim the dimension currently under work, should be between (orgData.size()-1) and 0
-     *
-     */
-template<typename C>
-void recursiveCopyMultiDimData(C** orgData, C** newData, const std::vector<size_t>& orgDimSize, const std::vector<size_t>& orgSliceSize, const std::vector<size_t>& newStart, const std::vector<size_t>& newSize, size_t currentDim) {
-    (*orgData) += newStart[currentDim] * orgSliceSize[currentDim];
-    if (currentDim == 0) {
-        *newData = std::copy(&(*orgData)[0], &(*orgData)[newSize[0]], *newData);
-        (*orgData) += newSize[0]; // forward orgData pointer
-    } else {
-        for (size_t i = 0; i < newSize[currentDim]; i++) {
-            recursiveCopyMultiDimData(orgData, newData, orgDimSize, orgSliceSize, newStart, newSize, currentDim - 1);
-        }
-    }
-    (*orgData) += (orgDimSize[currentDim] - (newStart[currentDim] + newSize[currentDim])) * orgSliceSize[currentDim];
-}
-
 template<typename C>
 DataPtr DataImpl<C>::slice(const std::vector<size_t>& orgDimSize, const std::vector<size_t>& startDims, const std::vector<size_t>& outputDimSize) {
     // handle scalar data
@@ -294,7 +268,7 @@ DataPtr DataImpl<C>::slice(const std::vector<size_t>& orgDimSize, const std::vec
         orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim-1];
     }
     // slice the data
-    recursiveCopyMultiDimData(&oldData, &newData, orgDimSize, orgSliceSize, startDims, outputDimSize, orgDimSize.size() - 1);
+    recursiveCopyMultiDimData(oldData, newData, orgDimSize, orgSliceSize, startDims, outputDimSize);
 
     return output;
 }

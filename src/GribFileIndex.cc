@@ -52,19 +52,100 @@
 
 #include "grib_api.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 using namespace std;
-static Logger_p logger = getLogger("fimex.GribFileIndex");
-static Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
+
+namespace {
+
+Logger_p logger = getLogger("fimex.GribFileIndex");
+Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
+
+typedef std::shared_ptr<grib_handle> grib_handle_p;
+
+typedef std::shared_ptr<FILE> FILE_p;
+
+FILE_p file_open_seek(const std::string& path, size_t position)
+{
+    FILE* fileh = fopen(path.c_str(), "rb");
+    if (!fileh)
+        throw runtime_error("cannot open file '" + path + "'");
+
+    FILE_p fh(fileh, fclose);
+    fseeko(fh.get(), position, SEEK_SET);
+    return fh;
+}
+
+grib_handle_p make_grib_handle(FILE_p fh, int& err)
+{
+    return grib_handle_p(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+}
+
+int grib_get_nocheck(grib_handle_p gh, const char* key, std::string& value)
+{
+    char msg[1024];
+    size_t msgLength = sizeof(msg);
+    const int err = grib_get_string(gh.get(), key, msg, &msgLength);
+    if (err == GRIB_SUCCESS)
+        value = string(msg, msg + msgLength - 1);
+    return err;
+}
+
+void grib_get(grib_handle_p gh, const char* key, std::string& value)
+{
+    char msg[1024];
+    size_t msgLength = sizeof(msg);
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), key, msg, &msgLength), 0);
+    value = string(msg, msg + msgLength - 1);
+}
+
+void grib_set(grib_handle_p gh, const char* key, const std::string& value)
+{
+    size_t len = value.length();
+    MIFI_GRIB_CHECK(grib_set_string(gh.get(), key, value.c_str(), &len), key);
+}
+
+int grib_get_nocheck(grib_handle_p gh, const char* key, double& value)
+{
+    return grib_get_double(gh.get(), key, &value);
+}
+
+void grib_get(grib_handle_p gh, const char* key, double& value)
+{
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), key, &value), key);
+}
+
+void grib_get(grib_handle_p gh, const char* key, size_t& value)
+{
+    MIFI_GRIB_CHECK(grib_get_size(gh.get(), key, &value), key);
+}
+
+int grib_get_nocheck(grib_handle_p gh, const char* key, long& value)
+{
+    return grib_get_long(gh.get(), key, &value);
+}
+
+void grib_get(grib_handle_p gh, const char* key, long& value)
+{
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), key, &value), key);
+}
+
+void grib_get(grib_handle_p gh, const char* key, long& value, long dflt)
+{
+    int err = grib_get_nocheck(gh, key, value);
+    if (err == GRIB_NOT_FOUND)
+        value = dflt;
+    else
+        MIFI_GRIB_CHECK(err, key);
+}
 
 /**
  * @warning This variable is only for functions inside the GribFileIndex initialization.
  *       Don't use otherwise.
  */
-static std::string earthFigure_ = "";
+std::string earthFigure_;
 
-static void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
+void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
 {
     if (mifi_reproject_point_from_lonlat(projStr.c_str(), &lon, &lat) != MIFI_OK)
         throw std::runtime_error("point reprojection error");
@@ -72,19 +153,19 @@ static void projConvert(const std::string& projStr, double lon, double lat, doub
     y = lat;
 }
 
-std::string getEarthsOblateFigure(std::shared_ptr<grib_handle> gh, long factorToM)
+std::string getEarthsOblateFigure(grib_handle_p gh, long factorToM)
 {
     long majorFactor, minorFactor;
     double majorValue, minorValue;
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMajorAxisOfOblateSpheroidEarth", &majorFactor), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMajorAxisOfOblateSpheroidEarth", &majorValue), 0);
+    grib_get(gh, "scaleFactorOfMajorAxisOfOblateSpheroidEarth", majorFactor);
+    grib_get(gh, "scaledValueOfMajorAxisOfOblateSpheroidEarth", majorValue);
     while (majorFactor > 0) {majorValue *= 10; majorFactor--;}
     while (majorFactor < 0) {majorValue /= 10; majorFactor++;}
     // transfer km to m
     majorFactor *= factorToM;
 
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMinorAxisOfOblateSpheroidEarth", &minorFactor), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMinorAxisOfOblateSpheroidEarth", &minorValue), 0);
+    grib_get(gh, "scaleFactorOfMinorAxisOfOblateSpheroidEarth", minorFactor);
+    grib_get(gh, "scaledValueOfMinorAxisOfOblateSpheroidEarth", minorValue);
     while (minorFactor > 0) {minorValue *= 10; minorFactor--;}
     while (minorFactor < 0) {minorValue /= 10; minorFactor++;}
     // transfer (km|m) to m
@@ -93,14 +174,14 @@ std::string getEarthsOblateFigure(std::shared_ptr<grib_handle> gh, long factorTo
     return "+a=" + type2string(majorValue) + " +b=" + type2string(minorValue);
 }
 
-std::string getEarthsSphericalFigure(std::shared_ptr<grib_handle> gh)
+std::string getEarthsSphericalFigure(grib_handle_p gh)
 {
     double radius;
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "radiusInMetres", &radius), 0);
+    grib_get(gh, "radiusInMetres", radius);
     return "+a=" + type2string(radius) + " +e=0";
 }
 
-std::string getEarthsFigure(long edition, std::shared_ptr<grib_handle> gh)
+std::string getEarthsFigure(long edition, grib_handle_p gh)
 {
     if (earthFigure_ != "") {
         return earthFigure_;
@@ -109,7 +190,7 @@ std::string getEarthsFigure(long edition, std::shared_ptr<grib_handle> gh)
     string earth;
     if (edition == 1) {
         long earthIsOblate;
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "earthIsOblate", &earthIsOblate), 0);
+        grib_get(gh, "earthIsOblate", earthIsOblate);
         if (earthIsOblate == 0) {
             earth = "+a=6367470 +e=0"; // sphere
         } else {
@@ -117,7 +198,7 @@ std::string getEarthsFigure(long edition, std::shared_ptr<grib_handle> gh)
         }
     } else {
         long shapeOfTheEarth;
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "shapeOfTheEarth", &shapeOfTheEarth), 0);
+        grib_get(gh, "shapeOfTheEarth", shapeOfTheEarth);
         switch (shapeOfTheEarth) { // see code table 3.2
             case 0: earth = "+a=6367470 +e=0"; break;
             case 1: earth = getEarthsSphericalFigure(gh); break;
@@ -134,26 +215,26 @@ std::string getEarthsFigure(long edition, std::shared_ptr<grib_handle> gh)
     return earth;
 }
 
-GridDefinition getGridDefRegularLL(long edition, std::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefRegularLL(long edition, grib_handle_p gh)
 {
     long sizeX, sizeY, ijDirectionIncrementGiven;
     double startX, startY, incrX, incrY;
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
+    grib_get(gh, "Ni", sizeX);
+    grib_get(gh, "Nj", sizeY);
+    grib_get(gh, "longitudeOfFirstGridPointInDegrees", startX);
+    grib_get(gh, "latitudeOfFirstGridPointInDegrees", startY);
 
     GridDefinition::Orientation orient = gribGetGridOrientation(gh);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+    grib_get(gh, "ijDirectionIncrementGiven", ijDirectionIncrementGiven);
     double endX, endY;
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
+    grib_get(gh, "longitudeOfLastGridPointInDegrees", endX);
+    grib_get(gh, "latitudeOfLastGridPointInDegrees", endY);
     incrX = (endX - startX) / (sizeX-1);
     incrY = (endY - startY) / (sizeY-1);
     if (ijDirectionIncrementGiven != 0) {
         double incrX1, incrY1;
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX1), 0);
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY1), 0);
+        grib_get(gh, "iDirectionIncrementInDegrees", incrX1);
+        grib_get(gh, "jDirectionIncrementInDegrees", incrY1);
         if (orient & GridDefinition::ScanStartRight) {
             incrX1 *= -1;
         }
@@ -174,28 +255,29 @@ GridDefinition getGridDefRegularLL(long edition, std::shared_ptr<grib_handle> gh
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
-GridDefinition getGridDefRotatedLL(long edition, std::shared_ptr<grib_handle> gh)
+
+GridDefinition getGridDefRotatedLL(long edition, grib_handle_p gh)
 {
     long sizeX, sizeY, ijDirectionIncrementGiven;
     double startX, startY, incrX, incrY, latRot, lonRot;
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfSouthernPoleInDegrees", &lonRot), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfSouthernPoleInDegrees", &latRot), 0);
+    grib_get(gh, "Ni", sizeX);
+    grib_get(gh, "Nj", sizeY);
+    grib_get(gh, "longitudeOfFirstGridPointInDegrees", startX);
+    grib_get(gh, "latitudeOfFirstGridPointInDegrees", startY);
+    grib_get(gh, "longitudeOfSouthernPoleInDegrees", lonRot);
+    grib_get(gh, "latitudeOfSouthernPoleInDegrees", latRot);
 
     GridDefinition::Orientation orient = gribGetGridOrientation(gh);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+    grib_get(gh, "ijDirectionIncrementGiven", ijDirectionIncrementGiven);
     if (ijDirectionIncrementGiven == 0) {
         double endX, endY;
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
+        grib_get(gh, "longitudeOfLastGridPointInDegrees", endX);
+        grib_get(gh, "latitudeOfLastGridPointInDegrees", endY);
         incrX = (endX - startX) / sizeX;
         incrY = (endY - startY) / sizeY;
     } else {
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+        grib_get(gh, "iDirectionIncrementInDegrees", incrX);
+        grib_get(gh, "jDirectionIncrementInDegrees", incrY);
         if (orient & GridDefinition::ScanStartRight) {
             incrX *= -1;
         }
@@ -221,35 +303,35 @@ struct GribMetricDef {
     double startLat;
 };
 
-GribMetricDef getGridDefMetric(long edition, std::shared_ptr<grib_handle> gh)
+GribMetricDef getGridDefMetric(long edition, grib_handle_p gh)
 {
     GribMetricDef gmd;
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &gmd.sizeX), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &gmd.sizeY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &gmd.startLon), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &gmd.startLat), 0);
+    grib_get(gh, "Ni", gmd.sizeX);
+    grib_get(gh, "Nj", gmd.sizeY);
+    grib_get(gh, "longitudeOfFirstGridPointInDegrees", gmd.startLon);
+    grib_get(gh, "latitudeOfFirstGridPointInDegrees", gmd.startLat);
 
-    if (grib_get_double(gh.get(), "DxInMetres", &gmd.incrX)) {
+    if (grib_get_nocheck(gh, "DxInMetres", gmd.incrX) != GRIB_SUCCESS) {
         // = DxInMetres, DiInMetres, Di
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DiInMetres", &gmd.incrX), 0);
+        grib_get(gh, "DiInMetres", gmd.incrX);
     }
-    if (grib_get_double(gh.get(), "DyInMetres", &gmd.incrY)) {
+    if (grib_get_nocheck(gh, "DyInMetres", gmd.incrY) != GRIB_SUCCESS) {
         // = DyInMetres, DjInMetres, Dj
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DjInMetres", &gmd.incrY), 0);
+        grib_get(gh, "DjInMetres", gmd.incrY);
     }
 
     return gmd;
 }
 
-GridDefinition getGridDefMercator(long edition, std::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefMercator(long edition, grib_handle_p gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
 
 
     double orientationOfGrid, lat_ts;
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LaDInDegrees", &lat_ts), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "orientationOfTheGridInDegrees", &orientationOfGrid), 0);
+    grib_get(gh, "LaDInDegrees", lat_ts);
+    grib_get(gh, "orientationOfTheGridInDegrees", orientationOfGrid);
 
     ostringstream oss;
     oss << "+proj=merc +lon_0="<<orientationOfGrid  << " +lat_ts=" << lat_ts << " ";
@@ -262,7 +344,7 @@ GridDefinition getGridDefMercator(long edition, std::shared_ptr<grib_handle> gh)
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GridDefinition getGridDefLambert(long edition, std::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefLambert(long edition, grib_handle_p gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
@@ -270,13 +352,13 @@ GridDefinition getGridDefLambert(long edition, std::shared_ptr<grib_handle> gh)
 
     double lonV, lat1, lat2;
     // TODO: southPole position not used yet
-    // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfSouthernPoleInDegrees", &southPLat), 0);
-    // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfSouthernPoleInDegrees", &southPLon), 0);
+    // grib_get(gh, "latitudeOfSouthernPoleInDegrees", southPLat);
+    // grib_get(gh, "longitudeOfSouthernPoleInDegrees", southPLon);
 // ignore LaD, does not make sense for lambert and grib_api returns 60, which is wrong
-// MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LaDInDegrees", &latD), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LoVInDegrees", &lonV), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "Latin1InDegrees", &lat1), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "Latin2InDegrees", &lat2), 0);
+// grib_get(gh, "LaDInDegrees", latD);
+    grib_get(gh, "LoVInDegrees", lonV);
+    grib_get(gh, "Latin1InDegrees", lat1);
+    grib_get(gh, "Latin2InDegrees", lat2);
 
     ostringstream oss;
     oss << "+proj=lcc +lat_0="<<lat1 << " +lon_0="<< lonV << " +lat_1=" << lat1 << " " << " +lat_2=" << lat2 << " ";
@@ -289,7 +371,7 @@ GridDefinition getGridDefLambert(long edition, std::shared_ptr<grib_handle> gh)
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GridDefinition getGridDefPolarStereographic(long edition, std::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefPolarStereographic(long edition, grib_handle_p gh)
 {
     double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
@@ -298,14 +380,14 @@ GridDefinition getGridDefPolarStereographic(long edition, std::shared_ptr<grib_h
     long projectionCentreFlag;
     double orientationOfGrid, lat0, lat_ts;
     string earth;
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "orientationOfTheGridInDegrees", &orientationOfGrid), 0);
+    grib_get(gh, "orientationOfTheGridInDegrees", orientationOfGrid);
     if (edition == 1) {
-        // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", &lat_ts), 0); // defined in grib-api > 1.6 to 60
+        // grib_get(gh, "latitudeWhereDxAndDyAreSpecifiedInDegrees", lat_ts); // defined in grib-api > 1.6 to 60
         lat_ts = 60.;
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "projectionCenterFlag", &projectionCentreFlag), 0); // changed to centre in grib-api > 1.8
+        grib_get(gh, "projectionCenterFlag", projectionCentreFlag); // changed to centre in grib-api > 1.8
     } else {
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", &lat_ts), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "projectionCentreFlag", &projectionCentreFlag), 0);
+        grib_get(gh, "latitudeWhereDxAndDyAreSpecifiedInDegrees", lat_ts);
+        grib_get(gh, "projectionCentreFlag", projectionCentreFlag);
     }
     if (projectionCentreFlag == 0) {
         lat0 = 90.; // northpole
@@ -323,96 +405,120 @@ GridDefinition getGridDefPolarStereographic(long edition, std::shared_ptr<grib_h
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos,
+const char GK_dataDate[] = "dataDate";
+const char GK_edition[] = "edition";
+const char GK_endStep[] = "endStep";
+const char GK_level[] = "level";
+const char GK_levtype[] = "levtype";
+const char GK_numberOfForecastsInEnsemble[] = "numberOfForecastsInEnsemble";
+const char GK_parameterNumber[] = "parameterNumber";
+const char GK_perturbationNumber[] = "perturbationNumber";
+const char GK_productDefinitionTemplateNumber[] = "productDefinitionTemplateNumber";
+const char GK_startStep[] = "startStep";
+const char GK_stepUnits[] = "stepUnits";
+const char GK_time[] = "time";
+const char GK_totalNumberOfClusters[] = "totalNumberOfClusters";
+const char GK_typeOfGrid[] = "typeOfGrid";
+
+// currently unused
+const char GK_indicatorOfUnitOfTimeRange[] = "indicatorOfUnitOfTimeRange";
+
+} // namespace
+
+const char GK_discipline[] = "discipline";
+const char GK_gribTablesVersionNo[] = "gribTablesVersionNo";
+const char GK_identificationOfOriginatingGeneratingCentre[] = "identificationOfOriginatingGeneratingCentre";
+const char GK_indicatorOfParameter[] = "indicatorOfParameter";
+const char GK_parameterCategory[] = "parameterCategory";
+const char GK_stepType[] = "stepType";
+const char GK_timeRangeIndicator[] = "timeRangeIndicator";
+const char GK_typeOfStatisticalProcessing[] = "typeOfStatisticalProcessing";
+
+GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, long msgPos,
                                  const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys)
     : fileURL_(fileURL)
     , filePos_(filePos)
     , msgPos_(msgPos)
 {
-    if (gh.get() == 0)
+    if (!gh) {
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
+    }
 
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "edition", &edition_), 0);
-
-    char msg[1024];
-    size_t msgLength = 1024;
+    grib_get(gh, GK_edition, edition_);
 
     if (edition_ == 1) {
         gridParameterIds_ = vector<long> (3, 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParameterIds_[0]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParameterIds_[1]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "centre", &gridParameterIds_[2]), 0);
+        grib_get(gh, GK_indicatorOfParameter, gridParameterIds_[0]);
+        grib_get(gh, GK_gribTablesVersionNo, gridParameterIds_[1]);
+        grib_get(gh, "centre", gridParameterIds_[2]);
         if (gridParameterIds_[0] == 254) {
             long level = -1;
-            MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &level), 0);
+            grib_get(gh, GK_level, level);
             if (level == GRIB_MISSING_LONG) {
                 throw CDMException("Asimof-message deteced, cannot decode this message");
             }
         }
     } else if (edition_ == 2) {
         gridParameterIds_ = vector<long> (3, 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParameterIds_[0]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParameterIds_[1]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParameterIds_[2]), 0);
+        grib_get(gh, GK_parameterNumber, gridParameterIds_[0]);
+        grib_get(gh, GK_parameterCategory, gridParameterIds_[1]);
+        grib_get(gh, GK_discipline, gridParameterIds_[2]);
     } else {
         throw runtime_error("unknown grib version: " + type2string(edition_));
     }
 
-    int nameError = grib_get_string(gh.get(), "name", msg, &msgLength);
-    if ((nameError != GRIB_NOT_FOUND) && (string("unknown") != string(msg))) {
+    const int nameError = grib_get_nocheck(gh, "name", parameterName_);
+    if ((nameError != GRIB_NOT_FOUND) && (parameterName_ != "unknown")) {
         MIFI_GRIB_CHECK(nameError, 0);
-        parameterName_ = msg;
     } else {
         parameterName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), ",");
     }
-    int shortNameError = grib_get_string(gh.get(), "shortName", msg, &msgLength);
-    if ((shortNameError != GRIB_NOT_FOUND) && (string("unknown") != string(msg))) {
+    const int shortNameError = grib_get_nocheck(gh, "shortName", shortName_);
+    if ((shortNameError != GRIB_NOT_FOUND) && (shortName_ != "unknown")) {
         MIFI_GRIB_CHECK(shortNameError, 0);
-        shortName_ = msg;
     } else {
         shortName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), "_");
     }
 
     for (std::vector<std::string>::const_iterator keyIt = extraKeys.begin(); keyIt != extraKeys.end(); ++keyIt) {
-        int err;
         long val;
-        err = grib_get_long(gh.get(), keyIt->c_str(), &val);
-        if (err == GRIB_NOT_FOUND) {
-            val = -1;
-        } else {
+        const int err = grib_get_nocheck(gh, keyIt->c_str(), val);
+        if (err != GRIB_NOT_FOUND) {
             MIFI_GRIB_CHECK(err, 0); // other errors, or no errors
             otherKeys_[*keyIt] = val;
         }
     }
 
     // level
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "levtype", &levelType_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
+    grib_get(gh, GK_levtype, levelType_);
+    grib_get(gh, GK_level, levelNo_);
     // time
     // read files internal time-step unit
     // https://confluence.ecmwf.int/display/ECC/Frequently+Asked+Questions#FrequentlyAskedQuestions-ConfusedaboutstepUnits?
     // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
-    msgLength = 1024;
-    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "indicatorOfUnitOfTimeRange", msg, &msgLength), 0);
-    // use this unit as unit for future calls to grib-api
-    MIFI_GRIB_CHECK(grib_set_string(gh.get(), "stepUnits", msg, &msgLength), 0);
-    stepUnits_ = std::string(msg);
+    std::string iouotr;
+    grib_get(gh, GK_indicatorOfUnitOfTimeRange, iouotr);
+    grib_set(gh, GK_stepUnits, iouotr);
 
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
+    grib_get(gh, GK_stepUnits, stepUnits_);
+    grib_get(gh, GK_stepType, stepType_);
+
+    grib_get(gh, GK_dataDate, dataDate_);
+    grib_get(gh, GK_time, dataTime_);
+    grib_get(gh, GK_timeRangeIndicator, timeRangeIndicator_);
+    grib_get(gh, GK_typeOfStatisticalProcessing, typeOfStatisticalProcessing_, -1);
+    grib_get(gh, GK_startStep, stepStart_);
+    grib_get(gh, GK_endStep, stepEnd_);
     // ensemble
-    int gribError = grib_get_long(gh.get(), "numberOfForecastsInEnsemble", &totalNumberOfEnsembles_);
+    int gribError = grib_get_nocheck(gh, GK_numberOfForecastsInEnsemble, totalNumberOfEnsembles_);
     switch (gribError) {
     case GRIB_SUCCESS: {
-        int gribError_pn = grib_get_long(gh.get(), "perturbationNumber", &perturbationNo_);
+        int gribError_pn = grib_get_nocheck(gh, GK_perturbationNumber, perturbationNo_);
         if (gribError_pn == GRIB_NOT_FOUND) {
             perturbationNo_ = 0;
             totalNumberOfEnsembles_ = 0;
             long productDefinitionTemplateNo;
-            int gribError_pdn = grib_get_long(gh.get(), "productDefinitionTemplateNumber", &productDefinitionTemplateNo);
+            int gribError_pdn = grib_get_nocheck(gh, GK_productDefinitionTemplateNumber, productDefinitionTemplateNo);
             if ((gribError_pdn == GRIB_SUCCESS) && (productDefinitionTemplateNo == 2 || productDefinitionTemplateNo == 3 || productDefinitionTemplateNo == 4 ||
                     productDefinitionTemplateNo == 12 || productDefinitionTemplateNo == 13 || productDefinitionTemplateNo == 14)) {
                 LOG4FIMEX(logger, Logger::DEBUG, "productDefinitionTemplateNumber=" << productDefinitionTemplateNo << "=ensemble derived product, ignoring ensembles");
@@ -428,7 +534,7 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
         LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size());
-        if (members.size()>0) {
+        if (!members.empty()) {
             bool found=false;
             int i = 0;
             for (vector<std::pair<std::string, std::regex>>::const_iterator it = members.begin(); it != members.end(); ++it) {
@@ -448,13 +554,15 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
         }
         break;
     }
-    default: MIFI_GRIB_CHECK(gribError, 0); break;
+    default:
+        MIFI_GRIB_CHECK(gribError, 0);
+        break;
     }
     // cluster (mapped internally like ensembles)
     if (totalNumberOfEnsembles_ == 0) {
-        int gribError = grib_get_long(gh.get(), "totalNumberOfClusters", &totalNumberOfEnsembles_);
+        int gribError = grib_get_nocheck(gh, GK_totalNumberOfClusters, totalNumberOfEnsembles_);
         if (gribError == GRIB_SUCCESS) {
-            int gribError_cn = grib_get_long(gh.get(), "clusterNumber", &perturbationNo_);
+            int gribError_cn = grib_get_nocheck(gh, "clusterNumber", perturbationNo_);
             if (gribError_cn == GRIB_NOT_FOUND) {
                 perturbationNo_ = 0;
             }
@@ -465,9 +573,7 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
         }
     }
     // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
-    msgLength = 1024;
-    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
-    typeOfGrid_ = msg;
+    grib_get(gh, GK_typeOfGrid, typeOfGrid_);
     // =  regular_ll | reduced_ll | mercator | lambert | polar_stereographic | UTM | simple_polyconic | albers |
     //        miller | rotated_ll | stretched_ll | stretched_rotated_ll | regular_gg | rotated_gg | stretched_gg | stretched_rotated_gg |
     //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
@@ -484,29 +590,32 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
     } else {
         throw CDMException("unknown gridType: "+ typeOfGrid_);
     }
-
 }
 
 GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
 {
     fileURL_ = getXmlProp(node, "url");
-    if (fileURL_.size() == 0) {
+    if (fileURL_.empty()) {
         throw runtime_error("could not find url for node");
     }
+
     string posStr = getXmlProp(node, "seekPos");
-    if (posStr.size() == 0) {
+    if (posStr.empty()) {
         throw runtime_error("could not find seekPos for node");
     }
     filePos_ = string2type<off_t>(posStr);
-    string msgPosStr = getXmlProp(node, "messagePos");
-    if (msgPosStr.size() == 0) msgPos_ = 0;
-    else msgPos_ = string2type<size_t>(msgPosStr);
 
+    string msgPosStr = getXmlProp(node, "messagePos");
+    if (msgPosStr.empty())
+        msgPos_ = 0;
+    else
+        msgPos_ = string2type<size_t>(msgPosStr);
 
     {// parameter
         xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":parameter", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size == 0) throw runtime_error("parameter not found in node");
+        if (size == 0)
+            throw runtime_error("parameter not found in node");
         xmlNodePtr pNode = xp->nodesetval->nodeTab[0];
         parameterName_ = getXmlProp(pNode, "name");
         shortName_ = getXmlProp(pNode, "shortName");
@@ -516,18 +625,18 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
         if (gSize > 0) {
             edition_ = 1;
             xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
-            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "indicatorOfParameter")));
-            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "gribTablesVersionNo")));
-            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "identificationOfOriginatingGeneratingCentre")));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_indicatorOfParameter)));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_gribTablesVersionNo)));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_identificationOfOriginatingGeneratingCentre)));
         } else {
             xpG = doc->getXPathObject(nsPrefix+":grib2", pNode);
             int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
             if (gSize > 0) {
                 edition_ = 2;
                 xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
-                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterNumber")));
-                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterCategory")));
-                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "discipline")));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_parameterNumber)));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_parameterCategory)));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_discipline)));
             } else {
                 throw runtime_error("no grib parameters found");
             }
@@ -549,10 +658,11 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
-            dataDate_ = string2type<long>(getXmlProp(lNode, "dataDate"));
+            dataDate_ = string2type<long>(getXmlProp(lNode, GK_dataDate));
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
-            stepUnits_ = getXmlProp(lNode, "stepUnits");
-            timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, "timeRangeIndicator"));
+            stepUnits_ = getXmlProp(lNode, GK_stepUnits);
+            timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, GK_timeRangeIndicator));
+            typeOfStatisticalProcessing_ = string2type<long>(getXmlProp(lNode, GK_typeOfStatisticalProcessing));
             stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
             stepEnd_ = string2type<long>(getXmlProp(lNode, "stepEnd"));
         }
@@ -589,7 +699,6 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
             otherKeys_[keyName] = string2type<long>(getXmlProp(lNode, "value"));
         }
     }
-
     {
         xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":gridDefinition", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
@@ -615,14 +724,18 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
         XmlCharPtr name = xmlTextReaderName(reader);
         XmlCharPtr value = xmlTextReaderValue(reader);
         if (name == "url") {
-            if (value.len() == 0) throw runtime_error("could not find url for node");
+            if (value.len() == 0)
+                throw runtime_error("could not find url for node");
             fileURL_ = value.to_string();
         } else if (name == "seekPos") {
-            if (value.len() == 0) throw runtime_error("could not find seekPos for node");
+            if (value.len() == 0)
+                throw runtime_error("could not find seekPos for node");
             filePos_ = value.to_longlong();
         } else if (name == "messagePos") {
-            if (value.len() == 0) msgPos_ = 0;
-            else msgPos_ = value.to_longlong();
+            if (value.len() == 0)
+                msgPos_ = 0;
+            else
+                msgPos_ = value.to_longlong();
         }
     }
     // defaults
@@ -635,9 +748,9 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
         switch (type) {
         case XML_READER_TYPE_ELEMENT: {
             const xmlChar* name = xmlTextReaderConstName(reader);
-            if (name == NULL) name = reinterpret_cast<const xmlChar*>("-- NONAME");
+            if (name == NULL)
+                name = reinterpret_cast<const xmlChar*>("-- NONAME");
             if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("parameter"))) {
-
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
                     XmlCharPtr name = xmlTextReaderName(reader);
                     XmlCharPtr value = xmlTextReaderValue(reader);
@@ -657,11 +770,11 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
                     XmlCharPtr name = xmlTextReaderName(reader);
                     XmlCharPtr value = xmlTextReaderValue(reader);
-                    if (name == "indicatorOfParameter") {
+                    if (name == GK_indicatorOfParameter) {
                         id = value.to_long();
-                    } else if (name == "gribTablesVersionNo") {
+                    } else if (name == GK_gribTablesVersionNo) {
                         table = value.to_long();
-                    } else if (name == "identificationOfOriginatingGeneratingCentre") {
+                    } else if (name == GK_identificationOfOriginatingGeneratingCentre) {
                         centre = value.to_long();
                     }
                 }
@@ -678,11 +791,11 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
                     XmlCharPtr name = xmlTextReaderName(reader);
                     XmlCharPtr value = xmlTextReaderValue(reader);
-                    if (name == "parameterNumber") {
+                    if (name == GK_parameterNumber) {
                         no = value.to_long();
-                    } else if (name == "parameterCategory") {
+                    } else if (name == GK_parameterCategory) {
                         cat = value.to_long();
-                    } else if (name == "discipline") {
+                    } else if (name == GK_discipline) {
                         dis = value.to_long();
                     }
                 }
@@ -707,23 +820,25 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
                     XmlCharPtr name = xmlTextReaderName(reader);
                     XmlCharPtr value = xmlTextReaderValue(reader);
-                    if (name == "dataDate") {
+                    if (name == GK_dataDate) {
                         dataDate_ = value.to_long();
                     } else if (name == "dataTime") {
                         dataTime_ = value.to_long();
-                    } else if (name == "stepUnits") {
+                    } else if (name == GK_stepUnits) {
                         stepUnits_ = value.to_string();
-                    } else if (name == "stepType") {
-                        // ignore
-                    } else if (name == "timeRangeIndicator") {
+                    } else if (name == GK_stepType) {
+                        stepType_ = value.to_string();
+                    } else if (name == GK_timeRangeIndicator) {
                         timeRangeIndicator_ = value.to_long();
+                    } else if (name == GK_typeOfStatisticalProcessing) {
+                        typeOfStatisticalProcessing_ = value.to_long();
                     } else if (name == "stepStart") {
                         stepStart_ = value.to_long();
                     } else if (name == "stepEnd") {
                         stepEnd_ = value.to_long();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("typeOfGrid"))) {
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>(GK_typeOfGrid))) {
 
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
                     XmlCharPtr name = xmlTextReaderName(reader);
@@ -800,40 +915,40 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
         }
         case XML_READER_TYPE_END_ELEMENT: {
             const xmlChar* name = xmlTextReaderConstName(reader);
-            if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
+            if (name == NULL)
+                name = reinterpret_cast<const xmlChar*>("");
             if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
-                if (gridParameterIds_.size() != 3) throw runtime_error("no grib parameters found in " + fileName);
-                if (!isValid()) throw runtime_error("unable to parse gribMessage from " + fileName);
+                if (gridParameterIds_.size() != 3)
+                    throw runtime_error("no grib parameters found in " + fileName);
+                if (!isValid())
+                    throw runtime_error("unable to parse gribMessage from " + fileName);
                 // stop reading and return
                 return;
             }
             break;
         }
-        default: break; // only element nodes
+        default:
+            break; // only element nodes
         }
         ret = xmlTextReaderRead(reader);
     }
     throw CDMException("no end node for gribMessage in " + fileName);
 }
 
-
-
 GribFileMessage::GribFileMessage()
 {
-
 }
 
 GribFileMessage::~GribFileMessage()
 {
-
 }
-
 
 static void checkLXML(int status, string msg = "")
 {
     if (status < 0)
         throw runtime_error("libxml-error " + msg);
 }
+
 static const xmlChar* xmlCast(const std::string& msg)
 {
     return reinterpret_cast<const xmlChar*> (msg.c_str());
@@ -859,14 +974,17 @@ size_t GribFileMessage::getMessageNumber() const
 {
     return msgPos_;
 }
+
 const std::string& GribFileMessage::getName() const
 {
     return parameterName_;
 }
+
 const std::string& GribFileMessage::getShortName() const
 {
     return shortName_;
 }
+
 FimexTime GribFileMessage::getReferenceTime() const
 {
     long year = dataDate_ / 10000;
@@ -887,7 +1005,7 @@ FimexTime GribFileMessage::getValidTime() const
 
     // add step offset
     std::chrono::seconds timeOffset;
-    static const std::regex re_stepUnits("(\\d+)?(.)");
+    static const std::regex re_stepUnits("(\\d+)?([A-Za-z])");
     std::smatch what;
     if (std::regex_match(stepUnits_, what, re_stepUnits)) {
         int factor = 1;
@@ -922,6 +1040,16 @@ long GribFileMessage::getTimeRangeIndicator() const
     return timeRangeIndicator_;
 }
 
+long GribFileMessage::getTypeOfStatisticalProcessing() const
+{
+    return typeOfStatisticalProcessing_;
+}
+
+const std::string& GribFileMessage::getStepType() const
+{
+    return stepType_;
+}
+
 long GribFileMessage::getLevelNumber() const
 {
     return levelNo_;
@@ -941,7 +1069,6 @@ const vector<long>& GribFileMessage::getParameterIds() const
     return gridParameterIds_;
 }
 
-
 const std::string& GribFileMessage::getTypeOfGrid() const
 {
     return typeOfGrid_;
@@ -952,12 +1079,11 @@ const GridDefinition& GribFileMessage::getGridDefinition() const
     return gridDefinition_;
 }
 
-
 string GribFileMessage::toString() const
 {
 #if defined(LIBXML_WRITER_ENABLED)
     std::shared_ptr<xmlBuffer> buffer(xmlBufferCreate(), xmlBufferFree);
-    if (buffer.get() == 0)
+    if (!buffer)
         throw runtime_error("error allocation memory for xmlBuffer");
 
     {
@@ -978,27 +1104,16 @@ string GribFileMessage::toString() const
                 xmlCast("name"), xmlCast(parameterName_)));
         if (edition_ == 1) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib1")));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "indicatorOfParameter"), xmlCast(type2string(
-                    gridParameterIds_.at(0)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "gribTablesVersionNo"), xmlCast(type2string(
-                    gridParameterIds_.at(1)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "identificationOfOriginatingGeneratingCentre"), xmlCast(
-                    type2string(gridParameterIds_.at(2)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_indicatorOfParameter), xmlCast(type2string(gridParameterIds_.at(0)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_gribTablesVersionNo), xmlCast(type2string(gridParameterIds_.at(1)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_identificationOfOriginatingGeneratingCentre),
+                                                  xmlCast(type2string(gridParameterIds_.at(2)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else if (edition_ == 2) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib2")));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "parameterNumber"), xmlCast(type2string(
-                    gridParameterIds_.at(0)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "parameterCategory"), xmlCast(type2string(
-                    gridParameterIds_.at(1)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(),
-                    xmlCast("discipline"), xmlCast(type2string(
-                            gridParameterIds_.at(2)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterNumber), xmlCast(type2string(gridParameterIds_.at(0)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterCategory), xmlCast(type2string(gridParameterIds_.at(1)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_discipline), xmlCast(type2string(gridParameterIds_.at(2)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else {
             throw runtime_error("unknown gribEdition: " + type2string(edition_));
@@ -1040,14 +1155,13 @@ string GribFileMessage::toString() const
 
         // time
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("time")));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("dataDate"),
-                xmlCast(type2string(dataDate_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_dataDate), xmlCast(type2string(dataDate_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("dataTime"),
                 xmlCast(type2string(dataTime_))));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepUnits"),
-                xmlCast(stepUnits_)));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("timeRangeIndicator"),
-                xmlCast(type2string(timeRangeIndicator_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_stepUnits), xmlCast(stepUnits_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_stepType), xmlCast(stepType_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_timeRangeIndicator), xmlCast(type2string(timeRangeIndicator_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_typeOfStatisticalProcessing), xmlCast(type2string(typeOfStatisticalProcessing_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepStart"),
                 xmlCast(type2string(stepStart_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepEnd"),
@@ -1055,7 +1169,7 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterEndElement(writer.get()));
 
         // typeOfGrid
-        checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("typeOfGrid")));
+        checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast(GK_typeOfGrid)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("name"),
                 xmlCast(typeOfGrid_)));
         checkLXML(xmlTextWriterEndElement(writer.get()));
@@ -1092,91 +1206,68 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*> (buffer->content));
 }
 
-size_t GribFileMessage::readData(std::vector<double>& data, double missingValue) const
+grib_handle_p GribFileMessage::createGribHandle(bool asimofHeader) const
 {
-    if (!isValid()) return 0;
-    string url = getFileURL();
-    // remove the 'file:' prefix, needs to be improved when streams are allowed
-    url = url.substr(5);
-    FILE* fileh = fopen(url.c_str(), "rb");
-    if (fileh == 0) {
-        throw runtime_error("cannot open file: " + getFileURL());
-    }
-    std::shared_ptr<FILE> fh(fileh, fclose);
-    fseeko(fh.get(), getFilePosition(), SEEK_SET);
+    const string url = getFileURL().substr(5); // remove 'file:' prefix, needs to be improved when streams are allowed
+    const size_t position = asimofHeader ? 0 : getFilePosition();
+    FILE_p fh = file_open_seek(url, position);
 
     // enable multi-messages
     grib_multi_support_on(0);
 
     int err = 0;
-    for (size_t i = 0; i < getMessageNumber(); i++) {
+    const size_t message = asimofHeader ? 0 : getMessageNumber();
+    for (size_t i = 0; i < message; i++) {
         // forward to correct multimessage
-        std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+        grib_handle_p gh = make_grib_handle(fh, err);
     }
+
     // read the message of interest
-    std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
-    size_t size = 0;
-    if (gh.get() != 0) {
-        if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
-        double oldMissing;
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "missingValue", &oldMissing), 0);
-        MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", missingValue), 0);
-        MIFI_GRIB_CHECK(grib_get_size(gh.get(), "values", &size), 0);
-        if (size > data.size()) size = data.size();
-        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &size), 0);
-        MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", oldMissing), 0);
-    } else {
-        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(getFilePosition()) + " msg: " + type2string(getMessageNumber()));
-    }
-    return size;
+    grib_handle_p gh = make_grib_handle(fh, err);
+    if (!gh)
+        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(position) + " msg: " + type2string(message) +
+                           " asimof: " + type2string(asimofHeader));
+
+    if (err != GRIB_SUCCESS)
+        GRIB_CHECK(err, 0);
+
+    return gh;
+}
+
+size_t GribFileMessage::readData(double* data, size_t data_size, double missingValue) const
+{
+    if (!isValid())
+        return 0;
+
+    grib_handle_p gh = createGribHandle(false);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "set missing = " << missingValue);
+    MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", missingValue), 0);
+    LOG4FIMEX(logger, Logger::DEBUG, "retrieve values");
+    MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &data_size), 0);
+
+    return data_size;
 }
 
 size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader) const
 {
-    if (!isValid()) return 0;
-    string url = getFileURL();
-    // remove the 'file:' prefix, needs to be improved when streams are allowed
-    url = url.substr(5);
-    FILE* fileh = fopen(url.c_str(), "rb");
-    LOG4FIMEX(loggerGFM, Logger::DEBUG, "opening file: " << url << " filehandle: " << fileh);
-    if (fileh == 0) {
-        throw runtime_error("cannot open file: " + url);
-    }
-    std::shared_ptr<FILE> fh(fileh, fclose);
-    if (!asimofHeader) {
-        fseeko(fh.get(), getFilePosition(), SEEK_SET);
-    } else {
-        fseeko(fh.get(), 0, SEEK_SET);
-    }
-    // enable multi-messages
-    grib_multi_support_on(0);
+    if (!isValid())
+        return 0;
 
-    int err = 0;
-    if (!asimofHeader) {
-        for (size_t i = 0; i < getMessageNumber(); i++) {
-            // forward to correct multimessage
-            std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
-        }
-    }
-    // read the message of interest
-    std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    grib_handle_p gh = createGribHandle(asimofHeader);
+
     size_t size = 0;
-    if (gh.get() != 0) {
-        if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
-        long pvpresent = 0;
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "PVPresent", &pvpresent), 0);
-        if (pvpresent) {
-            MIFI_GRIB_CHECK(grib_get_size(gh.get(), "pv", &size), 0);
-            levelData.resize(size);
-            MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "pv", &levelData[0], &size), 0);
-            double inputMissing;
-            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "missingValue", &inputMissing), 0);
-            if (inputMissing != missingValue) {
-                transform(&levelData[0], &levelData[0]+size, &levelData[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
-            }
+    long pvpresent = 0;
+    grib_get(gh, "PVPresent", pvpresent);
+    if (pvpresent) {
+        grib_get(gh, "pv", size);
+        levelData.resize(size);
+        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "pv", &levelData[0], &size), 0);
+        double inputMissing;
+        grib_get(gh, "missingValue", inputMissing);
+        if (inputMissing != missingValue) {
+            transform(&levelData[0], &levelData[0] + size, &levelData[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
         }
-    } else {
-        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(getFilePosition()) + " msg: " + type2string(getMessageNumber()));
     }
     return size;
 }
@@ -1236,11 +1327,7 @@ void GribFileIndex::initByGrib(const std::string& gribFilePath, const std::vecto
                                const std::vector<std::string>& extraKeys)
 {
     url_ = "file:" + gribFilePath;
-    FILE* fileh = fopen(gribFilePath.c_str(), "r");
-    if (fileh == 0) {
-        throw runtime_error("cannot open file: " + url_);
-    }
-    std::shared_ptr<FILE> fh(fileh, fclose);
+    std::shared_ptr<FILE> fh = file_open_seek(gribFilePath, 0);
     // enable multi-messages
     grib_multi_support_on(0);
     off_t lastPos = static_cast<size_t>(-1);
@@ -1249,10 +1336,10 @@ void GribFileIndex::initByGrib(const std::string& gribFilePath, const std::vecto
         // read the next message
         off_t pos = ftello(fh.get());
         int err = 0;
-        std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+        grib_handle_p gh = make_grib_handle(fh, err);
         off_t newPos = ftello(fh.get());
-        if (gh.get() != 0) {
-            if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
+        if (gh) {
+            MIFI_GRIB_CHECK(err, 0);
             if (newPos != pos) {
                 // new message
                 lastPos = pos;

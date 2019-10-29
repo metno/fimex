@@ -115,6 +115,7 @@ SET(libfimex_SOURCES
   ${INCF}/Null_CDMWriter.h
   NullIoFactory.cc
   NullIoFactory.h
+  RecursiveSliceCopy.h
   ReplaceStringObject.cc
   ${INCF}/ReplaceStringObject.h
   ReplaceStringTimeObject.cc

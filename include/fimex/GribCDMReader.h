@@ -1,7 +1,7 @@
 /*
  * Fimex, GribCDMReader.h
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -118,7 +118,7 @@ private:
      */
     FimexTime getVariableValidTime(const GribFileMessage& gfm) const;
 
-    size_t getVariableMaxEnsembles(std::string varName) const;
+    size_t getVariableMaxEnsembles(const std::string& varName) const;
 
     void initAddTimeDimension();
     void initAddGlobalAttributes();
