@@ -622,7 +622,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
 
 #ifdef HAVE_MPI
     const bool sliceAlongUnlimited = (maxUnLim > 3);
-    const bool using_mp = (mifi_mpi_initialized() && mifi_mpi_size > 1);
+    const bool using_mpi = (mifi_mpi_initialized() && mifi_mpi_size > 1);
 #endif
 
     // read data along unLimDim and then variables, otherwise netcdf3 reading might get very slow
