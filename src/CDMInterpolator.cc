@@ -110,6 +110,7 @@ struct CDMInterpolator::Impl
 namespace {
 const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
 Logger_p logger = getLogger("fimex.CDMInterpolator");
+
 } // namespace
 
 CDMInterpolator::CDMInterpolator(CDMReader_p dataReader)
@@ -791,9 +792,7 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     // add new projection and parameters
     std::string newProjection = "latlong";
     if (newProj != "latlong") {
-        newProjection = "projection_"+newProj;
-        int i = 0;
-        while (cdm.hasVariable(newProjection)) newProjection = "projection_"+newProj+type2string(++i);
+        newProjection = findUniqueVarName(cdm, "projection_"+newProj);
         CDMVariable projVar(newProjection, CDM_INT, std::vector<std::string>());
         projVar.setData(createData(CDM_INT, 0)); // define empty data
         cdm.addVariable(projVar);
@@ -861,14 +860,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     std::string lat(latitudeName);
     std::string lon(longitudeName);
     if (newProj != "latlong") {
-        int i = 0;
-        while (cdm.hasVariable(lon)) {
-            lon = longitudeName + type2string(++i);
-        }
-        i = 0;
-        while (cdm.hasVariable(lat)) {
-            lat = latitudeName + type2string(++i);
-        }
+        lon = findUniqueVarName(cdm, lon);
+        lat = findUniqueVarName(cdm, lat);
         cdm.generateProjectionCoordinates(newProjection, newXAxis, newYAxis, lon, lat);
     }
 
@@ -1558,9 +1551,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
     // add new projection and parameters
     std::string newProjection = "latlong";
     if (newProj != "latlong") {
-        newProjection = "projection_"+newProj;
-        int i = 0;
-        while (cdm.hasVariable(newProjection)) newProjection = "projection_"+newProj+type2string(++i);
+        newProjection = findUniqueVarName(cdm, "projection_"+newProj);
         CDMVariable projVar(newProjection, CDM_NAT, std::vector<std::string>());
         projVar.setData(createData(CDM_NAT, 0)); // define empty data
         cdm.addVariable(projVar);

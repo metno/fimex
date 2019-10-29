@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMReaderUtils.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -160,22 +160,36 @@ bool compareCDMVarShapes(const CDM& cdm1, const string& varName1, const CDM& cdm
     return true;
 }
 
-string findUniqueDimVarName(const CDM& cdm, string baseVar)
+string findUniqueDimVarName(const CDM& cdm, const string& baseVar)
 {
-    // find a unique variable name
-    if (!(cdm.hasVariable(baseVar) || cdm.hasDimension(baseVar))) {
+    if (!(cdm.hasVariable(baseVar) || cdm.hasDimension(baseVar)))
         return baseVar;
-    } else {
-        for (size_t i = 0; i < 99; i++) {
-            string varName = baseVar + type2string(i);
-            if (!(cdm.hasVariable(varName) || cdm.hasDimension(varName))) {
-                return varName;
-            }
-        }
+
+    for (size_t i = 0; i < 99; i++) {
+        const string varName = baseVar + type2string(i);
+        if (!(cdm.hasVariable(varName) || cdm.hasDimension(varName)))
+            return varName;
     }
     throw CDMException("unable to generate new dimension/variable name starting with "+ baseVar);
 }
 
+std::string findUniqueVarName(const CDM& cdm, const std::string& name)
+{
+    std::string name_number = name;
+    int i = 0;
+    while (cdm.hasVariable(name_number))
+        name_number = name + type2string(++i);
+    return name_number;
+}
+
+std::string findUniqueDimName(const CDM& cdm, const std::string& name)
+{
+    std::string name_number = name;
+    int i = 0;
+    while (cdm.hasDimension(name_number))
+        name_number = name + type2string(++i);
+    return name_number;
+}
 
 struct CoordsInformation {
     string xDim;

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMReaderUtils.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -101,7 +101,10 @@ bool compareCDMVarShapes(const CDM& cdm1, const std::string& varName1, const CDM
  * @param baseVar the basic variable name
  * @return a st
  */
-std::string findUniqueDimVarName(const CDM& cdm, std::string baseVar);
+std::string findUniqueDimVarName(const CDM& cdm, const std::string& baseVar);
+
+std::string findUniqueVarName(const CDM& cdm, const std::string& name);
+std::string findUniqueDimName(const CDM& cdm, const std::string& name);
 
 /**
  * generate projection coordinates if they don't exist for a coordinate system
