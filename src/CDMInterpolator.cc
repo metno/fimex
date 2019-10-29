@@ -1249,9 +1249,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         size_t orgXYSize, orgXSize;
         extractValues(p_->dataReader->getScaledData(longitude), orgXVals, orgXSize);
         extractValues(p_->dataReader->getScaledData(latitude), orgYVals, orgXYSize);
-        assert(orgXYSize == orgXSize);
         transform_deg_to_rad(orgYVals.get(), orgXYSize);
-        transform_deg_to_rad(orgXVals.get(), orgXYSize);
+        transform_deg_to_rad(orgXVals.get(), orgXSize);
 
         // FIXME the following part also appears in "changeProjectionByCoordinates"
         string orgXDimName, orgYDimName;
