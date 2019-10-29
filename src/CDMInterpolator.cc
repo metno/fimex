@@ -729,18 +729,14 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     string newYAxis;
     for (map<string, CoordinateSystem_cp>::const_iterator csi = csMap.begin(); csi != csMap.end(); ++csi) {
         CoordinateSystem_cp cs = csi->second;
-        string orgProjection;
         if (cs->hasProjection()) {
-            orgProjection = cs->getProjection()->getName();
-            // remove all other projections, those might confuse other programs, i.e. IDV
-            // this is not int the orgProjection name i.e. stereographic but in the variable name projection_stere
+            // remove all projections, those might confuse other programs, i.e. IDV
             std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
-            for (size_t i = 0; i < gridMappings.size(); i++) {
-                LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
-                cdm.removeVariable(gridMappings[i]);
-                projectionVariables.erase(gridMappings[i]);
+            for (const string& gm : gridMappings) {
+                LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gm);
+                cdm.removeVariable(gm);
+                projectionVariables.erase(gm);
             }
-            LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << orgProjection);
         }
 
         string orgXAxis = cs->getGeoXAxis()->getName();
@@ -759,12 +755,13 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
             newYAxis = orgYAxis;
         } else {
             // use the new x/y-axis in shape for all variables
-            for (map<string, string>::const_iterator varIt = projectionVariables.begin(); varIt != projectionVariables.end(); ++varIt) {
-                LOG4FIMEX(logger, Logger::DEBUG, "changing shape for newX/YAxis for : " << varIt->first);
-                vector<string> shape = cdm.getVariable(varIt->first).getShape();
+            for (const auto& pv : projectionVariables) {
+                const std::string& v = pv.first;
+                LOG4FIMEX(logger, Logger::DEBUG, "changing shape for newX/YAxis for : " << v);
+                vector<string> shape = cdm.getVariable(v).getShape();
                 replace(shape.begin(), shape.end(), orgXAxis, newXAxis);
                 replace(shape.begin(), shape.end(), orgYAxis, newYAxis);
-                cdm.getVariable(varIt->first).setShape(shape);
+                cdm.getVariable(v).setShape(shape);
             }
             cdm.removeVariable(orgXAxis);
             cdm.removeVariable(orgYAxis);
@@ -1229,7 +1226,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         outYAxisRad.resize(out_y_axis.size());
         outYAxis = &outYAxisRad;
         transform_deg_to_rad(&out_y_axis[0], out_y_axis.size(), &outYAxisRad[0]);
-        miupYAxis = MIFI_LONGITUDE;
+        miupYAxis = MIFI_LATITUDE;
         LOG4FIMEX(logger, Logger::DEBUG, "done with outy axis deg->rad");
     }
 
@@ -1245,12 +1242,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         const string& latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         const string& longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
 
-        shared_array<double> orgXVals, orgYVals;
-        size_t orgXYSize, orgXSize;
-        extractValues(p_->dataReader->getScaledData(longitude), orgXVals, orgXSize);
-        extractValues(p_->dataReader->getScaledData(latitude), orgYVals, orgXYSize);
-        transform_deg_to_rad(orgYVals.get(), orgXYSize);
-        transform_deg_to_rad(orgXVals.get(), orgXSize);
+        shared_array<double> orgLonVals, orgLatVals;
+        size_t orgLatSize, orgLonSize;
+        extractValues(p_->dataReader->getScaledData(longitude), orgLonVals, orgLonSize);
+        extractValues(p_->dataReader->getScaledData(latitude), orgLatVals, orgLatSize);
+        transform_deg_to_rad(orgLatVals.get(), orgLatSize);
+        transform_deg_to_rad(orgLonVals.get(), orgLonSize);
 
         // FIXME the following part also appears in "changeProjectionByCoordinates"
         string orgXDimName, orgYDimName;
@@ -1268,33 +1265,36 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
             orgYDimName = cs->getGeoYAxis()->getName();
         }
         LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << orgXDimName << "," << orgYDimName);
-        size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
-        size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
+        const size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
+        const size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
+        size_t orgXYSize;
         if (latLonProj) {
             // create new latVals and lonVals as a matrix
-            lonLatVals2Matrix(orgXVals, orgYVals, orgXDimSize, orgYDimSize);
-            orgXYSize = orgXDimSize * orgYDimSize;
+            lonLatVals2Matrix(orgLonVals, orgLatVals, orgXDimSize, orgYDimSize);
+            orgXYSize = orgLonSize * orgLatSize;
+        } else if (orgLatSize != orgYDimSize * orgXDimSize || orgLonSize != orgLatSize) {
+            throw CDMException("bad org lon/lat size");
+        } else {
+            orgXYSize = orgLonSize;
         }
-        if (orgXYSize != orgXDimSize * orgYDimSize)
-            throw CDMException("bad orgX/YSize");
         // FIXME end of identical part
 
         // translate all input points to output-coordinates, stored in lonVals and latVals
         LOG4FIMEX(logger, Logger::DEBUG, "start reprojection of coordinates");
         std::string orgProjStr = LAT_LON_PROJSTR;
-        if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &orgXVals[0], &orgYVals[0], orgXYSize)) {
+        if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &orgLonVals[0], &orgLatVals[0], orgXYSize)) {
             throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
         }
 
         // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
         LOG4FIMEX(logger, Logger::DEBUG, "start calculating positions");
-        mifi_points2position(&orgXVals[0], orgXYSize, &(*outXAxis)[0], outXAxis->size(), miupXAxis);
-        mifi_points2position(&orgYVals[0], orgXYSize, &(*outYAxis)[0], outYAxis->size(), miupYAxis);
+        mifi_points2position(&orgLonVals[0], orgXYSize, &(*outXAxis)[0], outXAxis->size(), miupXAxis);
+        mifi_points2position(&orgLatVals[0], orgXYSize, &(*outYAxis)[0], outYAxis->size(), miupYAxis);
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = std::make_shared<CachedForwardInterpolation>(orgXDimName, orgYDimName, method, orgXVals, orgYVals, orgXDimSize,
-                                                                                            orgYDimSize, out_x_axis.size(), out_y_axis.size());
+        p_->cachedInterpolation[csIt->first] = std::make_shared<CachedForwardInterpolation>(orgXDimName, orgYDimName, method, orgLonVals, orgLatVals,
+                                                                                            orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
