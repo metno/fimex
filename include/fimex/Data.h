@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -294,28 +294,46 @@ DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last
      */
 DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
 
-/* BELOW follow template implementations */
+template <class T, class InputIterator>
+DataPtr createDataFromIterator(InputIterator first, InputIterator last)
+{
+    const size_t length = std::distance(first, last);
+    shared_array<T> values(new T[length]);
+    std::copy(first, last, values.get());
+    return createData(length, values);
+}
+
 template<class InputIterator>
 DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last)
 {
-    size_t length = std::distance(first, last);
-    // clang-format off
-        switch (datatype) {
-            case CDM_DOUBLE: { shared_array<double> ary(new double[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_FLOAT:  { shared_array<float> ary(new float[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_INT64:    { shared_array<long long> ary(new long long[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_INT:    { shared_array<int> ary(new int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_SHORT:  { shared_array<short> ary(new short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_CHAR:   { shared_array<char> ary(new char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_UINT64:    { shared_array<unsigned long long> ary(new unsigned long long[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_UINT:    { shared_array<unsigned int> ary(new unsigned int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_USHORT:  { shared_array<unsigned short> ary(new unsigned short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_UCHAR:   { shared_array<unsigned char> ary(new unsigned char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
-            case CDM_STRING:  { return createData(std::string(first, last)); }
-            case CDM_NAT:
-            default: break;
-         }
-    // clang-format on
+    switch (datatype) {
+    case CDM_DOUBLE:
+        return createDataFromIterator<double>(first, last);
+    case CDM_FLOAT:
+        return createDataFromIterator<float>(first, last);
+    case CDM_INT64:
+        return createDataFromIterator<long long>(first, last);
+    case CDM_INT:
+        return createDataFromIterator<int>(first, last);
+    case CDM_SHORT:
+        return createDataFromIterator<short>(first, last);
+    case CDM_CHAR:
+        return createDataFromIterator<char>(first, last);
+    case CDM_UINT64:
+        return createDataFromIterator<unsigned long long>(first, last);
+    case CDM_UINT:
+        return createDataFromIterator<unsigned int>(first, last);
+    case CDM_USHORT:
+        return createDataFromIterator<unsigned short>(first, last);
+    case CDM_UCHAR:
+        return createDataFromIterator<unsigned char>(first, last);
+    case CDM_STRING: {
+        return createData(std::string(first, last));
+    }
+    case CDM_NAT:
+    default:
+        break;
+    }
     return createData(0, shared_array<char>(new char[0])); // a dummy dataset
 }
 

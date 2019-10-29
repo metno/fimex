@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -275,9 +275,12 @@ DataPtr DataImpl<C>::slice(const std::vector<size_t>& orgDimSize, const std::vec
     for (size_t i = 0; i < orgDimSize.size(); ++i) {
         outputSize *= outputDimSize[i];
         orgSize *= orgDimSize[i];
-        if (orgDimSize[i] < (startDims[i] + outputDimSize[i])) throw CDMException("dimension-size error, start+size > orgSize: " + type2string(startDims[i]+outputDimSize[i]) + ">" + type2string(orgDimSize[i]) );
+        if (orgDimSize[i] < (startDims[i] + outputDimSize[i]))
+            throw CDMException("dimension-size error, start+size > orgSize: " + type2string(startDims[i] + outputDimSize[i]) + ">" +
+                               type2string(orgDimSize[i]));
     }
-    if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
+    if (orgSize != size())
+        throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
 
     // get the old and new datacontainer
     std::shared_ptr<DataImpl<C>> output(new DataImpl<C>(outputSize));
