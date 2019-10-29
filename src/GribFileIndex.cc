@@ -390,7 +390,7 @@ GribFileMessage::GribFileMessage(std::shared_ptr<grib_handle> gh, const std::str
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
     // time
     // read files internal time-step unit
-    // https://software.ecmwf.int/wiki/display/GRIB/GRIB+API+Frequently+Asked+Questions+FAQ#GRIBAPIFrequentlyAskedQuestionsFAQ-ConfusedaboutstepUnits?
+    // https://confluence.ecmwf.int/display/ECC/Frequently+Asked+Questions#FrequentlyAskedQuestions-ConfusedaboutstepUnits?
     // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "indicatorOfUnitOfTimeRange", msg, &msgLength), 0);
