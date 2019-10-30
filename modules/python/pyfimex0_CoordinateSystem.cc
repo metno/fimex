@@ -77,7 +77,7 @@ void pyfimex0_CoordinateSystem(py::module m)
         .value("Lat", CoordinateAxis::Lat)
         .value("Pressure", CoordinateAxis::Pressure)
         .value("Height", CoordinateAxis::Height)
-        .value("Dpeth", CoordinateAxis::Depth)
+        .value("Depth", CoordinateAxis::Depth)
         .value("ReferenceTime", CoordinateAxis::ReferenceTime)
         .value("Realization", CoordinateAxis::Realization);
 
