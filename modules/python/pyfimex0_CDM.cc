@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_CDM.cc
  *
- * (C) Copyright 2017-2018, met.no
+ * (C) Copyright 2017-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -23,10 +23,6 @@
  *  Created on: Aug 1, 2017
  *      Author: Alexander Bürger
  */
-
-#ifdef HAVE_CONFIG_H
-#include "../config.h"
-#endif // HAVE_CONFIG_H
 
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
