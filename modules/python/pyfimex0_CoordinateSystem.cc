@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_CoordinateSystem.cc
  *
- * (C) Copyright 2018, met.no
+ * (C) Copyright 2018-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -49,12 +49,12 @@ CoordinateSystem_cp findCompleteCoordinateSystemFor1(const std::vector<Coordinat
     return findCompleteCoordinateSystemFor(cs, varName);
 }
 
-CoordinateAxis_cp CoordinateSyste__findAxisOfType1(CoordinateSystem_cp cs, CoordinateAxis::AxisType type)
+CoordinateAxis_cp CoordinateSystem__findAxisOfType1(CoordinateSystem_cp cs, CoordinateAxis::AxisType type)
 {
     return cs->findAxisOfType(type);
 }
 
-CoordinateAxis_cp CoordinateSyste__findAxisOfType2(CoordinateSystem_cp cs, const std::vector<CoordinateAxis::AxisType>& types)
+CoordinateAxis_cp CoordinateSystem__findAxisOfType2(CoordinateSystem_cp cs, const std::vector<CoordinateAxis::AxisType>& types)
 {
     return cs->findAxisOfType(types);
 }
@@ -81,8 +81,8 @@ void pyfimex0_CoordinateSystem(py::module m)
 
     py::class_<CoordinateSystem, CoordinateSystem_p>(m, "_CoordinateSystem")
         .def("id", &CoordinateSystem::id)
-        .def("findAxisOfType", &CoordinateSyste__findAxisOfType1)
-        .def("findAxisOfType", &CoordinateSyste__findAxisOfType2);
+        .def("findAxisOfType", &CoordinateSystem__findAxisOfType1)
+        .def("findAxisOfType", &CoordinateSystem__findAxisOfType2);
 
     m.def("listCoordinateSystems", listCoordinateSystems1);
     m.def("findCompleteCoordinateSystemFor", findCompleteCoordinateSystemFor1);
