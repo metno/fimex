@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_Data.cc
  *
- * (C) Copyright 2017-2018, met.no
+ * (C) Copyright 2017-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -177,26 +177,26 @@ DataPtr Data_createNP(py::array nparray)
 void pyfimex0_Data(py::module m)
 {
     // clang-format off
-  py::enum_<CDMDataType>(m, "CDMDataType")
-      .value("NAT", CDM_NAT)
-      .value("CHAR", CDM_CHAR)
-      .value("SHORT", CDM_SHORT)
-      .value("INT", CDM_INT)
-      .value("FLOAT", CDM_FLOAT)
-      .value("DOUBLE", CDM_DOUBLE)
-      .value("STRING", CDM_STRING)
-      .value("UCHAR", CDM_UCHAR)
-      .value("USHORT", CDM_USHORT)
-      .value("UINT", CDM_UINT)
-      .value("INT64", CDM_INT64)
-      .value("UINT64", CDM_UINT64)
-      .value("STRINGS", CDM_STRINGS)
-      ;
+    py::enum_<CDMDataType>(m, "CDMDataType")
+        .value("NAT", CDM_NAT)
+        .value("CHAR", CDM_CHAR)
+        .value("SHORT", CDM_SHORT)
+        .value("INT", CDM_INT)
+        .value("FLOAT", CDM_FLOAT)
+        .value("DOUBLE", CDM_DOUBLE)
+        .value("STRING", CDM_STRING)
+        .value("UCHAR", CDM_UCHAR)
+        .value("USHORT", CDM_USHORT)
+        .value("UINT", CDM_UINT)
+        .value("INT64", CDM_INT64)
+        .value("UINT64", CDM_UINT64)
+        .value("STRINGS", CDM_STRINGS)
+        ;
 
-  py::class_<Data, DataPtr>(m, "_Data")
-      .def("size", &Data::size)
-      .def("values", Data_values)
-      .def("getDataType", &Data::getDataType);
+    py::class_<Data, DataPtr>(m, "_Data")
+        .def("size", &Data::size)
+        .def("values", Data_values)
+        .def("getDataType", &Data::getDataType);
     // clang-format on
 
     m.def("createData", Data_createNP, "create Data with datatype based on the numpy array type");
