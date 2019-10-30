@@ -1,3 +1,6 @@
+  * 2019-10-30 fimex-1.4.1
+    * bugfixes
+    * new extra test data in tar archive
   * 2019-10-29 fimex-1.4.0
     * support for comilation with proj 6, thanks to github user epifanio
     * support GRIB message selection by typeOfStatisticalProcessing and stepType
