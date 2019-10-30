@@ -10,7 +10,8 @@ MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
 IF (EXISTS "${TEST_EXTRADATA_DIR}/VERSION")
   FILE (STRINGS "${TEST_EXTRADATA_DIR}/VERSION" TEST_EXTRADATA_VERSION)
-  IF ("${TEST_EXTRADATA_VERSION}" STRLESS "20191024T1600")
+  SET (CURRENT_TEST_EXTRADATA_VERSION 20191030T0830)
+  IF ("${TEST_EXTRADATA_VERSION}" STRLESS "${CURRENT_TEST_EXTRADATA_VERSION}")
     MESSAGE (WARNING "Unxpected test data version '${TEST_EXTRADATA_VERSION}' in '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
   ENDIF ()
 ELSE ()
@@ -87,6 +88,7 @@ IF(ENABLE_NETCDF)
     ${NETCDF_MI_SH_TESTS}
     testCharNc.sh
     testInterpolatorFill.sh
+    testInterpolatorLonLat1D.sh
     testInterpolatorLonLat2D.sh
     testInterpolation2DataFillValue.sh
     testPrintSize.sh

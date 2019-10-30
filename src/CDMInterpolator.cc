@@ -389,8 +389,10 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "changing projection to new axes");
-    if (out_x_axis_type == CDM_NAT ||
-            out_y_axis_type == CDM_NAT) {
+    if (out_x_axis.empty() || out_y_axis.empty())
+        throw CDMException("refusing to interpolate to empty grid");
+
+    if (out_x_axis_type == CDM_NAT || out_y_axis_type == CDM_NAT) {
         throw CDMException("axis type of interpolation not well defined");
     }
     *cdm_ = p_->dataReader->getCDM(); // reset previous changes
@@ -1251,21 +1253,23 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         const std::vector<string>& shape_lat = p_->dataReader->getCDM().getVariable(name_lat).getShape();
         const std::vector<string>& shape_lon = p_->dataReader->getCDM().getVariable(name_lon).getShape();
-        if (shape_lat != shape_lon)
-            throw CDMException("need lat and lon with identical shape");
 
         string orgXDimName, orgYDimName;
-        if (!axis_geo_y || !axis_geo_x) {
-            // x and y axis not properly defined, guessing
-            if (shape_lat.size() != 2)
-                throw CDMException("unable to guess x/y from latitude variable with " + type2string(shape_lat.size()) + " dimensions");
-            orgXDimName = shape_lat[0];
-            orgYDimName = shape_lat[1];
-            LOG4FIMEX(logger, Logger::INFO, "guessed x and y axis: " << orgXDimName << "," << orgYDimName);
-        } else {
+        if (axis_geo_y && axis_geo_x) {
             orgXDimName = name_geo_x;
             orgYDimName = name_geo_y;
             LOG4FIMEX(logger, Logger::DEBUG, "x and y axis from GeoX/GeoY: " << orgXDimName << "," << orgYDimName);
+        } else if (shape_lat.size() == 1 && shape_lon.size() == 1) {
+            // x and y axis not properly defined, guessing
+            orgXDimName = shape_lon.front();
+            orgYDimName = shape_lat.front();
+            LOG4FIMEX(logger, Logger::INFO, "guessed x axis from lon and y axis from lat: " << orgXDimName << "," << orgYDimName);
+        } else if (shape_lat.size() == 2 && shape_lat == shape_lon) {
+            orgXDimName = shape_lat[0];
+            orgYDimName = shape_lat[1];
+            LOG4FIMEX(logger, Logger::INFO, "guessed x and y axis from 2D lon/lat: " << orgXDimName << "," << orgYDimName);
+        } else {
+            throw CDMException("unable to guess x/y from latitude variable");
         }
         const size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
         const size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
@@ -1274,8 +1278,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
             // create new latVals and lonVals as a matrix
             lonLatVals2Matrix(orgLonVals, orgLatVals, orgXDimSize, orgYDimSize);
             orgXYSize = orgLonSize * orgLatSize;
-        } else if (orgLatSize != orgYDimSize * orgXDimSize || orgLonSize != orgLatSize) {
-            throw CDMException("bad org lon/lat size");
+        } else if (shape_lat.size() != 2) {
+            throw CDMException("need lat and lon with 1 or 2 dimensions");
         } else {
             orgXYSize = orgLonSize;
         }
