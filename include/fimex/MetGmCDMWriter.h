@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,19 +28,19 @@
 
 namespace MetNoFimex {
 
-    /* forward declarations */
-    class MetGmCDMWriterImpl;
+/* forward declarations */
+class MetGmCDMWriterImpl;
 
-    class MetGmCDMWriter : public CDMWriter
-    {
-    public:
-            MetGmCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile = std::string());
-            ~MetGmCDMWriter();
+class MetGmCDMWriter : public CDMWriter
+{
+public:
+    MetGmCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
+    ~MetGmCDMWriter();
 
-    protected:
-        std::unique_ptr<MetGmCDMWriterImpl> d_ptr;
-    };
+protected:
+    std::unique_ptr<MetGmCDMWriterImpl> d_ptr;
+};
 
-}
+} // namespace MetNoFimex
 
 #endif // METGM_CDMWRITER_HPP

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,14 +26,11 @@
 
 // implementation stuff
 //
-#include "MetGmTimeTag.h"
 #include "MetGmCDMVariableProfile.h"
 #include "MetGmConfigurationMappings.h"
 
 // fimex
 #include "fimex/CDMWriter.h"
-#include "fimex/CDM.h"
-#include "fimex/XMLDoc.h"
 
 // standard
 //
@@ -45,89 +42,89 @@
 
 namespace MetNoFimex {
 
-    /* forwrd decelarations */
-    class MetGmVersion;
-    class MetGmHandlePtr;
-    class MetGmGroup3Ptr;
-    class MetGmFileHandlePtr;
-    class MetGmTimeTag;
-    class MetGmXTag;
-    class MetGmYTag;
-    class MetGmTags;
+class CDMAttribute;
+class CDMVariable;
+class XMLDoc;
 
-    class MetGmCDMWriterImpl : public CDMWriter
-    {
-    public:
-        /**
-         * @param cdmReader dataSource
-         * @param outputFile file-name to write to
-         * @param configFile xml-configuration
-         */
-        explicit MetGmCDMWriterImpl
-                (
-                        CDMReader_p cdmReader,
-                        const std::string& outputFile,
-                        const std::string& configFile
-                );
+/* forwrd decelarations */
+class MetGmVersion;
+class MetGmHandlePtr;
+class MetGmGroup3Ptr;
+class MetGmFileHandlePtr;
+class MetGmTags;
+class MetGmTimeTag;
+class MetGmXTag;
+class MetGmYTag;
+class MetGmTags;
 
-        virtual ~MetGmCDMWriterImpl();
+class MetGmCDMWriterImpl : public CDMWriter
+{
+public:
+    /**
+     * @param cdmReader dataSource
+     * @param outputFile file-name to write to
+     * @param configFile xml-configuration
+     */
+    explicit MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
 
-       /**
-         * @warning only public for testing
-         * @return the new name of a variable, eventually changed by the writers config
-         */
-        const std::string& getVariableName(const std::string& varName) const;
-        /**
-         * @warning only public for testing
-         * @return the new name of a dimension, eventually changed by the writers config
-         */
-        const std::string& getDimensionName(const std::string& dimName) const;
-        /**
-         * @warning only public for testing
-         * @param varName original variable name  (before config: newname)
-         * @param attName original attribute name (before config: newname)
-         * @return an attribute contained in the writers attribute, possibly added by config
-         */
-        const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
+    ~MetGmCDMWriterImpl();
 
-    protected:
+    virtual void configureAndWrite();
 
-        explicit MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile);
+    /**
+     * @warning only public for testing
+     * @return the new name of a variable, eventually changed by the writers config
+     */
+    const std::string& getVariableName(const std::string& varName) const;
+    /**
+     * @warning only public for testing
+     * @return the new name of a dimension, eventually changed by the writers config
+     */
+    const std::string& getDimensionName(const std::string& dimName) const;
+    /**
+     * @warning only public for testing
+     * @param varName original variable name  (before config: newname)
+     * @param attName original attribute name (before config: newname)
+     * @return an attribute contained in the writers attribute, possibly added by config
+     */
+    const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
 
-        void configure(const std::unique_ptr<XMLDoc>& doc);
+protected:
+    typedef std::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-        void writeGroup0Data();
-        void writeGroup1Data();
-        void writeGroup2Data();
-        void writeHeader();
+    explicit MetGmCDMWriterImpl(CDMReader_p cdmReader, const std::string& outputFile);
 
-        void writeGroup3Data(const CDMVariable* pVar);
-        void writeGroup3VerticalAxis(const CDMVariable* pVar);
-        void writeGroup3TimeAxis(const CDMVariable* pVar);
-        void writeGroup3HorizontalAxis(const CDMVariable* pVar);
+    virtual void configure(const std::unique_ptr<XMLDoc>& doc);
+    virtual void init();
+    virtual void write();
 
-        void writeGroup4Data(const CDMVariable* pVar);
+    void writeGroup0Data();
+    void writeGroup1Data();
+    void writeGroup2Data();
+    void writeHeader();
 
+    void writeGroup3Data(const MetGmCDMVariableProfile& profile);
+    void writeGroup3VerticalAxis(const MetGmTagsPtr& tags);
+    void writeGroup3TimeAxis(const MetGmTagsPtr& tags);
+    void writeGroup3HorizontalAxis(const MetGmTagsPtr& tags);
 
-        virtual void init();
-        virtual void writeGroup5Data(const CDMVariable* pVar);
+    void writeGroup4Data(const MetGmCDMVariableProfile& profile);
 
-        typedef std::shared_ptr<MetGmTags> MetGmTagsPtr;
+    virtual void writeGroup5Data(const MetGmCDMVariableProfile& profile, const CDMVariable* pVar);
 
-        std::string                                 configFileName_;
+protected:
+    std::unique_ptr<XMLDoc> xmlConfig_;
 
-        std::shared_ptr<MetGmVersion> metgmVersion_;
-        std::shared_ptr<MetGmHandlePtr> metgmHandle_;
-        std::shared_ptr<MetGmFileHandlePtr> metgmFileHandle_;
-        std::shared_ptr<MetGmTimeTag> metgmTimeTag_;
+    std::shared_ptr<MetGmVersion> metgmVersion_;
+    std::shared_ptr<MetGmHandlePtr> metgmHandle_;
+    std::shared_ptr<MetGmFileHandlePtr> metgmFileHandle_;
+    std::shared_ptr<MetGmTimeTag> metgmTimeTag_;
 
-        time_point analysisTime_;
+    xml_configuration xmlConfiguration_;
+    cdm_configuration cdmConfiguration_;
+};
 
-        xml_configuration                           xmlConfiguration_;
-        cdm_configuration                           cdmConfiguration_;
-    };
-
-}
+} // namespace MetNoFimex
 
 #endif // METGM_CDMWRITERIMPL_HPP
 

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -209,8 +209,7 @@ void MetGmGroup5Ptr::toFimexLayout()
 }
 
 std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
-                                                                               const std::shared_ptr<MetGmGroup3Ptr> pg3, const std::string& fillValue,
-                                                                               const std::string& addOffset, const std::string& scaleFactor)
+                                                                               const std::shared_ptr<MetGmGroup3Ptr> pg3)
 {
     std::shared_ptr<MetGmHDTag> hdtag = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
 
@@ -277,8 +276,6 @@ std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(c
         default:
         throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
     }
-
-    return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, shared_array<float>(), fillValue));
 }
 
 std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
@@ -625,8 +622,6 @@ std::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(c
             default:
             throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
         }
-
-        return std::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, shared_array<float>()));
     }
 
     /*

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -20,7 +20,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-
 
 // internals
 //
@@ -45,13 +44,12 @@
 namespace MetNoFimex {
 
 std::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
-                                                                const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id,
-                                                                const std::string fillValue, const std::string addOffset, const std::string scaleFactor)
+                                                                const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id)
 {
     std::shared_ptr<MetGmTags> tags = std::shared_ptr<MetGmTags>(new MetGmTags);
     tags->pGp3_ = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
     tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
-    tags->pGp5_ = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_, fillValue, addOffset, scaleFactor);
+    tags->pGp5_ = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_);
 
     if (tags->pGp5_.get() && tags->dimTag_.get() && tags->pGp3_.get())
         return tags;
@@ -93,10 +91,22 @@ std::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_
             return std::shared_ptr<MetGmTags>();
     }
 
-    const unsigned short MetGmTags::p_id() const { return pGp3_->p_id(); }
-    const int MetGmTags::pr() const { return pGp3_->pr(); }
-    const int MetGmTags::pz() const { return pGp3_->pz(); }
-    const unsigned short MetGmTags::hd() const { return dimTag_->asShort(); }
+    unsigned short MetGmTags::p_id() const
+    {
+        return pGp3_->p_id();
+    }
+    int MetGmTags::pr() const
+    {
+        return pGp3_->pr();
+    }
+    int MetGmTags::pz() const
+    {
+        return pGp3_->pz();
+    }
+    unsigned short MetGmTags::hd() const
+    {
+        return dimTag_->asShort();
+    }
 
     int MetGmTags::set_nt(int nt)   { return pGp3_->set_nt(nt); }
     int MetGmTags::set_dt(float dt) { return pGp3_->set_dt(dt); }
@@ -130,8 +140,14 @@ std::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_
         return dimTag_->tTag();
     }
 
-    const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
-    const unsigned long MetGmTags::sliceDataSize() { return dimTag_->sliceSize(); }
+    unsigned long MetGmTags::totalDataSize()
+    {
+        return dimTag_->totalSize();
+    }
+    unsigned long MetGmTags::sliceDataSize()
+    {
+        return dimTag_->sliceSize();
+    }
 
     void MetGmTags::sliceToMetGmLayout(shared_array<float>& slice)
     {
@@ -147,7 +163,8 @@ std::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const CDMReader_
     {
         return pGp5_->data();
     }
-    const std::string MetGmTags::units() const { return pGp5_->units(); }
+    std::string MetGmTags::units() const
+    {
+        return pGp5_->units();
+    }
 }
-
-

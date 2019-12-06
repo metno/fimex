@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,48 +26,45 @@
 
 // fimex
 //
-#include "fimex/CDMReader.h"
-#include "fimex/CDMAttribute.h"
-
-// libxml2
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
+#include "fimex/CDMReaderDecl.h"
 
 #include <memory>
 
 namespace MetNoFimex {
 
-    #define FREE_TEXT "metgm_free_text"
-    #define VERSION   "metgm_version"
-    #define ANALYSIS_DATE_TIME "metgm_analysis_date_time"
-    #define START_DATE_TIME "metgm_start_date_time"
-    #define DATA_TYPE "metgm_data_type"
-    #define MODEL_TYPE "metgm_model_type"
-    #define PRODUCTION_NATION "metgm_production_nation"
+extern const std::string FREE_TEXT;
+extern const std::string VERSION;
+extern const std::string ANALYSIS_DATE_TIME;
+extern const std::string START_DATE_TIME;
+extern const std::string DATA_TYPE;
+extern const std::string MODEL_TYPE;
+extern const std::string PRODUCTION_NATION;
 
-    class MetGmCommentAttributeParser {
-    public:
-        static std::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader);
+class MetGmCommentAttributeParser
+{
+public:
+    static std::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader);
 
-        std::string freeText()         {return freeText_; }
-        std::string version()          {return version_; }
-        std::string dataType()         {return dataType_; }
-        std::string modelType()        {return modelType_; }
-        std::string productNation()    {return productNation_; }
-        std::string analysisDateTime() {return analysisDateTime_; }
-        std::string startDateTime()    {return startDateTime_; }
+    const std::string& freeText() const { return freeText_; }
+    const std::string& version() const { return version_; }
+    const std::string& dataType() const { return dataType_; }
+    const std::string& modelType() const { return modelType_; }
+    const std::string& productNation() const { return productNation_; }
+    const std::string& analysisDateTime() const { return analysisDateTime_; }
+    const std::string& startDateTime() const { return startDateTime_; }
 
-    private:
-        MetGmCommentAttributeParser() { }
+private:
+    MetGmCommentAttributeParser() {}
 
-        std::string freeText_;
-        std::string version_;
-        std::string dataType_;
-        std::string modelType_;
-        std::string productNation_;
-        std::string analysisDateTime_;
-        std::string startDateTime_;
-    };
-}
+    std::string freeText_;
+    std::string version_;
+    std::string dataType_;
+    std::string modelType_;
+    std::string productNation_;
+    std::string analysisDateTime_;
+    std::string startDateTime_;
+};
+
+} // namespace MetNoFimex
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -48,9 +48,7 @@ namespace MetNoFimex {
     class MetGmTags {
     public:
         static std::shared_ptr<MetGmTags> createMetGmTagsForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
-                                                                    const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id,
-                                                                    const std::string fillValue = std::string(), const std::string addOffset = std::string(),
-                                                                    const std::string scaleFactor = std::string());
+                                                                    const std::shared_ptr<MetGmHandlePtr> mgmHandle, const unsigned short p_id);
 
         static std::shared_ptr<MetGmTags> createMetGmTagsForReading(const std::shared_ptr<MetGmGroup1Ptr> pGp1, const std::shared_ptr<MetGmGroup2Ptr> pGp2,
                                                                     const std::shared_ptr<MetGmVerticalTag> vTag);
@@ -65,11 +63,11 @@ namespace MetNoFimex {
         const std::shared_ptr<MetGmGroup3Ptr>& gp3() { return pGp3_; }
         //        const std::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
 
-        const unsigned short p_id()  const;
-        const int            pr()    const;
-        const int            pz()    const;
-        const unsigned short hd()    const;
-        const std::string    units() const;
+        unsigned short p_id() const;
+        int pr() const;
+        int pz() const;
+        unsigned short hd() const;
+        std::string units() const;
 
         int set_nt(int nt);
         int set_dt(float dt);
@@ -86,8 +84,8 @@ namespace MetNoFimex {
         int set_dy(float dy);
         int set_cy(float cy);
 
-        const unsigned long totalDataSize();
-        const unsigned long sliceDataSize();
+        unsigned long totalDataSize();
+        unsigned long sliceDataSize();
         const shared_array<float>& data();
 
         std::shared_ptr<MetGmXTag>& xTag();

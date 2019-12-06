@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -32,89 +32,40 @@
 //
 #include "metgm.h"
 
-// Fimex
-//
-#include "fimex/XMLDoc.h"
-
-// libxml2
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
-
 // standard
 //
 #include <memory>
 #include <string>
 
 namespace MetNoFimex {
+class XMLDoc;
 
-    #define VERSION   "metgm_version"
+class MetGmVersion
+{
+public:
+    static std::shared_ptr<MetGmVersion> createMetGmVersion(mgm_version version);
 
-    class MetGmVersion {
-    public:
-        static std::shared_ptr<MetGmVersion> createMetGmVersion(mgm_version version)
-        {
-            std::shared_ptr<MetGmVersion> pVersion = std::shared_ptr<MetGmVersion>(new MetGmVersion(version));
-            return pVersion;
-        }
+    static std::shared_ptr<MetGmVersion> createMetGmVersion(const std::unique_ptr<XMLDoc>& doc);
 
-        static std::shared_ptr<MetGmVersion> createMetGmVersion(const std::unique_ptr<XMLDoc>& doc)
-        {
+    std::string getAsString() const;
 
-            mgm_version version = MGM_Edition1;
+    inline bool operator==(const MetGmVersion& rh) const { return version_ == rh.version_; }
 
-            if(doc.get()) {
-                xmlXPathObject_p xpathObj = doc->getXPathObject("/metgm/meta_data/attribute");
-                xmlNodeSetPtr nodes = xpathObj->nodesetval;
-                size_t size = (nodes) ? nodes->nodeNr : 0;
-                for (size_t i = 0; i < size; ++i) {
-                    xmlNodePtr node = nodes->nodeTab[i];
-                    std::string attributeName = getXmlProp(node, "name");
-                    if(attributeName == std::string(VERSION)) {
-                        std::string strVersion = getXmlProp(node, "value");
-                        if(strVersion.find("Edition_2") != std::string::npos) {
-                            version = MGM_Edition2;
-                        }
-                    }
-                }
-            }
-            return std::shared_ptr<MetGmVersion>(new MetGmVersion(version));
-        }
+    inline bool operator==(const mgm_version rh_version) const { return version_ == rh_version; }
 
-        inline std::string getAsString()
-        {
-            if(version_ == MGM_Edition1)
-                return std::string("STANAG 6022 Edition 1");
-            else if(version_ == MGM_Edition2)
-                return std::string("STANAG 6022 Edition 2");
-            else
-                return std::string("Unknown STANAG 6022 Edition");
-        }
+    inline operator mgm_version() const { return version_; }
 
-        inline bool operator == (const MetGmVersion &rh) const
-        {
-            return version_ == rh.version_;
-        }
+    inline mgm_version as_mgm_version() const { return version_; }
 
-        inline bool operator == (const mgm_version rh_version) const
-        {
-            return version_ == rh_version;
-        }
+private:
+    mgm_version version_;
 
-        inline operator mgm_version ()
-        {
-            return version_;
-        }
+    explicit MetGmVersion(mgm_version version)
+        : version_(version)
+    {
+    }
+};
 
-        inline mgm_version as_mgm_version()
-        {
-            return version_;
-        }
-
-    private:
-        mgm_version version_;
-
-        explicit MetGmVersion(mgm_version version) : version_(version) { }
-    };
-}
+} // namespace MetNoFimex
 
 #endif // METGM_VERSION_H

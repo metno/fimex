@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -50,9 +50,7 @@ namespace MetNoFimex {
     class MetGmGroup5Ptr {
     public:
         static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable,
-                                                                              const std::shared_ptr<MetGmGroup3Ptr> gp3, const std::string& fillvalue,
-                                                                              const std::string& addOffset = std::string(),
-                                                                              const std::string& scaleFactor = std::string());
+                                                                              const std::shared_ptr<MetGmGroup3Ptr> gp3);
 
         static std::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(const std::shared_ptr<MetGmGroup3Ptr> gp3,
                                                                               const std::shared_ptr<MetGmHDTag> hdTag);

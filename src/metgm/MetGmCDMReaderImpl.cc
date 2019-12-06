@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -370,7 +370,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
         if (pIt == cdmConfiguration_.end())
             throw CDMException("can't find X / Y axis");
 
-        MetGmCDMVariableProfile profile = *pIt;
+        const MetGmCDMVariableProfile& profile = *pIt;
 
         // long and lat as dimensions on its own
         std::string xName = "longitude";
@@ -705,13 +705,14 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
             for (; pIt != xmlConfiguration_.end(); pIt = nIt) {
                 nIt = pIt;
                 nIt = std::find_if(++nIt, xmlConfiguration_.end(), byPId);
-                if (nIt == xmlConfiguration_.end() || (!pIt->units_.empty() && pIt->units_ == strUnit)) {
-                    kildeName = pIt->cdmName_;
-                    // strUnit = pIt->units_;
-                    standardName = pIt->standardName_;
-                    fillValue = pIt->fillValue_;
-                    addOffset = pIt->addOffset_;
-                    scaleFactor = pIt->scaleFactor_;
+                const MetGmConfigurationMappings& cm = *pIt;
+                if (nIt == xmlConfiguration_.end() || (!cm.units_.empty() && cm.units_ == strUnit)) {
+                    kildeName = cm.cdmName_;
+                    // strUnit = cm.units_;
+                    standardName = cm.standardName_;
+                    fillValue = cm.fillValue_;
+                    addOffset = cm.addOffset_;
+                    scaleFactor = cm.scaleFactor_;
                     break;
                 }
             }
@@ -741,8 +742,7 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
                 profile.fillValue_ = fillValue;
                 profile.addOffset_ = addOffset;
                 profile.scaleFactor_ = scaleFactor;
-                cdmConfiguration_.insert(profile);
-
+                cdmConfiguration_.push_back(profile);
             }
         }
     }
@@ -767,4 +767,5 @@ MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLIn
             return;
         }
     }
-}
+
+    } // namespace MetNoFimex

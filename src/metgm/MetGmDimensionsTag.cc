@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -21,7 +21,6 @@
  * USA.
  */
 
-
 // internals
 //
 #include "MetGmDimensionsTag.h"
@@ -37,19 +36,49 @@ namespace MetNoFimex {
 
 std::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTagForWriting(const CDMReader_p pCdmReader, const CDMVariable* pVariable)
 {
-
     std::shared_ptr<MetGmHDTag> tag = std::shared_ptr<MetGmHDTag>(new MetGmHDTag);
 
     tag->pXTag_ = MetGmHorizontalTag::createMetGmXTagForWriting(pCdmReader, pVariable);
-    bool hasXAxis = tag->pXTag_.get() ? true : false;
+    bool hasXAxis = tag->pXTag_ && tag->xTag()->nx() > 1;
 
     tag->pYTag_ = MetGmHorizontalTag::createMetGmYTagForWriting(pCdmReader, pVariable);
-    bool hasYAxis = tag->pYTag_.get() ? true : false;
+    bool hasYAxis = tag->pYTag_ && tag->yTag()->ny() > 1;
 
     tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForWriting(pCdmReader, pVariable);
-    bool hasZAxis = tag->pZTag_.get() ? true : false;
+    bool hasZAxis = tag->pZTag_ && tag->pZTag_->nz() > 1;
 
     tag->pTTag_ = MetGmTimeTag::createMetGmTimeTagForWriting(pCdmReader, pVariable);
+    bool hasTAxis = tag->pTTag_ && tag->pTTag_->nT() > 1;
+
+    if (hasZAxis && hasXAxis && hasYAxis) {
+        tag->hd_ = hasTAxis ? HD_3D_T : HD_3D;
+    } else if ((hasXAxis && hasYAxis) || (hasZAxis && hasYAxis) || (hasZAxis && hasXAxis)) {
+        tag->hd_ = hasTAxis ? HD_2D_T : HD_2D;
+    } else if (hasYAxis || hasXAxis || hasZAxis) {
+        tag->hd_ = hasTAxis ? HD_1D_T : HD_1D;
+    } else {
+        tag->hd_ = hasTAxis ? HD_0D_T : HD_0D;
+    }
+
+    tag->sliceSize_ = (hasXAxis ? tag->pXTag_->nx() : 1) * (hasYAxis ? tag->pYTag_->ny() : 1) * (hasZAxis ? tag->pZTag_->nz() : 1);
+
+    tag->totalSize_ = tag->sliceSize() * ((hasTAxis) ? tag->pTTag_->nT() : 1);
+
+    return tag;
+}
+
+std::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(const std::shared_ptr<MetGmGroup1Ptr> pGp1, const std::shared_ptr<MetGmGroup3Ptr> pGp3,
+                                                                 const std::shared_ptr<MetGmVerticalTag> vTag)
+{
+    std::shared_ptr<MetGmHDTag> tag = std::shared_ptr<MetGmHDTag>(new MetGmHDTag);
+    tag->pTTag_ = MetGmTimeTag::createMetGmTimeTagForReading(pGp1, pGp3);
+    tag->pXTag_ = MetGmHorizontalTag::createMetGmXTagForReading(pGp3);
+    tag->pYTag_ = MetGmHorizontalTag::createMetGmYTagForReading(pGp3);
+    tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForReading(pGp3, vTag);
+
+    bool hasXAxis = tag->pXTag_.get() ? true : false;
+    bool hasYAxis = tag->pYTag_.get() ? true : false;
+    bool hasZAxis = tag->pZTag_.get() ? true : false;
     bool hasTAxis = tag->pTTag_.get() ? true : false;
 
     if (hasZAxis && hasXAxis && hasYAxis) {
@@ -67,41 +96,6 @@ std::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTagForWriting(const
     tag->totalSize_ = tag->sliceSize() * ((hasTAxis) ? tag->pTTag_->nT() : 1);
 
     return tag;
-    }
-
-    std::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(const std::shared_ptr<MetGmGroup1Ptr> pGp1, const std::shared_ptr<MetGmGroup3Ptr> pGp3,
-                                                                     const std::shared_ptr<MetGmVerticalTag> vTag)
-    {
-        std::shared_ptr<MetGmHDTag> tag = std::shared_ptr<MetGmHDTag>(new MetGmHDTag);
-
-        tag->pTTag_ = MetGmTimeTag::createMetGmTimeTagForReading(pGp1, pGp3);
-        tag->pXTag_ = MetGmHorizontalTag::createMetGmXTagForReading(pGp3);
-        tag->pYTag_ = MetGmHorizontalTag::createMetGmYTagForReading(pGp3);
-        tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForReading(pGp3, vTag);
-
-        bool hasXAxis = tag->pXTag_.get() ? true : false;
-        bool hasYAxis = tag->pYTag_.get() ? true : false;
-        bool hasZAxis = tag->pZTag_.get() ? true : false;
-        bool hasTAxis = tag->pTTag_.get() ? true : false;
-
-        if(hasZAxis && hasXAxis && hasYAxis) {
-            tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
-        } else if((hasXAxis && hasYAxis) || (hasZAxis && hasYAxis) || (hasZAxis && hasXAxis)) {
-            tag->hd_= hasTAxis ? HD_2D_T : HD_2D;
-        } else if((hasYAxis) || (hasXAxis) || (hasZAxis)) {
-            tag->hd_= hasTAxis ? HD_1D_T : HD_1D;
-        } else {
-            tag->hd_= hasTAxis ?  HD_0D_T : HD_0D;
-        }
-
-        tag->sliceSize_ = (hasXAxis ? tag->pXTag_->nx() : 1)
-                * (hasYAxis ? tag->pYTag_->ny() : 1)
-                * (hasZAxis ? tag->pZTag_->nz() : 1);
-
-        tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTTag_->nT() : 1 );
-
-        return tag;
-    }
 }
 
-
+} // namespace MetNoFimex

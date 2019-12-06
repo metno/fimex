@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,9 +28,10 @@
 // fimex
 //
 #include "fimex/CDM.h"
+#include "fimex/CDMAttribute.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Logger.h"
-#include "fimex/Units.h"
 #include "fimex/XMLDoc.h"
 
 // libxml2
@@ -38,14 +39,17 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-
-// standard
-//
-#include <iostream>
-
 namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute");
+
+const std::string FREE_TEXT = "metgm_free_text";
+const std::string VERSION = "metgm_version";
+const std::string ANALYSIS_DATE_TIME = "metgm_analysis_date_time";
+const std::string START_DATE_TIME = "metgm_start_date_time";
+const std::string DATA_TYPE = "metgm_data_type";
+const std::string MODEL_TYPE = "metgm_model_type";
+const std::string PRODUCTION_NATION = "metgm_production_nation";
 
 std::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::createMetGmCommentAttributeParser(const CDMReader_p& pCdmReader)
 {
@@ -65,19 +69,19 @@ std::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::create
                 for (size_t i = 0; i < size; ++i) {
                     xmlNodePtr node = nodes->nodeTab[i];
                     std::string attributeName = getXmlProp(node, "name");
-                    if(attributeName == std::string(FREE_TEXT)) {
+                    if (attributeName == FREE_TEXT) {
                         parser->freeText_ = getXmlProp(node, "value");
-                    } else if(attributeName == std::string(VERSION)) {
+                    } else if (attributeName == VERSION) {
                         parser->version_ = getXmlProp(node, "value");
-                    } else if(attributeName == std::string(DATA_TYPE)) {
+                    } else if (attributeName == DATA_TYPE) {
                         parser->dataType_ = getXmlProp(node, "value");
-                    }  else if(attributeName == std::string(MODEL_TYPE)) {
+                    } else if (attributeName == MODEL_TYPE) {
                         parser->modelType_ = getXmlProp(node, "value");
-                    } else if(attributeName == std::string(PRODUCTION_NATION)) {
+                    } else if (attributeName == PRODUCTION_NATION) {
                         parser->productNation_ = getXmlProp(node, "value");
-                    } else if(attributeName == std::string(ANALYSIS_DATE_TIME)) {
+                    } else if (attributeName == ANALYSIS_DATE_TIME) {
                         parser->analysisDateTime_ = getXmlProp(node, "value");
-                    } else if(attributeName == std::string(START_DATE_TIME)) {
+                    } else if (attributeName == START_DATE_TIME) {
                         parser->startDateTime_ = getXmlProp(node, "value");
                     }
                 }
@@ -91,4 +95,4 @@ std::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::create
     return parser;
 }
 
-}
+} // namespace MetNoFimex

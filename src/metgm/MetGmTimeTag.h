@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -35,8 +35,6 @@
 #include <vector>
 
 namespace MetNoFimex {
-
-#define ANALYSIS_DATE_TIME "metgm_analysis_date_time"
 
     class CDMVariable;
     class MetGmGroup1Ptr;

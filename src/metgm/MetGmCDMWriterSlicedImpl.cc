@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,110 +24,53 @@
 #include "MetGmCDMWriterSlicedImpl.h"
 
 #include "fimex/CDMException.h"
-
-// private/implementation code
-//
-#include "MetGmTags.h"
-#include "MetGmUtils.h"
-#include "MetGmVersion.h"
 #include "MetGmHandlePtr.h"
-#include "MetGmGroup1Ptr.h"
-#include "MetGmGroup2Ptr.h"
-#include "MetGmGroup3Ptr.h"
-#include "MetGmGroup5Ptr.h"
-#include "MetGmFileHandlePtr.h"
-#include "MetGmConfigurationMappings.h"
-
-#include <cassert>
 
 namespace MetNoFimex {
-    MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl
-        (
-            CDMReader_p cdmReader,
-            const std::string& outputFile,
-            const std::string& configFile
-        )
-        : MetGmCDMWriterImpl(cdmReader, outputFile)
-    {
-        configFileName_ = configFile;
-        if (configFileName_ == "") throw CDMException("metgm requires configFile");
-        std::unique_ptr<XMLDoc> xmlDoc(new XMLDoc(configFileName_));
 
-        metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTagGlobal(cdmReader);
-        metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);
-        metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForWriting(outputFile);
-        metgmHandle_ = MetGmHandlePtr::createMetGmHandleForWriting(metgmFileHandle_, metgmVersion_);
+MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
+    : MetGmCDMWriterImpl(cdmReader, outputFile, configFile)
+{
+}
 
-        configure(xmlDoc);
+void MetGmCDMWriterSlicedImpl::init()
+{
+    for (xml_configuration::const_iterator pIt : sorted_by_pid(xmlConfiguration_)) {
+        const MetGmConfigurationMappings& entry = *pIt;
 
-        init();
-    }
-
-    MetGmCDMWriterSlicedImpl::~MetGmCDMWriterSlicedImpl() { }
-
-    void MetGmCDMWriterSlicedImpl::init()
-    {
-        for (xml_configuration::const_iterator pIt : sorted_by_pid(xmlConfiguration_)) {
-            const MetGmConfigurationMappings& entry = *pIt;
-
-            MetGmTagsPtr tags;
-
-            if (std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(entry.cdmName_)) != cdmConfiguration_.end()) {
-                throw CDMException("hmmm... the variable should not be found in cdm profile map");
-            }
-
-            const CDMVariable* pVariable = &cdmReader->getCDM().getVariable(entry.cdmName_);
-
-            tags = MetGmTags::createMetGmTagsForSlicedWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_);
-
-            if(!tags.get()) {
-                MGM_MESSAGE_POINT(std::string(" MetGmTag null -- not writing variable :").append(entry.cdmName_))
-                continue;
-            }
-
-            MetGmCDMVariableProfile profile(entry.p_id_, entry.cdmName_, tags);
-            // make sure that units are aligned
-            profile.units_ = tags->units();
-            cdmConfiguration_.insert(profile);
+        if (std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(entry.cdmName_)) != cdmConfiguration_.end()) {
+            throw CDMException("hmmm... the variable should not be found in cdm profile map");
         }
 
-        writeGroup0Data();
-        writeGroup1Data();
-        writeGroup2Data();
+        const CDMVariable* pVariable = &cdmReader->getCDM().getVariable(entry.cdmName_);
 
-        writeHeader();
-
-        const CDM& cdmRef = cdmReader->getCDM();
-        cdm_configuration::const_iterator varIt;
-        for(varIt = cdmConfiguration_.begin(); varIt != cdmConfiguration_.end(); ++varIt) {
-            const CDMVariable* pVariable = &cdmRef.getVariable(varIt->cdmName_);
-            writeGroup3Data(pVariable);
-            writeGroup4Data(pVariable);
-            writeGroup5Data(pVariable);
-        }
-    }
-
-    void MetGmCDMWriterSlicedImpl::writeGroup5Data(const CDMVariable* pVar)
-    {
-        const MetGmCDMVariableProfile& profile =
-            *std::find_if(cdmConfiguration_.begin(), cdmConfiguration_.end(), MetGmCDMVariableProfileEqName(pVar->getName()));
-
-        assert(profile.pTags_.get());
-
-        size_t total_num_of_slices = 0;
-        if(!profile.pTags_->tTag().get()) {
-            total_num_of_slices = 1;
-        } else {
-            total_num_of_slices = profile.pTags_->tTag()->nT();
+        MetGmTagsPtr tags = MetGmTags::createMetGmTagsForSlicedWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_);
+        if (!tags) {
+            MGM_MESSAGE_POINT(std::string(" MetGmTag null -- not writing variable :").append(entry.cdmName_))
+            continue;
         }
 
-        for(size_t slice_index = 0; slice_index < total_num_of_slices; ++slice_index)
-        {
-            size_t cSlicePos = -1;
-            DataPtr raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
-            shared_array<float> slice_to_write = raw_slice->asFloat();
-            profile.pTags_->sliceToMetGmLayout(slice_to_write);
-            MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));
-        }
+        MetGmCDMVariableProfile profile(entry.p_id_, entry.cdmName_, tags);
+        // make sure that units are aligned
+        profile.units_ = tags->units();
+        cdmConfiguration_.push_back(profile);
     }
 }
+
+void MetGmCDMWriterSlicedImpl::writeGroup5Data(const MetGmCDMVariableProfile& profile, const CDMVariable* pVar)
+{
+    size_t total_num_of_slices = 1;
+    if (profile.pTags_->tTag()) {
+        total_num_of_slices = profile.pTags_->tTag()->nT();
+    }
+
+    for (size_t slice_index = 0; slice_index < total_num_of_slices; ++slice_index) {
+        size_t cSlicePos = -1;
+        DataPtr raw_slice = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
+        shared_array<float> slice_to_write = raw_slice->asFloat();
+        profile.pTags_->sliceToMetGmLayout(slice_to_write);
+        MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));
+    }
+}
+
+} // namespace MetNoFimex

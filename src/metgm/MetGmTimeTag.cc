@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,6 +24,7 @@
 // internals
 //
 #include "MetGmTimeTag.h"
+#include "MetGmCommentAttributeParser.h"
 #include "MetGmGroup1Ptr.h"
 #include "MetGmGroup3Ptr.h"
 
@@ -47,7 +48,7 @@ namespace MetNoFimex {
 
 std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDMReader_p pCdmReader)
 {
-    if(!pCdmReader.get())
+    if (!pCdmReader)
         throw CDMException("createMetGmTimeTag: pCdmReader is null");
 
     const CDM& cdmRef = pCdmReader->getCDM();
@@ -55,10 +56,8 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const CDMRe
     if( !(cdmRef.hasDimension("time") && cdmRef.hasVariable("time")) )
         throw CDMException("createMetGmTimeTag: cdm model doesn't have the 'time'");
 
-    std::shared_ptr<MetGmTimeTag> TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag());
-
+    std::shared_ptr<MetGmTimeTag> TTag(new MetGmTimeTag);
     TTag->init(pCdmReader);
-
     return TTag;
 }
 
@@ -66,56 +65,45 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const C
 {
     std::shared_ptr<MetGmTimeTag> TTag;
 
-    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
-    const CDM& cdmRef = pCdmReader->getCDM();
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(listCoordinateSystems(pCdmReader), pVariable->getName());
+    if (cs && cs->isSimpleSpatialGridded() && cs->getTimeAxis()) {
+        TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
-    if (cs.get()) {
-        if(cs->isSimpleSpatialGridded()) {
+        CoordinateAxis_cp tAxis = cs->getTimeAxis();
+        if (tAxis->getAxisType() != CoordinateAxis::Time)
+            throw CDMException("time axis not found");
 
-            CoordinateAxis_cp tAxis = cs->getTimeAxis();
+        DataPtr data = pCdmReader->getData(tAxis->getName());
 
-            if(!tAxis.get()) {
-                return std::shared_ptr<MetGmTimeTag>();
-            }
+        TTag->nT_ = data->size();
 
-            TTag = std::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
+        const CDM& cdmRef = pCdmReader->getCDM();
+        const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
+        const std::string t_unit = tUnitAttribute.getStringValue();
+        const TimeUnit kilde_tu(t_unit);
 
-            if(tAxis->getAxisType() != CoordinateAxis::Time)
-                throw CDMException("time axis not found");
+        const shared_array<double> tArray = data->asDouble();
 
-            DataPtr data = pCdmReader->getData(tAxis->getName());
-
-            TTag->nT_ = data->size();
-
-            const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
-            const std::string t_unit = tUnitAttribute.getStringValue();
-            const TimeUnit kilde_tu(t_unit);
-
-            const shared_array<double> tArray = data->asDouble();
-
-            for(size_t index = 0; index < data->size(); ++index) {
-                time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
-                TTag->points_.push_back(t);
-            }
-
-            TTag->extractStartDateTime();
-
-            TTag->extractAnalysisDateTime(pCdmReader);
-
-            if(TTag->hasNegativeTimePoints())
-                throw CDMException("negative values on the time axis not supported");
-
-            if(TTag->hasNonEquidistantTimePoints())
-                throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
-
-            if(TTag->points_.size() <= 1) {
-                TTag->dT_ = 3600;
-            } else {
-                TTag->dT_ = TTag->points_.at(1) - TTag->points_.at(0);
-            }
+        for (size_t index = 0; index < data->size(); ++index) {
+            time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
+            TTag->points_.push_back(t);
         }
-    } else {
+
+        TTag->extractStartDateTime();
+
+        TTag->extractAnalysisDateTime(pCdmReader);
+
+        if (TTag->hasNegativeTimePoints())
+            throw CDMException("negative values on the time axis not supported");
+
+        if (TTag->hasNonEquidistantTimePoints())
+            throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
+
+        if (TTag->points_.size() <= 1) {
+            TTag->dT_ = 3600;
+        } else {
+            TTag->dT_ = TTag->points_.at(1) - TTag->points_.at(0);
+        }
     }
 
     return TTag;
@@ -147,98 +135,97 @@ std::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const s
     return TTag;
 }
 
-    void MetGmTimeTag::extractAnalysisDateTime(const CDMReader_p pCdmReader)
-    {
-        const CDM& cdmRef = pCdmReader->getCDM();
-        CDMAttribute metgmAnalysisDateTimeAttribute;
-        FimexTime analysisTime;
-        std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
-        if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
-            analysisTime = getUniqueForecastReferenceTimeFT(pCdmReader);
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
-            analysisTime = string2FimexTime(metgmAnalysisDateTimeAttribute.getStringValue());
-        } else {
-            analysisTime = make_fimextime_utc_now();
-        }
-
-        const TimeUnit tu("seconds since 1970-01-01 00:00:00");
-        double unit_time = tu.fimexTime2unitTime(analysisTime);
-        analysis_t = tu.unitTime2epochSeconds(unit_time);
+void MetGmTimeTag::extractAnalysisDateTime(const CDMReader_p pCdmReader)
+{
+    const CDM& cdmRef = pCdmReader->getCDM();
+    CDMAttribute metgmAnalysisDateTimeAttribute;
+    FimexTime analysisTime;
+    std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
+    if (!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
+        analysisTime = getUniqueForecastReferenceTimeFT(pCdmReader);
+    } else if (cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
+        analysisTime = string2FimexTime(metgmAnalysisDateTimeAttribute.getStringValue());
+    } else {
+        analysisTime = make_fimextime_utc_now();
     }
 
-    bool MetGmTimeTag::hasNegativeTimePoints()
-    {
-        return std::find_if(points_.begin(), points_.end(), [](float f) { return f < 0; }) != points_.end();
-    }
-
-    bool MetGmTimeTag::hasNonEquidistantTimePoints()
-    {
-        if(nT() <= 1)
-            return false;
-
-        std::deque<double> adjDiff(points_.size());
-        std::adjacent_difference(points_.begin(), points_.end(), adjDiff.begin());
-        adjDiff.pop_front(); // remove first element
-
-        std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
-        std::sort(adjDiff.begin(), it);
-
-        adjDiff.resize(it - adjDiff.begin());
-
-        return adjDiff.size() != 1;
-    }
-
-    void MetGmTimeTag::extractTimePoints(const CDMReader_p pCdmReader)
-    {
-        const CDM& cdmRef = pCdmReader->getCDM();
-        const CDMVariable& tVar = cdmRef.getVariable("time");
-
-        DataPtr tData = pCdmReader->getData(tVar.getName());
-
-        const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
-        const std::string t_unit = tUnitAttribute.getStringValue();
-        const TimeUnit kilde_tu(t_unit);
-
-        const shared_array<double> tArray = tData->asDouble();
-
-        for(size_t index = 0; index < tData->size(); ++index) {
-            time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
-            points_.push_back(t);
-        }
-
-        if(hasNegativeTimePoints())
-            throw CDMException("negative values on the time axis not supported");
-
-        if(hasNonEquidistantTimePoints())
-            throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
-    }
-
-    void MetGmTimeTag::extractStartDateTime()
-    {
-        start_t = points_.at(0);
-    }
-
-    void MetGmTimeTag::init(const CDMReader_p pCdmReader)
-    {
-        const CDM& cdmRef = pCdmReader->getCDM();
-        const CDMDimension& tDim = cdmRef.getDimension("time");
-
-        if(!tDim.isUnlimited())
-            throw CDMException("in given cdm model 'time'' is not unlimited dimension");
-
-        nT_ = tDim.getLength();
-
-        extractTimePoints(pCdmReader);
-
-        if(points_.size() <= 1)
-            dT_ = 3600;
-        else
-            dT_ = points_.at(1) - points_.at(0);
-
-        extractStartDateTime();
-
-        extractAnalysisDateTime(pCdmReader);
-    }
-
+    const TimeUnit tu("seconds since 1970-01-01 00:00:00");
+    double unit_time = tu.fimexTime2unitTime(analysisTime);
+    analysis_t = tu.unitTime2epochSeconds(unit_time);
 }
 
+bool MetGmTimeTag::hasNegativeTimePoints()
+{
+    return std::find_if(points_.begin(), points_.end(), [](float f) { return f < 0; }) != points_.end();
+}
+
+bool MetGmTimeTag::hasNonEquidistantTimePoints()
+{
+    if (nT() <= 1)
+        return false;
+
+    std::deque<double> adjDiff(points_.size());
+    std::adjacent_difference(points_.begin(), points_.end(), adjDiff.begin());
+    adjDiff.pop_front(); // remove first element
+
+    std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
+    std::sort(adjDiff.begin(), it);
+
+    adjDiff.resize(it - adjDiff.begin());
+
+    return adjDiff.size() != 1;
+}
+
+void MetGmTimeTag::extractTimePoints(const CDMReader_p pCdmReader)
+{
+    const CDM& cdmRef = pCdmReader->getCDM();
+    const CDMVariable& tVar = cdmRef.getVariable("time");
+
+    DataPtr tData = pCdmReader->getData(tVar.getName());
+
+    const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
+    const std::string t_unit = tUnitAttribute.getStringValue();
+    const TimeUnit kilde_tu(t_unit);
+
+    const shared_array<double> tArray = tData->asDouble();
+
+    for (size_t index = 0; index < tData->size(); ++index) {
+        time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
+        points_.push_back(t);
+    }
+
+    if (hasNegativeTimePoints())
+        throw CDMException("negative values on the time axis not supported");
+
+    if (hasNonEquidistantTimePoints())
+        throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
+}
+
+void MetGmTimeTag::extractStartDateTime()
+{
+    start_t = points_.at(0);
+}
+
+void MetGmTimeTag::init(const CDMReader_p pCdmReader)
+{
+    const CDM& cdmRef = pCdmReader->getCDM();
+    const CDMDimension& tDim = cdmRef.getDimension("time");
+
+    if (!tDim.isUnlimited())
+        throw CDMException("in given cdm model 'time'' is not unlimited dimension");
+
+    nT_ = tDim.getLength();
+
+    extractTimePoints(pCdmReader);
+
+    if (points_.size() <= 1)
+        dT_ = 3600;
+    else
+        dT_ = points_.at(1) - points_.at(0);
+
+    extractStartDateTime();
+
+    extractAnalysisDateTime(pCdmReader);
+}
+
+} // namespace MetNoFimex

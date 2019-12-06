@@ -23,10 +23,6 @@
 
 #include "MetGmUtils.h"
 
-// fimex
-//
-#include "fimex/CDMException.h"
-
 // standard
 //
 #include <ctime>

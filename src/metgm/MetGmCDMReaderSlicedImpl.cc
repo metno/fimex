@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -81,7 +81,7 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
 
     void MetGmCDMReaderSlicedImpl::addVariables()
     {
-        for (const MetGmCDMVariableProfile profile : cdmConfiguration_) {
+        for (const MetGmCDMVariableProfile& profile : cdmConfiguration_) {
 
             int p_id = profile.p_id_;
 
@@ -278,9 +278,9 @@ MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource,
                 profile.fillValue_ = fillValue;
                 profile.addOffset_ = addOffset;
                 profile.scaleFactor_ = scaleFactor;
-                cdmConfiguration_.insert(profile);
+                cdmConfiguration_.push_back(profile);
             }
         }
     }
 
-}
+    } // namespace MetNoFimex

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -21,27 +21,19 @@
  * USA.
  */
 
-//fimex
-//
 #include "fimex/MetGmCDMWriter.h"
 
-// private/implementation code
-#include "./metgm/MetGmCDMWriterImpl.h"
-#include "./metgm/MetGmCDMWriterSlicedImpl.h"
+#include "metgm/MetGmCDMWriterSlicedImpl.h"
 
 namespace MetNoFimex {
 
-MetGmCDMWriter::MetGmCDMWriter(const CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
+MetGmCDMWriter::MetGmCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
     : CDMWriter(cdmReader, outputFile)
     , d_ptr(new MetGmCDMWriterSlicedImpl(cdmReader, outputFile, configFile))
 {
-    }
+    d_ptr->configureAndWrite();
+}
 
+MetGmCDMWriter::~MetGmCDMWriter() {}
 
-    MetGmCDMWriter::~MetGmCDMWriter()
-    {
-    }
-
-} // end namespace
-
-
+} // namespace MetNoFimex

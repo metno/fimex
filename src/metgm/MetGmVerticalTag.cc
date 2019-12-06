@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -46,41 +46,28 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWri
 {
     std::shared_ptr<MetGmVerticalTag> VTag;
 
-    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(pCdmReader);
+    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(listCoordinateSystems(pCdmReader), pVariable->getName());
+    if (cs && cs->isSimpleSpatialGridded() && cs->getGeoZAxis()) {
+        VTag = std::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
 
-    CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
-    if (cs.get()) {
-        if(cs->isSimpleSpatialGridded()) {
-
-            CoordinateAxis_cp zAxis = cs->getGeoZAxis();
-
-            if(!zAxis.get()) {
-                return std::shared_ptr<MetGmVerticalTag>();
+        CoordinateAxis_cp zAxis = cs->getGeoZAxis();
+        DataPtr data;
+        /* do something with the data */
+        if (zAxis->getAxisType() == CoordinateAxis::Pressure) {
+            VTag->pr_ = 2;
+            data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "hPa");
+        } else if (zAxis->getAxisType() == CoordinateAxis::Height) {
+            VTag->pr_ = 1; // as default
+            if (ends_with(pVariable->getName(), "_MSL")) {
+                VTag->pr_ = 0;
             }
-
-            VTag = std::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
-
-            DataPtr data;
-
+            data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "m");
+        } else {
             data = pCdmReader->getData(zAxis->getName());
-
-            /* do something with the data */
-            if(zAxis->getAxisType() == CoordinateAxis::Pressure) {
-                VTag->pr_ = 2;
-                data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "hPa");
-            } else if (zAxis->getAxisType() == CoordinateAxis::Height) {
-                VTag->pr_ = 1; // as default
-                if (ends_with(pVariable->getName(), "_MSL")) {
-                    VTag->pr_ = 0;
-                }
-                data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "m");
-            }
-            VTag->pz_ = 1;
-            VTag->nz_= data->size();
-            VTag->extractVerticalPoints(data);
         }
-    } else {
-        /* vertical coordinate not found */
+        VTag->pz_ = 1;
+        VTag->nz_ = data->size();
+        VTag->extractVerticalPoints(data);
     }
 
     return VTag;
@@ -89,7 +76,7 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWri
 std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(std::shared_ptr<MetGmGroup3Ptr> pGp3,
                                                                                      std::shared_ptr<MetGmVerticalTag> prevTag)
 {
-    std::shared_ptr<MetGmVerticalTag> VTag = std::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+    std::shared_ptr<MetGmVerticalTag> VTag(new MetGmVerticalTag);
 
     if (pGp3->pz() == 0) {
         /**
@@ -132,14 +119,16 @@ std::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForRea
     MGM_THROW_ON_ERROR(mgm_read_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle(), VTag->points_.get()))
 
     return VTag;
-    }
-
-    bool MetGmVerticalTag::hasNegativePoints() {
-        return std::find_if(&points_[0], &points_[nz_], [](float f) { return f <= 0; }) != &points_[nz_];
-    }
-
-    void MetGmVerticalTag::extractVerticalPoints(const DataPtr& data)
-    {
-        points_ = data->asFloat();
-    }
 }
+
+bool MetGmVerticalTag::hasNegativePoints()
+{
+    return std::find_if(&points_[0], &points_[nz_], [](float f) { return f <= 0; }) != &points_[nz_];
+}
+
+void MetGmVerticalTag::extractVerticalPoints(const DataPtr& data)
+{
+    points_ = data->asFloat();
+}
+
+} // namespace MetNoFimex

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -36,9 +36,6 @@
 #include "fimex/CDMVariable.h"
 #include "fimex/String2Type.h"
 #include "fimex/TimeUnit.h"
-
-// standard
-#include <iostream>
 
 namespace MetNoFimex {
 
@@ -102,7 +99,8 @@ std::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(c
     }
 
     CDMAttribute metgmModelTypeAttribute;
-    gp1->modelType_= std::string("----------------");
+    gp1->modelType_ = "----------------";
+    gp1->modelType_ = "Arome-----------";
     if(!gp1->parser_->modelType().empty()) {
         /* value from xml */
         gp1->modelType_ = gp1->parser_->modelType();

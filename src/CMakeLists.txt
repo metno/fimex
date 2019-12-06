@@ -75,6 +75,8 @@ SET(libfimex_SOURCES
   ${INCF}/CDMVariable.h
   CDMVerticalInterpolator.cc
   ${INCF}/CDMVerticalInterpolator.h
+  CDMWriter.cc
+  ${INCF}/CDMWriter.h
   CDM_XMLConfigHelper.cc
   CDM_XMLConfigHelper.h
   CoordinateSystemSliceBuilder.cc
@@ -393,6 +395,7 @@ if(ENABLE_METGM)
     metgm/MetGmTimeTag.h
     metgm/MetGmUtils.cc
     metgm/MetGmUtils.h
+    metgm/MetGmVersion.cc
     metgm/MetGmVersion.h
     metgm/MetGmVerticalTag.cc
     metgm/MetGmVerticalTag.h

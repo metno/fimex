@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -42,6 +42,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace MetNoFimex {
 
@@ -69,7 +70,7 @@ namespace MetNoFimex {
         std::shared_ptr<MetGmTags> pTags_;
     };
 
-    typedef std::set<MetGmCDMVariableProfile> cdm_configuration;
+    typedef std::vector<MetGmCDMVariableProfile> cdm_configuration;
 
     struct MetGmCDMVariableProfileByPId
     {

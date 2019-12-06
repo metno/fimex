@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2019, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,8 +29,7 @@
 #include <memory>
 #include <string>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMWriter.h
@@ -38,9 +37,8 @@ namespace MetNoFimex
 class CDMWriter
 {
 public:
-    CDMWriter(CDMReader_p cdmReader, const std::string& outputFile)
-    : cdmReader(cdmReader), outputFile(outputFile) {}
-    virtual ~CDMWriter() {}
+    CDMWriter(CDMReader_p cdmReader, const std::string& outputFile);
+    virtual ~CDMWriter();
 
 protected:
     CDMReader_p cdmReader;
@@ -49,6 +47,6 @@ protected:
 
 typedef std::shared_ptr<CDMWriter> CDMWriter_p;
 
-} // namespace
+} // namespace MetNoFimex
 
 #endif /*CDMWRITER_H_*/
