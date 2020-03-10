@@ -1,18 +1,33 @@
 #!/bin/bash
 
-set -x
-fimex=/usr
+set -ex
 
-ncgen -b fimex2d_example.cdl -o fimex2d_example.nc4
-fimex --input.file=/opdata/arome2_5_main/AROME_MetCoOp_00_fp.nc --output.file=fimex2d_example_all.nc4 --extract.selectVariables=x --extract.selectVariables=y --extract.selectVariables=longitude --extract.selectVariables=latitude
+prefix=/usr
 
-gfortran -O3 -Wall -Werror fimex2d_example.F90 -o fimex2d_example -I$fimex/include -I. -L$fimex/lib/ -lfimexf -lfimex -Wall -Werror -Wl,-rpath=$fimex/lib/ || exit 1
+testfile="https://thredds.met.no/thredds/dodsC/mepslatest/meps_lagged_6_h_latest_2_5km_latest.nc"
 
-./fimex2d_example /opdata/arome2_5_main/AROME_MetCoOp_00_fp.nc fimex2d_example.nc4 netcdf || exit 1
+EX2D="./fimex2d_example"
 
-vars="air_temperature_2m"
-for var in $vars; do
-  ncks -A -v $var fimex2d_example.nc4 fimex2d_example_all.nc4
-done
+# download field (one variable, 4 time steps, 1 member)
+if test ! -r "${EX2D}_all.nc4" ; then
+    fimex-1.4 \
+        --input.file "${testfile}" \
+        --output.file "${EX2D}_all.nc4" \
+        --extract.selectVariables air_temperature_2m \
+        --extract.reduceDimension.name time --extract.reduceDimension.start 0 --extract.reduceDimension.end   3 \
+        --extract.pickDimension.name ensemble_member --extract.pickDimension.list 0
+fi
 
-ncview2 fimex2d_example_all.nc4
+if test ! -f "$EX2D" ; then
+    gfortran -O3 -Wall -Werror "$EX2D.F90" -o "$EX2D" `pkg-config --cflags --libs fimexf` -Wall -Werror -Wl,-rpath="$prefix/lib"
+fi
+
+# create empty template nc file
+ncgen -b "$EX2D.cdl" -o "$EX2D.nc4"
+
+# fill
+"$EX2D" "${testfile}" "$EX2D.nc4" nc
+
+#ncks -A -v air_temperature_2m "$EX2D.nc4" "${EX2D}_all.nc4"
+
+ncview "$EX2D.nc4"

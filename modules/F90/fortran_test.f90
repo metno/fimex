@@ -1,8 +1,7 @@
 !> @example fortran_test.f90
 !! Example on using the fimex interface
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
-                                      FILETYPE_RW
+  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
@@ -232,7 +231,7 @@ PROGRAM fortran_test
     ENDIF
     ! write the data to testOut.nc
     ! Open file
-    ierr=frw%open("testOut.nc","","netcdf")
+    ierr=frw%open("testOut.nc","","netcdf+rw")
     IF ( ierr /= 0 ) CALL error("Can't make rw-object with file: testOut.nc")
     ndims=frw%get_dimensions("pressure")
     IF ( ndims <= 0 ) CALL error("Can't make slicebuilder for pressure in testOut.nc")

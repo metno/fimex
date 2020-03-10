@@ -1,7 +1,7 @@
 netcdf fimex2d_example {
 dimensions:
-	y = 949 ;
-	x = 739 ;
+	y = 1069 ;
+	x = 949 ;
 variables:
     float air_temperature_2m(y, x) ;
         air_temperature_2m:units = "1" ;
