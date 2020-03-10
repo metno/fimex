@@ -3,7 +3,7 @@
 PROGRAM FIMEX2D_EXAMPLE
   !
   !
-  USE FIMEX, ONLY  : FIMEXIO,SET_FILETYPE,FILETYPE_RW
+  USE FIMEX, ONLY  : FIMEXIO
   USE FIMEX2D,ONLY : EPOCH2DTG,FI_ERROR,FI_GET_DIMENSIONS,FI_READ_DIMENSION,FI_READ_FIELD,&
                      FI_WRITE_FIELD,IKIND,RKIND
   IMPLICIT NONE
@@ -12,7 +12,8 @@ PROGRAM FIMEX2D_EXAMPLE
   CHARACTER(LEN=1024)                            :: DIMNAME_T
   CHARACTER(LEN=10)                              :: CDTG
   INTEGER                                        :: I,T
-  INTEGER(KIND=IKIND)                            :: NX,NY
+  INTEGER(KIND=IKIND)                            :: NX,NY,NZ
+  INTEGER(KIND=IKIND)                            :: NXO,NYO
   LOGICAL                                        :: FOUND12
   TYPE(FIMEXIO)                                  :: FIO_IN,FIO_OUT
   REAL(KIND=8),DIMENSION(:,:),ALLOCATABLE        :: T2M
@@ -44,7 +45,9 @@ PROGRAM FIMEX2D_EXAMPLE
                FILEFORMAT="grib"
             CASE("netcdf","NETCDF","nc","NC")
                FILEFORMAT="netcdf"
-            CASE DEFAULT
+            CASE("ncml","NCML")
+               FILEFORMAT="ncml"
+             CASE DEFAULT
               WRITE(*,*) "Invalid file format: "//FILEFORMAT
               CALL ABORT
          END SELECT
@@ -61,9 +64,9 @@ PROGRAM FIMEX2D_EXAMPLE
     ENDIF
   ENDIF
 
-  IERR=FIO_IN%OPEN(TRIM(INFILE),CONFIGFILE,SET_FILETYPE(FILEFORMAT))
+  IERR=FIO_IN%OPEN(TRIM(INFILE),CONFIGFILE,FILEFORMAT)
   IF ( ierr /= 0 ) CALL FI_ERROR("Error opening "//TRIM(INFILE))
-  IERR=FIO_OUT%OPEN(TRIM(OUTFILE),"",SET_FILETYPE("netcdf",FILETYPE_RW))
+  IERR=FIO_OUT%OPEN(TRIM(OUTFILE),"","netcdf"//"+rw")
   IF ( ierr /= 0 ) CALL FI_ERROR("Error opening "//TRIM(OUTFILE))
 
   WRITE(*,*) "List variables in input file "//TRIM(INFILE)
@@ -72,7 +75,7 @@ PROGRAM FIMEX2D_EXAMPLE
   END DO
 
   ! Get dimensions from temperature variable
-  CALL FI_GET_DIMENSIONS(FIO_IN,TRIM(CTEMP2M),NX=NX,NY=NY,NTIMES=NTIMES,DIMNAME_T=DIMNAME_T,BASETIME=BASETIME)
+  CALL FI_GET_DIMENSIONS(FIO_IN,TRIM(CTEMP2M),NX=NX,NY=NY,NZ=NZ,NTIMES=NTIMES,DIMNAME_T=DIMNAME_T,BASETIME=BASETIME)
 
   ! Read times in file
   ALLOCATE(TIMES(0:NTIMES-1))
@@ -102,7 +105,9 @@ PROGRAM FIMEX2D_EXAMPLE
   ENDDO TIME_LOOP
 
   IF (FOUND12) THEN
-    CALL FI_WRITE_FIELD(FIO_OUT,TRIM(CTEMP2M),NX,NY,T2M,VERBOSITY=2)
+    CALL FI_GET_DIMENSIONS(FIO_OUT,TRIM(CTEMP2M),NX=NXO,NY=NYO)
+    WRITE (*,*)  NX, NXO, NY, NYO, NZ
+    CALL FI_WRITE_FIELD(FIO_OUT,TRIM(CTEMP2M),NX=NX,NY=NY,OUTFIELD=T2M,VERBOSITY=2)
   ELSE
     CALL FI_ERROR("Variable for 12 UTC was not found")
   ENDIF
