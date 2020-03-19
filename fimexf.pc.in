@@ -1,0 +1,5 @@
+Name: fimexf@MINUS_FIMEX_VERSION@
+Description: The fimex fortran library
+Version: @FIMEX_VERSION_FULL@
+Requires: fimex@MINUS_FIMEX_VERSION@
+Libs: -lfimexf@MINUS_FIMEX_VERSION@
