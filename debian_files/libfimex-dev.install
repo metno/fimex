@@ -1,2 +1,3 @@
 usr/lib/*/pkgconfig/fimex.pc
+usr/lib/*/pkgconfig/fimexf.pc
 usr/lib/*/cmake/fimex
