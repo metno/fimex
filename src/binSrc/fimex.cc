@@ -661,7 +661,7 @@ CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p data
 std::shared_ptr<InterpolatorProcess2d> parseProcess(const string& procString, const string& logProcess)
 {
     std::smatch what;
-    if (std::regex_match(procString, what, std::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
+    if (std::regex_match(procString, what, std::regex("\\s*fill2d\\(([^, ]+), *([^, ]+), *([^ )]+)\\).*"))) {
         double critx = string2type<double>(what[1]);
         double cor = string2type<double>(what[2]);
         size_t maxLoop = string2type<size_t>(what[3]);
