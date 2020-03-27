@@ -41,7 +41,7 @@ using namespace MetNoFimex;
 
 static const int DEBUG = 0;
 
-#if defined(HAVE_NETCDF_H)
+#if defined(HAVE_FELT)
 static CDMReader_p createFeltReader()
 {
     if (!hasTestExtra())

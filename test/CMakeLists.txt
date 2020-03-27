@@ -22,7 +22,6 @@ SET(CC_TESTS
   testBinaryConstants
   testCDM
   testData
-  testFeltReader
   testFileReaderFactory
   testInterpolation
   testInterpolator
@@ -41,6 +40,7 @@ SET(CC_TESTS
 IF(ENABLE_FELT)
   LIST(APPEND CC_TESTS
     testExtractor
+    testFeltReader
   )
 
   SET(NETCDF_MI_TESTS
@@ -200,10 +200,12 @@ TARGET_INCLUDE_DIRECTORIES(testUtils
   PRIVATE
     "${CMAKE_SOURCE_DIR}/src" # for leap_iterator.h
 )
-TARGET_INCLUDE_DIRECTORIES(testFeltReader
-  PRIVATE
-    "${CMAKE_SOURCE_DIR}/src" # for FeltCDMReader2.h
-)
+IF(ENABLE_FELT)
+  TARGET_INCLUDE_DIRECTORIES(testFeltReader
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/src" # for FeltCDMReader2.h
+  )
+ENDIF(ENABLE_FELT)
 
 FOREACH(T ${SH_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")
