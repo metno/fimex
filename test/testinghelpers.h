@@ -56,7 +56,7 @@ std::string pathTestExtra(const std::string& filename);
 void copyFile(const std::string& from, const std::string& to);
 
 /*! Write to netcdf file, if compiledwith netcdf support, else "write" to null file. */
-bool writeToFile(CDMReader_p input, const std::string& fileName);
+bool writeToFile(CDMReader_p input, const std::string& fileName, bool removeFile=true);
 
 } // namespace MetNoFimex
 

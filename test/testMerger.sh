@@ -7,9 +7,10 @@ OUTER="${TEST_SRCDIR}/test_merge_outer.nc"
 VAR="ga_2t_1"
 
 if [ ! -f "$INNER" -o ! -f "$OUTER" ]; then
-   echo "no inner/outer input: $INNER / $OUTER, skipping test..."
-   exit 0;
+   echo "no inner/outer input: '$INNER' / '$OUTER'"
+   exit 1
 fi
+
 ./fimex.sh --input.file="$OUTER" --merge.inner.file="$INNER" \
     --merge.method=bilinear \
     --output.file=out$$.nc

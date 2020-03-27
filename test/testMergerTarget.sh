@@ -8,9 +8,10 @@ VAR="air_temperature_2m"
 VARBASE="sea_surface_temperature"
 
 if [ ! -f "$BASE" -o ! -f "$TOP" ]; then
-   echo "no base/top input: $BASE / $TOP, skipping test..."
-   exit 0;
+   echo "FAIL missing base / top input '$BASE' / '$TOP'"
+   exit 1
 fi
+
 ./fimex.sh --input.file="$BASE" --merge.inner.file="$TOP" \
     --merge.method=bilinear \
     --merge.projString="+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs" \

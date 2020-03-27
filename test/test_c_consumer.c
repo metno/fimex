@@ -184,11 +184,17 @@ int testNetcdfReadNetcdfWrite()
     }
 
     mifi_free_cdm_reader(ncReader);
+    remove(w_filename);
     return retVal;
 }
 
 int doubleCallback(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double* scaledData, size_t dataSize)
 {
+    (void)reader;
+    (void)varName;
+    (void)unLimDimPos;
+    (void)dataSize;
+
     for (size_t i = 0; i < dataSize; ++i) {
         *scaledData++ = (double) i;
     }
@@ -197,6 +203,7 @@ int doubleCallback(mifi_cdm_reader* reader, const char* varName, size_t unLimDim
 
 int testCReader(const char* feltFile, const char* configFile) {
     int retVal = 0;
+    const char w_filename[] = "test_c_reader.nc";
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
@@ -210,13 +217,14 @@ int testCReader(const char* feltFile, const char* configFile) {
         fprintf(stderr, "error in setting a callback");
     }
 
-    if (mifi_writer(cReader, "netcdf", "test_c_reader.nc", 0) != 0) {
+    if (mifi_writer(cReader, "netcdf", w_filename, 0) != 0) {
         retVal++;
-        fprintf(stderr, "error in writing netcdf-file test_c_reader.nc\n");
+        fprintf(stderr, "error in writing netcdf-file '%s'\n", w_filename);
     }
 
     mifi_free_cdm_reader(cReader);
     mifi_free_cdm_reader(feltReader);
+    remove(w_filename);
     return retVal;
 }
 
@@ -331,6 +339,7 @@ int main(int argc, char* argv[])
     // check if file exists
     FILE *fh = fopen(feltFile, "rb");
     if (fh == NULL) {
+        fprintf(stderr, "\n*** Skipping tests as optional test data file '%s' is not found\n", feltFile);
         tests = 0;
     } else {
         fclose(fh);
@@ -347,10 +356,11 @@ int main(int argc, char* argv[])
     if (testFeltVariables(feltFile, configFile) == 0) retVal--;
     if (testFeltData(feltFile, configFile) == 0) retVal--;
     if (testFeltReadNetcdfWrite(feltFile, configFile) == 0) retVal--;
-    if (testNetcdfReadNetcdfWrite() == 0)
-        retVal--;
+    if (testNetcdfReadNetcdfWrite() == 0) retVal--;
     if (testCReader(feltFile, configFile) == 0) retVal--;
     if (testCSliceBuilder(feltFile, configFile) == 0) retVal--;
+
+    remove(from_felt_nc);
 
     if (retVal == 0) {
         fprintf(stderr, "\n*** No errors detected\n");

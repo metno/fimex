@@ -11,7 +11,7 @@ fi
 
 TEST_DAT="${TEST_EXTRADATA_DIR}/flth00.dat"
 if [ ! -f "${TEST_DAT}" ]; then
-   echo "no input data: '${TEST_DAT}', skipping test..."
+   echo "SKIP missing optional '${TEST_DAT}'"
    exit 0
 fi
 

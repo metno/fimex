@@ -9,8 +9,8 @@ INPUT_FILE="coordTest.nc"
 OUTPUT_FILE="$TEST_BINDIR/coordTestFilled.nc"
 
 if [ ! -f "$INPUT_FILE" ]; then
-    echo "missing test data file '$INPUT_FILE'"
-    exit 1;
+    echo "FAIL missing '$INPUT_FILE'"
+    exit 1
 fi
 
 TESTCASE="interpolator with prefill"
@@ -43,4 +43,5 @@ if [ $? != 0 ]; then
 fi
 echo "success $TESTCASE"
 
+rm -f "$OUTPUT_FILE"
 exit 0

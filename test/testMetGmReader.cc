@@ -47,7 +47,7 @@ TEST4FIMEX_TEST_CASE(test_read_sample_ed1)
 
     defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd1 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
-    writeToFile(metgmReaderEd1, "testMetgmReadEd1.nc");
+    TEST4FIMEX_CHECK(writeToFile(metgmReaderEd1, "testMetgmReadEd1.nc"));
 }
 
 TEST4FIMEX_TEST_CASE(test_read_metgm2)
@@ -56,7 +56,7 @@ TEST4FIMEX_TEST_CASE(test_read_metgm2)
 
     defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd2 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
-    writeToFile(metgmReaderEd2, "testMetgmReadEd2.nc");
+    TEST4FIMEX_CHECK(writeToFile(metgmReaderEd2, "testMetgmReadEd2.nc"));
 }
 
 TEST4FIMEX_TEST_CASE(test_slicebuilder_metgm1)

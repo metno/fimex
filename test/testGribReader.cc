@@ -85,7 +85,7 @@ TEST4FIMEX_TEST_CASE(test_read_grb1)
     DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
     TEST4FIMEX_CHECK_EQ(20, dataS->size());
 
-    writeToFile(grbReader, "test_read_grb1.nc");
+    TEST4FIMEX_CHECK(writeToFile(grbReader, "test_read_grb1.nc"));
 }
 
 TEST4FIMEX_TEST_CASE(test_read_grb2)
@@ -96,5 +96,5 @@ TEST4FIMEX_TEST_CASE(test_read_grb2)
 
     defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml")));
-    writeToFile(grbReader, "test_grb2_out.nc");
+    TEST4FIMEX_CHECK(writeToFile(grbReader, "test_grb2_out.nc"));
 }

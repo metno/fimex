@@ -113,13 +113,17 @@ void copyFile(const std::string& from, const std::string& to)
     dst << src.rdbuf();
 }
 
-bool writeToFile(CDMReader_p input, const std::string& fileName)
+bool writeToFile(CDMReader_p input, const std::string& fileName, bool removeFile)
 {
 #ifdef HAVE_NETCDF_H
     MetNoFimex::createWriter(input, "netcdf", fileName);
-    return exists(fileName);
+    const bool written = exists(fileName);
+    if (removeFile)
+        remove(fileName);
+    return written;
 #else
-    MetNoFimex::createWriter(qe, "null", "");
+    MetNoFimex::createWriter(input, "null", "");
+    return true;
 #endif /* NETCDF */
 }
 

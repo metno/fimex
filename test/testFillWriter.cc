@@ -68,6 +68,7 @@ TEST4FIMEX_TEST_CASE(test_fillWriter)
         TEST4FIMEX_CHECK_EQ(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer", 2)->asInt()[11 * 11 * 4],
                             -32767); // last level, last number, first offsetTime
         TEST4FIMEX_CHECK_EQ(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer", 2)->asInt()[11 * 11 * 4 * 2 - 1], -32767); // last level, last number
+        remove(outFile);
     }
 }
 
@@ -87,5 +88,6 @@ TEST4FIMEX_TEST_CASE(test_fillWriterConfig)
         CDMReader_p out = CDMFileReaderFactory::create("netcdf", outFile);
         TEST4FIMEX_CHECK(out->getData("longitude")->asFloat()[2 * 11] + 13 < 1e-5);
         TEST4FIMEX_CHECK(out->getData("latitude")->asFloat()[2 * 11] - 28 < 1e-5);
+        remove(outFile);
     }
 }

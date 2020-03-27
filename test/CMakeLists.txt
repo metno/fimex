@@ -215,10 +215,7 @@ FOREACH(T ${SH_TESTS})
 ENDFOREACH()
 
 IF(ENABLE_FELT AND ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  SET_TESTS_PROPERTIES(testGribReader testFiIndexGribs.sh
-    PROPERTIES DEPENDS testGribWriter
-  )
-  SET_TESTS_PROPERTIES(testGribReader testFiGrbmlCat.sh
+  SET_TESTS_PROPERTIES(testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
     PROPERTIES DEPENDS testGribWriter
   )
 ENDIF()

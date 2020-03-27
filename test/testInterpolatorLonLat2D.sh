@@ -6,8 +6,8 @@ echo "testing $TEST"
 TEST_NC="${TEST_EXTRADATA_DIR}/grid_mapping_lonlat2d.nc"
 TEST_OC="${TEST_EXTRADATA_DIR}/output-nc4.xml"
 if [ ! -f "${TEST_NC}" -o ! -f "${TEST_OC}" ]; then
-   echo "missing input data '${TEST_NC}' and/or config '${TEST_OC}', skipping test..."
-   exit 0
+   echo "FAIL missing '${TEST_NC}' and/or config '${TEST_OC}'"
+   exit 1
 fi
 
 OUT="grid_mapping_lonlat2d_interpolated.nc"

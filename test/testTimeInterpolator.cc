@@ -67,6 +67,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolator)
         shared_array<float> ncTimeAry = ncTimes->asFloat();
         TEST4FIMEX_CHECK_EQ(ncTimeAry[0], 10);
         TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10 + 12);
+        remove(outputName);
     }
 }
 
@@ -100,6 +101,7 @@ TEST4FIMEX_TEST_CASE(test_timeInterpolatorRelative)
     shared_array<float> ncTimeAry = ncTimes->asFloat();
     TEST4FIMEX_CHECK_EQ(ncTimeAry[0], -2);
     TEST4FIMEX_CHECK_EQ(ncTimeAry[4], 10);
+    remove(outputName);
     }
 }
 #endif // HAVE_FELT && HAVE_NETCDF_H

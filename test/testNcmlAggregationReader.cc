@@ -141,6 +141,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
     shared_array<int> values = slice->asInt();
     TEST4FIMEX_REQUIRE(values);
     TEST4FIMEX_CHECK_EQ(values[0], 3);
+    remove(test_output);
 }
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
@@ -148,7 +149,6 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
     const string ncmlName = require("aggNewDim.ncml");
     defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
-    const std::string test_output = std::string(oldDir) + "/test_aggNewDim2.nc";
 
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("notlimited", 2, 1);

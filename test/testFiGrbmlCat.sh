@@ -1,11 +1,11 @@
 #! /bin/sh
 
 TEST_SRCDIR=$(dirname $0)
-TOP_SRCDIR=${TEST_SRCDIR}/..
+TOP_SRCDIR="${TEST_SRCDIR}/.."
 
 echo "test fiGrbmlCat"
 if [ ! -f test.grb1 ]; then
-   echo "no input data: test.grb1, skipping test..."
+   echo "SKIP missing 'test.grb1' (generated from optional test data)"
    exit 0
 fi
 

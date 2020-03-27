@@ -41,6 +41,7 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWrite)
     TEST4FIMEX_REQUIRE(feltReader);
 
     CDMFileReaderFactory::createWriter(feltReader, "netcdf", "test_feltNetcdfWrite.nc");
+    // cannot remove file as it is used by other tests
 }
 
 TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
@@ -51,7 +52,8 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
     CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     TEST4FIMEX_REQUIRE(feltReader);
 
-    NetCDF_CDMWriter writer(feltReader, "test_feltNetcdfWriteConfig.nc", pathShareEtc("cdmWriterConfigDeprecated.xml"));
+    const std::string outputFileName = "test_feltNetcdfWriteConfig.nc";
+    NetCDF_CDMWriter writer(feltReader, outputFileName, pathShareEtc("cdmWriterConfigDeprecated.xml"));
     TEST4FIMEX_CHECK_EQ(writer.getVariableName("sea_level_pressure"), "sea_pressure");
     TEST4FIMEX_CHECK_EQ(writer.getDimensionName("x"), "x_c");
     TEST4FIMEX_CHECK_EQ(writer.getVariableName("x"), "x_c");
@@ -62,4 +64,6 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
 
     TEST4FIMEX_CHECK_THROW(writer.getAttribute("surface_snow_thickness", "long_name"), CDMException);
     // "variable '" << var << "' has no attribute '" << att << "', expected exception");
+
+    remove(outputFileName);
 }

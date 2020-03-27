@@ -68,6 +68,7 @@ TEST4FIMEX_TEST_CASE(test_update)
             const double expect = diff + scale*read1->getDouble(i);
             TEST4FIMEX_CHECK(abs(actual - expect) < 1e-3);
         }
+        remove(fileName);
     }
 }
 
@@ -110,5 +111,6 @@ TEST4FIMEX_TEST_CASE(test_scaled)
             const double expect = addK + read1->getDouble(i);
             TEST4FIMEX_CHECK(abs(actual - expect) < 1e-3);
         }
+        remove(fileName);
     }
 }

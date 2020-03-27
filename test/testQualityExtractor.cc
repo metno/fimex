@@ -84,7 +84,7 @@ TEST4FIMEX_TEST_CASE(test_qualityExtract_convert)
     CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     std::shared_ptr<CDMQualityExtractor> qe = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
 
-    writeToFile(qe, "test_qualityExtract_convert.nc");
+    TEST4FIMEX_CHECK(writeToFile(qe, "test_qualityExtract_convert.nc"));
 }
 #endif // HAVE_FELT
 

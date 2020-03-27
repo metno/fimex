@@ -77,7 +77,7 @@ TEST4FIMEX_TEST_CASE(interpolator)
     }
     TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
 
-    writeToFile(interpolator, "test_interpolator.nc");
+    TEST4FIMEX_CHECK(writeToFile(interpolator, "test_interpolator.nc"));
 }
 
 TEST4FIMEX_TEST_CASE(interpolatorKDTree)

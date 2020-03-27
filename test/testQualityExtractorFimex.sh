@@ -8,9 +8,10 @@ MASK="${TEST_SRCDIR}/testQEmask_mask.nc"
 CONF="testQEmask.xml"
 
 if [ ! -f "$DATA" -o ! -f "$MASK" -o ! -f "$CONF" ]; then
-   echo "no input data/mask/config: $DATA / $MASK / $CONF, skipping test..."
-   exit 0;
+   echo "FAIL missing data / mask / config files '$DATA' / '$MASK' / '$CONF'"
+   exit 1
 fi
+
 ./fimex.sh --input.file="$DATA" --qualityExtract.config="$CONF" --output.file=out$$.nc
 if [ $? != 0 ]; then
   echo "failed masking via fimex command-line"

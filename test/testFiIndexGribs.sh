@@ -1,13 +1,14 @@
 #! /bin/sh
 
 TEST_SRCDIR=$(dirname $0)
-TOP_SRCDIR=${TEST_SRCDIR}/..
+TOP_SRCDIR="${TEST_SRCDIR}/.."
 
 echo "test fiIndexGribs"
 if [ ! -f test.grb1 ]; then
-   echo "no input data: test.grb1, skipping test..."
-   exit 0;
+   echo "SKIP missing 'test.grb1' (generated from optional test data)"
+   exit 0
 fi
+
 rm -f test.grb1.grbml
 ./fiIndexGribs.sh -i test.grb1
 if [ $? != 0 ]; then
@@ -69,5 +70,6 @@ else
   echo "success"
 fi
 
+rm -f test.grb1.grbml test.grb2.grbml
 exit 0
 

@@ -8,14 +8,16 @@ TESTCASE="writing netcdf byte and char"
 
 echo "test ${TESTCASE}"
 if [ ! -f "${INPUTFILE}" ]; then
-   echo "no input data: ${INPUTFILE}, skipping test..."
-   exit 0;
+   echo "FAIL missing '${INPUTFILE}'"
+   exit 1
 fi
+
 ./fimex.sh --input.file "${INPUTFILE}" --output.file "${OUTPUTFILE}"
 if [ $? != 0 ]; then
-  echo "failed ${TESTCASE}"
+  echo "FAIL ${TESTCASE}"
   exit 1
 fi
-echo "success"
+echo "PASS $TESTCASE"
+
 rm -f "${OUTPUTFILE}"
 exit 0

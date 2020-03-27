@@ -3,15 +3,15 @@ echo "test reading with ncml"
 
 TEST_SRCDIR=`dirname $0`
 TEST_BINDIR=`pwd`
-cd $TEST_SRCDIR
+cd "$TEST_SRCDIR"
 
 if [ ! -f coordTest.nc ]; then
-   echo "no input data: coordTest.nc ..."
-   exit 1;
+   echo "FAIL missing 'coordTest.nc'"
+   exit 1
 fi
 if [ ! -f test.ncml ]; then
-   echo "no input data: test.ncml ..."
-   exit 1;
+   echo "FAIL missing 'test.ncml'"
+   exit 1
 fi
 
 "${TEST_BINDIR}/fimex.sh" --input.file=test.ncml --output.file=x --output.type=null
