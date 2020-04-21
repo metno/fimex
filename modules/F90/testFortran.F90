@@ -57,6 +57,7 @@ PROGRAM fortran_test
   ndims=fio%get_dimensions(varName)
   IF ( ndims .ne. 3 ) CALL error("Unexpected dimension count")
   WRITE(0,*) "get_dimensions: ", ndims
+  WRITE(0,*) "projection: ", fio%get_proj4()
 
   if ("x"    .ne. fio%get_dimname(1)) CALL error("Unexpected 'x' dimension name")
   if ("y"    .ne. fio%get_dimname(2)) CALL error("Unexpected 'y' dimension name")

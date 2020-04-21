@@ -20,7 +20,7 @@
 !!
 !! An example to run against this module can be found in modules/F90/fortran_test.f90
 !!
-!! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
+!! @see https://github.com/metno/fimex/blob/master/modules/F90/fimex.f90
 MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR, C_NULL_PTR
   IMPLICIT NONE
@@ -77,6 +77,7 @@ MODULE Fimex
     procedure :: get_vartype => get_variable_type
     procedure :: get_dimensions => get_dimensions
     procedure :: get_dimname => get_dimname
+    procedure :: get_proj4 => get_proj4
     procedure :: get_var_longitude => get_var_longitude
     procedure :: get_var_latitude => get_var_latitude
     procedure :: get_dimension_start_size => get_dimension_start_size
@@ -273,6 +274,17 @@ MODULE Fimex
       INTEGER(KIND=C_INT), VALUE           :: n
       INTEGER(KIND=C_INT)                  :: c_mifi_slicebuilder_dimname
     END FUNCTION c_mifi_slicebuilder_dimname
+
+    !> F90-wrapper for mifi_slicebuilder_get_proj4()
+    FUNCTION c_mifi_slicebuilder_get_proj4(sb, proj4, n) BIND(C,NAME="mifi_slicebuilder_get_proj4_cpy")
+      USE iso_c_binding, ONLY: C_INT, C_CHAR, C_PTR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                   :: sb
+      CHARACTER(KIND=C_CHAR),INTENT(OUT)   :: proj4(*)
+      INTEGER(KIND=C_INT), VALUE           :: n
+      INTEGER(KIND=C_INT)                  :: c_mifi_slicebuilder_get_proj4
+    END FUNCTION c_mifi_slicebuilder_get_proj4
+
 
     !> F90-wrapper for mifi_fill_scaled_double_dataslice()
     FUNCTION c_mifi_fill_scaled_double_dataslice(io, varName, sb, units, data, dsize) &
@@ -655,6 +667,29 @@ MODULE Fimex
     ENDIF
     RETURN
   END FUNCTION get_dimname
+
+  !> Get the projection of the current variable
+  !! Get the projection as proj4 string fo the last variable checked
+  !! with get_dimensions.
+  !! @return proj4 string, or "" on error
+  FUNCTION get_proj4(this)
+    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_CHAR,C_INT,C_PTR,C_ASSOCIATED,C_F_POINTER
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(IN)    :: this
+    CHARACTER(LEN=1024)           :: get_proj4
+    CHARACTER(LEN=1025)           :: var_array
+    INTEGER                       :: i
+
+    get_proj4 = ""
+    IF ( C_ASSOCIATED(this%sb) ) THEN
+       i = c_mifi_slicebuilder_get_proj4(this%sb, var_array, 1025)
+       IF (i >= 2) THEN
+          i = i - 1
+          get_proj4(1:i) = var_array(1:i)
+       ENDIF
+    ENDIF
+    RETURN
+  END FUNCTION get_proj4
 
   !> Get the global size of a file's dimension
   !! Get the dimension-size of a dimension of the file
