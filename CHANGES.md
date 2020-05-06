@@ -31,6 +31,12 @@ Compression in `fiIndexGribs` and `fiGribCut` is no longer
 supported. The `fiIndexGribs` command line has changed in version 1.0
 to make it more clear which file is written or appended to.
 
+Previously, options specified in a file could be overwritten on the
+command line. This is now rejected (by the mi-programoptions
+library). Adding back this feature requires major changes in
+mi-programoptions, therefore it might not come back. There are some
+other subtle changes in reading options from files.
+
 ## C++ library changes
 
 Boost was removed from fimex 1.0 C++ code in favour of C++11 and some
