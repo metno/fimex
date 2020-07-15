@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2020, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,8 +29,7 @@
 #include <algorithm>
 #include <ostream>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 // static
 CDMVariable::SpatialVectorDirection CDMVariable::vectorDirectionFromString(const std::string& vd)
@@ -89,34 +88,38 @@ void CDMVariable::setData(DataPtr d)
 
 void CDMVariable::shapeToXMLStream(std::ostream& out) const
 {
-	if (shape.size() > 0) {
-		out << " shape=\"";
-		for (unsigned int i = 0; i < shape.size(); i++) {
-			out << shape[i];
-			if (i < (shape.size()-1)) {
-				out << " ";
-			} else {
-				out << "\" ";
-			}
-		}
-	}
+    if (shape.empty())
+        return;
+
+    out << "shape=\"";
+    bool first = true;
+    for (unsigned int i = 0; i < shape.size(); i++) {
+        if (!first)
+            out << ' ';
+        out << shape[i];
+    }
+    out << "\" ";
 }
+
 void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const
 {
-	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" ";
-	shapeToXMLStream(out);
-	out << ">" << std::endl;
-	for (std::vector<CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
-		it->toXMLStream(out, "  ");
-	}
-	out << "</variable>" << std::endl;
+    CDMDataType dt = getDataType();
+    out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(dt) << "\" ";
+    shapeToXMLStream(out);
+    if (!attrs.empty()) {
+        out << ">" << std::endl;
+        for (const auto& att : attrs) {
+            att.toXMLStream(out, "  ");
+        }
+        out << "</variable>" << std::endl;
+    } else {
+        out << "/>" << std::endl;
+    }
 }
 
 void CDMVariable::toXMLStream(std::ostream& out) const
 {
-	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\"";
-	shapeToXMLStream(out);
-	out << "/>" << std::endl;
+    toXMLStream(out, std::vector<CDMAttribute>());
 }
 
-}
+} // namespace MetNoFimex

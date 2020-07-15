@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2020, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -131,7 +131,6 @@ void XMLDoc::cleanup()
         xmlXPathFreeContext(xpathCtx);
     }
     xmlCleanupParser();
-
 }
 
 XMLDoc::~XMLDoc()

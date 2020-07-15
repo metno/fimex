@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2020, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,8 +25,7 @@
 
 #include "fimex/StringUtils.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 namespace {
 const std::string S_DOUBLE  = "double";
