@@ -8,14 +8,18 @@ IF (NOT TEST_EXTRADATA_DIR)
 ENDIF ()
 MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
+SET (CURRENT_TEST_EXTRADATA_VERSION 20191030T0830)
+SET(TEST_EXTRADATA_PAGE "https://wiki.met.no/fimex/download")
+SET(TEST_EXTRADATA_URL "https://wiki.met.no/_media/fimex/fimex-test-data-${CURRENT_TEST_EXTRADATA_VERSION}.tar.gz")
+SET(TEST_EXTRADATA_MESSAGE "in '${TEST_EXTRADATA_DIR}', please consider downloading version ${CURRENT_TEST_EXTRADATA_VERSION} from ${TEST_EXTRADATA_PAGE}")
+
 IF (EXISTS "${TEST_EXTRADATA_DIR}/VERSION")
   FILE (STRINGS "${TEST_EXTRADATA_DIR}/VERSION" TEST_EXTRADATA_VERSION)
-  SET (CURRENT_TEST_EXTRADATA_VERSION 20191030T0830)
   IF ("${TEST_EXTRADATA_VERSION}" STRLESS "${CURRENT_TEST_EXTRADATA_VERSION}")
-    MESSAGE (WARNING "Unxpected test data version '${TEST_EXTRADATA_VERSION}' in '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
+    MESSAGE (WARNING "Unxpected test data version '${TEST_EXTRADATA_VERSION}' ${TEST_EXTRADATA_MESSAGE}")
   ENDIF ()
 ELSE ()
-  MESSAGE (WARNING "No extra test data seem to be present '${TEST_EXTRADATA_DIR}', please consider downloading from https://wiki.met.no/fimex/download")
+  MESSAGE (WARNING "No extra test data seem to be present ${TEST_EXTRADATA_MESSAGE}")
 ENDIF ()
 
 SET(CC_TESTS
