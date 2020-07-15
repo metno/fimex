@@ -630,7 +630,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
     // use unLimDimPos = -1 for variables without unlimited dimension
 
 #ifdef _OPENMP
-#if defined(__GNUC__) && __GNUC__ >= 9
+#if (defined(__GNUC__) && __GNUC__ >= 9) || defined(__clang__)
 #pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap, maxUnLim, unLimDimId)
 #elif !defined(__INTEL_COMPILER) || (__INTEL_COMPILER >= 1800)
 #pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap)
