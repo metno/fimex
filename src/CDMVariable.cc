@@ -104,13 +104,26 @@ void CDMVariable::shapeToXMLStream(std::ostream& out) const
 void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const
 {
     CDMDataType dt = getDataType();
+    bool is_unsigned = false;
+    if (dt == CDM_UINT) {
+        dt = CDM_INT;
+        is_unsigned = true;
+    } else if (dt == CDM_USHORT) {
+        dt = CDM_SHORT;
+        is_unsigned = true;
+    } else if (dt == CDM_UCHAR) {
+        dt = CDM_CHAR;
+        is_unsigned = true;
+    }
     out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(dt) << "\" ";
     shapeToXMLStream(out);
-    if (!attrs.empty()) {
+    if (is_unsigned || !attrs.empty()) {
         out << ">" << std::endl;
         for (const auto& att : attrs) {
             att.toXMLStream(out, "  ");
         }
+        if (is_unsigned)
+            out << "  <attribute name=\"_Unsigned\" value=\"true\" />" << std::endl;
         out << "</variable>" << std::endl;
     } else {
         out << "/>" << std::endl;

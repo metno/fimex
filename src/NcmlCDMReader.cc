@@ -213,10 +213,37 @@ void NcmlCDMReader::initVariableTypeChange()
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
         if (name.empty())
             throw CDMException("ncml-file " + configId + " has no name for variable");
+        xmlXPathObject_p xpath_att_unsigned = doc->getXPathObject("/nc:attribute[@name='_Unsigned']", nodes->nodeTab[i]);
+        xmlNodeSetPtr nodes_att_unsigned = xpath_att_unsigned->nodesetval;
+        size_t n_att_unsigned = (nodes_att_unsigned) ? nodes_att_unsigned->nodeNr : 0;
+        bool att_unsigned = false;
+        if (n_att_unsigned == 1) {
+            std::string att_unsigned_val = getXmlProp(nodes_att_unsigned->nodeTab[0], "value");
+            if (att_unsigned_val == "true")
+                att_unsigned = true;
+            else if (att_unsigned_val != "false")
+                throw CDMException("ncml-file " + configId + " has invalid _Unsigned attribute value for variable '" + name + "'");
+        }
         if (cdm_->hasVariable(name)) {
             CDMVariable& var = cdm_->getVariable(name);
             CDMDataType oldType = var.getDataType();
             CDMDataType newType = string2datatype(type);
+            if (att_unsigned) {
+                switch (newType) {
+                case CDM_INT:
+                    newType = CDM_UINT;
+                    break;
+                case CDM_SHORT:
+                    newType = CDM_USHORT;
+                    break;
+                case CDM_CHAR:
+                    newType = CDM_UCHAR;
+                    break;
+                default:
+                    throw CDMException("ncml-file " + configId + " specifies _Unsigned attribute value for variable '" + name +
+                                       "' with type not in int,short,byte");
+                }
+            }
             if (oldType != newType) {
                 variableTypeChanges[name] = newType;
                 LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);

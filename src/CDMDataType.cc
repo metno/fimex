@@ -33,8 +33,11 @@ const std::string S_FLOAT   = "float";
 const std::string S_INT = "int", S_LONG = "long";
 const std::string S_SHORT   = "short";
 const std::string S_CHAR    = "char";
+const std::string S_BYTE    = "byte";
 const std::string S_STRING  = "string";
+const std::string S_STRING_CAP = "String";
 const std::string S_UCHAR   = "uchar";
+const std::string S_UBYTE   = "ubyte";
 const std::string S_USHORT  = "ushort";
 const std::string S_UINT    = "uint";
 const std::string S_INT64   = "int64";
@@ -51,13 +54,16 @@ CDMDataType string2datatype(const std::string& s)
     else if (str == S_INT || str == S_LONG)
                                { return CDM_INT; }
     else if (str == S_SHORT)   { return CDM_SHORT; }
-    else if (str == S_CHAR)    { return CDM_CHAR; }
+    else if (str == S_CHAR || str == S_BYTE)
+                               { return CDM_CHAR; }
     else if (str == S_INT64)   { return CDM_INT64; }
     else if (str == S_UINT64)  { return CDM_UINT64; }
     else if (str == S_UINT)    { return CDM_UINT; }
     else if (str == S_USHORT)  { return CDM_USHORT; }
-    else if (str == S_UCHAR)   { return CDM_UCHAR; }
-    else if (str == S_STRING)  { return CDM_STRING; }
+    else if (str == S_UCHAR || str == S_UBYTE)
+                               { return CDM_UCHAR; }
+    else if (str == S_STRING || str == S_STRING_CAP)
+                               { return CDM_STRING; }
     else if (str == S_STRINGS) { return CDM_STRINGS; }
     else { return CDM_NAT; }
 }
