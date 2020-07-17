@@ -238,6 +238,7 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
     case MIFI_VINT_ALTITUDE:
         cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("units", "m"));
         cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("positive", "up"));
+        cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("standard_name", "height_above_msl"));
         break;
     case MIFI_VINT_DEPTH:
         cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("units", "m"));

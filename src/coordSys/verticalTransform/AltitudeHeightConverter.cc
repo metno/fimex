@@ -81,11 +81,11 @@ VerticalConverter_p AltitudeHeightConverter::createConverter(CDMReader_p reader,
         }
     }
     if (topoVar.empty()) {
-        LOG4FIMEX(logger, Logger::DEBUG, "no topography/altitude found to retrieve height");
+        LOG4FIMEX(logger, Logger::WARN, "no topography variable found");
         return VerticalConverter_p();
     }
 
-    LOG4FIMEX(logger, Logger::INFO, "using altitude " << topoVar << " to retrieve height");
+    LOG4FIMEX(logger, Logger::INFO, "using " << topoVar << " to calculate " << (addTopography ? "altitude" : "height"));
     return std::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
 }
 

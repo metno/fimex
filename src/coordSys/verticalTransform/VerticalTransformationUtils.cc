@@ -375,7 +375,7 @@ VerticalConverter_p verticalConverter(CoordinateSystem_cp cs, CDMReader_p reader
         if (VerticalConverter_p converter = vt->getConverter(reader, cs, verticalType))
             return converter;
     }
-    throw CDMException("no vertical transformation found: " + cs->id());
+    throw CDMException("no vertical converter found: " + cs->id());
 }
 
 DataPtr verticalData4D(VerticalConverter_p converter, const CDM& cdm, size_t unLimDimPos)

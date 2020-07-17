@@ -29,6 +29,7 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMVerticalInterpolator.h"
+#include "fimex/CDMInterpolator.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
@@ -248,4 +249,34 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
     TEST4FIMEX_CHECK_CLOSE(1292, va[3], 1);
     TEST4FIMEX_CHECK_CLOSE(5000, va[4], 1);
     TEST4FIMEX_CHECK_CLOSE(5000, va[5], 1);
+}
+
+TEST4FIMEX_TEST_CASE(height_altitude_detection)
+{
+    if (!hasTestExtra())
+        return;
+    const std::string fileName = pathTestExtra("height_altitude.nc");
+    CDMReader_p ncreader(CDMFileReaderFactory::create("netcdf", fileName));
+
+    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncreader);
+    interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, {9.42}, {61.8});
+
+    {   // height => all above ground
+        std::shared_ptr<CDMVerticalInterpolator> reader = std::make_shared<CDMVerticalInterpolator>(interpolator, "height", "linear_no_extra");
+        reader->interpolateToFixed({100, 500, 1000});
+
+        DataPtr data = reader->getData("concentration");
+        TEST4FIMEX_REQUIRE(data);
+        TEST4FIMEX_CHECK(data->size() == 3);
+        TEST4FIMEX_CHECK_CLOSE(data->getDouble(0), 9.86e-07, 1e-07);
+    }
+    {   // altitude => lowest value is below ground
+        std::shared_ptr<CDMVerticalInterpolator> reader = std::make_shared<CDMVerticalInterpolator>(interpolator, "altitude", "linear_no_extra");
+        reader->interpolateToFixed({100, 500, 1000});
+
+        DataPtr data = reader->getData("concentration");
+        TEST4FIMEX_REQUIRE(data);
+        TEST4FIMEX_CHECK(data->size() == 3);
+        TEST4FIMEX_CHECK(data->getDouble(0) > 1e35); // FIXME should be NaN
+    }
 }

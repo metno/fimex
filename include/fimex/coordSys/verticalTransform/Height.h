@@ -29,8 +29,7 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/verticalTransform/Height.h
@@ -39,26 +38,32 @@ class Height : public VerticalTransformation
 {
 public:
     /// name of the height variable
-    const std::string height;
-    Height(const std::string& height) : height(height) {}
-    virtual ~Height() {}
+    Height(const std::string& height, bool is_altitude);
+    ~Height();
+
     /**
      * static NAME constant
      * @return height
      */
-    static const std::string NAME() {return "height";}
+    static const std::string NAME();
+
     /**
      * @return same as static NAME()
      */
-    virtual std::string getName() const { return NAME(); }
-    virtual int getPreferredVerticalType() const { return MIFI_VINT_HEIGHT; }
-    virtual std::string getParameterString() const { return "h="+height; }
-    virtual bool isComplete() const {return !height.empty();}
+    std::string getName() const override;
+
+    int getPreferredVerticalType() const override;
+    std::string getParameterString() const override;
+    bool isComplete() const override {return !height_.empty();}
 
 protected:
-    VerticalConverter_p getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
-    VerticalConverter_p getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
-    VerticalConverter_p getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const;
+    VerticalConverter_p getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const override;
+    VerticalConverter_p getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const override;
+    VerticalConverter_p getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const override;
+
+private:
+    const std::string height_;
+    const bool is_altitude_;
 };
 
 } /* namespace MetNoFimex */

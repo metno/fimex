@@ -31,23 +31,59 @@
 
 namespace MetNoFimex {
 
-VerticalConverter_p Height::getPressureConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
+static const std::string HEIGHT = "height";
+static const std::string ALTITUDE = "altitude";
+
+Height::Height(const std::string& height, bool is_altitude)
+    : height_(height)
+    , is_altitude_(is_altitude)
 {
-    // does not exist generally without known topography, which depends the variable to read
+}
+
+Height::~Height()
+{
+}
+
+// static
+const std::string Height::NAME()
+{
+    return HEIGHT;
+}
+
+std::string Height::getName() const
+{
+    return is_altitude_ ? ALTITUDE : HEIGHT;
+}
+
+int Height::getPreferredVerticalType() const
+{
+    return is_altitude_ ? MIFI_VINT_ALTITUDE : MIFI_VINT_HEIGHT;
+}
+
+std::string Height::getParameterString() const
+{
+    return (is_altitude_ ? "a=" : "h=") + height_;
+}
+
+VerticalConverter_p Height::getPressureConverter(CDMReader_p /*reader*/, CoordinateSystem_cp /*cs*/) const
+{
     return VerticalConverter_p();
 }
 
 VerticalConverter_p Height::getHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    return IdentityConverter::createConverterForVarName(reader, cs, height, "m");
+    VerticalConverter_p c = IdentityConverter::createConverterForVarName(reader, cs, height_, "m");
+    if (is_altitude_)
+        c = AltitudeHeightConverter::createToHeightConverter(reader, cs, c);
+    return c;
 }
 
 VerticalConverter_p Height::getAltitudeConverter(CDMReader_p reader, CoordinateSystem_cp cs) const
 {
-    if (VerticalConverter_p height = getHeightConverter(reader, cs))
-        return AltitudeHeightConverter::createToAltitudeConverter(reader, cs, height);
-
-    return VerticalConverter_p();
+    VerticalConverter_p c = IdentityConverter::createConverterForVarName(reader, cs, height_, "m");
+    if (!is_altitude_)
+        c = AltitudeHeightConverter::createToAltitudeConverter(reader, cs, c);
+    return c;
 }
 
 } // namespace MetNoFimex

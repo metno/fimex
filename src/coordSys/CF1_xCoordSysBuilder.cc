@@ -48,12 +48,27 @@
 #include <regex>
 #include <set>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
+using namespace std;
+
+namespace {
 
 static Logger_p logger = getLogger("fimex.CF1_xCoordSysBuilder");
 
-using namespace std;
+static const std::set<std::string> altitudes {
+    "height_above_msl",
+    "height_above_mean_sea_level",
+    "height_above_geopotential_datum",
+    "height_above_reference_ellipsoid"
+};
+
+bool is_altitude_name(const std::string& name)
+{
+    return (name.find("altitude") != std::string::npos) || altitudes.count(name);
+}
+
+} // namespace
 
 CF1_xCoordSysBuilder::CF1_xCoordSysBuilder()
 {
@@ -421,9 +436,19 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
             if (cdm.hasVariable(zAxis->getName())) {
                 LOG4FIMEX(logger, Logger::DEBUG, "z axis '" << zAxis->getName() << "' has type " << zAxis->getAxisTypeStr());
                 switch (zAxis->getAxisType()) {
-                case CoordinateAxis::Height:
-                    cs->setVerticalTransformation(std::make_shared<Height>(zAxis->getName()));
-                    break;
+                case CoordinateAxis::Height: {
+                    bool is_altitude = false;
+                    CDMAttribute attr;
+                    if (is_altitude_name(zAxis->getName())) {
+                        is_altitude = true;
+                    } else if (cdm.getAttribute(zAxis->getName(), "computed_standard_name", attr)
+                               || cdm.getAttribute(zAxis->getName(), "standard_name", attr))
+                    {
+                        if (is_altitude_name(attr.getStringValue()))
+                            is_altitude = true;
+                    }
+                    cs->setVerticalTransformation(std::make_shared<Height>(zAxis->getName(), is_altitude));
+                    break; }
                 case CoordinateAxis::Depth:
                     cs->setVerticalTransformation(std::make_shared<Depth>(zAxis->getName()));
                     break;
