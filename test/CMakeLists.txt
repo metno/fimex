@@ -100,7 +100,7 @@ IF(ENABLE_NETCDF)
     testVerticalInterpolatorSigmaHybridToPressure.sh
     testVerticalInterpolatorSigmaHybridFromPressure.sh
     testVerticalInterpolatorSigmaHybridReduced.sh
-    testVerticalInterpolatorAltitudeToHeight.sh
+    testVerticalInterpolatorHeightToAltitude.sh
     testVerticalInterpolatorEnsembleSigmaHybridToPressure.sh
     testVerticalInterpolatorAltitude.sh
     testVerticalInterpolatorConversion.sh
