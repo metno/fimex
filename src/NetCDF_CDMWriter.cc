@@ -698,16 +698,28 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
             const bool no_unlim = (unLimDimPos == -1 && unLimDimIdx == -1 && !cdm.hasUnlimitedDim(cdmVar));
             const bool with_unlim = (unLimDimPos != -1 && unLimDimIdx >= 0 && cdm.hasUnlimitedDim(cdmVar));
             DataPtr data;
-            if (no_unlim) {
-                data = cdmReader->getData(varName);
-            } else if (with_unlim) {
-                data = cdmReader->getDataSlice(varName, unLimDimPos);
-            } else {
-                continue; // FIXME
+            try {
+                if (no_unlim) {
+                    data = cdmReader->getData(varName);
+                } else if (with_unlim) {
+                    data = cdmReader->getDataSlice(varName, unLimDimPos);
+                } else {
+                    continue; // FIXME
+                }
+                if (data)
+                    data = convertData(cdmVar, data);
+            } catch (CDMException& ex) {
+                std::ostringstream msg;
+                msg << "exception while reading variable '" << varName << "'";
+                if (!no_unlim)
+                    msg << " at unlimited dim position " << unLimDimPos;
+                msg << "; using _FillValue";
+                msg << "; message: " << ex.what();
+                LOG4FIMEX(logger, Logger::ERROR, msg.str());
+                data = nullptr;
             }
-            data = convertData(cdmVar, data);
 
-            if (data->size() == 0 && ncFile->format < 3) {
+            if ((!data || data->size() == 0) && ncFile->format < 3) {
                 // need to write data with _FillValue,
                 // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
                 if (with_unlim)
@@ -715,13 +727,13 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                 size_t size = (n_dims > 0) ? std::accumulate(count.get(), count.get() + n_dims, 1, std::multiplies<size_t>()) : 1;
                 data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
             }
-            if (data->size() > 0) {
+            if (data && data->size() > 0) {
                 if (with_unlim) {
                     count[unLimDimIdx] = 1;
                     start[unLimDimIdx] = unLimDimPos;
                 }
                 LOG4FIMEX(logger, Logger::DEBUG,
-                          "writing variable " << varName << "dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims)
+                          "writing variable " << varName << " dimLen= " << n_dims << " start=" << join(&start[0], &start[0] + n_dims)
                                               << " count=" << join(&count[0], &count[0] + n_dims));
                 OmpScopedLock ncLock(Nc::getMutex());
                 try {
