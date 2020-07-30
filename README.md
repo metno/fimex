@@ -86,14 +86,14 @@ Xeon machine with a x386 CPU and gcc, the following flags might help
 
 ### Testing the Installation
 
-Some tests require download of
-[test-data](https://wiki.met.no/_media/fimex/flth00.dat.gz) which must
-be uncompressed and added to the `fimex-source/test` directory. Then
-run `make -C /fimex/build test`. Following the above example, command
-like these might be used
+Some tests require extra test data which can be downloaded from
+https://wiki.met.no/fimex/download. The test data archive must be
+unpacked, and the directory containing the file `VERSION` should be
+specified to cmake
 
-    curl https://wiki.met.no/_media/fimex/flth00.dat.gz | gunzip > $SRC/test/flth00.dat
-    make -C $BLD  test
+
+    cmake  ... -DTEST_EXTRADATA_DIR=/path/to/extra/test/data ...
+
 
 ## Usage Example
 
