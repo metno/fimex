@@ -1,3 +1,7 @@
+  * 2020-08-03 fimex-1.5.0
+    * support byte and unsigned in ncml
+    * try to detect altitude / height vertical axes
+    * bugfixes
   * 2020-01-06 fimex-1.4.2
     * metgm bugfixes
   * 2019-10-30 fimex-1.4.1
