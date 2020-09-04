@@ -199,11 +199,14 @@ const po::option op_merge_printNcML = po::option("merge.printNcML", "print NcML 
 const po::option op_merge_printCS = po::option("merge.printCS", "print CoordinateSystems of interpolator").set_narg(0);
 const po::option op_merge_printSize = po::option("merge.printSize", "print size estimate").set_narg(0);
 
+const std::string verticalInterpolate_config = "verticalInterpolate.config", vertialInterpolate_toAxis = "verticalInterpolate.toAxis";
+const po::option op_verticalInterpolate_config = po::option(verticalInterpolate_config, "ncml configuration to be applied before vertical interpolation (typically used to define a vertical axis for use together with --" + vertialInterpolate_toAxis + ")");
 const po::option op_verticalInterpolate_type = po::option("verticalInterpolate.type", "pressure, height (above ground) or depth");
 const po::option op_verticalInterpolate_ignoreValidityMin = po::option("verticalInterpolate.ignoreValidityMin", "ignore minimum value from vertical transformation (e.g. ocean surface)");
 const po::option op_verticalInterpolate_ignoreValidityMax = po::option("verticalInterpolate.ignoreValidityMax", "ignore maximum value from vertical transformation (e.g. ocean bathymetry)");
 const po::option op_verticalInterpolate_method = po::option("verticalInterpolate.method", "linear, linear_weak_extra, linear_no_extra, linear_const_extra, log, loglog or nearestneighbor interpolation");
 const po::option op_verticalInterpolate_templateVar = po::option("verticalInterpolate.templateVar", "specification template variable for interpolation to fixed or hybrid levels");
+const po::option op_verticalInterpolate_toAxis = po::option(vertialInterpolate_toAxis, "specify final vertical axis for interpolation to fixed or hybrid levels (typically used together with --" + verticalInterpolate_config + ")");
 const po::option op_verticalInterpolate_level1 = po::option("verticalInterpolate.level1", "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition");
 const po::option op_verticalInterpolate_level2 = po::option("verticalInterpolate.level2", "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition");
 const po::option op_verticalInterpolate_dataConversion = po::option("verticalInterpolate.dataConversion", "vertical data-conversion: theta2T, omega2vwind or add4Dpressure").set_composing();
@@ -615,6 +618,11 @@ CDMReader_p getCDMTimeInterpolator(const po::value_set& vm, CDMReader_p dataRead
 
 CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p dataReader)
 {
+    const string config = getConfig("verticalInterpolate", vm);
+    if (!config.empty()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "adding NcmlCDMReader with (" << config <<")");
+        dataReader = std::make_shared<NcmlCDMReader>(dataReader, XMLInputFile(config));
+    }
     vector<string> operations;
     if (getOptions(op_verticalInterpolate_dataConversion, vm, operations)) {
         try {
@@ -630,9 +638,12 @@ CDMReader_p getCDMVerticalInterpolator(const po::value_set& vm, CDMReader_p data
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
     std::shared_ptr<CDMVerticalInterpolator> verticalReader = std::make_shared<CDMVerticalInterpolator>(dataReader, vtype, vmethod);
-    string template_var;
-    if (getOption(op_verticalInterpolate_templateVar, vm, template_var)) {
-        LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate to template var");
+    string template_var, replace_z;
+    if (getOption(op_verticalInterpolate_toAxis, vm, replace_z)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate replace vertical axis with '" << replace_z << "'");
+        verticalReader->interpolateToAxis(replace_z);
+    } else if (getOption(op_verticalInterpolate_templateVar, vm, template_var)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate to template var '" << template_var << "'");
         verticalReader->interpolateByTemplateVariable(template_var);
     } else {
         string level1_text, level2_text;
@@ -991,11 +1002,13 @@ int run(int argc, char* args[])
         << op_merge_printCS
         << op_merge_printSize
 
+        << op_verticalInterpolate_config
         << op_verticalInterpolate_type
         << op_verticalInterpolate_ignoreValidityMin
         << op_verticalInterpolate_ignoreValidityMax
         << op_verticalInterpolate_method
         << op_verticalInterpolate_templateVar
+        << op_verticalInterpolate_toAxis
         << op_verticalInterpolate_level1
         << op_verticalInterpolate_level2
         << op_verticalInterpolate_dataConversion

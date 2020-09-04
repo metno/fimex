@@ -124,17 +124,27 @@ struct CDMVerticalInterpolator::Impl
     int verticalType;
     mifi_vertical_interpol_method verticalInterpolationMethod;
     vector<double> level1;
-    // name of the generated vertical axis
+    // name of the generated/final vertical axis
     string vAxis;
     // variable-names with vertical information to change
     CoordinateSystem_cp_v changeCoordSys;
 
-    string templateVarName;
+    bool interpolateToAxis;
+
     CoordinateSystem_cp templateCS;
 
     bool ignoreValidityMin;
     bool ignoreValidityMax;
+
+    Impl();
 };
+
+CDMVerticalInterpolator::Impl::Impl()
+    : interpolateToAxis(false)
+    , ignoreValidityMin(false)
+    , ignoreValidityMax(false)
+{
+}
 
 CDMVerticalInterpolator::CDMVerticalInterpolator(CDMReader_p dataReader, const string& verticalType, const string& verticalInterpolationMethod)
     : dataReader_(dataReader)
@@ -177,8 +187,6 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(CDMReader_p dataReader, const s
     } else {
         throw CDMException("unknown vertical interpolation method: " +verticalInterpolationMethod);
     }
-
-    pimpl_->ignoreValidityMin = pimpl_->ignoreValidityMax = false;
 }
 
 CDMVerticalInterpolator::~CDMVerticalInterpolator()
@@ -246,15 +254,13 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
         break;
     }
 
-    for (size_t i = 0; i < coordSys.size(); i++) {
-        CoordinateSystem_cp cs = coordSys[i];
+    for (const auto cs : coordSys) {
         if (isSimpleZAxis(*cdm_, cs)) {
             pimpl_->changeCoordSys.push_back(cs);
 
             // change the shape of the variables with this cs: remove the old z axis, add the new one
-            const CDM::VarVec vars = dataReader_->getCDM().getVariables();
-            for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-                replaceZaxis(*cdm_, cs, varIt->getName(), pimpl_->vAxis);
+            for (const auto& var : dataReader_->getCDM().getVariables()) {
+                replaceZaxis(*cdm_, cs, var.getName(), pimpl_->vAxis);
             }
 
             // remove the old zAxis
@@ -263,13 +269,45 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
     }
 }
 
+void CDMVerticalInterpolator::interpolateToAxis(const std::string& vAxis)
+{
+    if (vAxis.empty())
+        throw CDMException("vertical interpolation to '" + vAxis + "' not possible");
+
+    pimpl_->interpolateToAxis = true;
+    pimpl_->vAxis = vAxis;
+
+    // get all coordinate systems from file before changing this cdm
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(dataReader_);
+
+    std::set<std::string> removeZ;
+
+    for (const auto cs : coordSys) {
+        CoordinateAxis_cp zAxis = cs->getGeoZAxis();
+        if (!zAxis || zAxis->getName() == vAxis || !isSimpleZAxis(*cdm_, cs))
+            continue;
+
+        pimpl_->changeCoordSys.push_back(cs);
+        removeZ.insert(zAxis->getName());
+
+        // change the shape of the variable: remove the old axis, add the new one
+        for (const auto& var : dataReader_->getCDM().getVariables()) {
+            replaceZaxis(*cdm_, cs, var.getName(), vAxis);
+        }
+    }
+
+    // remove the old zAxis
+    for (const auto& zName : removeZ)
+        cdm_->removeVariable(zName);
+}
+
 void CDMVerticalInterpolator::interpolateByTemplateVariable(const std::string& tv)
 {
     // get all coordinate systems from file before changing this cdm
     const CoordinateSystem_cp_v coordSys = listCoordinateSystems(dataReader_);
 
-    pimpl_->templateVarName = tv;
-    pimpl_->templateCS = findCompleteCoordinateSystemFor(coordSys, pimpl_->templateVarName);
+    pimpl_->templateCS = findCompleteCoordinateSystemFor(coordSys, tv);
+
     if (!pimpl_->templateCS)
         throw CDMException("vertical interpolation template variable '" + tv + "' without coordinate system");
     if (!isSimpleZAxis(*cdm_, pimpl_->templateCS))
@@ -291,9 +329,8 @@ void CDMVerticalInterpolator::interpolateByTemplateVariable(const std::string& t
         pimpl_->changeCoordSys.push_back(cs);
 
         // change the shape of the variable: remove the old axis, add the new one
-        const CDM::VarVec vars = dataReader_->getCDM().getVariables();
-        for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-            replaceZaxis(*cdm_, cs, varIt->getName(), zAxisTemplateShape0);
+        for (const auto& var : dataReader_->getCDM().getVariables()) {
+            replaceZaxis(*cdm_, cs, var.getName(), zAxisTemplateShape0);
         }
     }
 }
@@ -304,14 +341,13 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     if (variable.hasData()) {
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
-    CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
-    if (csI.get() == 0) {
+    if (CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName)) {
+        return getLevelDataSlice(csI, varName, unLimDimPos);
+    } else {
         LOG4FIMEX(logger, Logger::DEBUG, "no cs change for var='" << varName << "'");
         // no level to change, propagate to the dataReader_
         return dataReader_->getDataSlice(varName, unLimDimPos);
     }
-
-    return getLevelDataSlice(csI, varName, unLimDimPos);
 }
 
 DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, const std::string& varName, size_t unLimDimPos)
@@ -326,7 +362,13 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
 
     VerticalConverter_p oConverter;
     DataPtr oVerticalData;
-    if (pimpl_->templateCS) {
+    if (pimpl_->interpolateToAxis) {
+        CDMReader_p self(this, [](CDMReader*) { }); // FIXME hack to avoid adding enable_shared_from_this
+        const CoordinateSystem_cp_v coordSys = listCoordinateSystems(self);
+        const auto cs = findCompleteCoordinateSystemFor(coordSys, varName);
+        oConverter = verticalConverter(cs, self, pimpl_->verticalType);
+        oVerticalData = verticalData4D(oConverter, *cdm_, unLimDimPos);
+    } else if (pimpl_->templateCS) {
         oConverter = verticalConverter(pimpl_->templateCS, dataReader_, pimpl_->verticalType);
         oVerticalData = verticalData4D(oConverter, dataReader_->getCDM(), unLimDimPos);
     }
@@ -351,7 +393,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     ArrayDims soVertical;
     ArrayDims sDataMax, sDataMin;
 
-    if (pimpl_->templateCS) {
+    if (oConverter) {
         soVertical = makeArrayDims(dataReader_->getCDM(), oConverter);
     } else {
         soVertical.add(pimpl_->vAxis /* or dim name? */, pimpl_->level1.size());
@@ -366,7 +408,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
 
     shared_array<double> valueMin, valueMax;
     size_t VALID_MIN = 0, VALID_MAX = 0;
-    if (pimpl_->templateCS) {
+    if (oConverter) {
         if (!pimpl_->ignoreValidityMax) {
             const std::vector<std::string> oValidMaxShape = oConverter->getValidityMaxShape();
             LOG4FIMEX(logger, Logger::DEBUG, "o valid max shape: " << join(oValidMaxShape.begin(), oValidMaxShape.end()));
@@ -428,7 +470,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     const size_t idataZdelta = siData.delta(geoZi);
     const size_t iverticalZdelta = siVertical.delta(geoZi);
     const size_t odataZdelta = soData.delta(geoZo);
-    const size_t overticalZdelta = pimpl_->templateCS ? soVertical.delta(geoZo) : 1;
+    const size_t overticalZdelta = soVertical.delta(geoZo);
 
     DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
     const double badValue = cdm_->getFillValue(varName);
@@ -437,7 +479,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     shared_array<float> oData(new float[oSize]);
     shared_array<float> iVerticalValues = iVerticalData->asFloat();
     shared_array<float> oVerticalValues;
-    if (pimpl_->templateCS)
+    if (oVerticalData)
         oVerticalValues = oVerticalData->asFloat();
 
 #ifdef _OPENMP
@@ -450,7 +492,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
         do { // sharedVolume() == 1 because we called minimizeShared before
             LOG4FIMEX(logger, Logger::DEBUG, "loopi=" << loopi++);
             const size_t verticalOutIdx = loop[OUT_VERTICAL] + k * overticalZdelta;
-            const double verticalOut = pimpl_->templateCS ? oVerticalValues[verticalOutIdx] : pimpl_->level1[verticalOutIdx];
+            const double verticalOut = oVerticalValues ? oVerticalValues[verticalOutIdx] : pimpl_->level1[verticalOutIdx];
             float* interpolated = &oData[loop[OUT] + k*odataZdelta];
 
             bool range = true;

@@ -69,6 +69,7 @@ public:
     void ignoreValidityMax(bool ignore);
 
     void interpolateToFixed(const std::vector<double>& level1);
+    void interpolateToAxis(const std::string& vAxis);
     void interpolateByTemplateVariable(const std::string& tv);
 
     using CDMReader::getDataSlice;
