@@ -888,9 +888,6 @@ void writeCDM(CDMReader_p dataReader, const po::value_set& vm)
     const string config = getConfig("output", vm);
     try {
       createWriter(dataReader, type, fileName, config);
-    } catch (CDMException& ex) {
-      LOG4FIMEX(logger, Logger::FATAL, "CDMException while writing: " << ex.what());
-      exit(1);
     } catch (exception& ex) {
       LOG4FIMEX(logger, Logger::FATAL, "exception while writing: " << ex.what());
       exit(1);

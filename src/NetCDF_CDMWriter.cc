@@ -629,11 +629,12 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
     // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
     // use unLimDimPos = -1 for variables without unlimited dimension
 
+    bool exceptions = false;
 #ifdef _OPENMP
 #if (defined(__GNUC__) && __GNUC__ >= 9) || defined(__clang__)
-#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap, maxUnLim, unLimDimId)
+#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap, maxUnLim, unLimDimId, exceptions)
 #elif !defined(__INTEL_COMPILER) || (__INTEL_COMPILER >= 1800)
-#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap)
+#pragma omp parallel for default(none) shared(logger, cdmVars, ncVarMap, exceptions)
 #endif // __INTEL_COMPILER
 #endif // _OPENMP
     for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
@@ -651,6 +652,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
         }
 #endif
         for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+            if (exceptions)
+                continue;
             const CDMVariable& cdmVar = cdmVars[vi];
             const std::string& varName = cdmVar.getName();
             const int varId = ncVarMap.find(varName)->second;
@@ -713,11 +716,23 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                 msg << "exception while reading variable '" << varName << "'";
                 if (!no_unlim)
                     msg << " at unlimited dim position " << unLimDimPos;
-                msg << "; using _FillValue";
+                msg << "; will stop writing data";
                 msg << "; message: " << ex.what();
                 LOG4FIMEX(logger, Logger::ERROR, msg.str());
                 data = nullptr;
+                exceptions = true;
+            } catch (...) {
+                std::ostringstream msg;
+                msg << "exception while reading variable '" << varName << "'";
+                if (!no_unlim)
+                    msg << " at unlimited dim position " << unLimDimPos;
+                msg << "; will stop writing data";
+                LOG4FIMEX(logger, Logger::ERROR, msg.str());
+                data = nullptr;
+                exceptions = true;
             }
+            if (exceptions)
+                continue;
 
             if ((!data || data->size() == 0) && ncFile->format < 3) {
                 // need to write data with _FillValue,
@@ -753,6 +768,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
         }
 #endif
     }
+    if (exceptions)
+        throw CDMException("netcdf writing failed with ERRORs");
 }
 
 void NetCDF_CDMWriter::init()
