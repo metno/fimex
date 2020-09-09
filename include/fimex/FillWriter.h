@@ -29,8 +29,9 @@
 
 #include <fimex/CDMReaderWriter.h>
 
-namespace MetNoFimex
-{
+#include <string>
+
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/FillWriter.h
@@ -60,4 +61,5 @@ public:
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* FILLWRITER_H_ */

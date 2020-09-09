@@ -27,6 +27,7 @@
 #include "fimex/FimexTime.h"
 
 #include <memory>
+#include <string>
 
 namespace MetNoFimex {
 

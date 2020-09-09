@@ -28,11 +28,12 @@
 #define CDMQUALITYEXTRACTOR_H_
 
 #include "CDMReader.h"
-#include <vector>
-#include <map>
 
-namespace MetNoFimex
-{
+#include <map>
+#include <vector>
+#include <string>
+
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMQualityExtractor.h
@@ -54,7 +55,7 @@ namespace MetNoFimex
  * them. It is therefore the task of the writer of the configuration, that no circular quality-flags exist.
  *
  */
-class CDMQualityExtractor: public MetNoFimex::CDMReader
+class CDMQualityExtractor : public CDMReader
 {
 public:
     /**
@@ -108,6 +109,6 @@ private:
     std::map<std::string, CDMReader_p> statusReaders;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* CDMQUALITYEXTRACTOR_H_ */
