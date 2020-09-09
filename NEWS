@@ -1,3 +1,6 @@
+  * 2020-09-09 fimex-1.5.1
+    * simplified use of vertical interpolation to hybrid axes
+    * bugfixes
   * 2020-08-03 fimex-1.5.0
     * support byte and unsigned in ncml
     * try to detect altitude / height vertical axes
