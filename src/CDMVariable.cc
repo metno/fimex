@@ -96,6 +96,7 @@ void CDMVariable::shapeToXMLStream(std::ostream& out) const
     for (unsigned int i = 0; i < shape.size(); i++) {
         if (!first)
             out << ' ';
+        first = false;
         out << shape[i];
     }
     out << "\" ";

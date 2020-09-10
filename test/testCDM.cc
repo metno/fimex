@@ -312,3 +312,13 @@ TEST4FIMEX_TEST_CASE(test_coordinateSystem)
     TEST4FIMEX_CHECK_EQ(latRetVal, lat);
     TEST4FIMEX_CHECK_EQ(lonRetVal, lon);
 }
+
+TEST4FIMEX_TEST_CASE(CDMVariable_NcML)
+{
+    const CDMVariable var("test", CDM_UINT, { "x", "y", "time"});
+    std::ostringstream xml;
+    var.toXMLStream(xml);
+    const std::string xmls = xml.str();
+    TEST4FIMEX_CHECK(xmls.find("shape=\"x y time\"") != std::string::npos);
+    TEST4FIMEX_CHECK(xmls.find("attribute name=\"_Unsigned\" value=\"true\"") != std::string::npos);
+}
