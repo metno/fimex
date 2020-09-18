@@ -8,8 +8,9 @@
 
 // defined if configured
 #cmakedefine HAVE_FELT 1
-#cmakedefine HAVE_GRIB_API_H 1
-#cmakedefine HAVE_GRIB_API_THREADSAFE 1
+#cmakedefine HAVE_ECCODES 1 // defined if using ecCodes for GRIB reading
+#cmakedefine HAVE_GRIB_API 1 // defined if using (outdated) grib-api for GRIB reading
+#cmakedefine HAVE_GRIB_THREADSAFE 1 // defined if ecCodes / grib-api are thread-safe
 #cmakedefine HAVE_LOG4CPP 1
 #cmakedefine HAVE_METGM_H 1
 #cmakedefine HAVE_MPI 1

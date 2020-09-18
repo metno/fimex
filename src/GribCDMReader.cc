@@ -1377,7 +1377,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
                       "start reading variable " << gfm.getShortName() << ", level " << gfm.getLevelNumber() << ", store at " << dataCurrentPos);
             size_t dataRead;
             {
-#ifndef HAVE_GRIB_API_THREADSAFE
+#ifndef HAVE_GRIB_THREADSAFE
                 OmpScopedLock lock(p_->mutex);
 #endif
                 dataRead = gfm.readData(grib_out, maxXySize, missingValue);

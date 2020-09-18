@@ -492,23 +492,25 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     // level
     grib_get(gh, GK_levtype, levelType_);
     grib_get(gh, GK_level, levelNo_);
+
     // time
+#ifdef HAVE_GRIB_API
     // read files internal time-step unit
     // https://confluence.ecmwf.int/display/ECC/Frequently+Asked+Questions#FrequentlyAskedQuestions-ConfusedaboutstepUnits?
     // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
     std::string iouotr;
     grib_get(gh, GK_indicatorOfUnitOfTimeRange, iouotr);
     grib_set(gh, GK_stepUnits, iouotr);
-
+#endif
     grib_get(gh, GK_stepUnits, stepUnits_);
     grib_get(gh, GK_stepType, stepType_);
-
     grib_get(gh, GK_dataDate, dataDate_);
     grib_get(gh, GK_time, dataTime_);
     grib_get(gh, GK_timeRangeIndicator, timeRangeIndicator_);
     grib_get(gh, GK_typeOfStatisticalProcessing, typeOfStatisticalProcessing_, -1);
     grib_get(gh, GK_startStep, stepStart_);
     grib_get(gh, GK_endStep, stepEnd_);
+
     // ensemble
     int gribError = grib_get_nocheck(gh, GK_numberOfForecastsInEnsemble, totalNumberOfEnsembles_);
     switch (gribError) {
