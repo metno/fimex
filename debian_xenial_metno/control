@@ -135,6 +135,7 @@ Package: python3-pyfimex0-0.23
 Section: python
 Architecture: amd64 ia64 powerpc
 Depends: python3,
+ python3-numpy,
  ${python:Depends},
  ${shlibs:Depends},
  ${misc:Depends},
