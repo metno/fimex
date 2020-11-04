@@ -91,11 +91,15 @@ Nc::~Nc()
     if (isOpen) {
         int status;
         NCMUTEX_LOCKED(status = nc_close(ncId));
-        if (status != NC_NOERR) {
-            LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
-       } else {
-           LOG4FIMEX(logger, Logger::DEBUG, "close NetCDF file '" << filename << "'");
-       }
+        try {
+            if (status != NC_NOERR) {
+                LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "close NetCDF file '" << filename << "'");
+            }
+        } catch (...) {
+            // ignore exceptions from logging
+        }
    }
 }
 
