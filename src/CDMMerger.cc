@@ -163,23 +163,36 @@ void CDMMerger::setTargetGridFromInner()
     const CDM::VarVec& varsI = cdmI.getVariables();
     for (const CDMVariable& varI : varsI) {
         const string& varName = varI.getName();
-        if (not cdmO.hasVariable(varName))
+        LOG4FIMEX(logger, Logger::DEBUG, "check variable '" << varName << "'");
+        if (not cdmO.hasVariable(varName)) {
+            LOG4FIMEX(logger, Logger::DEBUG, "variable '" << varName << "' not in outer");
             continue;
-        if (cdmI.hasDimension(varName) or cdmO.hasDimension(varName))
+        }
+        if (cdmI.hasDimension(varName) or cdmO.hasDimension(varName)) {
+            LOG4FIMEX(logger, Logger::DEBUG, "variable '" << varName << "' has dimension (i.e. is an axis)");
             continue;
+        }
 
         const CoordinateSystem_cp csI = findCompleteCoordinateSystemFor(allCsI, varName), csO = findCompleteCoordinateSystemFor(allCsO, varName);
-        if (!csI.get() || !csO.get())
+        if (!csI.get() || !csO.get()) {
+            LOG4FIMEX(logger, Logger::DEBUG, "no cs for '" << varName << "'");
             continue;
+        }
 
-        if (not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded()))
+        if (not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded())) {
+            LOG4FIMEX(logger, Logger::DEBUG, "variable '" << varName << "' cs is not simple spatial gridded");
             continue;
-        if (not (csI->hasProjection() and csO->hasProjection()))
+        }
+        if (not (csI->hasProjection() and csO->hasProjection())) {
+            LOG4FIMEX(logger, Logger::DEBUG, "no projection for '" << varName << "'");
             continue;
+        }
 
         Projection_cp projI = csI->getProjection(), projO = csO->getProjection();
-        if (projI->isDegree() != projO->isDegree())
+        if (projI->isDegree() != projO->isDegree()) {
+            LOG4FIMEX(logger, Logger::DEBUG, "variable '" << varName << "' is degree in inner but not in outer, or vice-versa");
             continue;
+        }
 
         CoordinateAxis_cp xAxisI = csI->getGeoXAxis(), yAxisI = csI->getGeoYAxis();
 
