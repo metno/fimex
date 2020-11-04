@@ -61,6 +61,7 @@ int toPythonLevel(Logger::LogLevel level)
 class PythonLoggingImpl : public LoggerImpl {
 public:
     PythonLoggingImpl(const py::object& log);
+    ~PythonLoggingImpl();
     bool isEnabledFor(Logger::LogLevel level) /* override */;
     void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) /* override */;
 
@@ -68,22 +69,56 @@ private:
     py::module log_;
 };
 
+// ignore exeptions from logging
+#define PY_GIL_IGNORE_EXCEPTIONS(x) \
+    do { try { \
+        PY_GIL_ACQUIRE; \
+        x; \
+    } catch (...) { \
+    } } while (false)
+
+// rethrow exeptions from logging, treating StopIteration specially
+#define PY_GIL_RETHROW_EXCEPTIONS(x) \
+    do { try { \
+        PY_GIL_ACQUIRE; \
+        x; \
+    } catch (py::error_already_set& pex) { \
+        if (pex.matches(PyExc_StopIteration)) { \
+            throw py::stop_iteration(); \
+        } else { \
+            throw; \
+        } \
+    } } while (false)
+
+#define PY_GIL_EXCEPTIONS(x) \
+    PY_GIL_IGNORE_EXCEPTIONS(x)
+
 PythonLoggingImpl::PythonLoggingImpl(const py::object& log)
 {
-    PY_GIL_ACQUIRE;
-    log_ = log;
+    if (!log.is_none())
+        PY_GIL_EXCEPTIONS(log_ = log);
+}
+
+PythonLoggingImpl::~PythonLoggingImpl()
+{
+    if (!log_.is_none())
+        PY_GIL_IGNORE_EXCEPTIONS(log_ = py::none());
 }
 
 bool PythonLoggingImpl::isEnabledFor(Logger::LogLevel level)
 {
     const int pylevel = toPythonLevel(level);
 
-    PY_GIL_ACQUIRE;
-    return log_.attr("isEnabledFor")(pylevel).cast<bool>();
+    if (!log_.is_none())
+        PY_GIL_EXCEPTIONS(log_.attr("isEnabledFor")(pylevel).cast<bool>());
+    return false;
 }
 
 void PythonLoggingImpl::log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber)
 {
+    if (log_.is_none())
+        return;
+
     std::ostringstream py_message;
     py_message << message
            << " in " << filename
@@ -91,8 +126,7 @@ void PythonLoggingImpl::log(Logger::LogLevel level, const std::string& message, 
     const std::string py_msg = py_message.str();
     const int pylevel = toPythonLevel(level);
 
-    PY_GIL_ACQUIRE;
-    log_.attr("log")(pylevel, py_msg);
+    PY_GIL_EXCEPTIONS(log_.attr("log")(pylevel, py_msg));
 }
 
 class PythonLoggingClass : public LoggerClass {
@@ -111,8 +145,8 @@ PythonLoggingClass::PythonLoggingClass()
 LoggerImpl* PythonLoggingClass::loggerFor(Logger* logger, const std::string& className)
 {
     remember(logger);
-    PY_GIL_ACQUIRE;
-    py::object py_logger = python_logging.attr("getLogger")(className);
+    py::object py_logger;
+    PY_GIL_EXCEPTIONS(py_logger = python_logging.attr("getLogger")(className));
     return new PythonLoggingImpl(py_logger);
 }
 
@@ -120,11 +154,15 @@ LoggerImpl* PythonLoggingClass::loggerFor(Logger* logger, const std::string& cla
 
 void pyfimex0_logging(py::module m)
 {
-    Logger::setClass(new PythonLoggingClass);
+    if (char* disable = getenv("FIMEX_PYTHON_NO_LOGGING")) {
+        Logger::setClass(nullptr);
+    } else {
+        Logger::setClass(new PythonLoggingClass);
 
-    // see https://pybind11.readthedocs.io/en/master/advanced/misc.html#module-destructors
-    py::cpp_function reset_logger([]() { Logger::setClass(nullptr); });
-    m.add_object("_cleanup", py::capsule(reset_logger));
-    if (auto atexit = py::module::import("atexit"))
-        atexit.attr("register")(reset_logger);
+        // see https://pybind11.readthedocs.io/en/master/advanced/misc.html#module-destructors
+        py::cpp_function reset_logger([]() { Logger::setClass(nullptr); });
+        m.add_object("_cleanup", py::capsule(reset_logger));
+        if (auto atexit = py::module::import("atexit"))
+            atexit.attr("register")(reset_logger);
+    }
 }
