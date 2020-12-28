@@ -221,7 +221,10 @@ bool Units::unload(bool force)
     if (force) {
         OmpScopedLock lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
-        ut_free_system(utSystem);
+        if (utSystem != 0) {
+          ut_free_system(utSystem);
+          utSystem = 0;
+        }
 #else
         utTerm();
 #endif
