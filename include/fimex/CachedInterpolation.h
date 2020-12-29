@@ -114,8 +114,8 @@ protected:
 typedef std::shared_ptr<CachedInterpolationInterface> CachedInterpolationInterface_p;
 
 CachedInterpolationInterface_p createCachedInterpolation(const std::string& xDimName, const std::string& yDimName, int method,
-                                                         const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis, size_t inX,
-                                                         size_t inY, size_t outX, size_t outY);
+                                                         shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis, size_t inX, size_t inY,
+                                                         size_t outX, size_t outY);
 
 /**
  * Container to cache projection details to speed up
@@ -124,8 +124,8 @@ CachedInterpolationInterface_p createCachedInterpolation(const std::string& xDim
 class CachedInterpolation : public CachedInterpolationInterface
 {
 private:
-    std::vector<double> pointsOnXAxis;
-    std::vector<double> pointsOnYAxis;
+    shared_array<double> pointsOnXAxis;
+    shared_array<double> pointsOnYAxis;
     int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
     /**
@@ -137,9 +137,8 @@ public:
      * @param outX size of new X axis
      * @param outY size of new Y axis
      */
-    CachedInterpolation(const std::string &xDimName, const std::string &yDimName, int funcType,
-                        const std::vector<double> &pointsOnXAxis, const std::vector<double> &pointsOnYAxis,
-                        size_t inX, size_t inY, size_t outX, size_t outY);
+    CachedInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, shared_array<double> pointsOnXAxis,
+                        shared_array<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
 
     /**
      * Actually interpolate the data. The data will be interpolated as floats internally.
@@ -176,8 +175,8 @@ public:
      * @param outX size of new X axis
      * @param outY size of new Y axis
      */
-    CachedNNInterpolation(const std::string& xDimName, const std::string& yDimName, const std::vector<double>& pointsOnXAxis,
-                          const std::vector<double>& pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    CachedNNInterpolation(const std::string& xDimName, const std::string& yDimName, shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis,
+                          size_t inX, size_t inY, size_t outX, size_t outY);
 
     /**
      * Actually interpolate the data. The data will be interpolated as floats internally.
