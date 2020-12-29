@@ -56,6 +56,17 @@ MODULE Fimex
     CDM_UINT64
   END ENUM
 
+  !> Logging levels
+  !! These are the same as #Logger::LogLevel in Logger.h
+  ENUM, BIND(C)
+    ENUMERATOR :: LOGLEVEL_OFF = 1000,&
+        LOGLEVEL_FATAL = 900,&
+        LOGLEVEL_ERROR = 800,&
+        LOGLEVEL_WARN = 700,&
+        LOGLEVEL_INFO = 600,&
+        LOGLEVEL_DEBUG = 500
+  END ENUM
+
   !> Class to store file-handles for the high-level API.
   !! @warning The class FimexIO stores internally two refernces to file and data-handles.
   !!    It should therefore not be accessed from two parallel threads
@@ -339,6 +350,13 @@ MODULE Fimex
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE    :: io
     END SUBROUTINE c_mifi_free_cdm_reader
+
+    !> F90-wrapper for Logger::defaultLogLevel(...)
+    SUBROUTINE c_mifi_set_default_log_level(loglevel) BIND(C,NAME="mifi_set_default_log_level")
+      USE iso_c_binding,     ONLY: C_INT
+      IMPLICIT NONE
+      INTEGER,INTENT(IN),VALUE        :: loglevel
+    END SUBROUTINE c_mifi_set_default_log_level
   END INTERFACE
 
   CONTAINS
@@ -957,4 +975,16 @@ MODULE Fimex
     INTEGER           :: x
     x = this%close ()
   END SUBROUTINE destructor
+
+  !> Set default loglevel
+  !! @param loglevel one of LOGLEVEL_*
+  SUBROUTINE set_default_log_level(loglevel)
+    USE iso_c_binding,                ONLY: C_INT
+    IMPLICIT NONE
+    INTEGER, INTENT(IN)                  :: loglevel
+
+    CALL c_mifi_set_default_log_level(loglevel)
+  END SUBROUTINE
+
+
 END MODULE Fimex
