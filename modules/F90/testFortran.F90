@@ -21,7 +21,7 @@ PROGRAM fortran_test
   CHARACTER(LEN=1024)             :: dimname
   LOGICAL                         :: fileExist
 
-  input_file = TOP_SRCDIR // "/test/flth00.dat"
+  input_file = TEST_EXTRADATA_DIR // "/flth00.dat"
   cfiletype = "felt"
   config_file = TOP_SRCDIR // "/share/etc/felt2nc_variables.xml"
   varName = "air_temperature"
