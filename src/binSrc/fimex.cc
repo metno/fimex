@@ -80,7 +80,7 @@ const po::option op_version = po::option("version", "program version").set_narg(
 const po::option op_debug = po::option("debug", "debug program").set_narg(0);
 const po::option op_log4cpp = po::option("log4cpp", "log4cpp property file (- = log4cpp without prop-file)");
 const po::option op_print_options = po::option("print-options", "print all options").set_narg(0);
-const po::option op_config = po::option("config", "configuration file").set_shortkey("c");
+const po::option op_config = po::option("config", "configuration file").set_shortkey("c").set_composing();
 const po::option op_num_threads = po::option("num_threads", "number of threads").set_shortkey("n");
 
 // options for command line and config file
@@ -182,7 +182,7 @@ const po::option op_interpolate_printSize = po::option("interpolate.printSize", 
 const po::option op_merge_inner_file = po::option("merge.inner.file", "inner file for merge");
 const po::option op_merge_inner_type = po::option("merge.inner.type", "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2");
 const po::option op_merge_inner_config = po::option("merge.inner.config", "non-standard configuration for inner merge file");
-const po::option op_merge_inner_cfg = po::option("merge.inner.cfg", "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging");
+const po::option op_merge_inner_cfg = po::option("merge.inner.cfg", "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging").set_composing();
 const po::option op_merge_smoothing = po::option("merge.smoothing", "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border");
 const po::option op_merge_keepOuterVariables =
     po::option("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer").set_narg(0);
@@ -824,7 +824,9 @@ CDMReader_p getCDMMerger(const po::value_set& vm, CDMReader_p dataReader)
     if( not readerI )
         throw CDMException("could not create reader for inner in merge");
     if (vm.is_set(op_merge_inner_cfg)) {
-        po::value_set mvm = po::parse_config_file(vm.value(op_merge_inner_cfg), config_file_options);
+        po::value_set mvm;
+        for (const std::string& c : vm.values(op_merge_inner_cfg))
+            mvm.add(po::parse_config_file(c, config_file_options));
         // apply all fimex processing tasks to the merge.inner stream
         readerI = applyFimexStreamTasks(mvm, readerI);
     }
@@ -1043,8 +1045,10 @@ int run(int argc, char* args[])
 
     std::vector<std::string> positional;
     po::value_set vm = parse_command_line(argc, args, cmdline_options, positional);
-    if (vm.is_set(op_config))
-        vm.add(parse_config_file(vm.value(op_config), config_file_options));
+    if (vm.is_set(op_config)) {
+        for (const std::string& c : vm.values(op_config))
+            vm.add(parse_config_file(c, config_file_options));
+    }
     if (argc == 1 || vm.is_set(op_help)) {
         writeUsage(cout, cmdline_options);
         return 0;
