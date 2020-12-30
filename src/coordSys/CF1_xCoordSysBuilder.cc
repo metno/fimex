@@ -268,7 +268,10 @@ static bool isCSForTerm(const CDM& cdm, const CoordinateSystem& cs, const std::s
                 continue;
             }
             if (!csAxes.count(*vaxit)) {
-                LOG4FIMEX(logger, Logger::INFO, "formula_term "<< term << " missing " << *vaxit << " in cs " << cs.id());
+                const Logger::LogLevel lvl = (csAxesPtr.size() == 1 && csAxesPtr.front()->getAxisType() == CoordinateAxis::GeoZ) ? Logger::DEBUG : Logger::INFO;
+                LOG4FIMEX(logger, lvl,
+                          "The coordinate system with id '" << cs.id() << "' contains a vertical axis with formula_term '" << term << "' whose axis '" << *vaxit
+                                                            << "' is not part of the coordinate sytstem. No vertical transformation will be assigned.");
                 return false;
             }
         }
