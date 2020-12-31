@@ -43,6 +43,7 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
 #include <regex>
+#include <set>
 
 namespace MetNoFimex {
 
@@ -115,7 +116,22 @@ int NetCDFIoFactory::matchFileTypeName(const std::string& type)
 
 int NetCDFIoFactory::matchFileName(const std::string& fileName)
 {
-    return getExtension(fileName) == "nc";
+    const std::string ext = getExtension(fileName);
+    if (ext == "nc")
+        return 1;
+
+    // also match ncml for http(s) and dods, as these likely are OpenDAP
+    if (ext == "ncml") {
+        static const std::regex re_url_scheme("^(\\w+)://");
+        std::smatch what;
+        if (std::regex_search(fileName, what, re_url_scheme)) {
+            static const std::set<std::string> url_schemes{"https", "http", "dods"};
+            if (url_schemes.count(what[1].str()))
+                return 2;
+        }
+    }
+
+    return 0;
 }
 
 CDMReader_p NetCDFIoFactory::createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,

@@ -83,7 +83,8 @@ IoFactory_p findFactoryFromMagic(const std::string& fileName)
 
     std::ifstream fs(fileName.c_str());
     if (!fs.is_open())
-        throw CDMException("cannot open file '" + fileName + "'");
+        return nullptr; // acceptable, fileName might be a url
+
     std::unique_ptr<char[]> magic(new char[magicSize]);
     fs.read(magic.get(), magicSize);
     const size_t actualMagicSize = fs.gcount();
