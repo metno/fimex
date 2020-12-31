@@ -99,9 +99,9 @@ bool NetCDFIoFactory::matchFileType(const std::string& type, bool& is_rw)
 {
     std::string nc;
     is_rw = false;
-    static const std::regex re_extension("(\\w+)(\\+rw)?");
+    static const std::regex re_type_rw("(\\w+)(\\+rw)?");
     std::smatch what;
-    if (std::regex_match(type, what, re_extension)) {
+    if (std::regex_match(type, what, re_type_rw)) {
         nc = what[1].str();
         is_rw = what[2].matched;
     }
