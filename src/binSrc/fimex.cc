@@ -253,22 +253,10 @@ void writeUsage(ostream& out, const po::option_set& config)
 
 string getType(const string& io, const po::value_set& vm)
 {
-    string type;
     if (po::option_cx opt = vm.find(io + ".type")) {
-        type = vm.value(opt);
-    } else {
-        po::option_cx fopt = vm.find(io + ".file");
-        if (!fopt)
-            fopt = vm.find(io + ".fillFile");
-        if (fopt) {
-            std::smatch what;
-            if (std::regex_match(vm.value(fopt), what, std::regex(".*\\.(\\w+)$"))) {
-                type = what[1].str();
-            }
-        }
+        return vm.value(opt);
     }
-    std::transform(type.begin(), type.end(), type.begin(), (int (*)(int))tolower);
-    return type;
+    return string();
 }
 
 template <typename T>
