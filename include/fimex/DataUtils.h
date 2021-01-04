@@ -27,6 +27,9 @@
 #include "fimex/MathUtils.h"
 #include "fimex/UnitsConverter.h"
 
+#include "fimex/CDMDataType.h"
+#include "fimex/DataDecl.h"
+
 namespace MetNoFimex {
 
 /**
@@ -109,6 +112,8 @@ public:
     }
     OUT operator()(const IN& in) const { return (in == oldFill_ || mifi_isnan(in)) ? newFill_ : static_cast<OUT>(in); }
 };
+
+DataPtr initDataByArray(CDMDataType datatype, const std::vector<std::string>& values);
 
 } // namespace MetNoFimex
 

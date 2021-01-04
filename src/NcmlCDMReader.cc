@@ -31,6 +31,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/MutexLock.h"
 #include "fimex/SliceBuilder.h"
@@ -50,7 +51,37 @@ namespace MetNoFimex {
 
 using namespace std;
 
-static Logger_p logger = getLogger("fimex.NcmlCDMReader");
+namespace {
+
+Logger_p logger = getLogger("fimex.NcmlCDMReader");
+
+template <class OutputIterator>
+void split_marker(OutputIterator out, const std::string& str, const std::string& marker)
+{
+    std::size_t previous = 0, current;
+    while ((current = str.find(marker, previous)) != std::string::npos) {
+        *(out++) = str.substr(previous, current - previous);
+        previous = current + marker.size();
+    }
+    *(out++) = str.substr(previous);
+}
+
+std::vector<std::string> split_marker(const std::string& str, const std::string& marker)
+{
+    std::vector<std::string> out;
+    split_marker(std::back_inserter(out), str, marker);
+    return out;
+}
+
+std::vector<std::string> split_ncml_values(const std::string& values, const std::string& separator)
+{
+    if (separator.empty())
+        return tokenize(values, " ,\t\r\n");
+    else
+        return split_marker(values, separator);
+}
+
+} // namespace
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())
@@ -263,21 +294,25 @@ void NcmlCDMReader::initVariableDataChange()
         if (name.empty())
             throw CDMException("ncml-file " + configId + " has no name for variable");
         if (cdm_->hasVariable(name)) {
-            std::string values = getXmlContent(nodes->nodeTab[i]);
-            std::vector<double> dvals = tokenizeDotted<double>(values, " ,\t\r\n");
             CDMVariable& var = cdm_->getVariable(name);
+
+            const auto values_list = split_ncml_values(getXmlContent(nodes->nodeTab[i]), getXmlProp(nodes->nodeTab[i], "separator"));
+
             // check that no. of values == shape-size
             size_t dataSize = 1;
             const vector<string>& dims = var.getShape();
             for (const string& d : dims) {
                 dataSize *= cdm_->getDimension(d).getLength();
             }
-            if ((dims.size() == 0 && dvals.size() > 1) // scalars
-                || (dims.size() > 0 && dvals.size() != dataSize)) {
-                LOG4FIMEX(logger, Logger::ERROR, "values from ncml: "<< dvals.size() <<" required for " << name << ": " << dataSize);
-                throw CDMException("values from ncml do not match shape for variable " + name);
+            if ((dims.size() == 0 && values_list.size() > 1) // scalars
+                || (dims.size() > 0 && values_list.size() != dataSize)) {
+                std::ostringstream msg;
+                msg << "ncml for variable " << name << " has " << values_list.size() << " values while shape requires " << dataSize << " values";
+                LOG4FIMEX(logger, Logger::ERROR, msg.str());
+                throw CDMException(msg.str());
             }
-            var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
+
+            var.setData(initDataByArray(var.getDataType(), values_list));
         }
     }
 }
@@ -300,44 +335,73 @@ void NcmlCDMReader::initVariableSpatialVector()
     }
 }
 
+namespace {
+std::string getAttributeValue(const xmlNodePtr node)
+{
+    std::string value = getXmlProp(node, "value");
+    if (value.empty()) {
+        // attribute value may also be specified as element content
+        value = getXmlContent(node);
+    }
+    return value;
+}
+
+CDMAttribute createAttributeFromXML(const xmlNodePtr node, const std::string& value)
+{
+    std::string name = getXmlProp(node, "name");
+
+    std::string type = getXmlProp(node, "type");
+    if (type.empty()) {
+        // default attribute type is "string"
+        type = "string";
+    }
+    const CDMDataType datatype = string2datatype(type);
+    if (datatype == CDM_NAT)
+        throw CDMException("cannot create att name='" + name + "' with type '" + type + "'");
+
+    vector<string> values;
+    if (type == "string") {
+        // string attributes always have a single value
+        values = {value};
+    } else {
+        values = split_ncml_values(value, getXmlProp(node, "separator"));
+    }
+
+    return CDMAttribute(name, datatype, values);
+}
+} // namespace
+
 void NcmlCDMReader::initAddReassignAttribute()
 {
-    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@value]");
+    // see https://docs.unidata.ucar.edu/netcdf-java/current/userguide/annotated_ncml_schema.html#attribute-element
+    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
-        std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        std::string value = getXmlProp(nodes->nodeTab[i], "value");
-        std::string separator = getXmlProp(nodes->nodeTab[i], "separator");
-        if (separator.empty())
-            separator = " ";
-        vector<string> values = tokenize(value, separator);
-        std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type.empty())
-            type = "string";
-        LOG4FIMEX(logger, Logger::DEBUG, "adding global attribute: " + name);
-        cdm_->removeAttribute(CDM::globalAttributeNS(), name);
-        cdm_->addAttribute(CDM::globalAttributeNS(), CDMAttribute(name, string2datatype(type), values));
+        const std::string value = getAttributeValue(nodes->nodeTab[i]);
+        if (value.empty())
+            continue;
+
+        const CDMAttribute att = createAttributeFromXML(nodes->nodeTab[i], value);
+
+        LOG4FIMEX(logger, Logger::DEBUG, "adding global attribute: " + att.getName());
+        cdm_->removeAttribute(CDM::globalAttributeNS(), att.getName());
+        cdm_->addAttribute(CDM::globalAttributeNS(), att);
     }
 
     /* the variable attributes */
-    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:attribute[@value]");
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:attribute");
     nodes = xpathObj->nodesetval;
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
-        std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
-        std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        std::string value = getXmlProp(nodes->nodeTab[i], "value");
-        std::string separator = getXmlProp(nodes->nodeTab[i], "separator");
-        if (separator.empty())
-            separator = " ";
-        vector<string> values = tokenize(value, separator);
-        std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type.empty())
-            type = "string";
-        cdm_->removeAttribute(varName, name);
-        LOG4FIMEX(logger, Logger::DEBUG, "adding variable attribute to "<< varName << ": " << name);
-        cdm_->addAttribute(varName, CDMAttribute(name, string2datatype(type), values));
+        const std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        const std::string value = getAttributeValue(nodes->nodeTab[i]);
+        if (value.empty())
+            continue;
+        const CDMAttribute att = createAttributeFromXML(nodes->nodeTab[i], value);
+        cdm_->removeAttribute(varName, att.getName());
+        LOG4FIMEX(logger, Logger::DEBUG, "adding variable attribute to " << varName << ": " << att.getName());
+        cdm_->addAttribute(varName, att);
     }
 }
 
