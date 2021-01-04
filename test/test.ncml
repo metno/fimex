@@ -32,6 +32,13 @@
   <spatial_vector direction="y,latitude" counterpart="x_wind" />
 </variable>
 
+<variable name="x_wind_10m">
+  <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
+</variable>
+<variable name="y_wind_10m">
+  <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
+</variable>
+
 <variable name="projection_1">
   <remove type="attribute" name="proj4" />
   <attribute name="towgs84" type="double" value="0 0 0"/>

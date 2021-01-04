@@ -418,6 +418,8 @@ void NcmlCDMReader::initVariableNameChange()
             std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
             vector<string> vshape = tokenize(shape, " \t");
             std::string type = getXmlProp(nodes->nodeTab[i], "type");
+            if (type.empty())
+                continue;
             CDMDataType dataType = string2datatype(type);
             CDMVariable var(name, dataType, vshape);
             var.setData(createData(dataType, 0)); // this data cannot get fetched from the reader!
