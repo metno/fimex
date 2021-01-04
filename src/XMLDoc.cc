@@ -53,7 +53,7 @@ XMLDoc::XMLDoc(const std::string& filename)
     :doc(0), xpathCtx(0)
 {
     init();
-    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, 0);
+    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, XML_PARSE_HUGE);
     if (pdoc == 0)
         throw CDMException("cannot read xml-file '" + filename + "'");
     setDoc(pdoc);
