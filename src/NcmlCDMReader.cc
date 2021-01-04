@@ -267,14 +267,10 @@ void NcmlCDMReader::initVariableDataChange()
             std::vector<double> dvals = tokenizeDotted<double>(values, " ,\t\r\n");
             CDMVariable& var = cdm_->getVariable(name);
             // check that no. of values == shape-size
-            vector<string> dims = var.getShape();
-            size_t dataSize = 0;
-            for (size_t i = 0; i < dims.size(); ++i) {
-                size_t dimLen = cdm_->getDimension(dims[i]).getLength();
-                if (dataSize == 0) {
-                    dataSize = 1;
-                }
-                dataSize *= dimLen;
+            size_t dataSize = 1;
+            const vector<string>& dims = var.getShape();
+            for (const string& d : dims) {
+                dataSize *= cdm_->getDimension(d).getLength();
             }
             if ((dims.size() == 0 && dvals.size() > 1) // scalars
                 || (dims.size() > 0 && dvals.size() != dataSize)) {
