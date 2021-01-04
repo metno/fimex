@@ -275,7 +275,7 @@ void NcmlCDMReader::initVariableDataChange()
             if ((dims.size() == 0 && dvals.size() > 1) // scalars
                 || (dims.size() > 0 && dvals.size() != dataSize)) {
                 LOG4FIMEX(logger, Logger::ERROR, "values from ncml: "<< dvals.size() <<" required for " << name << ": " << dataSize);
-                throw CDMException("values from ncml does not match shape for variable "+name);
+                throw CDMException("values from ncml do not match shape for variable " + name);
             }
             var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
         }
