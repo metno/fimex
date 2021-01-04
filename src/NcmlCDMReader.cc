@@ -82,6 +82,14 @@ std::vector<std::string> split_ncml_values(const std::string& values, const std:
         return split_marker(values, separator);
 }
 
+std::vector<std::string> fimexShapeFromXmlAtt(const std::string& ncml_att_shape)
+{
+    // ncml shape is slowest varying dimension first, fimex shape is fastest varying dimension first
+    const std::vector<std::string> ncml_shape = tokenize(ncml_att_shape, " \t");
+    const std::vector<std::string> fimex_shape(ncml_shape.rbegin(), ncml_shape.rend());
+    return fimex_shape;
+}
+
 } // namespace
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
@@ -218,7 +226,6 @@ void NcmlCDMReader::initVariableShapeChange()
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
-        std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
         std::string name = getXmlProp(nodes->nodeTab[i], "orgName");
         if (name.empty()) {
             name = getXmlProp(nodes->nodeTab[i], "name");
@@ -226,11 +233,13 @@ void NcmlCDMReader::initVariableShapeChange()
         if (name.empty())
             throw CDMException("ncml-file " + configId + " has no name or orgName for variable");
         if (cdm_->hasVariable(name)) {
-            vector<string> vshape = tokenize(shape, " \t");
             CDMVariable& var = cdm_->getVariable(name);
-            vector<string> oldShape = var.getShape();
-            var.setShape(vshape);
-            LOG4FIMEX(logger, Logger::DEBUG, "changing shape of variable: " << name << " from " << join(oldShape.begin(), oldShape.end(), ",") << " to " << shape);
+            const std::vector<std::string> old_shape = var.getShape(); // no reference as it will be replaced
+            const std::vector<std::string> fimex_shape = fimexShapeFromXmlAtt(getXmlProp(nodes->nodeTab[i], "shape"));
+            var.setShape(fimex_shape);
+            LOG4FIMEX(logger, Logger::DEBUG,
+                      "changing shape of variable: " << name << " from " << join(old_shape.begin(), old_shape.end(), ",") << " to "
+                                                     << join(fimex_shape.begin(), fimex_shape.end(), ","));
         }
     }
 }
@@ -414,14 +423,10 @@ void NcmlCDMReader::initVariableNameChange()
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (!cdm_->hasVariable(name)) {
-            std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
-            vector<string> vshape = tokenize(shape, " \t");
-            std::string type = getXmlProp(nodes->nodeTab[i], "type");
-            if (type.empty())
-                continue;
+        std::string type = getXmlProp(nodes->nodeTab[i], "type");
+        if (!type.empty() && !cdm_->hasVariable(name)) {
             CDMDataType dataType = string2datatype(type);
-            CDMVariable var(name, dataType, vshape);
+            CDMVariable var(name, dataType, fimexShapeFromXmlAtt(getXmlProp(nodes->nodeTab[i], "shape")));
             var.setData(createData(dataType, 0)); // this data cannot get fetched from the reader!
             cdm_->addVariable(var);
         }

@@ -9,8 +9,8 @@
      <attribute name="standard_name" value="realization" type="String" />
      <values>1</values>
    </variable>
-   <variable name="u10" type="float"  shape="lon lat lev time ensemble_member" />
-   <variable name="v10" type="float"  shape="lon lat lev time ensemble_member" />
+   <variable name="u10" type="float"  shape="ensemble_member time lev lat lon" />
+   <variable name="v10" type="float"  shape="ensemble_member time lev lat lon" />
  </netcdf>
  <netcdf location="test_ncmlagg_with_config_ens02.nc netcdf test_ncmlagg_with_config_notime.ncml" >
    <dimension name="ensemble_member" length="1" isUnlimited="true" />
@@ -18,8 +18,8 @@
      <attribute name="standard_name" value="realization" type="String" />
        <values>2</values>
    </variable>
-   <variable name="u10" type="float"  shape="lon lat lev time ensemble_member" />
-   <variable name="v10" type="float"  shape="lon lat lev time ensemble_member" />
+   <variable name="u10" type="float"  shape="ensemble_member time lev lat lon" />
+   <variable name="v10" type="float"  shape="ensemble_member time lev lat lon" />
  </netcdf>
 
 </aggregation>

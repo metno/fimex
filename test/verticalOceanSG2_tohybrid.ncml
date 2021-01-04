@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
-  <variable name="to_hybrid_template" shape="xi_rho eta_rho s_rho ocean_time" type="int">
+  <variable name="to_hybrid_template" shape="ocean_time s_rho eta_rho xi_rho" type="int">
     <attribute name="coordinates" value="lon_rho lat_rho ocean_time" />
   </variable>
 

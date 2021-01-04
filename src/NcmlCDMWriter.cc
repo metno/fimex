@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
 
 #include "NcmlUtils.h"
@@ -38,20 +39,13 @@ namespace {
 
 Logger_p logger = getLogger("fimex.NcmlCDMWriter");
 
-void shapeToXMLStream(std::ostream& out, const std::vector<std::string>& shape)
+void shapeToXMLStream(std::ostream& out, const std::vector<std::string>& fimex_shape)
 {
-    if (shape.empty())
+    if (fimex_shape.empty())
         return;
 
-    out << " shape=\"";
-    bool first = true;
-    for (const auto& s : shape) {
-        if (!first)
-            out << ' ';
-        first = false;
-        out << s;
-    }
-    out << '"';
+    // ncml shape is slowest varying dimension first, fimex shape is fastest varying dimension first
+    out << " shape=\"" << join(fimex_shape.rbegin(), fimex_shape.rend(), " ") << "\"";
 }
 
 } // namespace
