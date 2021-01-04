@@ -59,10 +59,12 @@ public:
     typedef std::map<std::string, AttrVec> StrAttrVecMap;
     typedef std::vector<CDMDimension> DimVec;
     typedef std::vector<CDMVariable> VarVec;
+
     CDM();
     CDM(const CDM& rhs);
     virtual ~CDM();
     CDM& operator=(const CDM& rhs);
+
     /**
      * @brief add variable to cdm
      *
@@ -70,6 +72,7 @@ public:
      * @throw CDMException if var.varName() already exists
      */
     void addVariable(const CDMVariable& var);
+
     /**
      * @brief get a reference of a variable
      *
@@ -77,6 +80,7 @@ public:
      * @throw CDMException if varName doesn't exist
      */
     CDMVariable& getVariable(const std::string& varName);
+
     /**
      * @brief get a reference of a variable
      *
@@ -86,12 +90,14 @@ public:
      * @throw CDMException if varName doesn't exist
      */
     const CDMVariable& getVariable(const std::string& varName) const;
+
     /**
      * @brief test if variable exists
      *
      * @param varName name of variable
      */
     bool hasVariable(const std::string& varName) const;
+
     /**
      * @brief search for variable with certain attribute-value
      *
@@ -100,6 +106,7 @@ public:
      * @return variable names of the variable with attributes matching
      */
     std::vector<std::string> findVariables(const std::string& attrName, const std::string& attrValueRegExp) const;
+
     /**
      * @brief search for variable with attribute-values and dimensions
      *
@@ -110,6 +117,7 @@ public:
      * @return variable names of the variable with attributes matching the request and containing all dimensions
      */
     std::vector<std::string> findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const;
+
     /**
      * @brief rename a variable
      *
@@ -120,6 +128,7 @@ public:
      * @warning this will not change the spatialVectorCounterPart of all other variables
      */
     bool renameVariable(const std::string& oldName, const std::string& newName);
+
     /**
      * check if a variable contains a attributes with a matching string-value
      *
@@ -128,6 +137,7 @@ public:
      * @param attrValue the regexp the string-value of the attribute will match against
      */
     bool checkVariableAttribute(const std::string& varName, const std::string& attribute, const std::regex& attrValue) const;
+
     /**
      * @brief remove a variable and corresponding attributes
      *
@@ -142,6 +152,7 @@ public:
      *  @throw CDMException if dim-name already exists
      */
     void addDimension(const CDMDimension& dim);
+
     /**
      * check if the dimension exists
      * @param dimName name of the dimension
@@ -209,6 +220,7 @@ public:
      * @return unLimDim pointer with the unlimited dimension, the pointer will be deleted with the CDM
      */
     const CDMDimension* getUnlimitedDim() const;
+
     /**
      * @brief test if a variable contains the unlimited dim
      * @return true/false
@@ -231,6 +243,7 @@ public:
      * @throw CDMException if vaName doesn't exist
      */
     void addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr);
+
     /**
      * remove an attribute from the cdm
      *
@@ -239,27 +252,29 @@ public:
      */
     void removeAttribute(const std::string& varName, const std::string& attrName);
 
-
     /// @brief print a xml representation to the stream
-    void toXMLStream(std::ostream& os) const;
+    MIFI_DEPRECATED(void toXMLStream(std::ostream& os) const);
+
     /// @brief the namespace for global attributes
     const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;}
 
     /// @brief get the dimension
     const DimVec& getDimensions() const;
+
     /// @brief get the variables
     const VarVec& getVariables() const;
+
     /**
      *  @brief get the attributes
      *  @return map of type <variableName <attributeName, attribute>>
      */
     const StrAttrVecMap& getAttributes() const;
+
     /**
      * @brief get the attributes of an variable
      * @param varName name of variable
      */
     std::vector<CDMAttribute> getAttributes(const std::string& varName) const;
-
 
     /**
      * @brief get an attribute
@@ -399,6 +414,7 @@ public:
      * @warning not thread-safe, though read-only, it might change the internal state of the CDM due to caching
      */
     std::string getHorizontalXAxis(std::string varName) const;
+
     /**
      * @brief get the y-(lat) axis of the variable
      *
@@ -409,6 +425,7 @@ public:
      * @warning not thread-safe, though read-only, it might change the internal state of the CDM due to caching
      */
     std::string getHorizontalYAxis(std::string varName) const;
+
     /**
      * @brief detect the latitude and longitude coordinates of the variable
      *
@@ -420,6 +437,7 @@ public:
      * @return true if latitude and longitude have been found
      * @warning not thread-safe, though read-only, it might change the internal state of the CDM due to caching
      */
+
     bool getLatitudeLongitude(std::string varName, std::string& latitude, std::string& longitude) const;
     /**
      * @brief get the time axis of the variable
@@ -430,6 +448,7 @@ public:
      * @return name of time dimension (or "" if not defined)
      * @warning not thread-safe, though read-only, it might change the internal state of the CDM due to caching
      */
+
     std::string getTimeAxis(std::string varName) const;
     /**
      * @brief get the vertical axis of the variable
@@ -446,6 +465,6 @@ private:
     std::unique_ptr<CDMImpl> pimpl_;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*CDM_H_*/

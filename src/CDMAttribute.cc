@@ -24,15 +24,10 @@
 #include "fimex/CDMAttribute.h"
 
 #include "fimex/CDMException.h"
-#include "fimex/CDMNamedEntity.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
+#include "fimex/NcmlCDMWriter.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
-#include "fimex/coordSys/Projection.h"
-#include <cmath>
-#include <memory>
-#include <regex>
 
 namespace MetNoFimex {
 
@@ -166,8 +161,7 @@ CDMDataType CDMAttribute::getDataType() const
 
 void CDMAttribute::toXMLStream(std::ostream& out, const std::string& indent) const
 {
-    out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />"
-        << std::endl;
+    NcmlCDMWriter::write(out, *this, indent);
 }
 
 } // namespace MetNoFimex

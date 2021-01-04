@@ -43,6 +43,8 @@ public:
 
     CDMReader_p createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                              const std::vector<std::string>& args) override;
+
+    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config) override;
 };
 } // namespace MetNoFimex
 

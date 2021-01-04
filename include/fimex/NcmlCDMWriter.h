@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -21,30 +21,37 @@
  * USA.
  */
 
-#include "fimex/CDMDimension.h"
+#ifndef NULL_CDMWRITER_H_
+#define NULL_CDMWRITER_H_
 
-#include <fimex/NcmlCDMWriter.h>
+#include "fimex/CDMWriter.h"
 
-namespace MetNoFimex
+#include <iosfwd>
+
+namespace MetNoFimex {
+
+class CDMAttribute;
+class CDMDimension;
+class CDMVariable;
+
+/**
+ * Write CDM content to a text file.
+ */
+class NcmlCDMWriter : public CDMWriter
 {
+public:
+    NcmlCDMWriter(const CDMReader_p cdmReader, const std::string& outputFile);
+    NcmlCDMWriter(const CDMReader_p cdmReader, std::ostream& output, bool withData);
+    ~NcmlCDMWriter();
 
-CDMDimension::CDMDimension()
-: name("_null"), length(0), unlimited(0)
-{
-}
+    static void write(std::ostream& out, const CDMDimension& dim);
+    static void write(std::ostream& out, const CDMAttribute& att, const std::string& indent);
+    static void write(std::ostream& out, const CDMVariable& var, const std::vector<CDMAttribute>& attrs, bool closeXML);
 
-CDMDimension::CDMDimension(std::string name, long length)
-: name(name), length(length), unlimited(0)
-{
-}
-
-CDMDimension::~CDMDimension()
-{
-}
-
-void CDMDimension::toXMLStream(std::ostream& out) const
-{
-    NcmlCDMWriter::write(out, *this);
-}
+private:
+    void write(std::ostream& out, bool withData);
+};
 
 } // namespace MetNoFimex
+
+#endif /*NULL_CDMWRITER_H_*/

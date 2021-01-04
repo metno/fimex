@@ -28,9 +28,9 @@
 
 #include "fimex/CDMDataType.h"
 #include "fimex/DataDecl.h"
+#include "fimex/deprecated.h"
 
 #include <iosfwd>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -78,13 +78,14 @@ public:
     void setData(DataPtr data) {this->data = data;}
     /// retrieve the datatype of the attribute
     CDMDataType getDataType() const;
-    void toXMLStream(std::ostream& out, const std::string& indent = "") const;
+
+    MIFI_DEPRECATED(void toXMLStream(std::ostream& out, const std::string& indent = "") const);
 
 private:
     std::string name;
     DataPtr data;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*CDMATTRIBUTE_H_*/

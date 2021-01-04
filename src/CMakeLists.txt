@@ -6,6 +6,8 @@ SET(INCF "${CMAKE_SOURCE_DIR}/include/fimex")
 SET(libfimex_ncml_SOURCES
   NcmlCDMReader.cc
   ${INCF}/NcmlCDMReader.h
+  NcmlCDMWriter.cc
+  ${INCF}/NcmlCDMWriter.h
   NcmlIoFactory.cc
   NcmlIoFactory.h
   NcmlAggregationReader.cc

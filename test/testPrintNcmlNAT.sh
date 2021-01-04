@@ -33,7 +33,7 @@ elif [ ! -f" ${file}" ]; then
     echo "FAIL $TEST, missing ncml output ${file}"
 elif test "`head -n1 $file`" != '<?xml version="1.0" encoding="UTF-8"?>' ; then
     echo "FAIL $TEST, ncml output does not seem to be xml"
-elif grep -q '<!-- datatype NAT translated to INT for ncml -->' "${file}" ; then
+elif grep -q '<!-- cdm datatype .* not available in ncml, replaced with INT -->' "${file}" ; then
     echo "PASS $TEST"
     E=0
 else

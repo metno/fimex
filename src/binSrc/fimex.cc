@@ -41,6 +41,7 @@
 #include "fimex/mifi_mpi.h"
 #endif
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/NcmlCDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
@@ -364,14 +365,14 @@ void printReaderStatements(const string& readerName, const po::value_set& vm, CD
     if (getOption(readerName+".printNcML", vm, ncmlout)) {
         if (ncmlout == "-") {
             cout << readerName << " as NcML:" << endl;
-            reader->getCDM().toXMLStream(cout);
+            NcmlCDMWriter writer(reader, cout, false);
             cout << endl;
         } else {
             ofstream file(ncmlout);
             if (!file) {
                 throw CDMException("cannot write ncml-file: '" + ncmlout + "'");
             }
-            reader->getCDM().toXMLStream(file);
+            NcmlCDMWriter writer(reader, file, false);
         }
     }
     if (po::option_cx opt = vm.find(readerName + ".printCS")) {
