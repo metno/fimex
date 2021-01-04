@@ -28,6 +28,8 @@
 #include "fimex/Logger.h"
 #include "fimex/Type2String.h"
 
+#include "NcmlUtils.h"
+
 #include <fstream>
 
 namespace MetNoFimex {
@@ -50,89 +52,6 @@ void shapeToXMLStream(std::ostream& out, const std::vector<std::string>& shape)
         out << s;
     }
     out << '"';
-}
-
-struct NcmlDataType
-{
-    const std::string name;
-    bool is_unsigned;
-    operator bool() const { return !name.empty(); }
-};
-
-const NcmlDataType ncml_BYTE = {"byte", false};
-const NcmlDataType ncml_SHORT = {"short", false};
-const NcmlDataType ncml_INT = {"int", false};
-const NcmlDataType ncml_LONG = {"long", false};
-const NcmlDataType ncml_UBYTE = {"byte", true};
-const NcmlDataType ncml_USHORT = {"short", true};
-const NcmlDataType ncml_UINT = {"int", true};
-const NcmlDataType ncml_ULONG = {"long", true};
-const NcmlDataType ncml_CHAR = {"char", false};
-const NcmlDataType ncml_FLOAT = {"float", false};
-const NcmlDataType ncml_DOUBLE = {"double", false};
-const NcmlDataType ncml_STRING = {"string", false};
-const NcmlDataType ncml_STRING_CAP = {"String", false};
-const NcmlDataType ncml_NAT = {std::string(), false};
-
-const NcmlDataType& datatype_cdm2ncml(CDMDataType dt)
-{
-    switch (dt) {
-    case CDM_CHAR:
-        return ncml_BYTE;
-    case CDM_SHORT:
-        return ncml_SHORT;
-    case CDM_INT:
-        return ncml_INT;
-    case CDM_INT64:
-        return ncml_LONG;
-    case CDM_UCHAR:
-        return ncml_UBYTE;
-    case CDM_USHORT:
-        return ncml_USHORT;
-    case CDM_UINT:
-        return ncml_UINT;
-    case CDM_UINT64:
-        return ncml_ULONG;
-    case CDM_FLOAT:
-        return ncml_FLOAT;
-    case CDM_DOUBLE:
-        return ncml_DOUBLE;
-    case CDM_STRING:
-        return ncml_STRING;
-    default:
-        return ncml_NAT;
-    }
-}
-
-CDMDataType datatype_ncml2cdm(const NcmlDataType& dt)
-{
-    if (dt == ncml_NAT) {
-        return CDM_NAT;
-    } else if (dt == ncml_BYTE) {
-        return CDM_CHAR;
-    } else if (dt == ncml_SHORT) {
-        return CDM_SHORT;
-    } else if (dt == ncml_INT) {
-        return CDM_INT;
-    } else if (dt == ncml_LONG) {
-        return CDM_INT64;
-    } else if (dt == ncml_UBYTE) {
-        return CDM_UCHAR;
-    } else if (dt == ncml_USHORT) {
-        return CDM_USHORT;
-    } else if (dt == ncml_UINT) {
-        return CDM_UINT;
-    } else if (dt == ncml_ULONG) {
-        return CDM_UINT64;
-    } else if (dt == ncml_FLOAT) {
-        return CDM_FLOAT;
-    } else if (dt == ncml_DOUBLE) {
-        return CDM_DOUBLE;
-    } else if (dt == ncml_STRING || dt == ncml_STRING_CAP) {
-        return CDM_STRING;
-    } else {
-        return CDM_NAT;
-    }
 }
 
 } // namespace
@@ -252,7 +171,7 @@ void NcmlCDMWriter::write(std::ostream& out, const CDMVariable& var, const std::
     if (dt) {
         out << " type=\"" << dt.name << "\"";
         if (dt.is_unsigned) {
-            out << ">\n  <attribute name=\"_Unsigned\" value=\"true\" />" << std::endl;
+            out << ">\n  <attribute name=\"" << NCML_UNSIGNED << "\" value=\"true\" />" << std::endl;
             opened = true;
         }
     } else {

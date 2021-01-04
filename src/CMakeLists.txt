@@ -12,6 +12,8 @@ SET(libfimex_ncml_SOURCES
   NcmlIoFactory.h
   NcmlAggregationReader.cc
   NcmlAggregationReader.h
+  NcmlUtils.cc
+  NcmlUtils.h
 )
 
 SET(libfimex_SOURCES

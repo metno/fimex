@@ -35,11 +35,12 @@
 #include "fimex/Logger.h"
 #include "fimex/MutexLock.h"
 #include "fimex/SliceBuilder.h"
-#include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
-#include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/XMLInput.h"
+
+#include "NcmlAggregationReader.h"
+#include "NcmlUtils.h"
 
 #include <memory>
 #include <regex>
@@ -244,7 +245,7 @@ void NcmlCDMReader::initVariableTypeChange()
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
         if (name.empty())
             throw CDMException("ncml-file " + configId + " has no name for variable");
-        xmlXPathObject_p xpath_att_unsigned = doc->getXPathObject("/nc:attribute[@name='_Unsigned']", nodes->nodeTab[i]);
+        xmlXPathObject_p xpath_att_unsigned = doc->getXPathObject("/nc:attribute[@name='" + NCML_UNSIGNED + "']", nodes->nodeTab[i]);
         xmlNodeSetPtr nodes_att_unsigned = xpath_att_unsigned->nodesetval;
         size_t n_att_unsigned = (nodes_att_unsigned) ? nodes_att_unsigned->nodeNr : 0;
         bool att_unsigned = false;
@@ -257,28 +258,13 @@ void NcmlCDMReader::initVariableTypeChange()
         }
         if (cdm_->hasVariable(name)) {
             CDMVariable& var = cdm_->getVariable(name);
-            CDMDataType oldType = var.getDataType();
-            CDMDataType newType = string2datatype(type);
-            if (att_unsigned) {
-                switch (newType) {
-                case CDM_INT:
-                    newType = CDM_UINT;
-                    break;
-                case CDM_SHORT:
-                    newType = CDM_USHORT;
-                    break;
-                case CDM_CHAR:
-                    newType = CDM_UCHAR;
-                    break;
-                default:
-                    throw CDMException("ncml-file " + configId + " specifies _Unsigned attribute value for variable '" + name +
-                                       "' with type not in int,short,byte");
-                }
-            }
-            if (oldType != newType) {
+            const CDMDataType newType = datatype_ncml2cdm(type, att_unsigned);
+            if (newType == CDM_NAT)
+                throw CDMException("cannot create variable name='" + name + "' with type '" + type + "'");
+            if (newType != var.getDataType()) {
                 variableTypeChanges[name] = newType;
                 LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
-                var.setDataType(string2datatype(type));
+                var.setDataType(newType);
             }
         }
     }
@@ -355,7 +341,7 @@ CDMAttribute createAttributeFromXML(const xmlNodePtr node, const std::string& va
         // default attribute type is "string"
         type = "string";
     }
-    const CDMDataType datatype = string2datatype(type);
+    const CDMDataType datatype = datatype_ncml2cdm(type, false);
     if (datatype == CDM_NAT)
         throw CDMException("cannot create att name='" + name + "' with type '" + type + "'");
 
