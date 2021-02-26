@@ -90,12 +90,9 @@ DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, cons
 
 DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, const std::string& varName, const SliceBuilder& sb) const
 {
-    DataPtr data;
     LOG4FIMEX(logger, Logger::DEBUG, "creating a slicebuilder for '"<< varName << "'" );
     SliceBuilder rsb(reader->getCDM(), varName);
-    const std::vector<std::string> dims = rsb.getDimensionNames();
-    for (size_t i = 0; i < dims.size(); i++) {
-        const std::string& dn = dims[i];
+    for (const std::string& dn : rsb.getDimensionNames()) {
         size_t start, size;
         if (reducedDomain() && dn == reducedDomain()->xDim) {
             start = reducedDomain()->xMin;
@@ -110,8 +107,7 @@ DataPtr CachedInterpolationInterface::getInputDataSlice(CDMReader_p reader, cons
         }
         rsb.setStartAndSize(dn, start, size);
     }
-    data = reader->getDataSlice(varName, rsb);
-    return data;
+    return reader->getDataSlice(varName, rsb);
 }
 
 DataPtr CachedInterpolationInterface::getOutputDataSlice(DataPtr data, const SliceBuilder& sb) const
@@ -134,8 +130,8 @@ DataPtr CachedInterpolationInterface::getOutputDataSlice(DataPtr data, const Sli
 }
 
 CachedInterpolationInterface_p createCachedInterpolation(const std::string& xDimName, const std::string& yDimName, int method,
-                                                         const std::vector<double>& pointsOnXAxis, const std::vector<double>& pointsOnYAxis, size_t inX,
-                                                         size_t inY, size_t outX, size_t outY)
+                                                         shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis, size_t inX, size_t inY,
+                                                         size_t outX, size_t outY)
 {
     switch (method) {
     case MIFI_INTERPOL_BILINEAR:
@@ -150,8 +146,8 @@ CachedInterpolationInterface_p createCachedInterpolation(const std::string& xDim
     }
 }
 
-CachedInterpolation::CachedInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, const std::vector<double>& pointsOnXAxis,
-                                         const std::vector<double>& pointsOnYAxis, size_t inx, size_t iny, size_t outx, size_t outy)
+CachedInterpolation::CachedInterpolation(const std::string& xDimName, const std::string& yDimName, int funcType, shared_array<double> pointsOnXAxis,
+                                         shared_array<double> pointsOnYAxis, size_t inx, size_t iny, size_t outx, size_t outy)
     : CachedInterpolationInterface(xDimName, yDimName, inx, iny, outx, outy)
     , pointsOnXAxis(pointsOnXAxis)
     , pointsOnYAxis(pointsOnYAxis)
@@ -224,8 +220,9 @@ void CachedInterpolation::createReducedDomain(const std::string& xDimName, const
     if (reducedDomain())
         return;
 
-    const auto minmaxX = min_max_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
-    const auto minmaxY = min_max_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
+    const size_t outLayerSize = outX * outY;
+    const auto minmaxX = min_max_element(pointsOnXAxis.get(), pointsOnXAxis.get() + outLayerSize);
+    const auto minmaxY = min_max_element(pointsOnYAxis.get(), pointsOnYAxis.get() + outLayerSize);
 
     // allow additional cells for interpolation (2 for bicubic)
     const long long minX = clamp_ex(0, *minmaxX.first, -EXTEND, inX - 1);
@@ -257,8 +254,8 @@ const size_t INVALID = ~0u;
 } // namespace
 
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
-CachedNNInterpolation::CachedNNInterpolation(const std::string& xDimName, const std::string& yDimName, const std::vector<double>& pointsOnXAxis,
-                                             const std::vector<double>& pointsOnYAxis, size_t inx, size_t iny, size_t outx, size_t outy)
+CachedNNInterpolation::CachedNNInterpolation(const std::string& xDimName, const std::string& yDimName, shared_array<double> pointsOnXAxis,
+                                             shared_array<double> pointsOnYAxis, size_t inx, size_t iny, size_t outx, size_t outy)
     : CachedInterpolationInterface(xDimName, yDimName, inx, iny, outx, outy)
 {
     const size_t outLayerSize = outX * outY;
