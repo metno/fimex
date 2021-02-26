@@ -531,3 +531,8 @@ double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const ch
     }
     return retVal;
 }
+
+void mifi_set_default_log_level(int loglevel)
+{
+    defaultLogLevel(static_cast<Logger::LogLevel>(loglevel));
+}

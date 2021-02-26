@@ -1,5 +1,6 @@
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR
+  USE Fimex, ONLY                   : FimexIO, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat, INTERPOL_BILINEAR,&
+       set_default_log_level, LOGLEVEL_DEBUG
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
@@ -20,11 +21,13 @@ PROGRAM fortran_test
   CHARACTER(LEN=1024)             :: dimname
   LOGICAL                         :: fileExist
 
-  input_file = TOP_SRCDIR // "/test/flth00.dat"
+  input_file = TEST_EXTRADATA_DIR // "/flth00.dat"
   cfiletype = "felt"
   config_file = TOP_SRCDIR // "/share/etc/felt2nc_variables.xml"
   varName = "air_temperature"
   cunit = "K"
+
+  CALL set_default_log_level(LOGLEVEL_DEBUG)
 
   INQUIRE(file=input_file, exist=fileExist)
   IF (.not. fileExist) THEN

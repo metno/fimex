@@ -373,6 +373,10 @@ extern int mifi_write_scaled_double_dataslice(mifi_cdm_reader* rwreader, const c
  */
 double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units);
 
+/**
+ * Set default logging level.
+ */
+extern void mifi_set_default_log_level(int loglevel);
 
 #ifdef __cplusplus
 }
