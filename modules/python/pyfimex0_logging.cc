@@ -28,10 +28,34 @@
 
 #include <pybind11/pybind11.h>
 
-#define PY_GIL_ACQUIRE py::gil_scoped_acquire acquire
-
 using namespace MetNoFimex;
 namespace py = pybind11;
+
+#define PY_GIL_ACQUIRE py::gil_scoped_acquire acquire
+
+// ignore exeptions from logging
+#define PY_GIL_IGNORE_EXCEPTIONS(x) \
+    do { try { \
+        PY_GIL_ACQUIRE; \
+        x; \
+    } catch (...) { \
+    } } while (false)
+
+// rethrow exeptions from logging, treating StopIteration specially
+#define PY_GIL_RETHROW_EXCEPTIONS(x) \
+    do { try { \
+        PY_GIL_ACQUIRE; \
+        x; \
+    } catch (py::error_already_set& pex) { \
+        if (pex.matches(PyExc_StopIteration)) { \
+            throw py::stop_iteration(); \
+        } else { \
+            throw; \
+        } \
+    } } while (false)
+
+#define PY_GIL_EXCEPTIONS(x) \
+    PY_GIL_IGNORE_EXCEPTIONS(x)
 
 namespace {
 
@@ -66,32 +90,8 @@ public:
     void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) /* override */;
 
 private:
-    py::module log_;
+    py::object log_;
 };
-
-// ignore exeptions from logging
-#define PY_GIL_IGNORE_EXCEPTIONS(x) \
-    do { try { \
-        PY_GIL_ACQUIRE; \
-        x; \
-    } catch (...) { \
-    } } while (false)
-
-// rethrow exeptions from logging, treating StopIteration specially
-#define PY_GIL_RETHROW_EXCEPTIONS(x) \
-    do { try { \
-        PY_GIL_ACQUIRE; \
-        x; \
-    } catch (py::error_already_set& pex) { \
-        if (pex.matches(PyExc_StopIteration)) { \
-            throw py::stop_iteration(); \
-        } else { \
-            throw; \
-        } \
-    } } while (false)
-
-#define PY_GIL_EXCEPTIONS(x) \
-    PY_GIL_IGNORE_EXCEPTIONS(x)
 
 PythonLoggingImpl::PythonLoggingImpl(const py::object& log)
 {
@@ -133,7 +133,7 @@ class PythonLoggingClass : public LoggerClass {
 public:
     PythonLoggingClass();
     LoggerImpl* loggerFor(Logger* logger, const std::string& className) /* override */;
-    py::object python_logging;
+    py::module python_logging;
 };
 
 PythonLoggingClass::PythonLoggingClass()
@@ -157,12 +157,10 @@ void pyfimex0_logging(py::module m)
     if (char* disable = getenv("FIMEX_PYTHON_NO_LOGGING")) {
         Logger::setClass(nullptr);
     } else {
-        Logger::setClass(new PythonLoggingClass);
+        // see https://pybind11.readthedocs.io/en/stable/advanced/misc.html#module-destructors
+        auto atexit = py::module::import("atexit");
+        atexit.attr("register")(py::cpp_function([]() { Logger::setClass(nullptr); }));
 
-        // see https://pybind11.readthedocs.io/en/master/advanced/misc.html#module-destructors
-        py::cpp_function reset_logger([]() { Logger::setClass(nullptr); });
-        m.add_object("_cleanup", py::capsule(reset_logger));
-        if (auto atexit = py::module::import("atexit"))
-            atexit.attr("register")(reset_logger);
+        Logger::setClass(new PythonLoggingClass);
     }
 }
