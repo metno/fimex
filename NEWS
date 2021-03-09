@@ -1,3 +1,9 @@
+  * 2021-03-09 fimex-1.6.0
+    * drop support for xenial / cmake < 3.6
+    * filetype for http(s):// is netcdf
+    * support setting loglevel from fortran
+    * interpolation: less copying, respect type of existing lon/lat axis variables
+    * bugfixes
   * 2020-11-04 fimex-1.5.3
     * bugfixes
   * 2020-09-09 fimex-1.5.2
