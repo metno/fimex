@@ -48,9 +48,9 @@ TEST4FIMEX_TEST_CASE(test_extract)
 
     extract->reduceDimension("y", 10, 50);
     extract->reduceDimension("x", 80, 50); // spain
-    FimexTime startTime(2007,5,16, 9);
-    FimexTime endTime(2007,5,16, 20);
-    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    const FimexTime startTime(2007,5,16, 9);
+    const FimexTime endTime(2007,5,16, 20);
+    TEST4FIMEX_CHECK_NO_THROW(extract->reduceTime(startTime, endTime)); // 12 hours 9..20
     TEST4FIMEX_CHECK_EQ(extract->getData("y")->size(), 50);
     TEST4FIMEX_CHECK_EQ(extract->getData("x")->size(), 50);
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 12);
@@ -61,8 +61,8 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK(writeToFile(extract, "test_extract_1.nc"));
 
     // test chunked reading
-    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
-    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    extract = std::make_shared<CDMExtractor>(feltReader);
+    TEST4FIMEX_CHECK_NO_THROW(extract->reduceTime(startTime, endTime)); // 12 hours 9..20
     std::set<size_t> slices;
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
     extract->reduceDimension("y", slices);
@@ -89,8 +89,8 @@ TEST4FIMEX_TEST_CASE(test_extract)
     }
     TEST4FIMEX_CHECK(writeToFile(extract, "test_extract_2.nc"));
 
-    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
-    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    extract = std::make_shared<CDMExtractor>(feltReader);
+    TEST4FIMEX_CHECK_NO_THROW(extract->reduceTime(startTime, endTime)); // 12 hours 9..20
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
     extract->reduceDimension("y", slices);
     extract->reduceDimension("x", 80, 50); // spain
@@ -119,8 +119,8 @@ TEST4FIMEX_TEST_CASE(test_extract)
     }
 
     // slicebuilder along x
-    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
-    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    extract = std::make_shared<CDMExtractor>(feltReader);
+    TEST4FIMEX_CHECK_NO_THROW(extract->reduceTime(startTime, endTime)); // 12 hours 9..20
     slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
     extract->reduceDimension("y", slices);
     TEST4FIMEX_CHECK_EQ(extract->getData("y")->size(), 4);
@@ -147,8 +147,8 @@ TEST4FIMEX_TEST_CASE(test_extract)
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(3, 6, t, 50, 50, 12)], precData2[mifi_3d_array_position(3, 3, t, 50, 4, 12)]);
     }
 
-    extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
-    extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time));
+    extract = std::make_shared<CDMExtractor>(feltReader);
+    TEST4FIMEX_CHECK_NO_THROW(extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time)));
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 61);
 
     extract = std::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));

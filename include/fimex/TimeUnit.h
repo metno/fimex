@@ -65,8 +65,15 @@ public:
     /// calculate the time in a calendar form
     FimexTime unitTime2fimexTime(double unitTime) const;
 
-    /// calculate the time in the current unit from the calendar form
+    /*! calculate the time in the current unit from the calendar form
+     * \returns NaN for invalid times
+     */
     double fimexTime2unitTime(const FimexTime& fiTime) const;
+
+    /*! calculate the time in the current unit from the calendar form
+     * \returns invalidValue for invalid times
+     */
+    double fimexTime2unitTime(const FimexTime& fiTime, double invalidValue) const;
 
 private:
     void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00");

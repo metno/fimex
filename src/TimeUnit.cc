@@ -31,6 +31,7 @@
 #include "MutexLock.h"
 
 #include <climits>
+#include <cmath>
 #include <limits>
 
 #include "fimex_config.h"
@@ -133,8 +134,16 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
     return fiTime;
 }
 
-double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
+double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime, double invalidValue) const
 {
+    if (fiTime.invalid()) {
+        if (fiTime == FimexTime(FimexTime::min_date_time))
+            return std::numeric_limits<double>::lowest();
+        else if (fiTime == FimexTime(FimexTime::max_date_time))
+            return std::numeric_limits<double>::max();
+        return invalidValue;
+    }
+
     Units units; // unit initialization
     float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
     double unitTime;
@@ -151,6 +160,11 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
     handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
 #endif
     return unitTime;
+}
+
+double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const
+{
+    return fimexTime2unitTime(fiTime, std::nan(""));
 }
 
 } // namespace MetNoFimex

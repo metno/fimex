@@ -391,11 +391,11 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
 
 void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime)
 {
-    std::string unit = "seconds since 1970-01-01 00:00:00";
-    TimeUnit tu(unit);
-    std::vector<CoordinateAxis::AxisType> types;
-    types.push_back(CoordinateAxis::Time);
-    reduceAxes(types, unit, tu.fimexTime2unitTime(startTime), tu.fimexTime2unitTime(endTime));
+    const std::string unit = "seconds since 1970-01-01 00:00:00";
+    const TimeUnit tu(unit);
+    const double startVal = tu.fimexTime2unitTime(startTime, std::numeric_limits<double>::lowest());
+    const double endVal = tu.fimexTime2unitTime(endTime, std::numeric_limits<double>::max());
+    reduceAxes({CoordinateAxis::Time}, unit, startVal, endVal);
 }
 
 void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal, double endVal)
