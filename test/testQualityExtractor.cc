@@ -40,10 +40,9 @@ using namespace MetNoFimex;
 #ifdef HAVE_FELT
 TEST4FIMEX_TEST_CASE(test_qualityExtract)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
 #ifdef TEST_DEBUG
     defaultLogLevel(Logger::DEBUG);
 #endif
@@ -78,10 +77,9 @@ TEST4FIMEX_TEST_CASE(test_qualityExtract)
 
 TEST4FIMEX_TEST_CASE(test_qualityExtract_convert)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
     std::shared_ptr<CDMQualityExtractor> qe = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
 
     TEST4FIMEX_CHECK(writeToFile(qe, "test_qualityExtract_convert.nc"));

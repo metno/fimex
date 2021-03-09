@@ -36,10 +36,9 @@ using namespace MetNoFimex;
 
 TEST4FIMEX_TEST_CASE(test_feltGrib1Append)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
 
     const string outputFile("test_append.grb1");
     MetNoFimex::remove(outputFile);
@@ -56,10 +55,9 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Append)
 
 TEST4FIMEX_TEST_CASE(test_feltGrib1Write)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
 
     const string outputFile("test.grb1");
     GribApiCDMWriter(feltReader, outputFile, 1, pathShareEtc("cdmGribWriterConfig.xml"));
@@ -70,10 +68,10 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Write)
 
 TEST4FIMEX_TEST_CASE(test_feltGrib2Write)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
+
     const string outputFile("test.grb2");
     GribApiCDMWriter(feltReader, outputFile, 2, pathShareEtc("cdmGribWriterConfig.xml"));
     TEST4FIMEX_CHECK(MetNoFimex::exists(outputFile));

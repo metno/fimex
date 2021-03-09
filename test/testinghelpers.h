@@ -52,6 +52,7 @@ std::string pathTest(const std::string& filename);
 
 bool hasTestExtra();
 std::string pathTestExtra(const std::string& filename);
+CDMReader_p getFLTH00Reader();
 
 void copyFile(const std::string& from, const std::string& to);
 

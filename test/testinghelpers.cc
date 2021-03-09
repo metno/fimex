@@ -106,6 +106,14 @@ bool hasTestExtra()
     return exists(extra_data_dir + "flth00.dat");
 }
 
+CDMReader_p getFLTH00Reader()
+{
+    if (!hasTestExtra())
+        return nullptr;
+    const string fileName = pathTestExtra("flth00.dat");
+    return CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
+}
+
 void copyFile(const std::string& from, const std::string& to)
 {
     std::ifstream  src(from.c_str());

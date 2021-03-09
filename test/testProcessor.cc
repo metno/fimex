@@ -97,10 +97,9 @@ TEST4FIMEX_TEST_CASE(test_rotate)
 #ifdef HAVE_FELT
 TEST4FIMEX_TEST_CASE(interpolator_vectorlatlon)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string flth00_dat = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", flth00_dat, pathShareEtc("felt2nc_variables.xml"));
     std::shared_ptr<CDMProcessor> processor = std::make_shared<CDMProcessor>(feltReader);
     vector<string> x(1, "x_wind_10m");
     vector<string> y(1, "y_wind_10m");

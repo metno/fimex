@@ -34,23 +34,18 @@ using namespace MetNoFimex;
 
 TEST4FIMEX_TEST_CASE(test_feltNetcdfWrite)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
-    TEST4FIMEX_REQUIRE(feltReader);
-
     CDMFileReaderFactory::createWriter(feltReader, "netcdf", "test_feltNetcdfWrite.nc");
     // cannot remove file as it is used by other tests
 }
 
 TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
-    TEST4FIMEX_REQUIRE(feltReader);
 
     const std::string outputFileName = "test_feltNetcdfWriteConfig.nc";
     NetCDF_CDMWriter writer(feltReader, outputFileName, pathShareEtc("cdmWriterConfigDeprecated.xml"));

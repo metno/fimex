@@ -39,11 +39,10 @@ using namespace MetNoFimex;
 #ifdef HAVE_FELT
 TEST4FIMEX_TEST_CASE(test_extract)
 {
-    if (!hasTestExtra())
+    CDMReader_p feltReader = getFLTH00Reader();
+    if (!feltReader)
         return;
-    const string fileName = pathTestExtra("flth00.dat");
-    CDMReader_p feltReader = CDMFileReaderFactory::create("felt", fileName, pathShareEtc("felt2nc_variables.xml"));
-    std::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
+    std::shared_ptr<CDMExtractor> extract = std::make_shared<CDMExtractor>(feltReader);
     extract->removeVariable("relative_humidity");
     TEST4FIMEX_CHECK_THROW(extract->getCDM().getVariable("relative_humidity"), CDMException);
 

@@ -42,22 +42,13 @@ using namespace MetNoFimex;
 static const int DEBUG = 0;
 
 #if defined(HAVE_FELT)
-static CDMReader_p createFeltReader()
-{
-    if (!hasTestExtra())
-        return CDMReader_p();
-    const string flth00_dat = pathTestExtra("flth00.dat");
-    return CDMFileReaderFactory::create("felt", flth00_dat, pathShareEtc("felt2nc_variables.xml"));
-}
-
 TEST4FIMEX_TEST_CASE(interpolator)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    CDMReader_p feltReader = createFeltReader();
+    CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
 
-    const string flth00_dat = pathTestExtra("flth00.dat");
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
 
     vector<double> xAxis, yAxis;
@@ -83,7 +74,7 @@ TEST4FIMEX_TEST_CASE(interpolator)
 TEST4FIMEX_TEST_CASE(interpolatorKDTree)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-    CDMReader_p feltReader = createFeltReader();
+    CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
 
@@ -113,7 +104,7 @@ TEST4FIMEX_TEST_CASE(interpolatorRelative)
 {
     if (DEBUG)
         defaultLogLevel(Logger::DEBUG);
-    CDMReader_p feltReader = createFeltReader();
+    CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(feltReader);
