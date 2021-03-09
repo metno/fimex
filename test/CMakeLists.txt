@@ -1,5 +1,5 @@
 
-LINK_DIRECTORIES(${PC_LIBRARY_DIRS}
+LINK_DIRECTORIES(
   ${BOOST_LIBRARY_DIRS} # if using boost unit_test_framework
 )
 
@@ -144,7 +144,7 @@ ENDIF(ENABLE_METGM)
 IF (ENABLE_NETCDF)
   FIND_PROGRAM(NCDUMP_PROGRAM
     NAMES ncdump
-    HINTS "${PC_netcdf_PREFIX}/bin" "${netcdf_DIR}/bin"
+    HINTS "${netcdf_DIR}/bin"
   )
   IF (NCDUMP_PROGRAM)
     MESSAGE (STATUS "Found ncdump: ${NCDUMP_PROGRAM}")
@@ -186,10 +186,16 @@ ENDIF()
 
 FOREACH(T ${CC_TESTS})
   ADD_EXECUTABLE(${T} "${T}.cc")
-  TARGET_INCLUDE_DIRECTORIES(${T} PRIVATE ${Boost_INCLUDE_DIRS} ${PC_INCLUDE_DIRS})
-  TARGET_LINK_LIBRARIES(${T} libfimex testinghelpers ${Boost_LIBRARIES} ${PC_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(${T} PRIVATE ${Boost_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(${T}
+    libfimex
+    testinghelpers
+    ${Boost_LIBRARIES}
+  )
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
+
+TARGET_LINK_LIBRARIES(testXMLDoc ${libxml2_PACKAGE})
 
 FOREACH(T ${C_TESTS})
   ADD_EXECUTABLE(${T} "${T}.c")

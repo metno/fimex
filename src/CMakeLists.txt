@@ -1,20 +1,5 @@
 
-SET(libfimex_INCLUDE_DIRECTORIES
-  ${PC_INCLUDE_DIRS}
-  ${grib_api_INC_DIR}
-  ${libxml2_INC_DIR}
-  ${netcdf_INC_DIR}
-  ${proj_INC_DIR}
-  ${udunits2_INC_DIR}
-  ${ECCODES_INCLUDE_DIRS}
-  ${date_INC_DIR}
-)
-
-SET(libfimex_COMPILE_OPTIONS
-  ${PC_CFLAGS_OTHER}
-  )
 SET(FIMEX_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/fimex${MINUS_FIMEX_VERSION}")
-LINK_DIRECTORIES(${PC_LIBRARY_DIRS})
 
 SET(INCF "${CMAKE_SOURCE_DIR}/include/fimex")
 
@@ -301,7 +286,6 @@ ENDIF(ENABLE_NETCDF)
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   IF(ENABLE_GRIBAPI)
     SET(HAVE_GRIB_API 1)
-    LIST(APPEND libfimex_INCLUDE_DIRECTORIES ${GRIBAPI_INC_DIR})
   ELSE()
     SET(HAVE_ECCODES 1)
   ENDIF()
@@ -425,18 +409,20 @@ SET(libfimex_ALL_SOURCES
   ${libfimex_proradxml_SOURCES}
 )
 
-SET(libfimex_LIBS
+SET(libfimex_PACKAGES
   ${FELT_LIBRARY}
-  ${PC_LIBRARIES}
-  ${grib_api_LIB}
-  ${libxml2_LIB}
-  ${netcdf_LIB}
-  ${proj_LIB}
-  ${udunits2_LIB}
-  ${eccodes_LIB}
-  ${date_LIB}
+  ${date_PACKAGE}
+  ${eccodes_PACKAGE}
+  ${grib_api_PACKAGE}
+  ${libxml2_PACKAGE}
+  ${log4cpp_PACKAGE}
+  ${metgm_PACKAGE}
+  ${netCDF_PACKAGE}
+  ${proj_PACKAGE}
+  ${proradxmlrw_PACKAGE}
+  ${udunits2_PACKAGE}
 )
 
-FIMEX_ADD_LIBRARY(fimex "${libfimex_ALL_SOURCES}" "${libfimex_LIBS}" "${libfimex_INCLUDE_DIRECTORIES}" "${libfimex_COMPILE_OPTIONS}")
+FIMEX_ADD_LIBRARY(fimex "${libfimex_ALL_SOURCES}" "${libfimex_PACKAGES}")
 
 ADD_SUBDIRECTORY(binSrc)

@@ -35,14 +35,27 @@ INCLUDE(FimexUtils)
 FIMEX_CMAKE_SETUP()
 FIMEX_VERSION_DEFINES(FIMEX "include/fimex/CDMconstants.h")
 
-FIMEX_FIND_PACKAGE("libxml2" "libxml-2.0>=2.6.0" "xml2" "libxml/xmlversion.h")
-LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${libxml2_PC})
+FIMEX_FIND_PACKAGE(libxml2
+  VERSION_MIN "2.6.0"
+  CMAKE_NAME "libxml2"
+  PKGCONFIG_NAME "libxml-2.0"
+  LIBRARY_NAME "xml2"
+  INCLUDE_HDR "libxml/xmlversion.h"
+)
 
-FIMEX_FIND_PACKAGE("udunits2" "udunits>=2" "udunits2" "udunits2.h")
-LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${udunits2_PC})
+FIMEX_FIND_PACKAGE(udunits2
+  VERSION_MIN "2"
+  PKGCONFIG_NAME "udunits"
+  LIBRARY_NAME "udunits2"
+  INCLUDE_HDR "udunits2.h"
+)
 
-FIMEX_FIND_PACKAGE("proj" "proj" "proj" "proj_api.h")
-LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${proj_PC})
+FIMEX_FIND_PACKAGE(proj
+  CMAKE_NAME "PROJ"
+  PKGCONFIG_NAME "proj"
+  LIBRARY_NAME "proj"
+  INCLUDE_HDR "proj_api.h"
+)
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 
@@ -72,13 +85,25 @@ ENDIF()
 
 OPTION(ENABLE_LOG4CPP "Use Log4Cpp" OFF)
 IF(ENABLE_LOG4CPP)
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE log4cpp)
+  FIMEX_FIND_PACKAGE(log4cpp
+    PKGCONFIG_NAME "log4cpp"
+    LIBRARY_NAME "liblog4cpp"
+    INCLUDE_HDR "log4cpp/Priority.hh"
+  )
 ENDIF()
 
 OPTION(ENABLE_NETCDF "Use NetCDF" ON)
 IF(ENABLE_NETCDF)
-  FIMEX_FIND_PACKAGE("netcdf" "netcdf" "netcdf" "netcdf.h")
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE ${netcdf_PC})
+  FIMEX_FIND_PACKAGE(netCDF
+    CMAKE_NAME "netCDF"
+    CMAKE_TARGETS
+      "netCDF::netcdf" # focal, debian sid, ...
+      "netcdf"         # bionic
+    PKGCONFIG_NAME "netcdf"
+    LIBRARY_NAME "netcdf"
+    INCLUDE_HDR "netcdf.h"
+  )
+  CHECK_NETCDF_HAS_HDF5(HAVE_NETCDF_HDF5_LIB)
 ENDIF()
 
 OPTION(ENABLE_FELT "Use Felt library" ON)
@@ -90,7 +115,7 @@ IF((ENABLE_GRIBAPI) AND (ENABLE_ECCODES))
   MESSAGE(FATAL_ERROR "Cannot use both ecCodes libraries")
 ELSEIF(ENABLE_ECCODES)
   FIND_PACKAGE(eccodes REQUIRED)
-  SET(eccodes_LIB "eccodes")
+  SET(eccodes_PACKAGE "eccodes")
   MESSAGE(STATUS "Detected ecCodes version ${eccodes_VERSION}")
   # cmake variable "eccodes_FEATURES" was called "ECCODES_FEATURES" before 2.13.0
   IF((NOT eccodes_FEATURES) AND (ECCODES_FEATURES))
@@ -102,7 +127,10 @@ ELSEIF(ENABLE_ECCODES)
     SET(HAVE_GRIB_THREADSAFE 1)
   ENDIF()
 ELSEIF(ENABLE_GRIBAPI)
-  FIMEX_FIND_PACKAGE("grib_api" "" "grib_api" "grib_api.h")
+  FIMEX_FIND_PACKAGE(grib_api_PACKAGE
+    LIBRARY_NAME "grib_api"
+    INCLUDE_HDR "grib_api.h"
+  )
   OPTION(ENABLE_GRIBAPIPTHREAD "Use GribAPI library with pthread support" ON)
   IF(ENABLE_GRIBAPIPTHREAD)
     SET(HAVE_GRIB_THREADSAFE 1)
@@ -111,12 +139,20 @@ ENDIF()
 
 OPTION(ENABLE_METGM "Use metgm" OFF)
 IF(ENABLE_METGM)
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE metgm)
+  FIMEX_FIND_PACKAGE(metgm
+    PKGCONFIG_NAME "metgm"
+    LIBRARY_NAME "libmetgm"
+    INCLUDE_HDR "metgm.h"
+  )
 ENDIF()
 
 OPTION(ENABLE_PRORADXML "Use proradxml" OFF)
 IF(ENABLE_PRORADXML)
-  LIST(APPEND FIMEX_PC_REQUIRES_PRIVATE libproradxmlrw)
+  FIMEX_FIND_PACKAGE(proradxmlrw
+    PKGCONFIG_NAME "libproradxmlrw"
+    LIBRARY_NAME "libproradxmlrw"
+    INCLUDE_HDR "proradxmlrw.h"
+  )
 ENDIF()
 
 OPTION(ENABLE_FORTRAN "Use fortran" OFF)
@@ -126,12 +162,6 @@ ENDIF()
 
 OPTION(ENABLE_FIMEX_VERSIONNUMBERED "Use version numbers in filenames" ON)
 
-PKG_CHECK_MODULES(PC REQUIRED ${FIMEX_PC_REQUIRES};${FIMEX_PC_REQUIRES_PRIVATE})
-
-IF(ENABLE_NETCDF)
-  CHECK_NETCDF_HAS_HDF5(HAVE_NETCDF_HDF5_LIB)
-ENDIF()
-
 # github/HowardHinnant/date
 IF (NOT date_INC_DIR)
   SET (DATE_3RDPARTY "third_party/date")
@@ -139,12 +169,18 @@ IF (NOT date_INC_DIR)
     SET (date_INC_DIR "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/include")
   ELSE ()
     FIND_PACKAGE(date REQUIRED)
-    SET (date_LIB date_interface) # just a header file, therefore '..._interface'
+    SET (date_PACKAGE date_interface) # just a header file, therefore '..._interface'
   ENDIF ()
-ELSEIF (NOT (EXISTS "${date_INC_DIR}/date/date.h"))
-  MESSAGE (SEND_ERROR "Missing '${date_INC_DIR}/date/date.h'")
-ELSE()
-  MESSAGE (STATUS "Using '${date_INC_DIR}/date/date.h'")
+ENDIF ()
+IF (NOT date_PACKAGE)
+  SET(date_HDR "${date_INC_DIR}/date/date.h")
+  IF (EXISTS "${date_HDR}")
+    MESSAGE (STATUS "Using '${date_HDR}'")
+    FIMEX_ADD_IMPORTED_LIBRARY(date_IMP "" "${date_INC_DIR}" "")
+    SET (date_PACKAGE date_IMP)
+  ELSE()
+    MESSAGE (SEND_ERROR "Missing '${date_HDR}'")
+  ENDIF ()
 ENDIF ()
 
 SET (MI_PROGRAMOPTIONS_3RDPARTY "third_party/mi-programoptions")
@@ -173,8 +209,8 @@ SET(FIMEX_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}${pc_fimex_includedir}"
 
 SET(FIMEX_PC "fimex${MINUS_FIMEX_VERSION}.pc")
 FIMEX_GEN_PKGCONFIG(fimex.pc.in "${FIMEX_PC}"
-  "${FIMEX_PC_REQUIRES}"
-  "${grib_api_LIB};${libxml2_LIB};${netcdf_LIB};${proj_LIB};${udunits2_LIB};${eccodes_LIB}"
+  ""
+  "" 
   "${CMAKE_INSTALL_LIBDIR}"
   "${FIMEX_INSTALL_INCLUDEDIR};${udunits2_INC_DIR};${proj_INC_DIR};${grib_api_INC_DIR}"
 )

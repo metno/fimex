@@ -1,7 +1,4 @@
 
-LINK_DIRECTORIES(
-)
-
 LIST(APPEND libfelt_SOURCES
   FeltField.cpp
   FeltFile.cpp
@@ -9,15 +6,11 @@ LIST(APPEND libfelt_SOURCES
   FeltGridDefinition.cpp
   )
 
-SET (libfelt_INCLUDE_DIRS
-  "${date_INC_DIR}"
+SET(libfelt_PACKAGES
+  ${date_PACKAGE}
+  ${proj_PACKAGE}
 )
-
-SET (libfelt_LIBS
-  ${date_LIB}
-)
-
-FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_LIBS}" "${libfelt_INCLUDE_DIRS}" "")
+FIMEX_ADD_LIBRARY(felt "${libfelt_SOURCES}" "${libfelt_PACKAGES}")
 
 IF(TARGET libfelt)
   TARGET_INCLUDE_DIRECTORIES(libfelt PRIVATE "${CMAKE_BINARY_DIR}/src")

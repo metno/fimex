@@ -42,7 +42,12 @@ MACRO(FIMEX_CMAKE_SETUP)
 
   INCLUDE(CMakePackageConfigHelpers)
   INCLUDE(GNUInstallDirs)
-  INCLUDE(FindPkgConfig)
+  IF (${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    # see https://github.com/Kitware/CMake/commit/ac5731a7e380349f19dc319e6c31e189b5faba93
+    INCLUDE(FindPkgConfigBugfixLibraryPaths)
+  ELSE ()
+    INCLUDE(FindPkgConfig)
+  ENDIF ()
 
   SET(CMAKE_CXX_STANDARD 11)
   SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -144,11 +149,12 @@ FUNCTION(FIMEX_HEADERS headers sources source_suffix header_suffix)
 ENDFUNCTION()
 
 
-FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes options)
+FUNCTION(FIMEX_ADD_LIBRARY name sources packages)
   IF(BUILD_SHARED_LIBS)
+    MESSAGE(STATUS "adding shared lib '${name}' using packages '${packages}'")
     SET(shared_lib lib${name})
     ADD_LIBRARY(${shared_lib} SHARED ${sources})
-    TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${libs})
+    TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${packages})
     TARGET_INCLUDE_DIRECTORIES(${shared_lib}
       PUBLIC
       $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -156,7 +162,6 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes options)
       PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      ${includes}
       )
     IF(options)
       TARGET_COMPILE_OPTIONS(${shared_lib} PUBLIC ${options})
@@ -184,7 +189,6 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources libs includes options)
       PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      ${includes}
       )
     SET_TARGET_PROPERTIES(${static_lib} PROPERTIES
       OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
@@ -201,48 +205,110 @@ ENDFUNCTION()
 INCLUDE(CheckFunctionExists)
 
 FUNCTION(CHECK_NETCDF_HAS_HDF5 found)
-  IF (netcdf_PC)
-    # we want only netcdf
-    PKG_CHECK_MODULES(PC_NETCDF QUIET REQUIRED ${netcdf_PC})
-    SET(CMAKE_REQUIRED_FLAGS ${PC_NETCDF_LDFLAGS})
-    SET(CMAKE_REQUIRED_DEFINITIONS ${PC_NETCDF_CFLAGS_OTHER})
-    SET(CMAKE_REQUIRED_INCLUDES ${PC_NETCDF_INCLUDE_DIRS})
-    SET(CMAKE_REQUIRED_LIBRARIES ${PC_NETCDF_LIBRARIES})
-  ELSE ()
-    SET(CMAKE_REQUIRED_INCLUDES ${netcdf_INC_DIR})
-    SET(CMAKE_REQUIRED_LIBRARIES ${netcdf_LIB})
-  ENDIF ()
+  SET(CMAKE_REQUIRED_FLAGS "")
+  SET(CMAKE_REQUIRED_DEFINITIONS "")
+  SET(CMAKE_REQUIRED_INCLUDES "")
+  SET(CMAKE_REQUIRED_LIBRARIES ${netCDF_PACKAGE})
   CHECK_FUNCTION_EXISTS("nc_def_var_deflate" ${found})
 ENDFUNCTION()
 
+FUNCTION(FIMEX_ADD_IMPORTED_LIBRARY name libraries includes definitions)
+  add_library(${name} INTERFACE IMPORTED)
+  set_target_properties(
+    ${name}
+    PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${libraries}"
+      INTERFACE_INCLUDE_DIRECTORIES "${includes}"
+      INTERFACE_COMPILE_DEFINITIIONS "${definitions}"
+  )
+ENDFUNCTION()
 
-FUNCTION(FIMEX_FIND_PACKAGE name
-    pkg_pc
-    pkg_libname
-    pkg_hdr
-    )
+FUNCTION(FIMEX_FIND_PACKAGE ffp)
+  set(ARGS0
+    # options
+  )
+  set(ARGS1
+    # arguments with one value
+    PACKAGE
+    VERSION_MIN
+    CMAKE_NAME
+    PKGCONFIG_NAME
+    INCLUDE_HDR
+    LIBRARY_NAME
+  )
+  set(ARGSN
+    # arguments with multiple values
+    CMAKE_TARGETS
+  )
+  CMAKE_PARSE_ARGUMENTS(_ffp "${ARGS0}" "${ARGS1}" "${ARGSN}" ${ARGN})
 
-  UNSET(p_pc_FOUND CACHE)
+  # try to find via cmake
+  IF (_ffp_CMAKE_NAME)
+    FIND_PACKAGE(${_ffp_CMAKE_NAME} ${_ffp_VERSION_MIN} QUIET)
+    IF(${_ffp_CMAKE_NAME}_FOUND)
+      IF (NOT(DEFINED _ffp_CMAKE_TARGETS))
+        SET(_ffp_CMAKE_TARGET ${_ffp_CMAKE_NAME})
+      ENDIF()
+      FOREACH(_ffp_target ${_ffp_CMAKE_TARGETS})
+        IF(TARGET ${_ffp_target})
+          GET_TARGET_PROPERTY(_ffp_is_imported "${_ffp_target}" IMPORTED)
+          IF(_ffp_is_imported)
+            SET(${ffp}_PACKAGE "${_ffp_target}" PARENT_SCOPE)
+            MESSAGE(STATUS "Found ${ffp} via cmake imported")
+            RETURN()
+          ENDIF()
+        ENDIF()
+      ENDFOREACH ()
 
-  IF(pkg_pc)
-    PKG_CHECK_MODULES(p_pc QUIET "${pkg_pc}")
-  ENDIF()
-  IF(p_pc_FOUND)
-    MESSAGE(STATUS "Found ${name}: pkg-config '${pkg_pc}'")
-    SET(${name}_PC ${pkg_pc} PARENT_SCOPE)
-  ELSE()
-    FIND_PATH(${name}_INC_DIR
-      ${pkg_hdr}
-      HINTS "${${name}_INCLUDE_DIR}" "${${name}_DIR}/include"
-    )
-    FIND_LIBRARY(${name}_LIB
-      NAMES ${pkg_libname}
-      HINTS "${${name}_LIB_DIR}" "${${name}_DIR}/lib"
-    )
-    IF((${name}_INC_DIR) AND (${name}_LIB))
-      MESSAGE(STATUS "Found ${name}: include: '${${name}_INC_DIR}/${pkg_hdr}'  library: '${${name}_LIB}'")
-    ELSE()
-      MESSAGE(FATAL_ERROR "Required ${name} include/library not found")
+      FIMEX_ADD_IMPORTED_LIBRARY(${ffp}_IMP
+        "${${_ffp_CMAKE_TARGET}_LIBRARIES}"
+        "${${_ffp_CMAKE_TARGET}_INCLUDE_DIRS}"
+        "${${_ffp_CMAKE_TARGET}_DEFINITIONS}"
+      )
+      SET(${ffp}_PACKAGE "${ffp}_IMP" PARENT_SCOPE)
+      MESSAGE(STATUS "Found ${ffp} via cmake")
+      RETURN()
     ENDIF()
   ENDIF()
+
+
+  # try to find via pkg-config
+  IF(_ffp_PKGCONFIG_NAME)
+    IF(_ffp_VERSION_MIN)
+      SET(_ffp_pc_version "${_ffp_PKGCONFIG_NAME}>=${_ffp_VERSION_MIN}")
+    ELSE()
+      SET(_ffp_pc_version "${_ffp_PKGCONFIG_NAME}")
+    ENDIF()
+    SET (_ffp_pc ${_ffp_PKGCONFIG_NAME})
+    UNSET(${_ffp_pc}_FOUND CACHE)
+    PKG_CHECK_MODULES(${_ffp_pc} IMPORTED_TARGET QUIET "${_ffp_pc_version}")
+    IF(${_ffp_pc}_FOUND)
+      SET(${ffp}_PACKAGE "PkgConfig::${_ffp_pc}" PARENT_SCOPE)
+      MESSAGE(STATUS "Found ${ffp} via pkg-config '${_ffp_pc_version}'")
+      RETURN()
+    ENDIF()
+  ENDIF()
+
+  # try to find via library and header
+  UNSET(_ffp_inc_dir CACHE)
+  FIND_PATH(_ffp_inc_dir
+    ${_ffp_INCLUDE_HDR}
+    HINTS "${${ffp}_INCLUDE_DIR}" "${${ffp}_DIR}/include"
+  )
+  IF (NOT _ffp_inc_dir)
+    MESSAGE(FATAL_ERROR "Cannot find ${ffp}, include header '${_ffp_INCLUDE_HDR}' not found")
+  ENDIF()
+  IF (_ffp_LIBRARY_NAME)
+    UNSET(_ffp_lib CACHE)
+    FIND_LIBRARY(_ffp_lib
+      NAMES ${_ffp_LIBRARY_NAME}
+      HINTS "${${ffp}_LIB_DIR}" "${${ffp}_DIR}/lib"
+    )
+    IF (NOT _ffp_lib)
+      MESSAGE(FATAL_ERROR "Cannot find ${ffp}, library '${_ffp_LIBRARY_NAME}' not found")
+    ENDIF()
+  ENDIF()
+  FIMEX_ADD_IMPORTED_LIBRARY(${ffp}_LIB_INC "${_ffp_lib}" "${_ffp_inc_dir}" "")
+  SET(${ffp}_PACKAGE "${ffp}_LIB_INC" PARENT_SCOPE)
+  MESSAGE(STATUS "Found ${ffp} via find_package/find_path, lib='${_ffp_lib}', include='${_ffp_inc_dir}'")
 ENDFUNCTION()
