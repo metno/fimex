@@ -4,9 +4,9 @@ PROGRAM fortran_test
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
-  CHARACTER(LEN=80)               :: input_file
-  CHARACTER(LEN=80)               :: config_file
-  CHARACTER(LEN=80)               :: varName
+  CHARACTER(LEN=1024)             :: input_file
+  CHARACTER(LEN=1024)             :: config_file
+  CHARACTER(LEN=1024)             :: varName
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: field
   REAL(KIND=8),DIMENSION(:,:,:,:),POINTER :: field4d
   REAL(KIND=8),DIMENSION(:,:,:),POINTER :: field3d
@@ -19,7 +19,6 @@ PROGRAM fortran_test
   INTEGER(KIND=8)          :: vars
   CHARACTER(LEN=10)               :: cunit,cfiletype
   CHARACTER(LEN=1024)             :: dimname
-  LOGICAL                         :: fileExist
 
   input_file = TEST_EXTRADATA_DIR // "/flth00.dat"
   cfiletype = "felt"
@@ -29,8 +28,7 @@ PROGRAM fortran_test
 
   CALL set_default_log_level(LOGLEVEL_DEBUG)
 
-  INQUIRE(file=input_file, exist=fileExist)
-  IF (.not. fileExist) THEN
+  IF (ACCESS(input_file, 'r') /= 0) THEN
     WRITE(*,*) "no input-file: ", input_file, " skipping test"
     STOP (0)
   ENDIF
