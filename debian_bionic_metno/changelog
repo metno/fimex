@@ -1,3 +1,9 @@
+fimex-1.6 (1.6.1-1bionic+met1) bionic; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 16 Mar 2021 08:00:08 +0100
+
 fimex-1.6 (1.6.0-1bionic+met1) bionic; urgency=low
 
   * new fimex version

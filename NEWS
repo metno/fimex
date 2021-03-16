@@ -1,3 +1,5 @@
+  * 2021-03-16 fimex-1.6.1
+    * bugfix
   * 2021-03-09 fimex-1.6.0
     * drop support for xenial / cmake < 3.6
     * filetype for http(s):// is netcdf
