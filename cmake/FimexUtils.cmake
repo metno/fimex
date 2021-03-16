@@ -181,7 +181,7 @@ FUNCTION(FIMEX_ADD_LIBRARY name sources packages)
     SET(static_lib lib${name}-static)
     SET(lib${name}_STATICLIBS ${libs})
     ADD_LIBRARY(${static_lib} STATIC ${sources})
-    TARGET_LINK_LIBRARIES(${static_lib} PRIVATE ${libs})
+    TARGET_LINK_LIBRARIES(${static_lib} PRIVATE ${packages})
     TARGET_INCLUDE_DIRECTORIES(${static_lib}
       PUBLIC
       $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
