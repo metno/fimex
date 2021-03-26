@@ -1,3 +1,9 @@
+fimex-1.5 (1.5.3-1bionic2) bionic; urgency=low
+
+  * rebuild to use libmi-programoptions 1.0.0
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Fri, 26 Mar 2021 08:00:08 +0100
+
 fimex-1.5 (1.5.3-1bionic1) bionic; urgency=low
 
   * new fimex version
