@@ -293,7 +293,7 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
   UNSET(_ffp_inc_dir CACHE)
   FIND_PATH(_ffp_inc_dir
     ${_ffp_INCLUDE_HDR}
-    HINTS "${${ffp}_INCLUDE_DIR}" "${${ffp}_DIR}/include"
+    HINTS "${${ffp}_INC_DIR}" "${${ffp}_DIR}/include"
   )
   IF (NOT _ffp_inc_dir)
     MESSAGE(FATAL_ERROR "Cannot find ${ffp}, include header '${_ffp_INCLUDE_HDR}' not found")

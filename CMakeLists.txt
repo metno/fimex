@@ -167,21 +167,14 @@ IF (NOT date_INC_DIR)
   SET (DATE_3RDPARTY "third_party/date")
   IF ((NOT date_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/CMakeLists.txt"))
     SET (date_INC_DIR "${CMAKE_SOURCE_DIR}/${DATE_3RDPARTY}/include")
-  ELSE ()
-    FIND_PACKAGE(date REQUIRED)
-    SET (date_PACKAGE date_interface) # just a header file, therefore '..._interface'
   ENDIF ()
 ENDIF ()
-IF (NOT date_PACKAGE)
-  SET(date_HDR "${date_INC_DIR}/date/date.h")
-  IF (EXISTS "${date_HDR}")
-    MESSAGE (STATUS "Using '${date_HDR}'")
-    FIMEX_ADD_IMPORTED_LIBRARY(date_IMP "" "${date_INC_DIR}" "")
-    SET (date_PACKAGE date_IMP)
-  ELSE()
-    MESSAGE (SEND_ERROR "Missing '${date_HDR}'")
-  ENDIF ()
-ENDIF ()
+FIMEX_FIND_PACKAGE(date
+  CMAKE_TARGETS
+  date::date     # 3.0
+  date_interface # 2.4.1
+  INCLUDE_HDR "date/date.h"
+)
 
 SET (MI_PROGRAMOPTIONS_3RDPARTY "third_party/mi-programoptions")
 IF ((NOT mi-programoptions_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${MI_PROGRAMOPTIONS_3RDPARTY}/CMakeLists.txt"))
