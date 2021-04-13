@@ -18,6 +18,8 @@ IF((ENABLE_FELT) AND (ENABLE_NETCDF))
   SET(F90_TESTS testFortran)
 ENDIF()
 
+SET (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
+
 FOREACH(T ${F90_TESTS})
   ADD_EXECUTABLE(${T} "${T}.F90")
   TARGET_LINK_LIBRARIES(${T} libfimexf)
