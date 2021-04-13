@@ -298,8 +298,8 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
   IF (NOT _ffp_inc_dir)
     MESSAGE(FATAL_ERROR "Cannot find ${ffp}, include header '${_ffp_INCLUDE_HDR}' not found")
   ENDIF()
+  UNSET(_ffp_lib CACHE)
   IF (_ffp_LIBRARY_NAME)
-    UNSET(_ffp_lib CACHE)
     FIND_LIBRARY(_ffp_lib
       NAMES ${_ffp_LIBRARY_NAME}
       HINTS "${${ffp}_LIB_DIR}" "${${ffp}_DIR}/lib"
