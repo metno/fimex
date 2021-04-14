@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -217,6 +217,8 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
     return false;
 }
 
+namespace {
+
 /** object function for CDMVariable::checkDimension */
 class VariableDimensionCheck : public std::unary_function<std::string, bool>
 {
@@ -239,20 +241,22 @@ public:
     }
 };
 
+} // namespace
+
 std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const
 {
     std::vector<std::string> results;
     // precalc regexp
     std::map<std::string, std::regex> attrRegExps;
-    for (std::map<std::string, std::string>::const_iterator attrIt = findAttributes.begin(); attrIt != findAttributes.end(); ++attrIt) {
-        attrRegExps[attrIt->first] = std::regex(attrIt->second);
+    for (const auto fa : findAttributes) {
+        attrRegExps[fa.first] = std::regex(fa.second);
     }
-    for (VarVec::const_iterator varIt = pimpl_->variables.begin(); varIt != pimpl_->variables.end(); ++varIt) {
+    for (const auto& var : pimpl_->variables) {
         // test if all attributes are found in variable (find_if finds the first not found)
-        if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->getName()))) == attrRegExps.end()) {
+        if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, var.getName()))) == attrRegExps.end()) {
             // test if all dimensions are found in variable (find_if finds the first not found)
-            if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(*varIt))) == findDimensions.end()) {
-                results.push_back(varIt->getName());
+            if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(var))) == findDimensions.end()) {
+                results.push_back(var.getName());
             }
         }
     }

@@ -1,7 +1,7 @@
 /*
   Fimex, src/coordSys/verticalTransform/AltitudeHeightConverter.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2021 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -59,34 +59,27 @@ VerticalConverter_p AltitudeHeightConverter::createConverter(CDMReader_p reader,
     if (!xAxis || !yAxis)
         return VerticalConverter_p();
 
-    vector<string> dims;
-    dims.push_back(xAxis->getShape()[0]);
-    dims.push_back(yAxis->getShape()[0]);
-    map<string, string> attrs;
-    attrs["standard_name"] = "(surface_geopotential|surface_altitude|altitude|geopotential_height|geopotential)";
+    const vector<string> dims{xAxis->getShape()[0], yAxis->getShape()[0]};
+    const map<string, string> attrs{std::make_pair("standard_name", "(surface_geopotential|surface_altitude|altitude|geopotential_height|geopotential)")};
 
-    std::string topoVar;
     const vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
-    CoordinateSystem_cp_v allCS = listCoordinateSystems(reader);
-    for (vector<string>::const_iterator it = topoVars.begin(); it != topoVars.end(); ++it) {
-        if (CoordinateSystem_cp topoCS = findCompleteCoordinateSystemFor(allCS, *it)) {
+
+    const CoordinateSystem_cp_v allCS = listCoordinateSystems(reader);
+
+    for (const auto& tv : topoVars) {
+        if (CoordinateSystem_cp topoCS = findCompleteCoordinateSystemFor(allCS, tv)) {
             if (CoordinateAxis_cp zax = topoCS->getGeoZAxis()) {
                 if (reader->getCDM().getDimension(zax->getShape().front()).getLength() != 1) {
-                    LOG4FIMEX(logger, Logger::INFO, "topo var '" << *it << "' has z axis '" << zax->getName() << "' with length != 1, skipping");
+                    LOG4FIMEX(logger, Logger::INFO, "topo var '" << tv << "' has z axis '" << zax->getName() << "' with length != 1, skipping");
                     continue;
                 }
             }
-            topoVar = *it;
-            break;
+            LOG4FIMEX(logger, Logger::INFO, "using " << tv << " to calculate " << (addTopography ? "altitude" : "height"));
+            return std::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, tv, addTopography);
         }
     }
-    if (topoVar.empty()) {
-        LOG4FIMEX(logger, Logger::WARN, "no topography variable found");
-        return VerticalConverter_p();
-    }
-
-    LOG4FIMEX(logger, Logger::INFO, "using " << topoVar << " to calculate " << (addTopography ? "altitude" : "height"));
-    return std::make_shared<AltitudeHeightConverter>(reader, cs, altitudeOrHeight, topoVar, addTopography);
+    LOG4FIMEX(logger, Logger::WARN, "no topography variable found");
+    return VerticalConverter_p();
 }
 
 AltitudeHeightConverter::AltitudeHeightConverter(CDMReader_p reader, CoordinateSystem_cp cs, VerticalConverter_p altitudeOrHeight,
