@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -50,6 +50,10 @@
 
 #ifndef M_E
 static const double M_E = 2.7182818284590452354; /* e */
+#endif
+
+#if !defined(PJ_VERSION) || PJ_VERSION < 460 || (PJ_VERSION >= 500 && PJ_VERSION < 620)
+#error "proj version known not to work with fimex"
 #endif
 
 /**

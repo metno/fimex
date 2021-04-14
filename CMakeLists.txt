@@ -1,6 +1,6 @@
 # Fimex, CMakeLists.txt
 #
-# Copyright (C) 2018-2019 met.no
+# Copyright (C) 2018-2021 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -56,6 +56,24 @@ FIMEX_FIND_PACKAGE(proj
   LIBRARY_NAME "proj"
   INCLUDE_HDR "proj_api.h"
 )
+IF (proj_PACKAGE_VERSION STREQUAL "")
+  # unknown version, proj_api.h was found, compilation or tests should fail if unsupported
+ELSEIF (proj_PACKAGE_VERSION VERSION_LESS "4.6.0")
+  # <4.6
+  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' is too old")
+ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "5.0.0")
+  # >=4.6,<5.0
+  # proj_api.h
+ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "6.2.0")
+  # >=5.0,<6.2
+  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' not supported")
+ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "8.0.0")
+  # >=6.2,<8.0
+  # ok, proj_api.h
+ELSE ()
+  # >=8.0
+  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' not supported yet")
+ENDIF()
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 

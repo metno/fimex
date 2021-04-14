@@ -1,6 +1,6 @@
 # Fimex, cmake/FimexUtils.cmake
 #
-# Copyright (C) 2018-2019 met.no
+# Copyright (C) 2018-2021 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -246,6 +246,7 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
   IF (_ffp_CMAKE_NAME)
     FIND_PACKAGE(${_ffp_CMAKE_NAME} ${_ffp_VERSION_MIN} QUIET)
     IF(${_ffp_CMAKE_NAME}_FOUND)
+      SET(${ffp}_PACKAGE_VERSION "${${_ffp_CMAKE_NAME}_VERSION}" PARENT_SCOPE)
       IF (NOT(DEFINED _ffp_CMAKE_TARGETS))
         SET(_ffp_CMAKE_TARGET ${_ffp_CMAKE_NAME})
       ENDIF()
@@ -283,6 +284,7 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
     UNSET(${_ffp_pc}_FOUND CACHE)
     PKG_CHECK_MODULES(${_ffp_pc} IMPORTED_TARGET QUIET "${_ffp_pc_version}")
     IF(${_ffp_pc}_FOUND)
+      SET(${ffp}_PACKAGE_VERSION "${${_ffp_pc}_VERSION}" PARENT_SCOPE)
       SET(${ffp}_PACKAGE "PkgConfig::${_ffp_pc}" PARENT_SCOPE)
       MESSAGE(STATUS "Found ${ffp} via pkg-config '${_ffp_pc_version}'")
       RETURN()
