@@ -1,7 +1,7 @@
 /*
  * Fimex, SliceBuilder.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -52,7 +52,6 @@ SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>&
 
 SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setUnlimited)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "slicebuilder ctor varName='" << varName << "'");
     const CDMVariable& var = cdm.getVariable(varName);
     vector<string> shape = var.getShape();
     vector<size_t> dimSizes;
@@ -60,7 +59,6 @@ SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setU
     dimSizes.reserve(shape.size());
     unlimited.reserve(shape.size());
     for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
-        LOG4FIMEX(logger, Logger::DEBUG, "  shape dim '" << *dimIt << "'");
         const CDMDimension& dim = cdm.getDimension(*dimIt);
         dimSizes.push_back(dim.getLength());
         if (setUnlimited && dim.isUnlimited()) {

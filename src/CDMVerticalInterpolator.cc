@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMVerticalInterpolator.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -49,6 +49,9 @@
 #include <regex>
 #include <string>
 #include <vector>
+
+// define to enable debug logging statements inside loops in getLevelDataSlice (slow)
+// #define ENABLE_LOG_DEBUG_IN_LOOPS 1
 
 namespace MetNoFimex {
 
@@ -486,11 +489,15 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
 #pragma omp parallel for default(shared)
 #endif
     for (size_t k = 0; k < nzo; k++) {
+#ifdef ENABLE_LOG_DEBUG_IN_LOOPS
         LOG4FIMEX(logger, Logger::DEBUG, "k=" << k);
         size_t loopi = 0;
+#endif
         Loop loop(group);
         do { // sharedVolume() == 1 because we called minimizeShared before
+#ifdef ENABLE_LOG_DEBUG_IN_LOOPS
             LOG4FIMEX(logger, Logger::DEBUG, "loopi=" << loopi++);
+#endif
             const size_t verticalOutIdx = loop[OUT_VERTICAL] + k * overticalZdelta;
             const double verticalOut = oVerticalValues ? oVerticalValues[verticalOutIdx] : pimpl_->level1[verticalOutIdx];
             float* interpolated = &oData[loop[OUT] + k*odataZdelta];
@@ -498,20 +505,26 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
             bool range = true;
             if (valueMin && valueMax) {
                 range = (verticalOut >= valueMin[loop[VALID_MIN]]) && (verticalOut <= valueMax[loop[VALID_MAX]]);
+#ifdef ENABLE_LOG_DEBUG_IN_LOOPS
                 LOG4FIMEX(logger, Logger::DEBUG, "verticalOut= " << verticalOut
                           << " min[" << loop[VALID_MIN] << "]=" << valueMin[loop[VALID_MIN]]
                           << " max[" << loop[VALID_MAX] << "]=" << valueMax[loop[VALID_MAX]]
                           << " range=" << range);
+#endif
             } else if (valueMin) {
                 range = (verticalOut >= valueMin[loop[VALID_MIN]]);
+#ifdef ENABLE_LOG_DEBUG_IN_LOOPS
                 LOG4FIMEX(logger, Logger::DEBUG, "verticalOut= " << verticalOut
                           << " min[" << loop[VALID_MIN] << "]=" << valueMin[loop[VALID_MIN]]
                           << " range=" << range);
+#endif
             } else if (valueMax) {
                 range = (verticalOut <= valueMax[loop[VALID_MAX]]);
+#ifdef ENABLE_LOG_DEBUG_IN_LOOPS
                 LOG4FIMEX(logger, Logger::DEBUG, "verticalOut= " << verticalOut
                           << " max[" << loop[VALID_MAX] << "]=" << valueMax[loop[VALID_MAX]]
                           << " range=" << range);
+#endif
             }
 
             if (range) {

@@ -1,7 +1,7 @@
 /*
   Fimex, src/coordSys/verticalTransform/VerticalTransformationUtils.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2021 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -137,14 +137,18 @@ bool ShapeMerger::equalsAxisDim(const std::string& dim, CoordinateAxis_cp axis) 
     return axis && dim == axisDim(axis);
 }
 
+//#define DEBUG_SHAPEMERGER_MERGE 1
+
 ShapeMerger& ShapeMerger::merge(const shape_t& append, bool skipLength1)
 {
+#ifdef DEBUG_SHAPEMERGER_MERGE
     LOG4FIMEX(logger, Logger::DEBUG, "merge initial shape:");
     for (size_t i=0; i<shape_.size(); ++i)
         LOG4FIMEX(logger, Logger::DEBUG, "shape_[" << i << "]='" << shape_[i] << "'");
     LOG4FIMEX(logger, Logger::DEBUG, "merge adding shape:");
     for (size_t i=0; i<append.size(); ++i)
         LOG4FIMEX(logger, Logger::DEBUG, "append[" << i << "]='" << append[i] << "'");
+#endif
 
     // not sure if it would be better to use cs_ to construct a shape ...
     for (shape_t::const_iterator it = append.begin(); it != append.end(); ++it) {
@@ -153,7 +157,9 @@ ShapeMerger& ShapeMerger::merge(const shape_t& append, bool skipLength1)
                 continue;
         }
         if (std::find(shape_.begin(), shape_.end(), *it) != shape_.end()) {
+#ifdef DEBUG_SHAPEMERGER_MERGE
             LOG4FIMEX(logger, Logger::DEBUG, "not appending '" << *it << "', already in shape_");
+#endif
             continue;
         }
 
@@ -163,82 +169,116 @@ ShapeMerger& ShapeMerger::merge(const shape_t& append, bool skipLength1)
         if (equalsAxisDim(*it, cs_->getGeoXAxis())) {
             itI = shape_.begin(); // x axis first
             placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
             LOG4FIMEX(logger, Logger::DEBUG, "inserting x axis '" << *it << "' at start");
+#endif
         } else if (equalsAxisDim(*it, cs_->getGeoYAxis())) {
+#ifdef DEBUG_SHAPEMERGER_MERGE
             LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "'");
+#endif
             shape_t::iterator itF;
             if ((itF = findAxis(cs_->getGeoXAxis())) != shape_.end()) {
                 itI = ++itF; // y after x
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "' after x");
+#endif
             }
             if (!placement && (itF = findAxis(cs_->getGeoZAxis())) != shape_.end()) {
                 itI = itF; // y before z
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "appending y axis '" << *it << "' before z");
+#endif
             }
             if (!placement) {
                 itI = shape_.begin();
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "inserting y axis '" << *it << "' at start");
+#endif
             }
         } else if (equalsAxisDim(*it, cs_->getGeoZAxis())) {
+#ifdef DEBUG_SHAPEMERGER_MERGE
             LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "'");
+#endif
             shape_t::iterator itF;
             if ((itF = findAxis(cs_->getGeoYAxis())) != shape_.end()) {
                 itI = ++itF; // z after y
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "' after y");
+#endif
             }
             if (!placement && (itF = findAxis(cs_->getGeoXAxis())) != shape_.end()) {
                 itI = ++itF; // z after x if no y
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "appending z axis '" << *it << "' after x because no y");
+#endif
             }
             if (!placement) {
                 itI = shape_.begin();
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "inserting z axis '" << *it << "' at start");
+#endif
             }
         } else if (equalsAxisDim(*it, cs_->getTimeAxis())) {
             // itI = shape_.end(); time at end
             placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
             LOG4FIMEX(logger, Logger::DEBUG, "appending t axis '" << *it << "' at end");
+#endif
         }
         if (!placement) {
             shape_t::iterator itF;
             if ((itF = findAxis(cs_->getTimeAxis())) != shape_.end()) {
                 itI = itF; // insert before t
                 placement = true;
+#ifdef DEBUG_SHAPEMERGER_MERGE
                 LOG4FIMEX(logger, Logger::DEBUG, "inserting axis '" << *it << "' before time axis");
+#endif
             }
         }
         shape_.insert(itI, *it);
     }
+#ifdef DEBUG_SHAPEMERGER_MERGE
     LOG4FIMEX(logger, Logger::DEBUG, "merge final shape:");
     for (size_t i=0; i<shape_.size(); ++i)
         LOG4FIMEX(logger, Logger::DEBUG, "shape_[" << i << "]='" << shape_[i] << "'");
+#endif
     return *this;
 }
+
+//#define DEBUG_COPYSLICEBUILDER 1
 
 static void copySliceBuilder(SliceBuilder& sbVar, const SliceBuilder& sb)
 {
     const string_v& varDimNames = sbVar.getDimensionNames();
     const string_v& orgDimNames = sb.getDimensionNames();
+#ifdef DEBUG_COPYSLICEBUILDER
     for (string_v::const_iterator itO = orgDimNames.begin(); itO != orgDimNames.end(); ++itO) {
         LOG4FIMEX(logger, Logger::DEBUG, "*itO='" << *itO << "'");
     }
+#endif
     for (string_v::const_iterator itD = varDimNames.begin(); itD != varDimNames.end(); ++itD) {
+#ifdef DEBUG_COPYSLICEBUILDER
         LOG4FIMEX(logger, Logger::DEBUG, "*itD='" << *itD << "'");
+#endif
         if (std::find(orgDimNames.begin(), orgDimNames.end(), *itD) != orgDimNames.end()) {
             size_t start, size;
             sb.getStartAndSize(*itD, start, size);
+#ifdef DEBUG_COPYSLICEBUILDER
             LOG4FIMEX(logger, Logger::DEBUG, "*itD copy start=" << start << " size=" << size);
+#endif
             sbVar.setStartAndSize(*itD, start, size);
         } else {
             size_t start, size;
             sbVar.getStartAndSize(*itD, start, size);
+#ifdef DEBUG_COPYSLICEBUILDER
             LOG4FIMEX(logger, Logger::DEBUG, "*itD default start=" << start << " size=" << size);
+#endif
         }
     }
 }
