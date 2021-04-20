@@ -53,13 +53,13 @@ SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>&
 SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setUnlimited)
 {
     const CDMVariable& var = cdm.getVariable(varName);
-    vector<string> shape = var.getShape();
+    const vector<string>& shape = var.getShape();
     vector<size_t> dimSizes;
     vector<bool> unlimited;
     dimSizes.reserve(shape.size());
     unlimited.reserve(shape.size());
-    for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
-        const CDMDimension& dim = cdm.getDimension(*dimIt);
+    for (const std::string& dimName : shape) {
+        const CDMDimension& dim = cdm.getDimension(dimName);
         dimSizes.push_back(dim.getLength());
         if (setUnlimited && dim.isUnlimited()) {
             unlimited.push_back(true);
@@ -72,7 +72,7 @@ SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setU
 
 void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize, const vector<bool>& unlimited)
 {
-    if (dimNames.size() != dimSize.size()) {
+    if (dimNames.size() != dimSize.size() || dimNames.size() != unlimited.size()) {
         throw CDMException("dimension mismatch in SliceBuilder::init");
     }
     start_.resize(dimNames.size());
@@ -80,11 +80,11 @@ void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& di
     maxSize_.resize(dimNames.size());
     unlimited_.resize(dimNames.size());
     for (size_t pos = 0; pos < dimNames.size(); ++pos) {
-        dimPos_[dimNames.at(pos)] = pos;
-        start_.at(pos) = 0;
-        size_.at(pos) = dimSize.at(pos);
-        maxSize_.at(pos) = dimSize.at(pos);
-        unlimited_.at(pos) = unlimited.at(pos);
+        dimPos_[dimNames[pos]] = pos;
+        start_[pos] = 0;
+        size_[pos] = dimSize[pos];
+        maxSize_[pos] = dimSize[pos];
+        unlimited_[pos] = unlimited.at(pos);
     }
 }
 
