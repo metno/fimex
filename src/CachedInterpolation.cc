@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -181,21 +181,26 @@ shared_array<float> CachedInterpolation::interpolateValues(shared_array<float> i
 #pragma omp parallel default(shared)
     {
 #endif
+        bool error = false;
         std::unique_ptr<float[]> zValues(new float[inZ]);
 #ifdef _OPENMP
 #pragma omp for
 #endif
     for (size_t xy = 0; xy < outLayerSize; ++xy) {
-        float* outPos = &outfield[xy];
-        if (func(inData.get(), zValues.get(), pointsOnXAxis[xy], pointsOnYAxis[xy], inX, inY, inZ) != MIFI_ERROR) {
-            for (size_t z = 0; z < inZ; ++z) {
-                *outPos = zValues[z];
-                outPos += outLayerSize;
+        if (!error) {
+            float* outPos = &outfield[xy];
+            if (func(inData.get(), zValues.get(), pointsOnXAxis[xy], pointsOnYAxis[xy], inX, inY, inZ) != MIFI_ERROR) {
+                for (size_t z = 0; z < inZ; ++z) {
+                    *outPos = zValues[z];
+                    outPos += outLayerSize;
+                }
+            } else {
+                error = true;
             }
-        } else {
-            throw CDMException("error during interpolation");
         }
     }
+    if (error)
+        throw CDMException("error during interpolation");
 #ifdef _OPENMP
     }
 #endif
