@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMOverlay.cc
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2013-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -39,7 +39,7 @@ using namespace std;
 
 namespace MetNoFimex {
 
-//static LoggerPtr logger(getLogger("fimex.CDMOverlay"));
+static Logger_p logger(getLogger("fimex.CDMOverlay"));
 
 // ========================================================================
 
@@ -84,8 +84,22 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
     if (not cdmB.hasVariable(varName))
         THROW("variable '" << varName << "' unknown in base");
 
-    DataPtr sliceT = p->readerT->getScaledDataSlice(varName, unLimDimPos);
+    const std::string unitsT = p->readerT->getCDM().getUnits(varName);
+    const std::string unitsB = p->interpolatedB->getCDM().getUnits(varName);
+    DataPtr sliceT;
+    const bool emptyUnits = unitsT.empty() || unitsB.empty();
+    if (emptyUnits || unitsT == unitsB) {
+        if (emptyUnits) {
+            LOG4FIMEX(logger, Logger::WARN,
+                      "no unit conversion for variable '" << varName << "': units '" << unitsT << "' in top and '" << unitsB << "' in base");
+        }
+        sliceT = p->readerT->getScaledDataSlice(varName, unLimDimPos);
+    } else {
+        LOG4FIMEX(logger, Logger::INFO, "unit conversion for variable '" << varName << "' from '" << unitsT << "' in top to '" << unitsB << "' in base");
+        sliceT = p->readerT->getScaledDataSliceInUnit(varName, unitsB, unLimDimPos);
+    }
     DataPtr sliceB = p->interpolatedB->getScaledDataSlice(varName, unLimDimPos);
+
     for (size_t i=0; i<sliceB->size(); ++i) {
       const double valueT = sliceT->getDouble(i);
       if (not mifi_isnan(valueT))
