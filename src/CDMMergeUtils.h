@@ -1,7 +1,7 @@
 /*
   Fimex, src/CDMMergeUtils.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2021 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,13 +28,13 @@
   USA.
 */
 
-
 #ifndef fimex_CDMMergeUtils_h
 #define fimex_CDMMergeUtils_h
 
 #include "fimex/CDMBorderSmoothing.h"
 #include "fimex/CDMReaderDecl.h"
-#include "fimex/DataDecl.h"
+#include "fimex/Data.h"
+#include "fimex/SharedArray.h"
 #include "fimex/coordSys/CoordSysDecl.h"
 
 #include <memory>
@@ -83,6 +83,15 @@ CDM makeMergedCDM(CDMReader_p readerI, CDMReader_p& readerO, int gridInterpolati
                   std::string& nameY, bool keepAllOuter = false);
 
 CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string& specification);
+
+template <class T>
+shared_array<T> dataAs(DataPtr data);
+
+template <>
+inline shared_array<float> dataAs<float>(DataPtr data) { return data->asFloat(); }
+
+template <>
+inline shared_array<double> dataAs<double>(DataPtr data) { return data->asDouble(); }
 
 } // namespace MetNoFimex
 

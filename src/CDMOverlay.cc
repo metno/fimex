@@ -66,16 +66,37 @@ CDMOverlay::~CDMOverlay() {}
 
 // ------------------------------------------------------------------------
 
+namespace {
+template<class T> bool value_is_nan(T) { return false; }
+template<> bool value_is_nan<float>(float f) { return mifi_isnan(f); }
+template<> bool value_is_nan<double>(double d) { return mifi_isnan(d); }
+
+template <class T>
+DataPtr overlayDataSlices(T fillT, DataPtr sliceT, DataPtr sliceB)
+{
+    const shared_array<T> valuesT = dataAs<T>(sliceT);
+    shared_array<T> valuesB = dataAs<T>(sliceB);
+    for (size_t i = 0; i < sliceB->size(); ++i) {
+        const T valueT = valuesT[i];
+        if (!(value_is_nan<T>(valueT) || valueT == fillT))
+            valuesB[i] = valueT;
+    }
+    return createData(sliceB->size(), valuesB);
+}
+} // namespace
+
 DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
 {
+    const CDM& cdmT = p->readerT->getCDM();
+
     // use cdmB if not defined in cdmT
     // get simple coordinate variables from readerT
-    if (cdm_->hasDimension(varName) and p->readerT->getCDM().hasVariable(varName)) {
+    if (cdm_->hasDimension(varName) && cdmT.hasVariable(varName)) {
         // read dimension variables from top
         return p->readerT->getDataSlice(varName, unLimDimPos); // not scaled
     }
 
-    if (not p->readerT->getCDM().hasVariable(varName)) {
+    if (!cdmT.hasVariable(varName)) {
         // use complete base-data
         return p->interpolatedB->getDataSlice(varName, unLimDimPos);
     }
@@ -84,10 +105,31 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
     if (not cdmB.hasVariable(varName))
         THROW("variable '" << varName << "' unknown in base");
 
-    const std::string unitsT = p->readerT->getCDM().getUnits(varName);
-    const std::string unitsB = p->interpolatedB->getCDM().getUnits(varName);
-    DataPtr sliceT;
+    const std::string unitsT = cdmT.getUnits(varName);
+    const std::string unitsB = cdmB.getUnits(varName);
+
+    const CDMDataType dtT = cdmT.getVariable(varName).getDataType();
+    const CDMDataType dtB = cdmB.getVariable(varName).getDataType();
+
+    if (unitsT == unitsB
+        && dtT == dtB
+        && cdmT.getScaleFactor(varName) == cdmB.getScaleFactor(varName)
+        && cdmT.getAddOffset(varName) == cdmB.getAddOffset(varName))
+    {
+        DataPtr sliceT = p->readerT->getDataSlice(varName, unLimDimPos);
+        DataPtr sliceB = p->interpolatedB->getDataSlice(varName, unLimDimPos);
+        if (dtT == CDM_FLOAT) {
+            LOG4FIMEX(logger, Logger::DEBUG, "overlay using float without scaling");
+            return overlayDataSlices<float>(cdmT.getFillValue(varName), sliceT, sliceB);
+        } else if (dtT == CDM_DOUBLE) {
+            LOG4FIMEX(logger, Logger::DEBUG, "overlay using double without scaling");
+            return overlayDataSlices<double>(cdmT.getFillValue(varName), sliceT, sliceB);
+        }
+    }
+
+    // getScaledDataSlice always returns DataPtr with CDM_DOUBLE
     const bool emptyUnits = unitsT.empty() || unitsB.empty();
+    DataPtr sliceT;
     if (emptyUnits || unitsT == unitsB) {
         if (emptyUnits) {
             LOG4FIMEX(logger, Logger::WARN,

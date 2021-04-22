@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMPressureConversions.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2021, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -40,6 +40,8 @@
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
 
+#include "CDMMergeUtils.h"
+
 #include <memory>
 
 namespace MetNoFimex
@@ -50,21 +52,6 @@ static Logger_p logger = getLogger("fimex.CDMPressureConversions");
 using namespace std;
 
 namespace {
-
-template <class T>
-shared_array<T> dataAs(DataPtr data);
-
-template <>
-shared_array<float> dataAs<float>(DataPtr data)
-{
-    return data->asFloat();
-}
-
-template <>
-shared_array<double> dataAs<double>(DataPtr data)
-{
-    return data->asDouble();
-}
 
 template<typename T>
 void convert_omega_to_vertical_wind(size_t size, const T* o, const T* p, const T* t, T* w);
