@@ -110,7 +110,7 @@ bool PythonLoggingImpl::isEnabledFor(Logger::LogLevel level)
     const int pylevel = toPythonLevel(level);
 
     if (!log_.is_none())
-        PY_GIL_EXCEPTIONS(log_.attr("isEnabledFor")(pylevel).cast<bool>());
+        PY_GIL_EXCEPTIONS(return log_.attr("isEnabledFor")(pylevel).cast<bool>());
     return false;
 }
 
