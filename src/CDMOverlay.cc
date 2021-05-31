@@ -53,7 +53,7 @@ struct CDMOverlayPrivate {
 
 // ========================================================================
 
-// base == big, top == small
+// base == big == outer, top == small == inner
 CDMOverlay::CDMOverlay(CDMReader_p base, CDMReader_p top, int grim, bool keepOuterVariables)
     : p(new CDMOverlayPrivate)
 {
@@ -129,18 +129,18 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
 
     // getScaledDataSlice always returns DataPtr with CDM_DOUBLE
     const bool emptyUnits = unitsT.empty() || unitsB.empty();
-    DataPtr sliceT;
+    DataPtr sliceT = p->readerT->getScaledDataSlice(varName, unLimDimPos);
+    DataPtr sliceB;
     if (emptyUnits || unitsT == unitsB) {
         if (emptyUnits) {
             LOG4FIMEX(logger, Logger::WARN,
                       "no unit conversion for variable '" << varName << "': units '" << unitsT << "' in top and '" << unitsB << "' in base");
         }
-        sliceT = p->readerT->getScaledDataSlice(varName, unLimDimPos);
+        sliceB = p->interpolatedB->getScaledDataSlice(varName, unLimDimPos);
     } else {
-        LOG4FIMEX(logger, Logger::INFO, "unit conversion for variable '" << varName << "' from '" << unitsT << "' in top to '" << unitsB << "' in base");
-        sliceT = p->readerT->getScaledDataSliceInUnit(varName, unitsB, unLimDimPos);
+        LOG4FIMEX(logger, Logger::INFO, "unit conversion for variable '" << varName << "' from '" << unitsB << "' in base to '" << unitsT << "' in top");
+        sliceB = p->interpolatedB->getScaledDataSliceInUnit(varName, unitsT, unLimDimPos);
     }
-    DataPtr sliceB = p->interpolatedB->getScaledDataSlice(varName, unLimDimPos);
 
     for (size_t i=0; i<sliceB->size(); ++i) {
       const double valueT = sliceT->getDouble(i);
