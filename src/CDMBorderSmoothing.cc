@@ -103,8 +103,22 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
     if (cdm_->hasDimension(varName) or not cdmO.hasVariable(varName))
         return p->readerI->getDataSlice(varName, unLimDimPos); // not scaled
 
+    const std::string unitsI = p->readerI->getCDM().getUnits(varName);
+    const std::string unitsO = p->interpolatedO->getCDM().getUnits(varName);
+
+    const bool emptyUnits = unitsI.empty() || unitsO.empty();
     DataPtr sliceI = p->readerI->getScaledDataSlice(varName, unLimDimPos);
-    DataPtr sliceO = p->interpolatedO->getScaledDataSlice(varName, unLimDimPos);
+    DataPtr sliceO;
+    if (emptyUnits || unitsI == unitsO) {
+        if (emptyUnits) {
+            LOG4FIMEX(logger, Logger::WARN,
+                      "no unit conversion for variable '" << varName << "': units '" << unitsI << "' in inner and '" << unitsO << "' in outer");
+        }
+        sliceO = p->interpolatedO->getScaledDataSlice(varName, unLimDimPos);
+    } else {
+        LOG4FIMEX(logger, Logger::INFO, "unit conversion for variable '" << varName << "' from '" << unitsO << "' in outer to '" << unitsI << "' in inner");
+        sliceO = p->interpolatedO->getScaledDataSliceInUnit(varName, unitsI, unLimDimPos);
+    }
 
     const vector<string> &shape = cdm_->getVariable(varName).getShape();
     vector<size_t> dimSizes;
