@@ -72,14 +72,17 @@ template<> bool value_is_nan<float>(float f) { return mifi_isnan(f); }
 template<> bool value_is_nan<double>(double d) { return mifi_isnan(d); }
 
 template <class T>
-DataPtr overlayDataSlices(T fillT, DataPtr sliceT, DataPtr sliceB)
+DataPtr overlayDataSlices(T fillT, T fillB, DataPtr sliceT, DataPtr sliceB)
 {
     const shared_array<T> valuesT = dataAs<T>(sliceT);
     shared_array<T> valuesB = dataAs<T>(sliceB);
     for (size_t i = 0; i < sliceB->size(); ++i) {
         const T valueT = valuesT[i];
+        T& valueB = valuesB[i];
         if (!(value_is_nan<T>(valueT) || valueT == fillT))
-            valuesB[i] = valueT;
+            valueB = valueT;
+        if (value_is_nan<T>(valueB) || valueB == fillB)
+            valueB = fillT; // need to use FillValue from top
     }
     return createData(sliceB->size(), valuesB);
 }
@@ -120,10 +123,10 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
         DataPtr sliceB = p->interpolatedB->getDataSlice(varName, unLimDimPos);
         if (dtT == CDM_FLOAT) {
             LOG4FIMEX(logger, Logger::DEBUG, "overlay using float without scaling");
-            return overlayDataSlices<float>(cdmT.getFillValue(varName), sliceT, sliceB);
+            return overlayDataSlices<float>(cdmT.getFillValue(varName), cdmB.getFillValue(varName), sliceT, sliceB);
         } else if (dtT == CDM_DOUBLE) {
             LOG4FIMEX(logger, Logger::DEBUG, "overlay using double without scaling");
-            return overlayDataSlices<double>(cdmT.getFillValue(varName), sliceT, sliceB);
+            return overlayDataSlices<double>(cdmT.getFillValue(varName), cdmB.getFillValue(varName), sliceT, sliceB);
         }
     }
 
