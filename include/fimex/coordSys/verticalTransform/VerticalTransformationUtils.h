@@ -127,6 +127,8 @@ struct Var {
     Var(CDMReader_p reader, const std::string& varName, const std::string& unit, const SliceBuilder& sbOrig);
     Var(CDMReader_p reader, VerticalConverter_p converter, const SliceBuilder& sbOrig);
 
+    operator bool() const { return !!data; }
+
     const SliceBuilder sb;
     ArrayDims dims;
     DataPtr data;

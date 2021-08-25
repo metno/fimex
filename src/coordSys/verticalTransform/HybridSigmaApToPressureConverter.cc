@@ -73,6 +73,8 @@ DataPtr HybridSigmaApToPressureConverter::getDataSlice(const SliceBuilder& sb) c
     VarDouble ps(reader_, ps_, "hPa", sb);
     VarDouble ap(reader_, ap_, "hPa", sb);
     VarDouble b(reader_, b_, "", sb);
+    if (!ps || !ap || !b)
+        return DataPtr();
 
     ArrayDims out_dims = makeArrayDims(sb);
     shared_array<double> out_values(new double[out_dims.volume()]);

@@ -111,6 +111,8 @@ DataPtr AltitudeHeightConverter::getDataSlice(const SliceBuilder& sb) const
 {
     VarDouble topo(reader_, topography_, topographyUnit_, sb);
     VarDouble altiOrHeight(reader_, altitudeOrHeight_, sb);
+    if (!topo || !altiOrHeight)
+        return DataPtr();
 
     ArrayDims out_dims = makeArrayDims(sb);
     shared_array<double> out_values(new double[out_dims.volume()]);

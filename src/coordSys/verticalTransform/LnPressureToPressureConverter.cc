@@ -52,6 +52,8 @@ DataPtr LnPressureToPressureConverter::getDataSlice(const SliceBuilder& sb) cons
 {
     VarDouble p0(reader_, p0_, "hPa", sb);
     VarDouble lnP(reader_, lnP_, "", sb);
+    if (!p0 || !lnP)
+        return DataPtr();
 
     ArrayDims out_dims = makeArrayDims(sb);
     shared_array<double> out_values(new double[out_dims.volume()]);

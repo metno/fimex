@@ -74,6 +74,8 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     VarDouble s(reader_,  vars_.s, "", sb);
     VarDouble c(reader_, vars_.C, "", sb);
     VarDouble depth(reader_, vars_.depth, "m", sb);
+    if (!s || !c || !depth)
+        return DataPtr();
 
     ArrayDims dimsZ = makeArrayDims(sb);
     shared_array<double> z_values(new double[dimsZ.volume()]);

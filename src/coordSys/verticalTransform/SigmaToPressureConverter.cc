@@ -52,6 +52,8 @@ DataPtr SigmaToPressureConverter::getDataSlice(const SliceBuilder& sb) const
     VarDouble ps(reader_, ps_, "hPa", sb);
     VarDouble ptop(reader_, ptop_, "hPa", sb);
     VarDouble sigma(reader_, sigma_, "", sb);
+    if (!ps || !ptop || !sigma)
+        return DataPtr();
 
     ArrayDims out_dims = makeArrayDims(sb);
     shared_array<double> out_values(new double[out_dims.volume()]);
