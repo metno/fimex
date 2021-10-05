@@ -355,7 +355,7 @@ MODULE Fimex
     SUBROUTINE c_mifi_set_default_log_level(loglevel) BIND(C,NAME="mifi_set_default_log_level")
       USE iso_c_binding,     ONLY: C_INT
       IMPLICIT NONE
-      INTEGER,INTENT(IN),VALUE        :: loglevel
+      INTEGER(C_INT),INTENT(IN),VALUE        :: loglevel
     END SUBROUTINE c_mifi_set_default_log_level
   END INTERFACE
 
