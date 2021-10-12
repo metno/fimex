@@ -196,7 +196,9 @@ void CDMTimeInterpolator::changeTimeAxis(const string& timeSpec)
             shared_array<double> timeData(new double[newTimes.size()]);
             const TimeUnit newTU(ts.getUnitString());
             std::transform(newTimes.begin(), newTimes.end(), timeData.get(), [newTU](const FimexTime& ft) { return newTU.fimexTime2unitTime(ft); });
-            cdm_->getVariable(timeDimName).setData(createData(newTimes.size(), timeData));
+            auto& timeVar = cdm_->getVariable(timeDimName);
+            timeVar.setDataType(CDM_DOUBLE);
+            timeVar.setData(createData(newTimes.size(), timeData));
             cdm_->getDimension(timeDimName).setLength(newTimes.size());
 
             // store old times with new unit as oldTimesNewUnits-vector
