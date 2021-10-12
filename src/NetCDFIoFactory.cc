@@ -117,7 +117,7 @@ int NetCDFIoFactory::matchFileTypeName(const std::string& type)
 int NetCDFIoFactory::matchFileName(const std::string& fileName)
 {
     const std::string ext = getExtension(fileName);
-    if (ext == "nc")
+    if (ext == "nc" || ext == "nc4")
         return 1;
 
     // also match ncml for http(s) and dods, as these likely are OpenDAP
