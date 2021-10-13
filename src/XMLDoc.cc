@@ -40,6 +40,13 @@ std::string make_string(xmlChar* xc)
     }
     return retVal;
 }
+
+int doXmlInitParser()
+{
+    xmlInitParser();
+    LIBXML_TEST_VERSION
+    return 1;
+}
 } // namespace
 
 XMLDoc::XMLDoc(const std::string& filename)
@@ -61,8 +68,8 @@ XMLDoc::XMLDoc()
 
 void XMLDoc::init()
 {
-    xmlInitParser();
-    LIBXML_TEST_VERSION
+    static int done = doXmlInitParser();
+    (void)done;
 }
 
 void XMLDoc::setDoc(xmlDoc* pdoc)
@@ -130,7 +137,6 @@ void XMLDoc::cleanup()
     if (xpathCtx != 0) {
         xmlXPathFreeContext(xpathCtx);
     }
-    xmlCleanupParser();
 }
 
 XMLDoc::~XMLDoc()
