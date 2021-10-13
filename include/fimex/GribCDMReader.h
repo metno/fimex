@@ -55,14 +55,15 @@ class CDM;
 class CDMDimension;
 class GribFileMessage;
 
-class GribCDMReader: public MetNoFimex::CDMReader
+class GribCDMReader : public CDMReader
 {
 public:
     GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
     GribCDMReader(const std::string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
-    virtual ~GribCDMReader();
-    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
-    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    ~GribCDMReader();
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos) override;
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
+
     /**
      * Read a initialized cdmGribReader xml-document
      * @param configXML

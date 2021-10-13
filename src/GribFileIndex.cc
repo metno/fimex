@@ -541,7 +541,7 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     case GRIB_NOT_FOUND: {
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
-        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size());
+        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL << " in list of " << members.size());
         if (!members.empty()) {
             bool found=false;
             int i = 0;
@@ -555,9 +555,10 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
                 ++i;
             }
             if (!found) {
-                LOG4FIMEX(logger, Logger::WARN, "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+                LOG4FIMEX(logger, Logger::WARN,
+                          "perturbationNumber for " << fileURL << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
             } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL.c_str() << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
+                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
             }
         }
         break;

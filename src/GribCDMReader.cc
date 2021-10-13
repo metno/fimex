@@ -1258,11 +1258,12 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     if (variable.getDataType() == CDM_NAT) {
         return createData(CDM_INT,0); // empty
     }
+
     if (DataPtr mem = getDataSliceFromMemory(variable, sb))
         return mem;
 
     //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
-    map<string, map<size_t, map<long, map<size_t, size_t> > > >::const_iterator gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
+    const auto gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
     if (gmIt == p_->varTimeLevelEnsembleGFIBox.end()) {
         throw CDMException("no grib message found for variable '" + varName + "'");
     }
@@ -1295,14 +1296,13 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
         }
     }
 
-
     LOG4FIMEX(logger, Logger::DEBUG, "building slices for variable " << varName << ": size: " << sliceSize);
-    vector<size_t> timeSlices = createVector(timeId, dimStart, dimSizes);
-    vector<size_t> levelSlices = createVector(levelId, dimStart, dimSizes);
-    vector<size_t> ensembleSlices = createVector(ensembleId, dimStart, dimSizes);
+    const vector<size_t> timeSlices = createVector(timeId, dimStart, dimSizes);
+    const vector<size_t> levelSlices = createVector(levelId, dimStart, dimSizes);
+    const vector<size_t> ensembleSlices = createVector(ensembleId, dimStart, dimSizes);
     vector<GribFileMessage> slices;
     for (size_t ts : timeSlices) {
-        map<size_t, map<long, map<size_t, size_t>>>::const_iterator gmt = gmIt->second.find(ts);
+        const auto gmt = gmIt->second.find(ts);
         if (gmt == gmIt->second.end()) {
             for (size_t e = 0; e < ensembleSlices.size(); ++e) {
                 for (size_t l = 0; l < levelSlices.size(); ++l) {
@@ -1310,15 +1310,15 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
                 }
             }
         } else {
-            pair<string, size_t> typePos = p_->varLevelTypePos.at(varName);
-            vector<long> levels = p_->levelValsOfType.at(typePos.first).at(typePos.second);
+            const auto& typePos = p_->varLevelTypePos.at(varName);
+            const vector<long>& levels = p_->levelValsOfType.at(typePos.first).at(typePos.second);
             for (size_t ls : levelSlices) {
-                size_t lev = (ls == std::numeric_limits<size_t>::max()) ? 0 : ls; // undefined added as 0
-                map<long, map<size_t, size_t> >::const_iterator gmtl = gmt->second.find(levels.at(lev));
+                const size_t lev = (ls == std::numeric_limits<size_t>::max()) ? 0 : ls; // undefined added as 0
+                const auto gmtl = gmt->second.find(levels.at(lev));
                 if (gmtl != gmt->second.end()) {
                     for (size_t es : ensembleSlices) {
-                        size_t ens = (es == std::numeric_limits<size_t>::max()) ? 0 : es; // undefined added as 0
-                        map<size_t, size_t>::const_iterator gmtle = gmtl->second.find(ens);
+                        const size_t ens = (es == std::numeric_limits<size_t>::max()) ? 0 : es; // undefined added as 0
+                        const auto gmtle = gmtl->second.find(ens);
                         if (gmtle != gmtl->second.end()) {
                             slices.push_back(p_->indices.at(gmtle->second));
                         } else {
@@ -1336,7 +1336,8 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     }
 
     // read data from file
-    if (slices.size() == 0) return createData(variable.getDataType(), 0);
+    if (slices.empty())
+        return createData(variable.getDataType(), 0);
 
     const size_t maxXySize = maxSizes.at(0) * maxSizes.at(1);
 
