@@ -125,6 +125,11 @@ int grib_get_nocheck(grib_handle_p gh, const char* key, long& value)
     return grib_get_long(gh.get(), key, &value);
 }
 
+void grib_set(grib_handle_p gh, const char* key, long value)
+{
+    MIFI_GRIB_CHECK(grib_set_long(gh.get(), key, value), key);
+}
+
 void grib_get(grib_handle_p gh, const char* key, long& value)
 {
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), key, &value), key);
@@ -494,14 +499,15 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     grib_get(gh, GK_level, levelNo_);
 
     // time
-#ifdef HAVE_GRIB_API
-    // read files internal time-step unit
-    // https://confluence.ecmwf.int/display/ECC/Frequently+Asked+Questions#FrequentlyAskedQuestions-ConfusedaboutstepUnits?
-    // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
-    std::string iouotr;
-    grib_get(gh, GK_indicatorOfUnitOfTimeRange, iouotr);
-    grib_set(gh, GK_stepUnits, iouotr);
-#endif
+    {
+        // read files internal time-step unit
+        // https://confluence.ecmwf.int/display/ECC/Frequently+Asked+Questions#FrequentlyAskedQuestions-ConfusedaboutstepUnits?
+        // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
+        long iouotr = 255;
+        grib_get(gh, GK_indicatorOfUnitOfTimeRange, iouotr);
+        if (iouotr != 255)
+            grib_set(gh, GK_stepUnits, iouotr);
+    }
     grib_get(gh, GK_stepUnits, stepUnits_);
     grib_get(gh, GK_stepType, stepType_);
     grib_get(gh, GK_dataDate, dataDate_);
