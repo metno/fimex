@@ -308,7 +308,7 @@ struct GribMetricDef {
     double startLat;
 };
 
-GribMetricDef getGridDefMetric(long edition, grib_handle_p gh)
+GribMetricDef getGridDefMetric(long /*edition*/, grib_handle_p gh)
 {
     GribMetricDef gmd;
     grib_get(gh, "Ni", gmd.sizeX);
