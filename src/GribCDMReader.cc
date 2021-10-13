@@ -850,8 +850,15 @@ void GribCDMReader::initCreateGFIBoxes()
             unlimDimPos = distance(p_->times.begin(), pTimesIt);
         }
 
-        const size_t total_ensembles = gfm.getTotalNumberOfEnsembles(), perturbation_number = gfm.getPerturbationNumber();
+        const size_t total_ensembles = gfm.getTotalNumberOfEnsembles();
         const bool hasEnsemble = (total_ensembles > 1);
+        size_t perturbation_number = gfm.getPerturbationNumber();
+        if (!hasEnsemble && perturbation_number != 0) {
+            if (perturbation_number != 255) { // no warning for 255 == MISSING
+                LOG4FIMEX(logger, Logger::WARN, "Perturbation number " << perturbation_number << " is illegal without ensembles and will be replaced with 0.");
+            }
+            perturbation_number = 0;
+        }
 
         if (hasEnsemble) {
             if (p_->maxEnsembles == 0) { // first member
