@@ -120,15 +120,13 @@ int NetCDFIoFactory::matchFileName(const std::string& fileName)
     if (ext == "nc" || ext == "nc4")
         return 1;
 
-    // also match ncml for http(s) and dods, as these likely are OpenDAP
-    if (ext == "ncml") {
-        static const std::regex re_url_scheme("^(\\w+)://");
-        std::smatch what;
-        if (std::regex_search(fileName, what, re_url_scheme)) {
-            static const std::set<std::string> url_schemes{"https", "http", "dods"};
-            if (url_schemes.count(what[1].str()))
-                return 2;
-        }
+    // match urls with schemes http(s) and dods, as these likely are OpenDAP
+    static const std::set<std::string> url_schemes{"https", "http", "dods"};
+    static const std::regex re_url_scheme("^(\\w+)://");
+    std::smatch what;
+    if (std::regex_search(fileName, what, re_url_scheme)) {
+        if (url_schemes.count(what[1].str()))
+            return 2;
     }
 
     return 0;
