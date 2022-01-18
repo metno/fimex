@@ -1,7 +1,7 @@
 /*
  * Fimex, GribCDMReader.cc
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -991,7 +991,7 @@ void GribCDMReader::initAddProjection()
     for (const GribFileMessage& gfm : p_->indices) {
         bool inserted = gridDefs.insert(std::make_pair(gfm.getGridDefinition(), gfm.getTypeOfGrid())).second;
         if (inserted) {
-            LOG4FIMEX(logger, Logger::DEBUG, "found gridDef:" << gfm.getGridDefinition().id());
+            LOG4FIMEX(logger, Logger::DEBUG, "new grid id='" << gfm.getGridDefinition().id() << "' type='" << gfm.getTypeOfGrid() << "'");
         }
     }
     assert(!gridDefs.empty());
@@ -999,7 +999,7 @@ void GribCDMReader::initAddProjection()
     int lastXYId = 0;
     for (map<GridDefinition, string>::iterator gd = gridDefs.begin(); gd != gridDefs.end(); gd++, lastXYId++) {
         const GridDefinition& gridDef(gd->first);
-        LOG4FIMEX(logger, Logger::DEBUG,"adding gridDef:" << gridDef.id());
+        LOG4FIMEX(logger, Logger::DEBUG, "defining grid id='" << gridDef.id() << "'");
         string& gridType(gd->second);
         string projStr = replaceProj4Earthfigure(gridDef.getProjDefinition(), replaceEarthString);
         ProjectionInfo pi;
