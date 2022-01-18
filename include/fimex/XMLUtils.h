@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2019, met.no
+ * (C) Copyright 2019-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -38,6 +38,7 @@ public:
 
   std::string to_string() const;
   float to_float() const;
+  double to_double() const;
   long to_long() const;
   long long to_longlong() const;
 

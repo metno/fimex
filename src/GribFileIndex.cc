@@ -1,7 +1,7 @@
 /*
  * Fimex, GribFileIndex.cc
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -901,17 +901,17 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                     } else if (name == "isDegree") {
                         isDegree = value.to_long();
                     } else if (name == "startX") {
-                        startX = value.to_float();
+                        startX = value.to_double();
                     } else if (name == "startY") {
-                        startY = value.to_float();
+                        startY = value.to_double();
                     } else if (name == "sizeX") {
                         sizeX = value.to_longlong();
                     } else if (name == "sizeY") {
                         sizeY = value.to_longlong();
                     } else if (name == "incrX") {
-                        incrX = value.to_float();
+                        incrX = value.to_double();
                     } else if (name == "incrY") {
-                        incrY = value.to_float();
+                        incrY = value.to_double();
                     } else if (name == "scanMode") {
                         scanMode = static_cast<GridDefinition::Orientation>(value.to_long());
                     }

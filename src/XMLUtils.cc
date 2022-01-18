@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2019, met.no
+ * (C) Copyright 2019-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -33,6 +33,11 @@ std::string XmlCharPtr::to_string() const
 }
 
 float XmlCharPtr::to_float() const
+{
+    return atof(to_cc());
+}
+
+double XmlCharPtr::to_double() const
 {
     return atof(to_cc());
 }
