@@ -1,7 +1,7 @@
 /*
  * Fimex, GridDefinition.h
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -72,8 +72,8 @@ public:
     };
 
     GridDefinition();
-    GridDefinition(std::string projDefinition_, bool isDegree, size_t xSize_, size_t ySize_, double xIncr_, double yIncr_, double xStart_, double yStart_,
-                   Orientation orient);
+    GridDefinition(std::string projDefinition_, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
+                   double lonStart, double latStart, double lonLatResolution, Orientation orient);
 
     /// return a proj4 string
     std::string getProjDefinition() const { return projDefinition_; }
@@ -107,6 +107,14 @@ public:
     double getYStart() const { return yStart_; }
     void setYStart(double yStart) { yStart_ = yStart; }
 
+    /// longitude start in degree
+    double getLonStart() const { return lonStart_; }
+    void setLonStart(double lonStart) { lonStart_ = lonStart; }
+
+    /// latitude start in degree
+    double getLatStart() const { return latStart_; }
+    void setLatStart(double latStart) { latStart_ = latStart; }
+
     Orientation getScanMode() const { return orientation_; }
     void setScanMode(Orientation orient) { orientation_ = orient; }
 
@@ -129,11 +137,19 @@ public:
      * they have different id's.
      */
     std::string id() const;
+
     /**
      * Less than operator, for usabity of GridDefinition in maps. It does
      * not have any other meaning than a useful sort-order.
+     *
+     * If lonLatResolution is > 0, the comparison uses lonStart and latStart and ignores differences smaller than this resolution.
+     *
+     * If lonLatResolution is <= 0, the comparison uses xStart and yStart and ignores differences smaller then 5% of the grid step.
      */
     bool operator<(const GridDefinition& rhs) const;
+
+    bool operator==(const GridDefinition& rhs) const { return !(*this < rhs || rhs < *this); }
+    bool operator!=(const GridDefinition& rhs) const { return !(*this == rhs); }
 
 private:
     std::string projDefinition_;
@@ -144,6 +160,9 @@ private:
     double yIncr_;
     double xStart_;
     double yStart_;
+    double lonStart_;
+    double latStart_;
+    double lonLatResolution_;
     Orientation orientation_;
 };
 

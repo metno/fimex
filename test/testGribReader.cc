@@ -1,7 +1,7 @@
 /*
  * Fimex, testGribReader.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,6 +28,7 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/GridDefinition.h"
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -97,4 +98,13 @@ TEST4FIMEX_TEST_CASE(test_read_grb2)
     defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml")));
     TEST4FIMEX_CHECK(writeToFile(grbReader, "test_grb2_out.nc"));
+}
+
+TEST4FIMEX_TEST_CASE(test_griddefinition)
+{
+    const std::string proj4 = "+proj=lcc +lat_0=77.5 +lon_0=-25 +lat_1=77.5  +lat_2=77.5 +R=6.371e+06 +no_defs";
+    const GridDefinition gd1(proj4, false, 739, 949, 2500, 2500, 278603.156, -897931.562, -17.957, 69.299, 1e-3, GridDefinition::LeftUpperHorizontal);
+    const GridDefinition gd2(proj4, false, 739, 949, 2500, 2500, 278620.937, -897985.687, 342.043, 69.2985, 1e-6, GridDefinition::LeftUpperHorizontal);
+
+    TEST4FIMEX_CHECK(gd1 == gd2);
 }

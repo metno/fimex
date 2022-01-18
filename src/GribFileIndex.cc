@@ -220,6 +220,11 @@ std::string getEarthsFigure(long edition, grib_handle_p gh)
     return earth;
 }
 
+double lonLatResolutionForEdition(long edition)
+{
+    return edition == 1 ? 1e-3 : 1e-6;
+}
+
 GridDefinition getGridDefRegularLL(long edition, grib_handle_p gh)
 {
     long sizeX, sizeY, ijDirectionIncrementGiven;
@@ -258,7 +263,7 @@ GridDefinition getGridDefRegularLL(long edition, grib_handle_p gh)
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
 
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
-    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
+    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, startX, startY, lonLatResolutionForEdition(edition), orient);
 }
 
 GridDefinition getGridDefRotatedLL(long edition, grib_handle_p gh)
@@ -296,7 +301,7 @@ GridDefinition getGridDefRotatedLL(long edition, grib_handle_p gh)
     oss << " " << getEarthsFigure(edition, gh) <<  " +no_defs";
     string proj =  oss.str();
 
-    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
+    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, startX, startY, lonLatResolutionForEdition(edition), orient);
 }
 
 struct GribMetricDef {
@@ -339,21 +344,20 @@ GridDefinition getGridDefMercator(long edition, grib_handle_p gh)
     grib_get(gh, "orientationOfTheGridInDegrees", orientationOfGrid);
 
     ostringstream oss;
-    oss << "+proj=merc +lon_0="<<orientationOfGrid  << " +lat_ts=" << lat_ts << " ";
+    oss << "+proj=merc +lon_0=" << normalizeLongitude180(orientationOfGrid) << " +lat_ts=" << lat_ts << " ";
     oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gmd.startLon, gmd.startLat,
+                          lonLatResolutionForEdition(edition), gribGetGridOrientation(gh));
 }
 
 GridDefinition getGridDefLambert(long edition, grib_handle_p gh)
 {
-    double startX, startY;
     GribMetricDef gmd = getGridDefMetric(edition, gh);
-
 
     double lonV, lat1, lat2;
     // TODO: southPole position not used yet
@@ -366,14 +370,17 @@ GridDefinition getGridDefLambert(long edition, grib_handle_p gh)
     grib_get(gh, "Latin2InDegrees", lat2);
 
     ostringstream oss;
-    oss << "+proj=lcc +lat_0="<<lat1 << " +lon_0="<< lonV << " +lat_1=" << lat1 << " " << " +lat_2=" << lat2 << " ";
+    oss << "+proj=lcc +lat_0=" << lat1 << " +lon_0=" << normalizeLongitude180(lonV) << " +lat_1=" << lat1 << " "
+        << " +lat_2=" << lat2 << " ";
     oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
+    double startX, startY;
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
     LOG4FIMEX(logger, Logger::DEBUG, "startpos: (lon,lat) " << gmd.startLon  << ", " << gmd.startLat << "  (x,y)= " << startX << "," << startY << " projStr" << proj);
-    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gmd.startLon, gmd.startLat,
+                          lonLatResolutionForEdition(edition), gribGetGridOrientation(gh));
 }
 
 GridDefinition getGridDefPolarStereographic(long edition, grib_handle_p gh)
@@ -400,14 +407,15 @@ GridDefinition getGridDefPolarStereographic(long edition, grib_handle_p gh)
         lat0 = -90.; // southpole
     }
     ostringstream oss;
-    oss << "+proj=stere +lat_0="<<lat0 << " +lon_0="<< orientationOfGrid << " +lat_ts=" << lat_ts << " ";
+    oss << "+proj=stere +lat_0=" << lat0 << " +lon_0=" << normalizeLongitude180(orientationOfGrid) << " +lat_ts=" << lat_ts << " ";
     oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gmd.startLon, gmd.startLat,
+                          lonLatResolutionForEdition(edition), gribGetGridOrientation(gh));
 }
 
 const char GK_dataDate[] = "dataDate";
@@ -721,8 +729,16 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
             double sizeY = string2type<double>(getXmlProp(lNode, "sizeY"));
             double incrX = string2type<double>(getXmlProp(lNode, "incrX"));
             double incrY = string2type<double>(getXmlProp(lNode, "incrY"));
+
+            const std::string xmlStartLon = getXmlProp(lNode, "startLon");
+            const double startLon = !xmlStartLon.empty() ? string2type<double>(xmlStartLon) : 1000;
+            const std::string xmlStartLat = getXmlProp(lNode, "startLat");
+            const double startLat = !xmlStartLat.empty() ? string2type<double>(xmlStartLat) : 1000;
+            const double lonLatResolution = (!xmlStartLon.empty() && !xmlStartLat.empty()) ? lonLatResolutionForEdition(edition_) : -1;
+
             GridDefinition::Orientation scanMode = static_cast<GridDefinition::Orientation>(string2type<long>(getXmlProp(lNode, "scanMode")));
-            gridDefinition_ = GridDefinition(proj4, isDegree, static_cast<size_t>(sizeX), static_cast<size_t>(sizeY), incrX, incrY, startX, startY, scanMode);
+            gridDefinition_ = GridDefinition(proj4, isDegree, static_cast<size_t>(sizeX), static_cast<size_t>(sizeY), incrX, incrY, startX, startY, startLon,
+                                             startLat, lonLatResolution, scanMode);
         }
     }
 }
@@ -888,6 +904,10 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 int isDegree = 0;
                 double startX = 0;
                 double startY = 0;
+                double startLon = 1000;
+                double startLat = 1000;
+                bool haveStartLon = false;
+                bool haveStartLat = false;
                 size_t sizeX = 0;
                 size_t sizeY = 0;
                 double incrX = 0;
@@ -904,6 +924,12 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                         startX = value.to_double();
                     } else if (name == "startY") {
                         startY = value.to_double();
+                    } else if (name == "startLon") {
+                        startLon = value.to_double();
+                        haveStartLon = true;
+                    } else if (name == "startLat") {
+                        startLat = value.to_double();
+                        haveStartLat = true;
                     } else if (name == "sizeX") {
                         sizeX = value.to_longlong();
                     } else if (name == "sizeY") {
@@ -916,7 +942,8 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                         scanMode = static_cast<GridDefinition::Orientation>(value.to_long());
                     }
                 }
-                gridDefinition_ = GridDefinition(proj4, isDegree, sizeX, sizeY, incrX, incrY, startX, startY, scanMode);
+                const double lonLatResolution = (haveStartLon && haveStartLat) ? lonLatResolutionForEdition(edition_) : -1;
+                gridDefinition_ = GridDefinition(proj4, isDegree, sizeX, sizeY, incrX, incrY, startX, startY, startLon, startLat, lonLatResolution, scanMode);
             } else {
                 LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name);
             }
@@ -1201,6 +1228,8 @@ string GribFileMessage::toString() const
                         xmlCast(type2string(gridDefinition_.getXSize()))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("sizeY"),
                         xmlCast(type2string(gridDefinition_.getYSize()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startLon"), xmlCast(type2string(gridDefinition_.getLonStart()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startLat"), xmlCast(type2string(gridDefinition_.getLatStart()))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("scanMode"),
                         xmlCast(type2string(gridDefinition_.getScanMode()))));
         checkLXML(xmlTextWriterEndElement(writer.get()));

@@ -1,7 +1,7 @@
 /*
  * Fimex, GridDefinition.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -40,12 +40,15 @@ GridDefinition::GridDefinition()
     , yIncr_(0.)
     , xStart_(0.)
     , yStart_(0.)
+    , lonStart_(0)
+    , latStart_(0)
+    , lonLatResolution_(-1)
     , orientation_(GridDefinition::LeftLowerHorizontal)
 {
 }
 
 GridDefinition::GridDefinition(std::string projDefinition, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
-                               Orientation orient)
+                               double lonStart, double latStart, double lonLatResolution, Orientation orient)
     : projDefinition_(projDefinition)
     , isDegree_(isDegree)
     , xSize_(xSize)
@@ -54,6 +57,9 @@ GridDefinition::GridDefinition(std::string projDefinition, bool isDegree, size_t
     , yIncr_(yIncr)
     , xStart_(xStart)
     , yStart_(yStart)
+    , lonStart_(fmod(lonStart + 360, 360))
+    , latStart_(latStart)
+    , lonLatResolution_(lonLatResolution)
     , orientation_(orient)
 {
 }
@@ -95,7 +101,58 @@ std::string GridDefinition::id() const
 
 bool GridDefinition::operator<(const GridDefinition& rhs) const
 {
-    return id() < rhs.id();
+    if (projDefinition_ < rhs.projDefinition_)
+        return true;
+    else if (rhs.projDefinition_ < projDefinition_)
+        return false;
+
+    if (xSize_ < rhs.xSize_)
+        return true;
+    else if (rhs.xSize_ < xSize_)
+        return false;
+
+    if (ySize_ < rhs.ySize_)
+        return true;
+    else if (rhs.ySize_ < ySize_)
+        return false;
+
+    if (xIncr_ < rhs.xIncr_)
+        return true;
+    else if (rhs.xIncr_ < xIncr_)
+        return false;
+
+    if (yIncr_ < rhs.yIncr_)
+        return true;
+    else if (rhs.yIncr_ < yIncr_)
+        return false;
+
+    if (lonLatResolution_ > 0) {
+        const auto res = std::max(lonLatResolution_, rhs.lonLatResolution_);
+
+        if (lonStart_ + res < rhs.lonStart_)
+            return true;
+        else if (rhs.lonStart_ + res < lonStart_)
+            return false;
+
+        if (latStart_ + res < rhs.latStart_)
+            return true;
+        else if (rhs.latStart_ + res < latStart_)
+            return false;
+    } else {
+        const auto delta = 0.05 * (std::abs(xIncr_) + std::abs(rhs.xIncr_) + std::abs(yIncr_) + std::abs(rhs.yIncr_)) / 4;
+
+        if (xStart_ + delta < rhs.xStart_)
+            return true;
+        else if (rhs.xStart_ + delta < xStart_)
+            return false;
+
+        if (yStart_ + delta < rhs.yStart_)
+            return true;
+        else if (rhs.yStart_ + delta < yStart_)
+            return false;
+    }
+
+    return false;
 }
 
-}
+} // namespace MetNoFimex
