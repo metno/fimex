@@ -486,8 +486,10 @@ void GribCDMReader::initLevels()
         vector<string> dimNames;
         dimNames.reserve(lit.second.size());
         for (size_t i = 0; i < lit.second.size(); ++i) {
-            const string myExtension = (lit.second.size() > 1 ? type2string(i) : "");
+            string myExtension = (lit.second.size() > 1 ? type2string(i) : "");
             const string myLevelId = findUniqueDimName(*cdm_, levelId + myExtension);
+            myExtension = myLevelId.substr(levelId.size());
+
             dimNames.push_back(myLevelId);
             LOG4FIMEX(logger, Logger::DEBUG, "declaring level: " << myLevelId);
             CDMDimension levelDim(myLevelId, lit.second.at(i).size());
