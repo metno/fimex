@@ -1,3 +1,6 @@
+  * 2022-01-19 fimex 1.7.0
+    * GRIB grid tolerance
+    * bugfix GRIB formula_terms
   * 2021-10-27 fimex-1.6.9
     * bugfix GRIB stepUnits
     * bugfix GRIB for ensemble data
