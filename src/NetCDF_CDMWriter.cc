@@ -711,7 +711,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                 }
                 if (data)
                     data = convertData(cdmVar, data);
-            } catch (CDMException& ex) {
+            } catch (std::exception& ex) {
                 std::ostringstream msg;
                 msg << "exception while reading variable '" << varName << "'";
                 if (!no_unlim)
