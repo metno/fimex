@@ -423,6 +423,7 @@ const char GK_edition[] = "edition";
 const char GK_endStep[] = "endStep";
 const char GK_level[] = "level";
 const char GK_levtype[] = "levtype";
+const char GK_typeOfFirstFixedSurface[] = "typeOfFirstFixedSurface";
 const char GK_numberOfForecastsInEnsemble[] = "numberOfForecastsInEnsemble";
 const char GK_parameterNumber[] = "parameterNumber";
 const char GK_perturbationNumber[] = "perturbationNumber";
@@ -503,7 +504,10 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     }
 
     // level
-    grib_get(gh, GK_levtype, levelType_);
+    if (edition_ == 1)
+        grib_get(gh, GK_levtype, levelType_);
+    else
+        grib_get(gh, GK_typeOfFirstFixedSurface, levelType_);
     grib_get(gh, GK_level, levelNo_);
 
     // time

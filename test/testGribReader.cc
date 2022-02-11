@@ -28,6 +28,7 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/GribFileIndex.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
@@ -107,4 +108,18 @@ TEST4FIMEX_TEST_CASE(test_griddefinition)
     const GridDefinition gd2(proj4, false, 739, 949, 2500, 2500, 278620.937, -897985.687, 342.043, 69.2985, 1e-6, GridDefinition::LeftUpperHorizontal);
 
     TEST4FIMEX_CHECK(gd1 == gd2);
+}
+
+TEST4FIMEX_TEST_CASE(GribFileIndex_LevelType)
+{
+    if (!hasTestExtra())
+        return;
+    const std::string grib2file = pathTestExtra("aa_20220211_0900.m1.grib2");
+
+    std::map<std::string, std::string> options;
+    std::vector<std::pair<std::string, std::regex>> members;
+
+    const GribFileIndex gfi(grib2file, "", members, options);
+    for (const auto& gfm : gfi.listMessages())
+        TEST4FIMEX_CHECK_NE(0, gfm.getLevelType());
 }
