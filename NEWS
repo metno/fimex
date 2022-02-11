@@ -1,3 +1,5 @@
+  * 2022-02-11 fimex 1.7.1
+    * bugfix eccodes/GRIB2 level type
   * 2022-01-19 fimex 1.7.0
     * GRIB grid tolerance
     * bugfix GRIB formula_terms
