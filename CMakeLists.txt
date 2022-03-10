@@ -199,6 +199,9 @@ IF ((NOT mi-programoptions_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${MI_PROGRAMOPT
   ADD_SUBDIRECTORY(${MI_PROGRAMOPTIONS_3RDPARTY})
 ELSE ()
   FIND_PACKAGE(mi-programoptions REQUIRED)
+  IF (mi-programoptions_VERSION VERSION_LESS "1.0.0")
+    MESSAGE(SEND_ERROR "Found mi-programoptions version ${mi-programoptions_VERSION} -- too old.")
+  ENDIF ()
 ENDIF ()
 
 IF(ENABLE_FIMEX_VERSIONNUMBERED)
