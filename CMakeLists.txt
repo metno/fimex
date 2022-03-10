@@ -1,6 +1,6 @@
 # Fimex, CMakeLists.txt
 #
-# Copyright (C) 2018-2021 met.no
+# Copyright (C) 2018-2022 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -78,14 +78,6 @@ ENDIF()
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)
 
 OPTION(ENABLE_PYTHON "Use python" ON)
-
-OPTION(USE_BOOST_UNIT_TEST "Use boost unit_test_framework" OFF)
-IF (USE_BOOST_UNIT_TEST)
-  FIND_PACKAGE(Boost REQUIRED COMPONENTS unit_test_framework)
-  IF ((Boost_UNIT_TEST_FRAMEWORK_FOUND) AND (NOT (Boost_VERSION LESS 103400)))
-    SET (HAVE_BOOST_UNIT_TEST_FRAMEWORK TRUE)
-  ENDIF ()
-ENDIF ()
 
 OPTION(ENABLE_MPI "Use MPI" OFF)
 IF(ENABLE_MPI)
@@ -263,13 +255,11 @@ IF(ENABLE_PYTHON)
   ADD_SUBDIRECTORY(modules/python)
 ENDIF()
 
-IF (NOT USE_BOOST_UNIT_TEST)
-  SET (MI_CPPTEST_3RDPARTY "third_party/mi-cpptest")
-  IF ((NOT mi-cpptest_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${MI_CPPTEST_3RDPARTY}/CMakeLists.txt"))
-    ADD_SUBDIRECTORY(${MI_CPPTEST_3RDPARTY})
-  ELSE ()
-    FIND_PACKAGE(mi-cpptest REQUIRED)
-  ENDIF ()
+SET (MI_CPPTEST_3RDPARTY "third_party/mi-cpptest")
+IF ((NOT mi-cpptest_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${MI_CPPTEST_3RDPARTY}/CMakeLists.txt"))
+  ADD_SUBDIRECTORY(${MI_CPPTEST_3RDPARTY})
+ELSE ()
+  FIND_PACKAGE(mi-cpptest REQUIRED)
 ENDIF ()
 
 ADD_SUBDIRECTORY(test)

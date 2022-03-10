@@ -1,7 +1,7 @@
 /*
  * Fimex, testUtils.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,7 +30,6 @@
 #include "fimex/DataUtils.h"
 #include "fimex/FileUtils.h"
 #include "fimex/FindNeighborElements.h"
-#include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/min_max.h"
@@ -38,13 +37,6 @@
 #include "leap_iterator.h"
 
 #include <iostream>
-
-//#define TEST_DEBUG
-
-//#define COMPARE_WITH_BOOST_LEXICAL_CAST
-#ifdef COMPARE_WITH_BOOST_LEXICAL_CAST
-#include <boost/lexical_cast.hpp>
-#endif
 
 #include <cctype>
 #include <numeric>
@@ -61,8 +53,6 @@ TEST4FIMEX_TEST_CASE(test_scaleValue)
     TEST4FIMEX_CHECK_CLOSE(-2.7e11, sv(-32686), delta);
     TEST4FIMEX_CHECK_CLOSE(2., sv(1), delta);
 }
-
-#ifndef HAVE_BOOST_UNIT_TEST_FRAMEWORK // seems to have problems with ostream << vector<string>
 
 TEST4FIMEX_TEST_CASE(test_split)
 {
@@ -98,7 +88,6 @@ TEST4FIMEX_TEST_CASE(test_tokenize)
     TEST4FIMEX_CHECK_EQ((string_v{"hei"}), tokenize(":hei", ":"));
     TEST4FIMEX_CHECK_EQ((string_v{"hei", "ho"}), tokenize("hei::ho", ":"));
 }
-#endif
 
 TEST4FIMEX_TEST_CASE(test_tokenizeDotted)
 {
@@ -205,9 +194,6 @@ TEST4FIMEX_TEST_CASE(test_scanFiles)
 
 TEST4FIMEX_TEST_CASE(test_globFiles)
 {
-#ifdef TEST_DEBUG
-    defaultLogLevel(Logger::DEBUG);
-#endif
     {
         vector<string> files;
         globFiles(files, topSrcDir() + "/**stUti??.cc");

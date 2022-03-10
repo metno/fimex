@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,7 +26,6 @@
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/interpolation.h"

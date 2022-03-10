@@ -1,8 +1,4 @@
 
-LINK_DIRECTORIES(
-  ${BOOST_LIBRARY_DIRS} # if using boost unit_test_framework
-)
-
 IF (NOT TEST_EXTRADATA_DIR)
   SET (TEST_EXTRADATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fimex-test-data)
 ENDIF ()
@@ -161,8 +157,6 @@ CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
 
-CONFIGURE_FILE(test_config.h.in test_config.h)
-
 ADD_LIBRARY(testinghelpers STATIC
   testinghelpers.cc
   testinghelpers.h
@@ -170,7 +164,6 @@ ADD_LIBRARY(testinghelpers STATIC
 TARGET_INCLUDE_DIRECTORIES(testinghelpers
  PUBLIC
   "${CMAKE_BINARY_DIR}/src"   # for fimex_config.h
-  ${CMAKE_CURRENT_BINARY_DIR} # for test_config.h
  PRIVATE
   "${CMAKE_SOURCE_DIR}/include"
 )
@@ -178,19 +171,15 @@ TARGET_COMPILE_DEFINITIONS(testinghelpers PRIVATE
   -DTOP_SRCDIR="${CMAKE_SOURCE_DIR}"
   -DTEST_EXTRADATA_DIR="${TEST_EXTRADATA_DIR}"
 )
-IF(NOT USE_BOOST_UNIT_TEST)
-  TARGET_LINK_LIBRARIES(testinghelpers PUBLIC
-    mi-cpptest-main
-  )
-ENDIF()
+TARGET_LINK_LIBRARIES(testinghelpers PUBLIC
+  mi-cpptest
+  libfimex
+)
 
 FOREACH(T ${CC_TESTS})
   ADD_EXECUTABLE(${T} "${T}.cc")
-  TARGET_INCLUDE_DIRECTORIES(${T} PRIVATE ${Boost_INCLUDE_DIRS})
   TARGET_LINK_LIBRARIES(${T}
-    libfimex
     testinghelpers
-    ${Boost_LIBRARIES}
   )
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()

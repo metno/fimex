@@ -1,7 +1,7 @@
 /*
  * Fimex, testNcmlReader.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,7 +29,6 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/XMLInputFile.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -40,7 +39,6 @@ using namespace MetNoFimex;
 
 TEST4FIMEX_TEST_CASE(test_ncmlRead)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc"), ncmlName = pathTest("test.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName, XMLInputFile(ncmlName)));
     DataPtr data = reader->getDataSlice("sea_surface_temperature", 1);

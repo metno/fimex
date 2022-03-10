@@ -1,7 +1,7 @@
 /*
  * Fimex, testMerger.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -59,11 +59,6 @@ TEST4FIMEX_TEST_CASE(test_merger)
     shared_array<double> valuesM = sliceM->asDouble();
     for(int i=0; iLon[i] >= 0; ++i) {
         const int offset = iLon[i] + iLat[i]*NLON;
-#if 0
-        cout << "iLon=" << iLon[i] << " iLat=" << iLat[i]
-             << " expected=" << expected[i]
-             << " actual=" << valuesM[offset] << endl;
-#endif
         TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.001);
     }
 }
@@ -92,11 +87,6 @@ TEST4FIMEX_TEST_CASE(test_merge_target)
     shared_array<double> valuesM = sliceM->asDouble();
     for(int i=0; ix[i] >= 0; ++i) {
         const int offset = ix[i] + iy[i]*NX;
-#if 0
-        cout << "ix=" << ix[i] << " iy=" << iy[i]
-             << " expected=" << expected[i]
-             << " actual=" << valuesM[offset] << endl;
-#endif
         TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.01);
     }
 }

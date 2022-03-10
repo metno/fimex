@@ -1,7 +1,7 @@
 /*
  * Fimex, testProcessor.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,7 +28,6 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/SharedArray.h"
 #include "fimex/SliceBuilder.h"
 
@@ -42,7 +41,6 @@ using namespace MetNoFimex;
 #ifdef HAVE_NETCDF_H
 TEST4FIMEX_TEST_CASE(test_accumulate)
 {
-//    defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("coordTest.nc");
     CDMReader_p nc = CDMFileReaderFactory::create("netcdf", fileName);
     double t0 = 1179309600.;
@@ -71,7 +69,6 @@ TEST4FIMEX_TEST_CASE(test_accumulate)
 
 TEST4FIMEX_TEST_CASE(test_rotate)
 {
-    //    defaultLogLevel(Logger::DEBUG);
         const string fileName = pathTest("coordTest.nc");
 
         CDMReader_p nc = CDMFileReaderFactory::create("netcdf", fileName);

@@ -1,7 +1,7 @@
 /*
   Fimex, test/testinghelpers.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,16 +28,14 @@
   USA.
 */
 
+#include "fimex_config.h"
 
-#include "test_config.h"
-
-#if HAVE_BOOST_UNIT_TEST_FRAMEWORK
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#endif // HAVE_BOOST_UNIT_TEST_FRAMEWORK
 #include "testinghelpers.h"
 
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/Logger.h"
+
+#include <mi_cpptest_version.h>
 
 #include <stdexcept>
 #include <fstream>
@@ -136,3 +134,15 @@ bool writeToFile(CDMReader_p input, const std::string& fileName, bool removeFile
 }
 
 } // namespace MetNoFimex
+
+int main(int argc, char* args[])
+{
+    using namespace MetNoFimex;
+    Logger::setClass(Logger::LOG2STDERR);
+    defaultLogLevel(Logger::OFF);
+
+#if MI_CPPTEST_VERSION_CURRENT_INT >= MI_CPPTEST_VERSION_INT(0, 2, 0)
+    miutil::cpptest::test_recorder::set_file_prefix(TOP_SRCDIR);
+#endif
+    return miutil::cpptest::run_tests(argc - 1, args + 1) ? 0 : 1;
+}

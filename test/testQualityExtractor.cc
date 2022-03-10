@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,7 +26,6 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/SharedArray.h"
 #include "fimex/mifi_constants.h"
 
@@ -43,9 +42,7 @@ TEST4FIMEX_TEST_CASE(test_qualityExtract)
     CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
-#ifdef TEST_DEBUG
-    defaultLogLevel(Logger::DEBUG);
-#endif
+
     std::shared_ptr<CDMQualityExtractor> extract = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
 
     map<string, string> statusVariables = extract->getStatusVariable();

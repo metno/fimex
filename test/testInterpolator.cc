@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,7 +26,6 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -44,7 +43,6 @@ static const int DEBUG = 0;
 #if defined(HAVE_FELT)
 TEST4FIMEX_TEST_CASE(interpolator)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
@@ -73,7 +71,6 @@ TEST4FIMEX_TEST_CASE(interpolator)
 
 TEST4FIMEX_TEST_CASE(interpolatorKDTree)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
@@ -102,8 +99,6 @@ TEST4FIMEX_TEST_CASE(interpolatorKDTree)
 
 TEST4FIMEX_TEST_CASE(interpolatorRelative)
 {
-    if (DEBUG)
-        defaultLogLevel(Logger::DEBUG);
     CDMReader_p feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
@@ -119,7 +114,6 @@ TEST4FIMEX_TEST_CASE(interpolatorRelative)
 #if defined(HAVE_NETCDF_H)
 TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("satellite_cma.nc");
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
@@ -144,7 +138,6 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 
 TEST4FIMEX_TEST_CASE(interpolator2coords)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string fileName = pathTest("twoCoordsTest.nc");
     CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
@@ -375,7 +368,6 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
 
 TEST4FIMEX_TEST_CASE(interpolator_vcross)
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("erai.sfc.40N.0.75d.200301011200.nc");
     CDMReader_p ncReader = CDMFileReaderFactory::create("netcdf", ncFileName);
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);
@@ -425,8 +417,6 @@ std::vector<double> range(double start, double step, double end)
 
 TEST4FIMEX_TEST_CASE(interpolator_forward)
 {
-    if (DEBUG)
-        defaultLogLevel(Logger::DEBUG);
     const string ncFileName = pathTest("interpolator_forward_in.nc");
     CDMReader_p ncReader(CDMFileReaderFactory::create("netcdf", ncFileName));
     CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(ncReader);

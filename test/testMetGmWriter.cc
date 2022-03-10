@@ -1,7 +1,7 @@
 /*
  * Fimex, testMetGmWriter.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,7 +27,6 @@
 #include "testinghelpers.h"
 
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/Logger.h"
 
 #include <memory>
 #include <vector>
@@ -38,8 +37,6 @@ using namespace MetNoFimex;
 TEST4FIMEX_TEST_CASE(test_write_hirlam12_nc)
 {
     const string ncSource = pathTest("hirlam12.nc");
-
-    defaultLogLevel(Logger::INFO);
 
     // create reader that reads ncSource
     CDMReader_p netcdfReader = CDMFileReaderFactory::create("netcdf", ncSource);

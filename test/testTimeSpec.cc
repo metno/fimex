@@ -1,7 +1,7 @@
 /*
  * Fimex, testTimeSpec.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,19 +26,14 @@
 
 #include "testinghelpers.h"
 
-#include "fimex/Logger.h"
 #include "fimex/TimeSpec.h"
 #include "fimex/TimeUtils.h"
 
 using namespace std;
 using namespace MetNoFimex;
-//#define TEST_DEBUG
 
 TEST4FIMEX_TEST_CASE(test_TimeSpec)
 {
-#ifdef TEST_DEBUG
-    defaultLogLevel(Logger::DEBUG);
-#endif
 	string tspec("2000-01-01 00:00:00,2000-01-01 04:00:00,...,2000-01-02 08:00:00");
 	FimexTime start;
 	FimexTime end;

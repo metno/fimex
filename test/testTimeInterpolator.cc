@@ -1,7 +1,7 @@
 /*
  * Fimex, timeInterpolator.cc
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,7 +30,6 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -38,7 +37,6 @@ using namespace MetNoFimex;
 #if defined(HAVE_FELT) && defined(HAVE_NETCDF_H)
 TEST4FIMEX_TEST_CASE(test_timeInterpolator)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string outputName = "test_timeInterpolator.nc";
     MetNoFimex::remove(outputName);
 

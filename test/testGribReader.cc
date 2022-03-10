@@ -30,7 +30,6 @@
 #include "fimex/Data.h"
 #include "fimex/GribFileIndex.h"
 #include "fimex/GridDefinition.h"
-#include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
@@ -51,7 +50,6 @@ TEST4FIMEX_TEST_CASE(test_read_grb1)
         return;
     const string fileName = require("test.grb1"); // this is written by testGribWriter.cc
 
-    defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathTest("cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     TEST4FIMEX_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
@@ -96,7 +94,6 @@ TEST4FIMEX_TEST_CASE(test_read_grb2)
         return;
     const string fileName = require("test.grb2"); // this is written by testGribWriter.cc
 
-    defaultLogLevel(Logger::INFO);
     CDMReader_p grbReader = CDMFileReaderFactory::create("grib", fileName, XMLInputFile(pathShareEtc("cdmGribReaderConfig.xml")));
     TEST4FIMEX_CHECK(writeToFile(grbReader, "test_grb2_out.nc"));
 }

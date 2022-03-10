@@ -1,7 +1,7 @@
 /*
  * Fimex, testMetgmReader.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -31,7 +31,6 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/XMLInputFile.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
@@ -45,7 +44,6 @@ TEST4FIMEX_TEST_CASE(test_read_sample_ed1)
 {
     const string fileName = pathTest("sample_ed1.gm");
 
-    defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd1 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
     TEST4FIMEX_CHECK(writeToFile(metgmReaderEd1, "testMetgmReadEd1.nc"));
 }
@@ -54,7 +52,6 @@ TEST4FIMEX_TEST_CASE(test_read_metgm2)
 {
     const string fileName = pathTest("sample_ed2.gm");
 
-    defaultLogLevel(Logger::INFO);
     CDMReader_p metgmReaderEd2 = CDMFileReaderFactory::create("", fileName, XMLInputFile(pathShareEtc("cdmMetGmReaderConfig.xml")));
     TEST4FIMEX_CHECK(writeToFile(metgmReaderEd2, "testMetgmReadEd2.nc"));
 }

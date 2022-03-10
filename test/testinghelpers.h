@@ -1,7 +1,7 @@
 /*
   Fimex, test/testinghelpers.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -34,6 +34,8 @@
 
 #include "fimex/CDMReaderDecl.h"
 
+#include <mi_cpptest.h>
+
 #include <string>
 
 #include "fimex_config.h"
@@ -60,40 +62,6 @@ void copyFile(const std::string& from, const std::string& to);
 bool writeToFile(CDMReader_p input, const std::string& fileName, bool removeFile=true);
 
 } // namespace MetNoFimex
-
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
-#include <boost/test/unit_test.hpp>
-
-#define TEST4FIMEX_TEST_SUITE(x) BOOST_AUTO_TEST_SUITE(x)
-#define TEST4FIMEX_TEST_SUITE_END() BOOST_AUTO_TEST_SUITE_END()
-#define TEST4FIMEX_FIXTURE_TEST_CASE(x, fixture) BOOST_FIXTURE_TEST_CASE(x, fixture)
-
-#define TEST4FIMEX_TEST_CASE(x) BOOST_AUTO_TEST_CASE(x)
-
-#define TEST4FIMEX_REQUIRE(x) BOOST_REQUIRE(x)
-#define TEST4FIMEX_CHECK(x) BOOST_CHECK(x)
-
-#define TEST4FIMEX_FAIL(m) BOOST_FAIL(m)
-
-#define TEST4FIMEX_REQUIRE_MESSAGE(x, m) BOOST_REQUIRE_MESSAGE(x, m)
-#define TEST4FIMEX_CHECK_MESSAGE(x, m) BOOST_CHECK_MESSAGE(x, m)
-
-#define TEST4FIMEX_REQUIRE_EQ(x, y) BOOST_REQUIRE_EQUAL(x, y)
-#define TEST4FIMEX_CHECK_EQ(x, y) BOOST_CHECK_EQUAL(x, y)
-
-#define TEST4FIMEX_CHECK_NE(x, y) BOOST_REQUIRE_NE(x, y)
-#define TEST4FIMEX_REQUIRE_GT(a, b) BOOST_REQUIRE_GT(a, b)
-#define TEST4FIMEX_REQUIRE_GE(a, b) BOOST_REQUIRE_GE(a, b)
-#define TEST4FIMEX_REQUIRE_LE(a, b) BOOST_REQUIRE_LE(a, b)
-
-#define TEST4FIMEX_REQUIRE_CLOSE(x, y, z) BOOST_REQUIRE_CLOSE(x, y, z)
-#define TEST4FIMEX_CHECK_CLOSE(x, y, z) BOOST_CHECK_CLOSE(x, y, z)
-
-#define TEST4FIMEX_CHECK_THROW(x, ex) BOOST_CHECK_THROW(x, ex)
-#define TEST4FIMEX_CHECK_NO_THROW(x) BOOST_CHECK_NO_THROW(x)
-
-#else // !HAVE_BOOST_UNIT_TEST_FRAMEWORK
-#include <mi_cpptest.h>
 
 #define TEST4FIMEX_TEST_SUITE(x) MI_CPPTEST_TEST_SUITE(x)
 #define TEST4FIMEX_TEST_SUITE_END() MI_CPPTEST_TEST_SUITE_END()
@@ -122,8 +90,6 @@ bool writeToFile(CDMReader_p input, const std::string& fileName, bool removeFile
 
 #define TEST4FIMEX_CHECK_THROW(x, ex) MI_CPPTEST_CHECK_THROW(x, ex)
 #define TEST4FIMEX_CHECK_NO_THROW(x) MI_CPPTEST_CHECK_NO_THROW(x)
-#endif // !HAVE_BOOST_UNIT_TEST_FRAMEWORK
-
 extern "C" {
 // implemented in interpolation.c
 extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);

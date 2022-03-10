@@ -1,7 +1,7 @@
 /*
  * Fimex, testVLevelConverter.cc
  *
- * (C) Copyright 2015, met.no
+ * (C) Copyright 2015-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -34,7 +34,6 @@
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 
 #include <memory>
@@ -42,9 +41,6 @@
 using namespace MetNoFimex;
 
 namespace {
-
-const int DEBUG = 0;
-Logger_p logger = getLogger("fimex.testVLevelConverter");
 
 struct tst_t
 {
@@ -55,15 +51,10 @@ struct tst_t
 
 tst_t createVerticalTransformationForTest()
 {
-    if (DEBUG) defaultLogLevel(Logger::DEBUG);
-
     tst_t tst;
     tst.r = CDMFileReaderFactory::create("netcdf", pathTest("testdata_arome_vc.nc"));
     tst.cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(tst.r), "x_wind_ml");
-    TEST4FIMEX_REQUIRE(tst.cs);
-
     tst.vt = tst.cs->getVerticalTransformation();
-    TEST4FIMEX_REQUIRE(tst.vt);
     return tst;
 }
 
@@ -72,6 +63,8 @@ tst_t createVerticalTransformationForTest()
 TEST4FIMEX_TEST_CASE(test_vlevelconverter_pressure)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
 
     ToVLevelConverter_p pressc = tst.vt->getConverter(tst.r, MIFI_VINT_PRESSURE, 0, tst.cs);
     TEST4FIMEX_REQUIRE(pressc);
@@ -85,6 +78,8 @@ TEST4FIMEX_TEST_CASE(test_vlevelconverter_pressure)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_compat)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
 
     ToVLevelConverter_p altic = tst.vt->getConverter(tst.r, MIFI_VINT_ALTITUDE, 0, tst.cs);
     TEST4FIMEX_REQUIRE(altic);
@@ -100,6 +95,9 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_compat)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_shape)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
+
     VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
     TEST4FIMEX_REQUIRE(altivc);
 
@@ -115,6 +113,9 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_shape)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_entire_atmosphere)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
+
     VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
     TEST4FIMEX_REQUIRE(altivc);
 
@@ -127,15 +128,15 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_entire_atmosphere)
     TEST4FIMEX_REQUIRE(vd);
     shared_array<float> va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
-    for (size_t i = 0; i < vd->size(); ++i) {
-        LOG4FIMEX(logger, Logger::DEBUG, "va[" << i << "]=" << va[i]);
-    }
 }
 #endif
 
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_top_of_atmosphere)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
+
     VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
     TEST4FIMEX_REQUIRE(altivc);
 
@@ -156,6 +157,9 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_top_of_atmosphere)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_mid_of_atmosphere)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
+
     VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
     TEST4FIMEX_REQUIRE(altivc);
 
@@ -178,6 +182,9 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_mid_of_atmosphere)
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_bottom_of_atmosphere)
 {
     tst_t tst = createVerticalTransformationForTest();
+    TEST4FIMEX_REQUIRE(tst.cs);
+    TEST4FIMEX_REQUIRE(tst.vt);
+
     VerticalConverter_p altivc = tst.vt->getConverter(tst.r, tst.cs, MIFI_VINT_ALTITUDE);
     TEST4FIMEX_REQUIRE(altivc);
 
@@ -202,8 +209,6 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_bottom_of_atmosphere)
  */
 TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
 {
-    if (DEBUG)
-        defaultLogLevel(Logger::DEBUG);
     const std::string fileName = pathTest("testdata_arome_vc.nc");
     CDMReader_p ncreader(CDMFileReaderFactory::create("netcdf", fileName));
 

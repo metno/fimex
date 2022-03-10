@@ -1,7 +1,7 @@
 /*
  * Fimex, testVerticalVelocity.cc
  *
- * (C) Copyright 2014, met.no
+ * (C) Copyright 2014-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -113,7 +113,6 @@ TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
         pair<float*, float*> minMax = minmax_element(&w[k * nx * ny], &w[k * nx * ny] + nx * ny);
         TEST4FIMEX_CHECK(*minMax.first > -4);
         TEST4FIMEX_CHECK(*minMax.second < 4);
-        //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
     }
 }
 
@@ -150,7 +149,6 @@ TEST4FIMEX_TEST_CASE(test_cdmprocessor_addverticalvelocity)
             pair<float*, float*> minMax = minmax_element(&w[k * nx * ny], &w[k * nx * ny] + nx * ny);
             TEST4FIMEX_CHECK(*minMax.first > -4);
             TEST4FIMEX_CHECK(*minMax.second < 4);
-            //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
         }
     }
 }

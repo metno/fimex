@@ -1,7 +1,7 @@
 /*
  * Fimex, testNcmlAggregationReader.cc
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2013-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -31,23 +31,31 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/Logger.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
 
+#include <mi_cpptest_version.h>
+
 #include <unistd.h>
+
+#if !defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (MI_CPPTEST_VERSION_CURRENT_INT >= MI_CPPTEST_VERSION_INT(0, 2, 0))
+#define SWITCH_MI_CPPTEST(v01, v02) v02
+#else
+#define SWITCH_MI_CPPTEST(v01, v02) v01
+#endif
 
 using namespace std;
 using namespace MetNoFimex;
 
 namespace {
-struct TestConfig {
+struct TestConfig SWITCH_MI_CPPTEST(, : miutil::cpptest::test_fixture)
+{
     char oldDir[2048];
-    TestConfig();
-    ~TestConfig();
+    SWITCH_MI_CPPTEST(TestConfig(), void set_up() override);
+    SWITCH_MI_CPPTEST(~TestConfig(), void tear_down() override);
 };
 
-TestConfig::TestConfig()
+SWITCH_MI_CPPTEST(TestConfig::TestConfig(), void TestConfig::set_up())
 {
     char* cwd = getcwd(oldDir, sizeof(oldDir));
     TEST4FIMEX_REQUIRE(cwd == oldDir);
@@ -56,7 +64,7 @@ TestConfig::TestConfig()
         TEST4FIMEX_FAIL("cannot chdir to '" << test_data << "'");
     }
 }
-TestConfig::~TestConfig()
+SWITCH_MI_CPPTEST(TestConfig::~TestConfig(), void TestConfig::tear_down())
 {
     if (chdir(oldDir) != 0) {
         TEST4FIMEX_FAIL("cannot chdir to '" << oldDir << "'");
@@ -66,7 +74,6 @@ TestConfig::~TestConfig()
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExisting, TestConfig)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_REQUIRE(reader);
@@ -86,7 +93,6 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExisting, TestConfig)
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("joinExistingAggSuffix.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const CDMDimension* unlim = reader->getCDM().getUnlimitedDim();
@@ -109,7 +115,6 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNothing, TestConfig)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggNothing.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
@@ -117,19 +122,14 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNothing, TestConfig)
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggWrong, TestConfig)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("aggWrong.ncml");
-    // suppress ERROR: file unreadable
-    defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
-    defaultLogLevel(Logger::INFO);
     TEST4FIMEX_CHECK_EQ(reader->getCDM().getVariables().size(), 0);
 }
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
-    defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
 
@@ -147,7 +147,6 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
 {
     const string ncmlName = require("aggNewDim.ncml");
-    defaultLogLevel(Logger::FATAL);
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
 
     SliceBuilder sb(reader->getCDM(), "multi");
@@ -163,7 +162,6 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_union, TestConfig)
 {
-    //defaultLogLevel(Logger::DEBUG);
     const string ncmlName = require("unionAgg.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     TEST4FIMEX_CHECK(reader->getCDM().hasVariable("b"));
