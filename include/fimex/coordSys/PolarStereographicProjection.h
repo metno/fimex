@@ -29,23 +29,21 @@
 
 #include "fimex/coordSys/StereographicProjection.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/PolarStereographicProjection.h
  */
-class PolarStereographicProjection: public MetNoFimex::StereographicProjection
+class PolarStereographicProjection : public StereographicProjection
 {
-
 public:
     PolarStereographicProjection() : StereographicProjection("polar_stereographic") {}
-    virtual ~PolarStereographicProjection() {}
+    ~PolarStereographicProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* POLARSTEREOGRAPHICPROJECTION_H_ */

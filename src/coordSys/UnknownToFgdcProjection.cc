@@ -1,7 +1,7 @@
 /*
  * Fimex, UnknownToFgdcProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,25 +30,36 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 using namespace std;
 
 UnknownToFgdcProjection::UnknownToFgdcProjection()
-: ProjectionImpl("unknown_to_fgdc", false)
+    : ProjectionImpl("unknown_to_fgdc", false)
 {
 }
+
+UnknownToFgdcProjection::~UnknownToFgdcProjection() {}
 
 bool UnknownToFgdcProjection::acceptsProj4(const std::string& proj4Str)
 {
     return std::regex_search(proj4Str, std::regex("\\+proj=(\\S+)"));
 }
 
+std::string UnknownToFgdcProjection::getProj4String() const
+{
+    const auto proj4Par = find_if(params_.begin(), params_.end(), CDMNameEqual("proj4"));
+    if (proj4Par == params_.end())
+        throw CDMException("UnknownToFgdcProjection requires 'proj4' parameter");
+
+    return proj4Par->getStringValue();
+}
+
 std::vector<CDMAttribute> UnknownToFgdcProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "unknown_to_fgdc"));
 
@@ -63,4 +74,4 @@ std::ostream& UnknownToFgdcProjection::getProj4ProjectionPart(std::ostream& opro
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

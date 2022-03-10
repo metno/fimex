@@ -1,7 +1,7 @@
 /*
  * Fimex, OrthographicProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -49,6 +49,8 @@ OrthographicProjection::OrthographicProjection()
     : ProjectionImpl("orthographic", false)
 {
 }
+
+OrthographicProjection::~OrthographicProjection() {}
 
 bool OrthographicProjection::acceptsProj4(const std::string& proj4Str)
 {

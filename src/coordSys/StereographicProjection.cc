@@ -1,7 +1,7 @@
 /*
  * Fimex, StereographicProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,15 +30,18 @@
 #include <regex>
 #include <sstream>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 StereographicProjection::StereographicProjection()
-: ProjectionImpl("stereographic", false)
+    : ProjectionImpl("stereographic", false)
 {
 }
+
+StereographicProjection::StereographicProjection(const std::string& name)
+    : ProjectionImpl(name, false)
+{
+}
+StereographicProjection::~StereographicProjection() {}
 
 bool StereographicProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +50,9 @@ bool StereographicProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> StereographicProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     std::smatch what;
     double lon0, lat0, k;
@@ -93,4 +97,4 @@ std::ostream& StereographicProjection::getProj4ProjectionPart(std::ostream& opro
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

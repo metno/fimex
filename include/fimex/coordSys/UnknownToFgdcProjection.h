@@ -1,7 +1,7 @@
 /*
  * Fimex, UnknownToFgdcProjection.h
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,27 +29,31 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/UnknownToFgdcProjection.h
  */
-class UnknownToFgdcProjection: public MetNoFimex::ProjectionImpl
+class UnknownToFgdcProjection : public ProjectionImpl
 {
-
 public:
     UnknownToFgdcProjection();
-    virtual ~UnknownToFgdcProjection() {}
+    ~UnknownToFgdcProjection();
+
+    std::string getProj4String() const override;
+
     /** returns allways true */
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
-    UnknownToFgdcProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    UnknownToFgdcProjection(const std::string& name)
+        : ProjectionImpl(name, false)
+    {
+    }
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* UNKNOWNTOFGDCPROJECTION_H_ */

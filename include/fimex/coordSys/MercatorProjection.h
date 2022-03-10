@@ -1,7 +1,7 @@
 /*
  * Fimex, MercatorProjection.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,24 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 /**
  * @headerfile fimex/coordSys/MercatorProjection.h
  */
 
-class MercatorProjection: public MetNoFimex::ProjectionImpl
+class MercatorProjection : public ProjectionImpl
 {
 public:
     MercatorProjection();
-    virtual ~MercatorProjection();
+    ~MercatorProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
-protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 
+protected:
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* MERCATORPROJECTION_H_ */

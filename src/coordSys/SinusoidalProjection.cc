@@ -1,7 +1,7 @@
 /*
  * Fimex, SinusoidalProjection.cc
  *
- * Copyright (C) 2019 met.no
+ * Copyright (C) 2019-2022 met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,7 +29,6 @@
 #include <regex>
 
 namespace MetNoFimex {
-using namespace std;
 
 static Logger_p logger = getLogger("fimex.SinusoidalProjection");
 
@@ -50,7 +49,7 @@ bool SinusoidalProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> SinusoidalProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
+    std::vector<CDMAttribute> attrs;
     if (!acceptsProj4(proj4Str))
         return attrs;
 

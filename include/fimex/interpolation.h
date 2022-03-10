@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -164,10 +164,7 @@ extern int mifi_vector_reproject_values_by_matrix_f(int method,
  * @param oz z-dimension of the outfield
  * @return MIFI_OK or error value
  */
-extern int mifi_vector_reproject_direction_by_matrix_f(int method,
-                        const double* matrix,
-                        float* angle_out, // angle in radian
-                        int ox, int oy, int oz);
+extern int mifi_vector_reproject_direction_by_matrix_f(int method, const double* matrix, float* angle_out, int ox, int oy, int oz);
 
 /**
  * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f
@@ -209,7 +206,6 @@ int mifi_get_vector_reproject_matrix_field(const char* proj_input,
                         int ox, int oy,
                         double* matrix);
 
-
 /**
  * calculate the vector reprojection matrix when projecting to a list of n-points
  *
@@ -222,13 +218,9 @@ int mifi_get_vector_reproject_matrix_field(const char* proj_input,
  * @param matrix preallocated matrix of size (4*on)
  * @return MIFI_OK or error value
  */
-int mifi_get_vector_reproject_matrix_points(const char* proj_input,
-        const char* proj_output,
-        int inputIsMetric,
-        const double* out_x_points, const double* out_y_points, // both size on, must be in m or rad
-        int on,
-        double* matrix
-        );
+int mifi_get_vector_reproject_matrix_points(const char* proj_input, const char* proj_output, int inputIsMetric, const double* out_x_points,
+                                            const double* out_y_points, // both size on, must be in m or radians
+                                            int on, double* matrix);
 
 /**
  * Get the nearest neighbor of a value. Values are rounded to array-position. Extrapolates to once the distance of the two leftmost values (or rightmost).

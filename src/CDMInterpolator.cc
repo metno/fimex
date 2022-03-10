@@ -809,12 +809,12 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     std::string newProjection = "latlong";
     if (newProj != "latlong") {
         newProjection = findUniqueVarName(cdm, "projection_"+newProj);
-        CDMVariable projVar(newProjection, CDM_INT, std::vector<std::string>());
+        CDMVariable projVar(newProjection, CDM_INT, {});
         projVar.setData(createData(CDM_INT, size_t(0))); // define empty data
         cdm.addVariable(projVar);
-        std::vector<CDMAttribute> projAttrs = Projection::createByProj4(proj_input)->getParameters();
-        for (std::vector<CDMAttribute>::iterator it = projAttrs.begin(); it != projAttrs.end(); ++it) {
-            cdm.addAttribute(newProjection, *it);
+        const auto projAttr = Projection::createByProj4(proj_input)->getParameters(); // create a copy
+        for (const auto& att : projAttr) {
+            cdm.addAttribute(newProjection, att);
         }
     }
 
@@ -967,13 +967,12 @@ void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double>
     // all calculations on a sphere with unit 1
     maxDist /= MIFI_EARTH_RADIUS_M;
 
-
     time_t start = time(0);
     PointCloud<double> cloud;
     cloud.pts.resize(orgXDimSize*orgYDimSize);
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
-            size_t pos = ix+iy*orgXDimSize;
+            const size_t pos = ix + iy * orgXDimSize;
             if (!(std::isnan(latVals[pos]) || std::isnan(lonVals[pos]))) {
                 double sinLat = sin(latVals[pos]);
                 double cosLat = cos(latVals[pos]);
@@ -1058,15 +1057,13 @@ double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> 
             for (size_t ix = 0; ix < orgXDimSize; ix++) {
                 for (size_t iy = 0; iy < orgYDimSize; iy++) {
                     // find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
-                    size_t pos = ix+iy*orgXDimSize;
+                    const size_t pos = ix + iy * orgXDimSize;
                     if (pos != samplePos) {
                         double lon1 = lonVals[pos];
                         double lat1 = latVals[pos];
                         if (!(std::isnan(lon1) || std::isnan(lat1))) {
-
-                            double dlon = lon0 - lon1;
-
-                            double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
+                            const double dlon = lon0 - lon1;
+                            const double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
                             if (cos_d > min_cos_d) {
                                 min_cos_d = cos_d;
                             }
@@ -1087,10 +1084,8 @@ double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> 
 #ifdef _OPENMP
     }
 #endif
-    double max_grid_d = acos(*(min_element(samples.begin(), samples.end())));
-    max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
-    if (max_grid_d > MIFI_PI) max_grid_d = MIFI_PI;
-    return max_grid_d;
+    const double max_grid_d = acos(*(min_element(samples.begin(), samples.end()))) * 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
+    return std::min(max_grid_d, MIFI_PI);
 }
 
 // internal setup for binary search lat/long
@@ -1139,14 +1134,12 @@ void fastTranslatePointsToClosestInputCell(shared_array<double> pointsOnXAxis, s
     for (int i = 0; i < static_cast<int>(pointsSize); i++) { // using int instead of size_t because of openMP < 3.0
         //         lat               lon
         LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1., -1.);
-        size_t steps = 0;
         double min_cos_d = min_grid_cos_d; // max allowed distance
         double min_d = acos(min_cos_d);
         vector<LL_POINT>::const_iterator it = lower_bound(latlons.begin(), latlons.end(), p);
         vector<LL_POINT>::const_iterator it2 = it;
         // loop until end
         while (it != latlons.end()) {
-            steps++;
             double dlon = it->lon - p.lon;
             if (fabs(it->lat - p.lat) > min_d) {
                 it = latlons.end(); // all successing
@@ -1164,7 +1157,6 @@ void fastTranslatePointsToClosestInputCell(shared_array<double> pointsOnXAxis, s
         // loop until beginning
         if (it2 != latlons.begin()) {
             do {
-                steps++;
                 it2--;
                 double dlon = it2->lon - p.lon;
                 if (fabs(it2->lat - p.lat) > min_d) {

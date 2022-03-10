@@ -29,26 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/AlbersConicalEqualAreaProjection.h
  */
-class AlbersConicalEqualAreaProjection: public MetNoFimex::ProjectionImpl
+class AlbersConicalEqualAreaProjection : public ProjectionImpl
 {
-
 public:
     AlbersConicalEqualAreaProjection();
-    virtual ~AlbersConicalEqualAreaProjection() {}
+    ~AlbersConicalEqualAreaProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     AlbersConicalEqualAreaProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* ALBERSCONICALEQUALAREAPROJECTION_H_ */

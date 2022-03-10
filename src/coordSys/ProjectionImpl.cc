@@ -1,7 +1,7 @@
 /*
  * Fimex, ProjectionImpl.cc
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <regex>
 #include <sstream>
 
@@ -44,7 +45,8 @@ namespace MetNoFimex {
 using namespace std;
 
 ProjectionImpl::ProjectionImpl(std::string name, bool isDegree)
-: name_(name), isDegree_(isDegree)
+    : name_(name)
+    , isDegree_(isDegree)
 {
     // set a default, spherical world, might be overwritten later
     params_.push_back(CDMAttribute("earth_radius", MIFI_EARTH_RADIUS_M));
@@ -57,7 +59,7 @@ std::vector<CDMAttribute> ProjectionImpl::getParameters() const
     return params_;
 }
 
-void ProjectionImpl::addParameter(CDMAttribute attribute)
+void ProjectionImpl::addParameter(const CDMAttribute& attribute)
 {
     // ensure that name not changes
     if (attribute.getName() == "grid_mapping_name") {
@@ -90,18 +92,18 @@ void ProjectionImpl::addParameter(CDMAttribute attribute)
     }
 }
 
-void ProjectionImpl::addParameters(std::vector<CDMAttribute> attributes)
+void ProjectionImpl::addParameters(const std::vector<CDMAttribute>& attributes)
 {
-    for (vector<CDMAttribute>::const_iterator attr = attributes.begin(); attr != attributes.end(); ++attr) {
-        addParameter(*attr);
+    for (const CDMAttribute& attr : attributes) {
+        addParameter(attr);
     }
 }
 
-
-void ProjectionImpl::removeParameter(std::string paramName)
+void ProjectionImpl::removeParameter(const string& paramName)
 {
     vector<CDMAttribute>::iterator found = find_if(params_.begin(), params_.end(), CDMNameEqual(paramName));
-    if (found != params_.end()) params_.erase(found);
+    if (found != params_.end())
+        params_.erase(found);
 }
 
 const std::string& ProjectionImpl::getName() const
@@ -195,8 +197,8 @@ std::string ProjectionImpl::toString() const
     buffer << getName() << ":";
     vector<CDMAttribute> pars = getParameters();
     stable_sort(pars.begin(), pars.end(), CDMNameCompare());
-    for (vector<CDMAttribute>::const_iterator par = pars.begin(); par != pars.end(); ++par) {
-        buffer << par->getName() << "=" << par->getStringValue() << ";";
+    for (const CDMAttribute& par : pars) {
+        buffer << par.getName() << "=" << par.getStringValue() << ";";
     }
     return buffer.str();
 }

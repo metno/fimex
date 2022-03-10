@@ -1,7 +1,7 @@
 /*
  * Fimex, GeostationaryProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,15 +30,14 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 GeostationaryProjection::GeostationaryProjection()
 : ProjectionImpl("geostationary", false)
 {
 }
+
+GeostationaryProjection::~GeostationaryProjection() {}
 
 bool GeostationaryProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +46,9 @@ bool GeostationaryProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> GeostationaryProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "geostationary"));
 
@@ -71,7 +71,7 @@ std::vector<CDMAttribute> GeostationaryProjection::parametersFromProj4(const std
     }
     attrs.push_back(CDMAttribute("perspective_point_height", h));
 
-    string sweep = "y";
+    std::string sweep = "y";
     if (std::regex_search(proj4Str, what, std::regex("\\+sweep=(\\S+)"))) {
         sweep = what[1].str();
     }
@@ -93,4 +93,4 @@ std::ostream& GeostationaryProjection::getProj4ProjectionPart(std::ostream& opro
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

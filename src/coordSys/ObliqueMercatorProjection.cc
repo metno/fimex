@@ -1,7 +1,7 @@
 /*
  * Fimex, src/coordSys/ObliqueMercatorProjection.cc
  *
- * Copyright (C) 2017-2019, SMHI, met.no
+ * Copyright (C) 2017-2022, SMHI, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -32,7 +32,6 @@
 #include <regex>
 
 namespace MetNoFimex {
-using namespace std;
 
 static Logger_p logger = getLogger("fimex.ObliqueMercatorProjection");
 
@@ -50,7 +49,7 @@ bool ObliqueMercatorProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
+    std::vector<CDMAttribute> attrs;
     if (!acceptsProj4(proj4Str))
         return attrs;
 

@@ -1,7 +1,7 @@
 /*
  * Fimex, SinusoidalProjection.h
  *
- * Copyright (C) 2019 met.no
+ * Copyright (C) 2019-2022 met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -31,11 +31,12 @@ namespace MetNoFimex {
 /**
  * @headerfile fimex/coordSys/SinusoidalProjection.h
  */
-class SinusoidalProjection : public MetNoFimex::ProjectionImpl
+class SinusoidalProjection : public ProjectionImpl
 {
 public:
     SinusoidalProjection();
     ~SinusoidalProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 

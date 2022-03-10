@@ -1,7 +1,7 @@
 /*
  * Fimex, ObliqueMercatorProjection.h
  *
- * Copyright (C) 2017-2019, SMHI, met.no
+ * Copyright (C) 2017-2022 SMHI, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -34,11 +34,12 @@ namespace MetNoFimex {
 /**
  * @headerfile fimex/coordSys/ObliqueMercatorProjection.h
  */
-class ObliqueMercatorProjection: public MetNoFimex::ProjectionImpl
+class ObliqueMercatorProjection : public ProjectionImpl
 {
 public:
     ObliqueMercatorProjection();
     ~ObliqueMercatorProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 

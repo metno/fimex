@@ -30,15 +30,14 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 LambertCylindricalEqualAreaProjection::LambertCylindricalEqualAreaProjection()
 : ProjectionImpl("lambert_cylindrical_equal_area", false)
 {
 }
+
+LambertCylindricalEqualAreaProjection::~LambertCylindricalEqualAreaProjection() {}
 
 bool LambertCylindricalEqualAreaProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +46,9 @@ bool LambertCylindricalEqualAreaProjection::acceptsProj4(const std::string& proj
 
 std::vector<CDMAttribute> LambertCylindricalEqualAreaProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "lambert_cylindrical_equal_area"));
 
@@ -83,4 +83,4 @@ std::ostream& LambertCylindricalEqualAreaProjection::getProj4ProjectionPart(std:
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

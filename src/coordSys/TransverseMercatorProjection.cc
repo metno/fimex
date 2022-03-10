@@ -1,7 +1,7 @@
 /*
  * Fimex, TransverseMercatorProjection.cc
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -32,7 +32,6 @@
 #include <regex>
 
 namespace MetNoFimex {
-using namespace std;
 
 static Logger_p logger = getLogger("fimex.TransverseMercatorProjection");
 
@@ -51,8 +50,9 @@ bool TransverseMercatorProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "transverse_mercator"));
 
@@ -109,12 +109,10 @@ std::ostream& TransverseMercatorProjection::getProj4ProjectionPart(std::ostream&
 {
 #if PJ_VERSION > 480
     oproj << "+proj=etmerc";
-#else
-#if PJ_VERSION > 470
+#elif PJ_VERSION > 470
     oproj << "+proj=gstmerc";
 #else
     oproj << "+proj=tmerc";
-#endif
 #endif
     addParameterToStream(oproj, "longitude_of_central_meridian", " +lon_0=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");

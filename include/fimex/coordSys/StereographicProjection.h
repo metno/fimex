@@ -1,7 +1,7 @@
 /*
  * Fimex, StereographicProjection.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,26 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/StereographicProjection.h
  */
-class StereographicProjection: public MetNoFimex::ProjectionImpl
+class StereographicProjection : public ProjectionImpl
 {
-
 public:
     StereographicProjection();
-    virtual ~StereographicProjection() {}
+    ~StereographicProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
-    StereographicProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    StereographicProjection(const std::string& name);
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* STEREOGRAPHICPROJECTION_H_ */

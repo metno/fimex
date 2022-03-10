@@ -29,24 +29,24 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/LambertConformalConicProjection.h
  */
-class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
+class LambertConformalConicProjection : public ProjectionImpl
 {
 public:
     LambertConformalConicProjection();
-    virtual ~LambertConformalConicProjection() {}
+    ~LambertConformalConicProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* LAMBERTCONFORMALCONICPROJECTION_H_ */

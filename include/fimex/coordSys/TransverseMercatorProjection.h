@@ -29,24 +29,24 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/TransverseMercatorProjection.h
  */
-class TransverseMercatorProjection: public MetNoFimex::ProjectionImpl
+class TransverseMercatorProjection : public ProjectionImpl
 {
 public:
     TransverseMercatorProjection();
-    virtual ~TransverseMercatorProjection();
+    ~TransverseMercatorProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
-protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 
+protected:
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* TRANSVERSEMERCATORPROJECTION_H_ */

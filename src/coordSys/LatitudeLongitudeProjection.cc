@@ -1,7 +1,7 @@
 /*
  * Fimex, LatitudeLongitudeProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,15 +25,12 @@
  */
 
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
-#include <iostream>
-#include <regex>
 
-namespace MetNoFimex
-{
+#include <ostream>
 
-using namespace std;
+namespace MetNoFimex {
 
-string LatitudeLongitudeProjection::NAME()
+std::string LatitudeLongitudeProjection::NAME()
 {
     return "latitude_longitude";
 }
@@ -43,6 +40,8 @@ LatitudeLongitudeProjection::LatitudeLongitudeProjection()
 {
 }
 
+LatitudeLongitudeProjection::~LatitudeLongitudeProjection() {}
+
 bool LatitudeLongitudeProjection::acceptsProj4(const std::string& proj4Str)
 {
     return proj4ProjectionMatchesName(proj4Str, "latlong") || proj4ProjectionMatchesName(proj4Str, "longlat");
@@ -50,8 +49,9 @@ bool LatitudeLongitudeProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> LatitudeLongitudeProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "latitude_longitude"));
 
@@ -65,4 +65,4 @@ std::ostream& LatitudeLongitudeProjection::getProj4ProjectionPart(std::ostream& 
     return oproj << "+proj=latlong";
 }
 
-}
+} // namespace MetNoFimex

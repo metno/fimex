@@ -1,7 +1,7 @@
 /*
  * Fimex, ProjectionImpl.h
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -43,19 +43,17 @@ namespace MetNoFimex {
  * @note the implemented projection needs to get made visible in Projection::create() and  Projection::createByProj4
  *
  */
-class ProjectionImpl: public MetNoFimex::Projection
+class ProjectionImpl : public Projection
 {
 public:
-    virtual ~ProjectionImpl();
-    virtual std::vector<CDMAttribute> getParameters() const;
-    virtual void addParameter(CDMAttribute attribute);
-    virtual void addParameters(std::vector<CDMAttribute> attributes);
-    virtual void removeParameter(std::string paramName);
-
+    ~ProjectionImpl();
+    std::vector<CDMAttribute> getParameters() const override;
+    void addParameter(const CDMAttribute& attribute) override;
+    void addParameters(const std::vector<CDMAttribute>& attributes) override;
+    void removeParameter(const std::string& paramName) override;
     /** get the projection name */
-    virtual const std::string& getName() const;
-
-    virtual bool isDegree() const;
+    const std::string& getName() const override;
+    bool isDegree() const override;
 
     /**
      * get the proj4 string defined by the parameters. If a parameter
@@ -64,15 +62,15 @@ public:
      * @note Implementors should not overwrite this method, but the protected getProj4ProjectionPart()
      * method
      */
-    virtual std::string getProj4String() const;
+    std::string getProj4String() const override;
 
     /**
      * get the parts of the proj4 string defining the earth.
      */
-    virtual std::string getProj4EarthString() const;
+    std::string getProj4EarthString() const override;
 
     /** get a string representation */
-    virtual std::string toString() const;
+    std::string toString() const override;
 
 protected:
     /** match the +proj= part of a proj4 string */

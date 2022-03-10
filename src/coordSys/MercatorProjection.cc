@@ -1,7 +1,7 @@
 /*
  * Fimex, MercatorProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,16 +30,13 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
-    using namespace std;
+namespace MetNoFimex {
 
 MercatorProjection::MercatorProjection()
-: ProjectionImpl("mercator", false)
+    : ProjectionImpl("mercator", false)
 {}
 
-MercatorProjection::~MercatorProjection()
-{}
+MercatorProjection::~MercatorProjection() {}
 
 bool MercatorProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -48,8 +45,9 @@ bool MercatorProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> MercatorProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "mercator"));
 
@@ -84,4 +82,4 @@ std::ostream& MercatorProjection::getProj4ProjectionPart(std::ostream& oproj) co
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

@@ -1,7 +1,7 @@
 /*
  * Fimex, LambertConformalConicProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,15 +29,14 @@
 #include "fimex/String2Type.h"
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 LambertConformalConicProjection::LambertConformalConicProjection()
 : ProjectionImpl("lambert_conformal_conic", false)
 {
 }
+
+LambertConformalConicProjection::~LambertConformalConicProjection() {}
 
 bool LambertConformalConicProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -46,8 +45,9 @@ bool LambertConformalConicProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> LambertConformalConicProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "lambert_conformal_conic"));
 
@@ -105,4 +105,4 @@ std::ostream& LambertConformalConicProjection::getProj4ProjectionPart(std::ostre
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

@@ -29,26 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/LambertAzimuthalEqualAreaProjection.h
  */
-class LambertAzimuthalEqualAreaProjection: public MetNoFimex::ProjectionImpl
+class LambertAzimuthalEqualAreaProjection : public ProjectionImpl
 {
-
 public:
     LambertAzimuthalEqualAreaProjection();
-    virtual ~LambertAzimuthalEqualAreaProjection() {}
+    ~LambertAzimuthalEqualAreaProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     LambertAzimuthalEqualAreaProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* LAMBERTAZIMUTHALEQUALAREAPROJECTION_H_ */

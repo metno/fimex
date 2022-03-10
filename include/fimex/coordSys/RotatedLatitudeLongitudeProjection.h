@@ -29,25 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/RotatedLatitudeLongitudeProjection.h
  */
-class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
+class RotatedLatitudeLongitudeProjection : public ProjectionImpl
 {
 public:
     RotatedLatitudeLongitudeProjection();
-    virtual ~RotatedLatitudeLongitudeProjection() {}
+    ~RotatedLatitudeLongitudeProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
     static std::string NAME();
 
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /* ROTATEDLATITUDELONGITUDEPROJECTION_H_ */

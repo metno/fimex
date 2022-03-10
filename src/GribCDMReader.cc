@@ -1015,7 +1015,8 @@ void GribCDMReader::initAddProjection()
         // projection-variable without datatype and dimension
         CDMVariable projVar(pi.gridMapping, CDM_NAT, vector<string>());
         cdm_->addVariable(projVar);
-        for (const auto& attr : Projection::createByProj4(projStr)->getParameters()) {
+        const auto projAttr = Projection::createByProj4(projStr)->getParameters(); // create a copy
+        for (const auto& attr : projAttr) {
             cdm_->addAttribute(pi.gridMapping, attr);
         }
 

@@ -1,7 +1,7 @@
 /*
  * Fimex, PolarStereographicProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,25 +25,24 @@
  */
 
 #include "fimex/coordSys/PolarStereographicProjection.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/String2Type.h"
 
-#include <cassert>
 #include <cmath>
 #include <regex>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-using namespace std;
+PolarStereographicProjection::~PolarStereographicProjection() {}
 
 bool PolarStereographicProjection::acceptsProj4(const std::string& proj4Str)
 {
     if (proj4ProjectionMatchesName(proj4Str, "stere")) {
         std::smatch what;
         if (std::regex_search(proj4Str, what, std::regex("\\+lat_0=(\\S+)"))) {
-            double lat0 = string2type<double>(what[1].str());
-            if (fabs(fabs(lat0)-90) < 1e-4) {
+            const double lat0 = string2type<double>(what[1].str());
+            if (std::abs(std::abs(lat0) - 90) < 1e-4) {
                 return true; // +90/-90
             }
         }
@@ -53,21 +52,27 @@ bool PolarStereographicProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> PolarStereographicProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     // get Stereographic attributes
     attrs = StereographicProjection::parametersFromProj4(proj4Str);
+
     // switch grid_mapping_name to polar_stereographic
-    vector<CDMAttribute>::iterator found = find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
-    assert(found != attrs.end());
+    std::vector<CDMAttribute>::iterator found = find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
+    if (found == attrs.end())
+        throw CDMException("no grid_mapping_name for PolarStereographicProjection");
     *found = CDMAttribute("grid_mapping_name", "polar_stereographic");
+
     // switch longitude_of_projection_origin to straight_vertical_longitude_from_pole
     found = find_if(attrs.begin(), attrs.end(), CDMNameEqual("longitude_of_projection_origin"));
-    assert(found != attrs.end());
+    if (found == attrs.end())
+        throw CDMException("no longitude_of_projection_origin for PolarStereographicProjection");
     double lonVal = found->getData()->asDouble()[0];
     *found = CDMAttribute("straight_vertical_longitude_from_pole", lonVal);
+
     return attrs;
 }
 
-}
+} // namespace MetNoFimex

@@ -29,26 +29,26 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/AzimuthalEquidistantProjection.h
  */
-class AzimuthalEquidistantProjection: public MetNoFimex::ProjectionImpl
+class AzimuthalEquidistantProjection : public ProjectionImpl
 {
 
 public:
     AzimuthalEquidistantProjection();
-    virtual ~AzimuthalEquidistantProjection() {}
+    ~AzimuthalEquidistantProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     AzimuthalEquidistantProjection(std::string name) : ProjectionImpl(name, false) {}
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* AZIMUTHALEQUIDISTANTPROJECTION_H_ */

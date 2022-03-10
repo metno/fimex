@@ -1,7 +1,7 @@
 /*
  * Fimex, VerticalPerspectiveProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,15 +30,14 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 VerticalPerspectiveProjection::VerticalPerspectiveProjection()
 : ProjectionImpl("vertical_perspective", false)
 {
 }
+
+VerticalPerspectiveProjection::~VerticalPerspectiveProjection() {}
 
 bool VerticalPerspectiveProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +46,9 @@ bool VerticalPerspectiveProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> VerticalPerspectiveProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "vertical_perspective"));
 
@@ -87,4 +87,4 @@ std::ostream& VerticalPerspectiveProjection::getProj4ProjectionPart(std::ostream
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

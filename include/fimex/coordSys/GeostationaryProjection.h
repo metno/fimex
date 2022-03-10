@@ -1,7 +1,7 @@
 /*
  * Fimex, GeostationaryProjection.h
  *
- * (C) Copyright 2017, SMHI
+ * Copyright (C) 2017-2022 SMHI, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,26 +29,25 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/GeostationaryProjection.h
  */
-class GeostationaryProjection: public MetNoFimex::ProjectionImpl
+class GeostationaryProjection : public ProjectionImpl
 {
-
 public:
     GeostationaryProjection();
-    virtual ~GeostationaryProjection() {}
+    ~GeostationaryProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     GeostationaryProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* GEOSTATIONARYPROJECTION_H_ */

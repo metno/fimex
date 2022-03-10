@@ -1,7 +1,7 @@
 /*
  * Fimex, OrthographicProjection.h
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,26 +29,26 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/OrthographicProjection.h
  */
-class OrthographicProjection: public MetNoFimex::ProjectionImpl
+class OrthographicProjection : public ProjectionImpl
 {
 
 public:
     OrthographicProjection();
-    virtual ~OrthographicProjection() {}
+    ~OrthographicProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     OrthographicProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* ORTHOGRAPHICPROJECTION_H_ */

@@ -1,7 +1,7 @@
 /*
  * Fimex, AzimuthalEquidistantProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,15 +30,14 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 AzimuthalEquidistantProjection::AzimuthalEquidistantProjection()
 : ProjectionImpl("azimuthal_equidistant", false)
 {
 }
+
+AzimuthalEquidistantProjection::~AzimuthalEquidistantProjection() {}
 
 bool AzimuthalEquidistantProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +46,9 @@ bool AzimuthalEquidistantProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> AzimuthalEquidistantProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "azimuthal_equidistant"));
 
@@ -79,4 +79,4 @@ std::ostream& AzimuthalEquidistantProjection::getProj4ProjectionPart(std::ostrea
     return oproj;
 }
 
-}
+} // namespace MetNoFimex

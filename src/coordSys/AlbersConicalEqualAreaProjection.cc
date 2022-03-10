@@ -1,7 +1,7 @@
 /*
  * Fimex, AlbersConicalEqualAreaProjection.cc
  *
- * (C) Copyright 2011, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -33,12 +33,12 @@
 
 namespace MetNoFimex {
 
-using namespace std;
-
 AlbersConicalEqualAreaProjection::AlbersConicalEqualAreaProjection()
 : ProjectionImpl("albers_conical_equal_area", false)
 {
 }
+
+AlbersConicalEqualAreaProjection::~AlbersConicalEqualAreaProjection() {}
 
 bool AlbersConicalEqualAreaProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -47,8 +47,9 @@ bool AlbersConicalEqualAreaProjection::acceptsProj4(const std::string& proj4Str)
 
 std::vector<CDMAttribute> AlbersConicalEqualAreaProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "albers_conical_equal_area"));
 

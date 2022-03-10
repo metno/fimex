@@ -1,7 +1,7 @@
 /*
  * Fimex, Projection.h
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -47,17 +47,21 @@ class Projection : public CDMNamedEntity
 public:
     ~Projection();
     virtual std::vector<CDMAttribute> getParameters() const = 0;
-    virtual void addParameter(CDMAttribute attribute) = 0;
-    virtual void addParameters(std::vector<CDMAttribute> attributes) = 0;
-    virtual void removeParameter(std::string paramName) = 0;
+    virtual void addParameter(const CDMAttribute& attribute) = 0;
+    virtual void addParameters(const std::vector<CDMAttribute>& attributes) = 0;
+    virtual void removeParameter(const std::string& paramName) = 0;
+
     /** check if the coordinates belonging to this projection are in degree (otherwise metrical) */
     virtual bool isDegree() const = 0;
+
     /** get a proj4 string */
     virtual std::string getProj4String() const = 0;
+
     /**
      * get the parts of the proj4 string defining the earth.
      */
     virtual std::string getProj4EarthString() const = 0;
+
     /**
      * convert two vectors of values in the projection to latitude and longitude
      * in degree. The earth ellipsoid will be the same as the input.
@@ -68,6 +72,7 @@ public:
      * @warning the values will be converted in place
      */
     virtual void convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const;
+
     /**
      * convert two vectors of values in the projection to latitude and longitude
      * in degree. The earth ellipsoid will be the same as the input.
@@ -78,11 +83,13 @@ public:
      * @warning the values will be converted in place
      */
     virtual void convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const;
+
     /**
      * get a string representation
      * @note this should be implemented as unique as possible, i.e.
      */
     virtual std::string toString() const = 0;
+
     /**
      * Comparison of two projections, implemented using the toString() function.
      * This function does not guarantee that two projections are physically equal.

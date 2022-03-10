@@ -1,7 +1,7 @@
 /*
  * Fimex, RotatedLatitudeLongitudeProjection.cc
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -31,12 +31,9 @@
 
 #include <regex>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
-using namespace std;
-
-string RotatedLatitudeLongitudeProjection::NAME()
+std::string RotatedLatitudeLongitudeProjection::NAME()
 {
     return "rotated_latitude_longitude";
 }
@@ -46,12 +43,14 @@ RotatedLatitudeLongitudeProjection::RotatedLatitudeLongitudeProjection()
 {
 }
 
+RotatedLatitudeLongitudeProjection::~RotatedLatitudeLongitudeProjection() {}
+
 bool RotatedLatitudeLongitudeProjection::acceptsProj4(const std::string& proj4Str)
 {
     if (proj4ProjectionMatchesName(proj4Str, "ob_tran")) {
         std::smatch what;
         if (std::regex_search(proj4Str, what, std::regex("\\+o_proj=(\\S+)"))) {
-            string orgProj = what[1].str();
+            std::string orgProj = what[1].str();
             if (orgProj == "latlong" || orgProj == "longlat" || orgProj == "eqc") {
                 return true;
             }
@@ -62,8 +61,9 @@ bool RotatedLatitudeLongitudeProjection::acceptsProj4(const std::string& proj4St
 
 std::vector<CDMAttribute> RotatedLatitudeLongitudeProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
     double north_pole_lat = 90;
@@ -104,5 +104,4 @@ std::ostream& RotatedLatitudeLongitudeProjection::getProj4ProjectionPart(std::os
     return oproj;
 }
 
-}
-
+} // namespace MetNoFimex

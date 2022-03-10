@@ -29,26 +29,28 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/VerticalPerspectiveProjection.h
  */
-class VerticalPerspectiveProjection: public MetNoFimex::ProjectionImpl
+class VerticalPerspectiveProjection : public ProjectionImpl
 {
-
 public:
     VerticalPerspectiveProjection();
-    virtual ~VerticalPerspectiveProjection() {}
+    ~VerticalPerspectiveProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
-    VerticalPerspectiveProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    VerticalPerspectiveProjection(const std::string& name)
+        : ProjectionImpl(name, false)
+    {
+    }
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* VERTICALPERSPECTIVEPROJECTION_H_ */

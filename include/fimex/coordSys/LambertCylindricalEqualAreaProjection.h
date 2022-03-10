@@ -29,26 +29,26 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/LambertCylindricalEqualAreaProjection.h
  */
-class LambertCylindricalEqualAreaProjection: public MetNoFimex::ProjectionImpl
+class LambertCylindricalEqualAreaProjection : public ProjectionImpl
 {
 
 public:
     LambertCylindricalEqualAreaProjection();
-    virtual ~LambertCylindricalEqualAreaProjection() {}
+    ~LambertCylindricalEqualAreaProjection();
+
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     LambertCylindricalEqualAreaProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+    std::ostream& getProj4ProjectionPart(std::ostream& oproj) const override;
 };
 
-}
-
+} // namespace MetNoFimex
 
 #endif /* LAMBERTCYLINDRICALEQUALAREAPROJECTION_H_ */

@@ -28,15 +28,14 @@
 #include "fimex/String2Type.h"
 #include <regex>
 
-namespace MetNoFimex
-{
-
-using namespace std;
+namespace MetNoFimex {
 
 LambertAzimuthalEqualAreaProjection::LambertAzimuthalEqualAreaProjection()
 : ProjectionImpl("lambert_azimuthal_equal_area", false)
 {
 }
+
+LambertAzimuthalEqualAreaProjection::~LambertAzimuthalEqualAreaProjection() {}
 
 bool LambertAzimuthalEqualAreaProjection::acceptsProj4(const std::string& proj4Str)
 {
@@ -45,8 +44,9 @@ bool LambertAzimuthalEqualAreaProjection::acceptsProj4(const std::string& proj4S
 
 std::vector<CDMAttribute> LambertAzimuthalEqualAreaProjection::parametersFromProj4(const std::string& proj4Str)
 {
-    vector<CDMAttribute> attrs;
-    if (!acceptsProj4(proj4Str)) return attrs;
+    std::vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str))
+        return attrs;
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "lambert_azimuthal_equal_area"));
 
@@ -77,4 +77,4 @@ std::ostream& LambertAzimuthalEqualAreaProjection::getProj4ProjectionPart(std::o
     return oproj;
 }
 
-}
+} // namespace MetNoFimex
