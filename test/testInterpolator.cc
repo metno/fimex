@@ -138,46 +138,26 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 
 TEST4FIMEX_TEST_CASE(interpolator2coords)
 {
-    const string fileName = pathTest("twoCoordsTest.nc");
-    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
-    CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
-    {
-        vector<double> xAxis, yAxis;
-        for (int i = 0; i < 12; i++) {
-            xAxis.push_back(-1705516 + i * 50000);
-            yAxis.push_back(-6872225 + i * 50000);
-        }
-        interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-        //NetCDF_CDMWriter(interpolator, "test2coordsNNKDInterpolator.nc");
-    }
-    {
-        DataPtr temp2Data = interpolator->getDataSlice("temp2");
-        shared_array<double> tmpArray = temp2Data->asDouble();
-        int found = 0;
-        for (size_t i = 0; i < temp2Data->size(); i++) {
-            if (tmpArray[i] > 29000) {
-                found++;
-            }
-        }
-        TEST4FIMEX_CHECK(found > 100); // at least 100 cells above 2000m
+    const string proj_stere = "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a=" + type2string(MIFI_EARTH_RADIUS_M) + " +e=0";
+
+    vector<double> xAxis, yAxis;
+    for (int i = 0; i < 12; i++) {
+        xAxis.push_back(-1705516 + i * 50000);
+        yAxis.push_back(-6872225 + i * 50000);
     }
 
-    interpolator = std::make_shared<CDMInterpolator>(reader);
-    {
-        vector<double> xAxis, yAxis;
-        for (int i = 0; i < 12; i++) {
-            xAxis.push_back(-1705516 + i * 50000);
-            yAxis.push_back(-6872225 + i * 50000);
-        }
-        interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-        //NetCDF_CDMWriter(interpolator, "test2nearestneighborInterpolator.nc");
-    }
-    {
+    const string fileName = pathTest("twoCoordsTest.nc");
+    CDMReader_p reader(CDMFileReaderFactory::create("netcdf", fileName));
+    const std::vector<int> interpol_method{MIFI_INTERPOL_COORD_NN_KD, MIFI_INTERPOL_NEAREST_NEIGHBOR};
+    for (int method : interpol_method) {
+        CDMInterpolator_p interpolator = std::make_shared<CDMInterpolator>(reader);
+        interpolator->changeProjection(method, proj_stere, xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+
         int found = 0;
-        DataPtr temp2Data = interpolator->getDataSlice("temp2");
+        DataPtr temp2Data = interpolator->getScaledDataSlice("temp2", 0);
         shared_array<double> tmpArray = temp2Data->asDouble();
         for (size_t i = 0; i < temp2Data->size(); i++) {
-            if (tmpArray[i] > 29000) {
+            if (!mifi_isnan(tmpArray[i])) {
                 found++;
             }
         }
