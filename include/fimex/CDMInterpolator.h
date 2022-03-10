@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -262,12 +262,11 @@ public:
      *
      * @param out_x_axis the available new x-axis (in meter or radian)
      * @param out_y_axis the available new y-axis (in meter or radian)
-     * @param isMetric indicate if y-axis is already given in m, or is in degree
      *
      * @return the maximum distance (in m) between adjacent points,
      *         or the value given with setDistanceOfInterest()
      */
-    virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis, bool isMetric) const;
+    virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis) const;
     /**
      * set the distance of interest, usually the radius of input-points + ~1/2 cell-size of output
      * Negative values invalidate the distance. To have effect, this function must be set before calling changeProjection()

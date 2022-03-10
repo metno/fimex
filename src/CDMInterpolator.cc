@@ -294,26 +294,18 @@ const std::string& CDMInterpolator::getLongitudeName() const {
 void CDMInterpolator::setDistanceOfInterest(double dist) {
     p_->maxDistance = dist;
 }
-double CDMInterpolator::getMaxDistanceOfInterest(const vector<double>& out_x_axis, const vector<double>& out_y_axis, bool isMetric) const
+double CDMInterpolator::getMaxDistanceOfInterest(const vector<double>& out_x_axis, const vector<double>& out_y_axis) const
 {
-    if (p_->maxDistance > 0) return p_->maxDistance;
+    if (p_->maxDistance > 0)
+        return p_->maxDistance;
     // find the max distance of two neighboring points in the output
     // this is the region of influence for a cell
-    double factor = 1.;
-    if (!isMetric) {
-        factor = MIFI_EARTH_RADIUS_M;
-    }
     double maxDist = 0;
-    {
-        double maxX = 0;
-        for (size_t i = 0; i < out_x_axis.size() - 1; ++i) {
-            maxX = max(factor*abs(out_x_axis[i+1]-out_x_axis[i]), maxX);
-        }
-        double maxY = 0;
-        for (size_t j = 0; j < out_y_axis.size()-1; ++j) {
-            maxY = max(factor*abs(out_y_axis[j+1] - out_y_axis[j]), maxY);
-        }
-        maxDist = max(maxX, maxY);
+    for (size_t i = 0; i < out_x_axis.size() - 1; ++i) {
+        maxDist = max(abs(out_x_axis[i + 1] - out_x_axis[i]), maxDist);
+    }
+    for (size_t j = 0; j < out_y_axis.size() - 1; ++j) {
+        maxDist = max(abs(out_y_axis[j + 1] - out_y_axis[j]), maxDist);
     }
     return maxDist;
 }
@@ -1378,7 +1370,10 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         if (method == MIFI_INTERPOL_COORD_NN) {
             fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, fieldSize, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
         } else if (method == MIFI_INTERPOL_COORD_NN_KD) {
-            double maxDistance = getMaxDistanceOfInterest(out_x_axis, out_y_axis, isMetric);
+            double maxDistance = getMaxDistanceOfInterest(out_x_axis, out_y_axis);
+            if (!isMetric) {
+                maxDistance *= MIFI_EARTH_RADIUS_M;
+            }
             flannTranslatePointsToClosestInputCell(maxDistance, pointsOnXAxis, pointsOnYAxis, fieldSize, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
         } else {
             throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
