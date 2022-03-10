@@ -233,12 +233,12 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
     VERSION_MIN
     CMAKE_NAME
     PKGCONFIG_NAME
-    INCLUDE_HDR
     LIBRARY_NAME
   )
   set(ARGSN
     # arguments with multiple values
     CMAKE_TARGETS
+    INCLUDE_HDR
   )
   CMAKE_PARSE_ARGUMENTS(_ffp "${ARGS0}" "${ARGS1}" "${ARGSN}" ${ARGN})
 
@@ -294,7 +294,7 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
   # try to find via library and header
   UNSET(_ffp_inc_dir CACHE)
   FIND_PATH(_ffp_inc_dir
-    ${_ffp_INCLUDE_HDR}
+    NAMES ${_ffp_INCLUDE_HDR}
     HINTS "${${ffp}_INC_DIR}" "${${ffp}_DIR}/include"
   )
   IF (NOT _ffp_inc_dir)
@@ -312,5 +312,6 @@ FUNCTION(FIMEX_FIND_PACKAGE ffp)
   ENDIF()
   FIMEX_ADD_IMPORTED_LIBRARY(${ffp}_LIB_INC "${_ffp_lib}" "${_ffp_inc_dir}" "")
   SET(${ffp}_PACKAGE "${ffp}_LIB_INC" PARENT_SCOPE)
+  SET(${ffp}_PACKAGE_VERSION "" PARENT_SCOPE)
   MESSAGE(STATUS "Found ${ffp} via find_package/find_path, lib='${_ffp_lib}', include='${_ffp_inc_dir}'")
 ENDFUNCTION()

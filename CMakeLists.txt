@@ -54,19 +54,27 @@ FIMEX_FIND_PACKAGE(proj
   CMAKE_NAME "PROJ"
   PKGCONFIG_NAME "proj"
   LIBRARY_NAME "proj"
-  INCLUDE_HDR "proj_api.h"
+  INCLUDE_HDR "proj.h" "proj_api.h"
 )
 IF (proj_PACKAGE_VERSION STREQUAL "")
-  # unknown version, proj_api.h was found, compilation or tests should fail if unsupported
+  # unknown version
+  FIND_PATH(proj_h_inc_dir
+    NAMES "proj.h"
+    HINTS "${proj_INC_DIR}" "${proj_DIR}/include"
+  )
+  IF (proj_h_inc_dir)
+    # proj.h was found
+    SET(HAVE_PROJ_H 1)
+  ENDIF()
 ELSEIF (proj_PACKAGE_VERSION VERSION_LESS "4.6.0")
   # <4.6
-  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' is too old")
+  MESSAGE(SEND_ERROR "proj version '${proj_PACKAGE_VERSION}' is too old")
 ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "5.0.0")
   # >=4.6,<5.0
   # proj_api.h
 ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "6.2.0")
   # >=5.0,<6.2
-  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' not supported")
+  MESSAGE(SEND_ERROR "proj version '${proj_PACKAGE_VERSION}' not supported")
 ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "8.0.0")
   # >=6.2,<8.0
   # ok, proj_api.h
