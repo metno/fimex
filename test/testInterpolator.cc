@@ -251,8 +251,6 @@ TEST4FIMEX_TEST_CASE(interpolator_wrongaxes_latlon)
 
 namespace {
 struct IP {
-    IP(string proj, string xAxis, string yAxis, string unit, string lonAxis="-180,-179,...,180", string latAxis="-90,-89,...,90", double delta=1e-4)
-        : proj(proj), xAxis(xAxis), yAxis(yAxis), unit(unit), lonAxis(lonAxis), latAxis(latAxis), delta(delta) {}
     string proj;
     string xAxis;
     string yAxis;
@@ -261,67 +259,51 @@ struct IP {
     string latAxis;
     double delta;
 };
-
-template<class T>
-class TestMany {
-    vector<T> all;
-public:
-    TestMany& operator()(T ip) {
-        all.push_back(ip);
-        return *this;
-    }
-    size_t size() {return all.size();}
-    T& get(size_t i) {return all.at(i);}
-};
 } // namespace
 
 TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
 {
-    TestMany<IP> tests;
-    tests(IP("+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
-             "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-             "-180,-179,...,179", "55,56,...,87", 8e-2))
-         (IP("+proj=stere +lat_0=90 +lon_0=0 +lat_ts=90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
-             "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-             "-180,-179,...,179", "55,56,...,87", 8e-2))
-         (IP("+proj=stere +lat_0=-90 +lon_0=0 +lat_ts=-90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
-             "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-             "0,1,359", "-55,-56,...,-87", 8e-2)) // south-pole - difficult around -180,180 edge, +-ywind???
-         (IP("+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6.371e+06",
-              "-922000,-902000,...,922000", "-1130000,-1110000,...,1230000", "m",
-              "-30,-29,...,40","50,51,...,85", 1e-2)) // arome-norway
-         (IP("+proj=ob_tran +o_proj=longlat +lon_0=-40 +o_lat_p=22 +R=6.371e+06 +no_defs",
-             "16.5,16.6,...,24.2","-3.8,-3.7,...,14.9","degree",
-             "-30,-29,...,40","50,51,...,85", 5e-3)) // hirlam8
-         (IP("+proj=ob_tran +o_proj=longlat +lon_0=0 +o_lat_p=25 +R=6.371e+06 +no_defs",
-             "-46.4,-46.2,...,46.","-36.4,-36.2,...,38.8","degree",
-             "-90,-89,...,90","40,51,...,85", 3e-2)) // hirlam12
-         (IP("+proj=latlon +R=6.371e+06 +no_defs",
-             "-179,-178,...,179","-89.5,-89,...,89.5","degree",
-             "-180,-179,...,179","-90,-89,...,90", 1e-3)) // latlon
-         (IP("+proj=utm +zone=33 +datum=WGS84 +no_defs",
-             "0,1000,...,x;relativeStart=0","0,1000,...,x;relativeStart=0","m",
-             "-30,-29,...,40","50,51,...,85", 1e-2)) // UTM
-         ;
+    std::vector<IP> tests{
+        {"+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
+         "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
+         "-180,-179,...,179", "55,56,...,87", 8.01e-2},
+        {"+proj=stere +lat_0=90 +lon_0=0 +lat_ts=90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
+         "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
+         "-180,-179,...,179", "55,56,...,87", 8.02e-2},
+        {"+proj=stere +lat_0=-90 +lon_0=0 +lat_ts=-90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
+         "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
+         "0,1,359", "-55,-56,...,-87", 8.03e-2 }, // south-pole - difficult around -180,180 edge, +-ywind???
+        {"+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6.371e+06",
+         "-922000,-902000,...,922000", "-1130000,-1110000,...,1230000", "m",
+         "-30,-29,...,40","50,51,...,85", 1.04e-2 }, // arome-norway
+        {"+proj=ob_tran +o_proj=longlat +lon_0=-40 +o_lat_p=22 +R=6.371e+06 +no_defs",
+         "16.5,16.6,...,24.2","-3.8,-3.7,...,14.9","degree",
+         "-30,-29,...,40","50,51,...,85", 5.05e-3 }, // hirlam8
+        {"+proj=ob_tran +o_proj=longlat +lon_0=0 +o_lat_p=25 +R=6.371e+06 +no_defs",
+         "-46.4,-46.2,...,46.","-36.4,-36.2,...,38.8","degree",
+         "-90,-89,...,90","40,51,...,85", 3.06e-2 }, // hirlam12
+        {"+proj=latlon +R=6.371e+06 +no_defs",
+         "-179,-178,...,179","-89.5,-89,...,89.5","degree",
+         "-180,-179,...,179","-90,-89,...,90", 1.07e-3 }, // latlon
+#if 0 // produces only NaN
+        {"+proj=utm +zone=33 +datum=WGS84 +no_defs",
+         "0,1000,...,x;relativeStart=0","0,1000,...,x;relativeStart=0","m",
+         "-30,-29,...,40","50,51,...,85", 1.08e-2 }, // UTM
+#endif
+    };
 
     for (size_t k = 0; k < 2; ++k) {
         CDMReader_p reader;
-        string fileName = pathTest("data/north.nc");
-        double xWind = 0;
-        double yWind = 1;
-        if (k == 1) {
-            fileName = pathTest("data/east.nc");
-            xWind = 1;
-            yWind = 0;
-        }
+        const string fileName = k == 0 ? pathTest("data/north.nc") : pathTest("data/east.nc");
+        const double xWind = k;
+        const double yWind = 1 - k;
         try {
             reader = CDMFileReaderFactory::create("netcdf", fileName);
         } catch (CDMException& ex) {
             // ignore, most likely nc4 not readable
             continue;
         }
-        for (size_t i = 0; i < tests.size(); ++i) {
-            IP ip(tests.get(i));
+        for (const IP& ip : tests) {
             CDMInterpolator_p interp = std::make_shared<CDMInterpolator>(reader);
             interp->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, ip.proj,
                     ip.xAxis, ip.yAxis, ip.unit, ip.unit);
@@ -336,7 +318,7 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
             shared_array<float> ywind = iback->getScaledData("y_wind")->asFloat();
 
             for (size_t i = 0; i < dxwind->size(); ++i) {
-                if (!(mifi_isnan(xwind[i]) || (mifi_isnan(ywind[i])))) {
+                if (!mifi_isnan(xwind[i]) && !mifi_isnan(ywind[i])) {
                     TEST4FIMEX_CHECK_MESSAGE((std::abs(xWind - xwind[i]) < ip.delta) && (std::abs(yWind - ywind[i]) < ip.delta),
                                              "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:(" << xWind << "," << yWind << ") -> " << i << ": (" << xwind[i]
                                                                                                << "," << ywind[i] << "): " << ip.proj);
