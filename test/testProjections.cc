@@ -1,7 +1,7 @@
 /*
  * Fimex, testProjections.cc
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -217,4 +217,32 @@ TEST4FIMEX_TEST_CASE(test_conversion_geostationary)
         TEST4FIMEX_CHECK(fabs(lonValsConv[i] - xVals[i]) < 1e-5);
         TEST4FIMEX_CHECK(fabs(latValsConv[i] - yVals[i]) < 1e-5);
     }
+}
+
+TEST4FIMEX_TEST_CASE(test_common_projections)
+{
+    const std::vector<std::string> proj4 = {
+        "+proj=lcc +lat_0=77.5 +lon_0=335 +lat_1=77.5 +lat_2=77.5 +no_defs +R=6.371e+06",        // Arome-Arctic 2022
+        "+proj=lcc +lat_0=77.5 +lon_0=-25 +lat_1=77.5 +lat_2=77.5 +no_defs +R=6.371e+06",        // Arome-Arctic 2015
+        "+proj=lcc +lat_0=63.3 +lon_0=15 +lat_1=63.3 +lat_2=63.3 +no_defs +R=6.371e+06",         // MEPS 2022
+        "+proj=lcc +lon_0=15 +lat_0=63 +lat_1=63 +lat_2=63 +R=6.371e+06 +units=m +no_defs",      // MEPS 2015
+        "+proj=stere +ellps=WGS84 +lat_0=90.0 +lat_ts=60.0 +x_0=3192800 +y_0=1784000 +lon_0=70", // NorKyst 2022
+        "+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs",        // NorKyst 2015
+        "+proj=ob_tran +o_proj=longlat +lon_0=-40 +o_lat_p=22 +R=6.371e+06 +no_defs",            // MyWave Wam 4km
+        "+proj=longlat +a=6367470 +e=0 +no_defs",                                                // ECMWF 2022
+    };
+
+    for (const auto& p4 : proj4) {
+        Projection_p p = Projection::createByProj4(p4);
+        TEST4FIMEX_CHECK_NE(p->getName(), "unknown_to_fgdc");
+        std::vector<double> lon{10}, lat{60};
+        p->convertFromLonLat(lon, lat);
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_bad_projection)
+{
+    const std::string p4 = "+proj=fork +lat_1000=123 +fish=-25 +car=6.371e+06";
+    Projection_cp p = Projection::createByProj4(p4);
+    TEST4FIMEX_CHECK_EQ(p->getName(), "unknown_to_fgdc");
 }
