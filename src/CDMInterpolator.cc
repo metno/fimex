@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -401,7 +401,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         if (getProjectionName(proj_input) != "latlong") {
             std::string orgProjStr = LAT_LON_PROJSTR;
             if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
-                throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input);
+                throw CDMException("unable to project values from \"" + orgProjStr + "\" to \"" + proj_input + "\" in CDMInterpolator::changeProjection");
             }
             // lonVals contains now all x-values, latVals all y-values
             // get bounding box:
@@ -1288,7 +1288,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         LOG4FIMEX(logger, Logger::DEBUG, "start reprojection of coordinates");
         std::string orgProjStr = LAT_LON_PROJSTR;
         if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &orgLonVals[0], &orgLatVals[0], orgXYSize)) {
-            throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
+            throw CDMException("unable to project values from \"" + orgProjStr + "\" to \"" + proj_input +
+                               "\" in CDMInterpolator::changeProjectionByForwardInterpolation");
         }
 
         // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
@@ -1371,7 +1372,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         shared_array<double> pointsOnYAxis = make_shared_array<double>(fieldSize);
         if (MIFI_OK != mifi_project_axes(proj_input.c_str(), LAT_LON_PROJSTR.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(),
                                          &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-            throw CDMException("unable to project axes from latlon to " + proj_input);
+            throw CDMException("unable to project axes from \"" + proj_input + "\" to \"" + LAT_LON_PROJSTR +
+                               "\" in CDMInterpolator::changeProjectionByCoordinates");
         }
         if (method == MIFI_INTERPOL_COORD_NN) {
             fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, fieldSize, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
@@ -1438,7 +1440,8 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         const std::string orgProjStr = cs->getProjection()->getProj4String();
         if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(),
                                          &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-            throw CDMException("unable to project axes from " + orgProjStr + " to " + proj_input);
+            throw CDMException("unable to project axes from \"" + proj_input + "\" to \"" + orgProjStr +
+                               "\" in CDMInterpolator::changeProjectionByProjectionParameters");
         }
         LOG4FIMEX(logger, Logger::DEBUG,
                   "mifi_project_axes: " << proj_input << "," << orgProjStr << "," << outXAxis[0] << "," << outYAxis[0] << " => " << pointsOnXAxis[0] << ","
@@ -1708,7 +1711,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         // projects lat / lon from template to axis-projection found in model file
         // we want to get template lat/long expressed in terms of the original projection
         if (MIFI_OK != mifi_project_values(tmpl_proj_input.c_str(), orgProjStr.c_str(), &lonX[0], &latY[0], tmplLatVals->size())) {
-            throw CDMException("unable to project values from "+orgProjStr+ " to " +tmpl_proj_input.c_str());
+            throw CDMException("unable to project values from \"" + tmpl_proj_input + "\" to \"" + orgProjStr +
+                               "\" in changeProjectionByProjectionParametersToLatLonTemplate");
         }
         LOG4FIMEX(logger, Logger::DEBUG,
                   "mifi_project_values: " << tmpl_proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << lonX[0] << ","

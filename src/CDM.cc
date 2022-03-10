@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2021, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -718,7 +718,7 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     std::string projStr = projection->getProj4String();
     LOG4FIMEX(logger, Logger::DEBUG, "generating "<<latDim<<"("<<xDim<<","<<yDim<<"),"<<lonDim<<"("<<xDim<<","<<yDim<<") using proj4: "+projStr);
     if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
-        throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
+        throw CDMException("unable to project axes from \"" + projStr + "\" to \"" + lonLatProj + "\" while generating projection coordinates");
     }
     // converting to Degree
     transform_rad_to_deg(longVal.get(), fieldSize);
