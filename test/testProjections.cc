@@ -30,10 +30,13 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
+#include "reproject.h"
+
 #include <algorithm>
 
 using namespace std;
 using namespace MetNoFimex;
+using namespace MetNoFimex::reproject;
 
 namespace {
 const string projLonLat = "+proj=lonlat +ellps=sphere +a=6371000 +e=0";
@@ -111,9 +114,7 @@ TEST4FIMEX_TEST_CASE(test_conversion)
     // create the expected values
     std::vector<double> lonVals(xVals.begin(), xVals.end());
     std::vector<double> latVals(yVals.begin(), yVals.end());
-    mifi_project_values(proj4stere.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
-    transform_rad_to_deg(lonVals);
-    transform_rad_to_deg(latVals);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_values(proj4stere, projLonLat, &lonVals[0], &latVals[0], lonVals.size()));
 
     // calculate the values with projection
     std::vector<double> lonValsConv(xVals.begin(), xVals.end());
@@ -153,9 +154,7 @@ TEST4FIMEX_TEST_CASE(test_conversion_oblique_mercator)
     // create the expected values
     std::vector<double> lonVals(xVals.begin(), xVals.end());
     std::vector<double> latVals(yVals.begin(), yVals.end());
-    mifi_project_values(proj4omerc.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
-    transform_rad_to_deg(lonVals);
-    transform_rad_to_deg(latVals);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_values(proj4omerc, projLonLat, &lonVals[0], &latVals[0], lonVals.size()));
 
     // calculate the values with projection
     std::vector<double> lonValsConv(xVals.begin(), xVals.end());
@@ -195,9 +194,7 @@ TEST4FIMEX_TEST_CASE(test_conversion_geostationary)
     // create the expected values
     std::vector<double> lonVals(xVals.begin(), xVals.end());
     std::vector<double> latVals(yVals.begin(), yVals.end());
-    mifi_project_values(proj4geos.c_str(), projLonLat.c_str(), &lonVals[0], &latVals[0], lonVals.size());
-    transform_rad_to_deg(lonVals);
-    transform_rad_to_deg(latVals);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_values(proj4geos, projLonLat, &lonVals[0], &latVals[0], lonVals.size()));
 
     // calculate the values with projection
     std::vector<double> lonValsConv(xVals.begin(), xVals.end());

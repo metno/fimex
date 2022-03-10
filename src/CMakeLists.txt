@@ -257,6 +257,9 @@ SET(libfimex_SOURCES
   vertical_coordinate_transformations.c
   ${INCF}/vertical_coordinate_transformations.h
 
+  reproject.cc
+  reproject.h
+
   leap_iterator.h
 )
 

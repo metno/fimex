@@ -69,7 +69,6 @@ std::vector<CDMAttribute> LambertCylindricalEqualAreaProjection::parametersFromP
     }
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

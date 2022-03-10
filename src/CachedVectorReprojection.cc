@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,32 +26,30 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "fimex/interpolation.h"
+
+#include "reproject.h"
 
 namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.CachedVectorReprojection");
 
+CachedVectorReprojection::CachedVectorReprojection(reproject::Matrix_cp matrix)
+    : matrix(matrix)
+    , ox(matrix->size_x)
+    , oy(matrix->size_y)
+{
+}
+
 void CachedVectorReprojection::reprojectValues(shared_array<float>& uValues, shared_array<float>& vValues, size_t size) const
 {
-    if (ox == 0 || oy == 0 || matrix.get() == 0) {
-        LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
-        return;
-    }
-    size_t oz = size / (ox*oy);
-    int errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix.get(), &uValues[0], &vValues[0], ox, oy, oz);
-    if (errcode != MIFI_OK)	throw CDMException("Error during reprojection of vector-values");
+    const size_t oz = size / (getXSize() * getYSize());
+    reproject::vector_reproject_values_by_matrix_f(matrix, &uValues[0], &vValues[0], oz);
 }
 
 void CachedVectorReprojection::reprojectDirectionValues(shared_array<float>& angles, size_t size) const
 {
-    if (ox == 0 || oy == 0 || matrix.get() == 0) {
-        LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
-        return;
-    }
-    size_t oz = size / (ox*oy);
-    int errcode = mifi_vector_reproject_direction_by_matrix_f(method, matrix.get(), &angles[0], ox, oy, oz);
-    if (errcode != MIFI_OK) throw CDMException("Error during reprojection of vector-direction-values");
+    const size_t oz = size / (getXSize() * getYSize());
+    reproject::vector_reproject_direction_by_matrix_f(matrix, &angles[0], oz);
 }
 
 } // namespace MetNoFimex

@@ -92,7 +92,6 @@ std::vector<CDMAttribute> ObliqueMercatorProjection::parametersFromProj4(const s
     }
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

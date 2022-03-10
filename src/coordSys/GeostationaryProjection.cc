@@ -78,7 +78,6 @@ std::vector<CDMAttribute> GeostationaryProjection::parametersFromProj4(const std
     attrs.push_back(CDMAttribute("sweep_axis", sweep));
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

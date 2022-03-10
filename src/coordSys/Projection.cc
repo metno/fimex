@@ -1,7 +1,7 @@
 /*
  * Fimex, Projection.cc
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -51,6 +51,8 @@
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
 #include "fimex/coordSys/VerticalPerspectiveProjection.h"
 
+#include "reproject.h"
+
 #include <memory>
 #include <regex>
 
@@ -79,24 +81,12 @@ void Projection::convertToLonLat(std::vector<double>& xVals, std::vector<double>
     if (xVals.size() != yVals.size())
         throw CDMException("convertToLonLat: xVals.size() != yVals.size()");
 
-    // convert to radian if required
-    if (isDegree()) {
-        transform_deg_to_rad(xVals);
-        transform_deg_to_rad(yVals);
-    }
-
     // run projection
     std::string fromProj = getProj4String();
     std::string toProj = "+proj=latlong " + getProj4EarthString();
     if (fromProj == toProj)
         return;
-    if (MIFI_OK != mifi_project_values(fromProj.c_str(), toProj.c_str(), &xVals[0], &yVals[0], static_cast<int>(xVals.size()))) {
-        throw CDMException("convertToLonLat: unable to convert from '" +fromProj + "' to '"+toProj+"'");
-    }
-
-    // convert to degree
-    transform_rad_to_deg(xVals);
-    transform_rad_to_deg(yVals);
+    reproject::reproject_values(fromProj, toProj, &xVals[0], &yVals[0], static_cast<int>(xVals.size()));
 }
 
 void Projection::convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const
@@ -107,24 +97,12 @@ void Projection::convertFromLonLat(std::vector<double>& xVals, std::vector<doubl
     if (xVals.size() != yVals.size())
         throw CDMException("convertFromLonLat: xVals.size() != yVals.size()");
 
-    // convert to radian
-    transform_deg_to_rad(xVals);
-    transform_deg_to_rad(yVals);
-
     // run projection
     std::string fromProj = "+proj=latlong " + getProj4EarthString();
     std::string toProj = getProj4String();
     if (fromProj == toProj)
         return;
-    if (MIFI_OK != mifi_project_values(fromProj.c_str(), toProj.c_str(), &xVals[0], &yVals[0], static_cast<int>(xVals.size()))) {
-        throw CDMException("convertFromLonLat: unable to convert from '" +fromProj + "' to '"+toProj+"'");
-    }
-
-    // convert to degree if required
-    if (isDegree()) {
-        transform_rad_to_deg(xVals);
-        transform_rad_to_deg(yVals);
-    }
+    reproject::reproject_values(fromProj, toProj, &xVals[0], &yVals[0], static_cast<int>(xVals.size()));
 }
 
 Projection_p Projection::create(const std::vector<CDMAttribute>& attrs)

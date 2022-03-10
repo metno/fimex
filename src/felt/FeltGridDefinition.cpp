@@ -1,29 +1,24 @@
 /*
- wdb
-
- Copyright (C) 2007-2019 met.no
-
- Contact information:
- Norwegian Meteorological Institute
- Box 43 Blindern
- 0313 OSLO
- NORWAY
- E-mail: wdb@met.no
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- MA  02110-1301, USA
+ * Fimex, FeltGridDefinition.cpp
+ *
+ * (C) Copyright 2007-2022, met.no
+ *
+ * Project Info:  https://wiki.met.no/fimex/start
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
  */
 
 #include "felt/FeltGridDefinition.h"
@@ -35,13 +30,22 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#include "fimex_config.h"
+#ifdef HAVE_PROJ_H
+#include "proj.h"
+#else
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H 1
+#include "proj_api.h"
 #endif
 
-#include "proj_api.h"
-
 namespace felt {
+
+#ifdef HAVE_PROJ_H
+void delete_PJ(void* pj)
+{
+    proj_destroy(static_cast<PJ*>(pj));
+}
+#endif
 
 static_assert(sizeof(word) == 2, "unexpected sizeof(word)");
 
@@ -56,6 +60,19 @@ static_assert(sizeof(word) == 2, "unexpected sizeof(word)");
  */
 static void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
 {
+    // FIXME this is almost the same as mifi_reproject_point_from_lonlat in reproject.cc
+    // but that code cannot be used as libfelt is a separate library
+#ifdef HAVE_PROJ_H
+    std::shared_ptr<PJ> P(proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4326", projStr.c_str(), nullptr), delete_PJ);
+    if (!P) {
+        throw std::runtime_error("Proj error");
+    }
+
+    const auto uv = proj_coord(lat, lon, 0, 0); // EPSG:4326 here needs lat first, lon second
+    const auto xy = proj_trans(P.get(), PJ_FWD, uv);
+    x = xy.enu.e;
+    y = xy.enu.n;
+#else
     projPJ outputPJ;
     if ( !(outputPJ = pj_init_plus(projStr.c_str())) ) {
         std::string errorMsg(pj_strerrno(pj_errno));
@@ -76,6 +93,7 @@ static void projConvert(const std::string& projStr, double lon, double lat, doub
     }
     x = uv.u;
     y = uv.v;
+#endif
 }
 
 

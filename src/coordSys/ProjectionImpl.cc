@@ -118,12 +118,6 @@ bool ProjectionImpl::isDegree() const
 
 std::string ProjectionImpl::getProj4String() const
 {
-    // check for proj4 parameter
-    std::vector<CDMAttribute>::const_iterator proj4Par = find_if(params_.begin(), params_.end(), CDMNameEqual("proj4"));
-    if (proj4Par != params_.end()) {
-        return proj4Par->getStringValue();
-    }
-
     std::ostringstream out;
     getProj4ProjectionPart(out);
 

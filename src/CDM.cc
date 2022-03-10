@@ -32,6 +32,8 @@
 #include "fimex/coordSys/Projection.h"
 #include "fimex/interpolation.h"
 
+#include "reproject.h"
+
 #include <algorithm>
 #include <cassert>
 #include <functional>
@@ -696,20 +698,6 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     size_t yDimLength = getDimension(yDim).getLength();
     assert(xDimLength == xVar.getData()->size());
     assert(yDimLength == yVar.getData()->size());
-    std::string xUnits = getUnits(xDim);
-    if (std::regex_match(xUnits, std::regex(".*degree.*"))) {
-        // convert degrees to radians, create a new array so data in cdm does not get overwritten
-        shared_array<double> newXData(new double[xDimLength]);
-        transform_deg_to_rad(xData.get(), xDimLength, newXData.get());
-        xData = newXData;
-    }
-    std::string yUnits = getUnits(yDim);
-    if (std::regex_match(yUnits, std::regex(".*degree.*"))) {
-        // convert degrees to radians, create a new array so data in cdm does not get overwritten
-        shared_array<double> newYData(new double[yDimLength]);
-        transform_deg_to_rad(yData.get(), yDimLength, newYData.get());
-        yData = newYData;
-    }
     size_t fieldSize = xDimLength * yDimLength;
     shared_array<double> longVal(new double[fieldSize]);
     shared_array<double> latVal(new double[fieldSize]);
@@ -717,12 +705,7 @@ void CDM::generateProjectionCoordinates(Projection_cp projection, const std::str
     assert(projection.get() != 0);
     std::string projStr = projection->getProj4String();
     LOG4FIMEX(logger, Logger::DEBUG, "generating "<<latDim<<"("<<xDim<<","<<yDim<<"),"<<lonDim<<"("<<xDim<<","<<yDim<<") using proj4: "+projStr);
-    if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
-        throw CDMException("unable to project axes from \"" + projStr + "\" to \"" + lonLatProj + "\" while generating projection coordinates");
-    }
-    // converting to Degree
-    transform_rad_to_deg(longVal.get(), fieldSize);
-    transform_rad_to_deg(latVal.get(), fieldSize);
+    reproject::reproject_axes(projStr, lonLatProj, xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get());
     std::vector<std::string> xyDims;
     xyDims.push_back(xDim);
     xyDims.push_back(yDim);

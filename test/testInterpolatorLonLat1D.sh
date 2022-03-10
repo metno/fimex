@@ -13,7 +13,7 @@ OUT="eez_ospar_emep01.nc"
 
 ./fimex.sh \
     --input.file="$TEST_NC" \
-    --interpolate.projString="+ellps=sphere +R=6370000 +proj=latlon +no_defs" \
+    --interpolate.projString="+proj=latlon +ellps=sphere +R=6370000 +no_defs" \
     --interpolate.method=forward_sum \
     --interpolate.xAxisUnit=degrees_east \
     --interpolate.yAxisUnit=degrees_north \

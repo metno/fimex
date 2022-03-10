@@ -164,6 +164,7 @@ ADD_LIBRARY(testinghelpers STATIC
 TARGET_INCLUDE_DIRECTORIES(testinghelpers
  PUBLIC
   "${CMAKE_BINARY_DIR}/src"   # for fimex_config.h
+  "${CMAKE_SOURCE_DIR}/src"   # for reproject.h etc
  PRIVATE
   "${CMAKE_SOURCE_DIR}/include"
 )

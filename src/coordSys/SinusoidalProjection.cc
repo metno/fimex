@@ -64,7 +64,6 @@ std::vector<CDMAttribute> SinusoidalProjection::parametersFromProj4(const std::s
     attrs.push_back(CDMAttribute("longitude_of_projection_origin", longOfProjOrigin));
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

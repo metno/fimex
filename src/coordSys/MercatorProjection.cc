@@ -69,7 +69,6 @@ std::vector<CDMAttribute> MercatorProjection::parametersFromProj4(const std::str
     }
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

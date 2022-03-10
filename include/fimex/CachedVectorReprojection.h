@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,20 +27,20 @@
 #include "fimex/SharedArray.h"
 
 namespace MetNoFimex {
+namespace reproject {
+struct Matrix;
+typedef std::shared_ptr<const Matrix> Matrix_cp;
+} // namespace reproject
 
 class CachedVectorReprojection
 {
 public:
     CachedVectorReprojection() = delete;
 
-    CachedVectorReprojection(int method, shared_array<double> matrix, int ox, int oy)
-        : method(method)
-        , matrix(matrix)
-        , ox(ox)
-        , oy(oy)
-    {
-    }
+    CachedVectorReprojection(reproject::Matrix_cp matrix);
+
     virtual ~CachedVectorReprojection() {}
+
     /**
      *  reproject the vector values
      *
@@ -49,20 +49,22 @@ public:
      * @param size the size of both arrays
      */
     void reprojectValues(shared_array<float>& uValues, shared_array<float>& vValues, size_t size) const;
+
     /**
      * reproject directions given in angles in degree
      * @param angles direction of vector in each grid-cell, given in degree
      * @param size the size of the angles-array
      */
     void reprojectDirectionValues(shared_array<float>& angles, size_t size) const;
+
     // @return size of the spatial plane in x-direction
     size_t getXSize() const {return ox;}
+
     // @return size of the spatial plane in y-direction
     size_t getYSize() const {return oy;}
 
 private:
-    int method;
-    shared_array<double> matrix;
+    reproject::Matrix_cp matrix;
     size_t ox;
     size_t oy;
 };

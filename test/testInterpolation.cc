@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,11 +28,14 @@
 #include "fimex/Data.h"
 #include "fimex/MathUtils.h"
 
+#include "reproject.h"
+
 #include <cmath>
 #include <fstream>
 #include <string>
 
 using MetNoFimex::pathTest;
+using namespace MetNoFimex::reproject;
 
 namespace {
 inline bool near(float a, float b, float eps)
@@ -239,16 +242,19 @@ TEST4FIMEX_TEST_CASE(mifi_get_values_log_log_f)
     TEST4FIMEX_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
 
+namespace {
+const std::string latlongProj = "+proj=latlong +a=6370 +e=0";
+} // namespace
+
 TEST4FIMEX_TEST_CASE(mifi_project_axes)
 {
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-    std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
 
     double emepX[] = {6,7,8};
     double emepY[] = {108,109,110};
     double outX[9];
     double outY[9];
-    TEST4FIMEX_CHECK_EQ(MIFI_OK, mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
+    TEST4FIMEX_CHECK_NO_THROW(reproject_axes(emepProj, latlongProj, &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             TEST4FIMEX_CHECK(MetNoFimex::rad_to_deg(outY[j + 3 * i]) > 89);
@@ -263,8 +269,7 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     const int latSize = 90;
     float inArray[iSize*jSize*zSize]; // emep i, j, z
     float outArray[lonSize*latSize*zSize]; // long, lat, z
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-    std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
     double emepIAxis[iSize];
     double emepJAxis[jSize];
     double latitudeAxis[latSize];
@@ -315,23 +320,21 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     datafile.close();
     TEST4FIMEX_REQUIRE(near(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)], 4, 1e-5));
 
-    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize,
-                                        jSize, zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
-                                        latSize) == MIFI_OK);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
+                                          zSize, latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
     TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " "
               << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-    std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
+    std::cerr << "emepProj: " << emepProj << " latlonProj: " << latlongProj << std::endl;
 #endif
 
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BILINEAR, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
-                                        zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
-                                        latSize) == MIFI_OK);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_BILINEAR, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+                                          latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
     TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
@@ -348,9 +351,8 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
     }
-    TEST4FIMEX_CHECK(mifi_interpolate_f(MIFI_INTERPOL_BICUBIC, emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
-                                        zSize, latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize,
-                                        latSize) == MIFI_OK);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_BICUBIC, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+                                          latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
     TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
 #if 0
@@ -367,8 +369,9 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
 {
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
-    std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
+    const std::string emepProj2 = "+proj=stere +a=127.4 +lat_0=90 +lon_0=90 +lat_ts=60";
+
     double emepIAxis[5];
     double emepJAxis[5];
     double emepIOutAxis[5];
@@ -392,14 +395,10 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
     float vOut[5*5];
     float uRot[5*5];
     float vRot[5*5];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis,
-                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis,
-                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2,
+                                          uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5));
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2,
+                                          vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
@@ -408,10 +407,7 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
             //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
-                                   emepProj2.c_str(), uOut, vOut, emepIOutAxis,
-                                   emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                                   5, 5, 1);
+    TEST4FIMEX_CHECK_NO_THROW(vector_reproject_values_f(emepProj, emepProj2, uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
 //            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
@@ -425,8 +421,9 @@ TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
 {
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
-    std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=180 +lat_ts=60");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
+    const std::string emepProj2 = "+proj=stere +a=127.4 +lat_0=90 +lon_0=180 +lat_ts=60";
+
     double emepIAxis[5];
     double emepJAxis[5];
     double emepIOutAxis[5];
@@ -450,14 +447,10 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
     float vOut[5*5];
     float uRot[5*5];
     float vRot[5*5];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis,
-                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis,
-                       emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2,
+                                          uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5));
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2,
+                                          vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
@@ -466,10 +459,7 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
             //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
-                                   emepProj2.c_str(), uOut, vOut, emepIOutAxis,
-                                   emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                                   5, 5, 1);
+    TEST4FIMEX_CHECK_NO_THROW(vector_reproject_values_f(emepProj, emepProj2, uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
             //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
@@ -483,8 +473,8 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
 {
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-    std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
+
     double emepIAxis[4];
     double emepJAxis[4];
     double latitudeAxis[4];
@@ -514,16 +504,10 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
     float vOut[4*4];
     float uRot[4*4];
     float vRot[4*4];
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       4, 4, 1, latlongProj.c_str(), uOut,
-                       longitudeAxis, latitudeAxis,
-                       MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
-    mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v,
-                       emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS,
-                       4, 4, 1, latlongProj.c_str(), vOut,
-                       longitudeAxis, latitudeAxis,
-                       MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1,
+                                          latlongProj, uOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4));
+    TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1,
+                                          latlongProj, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4));
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -532,10 +516,8 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
             vRot[j*4+i] = vOut[j*4+i];
         }
     }
-    mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(),
-                                   latlongProj.c_str(), uOut, vOut,
-                                   longitudeAxis, latitudeAxis,
-                                   MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1);
+    TEST4FIMEX_CHECK_NO_THROW(
+        vector_reproject_values_f(emepProj, latlongProj, uOut, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1));
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -552,8 +534,8 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
 {
-    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
-    std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
+    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
+
     int ox = 5;
     int oy = 5;
     int oz = 1;
@@ -580,18 +562,12 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
 
     double xOut[ox*oy];
     double yOut[ox*oy];
-    mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), emepIAxis, emepJAxis, ox, oy, xOut, yOut);
-    double* matrix = (double*) malloc(ox*oy*4*sizeof(double));
-    if (matrix == NULL) {
-        fprintf(stderr, "error allocating memory of double(4*%d*%d)", ox, oy);
-        exit(1);
-    }
+    TEST4FIMEX_CHECK_NO_THROW(reproject_axes(emepProj, latlongProj, emepIAxis, emepJAxis, ox, oy, xOut, yOut));
+    Matrix_cp matrix;
     // calculate the positions in the original proj.
-    int errcode = mifi_get_vector_reproject_matrix_field(emepProj.c_str(),
-        latlongProj.c_str(), in_x_field, in_y_field, ox, oy, matrix);
-    TEST4FIMEX_CHECK_EQ(errcode, MIFI_OK);
+    TEST4FIMEX_CHECK_NO_THROW(matrix = get_vector_reproject_matrix_field(emepProj, latlongProj, in_x_field, in_y_field, ox, oy));
 
-    mifi_vector_reproject_direction_by_matrix_f(MIFI_VECTOR_KEEP_SIZE, matrix, angles, ox, oy, oz);
+    TEST4FIMEX_CHECK_NO_THROW(vector_reproject_direction_by_matrix_f(matrix, angles, oz));
 #if 0
     for (int i = 0; i < ox; ++i) {
         for (int j = 0; j < oy; ++j) {

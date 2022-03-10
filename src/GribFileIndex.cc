@@ -38,6 +38,8 @@
 #include "fimex/XMLUtils.h"
 #include "fimex/interpolation.h"
 
+#include "reproject.h"
+
 #include <date/date.h>
 
 #include <algorithm>
@@ -152,8 +154,7 @@ std::string earthFigure_;
 
 void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
 {
-    if (mifi_reproject_point_from_lonlat(projStr.c_str(), &lon, &lat) != MIFI_OK)
-        throw std::runtime_error("point reprojection error");
+    reproject::reproject_point_from_lonlat(projStr, &lon, &lat);
     x = lon;
     y = lat;
 }

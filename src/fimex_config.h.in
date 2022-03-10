@@ -17,5 +17,6 @@
 #cmakedefine HAVE_NETCDF_H 1
 #cmakedefine HAVE_NETCDF_HDF5_LIB 1
 #cmakedefine HAVE_PRORADXML 1
+#cmakedefine HAVE_PROJ_H 1 // defined from fimex CMakeLists.txt if using proj >= 6.2.0
 
 #endif // FIMEX_CONFIG_H

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMProcessor.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -38,6 +38,8 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
+
+#include "reproject.h"
 
 #include <algorithm>
 #include <cassert>
@@ -124,7 +126,7 @@ CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, 
     shared_array<double> yAxisD = yAxisData->asDouble();
 
     LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
-    shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
+    reproject::Matrix_cp matrix;
     if (toLatLon) {
         shared_array<double> inXField(new double[xAxisSize * yAxisSize]);
         shared_array<double> inYField(new double[xAxisSize * yAxisSize]);
@@ -135,15 +137,15 @@ CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, 
             }
         }
         // prepare interpolation of vectors
-        mifi_get_vector_reproject_matrix_field(cs->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4, &inXField[0], &inYField[0],
-                xAxisSize, yAxisSize, matrix.get());
+        matrix = reproject::get_vector_reproject_matrix_field(cs->getProjection()->getProj4String(), MIFI_WGS84_LATLON_PROJ4, &inXField[0], &inYField[0],
+                                                              xAxisSize, yAxisSize);
     } else {
         // using MIFI_PROJ_AXIS even for LAT/LON since axes already in radian
-        mifi_get_vector_reproject_matrix(MIFI_WGS84_LATLON_PROJ4, cs->getProjection()->getProj4String().c_str(), &xAxisD[0], &yAxisD[0],
-                MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, xAxisSize, yAxisSize, matrix.get());
+        matrix = reproject::get_vector_reproject_matrix(MIFI_WGS84_LATLON_PROJ4, cs->getProjection()->getProj4String(), &xAxisD[0], &yAxisD[0], MIFI_PROJ_AXIS,
+                                                        MIFI_PROJ_AXIS, xAxisSize, yAxisSize);
     }
     LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
-    return std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize);
+    return std::make_shared<CachedVectorReprojection>(matrix);
 }
 
 CDMProcessor::CDMProcessor(CDMReader_p dataReader)

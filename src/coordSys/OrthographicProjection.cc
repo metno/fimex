@@ -66,7 +66,6 @@ std::vector<CDMAttribute> OrthographicProjection::parametersFromProj4(const std:
         attrs.push_back(CDMAttribute("latitude_of_projection_origin", extractProj4InitValue(proj4Str, "lat_0")));
 
         proj4GetEarthAttributes(proj4Str, attrs);
-        attrs.push_back(CDMAttribute("proj4", proj4Str));
     }
     return attrs;
 }

@@ -1,7 +1,7 @@
 /*
  * Fimex, WRFCoordSysBuilder.cc
  *
- * (C) Copyright 2012-2019, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -38,6 +38,8 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 #include "fimex/mifi_constants.h"
+
+#include "reproject.h"
 
 #include <cassert>
 #include <cmath>
@@ -158,7 +160,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
     Projection_p proj = Projection::createByProj4(proj4.str());
     double centerX = deg_to_rad(centralLon);
     double centerY = deg_to_rad(centralLat);
-    mifi_project_values(MIFI_WGS84_LATLON_PROJ4, proj4.str().c_str(), &centerX, &centerY, 1);
+    reproject::reproject_values(MIFI_WGS84_LATLON_PROJ4, proj4.str(), &centerX, &centerY, 1);
     if (isLatLon) {
         centerX = rad_to_deg(centerX);
         centerY = rad_to_deg(centerY);

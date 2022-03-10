@@ -138,7 +138,7 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
 
 TEST4FIMEX_TEST_CASE(interpolator2coords)
 {
-    const string proj_stere = "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a=" + type2string(MIFI_EARTH_RADIUS_M) + " +e=0";
+    const string proj_stere = "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere";
 
     vector<double> xAxis, yAxis;
     for (int i = 0; i < 12; i++) {

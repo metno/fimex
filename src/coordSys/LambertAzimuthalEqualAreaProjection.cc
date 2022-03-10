@@ -64,7 +64,6 @@ std::vector<CDMAttribute> LambertAzimuthalEqualAreaProjection::parametersFromPro
     attrs.push_back(CDMAttribute("latitude_of_projection_origin", lat0));
 
     proj4GetEarthAttributes(proj4Str, attrs);
-    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

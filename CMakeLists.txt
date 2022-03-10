@@ -80,7 +80,7 @@ ELSEIF (${proj_PACKAGE_VERSION} VERSION_LESS "8.0.0")
   # ok, proj_api.h
 ELSE ()
   # >=8.0
-  MESSAGE(FATAL_ERROR "proj version '${proj_PACKAGE_VERSION}' not supported yet")
+  SET(HAVE_PROJ_H 1)
 ENDIF()
 
 OPTION(BUILD_SHARED_LIBS "Select ON (default) for shared lib, OFF for static lib, BOTH for both" ON)

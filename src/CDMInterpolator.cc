@@ -46,6 +46,8 @@
 #include "fimex/interpolation.h"
 #include "fimex/min_max.h"
 
+#include "reproject.h"
+
 #include "nanoflann/nanoflann.hpp"
 
 // standard
@@ -112,6 +114,11 @@ namespace {
 const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
 Logger_p logger = getLogger("fimex.CDMInterpolator");
 
+bool unitIsDegree(const std::string& out_x_axis_unit, const std::string& out_y_axis_unit)
+{
+    static const std::regex degree(".*degree.*");
+    return std::regex_match(out_x_axis_unit, degree) || std::regex_match(out_y_axis_unit, degree);
+}
 } // namespace
 
 CDMInterpolator::CDMInterpolator(CDMReader_p dataReader)
@@ -181,14 +188,6 @@ void extractValues(DataPtr data, shared_array<double>& values, size_t& size)
 {
     values = data->asDouble();
     size = data->size();
-}
-
-shared_array<double> data_deg_to_rad(DataPtr deg)
-{
-    shared_array<double> degVals = deg->asDouble();
-    shared_array<double> radVals = make_shared_array<double>(deg->size());
-    transform_deg_to_rad(degVals.get(), deg->size(), radVals.get());
-    return radVals;
 }
 
 shared_array<double> clone(shared_array<double> orig, size_t size)
@@ -379,8 +378,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             throw CDMException("could not find latitude/longitude axes");
         DataPtr lonData = p_->dataReader->getScaledData(lonAxis->getName());
         DataPtr latData = p_->dataReader->getScaledData(latAxis->getName());
-        shared_array<double> lonVals = data_deg_to_rad(lonData);
-        shared_array<double> latVals = data_deg_to_rad(latData);
+        shared_array<double> lonVals = lonData->asDouble();
+        shared_array<double> latVals = latData->asDouble();
         size_t latSize = latData->size();
         size_t lonSize = lonData->size();
         if (latSize != lonSize) {
@@ -391,10 +390,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             lonSize = latSize;
         }
         if (getProjectionName(proj_input) != "latlong") {
-            std::string orgProjStr = LAT_LON_PROJSTR;
-            if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
-                throw CDMException("unable to project values from \"" + orgProjStr + "\" to \"" + proj_input + "\" in CDMInterpolator::changeProjection");
-            }
+            reproject::reproject_values(LAT_LON_PROJSTR, proj_input, &lonVals[0], &latVals[0], latSize);
             // lonVals contains now all x-values, latVals all y-values
             // get bounding box:
             double xMin = *(min_element(&lonVals[0], &lonVals[latSize]));
@@ -955,8 +951,9 @@ struct PointCloud
         }
 };
 
-void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis, size_t pointsSize,
-                                            const double* lonVals, const double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double> pointsOnXAxis /* degrees */, shared_array<double> pointsOnYAxis /* degrees */,
+                                            size_t pointsSize, const double* lonVals /* degrees */, const double* latVals /* degrees */, size_t orgXDimSize,
+                                            size_t orgYDimSize)
 {
     // pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in rad
 
@@ -974,10 +971,12 @@ void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double>
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             const size_t pos = ix + iy * orgXDimSize;
             if (!(std::isnan(latVals[pos]) || std::isnan(lonVals[pos]))) {
-                double sinLat = sin(latVals[pos]);
-                double cosLat = cos(latVals[pos]);
-                double sinLon = sin(lonVals[pos]);
-                double cosLon = cos(lonVals[pos]);
+                const double lat_rad = deg_to_rad(latVals[pos]);
+                const double lon_rad = deg_to_rad(lonVals[pos]);
+                const double sinLat = sin(lat_rad);
+                const double cosLat = cos(lat_rad);
+                const double sinLon = sin(lon_rad);
+                const double cosLon = cos(lon_rad);
                 cloud.pts[pos].x = cosLat * cosLon;
                 cloud.pts[pos].y = cosLat * sinLon;
                 cloud.pts[pos].z = sinLat;
@@ -1001,10 +1000,12 @@ void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double>
     nanoflann::SearchParams params;
     params.sorted = true;
     for (size_t i = 0; i < pointsSize; i++) {
-        double sinLat = sin(pointsOnYAxis[i]);
-        double cosLat = cos(pointsOnYAxis[i]);
-        double sinLon = sin(pointsOnXAxis[i]);
-        double cosLon = cos(pointsOnXAxis[i]);
+        const double lat_rad = deg_to_rad(pointsOnYAxis[i]);
+        const double lon_rad = deg_to_rad(pointsOnXAxis[i]);
+        const double sinLat = sin(lat_rad);
+        const double cosLat = cos(lat_rad);
+        const double sinLon = sin(lon_rad);
+        const double cosLon = cos(lon_rad);
         const double query_pt[3] = { cosLat * cosLon,
                                      cosLat * sinLon,
                                      sinLat };
@@ -1027,8 +1028,9 @@ void flannTranslatePointsToClosestInputCell(double maxDist, shared_array<double>
     LOG4FIMEX(logger, Logger::DEBUG, "finished flannKDTranslatePointsToClosestInputCell");
 }
 
-double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis, const double* lonVals, const double* latVals, size_t orgXDimSize,
-                       size_t orgYDimSize)
+double /* rad */ getGridDistance(const double* lonVals, // in degrees
+                                 const double* latVals, // in degrees
+                                 size_t orgXDimSize, size_t orgYDimSize)
 {
     // try to determine a average grid-distance, take some example points, evaluate the max,
     // multiply that with a number slightly bigger than 1 (i use 1.414
@@ -1044,14 +1046,14 @@ double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> 
         steps = orgXDimSize * orgYDimSize;
     }
 #ifdef _OPENMP
-#pragma omp parallel default(none) firstprivate(steps, stepSize, orgXDimSize, orgYDimSize) shared(samples, pointsOnXAxis, pointsOnYAxis, lonVals, latVals) if (steps > 4)
+#pragma omp parallel default(none) firstprivate(steps, stepSize, orgXDimSize, orgYDimSize) shared(samples, lonVals, latVals) if (steps > 4)
     {
 #pragma omp for nowait
 #endif
     for (int ik = 0; ik < steps; ik++) { // using int instead of size_t because of openMP < 3.0
-        size_t samplePos = ik * stepSize;
-        double lon0 = lonVals[samplePos];
-        double lat0 = latVals[samplePos];
+        const size_t samplePos = ik * stepSize;
+        const double lon0 = deg_to_rad(lonVals[samplePos]);
+        const double lat0 = deg_to_rad(latVals[samplePos]);
         if (!(std::isnan(lon0) || std::isnan(lat0))) {
             double min_cos_d = -2; // max possible distance on unit-sphere has cos_d -1 -> d= pi * r
             for (size_t ix = 0; ix < orgXDimSize; ix++) {
@@ -1059,8 +1061,8 @@ double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> 
                     // find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
                     const size_t pos = ix + iy * orgXDimSize;
                     if (pos != samplePos) {
-                        double lon1 = lonVals[pos];
-                        double lat1 = latVals[pos];
+                        const double lon1 = deg_to_rad(lonVals[pos]);
+                        const double lat1 = deg_to_rad(latVals[pos]);
                         if (!(std::isnan(lon1) || std::isnan(lat1))) {
                             const double dlon = lon0 - lon1;
                             const double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
@@ -1091,25 +1093,32 @@ double getGridDistance(shared_array<double> pointsOnXAxis, shared_array<double> 
 // internal setup for binary search lat/long
 class LL_POINT {
 public:
-    double lat;
-    double lon;
+    double lat; //! in radians
+    double lon; //! in radians
     double x;
     double y;
     LL_POINT() : lat(0), lon(0), x(-1.), y(-1.) {}
-    LL_POINT(double lat, double lon, double x, double y) : lat(lat), lon(lon), x(x), y(y) {}
+    LL_POINT(double lat_deg, double lon_deg, double x, double y)
+        : lat(deg_to_rad(lat_deg))
+        , lon(deg_to_rad(lon_deg))
+        , x(x)
+        , y(y)
+    {
+    }
     bool operator<(const LL_POINT& rhs) const { return (this->lat < rhs.lat); }
 };
 
 // translate all degree-values of pointsOnX/YAxis to the nearest index
 // in lonVals/latVals using a binary search in latitude-direction, otherwise brute-force
-void fastTranslatePointsToClosestInputCell(shared_array<double> pointsOnXAxis, shared_array<double> pointsOnYAxis, size_t pointsSize, const double* lonVals,
-                                           const double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+void fastTranslatePointsToClosestInputCell(shared_array<double> pointsOnXAxis /* degrees */, shared_array<double> pointsOnYAxis /* degrees */,
+                                           size_t pointsSize, const double* lonVals /* degrees */, const double* latVals /* degrees */, size_t orgXDimSize,
+                                           size_t orgYDimSize)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "estimation of ROI of input-data");
-    time_t start = time(0);
-    double max_grid_d = getGridDistance(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+    const time_t start = time(0);
+    const double max_grid_d = getGridDistance(&lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
     LOG4FIMEX(logger, Logger::DEBUG, "assuming a ROI of input-data as: "<< (max_grid_d*180/MIFI_PI) << "deg after " << (time(0) - start) << "s");
-    double min_grid_cos_d = cos(max_grid_d);
+    double min_grid_cos_d = cos(max_grid_d); // this is const, but declaring it const causes problems with OpenMP for some compilers
 
     // 1. order lat/lon after latitude
     // 2. search for closest latitude
@@ -1188,26 +1197,9 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 {
     // store projection changes to be used in data-section
     // translate temporary new axes from deg2rad if required
-    int miupXAxis = MIFI_PROJ_AXIS;
-    int miupYAxis = MIFI_PROJ_AXIS;
-    vector<double> outXAxisRad, outYAxisRad;
-    const vector<double>* outXAxis = &out_x_axis;
-    const vector<double>* outYAxis = &out_y_axis;
-    std::regex degree(".*degree.*");
-    if (std::regex_match(out_x_axis_unit, degree)) {
-        outXAxisRad.resize(out_x_axis.size());
-        outXAxis = &outXAxisRad;
-        transform_deg_to_rad(&out_x_axis[0], out_x_axis.size(), &outXAxisRad[0]);
-        miupXAxis = MIFI_LONGITUDE;
-        LOG4FIMEX(logger, Logger::DEBUG, "done with outx axis deg->rad");
-    }
-    if (std::regex_match(out_y_axis_unit, degree)) {
-        outYAxisRad.resize(out_y_axis.size());
-        outYAxis = &outYAxisRad;
-        transform_deg_to_rad(&out_y_axis[0], out_y_axis.size(), &outYAxisRad[0]);
-        miupYAxis = MIFI_LATITUDE;
-        LOG4FIMEX(logger, Logger::DEBUG, "done with outy axis deg->rad");
-    }
+    const bool isDegree = unitIsDegree(out_x_axis_unit, out_y_axis_unit);
+    const int miupXAxis = isDegree ? MIFI_LONGITUDE : MIFI_PROJ_AXIS;
+    const int miupYAxis = isDegree ? MIFI_LATITUDE : MIFI_PROJ_AXIS;
 
     map<string, CoordinateSystem_cp> csMap = findBestCoordinateSystemsAndProjectionVars(false);
 
@@ -1232,8 +1224,6 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         size_t orgLatSize, orgLonSize;
         extractValues(p_->dataReader->getScaledData(name_lon), orgLonVals, orgLonSize);
         extractValues(p_->dataReader->getScaledData(name_lat), orgLatVals, orgLatSize);
-        transform_deg_to_rad(orgLatVals.get(), orgLatSize);
-        transform_deg_to_rad(orgLonVals.get(), orgLonSize);
 
         const std::vector<string>& shape_lat = p_->dataReader->getCDM().getVariable(name_lat).getShape();
         const std::vector<string>& shape_lon = p_->dataReader->getCDM().getVariable(name_lon).getShape();
@@ -1270,16 +1260,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // translate all input points to output-coordinates, stored in lonVals and latVals
         LOG4FIMEX(logger, Logger::DEBUG, "start reprojection of coordinates");
-        std::string orgProjStr = LAT_LON_PROJSTR;
-        if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &orgLonVals[0], &orgLatVals[0], orgXYSize)) {
-            throw CDMException("unable to project values from \"" + orgProjStr + "\" to \"" + proj_input +
-                               "\" in CDMInterpolator::changeProjectionByForwardInterpolation");
-        }
+        reproject::reproject_values(LAT_LON_PROJSTR, proj_input, &orgLonVals[0], &orgLatVals[0], orgXYSize);
 
         // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
         LOG4FIMEX(logger, Logger::DEBUG, "start calculating positions");
-        mifi_points2position(&orgLonVals[0], orgXYSize, &(*outXAxis)[0], outXAxis->size(), miupXAxis);
-        mifi_points2position(&orgLatVals[0], orgXYSize, &(*outYAxis)[0], outYAxis->size(), miupYAxis);
+        mifi_points2position(&orgLonVals[0], orgXYSize, &out_x_axis[0], out_x_axis.size(), miupXAxis);
+        mifi_points2position(&orgLatVals[0], orgXYSize, &out_y_axis[0], out_y_axis.size(), miupYAxis);
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
@@ -1303,18 +1289,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
               getLongitudeName(), getLatitudeName());
 
     // store projection changes to be used in data-section
-    // translate temporary new axes from deg2rad if required
-    vector<double> outXAxis = out_x_axis;
-    vector<double> outYAxis = out_y_axis;
-    std::regex degree(".*degree.*");
-    bool isMetric = true;
-    if (std::regex_match(out_x_axis_unit, degree)) {
-        isMetric = false;
-        transform_deg_to_rad(outXAxis);
-    }
-    if (std::regex_match(out_y_axis_unit, degree)) {
-        transform_deg_to_rad(outYAxis);
-    }
+    const std::regex degree(".*degree.*");
+    const bool isDegree = std::regex_match(out_x_axis_unit, degree) || std::regex_match(out_y_axis_unit, degree);
 
     for (map<string, CoordinateSystem_cp>::iterator csIt = csMap.begin(); csIt != csMap.end(); ++csIt) {
         CoordinateSystem_cp cs = csIt->second;
@@ -1325,8 +1301,6 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         size_t latSize, lonSize;
         extractValues(p_->dataReader->getScaledData(latitude), latVals, latSize);
         extractValues(p_->dataReader->getScaledData(longitude), lonVals, lonSize);
-        transform_deg_to_rad(&latVals[0], latSize);
-        transform_deg_to_rad(&lonVals[0], lonSize);
 
         string orgXDimName, orgYDimName;
         const bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
@@ -1351,19 +1325,17 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         }
 
         // get output axes expressed in latitude, longitude
-        const size_t fieldSize = outXAxis.size() * outYAxis.size();
+        const size_t fieldSize = out_x_axis.size() * out_y_axis.size();
         shared_array<double> pointsOnXAxis = make_shared_array<double>(fieldSize);
         shared_array<double> pointsOnYAxis = make_shared_array<double>(fieldSize);
-        if (MIFI_OK != mifi_project_axes(proj_input.c_str(), LAT_LON_PROJSTR.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(),
-                                         &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-            throw CDMException("unable to project axes from \"" + proj_input + "\" to \"" + LAT_LON_PROJSTR +
-                               "\" in CDMInterpolator::changeProjectionByCoordinates");
-        }
+        reproject::reproject_axes(proj_input, LAT_LON_PROJSTR, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
+                                  &pointsOnYAxis[0]);
+        // here, pointOnX/YAxis is in degrees
         if (method == MIFI_INTERPOL_COORD_NN) {
             fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, fieldSize, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
         } else if (method == MIFI_INTERPOL_COORD_NN_KD) {
             double maxDistance = getMaxDistanceOfInterest(out_x_axis, out_y_axis);
-            if (!isMetric) {
+            if (isDegree) {
                 maxDistance *= MIFI_EARTH_RADIUS_M;
             }
             flannTranslatePointsToClosestInputCell(maxDistance, pointsOnXAxis, pointsOnYAxis, fieldSize, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
@@ -1392,26 +1364,16 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
               getLongitudeName(), getLatitudeName());
 
     // store projection changes to be used in data-section
-    // translate temporary new axes from deg2rad if required
-    vector<double> outXAxis = out_x_axis;
-    vector<double> outYAxis = out_y_axis;
-    int outXAxisType = MIFI_PROJ_AXIS;
-    int outYAxisType = MIFI_PROJ_AXIS;
-    std::regex degree(".*degree.*");
-    if (std::regex_match(out_x_axis_unit, degree)) {
-        transform_deg_to_rad(outXAxis);
-        outXAxisType = MIFI_LONGITUDE;
-    }
-    if (std::regex_match(out_y_axis_unit, degree)) {
-        transform_deg_to_rad(outYAxis);
-        outYAxisType = MIFI_LATITUDE;
-    }
+    const bool outIsDegree = unitIsDegree(out_x_axis_unit, out_y_axis_unit);
+    const int outXAxisType = outIsDegree ? MIFI_LONGITUDE : MIFI_PROJ_AXIS;
+    const int outYAxisType = outIsDegree ? MIFI_LATITUDE : MIFI_PROJ_AXIS;
 
     for (map<string, CoordinateSystem_cp>::iterator csIt = csMap.begin(); csIt != csMap.end(); ++csIt) {
         CoordinateSystem_cp cs = csIt->second;
 
         // translate axes to 'm' if given in other metric units
-        std::string orgUnit = cs->getProjection()->isDegree() ? "degree" : "m";
+        const bool isDegree = cs->getProjection()->isDegree();
+        const std::string orgUnit = isDegree ? "degree" : "m";
         const std::string& orgXAxisName = cs->getGeoXAxis()->getName();
         const std::string& orgYAxisName = cs->getGeoYAxis()->getName();
 
@@ -1421,29 +1383,19 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         extractValues(p_->dataReader->getScaledDataInUnit(orgYAxisName, orgUnit), orgYAxisValsArray, orgYAxisSize);
 
         // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
-        const size_t fieldSize = outXAxis.size() * outYAxis.size();
+        const size_t fieldSize = out_x_axis.size() * out_y_axis.size();
         shared_array<double> pointsOnXAxis = make_shared_array<double>(fieldSize);
         shared_array<double> pointsOnYAxis = make_shared_array<double>(fieldSize);
         const std::string orgProjStr = cs->getProjection()->getProj4String();
-        if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(),
-                                         &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-            throw CDMException("unable to project axes from \"" + proj_input + "\" to \"" + orgProjStr +
-                               "\" in CDMInterpolator::changeProjectionByProjectionParameters");
-        }
+        reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
+                                  &pointsOnYAxis[0]);
         LOG4FIMEX(logger, Logger::DEBUG,
-                  "mifi_project_axes: " << proj_input << "," << orgProjStr << "," << outXAxis[0] << "," << outYAxis[0] << " => " << pointsOnXAxis[0] << ","
+                  "mifi_project_axes: " << proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << pointsOnXAxis[0] << ","
                                         << pointsOnYAxis[0]);
 
-        // translate original axes from deg2rad if required
-        int miupXAxis = MIFI_PROJ_AXIS;
-        int miupYAxis = MIFI_PROJ_AXIS;
-        if (cs->getProjection()->isDegree()) {
-            miupXAxis = MIFI_LONGITUDE;
-            transform_deg_to_rad(&orgXAxisValsArray[0], orgXAxisSize);
-            miupYAxis = MIFI_LATITUDE;
-            transform_deg_to_rad(&orgYAxisValsArray[0], orgYAxisSize);
-        }
-        // translate coordinates (in rad or m) to indices
+        const int miupXAxis = isDegree ? MIFI_LONGITUDE : MIFI_PROJ_AXIS;
+        const int miupYAxis = isDegree ? MIFI_LATITUDE : MIFI_PROJ_AXIS;
+        // translate coordinates (in deg or m) to indices
         mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisSize, miupXAxis);
         mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisSize, miupYAxis);
 
@@ -1459,11 +1411,10 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             LOG4FIMEX(logger, Logger::DEBUG,
                       "creating cached vector projection interpolation matrix " << orgXAxisSize << "x" << orgYAxisSize << " => " << out_x_axis.size() << "x"
                                                                                 << out_y_axis.size());
-            shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
-            mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
+            reproject::Matrix_cp matrix = reproject::get_vector_reproject_matrix(orgProjStr, proj_input, &out_x_axis[0], &out_y_axis[0], outXAxisType,
+                                                                                 outYAxisType, out_x_axis.size(), out_y_axis.size());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
-            p_->cachedVectorReprojection[csIt->first] =
-                std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());
+            p_->cachedVectorReprojection[csIt->first] = std::make_shared<CachedVectorReprojection>(matrix);
         }
     }
 }
@@ -1674,9 +1625,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
     assert(tmplLatVals->size() == tmplLonVals->size());
 
-    // as template data are in degrees we have to do deg2rad
-    shared_array<double> lat_rad = data_deg_to_rad(tmplLatVals);
-    shared_array<double> lon_rad = data_deg_to_rad(tmplLonVals);
+    shared_array<double> lat_deg = tmplLatVals->asDouble();
+    shared_array<double> lon_deg = tmplLonVals->asDouble();
 
     for (const auto& csi : csMap) {
         CSGridDefinition def = orgGrids[csi.first];
@@ -1690,34 +1640,24 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         const std::string& orgProjStr = csp->getProj4String();
 
         // store projection changes to be used in data-section
-        shared_array<double> latY = clone(lat_rad, tmplLatVals->size());
-        shared_array<double> lonX = clone(lon_rad, tmplLonVals->size());
+        shared_array<double> latY = clone(lat_deg, tmplLatVals->size());
+        shared_array<double> lonX = clone(lon_deg, tmplLonVals->size());
 
         // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
 
         // projects lat / lon from template to axis-projection found in model file
         // we want to get template lat/long expressed in terms of the original projection
-        if (MIFI_OK != mifi_project_values(tmpl_proj_input.c_str(), orgProjStr.c_str(), &lonX[0], &latY[0], tmplLatVals->size())) {
-            throw CDMException("unable to project values from \"" + tmpl_proj_input + "\" to \"" + orgProjStr +
-                               "\" in changeProjectionByProjectionParametersToLatLonTemplate");
-        }
+        reproject::reproject_values(tmpl_proj_input, orgProjStr, &lonX[0], &latY[0], tmplLatVals->size());
         LOG4FIMEX(logger, Logger::DEBUG,
                   "mifi_project_values: " << tmpl_proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << lonX[0] << ","
                                           << latY[0]);
 
         // now latVals and lonVals are given in original-input coordinates
         // check if we have to translate original axes from deg2rad
-        int miupXAxis = MIFI_PROJ_AXIS;
-        int miupYAxis = MIFI_PROJ_AXIS;
+        const int miupXAxis = csp->isDegree() ? MIFI_LONGITUDE : MIFI_PROJ_AXIS;
+        const int miupYAxis = csp->isDegree() ? MIFI_LATITUDE : MIFI_PROJ_AXIS;
 
-        if (csp->isDegree()) {
-            miupXAxis = MIFI_LONGITUDE;
-            transform_deg_to_rad(orgXAxisArray.get(), def.xAxisData->size());
-            miupYAxis = MIFI_LATITUDE;
-            transform_deg_to_rad(orgYAxisArray.get(), def.yAxisData->size());
-        }
-
-        // translate coordinates (in radians) to indices
+        // translate coordinates (in degrees) to indices
         mifi_points2position(&latY[0], tmplLatVals->size(), orgYAxisArray.get(), def.yAxisData->size(), miupYAxis);
         mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
 
@@ -1732,12 +1672,11 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         if (hasXYSpatialVectors()) {
             // std::string orgUnit = csi.second->getProjection()->isDegree() ? "rad" : "m";
             LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
-            size_t outSize = tmplLatVals->size();
-            shared_array<double> matrix(new double[outSize * 4]);
+            const size_t outSize = tmplLatVals->size();
             // prepare interpolation of vectors
-            mifi_get_vector_reproject_matrix_points(orgProjStr.c_str(), MIFI_WGS84_LATLON_PROJ4, csp->isDegree() ? 0 : 1, &lon_rad[0], &lat_rad[0], outSize,
-                                                    matrix.get());
-            p_->cachedVectorReprojection[csi.first] = std::make_shared<CachedVectorReprojection>(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1);
+            reproject::Matrix_cp matrix =
+                reproject::get_vector_reproject_matrix_points(orgProjStr, LAT_LON_PROJSTR, csp->isDegree() ? 0 : 1, &lon_deg[0], &lat_deg[0], outSize, 1);
+            p_->cachedVectorReprojection[csi.first] = std::make_shared<CachedVectorReprojection>(matrix);
         }
     }
 }
