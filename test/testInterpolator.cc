@@ -258,6 +258,7 @@ struct IP {
     string lonAxis;
     string latAxis;
     double delta;
+    int nan_count;
 };
 } // namespace
 
@@ -266,29 +267,29 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
     std::vector<IP> tests{
         {"+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
          "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-         "-180,-179,...,179", "55,56,...,87", 8.01e-2},
+         "-180,-179,...,179", "55,56,...,87", 8.01e-2, 5 },
         {"+proj=stere +lat_0=90 +lon_0=0 +lat_ts=90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
          "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-         "-180,-179,...,179", "55,56,...,87", 8.02e-2},
+         "-180,-179,...,179", "55,56,...,87", 8.02e-2, 5 },
         {"+proj=stere +lat_0=-90 +lon_0=0 +lat_ts=-90 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
          "-30000000,-29950000,...,30000000", "-30000000,-29950000,...,30000000", "m",
-         "0,1,359", "-55,-56,...,-87", 8.03e-2 }, // south-pole - difficult around -180,180 edge, +-ywind???
+         "0,1,359", "-55,-56,...,-87", 8.03e-2, 5 }, // south-pole - difficult around -180,180 edge, +-ywind???
         {"+proj=lcc +lat_0=63 +lon_0=15 +lat_1=63 +lat_2=63 +no_defs +R=6.371e+06",
          "-922000,-902000,...,922000", "-1130000,-1110000,...,1230000", "m",
-         "-30,-29,...,40","50,51,...,85", 1.04e-2 }, // arome-norway
+         "-30,-29,...,40","50,51,...,85", 1.04e-2, 1750 }, // arome-norway
         {"+proj=ob_tran +o_proj=longlat +lon_0=-40 +o_lat_p=22 +R=6.371e+06 +no_defs",
          "16.5,16.6,...,24.2","-3.8,-3.7,...,14.9","degree",
-         "-30,-29,...,40","50,51,...,85", 5.05e-3 }, // hirlam8
+         "-30,-29,...,40","50,51,...,85", 5.05e-3, 2220 }, // hirlam8
         {"+proj=ob_tran +o_proj=longlat +lon_0=0 +o_lat_p=25 +R=6.371e+06 +no_defs",
          "-46.4,-46.2,...,46.","-36.4,-36.2,...,38.8","degree",
-         "-90,-89,...,90","40,51,...,85", 3.06e-2 }, // hirlam12
+         "-90,-89,...,90","40,51,...,85", 3.06e-2, 40 }, // hirlam12
         {"+proj=latlon +R=6.371e+06 +no_defs",
          "-179,-178,...,179","-89.5,-89,...,89.5","degree",
-         "-180,-179,...,179","-90,-89,...,90", 1.07e-3 }, // latlon
+         "-180,-179,...,179","-90,-89,...,90", 1.07e-3, 900 }, // latlon
 #if 0 // produces only NaN
         {"+proj=utm +zone=33 +datum=WGS84 +no_defs",
          "0,1000,...,x;relativeStart=0","0,1000,...,x;relativeStart=0","m",
-         "-30,-29,...,40","50,51,...,85", 1.08e-2 }, // UTM
+         "-30,-29,...,40","50,51,...,85", 1.08e-2, 0 }, // UTM
 #endif
     };
 
@@ -317,13 +318,17 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
             shared_array<float> xwind = dxwind->asFloat();
             shared_array<float> ywind = iback->getScaledData("y_wind")->asFloat();
 
+            size_t count_nan = 0;
             for (size_t i = 0; i < dxwind->size(); ++i) {
                 if (!mifi_isnan(xwind[i]) && !mifi_isnan(ywind[i])) {
                     TEST4FIMEX_CHECK_MESSAGE((std::abs(xWind - xwind[i]) < ip.delta) && (std::abs(yWind - ywind[i]) < ip.delta),
                                              "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:(" << xWind << "," << yWind << ") -> " << i << ": (" << xwind[i]
                                                                                                << "," << ywind[i] << "): " << ip.proj);
+                } else {
+                    count_nan += 1;
                 }
             }
+            TEST4FIMEX_CHECK_MESSAGE(count_nan <= ip.nan_count, "k=" << k << " proj=" << ip.proj << " nan " << count_nan << " > " << ip.nan_count);
         }
     }
 }
