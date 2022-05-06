@@ -677,12 +677,14 @@ MODULE Fimex
 
     c_pos = pos - 1
     get_dimname = ""
-    IF ( C_ASSOCIATED(this%sb) .AND. pos <= c_mifi_slicebuilder_ndims(this%sb) ) THEN
-       i = c_mifi_slicebuilder_dimname(this%sb, c_pos, var_array, 1025)
-       IF (i >= 2) THEN
-          i = i - 1
-          get_dimname(1:i) = var_array(1:i)
-       ENDIF
+    IF (C_ASSOCIATED(this%sb)) THEN
+      IF (pos <= c_mifi_slicebuilder_ndims(this%sb)) THEN
+         i = c_mifi_slicebuilder_dimname(this%sb, c_pos, var_array, 1025)
+         IF (i >= 2) THEN
+            i = i - 1
+            get_dimname(1:i) = var_array(1:i)
+         ENDIF
+      ENDIF
     ENDIF
     RETURN
   END FUNCTION get_dimname
