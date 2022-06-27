@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -71,8 +71,13 @@ public:
     virtual ~UnScale() {}
 };
 
-GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
-: CDMWriter(cdmReader, outputFile), gribVersion(gribVersion), configFile(configFile), xmlConfig(new XMLDoc(configFile))
+GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile,
+                                                             const std::string& configFile)
+    : CDMWriter(cdmReader, outputFile)
+    , gribVersion(gribVersion)
+    , configFile(configFile)
+    , xmlConfig(new XMLDoc(configFile))
+    , omitEmptyFields(true)
 {
     {
         std::string templXPath("/cdm_gribwriter_config/template_file");
@@ -123,6 +128,22 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
         }
         if (!gribFile.is_open())
             throw CDMException("Cannot write grib-file: "+outputFile);
+    }
+    // check processing options
+    {
+        std::string templXPath("/cdm_gribwriter_config/processing_options/omitEmptyFields");
+        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
+        xmlNodeSetPtr nodes = xPObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        if (size > 0) {
+            const std::string omitEmpty = getXmlContent(nodes->nodeTab[0]);
+            if (omitEmpty == "1" || omitEmpty == "yes" || omitEmpty == "true")
+                omitEmptyFields = true;
+            else if (omitEmpty == "0" || omitEmpty == "no" || omitEmpty == "false")
+                omitEmptyFields = false;
+            else if (omitEmpty != "")
+                LOG4FIMEX(logger, Logger::WARN, "ignoring unknown value '" << omitEmpty << "' for processing option 'omitEmptyFields'");
+        }
     }
 }
 
@@ -288,8 +309,12 @@ void GribApiCDMWriter_ImplAbstract::run()
                                 DataPtr data = cdmReader->getDataSlice(*var, sb);
                                 if (data->size() != 0) {
                                     shared_array<double> da = data->asDouble();
-                                    size_t countMissing = count(&da[0], &da[0] + data->size(), cdm.getFillValue(*var));
-                                    if (countMissing < data->size()) {
+                                    bool writeData = true;
+                                    if (omitEmptyFields) {
+                                        const size_t countMissing = count(&da[0], &da[0] + data->size(), cdm.getFillValue(*var));
+                                        writeData = (countMissing < data->size());
+                                    }
+                                    if (writeData) {
                                         data = handleTypeScaleAndMissingData(*var, levelVal, data);
                                         setData(data);
                                         writeGribHandleToFile();

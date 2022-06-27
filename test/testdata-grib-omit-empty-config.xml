@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_gribwriter_config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <global_attributes>
+    <!-- currently using 98 (ec), since netcdf doesn't support ours -->
+    <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" />
+  </global_attributes>
+
+  <processing_options>
+    <omitEmptyFields>0</omitEmptyFields>
+  </processing_options>
+
+  <axes>
+    <vertical_axis standard_name="">
+      <!-- using height in meter, 0 -->
+      <grib1 id="105" value="0" type="short"/>
+    </vertical_axis>
+  </axes>
+
+  <variables>
+    <parameter standard_name="precipitation_amount">
+      <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
+      <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
+    </parameter>
+  </variables>
+</cdm_gribwriter_config>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ../share/etc/ncml-2.2-fimex-0.xsd ">
+
+<dimension name="longitude" length="2" />
+<dimension name="latitude"  length="2" />
+<dimension name="time" length="3" unlimited="true" />
+
+<variable name="time" type="int" shape="time">
+  <attribute name="units" type="string" value="days since 2020-02-02 00:00:00"/>
+  <values>0 1 2</values>
+</variable>
+
+<variable name="longitude" type="int" shape="longitude">
+  <attribute name="units" type="string" value="degrees_east"/>
+  <values>55 65</values>
+</variable>
+
+<variable name="latitude" type="int" shape="latitude">
+  <attribute name="units" type="string" value="degrees_north"/>
+  <values>5 15</values>
+</variable>
+
+<variable name="dummy" shape="longitude latitude time" type="int">
+  <attribute name="_FillValue" type="int" value="-1" />
+  <attribute name="standard_name" type="string" value="precipitation_amount" />
+  <values>
+    111 112 121 122
+    -1 -1 -1 -1
+    211 212 221 222
+  </values>
+</variable>
+
+</netcdf>

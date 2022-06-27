@@ -1,0 +1,28 @@
+#! /bin/sh
+set -e
+
+TEST="writing grib without omitting empty fields"
+echo "testing $TEST"
+
+OUT="test-grib-omit-empty-out.grib"
+
+./fimex.sh \
+    --input.file "@CMAKE_CURRENT_SOURCE_DIR@/testdata-grib-omit-empty.ncml" \
+    --output.file "$OUT" \
+    --output.config "@CMAKE_CURRENT_SOURCE_DIR@/testdata-grib-omit-empty-config.xml"
+
+E="$?"
+if test "$E" != "0" ; then
+    echo "failed $TEST (fimex)"
+else
+    GC=$("@GRIB_COUNT_PROGRAM@" "$OUT")
+    if test "$GC" != "3" ; then
+        echo "failed $TEST (count)"
+        E=1
+    else
+        echo "success"
+    fi
+fi
+
+rm -f "$OUT"
+exit $E

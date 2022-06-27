@@ -122,6 +122,19 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
   ADD_TEST(NAME testGrib2SomeUndefined.sh COMMAND testGrib2SomeUndefined.sh)
 ENDIF()
+IF (ENABLE_ECCODES)
+  FIND_PROGRAM(GRIB_COUNT_PROGRAM
+    NAMES grib_count
+    HINTS "${eccodes_DIR}/bin"
+  )
+  IF (GRIB_COUNT_PROGRAM)
+    MESSAGE (STATUS "Found grib_count: ${GRIB_COUNT_PROGRAM}")
+    CONFIGURE_FILE(test-grib-omit-empty.sh.in test-grib-omit-empty.sh @ONLY)
+    ADD_TEST(NAME test-grib-omit-empty.sh COMMAND test-grib-omit-empty.sh)
+  ELSE ()
+    MESSAGE (STATUS "Found no grib_count, omitting test")
+  ENDIF()
+ENDIF()
 
 IF((ENABLE_FELT) AND (ENABLE_NETCDF) AND ((ENABLE_GRIBAPI) OR (ENABLE_ECCODES)))
   LIST(APPEND SH_TESTS

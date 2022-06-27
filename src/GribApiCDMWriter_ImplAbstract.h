@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -57,6 +57,7 @@ public:
      * actually fetch and write the data.
      */
     void run();
+
 protected:
     /**
      * add the global attributes from the config to the default grib-handle
@@ -118,6 +119,7 @@ protected:
     int gribVersion;
     const std::string configFile;
     const XMLDoc_p xmlConfig;
+    bool omitEmptyFields;
     std::shared_ptr<grib_handle> gribHandle;
 
 private:
