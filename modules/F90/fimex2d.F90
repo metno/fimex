@@ -132,7 +132,7 @@ MODULE FIMEX2D
       CHARACTER(len=*),                  INTENT(IN)              :: VARNAME
       INTEGER(KIND=IKIND),               INTENT(IN)              :: NX
       INTEGER(KIND=IKIND),               INTENT(IN)              :: NY
-      REAL(KIND=RKIND),DIMENSION(NX*NY), INTENT(IN)              :: OUTFIELD
+      REAL(KIND=RKIND),DIMENSION(NX,NY), INTENT(IN)              :: OUTFIELD
       INTEGER(KIND=IKIND),               INTENT(IN),   OPTIONAL  :: STEP
       INTEGER(KIND=IKIND),               INTENT(IN),   OPTIONAL  :: REL
       INTEGER(KIND=IKIND),               INTENT(IN),   OPTIONAL  :: LEVEL
