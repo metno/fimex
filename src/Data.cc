@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -143,13 +143,6 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
     // clang-format on
     d->setValues(0, data, dataStartPos, dataStartPos + length);
     return d;
-}
-
-template <class C>
-DataPtr DataImpl<C>::clone() const
-{
-    typedef DataImpl<C> Impl;
-    return std::shared_ptr<Impl>(new Impl(*this));
 }
 
 template<>

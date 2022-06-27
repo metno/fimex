@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -329,6 +329,13 @@ DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double old
         }
     // clang-format on
     throw CDMException("cannot convert unknown datatype");
+}
+
+template <typename C>
+DataPtr DataImpl<C>::clone() const
+{
+    typedef DataImpl<C> Impl;
+    return std::shared_ptr<Impl>(new Impl(*this));
 }
 
 template <>
