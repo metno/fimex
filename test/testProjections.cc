@@ -227,6 +227,7 @@ TEST4FIMEX_TEST_CASE(test_common_projections)
         "+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs",        // NorKyst 2015
         "+proj=ob_tran +o_proj=longlat +lon_0=-40 +o_lat_p=22 +R=6.371e+06 +no_defs",            // MyWave Wam 4km
         "+proj=longlat +a=6367470 +e=0 +no_defs",                                                // ECMWF 2022
+        "+proj=lcc +lat_0=77.5 +lon_0=-25 +lat_1=77.5 +lat_2=77.5 +no_defs +R=6.371e+06",        // Barents 2.5km
     };
 
     for (const auto& p4 : proj4) {
