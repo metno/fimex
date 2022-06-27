@@ -1,7 +1,7 @@
 Source: fimex-0.23
 Priority: extra
 Maintainer: MET Norway <fimex@met.no>
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper (>= 11),
  dh-python,
  cmake,
  quilt,
