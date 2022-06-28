@@ -4,6 +4,11 @@
 <!--                        xsi:noNamespaceSchemaLocation="cdmGribWriterConfig.xsd"> -->
 <!-- select a specialized grib-template instead of using the default grib_api file -->
 <!-- <template_file name="/disk1/Fimex/conc_Am-241.ID_328.grib" /> -->
+<!-- allow writing of fields with only missing-values, default true
+<processing_options>
+    <omitEmptyFields>false</omitEmptyFields>
+</processing_options>
+-->
 <!-- output-file configuration, default-type: overwrite -->
 <!-- <output_file type="append" />  -->
 <global_attributes>
