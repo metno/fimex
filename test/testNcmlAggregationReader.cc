@@ -31,7 +31,6 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
 
 #include <mi_cpptest_version.h>
@@ -132,8 +131,8 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
     const string ncmlName = require("aggNewDim.ncml");
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
+    CDMFileReaderFactory::createWriter(reader, "nc4", test_output);
 
-    NetCDF_CDMWriter(reader, test_output, "", 4); // does not work for netcdf-3
     CDMReader_p reader2(CDMFileReaderFactory::create("NETCDF", test_output));
     DataPtr slice = reader->getDataSlice("notlimited", 2);
     TEST4FIMEX_REQUIRE(slice);

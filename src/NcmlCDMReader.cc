@@ -1,7 +1,7 @@
 /*
  * Fimex, NcmlCDMReader.cc
  *
- * (C) Copyright 2009-2020, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,19 +26,19 @@
 
 #include "fimex/NcmlCDMReader.h"
 
+#include "NcmlAggregationReader.h"
+
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MutexLock.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/XMLInput.h"
-
-#include "MutexLock.h"
-#include "NcmlAggregationReader.h"
 
 #include <memory>
 #include <regex>

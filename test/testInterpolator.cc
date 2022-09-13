@@ -28,7 +28,6 @@
 #include "fimex/Data.h"
 #include "fimex/MathUtils.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLInputFile.h"
 #include "fimex/interpolation.h"

@@ -1,7 +1,7 @@
 /*
  * Fimex, Log4cppLogger.cc
  *
- * (C) Copyright 2012-2019, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,7 +27,7 @@
 #include "Log4cppLogger.h"
 #ifdef HAVE_LOG4CPP
 
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 
 #include "log4cpp/CategoryStream.hh"
 

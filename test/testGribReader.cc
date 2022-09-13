@@ -28,13 +28,13 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
-#include "fimex/GribFileIndex.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/MathUtils.h"
-#include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/XMLInputFile.h"
+
+#include "GribFileIndex.h"
 
 #include "testinghelpers.h"
 

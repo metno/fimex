@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,12 +24,12 @@
 #include "fimex/Units.h"
 
 #include "fimex/Logger.h"
+#include "fimex/MutexLock.h"
 #include "fimex/UnitsConverter.h"
 #include "fimex/UnitsException.h"
 
 #include <memory>
 
-#include "MutexLock.h"
 #include "fimex_config.h"
 #ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"

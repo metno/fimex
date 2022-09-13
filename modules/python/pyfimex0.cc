@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0.cc
  *
- * (C) Copyright 2017-2019, met.no
+ * (C) Copyright 2017-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -43,7 +43,6 @@ void pyfimex0_CDMWriter(py::module m);
 void pyfimex0_AggregationReader(py::module m);
 void pyfimex0_CoordinateSystem(py::module m);
 void pyfimex0_NcmlCDMReader(py::module m);
-void pyfimex0_NetCDF_CDMWriter(py::module m);
 
 namespace {
 py::object mifi_version()
@@ -67,7 +66,6 @@ PYBIND11_MODULE(pyfimex0, m)
     pyfimex0_CoordinateSystem(m);
     pyfimex0_AggregationReader(m);
     pyfimex0_NcmlCDMReader(m);
-    pyfimex0_NetCDF_CDMWriter(m);
 
     m.def("mifi_version", mifi_version, "Returns a 4-tuple with (major, minor, patch, status) version numbers.");
 }

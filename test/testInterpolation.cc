@@ -28,7 +28,7 @@
 #include "fimex/Data.h"
 #include "fimex/MathUtils.h"
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include <cmath>
 #include <fstream>

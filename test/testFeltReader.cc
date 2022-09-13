@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,7 +26,8 @@
 #include "FeltParameters.h"
 #include "Felt_Array2.h"
 #include "Felt_File2.h"
-#include "felt/FeltGridDefinition.h"
+
+#include "FeltGridDefinition.h"
 
 #include <array>
 #include <cassert>

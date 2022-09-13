@@ -1,7 +1,7 @@
 /*
  * Fimex, testGribWriter.cc
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,7 +27,8 @@
 #include "testinghelpers.h"
 
 #include "fimex/CDMFileReaderFactory.h"
-#include "fimex/GribApiCDMWriter.h"
+
+#include "GribApiCDMWriter.h"
 
 #include <memory>
 

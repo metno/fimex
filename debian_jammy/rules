@@ -20,7 +20,6 @@ endif
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
 	dh_auto_configure -- \
-	    -DBUILD_SHARED_LIBS=BOTH \
 	    -DENABLE_LOG4CPP=YES \
 	    -DENABLE_ECCODES=YES \
 	    -DENABLE_FORTRAN=YES \

@@ -46,7 +46,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/min_max.h"
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include "nanoflann/nanoflann.hpp"
 

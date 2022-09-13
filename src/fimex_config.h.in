@@ -5,18 +5,12 @@
 #define HAVE_UDUNITS2_H 1
 
 #define FIMEX_DATADIR "@FIMEX_DATADIR@"
+#define FIMEX_IO_PLUGINS_PATH "@FIMEX_IO_PLUGINS_PATH@"
+#define FIMEX_IO_PLUGINS_VERSION "@MINUS_FIMEX_VERSION@"
 
 // defined if configured
-#cmakedefine HAVE_FELT 1
-#cmakedefine HAVE_ECCODES 1 // defined if using ecCodes for GRIB reading
-#cmakedefine HAVE_GRIB_API 1 // defined if using (outdated) grib-api for GRIB reading
-#cmakedefine HAVE_GRIB_THREADSAFE 1 // defined if ecCodes / grib-api are thread-safe
 #cmakedefine HAVE_LOG4CPP 1
-#cmakedefine HAVE_METGM_H 1
 #cmakedefine HAVE_MPI 1
-#cmakedefine HAVE_NETCDF_H 1
-#cmakedefine HAVE_NETCDF_HDF5_LIB 1
-#cmakedefine HAVE_PRORADXML 1
 #cmakedefine HAVE_PROJ_H 1 // defined from fimex CMakeLists.txt if using proj >= 6.2.0
 
 #endif // FIMEX_CONFIG_H

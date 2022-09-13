@@ -9,8 +9,6 @@ SET(config_DATA
   cdmGribReaderConfig.xsd
   cdmGribWriterConfig.xml
   cdmGribWriterConfig.xsd
-  cdmMetGmReaderConfig.xml
-  cdmMetGmWriterConfig.xml
   cdmQualityConfig.xml
   cdmQualityConfig.xsd
   cdmWriterConfig.xml
@@ -51,7 +49,6 @@ SET(config_DATA
   felt2nc_variables.dtd
   felt2nc_variables.xml
   fimex_example.cfg
-  metgm_config.xsd
   ncml-2.2.xsd
   ncml-2.2-fimex-0.xsd
   ncmlCDMConfig.ncml

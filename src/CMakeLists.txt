@@ -3,6 +3,15 @@ SET(FIMEX_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/fimex${MINUS_FIMEX_VERSION}")
 
 SET(INCF "${CMAKE_SOURCE_DIR}/include/fimex")
 
+SET(libfimex_ncml_SOURCES
+  NcmlCDMReader.cc
+  ${INCF}/NcmlCDMReader.h
+  NcmlIoFactory.cc
+  NcmlIoFactory.h
+  NcmlAggregationReader.cc
+  NcmlAggregationReader.h
+)
+
 SET(libfimex_SOURCES
   c_fimex.cc
   ${INCF}/c_fimex.h
@@ -63,7 +72,7 @@ SET(libfimex_SOURCES
   CDMWriter.cc
   ${INCF}/CDMWriter.h
   CDM_XMLConfigHelper.cc
-  CDM_XMLConfigHelper.h
+  ${INCF}/CDM_XMLConfigHelper.h
   CoordinateSystemSliceBuilder.cc
   ${INCF}/CoordinateSystemSliceBuilder.h
   Data.cc
@@ -85,24 +94,21 @@ SET(libfimex_SOURCES
   ${INCF}/IndexedData.h
   IoFactory.cc
   ${INCF}/IoFactory.h
+  IoPlugin.cc
+  ${INCF}/IoPlugin.h
+
   Logger.cc
   ${INCF}/Logger.h
   Log4cppLogger.cc
   Log4cppLogger.h
-  MutexLock.h
+  ${INCF}/MutexLock.h
   NativeData.cc
   NativeData.h
-  NcmlCDMReader.cc
-  ${INCF}/NcmlCDMReader.h
-  NcmlIoFactory.cc
-  NcmlIoFactory.h
-  NcmlAggregationReader.cc
-  NcmlAggregationReader.h
   Null_CDMWriter.cc
   ${INCF}/Null_CDMWriter.h
   NullIoFactory.cc
   NullIoFactory.h
-  RecursiveSliceCopy.h
+  ${INCF}/RecursiveSliceCopy.h
   ReplaceStringObject.cc
   ${INCF}/ReplaceStringObject.h
   ReplaceStringTimeObject.cc
@@ -258,10 +264,11 @@ SET(libfimex_SOURCES
   ${INCF}/vertical_coordinate_transformations.h
 
   reproject.cc
-  reproject.h
+  ${INCF}/reproject.h
 
   leap_iterator.h
 )
+LIST (APPEND libfimex_SOURCES ${libfimex_ncml_SOURCES})
 
 IF(ENABLE_LOG4CPP)
   SET(HAVE_LOG4CPP 1)
@@ -271,161 +278,29 @@ IF(MPI_CXX_FOUND)
   SET(HAVE_MPI 1)
 ENDIF()
 
-IF(ENABLE_NETCDF)
-  SET(HAVE_NETCDF_H 1)
-
-  SET(libfimex_netcdf_SOURCES
-    NetCDF_CDMReader.cc
-    ${INCF}/NetCDF_CDMReader.h
-    NetCDF_CDMWriter.cc
-    ${INCF}/NetCDF_CDMWriter.h
-    NetCDF_Utils.cc
-    NetCDF_Utils.h
-    NetCDFIoFactory.cc
-    NetCDFIoFactory.h
-  )
-ENDIF(ENABLE_NETCDF)
-
-IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
-  IF(ENABLE_GRIBAPI)
-    SET(HAVE_GRIB_API 1)
-  ELSE()
-    SET(HAVE_ECCODES 1)
-  ENDIF()
-
-  SET(libfimex_grib_SOURCES
-    GribApiCDMWriter.cc
-    ${INCF}/GribApiCDMWriter.h
-    GribApiCDMWriter_ImplAbstract.cc
-    GribApiCDMWriter_ImplAbstract.h
-    GribApiCDMWriter_Impl1.cc
-    GribApiCDMWriter_Impl1.h
-    GribApiCDMWriter_Impl2.cc
-    GribApiCDMWriter_Impl2.h
-    GribCDMReader.cc
-    ${INCF}/GribCDMReader.h
-    GribFileIndex.cc
-    ${INCF}/GribFileIndex.h
-    GribUtils.cc
-    ${INCF}/GribUtils.h
-    GribIoFactory.cc
-    GribIoFactory.h
-    )
-ENDIF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
-
-IF(ENABLE_FELT)
-  ADD_SUBDIRECTORY(felt)
-  SET(FELT_LIBRARY libfelt)
-
-  SET(HAVE_FELT 1)
-
-  SET(libfimex_felt_SOURCES
-    Felt_Array2.cc
-    FeltCDMReader2.cc
-    Felt_File2.cc
-    FeltParameters.cc
-
-    Felt_Array2.h
-    FeltCDMReader2.h
-    Felt_File_Error.h
-    Felt_File2.h
-    FeltParameters.h
-
-    FeltIoFactory.cc
-    FeltIoFactory.h
-    )
-
-ENDIF(ENABLE_FELT)
-
-if(ENABLE_METGM)
-  SET(HAVE_METGM_H 1)
-
-  SET(libfimex_metgm_SOURCES
-    MetGmCDMWriter.cc
-    ${INCF}/MetGmCDMWriter.h
-    MetGmCDMReader.cc
-    ${INCF}/MetGmCDMReader.h
-    MetGmIoFactory.cc
-    MetGmIoFactory.h
-
-    metgm/MetGmCDMReaderImpl.cc
-    metgm/MetGmCDMReaderImpl.h
-    metgm/MetGmCDMReaderSlicedImpl.cc
-    metgm/MetGmCDMReaderSlicedImpl.h
-    metgm/MetGmCDMVariableProfile.cc
-    metgm/MetGmCDMVariableProfile.h
-    metgm/MetGmCDMWriterImpl.cc
-    metgm/MetGmCDMWriterImpl.h
-    metgm/MetGmCDMWriterSlicedImpl.cc
-    metgm/MetGmCDMWriterSlicedImpl.h
-    metgm/MetGmCommentAttributeParser.cc
-    metgm/MetGmCommentAttributeParser.h
-    metgm/MetGmConfigurationMappings.cc
-    metgm/MetGmConfigurationMappings.h
-    metgm/MetGmDimensionsTag.cc
-    metgm/MetGmDimensionsTag.h
-    metgm/MetGmFileHandlePtr.h
-    metgm/MetGmGroup1Ptr.cc
-    metgm/MetGmGroup1Ptr.h
-    metgm/MetGmGroup2Ptr.cc
-    metgm/MetGmGroup2Ptr.h
-    metgm/MetGmGroup3Ptr.cc
-    metgm/MetGmGroup3Ptr.h
-    metgm/MetGmGroup5Ptr.cc
-    metgm/MetGmGroup5Ptr.h
-    metgm/MetGmHandlePtr.cc
-    metgm/MetGmHandlePtr.h
-    metgm/MetGmHorizontalTag.cc
-    metgm/MetGmHorizontalTag.h
-    metgm/MetGmTags.cc
-    metgm/MetGmTags.h
-    metgm/MetGmTimeTag.cc
-    metgm/MetGmTimeTag.h
-    metgm/MetGmUtils.cc
-    metgm/MetGmUtils.h
-    metgm/MetGmVersion.cc
-    metgm/MetGmVersion.h
-    metgm/MetGmVerticalTag.cc
-    metgm/MetGmVerticalTag.h
-  )
-ENDIF(ENABLE_METGM)
-
-if(ENABLE_PRORADXML)
-  SET(HAVE_PRORADXML 1)
-
-  SET(libfimex_proradxml_SOURCES
-    ProradXMLCDMReader.cc
-    ProradXMLCDMReader.h
-    ProradXMLIoFactory.cc
-    ProradXMLIoFactory.h
-    )
-ENDIF(ENABLE_PRORADXML)
+SET(FIMEX_IO_PLUGINS_PATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 
 CONFIGURE_FILE(fimex_config.h.in fimex_config.h)
 
-SET(libfimex_ALL_SOURCES
-  ${libfimex_SOURCES}
-  ${libfimex_netcdf_SOURCES}
-  ${libfimex_grib_SOURCES}
-  ${libfimex_felt_SOURCES}
-  ${libfimex_metgm_SOURCES}
-  ${libfimex_proradxml_SOURCES}
-)
-
 SET(libfimex_PACKAGES
-  ${FELT_LIBRARY}
   ${date_PACKAGE}
-  ${eccodes_PACKAGE}
-  ${grib_api_PACKAGE}
   ${libxml2_PACKAGE}
   ${log4cpp_PACKAGE}
-  ${metgm_PACKAGE}
-  ${netCDF_PACKAGE}
   ${proj_PACKAGE}
-  ${proradxmlrw_PACKAGE}
   ${udunits2_PACKAGE}
 )
 
-FIMEX_ADD_LIBRARY(fimex "${libfimex_ALL_SOURCES}" "${libfimex_PACKAGES}")
+FIMEX_ADD_LIBRARY(fimex "${libfimex_SOURCES}" "${libfimex_PACKAGES}")
+
+SET(IO_PACKAGES "libfimex;${libxml2_PACKAGE}")
+IF (ENABLE_NETCDF)
+ADD_SUBDIRECTORY(io/netcdf)
+ENDIF ()
+IF (ENABLE_FELT)
+ADD_SUBDIRECTORY(io/felt)
+ENDIF ()
+IF (ENABLE_GRIBAPI OR ENABLE_ECCODES)
+ADD_SUBDIRECTORY(io/grib)
+ENDIF ()
 
 ADD_SUBDIRECTORY(binSrc)

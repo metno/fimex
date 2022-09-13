@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,11 +24,10 @@
 #include "fimex/TimeUnit.h"
 
 #include "fimex/CDMException.h"
+#include "fimex/MutexLock.h"
 #include "fimex/TimeUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
-
-#include "MutexLock.h"
 
 #include <climits>
 #include <cmath>

@@ -39,7 +39,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/mifi_constants.h"
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include <cassert>
 #include <cmath>

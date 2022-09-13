@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include "fimex_config.h"
+#include "fimex_test_config.h"
 
 namespace MetNoFimex {
 

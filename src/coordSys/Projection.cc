@@ -51,7 +51,7 @@
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
 #include "fimex/coordSys/VerticalPerspectiveProjection.h"
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include <memory>
 #include <regex>

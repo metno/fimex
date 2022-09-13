@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include "fimex/CDMException.h"
 #include "fimex/CDMconstants.h"

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDM_XMLConfigHelper.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "CDM_XMLConfigHelper.h"
+#include "fimex/CDM_XMLConfigHelper.h"
 
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMException.h"
@@ -33,11 +33,15 @@
 #include "fimex/StringUtils.h"
 #include "fimex/XMLDoc.h"
 
+#include <libxml/tree.h>
+#include <libxml/xinclude.h>
 #include <libxml/xpath.h>
 
 #include <regex>
 
 namespace MetNoFimex {
+
+using namespace std;
 
 static string replaceTemplateAttribute(string value, const map<string, std::shared_ptr<ReplaceStringObject>> templateReplacements)
 {

@@ -8,24 +8,10 @@ LINK_DIRECTORIES(${PC_LIBRARY_DIRS} ${BOOST_LIBRARY_DIRS})
 
 FIMEX_ADD_LIBRARY(fimexf "${libfimexf_SOURCES}" libfimex "" "")
 
-# use separate directories for fortran mod files,
-# see https://gitlab.kitware.com/cmake/cmake/-/issues/17044
-IF(BUILD_SHARED_LIBS)
-  SET (F90_MOD_DIR "${CMAKE_CURRENT_BINARY_DIR}/libfimexf_mods")
-  SET_TARGET_PROPERTIES(libfimexf PROPERTIES
-    Fortran_MODULE_DIRECTORY "${F90_MOD_DIR}"
-  )
-ENDIF()
-IF((NOT (BUILD_SHARED_LIBS)) OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
-  SET (F90S_MOD_DIR "${CMAKE_CURRENT_BINARY_DIR}/libfimexf_static_mods")
-  SET_TARGET_PROPERTIES(libfimexf-static PROPERTIES
-    Fortran_MODULE_DIRECTORY "${F90S_MOD_DIR}"
-  )
-  IF (NOT F90_MOD_DIR)
-    SET (F90_MOD_DIR "${F90S_MOD_DIR}")
-  ENDIF ()
-ENDIF()
-
+SET (F90_MOD_DIR "${CMAKE_CURRENT_BINARY_DIR}/libfimexf_mods")
+SET_TARGET_PROPERTIES(libfimexf PROPERTIES
+  Fortran_MODULE_DIRECTORY "${F90_MOD_DIR}"
+)
 INSTALL(FILES
   "${F90_MOD_DIR}/fimex.mod"
   "${F90_MOD_DIR}/fimex2d.mod"
@@ -46,3 +32,7 @@ FOREACH(T ${F90_TESTS})
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
 
+SET_PROPERTY(
+  TEST ${F90_TESTS}
+  APPEND PROPERTY ENVIRONMENT "FIMEX_IO_PLUGINS_PATH=${FIMEX_IO_PLUGINS_PATH}"
+)

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMFileReaderFactory.cc
  *
- * (C) Copyright 2010-2018, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -31,6 +31,8 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/FileUtils.h"
 #include "fimex/IoFactory.h"
+#include "fimex/IoPlugin.h"
+#include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
@@ -44,6 +46,8 @@
 #include <memory>
 #include <regex>
 
+#include "fimex_config.h"
+
 namespace MetNoFimex {
 
 #if 0 // FIXME detect xml types, look at this header and xmlns:??="..."
@@ -55,6 +59,52 @@ static bool detectXML(const char* magic) {
 // ========================================================================
 
 namespace {
+
+Logger_p logger = getLogger("fimex.CDMFileReaderFactory");
+
+static bool haveScannedForIoPlugins = false;
+
+std::vector<std::string> getIoPluginsDirs()
+{
+    std::string plugins_path{FIMEX_IO_PLUGINS_PATH};
+    if (const char* iopp = getenv("FIMEX_IO_PLUGINS_PATH")) {
+        plugins_path = iopp;
+    }
+    return tokenize(plugins_path, ":");
+}
+
+// static
+void scanForIoPlugins()
+{
+    if (haveScannedForIoPlugins)
+        return;
+    haveScannedForIoPlugins = true;
+
+    static const std::regex re_plugin_so("libfimex-io-([a-z0-9]+)" FIMEX_IO_PLUGINS_VERSION "\\.so");
+    static const auto plugin_dirs = getIoPluginsDirs();
+    for (const auto& pd : plugin_dirs) {
+        LOG4FIMEX(logger, Logger::DEBUG, "searching for io plugins in '" << pd << "' ...");
+        std::vector<std::string> plugins;
+        scanFiles(plugins, pd, 0, re_plugin_so, true);
+        for (const auto& plugin_file : plugins) {
+            try {
+                auto plugin = std::make_shared<IoPlugin>(plugin_file);
+                const auto name = plugin->name();
+                if (IoFactory::factories().count(name)) {
+                    LOG4FIMEX(logger, Logger::INFO,
+                              "not installing plugin '" << plugin_file << "' because another plugin with name '" << name << "' is already loaded");
+                } else {
+                    IoFactory::install(name, plugin);
+                    LOG4FIMEX(logger, Logger::DEBUG, "installed io plugin '" << plugin_file << "' ...");
+                }
+            } catch (std::exception& ex) {
+                LOG4FIMEX(logger, Logger::ERROR, "failed to load io plugin '" << plugin_file << "': " << ex.what());
+            } catch (...) {
+                LOG4FIMEX(logger, Logger::ERROR, "failed to load io plugin '" << plugin_file << "' with an unknown error");
+            }
+        }
+    }
+}
 
 IoFactory_pm& ioFactories()
 {
@@ -112,6 +162,8 @@ IoFactory_p findFactoryFromFileName(const std::string& fileName)
 
 IoFactory_p findFactory(const std::string& fileTypeName, const std::string& fileName, bool write)
 {
+    scanForIoPlugins();
+
     if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
         return f;
 

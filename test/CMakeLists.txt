@@ -81,10 +81,6 @@ IF(ENABLE_NETCDF)
     testVLevelConverter
     )
 
-  SET(METGM_NC_TESTS
-    testMetGmWriter
-    )
-
   LIST(APPEND SH_TESTS
     ${NETCDF_MI_SH_TESTS}
     testCharNc.sh
@@ -120,8 +116,10 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
     ${GRIBAPI_NC_TESTS}
     testGribReader
     )
+ENDIF()
+IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
   CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
-  ADD_TEST(NAME testGrib2SomeUndefined.sh COMMAND testGrib2SomeUndefined.sh)
+  LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
 ENDIF()
 IF (ENABLE_ECCODES)
   FIND_PROGRAM(GRIB_COUNT_PROGRAM
@@ -131,25 +129,18 @@ IF (ENABLE_ECCODES)
   IF (GRIB_COUNT_PROGRAM)
     MESSAGE (STATUS "Found grib_count: ${GRIB_COUNT_PROGRAM}")
     CONFIGURE_FILE(test-grib-omit-empty.sh.in test-grib-omit-empty.sh @ONLY)
-    ADD_TEST(NAME test-grib-omit-empty.sh COMMAND test-grib-omit-empty.sh)
+    LIST(APPEND SH_BIN_TESTS test-grib-omit-empty.sh)
   ELSE ()
     MESSAGE (STATUS "Found no grib_count, omitting test")
   ENDIF()
 ENDIF()
 
-IF((ENABLE_FELT) AND (ENABLE_NETCDF) AND ((ENABLE_GRIBAPI) OR (ENABLE_ECCODES)))
+IF(ENABLE_FELT AND ((ENABLE_GRIBAPI) OR (ENABLE_ECCODES)))
   LIST(APPEND SH_TESTS
     testFiIndexGribs.sh
     testFiGrbmlCat.sh
     )
 ENDIF()
-
-IF(ENABLE_METGM)
-  LIST(APPEND CC_TESTS
-    testMetGmReader
-    ${METGM_NC_TESTS}
-    )
-ENDIF(ENABLE_METGM)
 
 IF (ENABLE_NETCDF)
   FIND_PROGRAM(NCDUMP_PROGRAM
@@ -164,6 +155,8 @@ IF (ENABLE_NETCDF)
   ENDIF()
 ENDIF()
 
+CONFIGURE_FILE(fimex_test_config.h.in fimex_test_config.h)
+
 CONFIGURE_FILE(nccmp.sh.in nccmp.sh @ONLY)
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 
@@ -177,8 +170,7 @@ ADD_LIBRARY(testinghelpers STATIC
 )
 TARGET_INCLUDE_DIRECTORIES(testinghelpers
  PUBLIC
-  "${CMAKE_BINARY_DIR}/src"   # for fimex_config.h
-  "${CMAKE_SOURCE_DIR}/src"   # for reproject.h etc
+  "${CMAKE_CURRENT_BINARY_DIR}" # for fimex_test_config.h
  PRIVATE
   "${CMAKE_SOURCE_DIR}/include"
 )
@@ -224,22 +216,46 @@ ENDIF(ENABLE_FELT)
 
 FOREACH(T ${SH_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")
-  SET_TESTS_PROPERTIES(${T}
-    PROPERTIES
-    ENVIRONMENT "TEST_EXTRADATA_DIR=${TEST_EXTRADATA_DIR}"
-    DEPENDS fimex
-  )
+ENDFOREACH()
+FOREACH(T ${SH_BIN_TESTS})
+  ADD_TEST(NAME ${T} COMMAND "${T}")
 ENDFOREACH()
 
-IF(ENABLE_FELT AND ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  SET_TESTS_PROPERTIES(testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
-    PROPERTIES DEPENDS testGribWriter
+SET_TESTS_PROPERTIES(${SH_TESTS};${SH_BIN_TESTS} PROPERTIES DEPENDS fimex)
+
+SET_PROPERTY(
+  TEST ${SH_TESTS} ${SH_BIN_TESTS} ${C_TESTS} ${CC_TESTS}
+  APPEND PROPERTY ENVIRONMENT "TEST_EXTRADATA_DIR=${TEST_EXTRADATA_DIR}"
+)
+
+SET_PROPERTY(
+  TEST ${SH_TESTS} ${SH_BIN_TESTS} ${C_TESTS} ${CC_TESTS}
+  APPEND PROPERTY ENVIRONMENT "FIMEX_IO_PLUGINS_PATH=${FIMEX_IO_PLUGINS_PATH}"
+)
+
+IF(ENABLE_FELT AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
+  SET_PROPERTY(
+    TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
+    APPEND PROPERTY DEPENDS testGribWriter
   )
-  TARGET_LINK_LIBRARIES(testGribReader ${libxml2_PACKAGE})
+  TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib)
+ENDIF()
+IF(ENABLE_GRIBAPI OR ENABLE_ECCODES)
+  TARGET_LINK_LIBRARIES(testGribReader libfimex-io-grib)
 ENDIF()
 
 IF(ENABLE_FELT AND ENABLE_NETCDF)
-  SET_TESTS_PROPERTIES(testNetCDFReadWrite.sh
-    PROPERTIES DEPENDS testNetcdfWriter
+  SET_PROPERTY(
+    TEST testNetCDFReadWrite.sh
+    APPEND PROPERTY DEPENDS testNetcdfWriter
   )
+  TARGET_LINK_LIBRARIES(testNetcdfWriter libfimex-io-netcdf)
+ENDIF()
+
+IF(ENABLE_NETCDF)
+  TARGET_LINK_LIBRARIES(testNcmlAggregationReader libfimex-io-netcdf)
+ENDIF()
+
+IF(ENABLE_FELT)
+  TARGET_LINK_LIBRARIES(testFeltReader libfimex-io-felt)
 ENDIF()

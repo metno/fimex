@@ -29,7 +29,6 @@ SET(pyfimex0_SOURCES
   pyfimex0_CoordinateSystem.cc
   pyfimex0_Data.cc
   pyfimex0_NcmlCDMReader.cc
-  pyfimex0_NetCDF_CDMWriter.cc
   pyfimex0_AggregationReader.cc
   pyfimex0.cc
 )
@@ -46,14 +45,20 @@ INSTALL(TARGETS pyfimex0
 
 SET(pyfimex0_TESTS
   test_pyfimex0.py
-  test_pyfimex0_coordinatesystem.py
-  test_pyfimex0_extractor.py
-  test_pyfimex0_interpolator.py
-  test_pyfimex0_merger.py
-  test_pyfimex0_netcdf_cdmwriter.py
-  test_pyfimex0_netcdf_cdmreaderwriter.py
   test_pyfimex0_PyCDMReader.py
   )
+
+IF (ENABLE_NETCDF)
+  LIST (APPEND pyfimex0_TESTS
+    test_pyfimex0_coordinatesystem.py
+    test_pyfimex0_extractor.py
+    test_pyfimex0_interpolator.py
+    test_pyfimex0_merger.py
+    test_pyfimex0_netcdf.py
+    test_pyfimex0_netcdf_cdmwriter.py
+    test_pyfimex0_netcdf_cdmreaderwriter.py
+  )
+ENDIF()
 
 FOREACH(T ${pyfimex0_TESTS})
   ADD_TEST(NAME ${T}
@@ -61,8 +66,13 @@ FOREACH(T ${pyfimex0_TESTS})
     )
 ENDFOREACH()
 SET(TESTS_PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}" )
-SET_TESTS_PROPERTIES(${pyfimex0_TESTS}
-  PROPERTIES ENVIRONMENT "PYTHONPATH=${TESTS_PYTHONPATH}"
+SET_PROPERTY(
+  TEST ${pyfimex0_TESTS}
+  APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${TESTS_PYTHONPATH}"
+)
+SET_PROPERTY(
+  TEST ${pyfimex0_TESTS}
+  APPEND PROPERTY ENVIRONMENT "FIMEX_IO_PLUGINS_PATH=${FIMEX_IO_PLUGINS_PATH}"
 )
 
 # dummy target to tell IDEs that these files are part of the project

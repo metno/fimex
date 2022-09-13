@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,10 +28,9 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MutexLock.h"
 #include "fimex/SharedArray.h"
 #include "fimex/Type2String.h"
-
-#include "MutexLock.h"
 
 #include "fimex_config.h"
 #ifdef HAVE_MPI
@@ -51,7 +50,7 @@ bool convertData(CDMDataType dt, DataPtr data)
 
     // clang-format off
     switch (dt) {
-    case CDM_NAT: return false;
+    case CDM_NAT: return true;
     case CDM_CHAR:   data->asChar().get(); break;
     case CDM_UCHAR:  data->asUChar().get(); break;
     case CDM_SHORT:  data->asShort().get(); break;
@@ -140,7 +139,8 @@ Null_CDMWriter::Null_CDMWriter(const CDMReader_p cdmReader, const std::string& o
                 continue;
             }
             if (!convertData(cdmVar.getDataType(), data)) {
-                throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
+                throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()) +
+                                   ", datatype: " + type2string(cdmVar.getDataType()));
             }
         }
     }

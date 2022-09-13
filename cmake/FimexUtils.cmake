@@ -1,6 +1,6 @@
 # Fimex, cmake/FimexUtils.cmake
 #
-# Copyright (C) 2018-2021 met.no
+# Copyright (C) 2018-2022 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -150,55 +150,30 @@ ENDFUNCTION()
 
 
 FUNCTION(FIMEX_ADD_LIBRARY name sources packages)
-  IF(BUILD_SHARED_LIBS)
-    MESSAGE(STATUS "adding shared lib '${name}' using packages '${packages}'")
-    SET(shared_lib lib${name})
-    ADD_LIBRARY(${shared_lib} SHARED ${sources})
-    TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${packages})
-    TARGET_INCLUDE_DIRECTORIES(${shared_lib}
-      PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-      $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
-      PRIVATE
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      )
-    IF(options)
-      TARGET_COMPILE_OPTIONS(${shared_lib} PUBLIC ${options})
-    ENDIF()
-    SET_TARGET_PROPERTIES(${shared_lib} PROPERTIES
-      VERSION ${lib_version}
-      SOVERSION ${lib_soversion}
-      OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
-      )
-    INSTALL(TARGETS ${shared_lib}
-      EXPORT ${name}
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      )
+  MESSAGE(STATUS "adding shared lib '${name}' using packages '${packages}'")
+  SET(shared_lib lib${name})
+  ADD_LIBRARY(${shared_lib} SHARED ${sources})
+  TARGET_LINK_LIBRARIES(${shared_lib} PRIVATE ${packages})
+  TARGET_INCLUDE_DIRECTORIES(${shared_lib}
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    )
+  IF(options)
+    TARGET_COMPILE_OPTIONS(${shared_lib} PUBLIC ${options})
   ENDIF()
-
-  IF((NOT (BUILD_SHARED_LIBS)) OR (BUILD_SHARED_LIBS MATCHES "[Bb][Oo][Tt][Hh]"))
-    SET(static_lib lib${name}-static)
-    SET(lib${name}_STATICLIBS ${libs})
-    ADD_LIBRARY(${static_lib} STATIC ${sources})
-    TARGET_LINK_LIBRARIES(${static_lib} PRIVATE ${packages})
-    TARGET_INCLUDE_DIRECTORIES(${static_lib}
-      PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-      $<INSTALL_INTERFACE:${FIMEX_INSTALL_INCLUDEDIR}>
-      PRIVATE
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      )
-    SET_TARGET_PROPERTIES(${static_lib} PROPERTIES
-      OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
-      )
-    INSTALL(TARGETS ${static_lib}
-      # disabled: fimex needs libfelt, find_package(fimex) fails unless preceded by find_package(felt)
-      # EXPORT ${name}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      )
-  ENDIF()
+  SET_TARGET_PROPERTIES(${shared_lib} PROPERTIES
+    VERSION ${lib_version}
+    SOVERSION ${lib_soversion}
+    OUTPUT_NAME "${name}${MINUS_FIMEX_VERSION}"
+    )
+  INSTALL(TARGETS ${shared_lib}
+    EXPORT ${name}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 ENDFUNCTION()
 
 

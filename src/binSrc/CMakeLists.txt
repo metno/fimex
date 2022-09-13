@@ -24,7 +24,7 @@ ADD_EXE(fimex "")
 ADD_EXE(fiXYcontents "")
 
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
-  SET(GRIB_PACKAGES ${eccodes_PACKAGE} ${grib_api_PACKAGE})
+  SET(GRIB_PACKAGES ${eccodes_PACKAGE} ${grib_api_PACKAGE} libfimex-io-grib)
 
   ADD_EXE(fiIndexGribs "${GRIB_PACKAGES}")
   ADD_EXE(fiGribCut    "${GRIB_PACKAGES}")

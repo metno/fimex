@@ -1,7 +1,7 @@
 /*
  * Fimex, fiIndexGribs.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,14 +26,16 @@
 
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/GribCDMReader.h"
-#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/GribFileIndex.h"
+
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/XMLInputFile.h"
+
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "GribCDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "GribFileIndex.h"
 
 #include <mi_programoptions.h>
 

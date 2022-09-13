@@ -1,0 +1,9 @@
+#ifndef FIMEX_GRIB_CONFIG_H
+#define FIMEX_GRIB_CONFIG_H 1
+
+// defined if configured
+#cmakedefine HAVE_ECCODES 1 // defined if using ecCodes for GRIB reading
+#cmakedefine HAVE_GRIB_API 1 // defined if using (outdated) grib-api for GRIB reading
+#cmakedefine HAVE_GRIB_THREADSAFE 1 // defined if ecCodes / grib-api are thread-safe
+
+#endif // FIMEX_GRIB_CONFIG_H

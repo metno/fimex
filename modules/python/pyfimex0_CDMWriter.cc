@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_CDMWriter.cc
  *
- * (C) Copyright 2017, met.no
+ * (C) Copyright 2017-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,6 +25,7 @@
  */
 
 #include "fimex/CDM.h"
+#include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMWriter.h"
 
@@ -34,6 +35,26 @@ using namespace MetNoFimex;
 namespace py = pybind11;
 
 namespace {
+
+// wrappers for createNetCDFWriter
+void createNetCDFWriter_4(CDMReader_p reader, const std::string& filename, const std::string& configfile, int version)
+{
+    if (version != 3 && version != 4)
+        throw CDMException("pyfimex createNetCDFWriter only supports version 3 or 4");
+
+    const std::string filetype = (version == 4) ? "nc4" : "netcdf";
+    createWriter(reader, filetype, filename, configfile);
+}
+
+void createNetCDFWriter_3(CDMReader_p reader, const std::string& filename, const std::string& configfile)
+{
+    createNetCDFWriter_4(reader, filename, configfile, 3);
+}
+
+void createNetCDFWriter_2(CDMReader_p reader, const std::string& filename)
+{
+    createNetCDFWriter_3(reader, filename, "");
+}
 
 // wrappers for default arguments
 void createFileWriter4(CDMReader_p reader, const std::string& fileType, const std::string& fileName, const std::string& configFile)
@@ -55,4 +76,8 @@ void pyfimex0_CDMWriter(py::module m)
 
     m.def("createFileWriter", createFileWriter4);
     m.def("createFileWriter", createFileWriter3);
+
+    m.def("createNetCDFWriter", createNetCDFWriter_4);
+    m.def("createNetCDFWriter", createNetCDFWriter_3);
+    m.def("createNetCDFWriter", createNetCDFWriter_2);
 }

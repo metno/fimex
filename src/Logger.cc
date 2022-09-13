@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -22,10 +22,11 @@
  */
 
 #include "fimex/Logger.h"
+
 #include "Log4cppLogger.h"
+#include "fimex/MutexLock.h"
 
 #include "fimex_config.h"
-#include "MutexLock.h"
 
 #include <algorithm>
 #include <iostream>

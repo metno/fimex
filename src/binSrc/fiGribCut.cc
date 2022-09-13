@@ -26,12 +26,13 @@
 
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/GribUtils.h"
 #include "fimex/SharedArray.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Type2String.h"
+
+#include "GribUtils.h"
 
 #include <mi_programoptions.h>
 

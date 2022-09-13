@@ -39,7 +39,7 @@
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
 
-#include "reproject.h"
+#include "fimex/reproject.h"
 
 #include <algorithm>
 #include <cassert>

@@ -28,8 +28,6 @@
   USA.
 */
 
-#include "fimex_config.h"
-
 #include "testinghelpers.h"
 
 #include "fimex/CDMFileReaderFactory.h"

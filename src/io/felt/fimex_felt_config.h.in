@@ -1,0 +1,7 @@
+#ifndef FIMEX_FELT_CONFIG_H
+#define FIMEX_FELT_CONFIG_H 1
+
+#define FIMEX_DATADIR "@FIMEX_DATADIR@"
+#cmakedefine HAVE_PROJ_H 1 // defined from fimex CMakeLists.txt if using proj >= 6.2.0
+
+#endif // FIMEX_FELT_CONFIG_H

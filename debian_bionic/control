@@ -23,8 +23,7 @@ Build-Depends: debhelper (>= 11),
  libopenjp2-7-dev,
  liblog4cpp5-dev,
  netcdf-bin
-Build-Conflicts: libfimex-dev,
- libfelt-dev
+Build-Conflicts: libfimex-dev
 Standards-Version: 3.9.7
 Section: libs
 
@@ -52,8 +51,7 @@ Section: libs
 Architecture: amd64 ia64 powerpc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
- fimex-0.23-share,
- libfelt-0.23-0 (= ${binary:Version})
+ fimex-0.23-share
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
@@ -65,7 +63,7 @@ Depends: ${misc:Depends},
  libfimex-0.23-0 (= ${binary:Version})
 Description: command line utility for geo-spatial gridded data
  The fimex-dbg package provide debugging symbols for all
- (lib-) fimex/felt packages.
+ (lib-) fimex packages.
 
 Package: fimex-0.23-bin
 Section: science
@@ -85,24 +83,6 @@ Conflicts: fimex-bin (<< 0.46)
 Description: shared files required for fimex-bin and libfimex
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.
-
-Package: libfelt-0.23-0
-Section: libs
-Architecture: amd64 ia64 powerpc
-Depends: ${shlibs:Depends},
- ${misc:Depends}
-Description: C++ library for reading met.no's felt-files
- Library for reading the internal file-format of the
- Norwegian Meteorological Institute
-
-Package: libfelt-0.23-dev
-Section: libdevel
-Architecture: amd64 ia64 powerpc
-Depends: ${misc:Depends},
- libfelt-0.23-0 (= ${binary:Version})
-Description: C++ library for reading met.no's felt-files
- Dev-library for reading the internal file-format of the
- Norwegian Meteorological Institute
 
 Package: libfimexf-0.23-0
 Section: libs

@@ -29,9 +29,8 @@
 #include "fimex/Data.h"
 #include "fimex/DataUtils.h"
 #include "fimex/MathUtils.h"
+#include "fimex/RecursiveSliceCopy.h"
 #include "fimex/Type2String.h"
-
-#include "RecursiveSliceCopy.h"
 
 #include <algorithm>
 #include <cmath>

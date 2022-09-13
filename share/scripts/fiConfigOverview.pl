@@ -94,7 +94,6 @@ use constant FILETYPES => {
     'cdm_ncwriter_config' => \&ignore,
     'cdmQualityConfig' => \&ignore,
     'gribFileIndex' => \&ignore,
-    'metgm_config' => \&ignore,
 };
 
 
