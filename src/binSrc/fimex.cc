@@ -360,8 +360,8 @@ void printReaderStatements(const string& readerName, const po::value_set& vm, CD
 {
     string ncmlout;
     if (getOption(readerName+".printNcML", vm, ncmlout)) {
-        cout << readerName << " as NcML:" << endl;
         if (ncmlout == "-") {
+            cout << readerName << " as NcML:" << endl;
             reader->getCDM().toXMLStream(cout);
             cout << endl;
         } else {
