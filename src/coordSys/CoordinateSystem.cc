@@ -1,7 +1,7 @@
 /*
  * Fimex, CoordinateSystem.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -462,9 +462,7 @@ CoordinateSystem_cp_v listCoordinateSystems(CDM& cdm)
     CoordinateSystem_cp_v coordSystems;
 
     const CoordSysBuilder_pv builders = createBuilders();
-
-    for (size_t i = 0; i < builders.size(); ++i) {
-        CoordSysBuilder_p builder = builders.at(i);
+    for (CoordSysBuilder_p builder : builders) {
         if (builder->isMine(cdm)) {
             CoordinateSystem_cp_v myCoordSystems = builder->listCoordinateSystems(cdm);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
@@ -489,9 +487,7 @@ CoordinateSystem_cp_v listCoordinateSystems(CDMReader_p reader)
     CoordinateSystem_cp_v coordSystems;
 
     const CoordSysBuilder_pv builders = createBuilders();
-
-    for (size_t i = 0; i < builders.size(); ++i) {
-        CoordSysBuilder_p builder = builders.at(i);
+    for (CoordSysBuilder_p builder : builders) {
         if (builder->isMine(reader->getCDM())) {
             CoordinateSystem_cp_v myCoordSystems = builder->listCoordinateSystems(reader);
             LOG4FIMEX(logger, Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());

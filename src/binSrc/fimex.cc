@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -365,14 +365,11 @@ void printReaderStatements(const string& readerName, const po::value_set& vm, CD
             reader->getCDM().toXMLStream(cout);
             cout << endl;
         } else {
-            ofstream file;
-            file.open(ncmlout.c_str(), ios::out);
-            if (file.is_open()) {
-                reader->getCDM().toXMLStream(file);
-                file.close();
-            } else {
+            ofstream file(ncmlout);
+            if (!file) {
                 throw CDMException("cannot write ncml-file: '" + ncmlout + "'");
             }
+            reader->getCDM().toXMLStream(file);
         }
     }
     if (po::option_cx opt = vm.find(readerName + ".printCS")) {

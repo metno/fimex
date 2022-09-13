@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,11 +26,12 @@
 
 #include "fimex/CDMWriter.h"
 #include "fimex/CDM.h"
+
 #include <map>
 #include <string>
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 /* forward declarations */
 class XMLDoc;
 class Nc;
@@ -67,8 +68,6 @@ public:
      */
     const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
 
-
-
 private:
     void init();
     void initNcmlReader(std::unique_ptr<XMLDoc>& doc);
@@ -97,6 +96,6 @@ private:
     std::map<std::string, std::string> dimensionNameChanges;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*NETCDF_CDMWRITER_H_*/

@@ -576,22 +576,23 @@ void CDM::toXMLStream(std::ostream& out) const
             "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl <<
             "        xsi:schemaLocation=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 http://www.unidata.ucar.edu/schemas/netcdf/ncml-2.2.xsd\">" << std::endl;
     out << std::endl;
-    for (DimVec::const_iterator it = pimpl_->dimensions.begin(); it != pimpl_->dimensions.end(); ++it) {
-        it->toXMLStream(out);
+    for (const auto& dim : pimpl_->dimensions) {
+        dim.toXMLStream(out);
     }
     out << std::endl;
-    if (pimpl_->attributes.find(globalAttributeNS()) != pimpl_->attributes.end()) {
-        const AttrVec& attrs = pimpl_->attributes.find(globalAttributeNS())->second;
-        for (AttrVec::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
-            it->toXMLStream(out);
+    const auto it_global_attributes = pimpl_->attributes.find(globalAttributeNS());
+    if (it_global_attributes != pimpl_->attributes.end()) {
+        for (const auto& att : it_global_attributes->second) {
+            att.toXMLStream(out);
         }
     }
-    for (VarVec::const_iterator it = pimpl_->variables.begin(); it != pimpl_->variables.end(); ++it) {
+    for (const auto& var : pimpl_->variables) {
         out << std::endl;
-        if (pimpl_->attributes.find(it->getName()) != pimpl_->attributes.end()) {
-            it->toXMLStream(out, pimpl_->attributes.find(it->getName())->second);
+        const auto it_var_attributes = pimpl_->attributes.find(var.getName());
+        if (it_var_attributes != pimpl_->attributes.end()) {
+            var.toXMLStream(out, it_var_attributes->second);
         } else {
-            it->toXMLStream(out);
+            var.toXMLStream(out);
         }
     }
 
