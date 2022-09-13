@@ -139,7 +139,7 @@ CDMInterpolator::~CDMInterpolator()
 
 shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue)
 {
-    shared_array<float> array = inData->asFloat();
+    auto array = inData->asFloat();
     mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
     return array;
 }
@@ -192,7 +192,7 @@ void extractValues(DataPtr data, shared_array<double>& values, size_t& size)
 
 shared_array<double> clone(shared_array<double> orig, size_t size)
 {
-    shared_array<double> copy = make_shared_array<double>(size);
+    auto copy = make_shared_array<double>(size);
     std::copy(orig.get(), orig.get() + size, copy.get());
     return copy;
 }
@@ -222,12 +222,12 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
         return data;
 
     const double badValue = cdm_->getFillValue(varName);
-    shared_array<float> array = data2InterpolationArray(data, badValue);
+    auto array = data2InterpolationArray(data, badValue);
     processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
 
     size_t newSize = 0;
     LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(slicebuilder)");
-    shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
+    auto iArray = ci->interpolateValues(array, data->size(), newSize);
 
     if (variable.isSpatialVector()) {
         // vector in x/y direction
@@ -242,11 +242,10 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
                     CachedVectorReprojection_p cvr = itV->second;
                     // fetch and transpose vector-data
                     // transposing needed once for each direction (or caching, but that needs to much memory)
-                    shared_array<float> counterPartArray =
-                        data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
+                    auto counterPartArray = data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
                     processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
                     LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(slicebuilder)");
-                    shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
+                    auto counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
                     if (dir == CDMVariable::SPATIAL_VECTOR_X)
                         cvr->reprojectValues(iArray, counterpartiArray, newSize);
                     else
@@ -326,13 +325,13 @@ string getProjectionName(const string& proj_input)
 }
 
 template <class Container>
-DataPtr createData(const Container& c)
+DataPtr createDataFromContainer(const Container& c)
 {
     return createDataFromIterator<typename Container::value_type>(c.begin(), c.end());
 }
 
 template <class Container>
-DataPtr createData(CDMDataType dataType, const Container& c)
+DataPtr createDataFromContainer(CDMDataType dataType, const Container& c)
 {
     return createData(dataType, c.begin(), c.end());
 }
@@ -343,8 +342,8 @@ DataPtr createData(CDMDataType dataType, const Container& c)
  */
 void lonLatVals2Matrix(shared_array<double>& lonVals, shared_array<double>& latVals, size_t lonSize, size_t latSize)
 {
-    shared_array<double> matrixLatVals(new double[lonSize * latSize]);
-    shared_array<double> matrixLonVals(new double[lonSize * latSize]);
+    auto matrixLatVals = make_shared_array<double>(lonSize * latSize);
+    auto matrixLonVals = make_shared_array<double>(lonSize * latSize);
     for (size_t ix = 0; ix < lonSize; ix++) {
         for (size_t iy = 0; iy < latSize; iy++) {
             size_t pos = ix + iy * lonSize;
@@ -378,8 +377,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             throw CDMException("could not find latitude/longitude axes");
         DataPtr lonData = p_->dataReader->getScaledData(lonAxis->getName());
         DataPtr latData = p_->dataReader->getScaledData(latAxis->getName());
-        shared_array<double> lonVals = lonData->asDouble();
-        shared_array<double> latVals = latData->asDouble();
+        auto lonVals = lonData->asDouble();
+        auto latVals = latData->asDouble();
         size_t latSize = latData->size();
         size_t lonSize = lonData->size();
         if (latSize != lonSize) {
@@ -472,8 +471,8 @@ void CDMInterpolator::changeProjection(int method, const vector<double>& lonVals
         vector<double> xVals(lonVals.size());
         std::iota(xVals.begin(), xVals.end(), 0);
 
-        changeProjectionByProjectionParametersToLatLonTemplate(method, LAT_LON_PROJSTR, xVals, yVals, "1", "1", CDM_DOUBLE, CDM_DOUBLE, createData(latVals),
-                                                               createData(lonVals));
+        changeProjectionByProjectionParametersToLatLonTemplate(method, LAT_LON_PROJSTR, xVals, yVals, "1", "1", CDM_DOUBLE, CDM_DOUBLE,
+                                                               createDataFromContainer(latVals), createDataFromContainer(lonVals));
         break;
     }
     case MIFI_INTERPOL_COORD_NN:
@@ -514,7 +513,7 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     if (xData->size() < 2 || yData->size() < 2) {
         throw CDMException("x- or y-axis sizes < 2 elements, not possible to interpolate");
     }
-    shared_array<double> d = xData->asDouble();
+    auto d = xData->asDouble();
     double dx = d[1] - d[0];
     d = yData->asDouble();
     double dy = d[1] - d[0];
@@ -598,7 +597,7 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
     shape.push_back("nvcross");
     CDMVariable vcrossBnds("vcross_bnds", CDM_INT, shape);
     assert(nvcross == startPositions.size());
-    shared_array<int> vcrossBndsAry(new int[2 * nvcross]);
+    auto vcrossBndsAry = make_shared_array<int>(2 * nvcross);
     for (size_t i = 0; i < (nvcross-1); ++i) {
         vcrossBndsAry[i*2] = startPositions.at(i);
         vcrossBndsAry[i*2+1] = startPositions.at(i+1)-1;
@@ -668,8 +667,8 @@ void CDMInterpolator::changeProjection(int method, CDMReader_p tmplReader, const
            std::string tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
            DataPtr tmplXData = tmplReader->getScaledData(tmplXName);
            DataPtr tmplYData = tmplReader->getScaledData(tmplYName);
-           shared_array<double> tmplXArray = tmplXData->asDouble();
-           shared_array<double> tmplYArray = tmplYData->asDouble();
+           auto tmplXArray = tmplXData->asDouble();
+           auto tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
 
@@ -863,8 +862,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordinateS
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", xUnit));
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", yUnit));
-    cdm.getVariable(newXAxis).setData(createData(xAxisType, out_x_axis));
-    cdm.getVariable(newYAxis).setData(createData(yAxisType, out_y_axis));
+    cdm.getVariable(newXAxis).setData(createDataFromContainer(xAxisType, out_x_axis));
+    cdm.getVariable(newYAxis).setData(createDataFromContainer(yAxisType, out_y_axis));
 
     cdm.getDimension(newXAxis).setLength(out_x_axis.size());
     cdm.getDimension(newYAxis).setLength(out_y_axis.size());
@@ -1326,8 +1325,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 
         // get output axes expressed in latitude, longitude
         const size_t fieldSize = out_x_axis.size() * out_y_axis.size();
-        shared_array<double> pointsOnXAxis = make_shared_array<double>(fieldSize);
-        shared_array<double> pointsOnYAxis = make_shared_array<double>(fieldSize);
+        auto pointsOnXAxis = make_shared_array<double>(fieldSize);
+        auto pointsOnYAxis = make_shared_array<double>(fieldSize);
         reproject::reproject_axes(proj_input, LAT_LON_PROJSTR, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
                                   &pointsOnYAxis[0]);
         // here, pointOnX/YAxis is in degrees
@@ -1384,8 +1383,8 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 
         // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
         const size_t fieldSize = out_x_axis.size() * out_y_axis.size();
-        shared_array<double> pointsOnXAxis = make_shared_array<double>(fieldSize);
-        shared_array<double> pointsOnYAxis = make_shared_array<double>(fieldSize);
+        auto pointsOnXAxis = make_shared_array<double>(fieldSize);
+        auto pointsOnYAxis = make_shared_array<double>(fieldSize);
         const std::string orgProjStr = cs->getProjection()->getProj4String();
         reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
                                   &pointsOnYAxis[0]);
@@ -1532,7 +1531,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("long_name", xLongName));
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("standard_name", xStandardName));
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", out_x_axis_unit));
-    cdm.getVariable(newXAxis).setData(createData(xAxisType, out_x_axis));
+    cdm.getVariable(newXAxis).setData(createDataFromContainer(xAxisType, out_x_axis));
 
     if (!cdm.hasVariable(newYAxis)) {
         // create dimension-variable
@@ -1546,7 +1545,7 @@ void changeCDMToLatLonTemplate(CDM& cdm, const string& tmpl_proj_input, const ma
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("long_name", yLongName));
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", out_y_axis_unit));
-    cdm.getVariable(newYAxis).setData(createData(yAxisType, out_y_axis));
+    cdm.getVariable(newYAxis).setData(createDataFromContainer(yAxisType, out_y_axis));
 
     // adding lat & long from list
     const vector<string> shape{newXAxis, newYAxis};
@@ -1625,8 +1624,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
     assert(tmplLatVals->size() == tmplLonVals->size());
 
-    shared_array<double> lat_deg = tmplLatVals->asDouble();
-    shared_array<double> lon_deg = tmplLonVals->asDouble();
+    auto lat_deg = tmplLatVals->asDouble();
+    auto lon_deg = tmplLonVals->asDouble();
 
     for (const auto& csi : csMap) {
         CSGridDefinition def = orgGrids[csi.first];
@@ -1634,14 +1633,14 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         if (!csp)
             continue;
 
-        shared_array<double> orgXAxisArray = def.xAxisData->asDouble();
-        shared_array<double> orgYAxisArray = def.yAxisData->asDouble();
+        auto orgXAxisArray = def.xAxisData->asDouble();
+        auto orgYAxisArray = def.yAxisData->asDouble();
 
         const std::string& orgProjStr = csp->getProj4String();
 
         // store projection changes to be used in data-section
-        shared_array<double> latY = clone(lat_deg, tmplLatVals->size());
-        shared_array<double> lonX = clone(lon_deg, tmplLonVals->size());
+        auto latY = clone(lat_deg, tmplLatVals->size());
+        auto lonX = clone(lon_deg, tmplLonVals->size());
 
         // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
 

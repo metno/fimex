@@ -1,7 +1,7 @@
 /*
  * Fimex, C_CDMReader.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -85,7 +85,7 @@ DataPtr C_CDMReader::getDataSlice(const std::string & varName, size_t unLimDimPo
     // wrap the object as a mifi_cdm_reader for C-usage
     mifi_cdm_reader reader(std::shared_ptr<C_CDMReader>(this, noDealloc));
     // get a C-array to the scaled data
-    shared_array<double> doubleArray = data->asDouble();
+    auto doubleArray = data->asDouble();
     // call the callback-function
     int retVal = (*callback)(&reader, varName.c_str(), unLimDimPos, &doubleArray[0], data->size());
     if (retVal != 0) {

@@ -46,8 +46,8 @@ TEST4FIMEX_TEST_CASE(test_ncmlRead)
     sb.setStartAndSize("time", 1, 1);
     DataPtr dataSlice = reader->getDataSlice("sea_surface_temperature", sb);
     TEST4FIMEX_CHECK_EQ(data->size(), dataSlice->size());
-    shared_array<short> d = data->asShort();
-    shared_array<short> ds = dataSlice->asShort();
+    auto d = data->asShort();
+    auto ds = dataSlice->asShort();
     for (size_t i = 0; i < data->size(); i++) {
         TEST4FIMEX_CHECK_EQ(d[i], ds[i]);
     }

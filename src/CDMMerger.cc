@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMMerger.cc
  *
- * (C) Copyright 2012-2013, met.no
+ * (C) Copyright 2012-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -260,7 +260,7 @@ values_v CDMMergerPrivate::extendInnerAxis(CoordinateAxis_cp axisI, CoordinateAx
     if( !axisDataO || axisDataO->size() < 2 )
         THROW("no data for axis '" << nameO << "' in outer");
 
-    shared_array<double> valuesI = axisDataI->asDouble(), valuesO = axisDataO->asDouble();
+    auto valuesI = axisDataI->asDouble(), valuesO = axisDataO->asDouble();
     const double stepI = valuesI[1] - valuesI[0], stepO = valuesO[1] - valuesO[0];
 
     for(size_t i=2; i<axisDataI->size(); ++i) {

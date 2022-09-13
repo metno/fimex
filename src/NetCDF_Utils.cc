@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/
  *
@@ -49,7 +49,7 @@ namespace {
 
 DataPtr createDataStringsFromNc(shared_array<char*> cvals, size_t len)
 {
-    shared_array<std::string> vals(new std::string[len]);
+    auto vals = make_shared_array<std::string>(len);
     for (size_t i=0; i<len; ++i) {
         vals[i] = cvals[i];
     }
@@ -170,7 +170,7 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
     ncCheck(nc_inq_attlen (ncId, varId, attName.c_str(), &attrLen));
     switch (dt) {
     case NC_BYTE: {
-        shared_array<char> vals(new char[attrLen]);
+        auto vals = make_shared_array<char>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
@@ -184,60 +184,60 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
         return createData(vals);
     }
     case NC_SHORT: {
-        shared_array<short> vals(new short[attrLen]);
+        auto vals = make_shared_array<short>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_INT: {
-        shared_array<int> vals(new int[attrLen]);
+        auto vals = make_shared_array<int>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_FLOAT: {
-        shared_array<float> vals(new float[attrLen]);
+        auto vals = make_shared_array<float>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_DOUBLE: {
-        shared_array<double> vals(new double[attrLen]);
+        auto vals = make_shared_array<double>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
 #ifdef NC_NETCDF4
     case NC_UBYTE: {
-        shared_array<unsigned char> vals(new unsigned char[attrLen]);
+        auto vals = make_shared_array<unsigned char>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_USHORT: {
-        shared_array<unsigned short> vals(new unsigned short[attrLen]);
+        auto vals = make_shared_array<unsigned short>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_UINT: {
-        shared_array<unsigned int> vals(new unsigned int[attrLen]);
+        auto vals = make_shared_array<unsigned int>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_INT64: {
-        shared_array<long long> vals(new long long[attrLen]);
+        auto vals = make_shared_array<long long>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_UINT64: {
-        shared_array<unsigned long long> vals(new unsigned long long[attrLen]);
+        auto vals = make_shared_array<unsigned long long>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
         return createData(attrLen, vals);
     }
     case NC_STRING: {
-        shared_array<char*> cvals(new char*[attrLen]);
+        auto cvals = make_shared_array<char*>(attrLen);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&cvals[0])));
         return createDataStringsFromNc(cvals, attrLen);
     }
 #endif
     case NC_NAT:
     default:
-        return createData(0, shared_array<int>(new int[0]));
+        return createData(0, make_shared_array<int>(0));
     }
 }
 
@@ -262,66 +262,66 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         return createData(vals);
     }
     case NC_BYTE: {
-        shared_array<char> vals(new char[sliceLen]);
+        auto vals = make_shared_array<char>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_SHORT: {
-        shared_array<short> vals(new short[sliceLen]);
+        auto vals = make_shared_array<short>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT: {
-        shared_array<int> vals(new int[sliceLen]);
+        auto vals = make_shared_array<int>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_FLOAT: {
-        shared_array<float> vals(new float[sliceLen]);
+        auto vals = make_shared_array<float>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_DOUBLE: {
-        shared_array<double> vals(new double[sliceLen]);
+        auto vals = make_shared_array<double>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
 #ifdef NC_NETCDF4
     case NC_UBYTE: {
-        shared_array<unsigned char> vals(new unsigned char[sliceLen]);
+        auto vals = make_shared_array<unsigned char>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_USHORT: {
-        shared_array<unsigned short> vals(new unsigned short[sliceLen]);
+        auto vals = make_shared_array<unsigned short>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT: {
-        shared_array<unsigned int> vals(new unsigned int[sliceLen]);
+        auto vals = make_shared_array<unsigned int>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT64: {
-        shared_array<long long> vals(new long long[sliceLen]);
+        auto vals = make_shared_array<long long>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT64: {
-        shared_array<unsigned long long> vals(new unsigned long long[sliceLen]);
+        auto vals = make_shared_array<unsigned long long>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_STRING: {
         // this will fail if NetCDF file does not support NC_STRING, e.g. for NetCDF 3 or NetCDF 4 classic
-        shared_array<char*> cvals(new char*[sliceLen]);
+        auto cvals = make_shared_array<char*>(sliceLen);
         ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&cvals[0])));
         return createDataStringsFromNc(cvals, sliceLen);
     }
 #endif
     case NC_NAT:
     default:
-        return createData(0, shared_array<int>(new int[0]));
+        return createData(0, make_shared_array<int>(0));
     }
 }
 
@@ -377,8 +377,8 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
 #if NC_NETCDF4
     case NC_STRING: {
         const size_t dataLen = data->size();
-        shared_array<std::string> svals = data->asStrings();
-        shared_array<const char*> cvals(new const char*[dataLen]);
+        auto svals = data->asStrings();
+        auto cvals = make_shared_array<const char*>(dataLen);
         for (size_t i=0; i<dataLen; ++i)
             cvals[i] = svals[i].c_str();
         ncCheck(nc_put_vara(ncId, varId, start, count, &cvals[0]));

@@ -55,7 +55,7 @@ namespace MetNoFimex {
  * @brief create a new shared array with a different type using static_cast
  *        or return the original array
  *
- * Usage: shared_array<OUTTYPE> x = ArrayTypeConverter<OUTTYPE, INTYPE>(inData, inLength)();
+ * Usage: auto x = ArrayTypeConverter<OUTTYPE, INTYPE>(inData, inLength)();
  *
  * Using functor here since case INTYPE == OUTTYPE will be partially specialized, and that is only allowed
  * for classes, not for functions in C++.
@@ -171,7 +171,7 @@ template<typename C>
 DataImpl<C>& DataImpl<C>::operator=(const DataImpl<C>& rhs)
 {
     length = rhs.length;
-    theData = shared_array<C>(new C[rhs.length]);
+    theData = make_shared_array<C>(rhs.length);
     std::copy(&rhs.theData[0], &rhs.theData[0] + rhs.length, &theData[0]);
     return *this;
 }
@@ -286,7 +286,7 @@ template <typename OUT, typename IN>
 shared_array<OUT> convertArrayType(const shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset,
                                    UnitsConverter_p unitsConverter, double newFill, double newScale, double newOffset)
 {
-    shared_array<OUT> outData(new OUT[length]);
+    auto outData = make_shared_array<OUT>(length);
     if (!unitsConverter) {
         ScaleValue<IN, OUT> sv(oldFill, oldScale, oldOffset, newFill, newScale, newOffset);
         std::transform(&inData[0], &inData[length], &outData[0], sv);
@@ -347,7 +347,7 @@ DataPtr DataImpl<std::string>::convertDataType(double, double, double, UnitsConv
 template <typename T1, typename T2>
 shared_array<T1> ArrayTypeConverter<T1, T2>::operator()()
 {
-    shared_array<T1> outData(new T1[length]);
+    auto outData = make_shared_array<T1>(length);
     std::transform(&inData[0], &inData[length], &outData[0], data_caster<T1, T2>());
     return outData;
 }

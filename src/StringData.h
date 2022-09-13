@@ -1,7 +1,7 @@
 /*
   Fimex, src/StringData.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -73,7 +73,7 @@ public:
 
     shared_array<std::string> asStrings() const override
     {
-        shared_array<std::string> strings(new std::string[1]);
+        auto strings = make_shared_array<std::string>(1);
         strings[0] = text_;
         return strings;
     }

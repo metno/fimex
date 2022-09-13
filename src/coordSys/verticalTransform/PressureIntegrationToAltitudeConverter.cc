@@ -216,7 +216,7 @@ DataPtr PressureIntegrationToAltitudeConverter::getDataSlice(const SliceBuilder&
     const size_t dZSHum = siSHum.delta(zName), dZAlti = soAltitude.delta(zName);
 
     const size_t size = soAltitude.volume();
-    shared_array<double> altiVal(new double[size]);
+    auto altiVal = make_shared_array<double>(size);
 
     // 4)
 #if 0 && defined(_OPENMP)

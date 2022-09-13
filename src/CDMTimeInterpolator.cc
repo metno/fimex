@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMTimeInterpolator.cpp
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -123,7 +123,7 @@ DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unL
         } else if (d2->size() == 0) {
             data = d1;
         } else if (d1->size() == d2->size()) {
-            shared_array<float> out(new float[d1->size()]);
+            auto out = make_shared_array<float>(d1->size());
             mifi_get_values_linear_weak_extrapol_f(d1->asFloat().get(), d2->asFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
             data = createData(d1->size(), out);
         } else {
@@ -153,7 +153,7 @@ void CDMTimeInterpolator::changeTimeAxis(const string& timeSpec)
             string unit = cdm_->getUnits(timeDimName);
             const TimeUnit tu(unit);
             vector<FimexTime> oldTimes;
-            shared_array<double> oldTimesPtr = times->asDouble();
+            auto oldTimesPtr = times->asDouble();
             size_t nEl = times->size();
             transform(oldTimesPtr.get(),
                       oldTimesPtr.get()+nEl,
@@ -193,7 +193,7 @@ void CDMTimeInterpolator::changeTimeAxis(const string& timeSpec)
 
             // change cdm timeAxis values
             cdm_->addOrReplaceAttribute(timeDimName, CDMAttribute("units", ts.getUnitString()));
-            shared_array<double> timeData(new double[newTimes.size()]);
+            auto timeData = make_shared_array<double>(newTimes.size());
             const TimeUnit newTU(ts.getUnitString());
             std::transform(newTimes.begin(), newTimes.end(), timeData.get(), [newTU](const FimexTime& ft) { return newTU.fimexTime2unitTime(ft); });
             auto& timeVar = cdm_->getVariable(timeDimName);

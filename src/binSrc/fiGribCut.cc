@@ -1,7 +1,7 @@
 /*
  * Fimex, fiGribCut.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -163,7 +163,7 @@ static std::shared_ptr<grib_handle> cutBoundingBox(const std::shared_ptr<grib_ha
             if (nv != static_cast<unsigned long>(latN*lonN)) {
                 throw runtime_error("numberOfValues ("+type2string(nv) + ") != latN*lonN ("+type2string(latN)+"*"+type2string(lonN)+")");
             }
-            shared_array<double> array(new double[nv]);
+            auto array = make_shared_array<double>(nv);
             if (debug) cerr << "reading " << nv << " values" << endl;
             MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &array[0], &nv), 0);
             if (debug) cerr << "got " << nv << " values" << endl;
@@ -200,7 +200,7 @@ static std::shared_ptr<grib_handle> cutBoundingBox(const std::shared_ptr<grib_ha
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Ni", (lonFirstLast.second-lonFirstLast.first)),0);
 
             // set the data
-            shared_array<double> outArray = outData->asDouble();
+            auto outArray = outData->asDouble();
             if (debug) cerr << "setting new data" << endl;
             MIFI_GRIB_CHECK(grib_set_double_array(newGh.get(), "values", &outArray[0], outData->size()), 0);
 

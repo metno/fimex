@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMReaderUtils.cc
  *
- * (C) Copyright 2010-2019, met.no
+ * (C) Copyright 2010-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -56,7 +56,7 @@ FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
         const string units = cdm.getUnits(varname);
         TimeUnit tu(units);
         DataPtr timeData = reader->getData(varname);
-        shared_array<double> times = timeData->asDouble();
+        auto times = timeData->asDouble();
         const double* tPtr = &times[0];
         const double* end = tPtr + timeData->size();
         while (tPtr != end) {
@@ -86,7 +86,7 @@ FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
 vector<double> getDataSliceInUnit(CDMReader_p reader, const string& var, const string& unit, int unLimDimPos)
 {
     DataPtr data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
-    shared_array<double> array = data->asDouble();
+    auto array = data->asDouble();
     return vector<double>(&array[0], &array[0] + data->size());
 }
 

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMVerticalInterpolator.cc
  *
- * (C) Copyright 2011-2021, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -232,7 +232,7 @@ void CDMVerticalInterpolator::interpolateToFixed(const std::vector<double>& leve
 
     cdm_->addDimension(CDMDimension(pimpl_->vAxis, level1.size()));
     CDMVariable var(pimpl_->vAxis, CDM_DOUBLE, vector<string>(1, pimpl_->vAxis));
-    shared_array<double> level1d(new double[level1.size()]);
+    auto level1d = make_shared_array<double>(level1.size());
     copy(level1.begin(), level1.end(), &level1d[0]);
     var.setData(createData(level1.size(), level1d));
     cdm_->addVariable(var);
@@ -477,10 +477,10 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
 
     DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
     const double badValue = cdm_->getFillValue(varName);
-    shared_array<float> iData = data2InterpolationArray(data, badValue);
+    auto iData = data2InterpolationArray(data, badValue);
     const size_t oSize = soData.volume();
-    shared_array<float> oData(new float[oSize]);
-    shared_array<float> iVerticalValues = iVerticalData->asFloat();
+    auto oData = make_shared_array<float>(oSize);
+    auto iVerticalValues = iVerticalData->asFloat();
     shared_array<float> oVerticalValues;
     if (oVerticalData)
         oVerticalValues = oVerticalData->asFloat();

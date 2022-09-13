@@ -56,7 +56,7 @@ TEST4FIMEX_TEST_CASE(test_merger)
     const int iLat[] = { 56, 56, 56, -1 };
     const double expected[] = { 288.104, 288.467, 289.937, -1 };
 
-    shared_array<double> valuesM = sliceM->asDouble();
+    auto valuesM = sliceM->asDouble();
     for(int i=0; iLon[i] >= 0; ++i) {
         const int offset = iLon[i] + iLat[i]*NLON;
         TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.001);
@@ -84,7 +84,7 @@ TEST4FIMEX_TEST_CASE(test_merge_target)
     const int iy[] = { 65, 21, -1 };
     const double expected[] = { 275.62, 276.30, -1 };
 
-    shared_array<double> valuesM = sliceM->asDouble();
+    auto valuesM = sliceM->asDouble();
     for(int i=0; ix[i] >= 0; ++i) {
         const int offset = ix[i] + iy[i]*NX;
         TEST4FIMEX_CHECK(fabs(valuesM[offset] - expected[i]) < 0.01);

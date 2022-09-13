@@ -401,7 +401,7 @@ Matrix_cp get_vector_reproject_matrix_proj(crs2crs& c2c, const double* in_x_fiel
 Matrix::Matrix(int sizex, int sizey)
     : size_x(sizex)
     , size_y(sizey)
-    , matrix(new double[size_x * size_y * stride])
+    , matrix(make_shared_array<double>(size_x * size_y * stride))
 {
 }
 

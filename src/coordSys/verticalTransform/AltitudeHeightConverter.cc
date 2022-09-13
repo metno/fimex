@@ -115,7 +115,7 @@ DataPtr AltitudeHeightConverter::getDataSlice(const SliceBuilder& sb) const
         return DataPtr();
 
     ArrayDims out_dims = makeArrayDims(sb);
-    shared_array<double> out_values(new double[out_dims.volume()]);
+    auto out_values = make_shared_array<double>(out_dims.volume());
 
     enum { TOPO, IN_ALTI, OUT_HEIGHT };
     ArrayGroup group = ArrayGroup().add(topo.dims).add(altiOrHeight.dims).add(out_dims);

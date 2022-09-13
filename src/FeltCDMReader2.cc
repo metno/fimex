@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -119,8 +119,8 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
                 double p0 = 100000;
                 const CDMVariable& ap = getCDM().getVariable("ap");
                 const CDMVariable& b = getCDM().getVariable("b");
-                shared_array<double> apData = ap.getData()->asDouble();
-                shared_array<double> bData = b.getData()->asDouble();
+                auto apData = ap.getData()->asDouble();
+                auto bData = b.getData()->asDouble();
                 for (size_t i = 0; i < ap.getData()->size(); ++i) {
                     retValues.push_back(apData[i]/p0 + bData[i]);
                 }

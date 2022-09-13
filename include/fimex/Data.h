@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -298,7 +298,7 @@ template <class T, class InputIterator>
 DataPtr createDataFromIterator(InputIterator first, InputIterator last)
 {
     const size_t length = std::distance(first, last);
-    shared_array<T> values(new T[length]);
+    auto values = make_shared_array<T>(length);
     std::copy(first, last, values.get());
     return createData(length, values);
 }
@@ -334,7 +334,7 @@ DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last
     default:
         break;
     }
-    return createData(0, shared_array<char>(new char[0])); // a dummy dataset
+    return createData(0, make_shared_array<char>(0)); // a dummy dataset
 }
 
 DataPtr convertValues(const Data& data, CDMDataType newType);

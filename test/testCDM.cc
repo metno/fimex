@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -76,7 +76,7 @@ TEST4FIMEX_TEST_CASE(test_attribute_types)
         const DataPtr d = a.getData();
         TEST4FIMEX_REQUIRE(d);
         TEST4FIMEX_CHECK_EQ(2, d->size());
-        const shared_array<char> v = d->asChar();
+        const auto v = d->asChar();
         TEST4FIMEX_CHECK_EQ(1, v[0]);
         TEST4FIMEX_CHECK_EQ(2, v[1]);
     }
@@ -86,7 +86,7 @@ TEST4FIMEX_TEST_CASE(test_attribute_types)
         const DataPtr d = a.getData();
         TEST4FIMEX_REQUIRE(d);
         TEST4FIMEX_CHECK_EQ(2, d->size());
-        const shared_array<double> v = d->asDouble();
+        const auto v = d->asDouble();
         TEST4FIMEX_CHECK_EQ(1.0, v[0]);
         TEST4FIMEX_CHECK_EQ(2.0, v[1]);
         TEST4FIMEX_CHECK_EQ("1 2", a.getStringValue());

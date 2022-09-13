@@ -1,7 +1,7 @@
 /*
  * Fimex, testCoordSys.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -127,7 +127,7 @@ TEST4FIMEX_TEST_CASE(test_coordSys)
     DataPtr allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
     size_t n = 11 * 11 * 4 * 4;
     TEST4FIMEX_REQUIRE_EQ(allData->size(), n);
-    shared_array<short> all = allData->asShort();
+    auto all = allData->asShort();
     TEST4FIMEX_CHECK_EQ(accumulate(all.get(), all.get() + n, 0UL), static_cast<size_t>(n * (n - 1) / 2)); // gauss computation of sum of sequence
 
     // check accessor function
@@ -144,7 +144,7 @@ TEST4FIMEX_TEST_CASE(test_coordSys)
     DataPtr sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     size_t s = 11*11;
     TEST4FIMEX_CHECK_EQ(sData->size(), s);
-    shared_array<short> slice = sData->asShort();
+    auto slice = sData->asShort();
     TEST4FIMEX_CHECK_EQ(accumulate(slice.get(), slice.get() + s, 0UL), static_cast<size_t>(n * (n - 1) / 2 - (n - s) * (n - s - 1) / 2));
 
     // native slice reader

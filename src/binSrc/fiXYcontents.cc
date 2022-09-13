@@ -1,7 +1,7 @@
 /*
  * Fimex, fiXYcontents.cc
  *
- * (C) Copyright 2015, met.no
+ * (C) Copyright 2015-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -118,7 +118,7 @@ map<string, double> calcStats(DataPtr data)
     size_t undefs = 0;
     { // count and remove undefs
         vec.reserve(data->size());
-        shared_array<double> array = data->asDouble();
+        auto array = data->asDouble();
         for (size_t i = 0; i < data->size(); i++) {
             if (mifi_isnan(array[i])) {
                 undefs++;
@@ -261,7 +261,7 @@ void runStats(po::value_set& vm, CDMReader_p reader)
                     }
                     tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "hours since " + make_time_string_extended(refTime),
                                                              sb.getTimeVariableSliceBuilder());
-                    shared_array<float> tArray = tData->asFloat();
+                    auto tArray = tData->asFloat();
                     set<long> forecastTimes60;
                     if (vm.is_set(op_forecastTime)) {
                         vector<float> ft = tokenizeDotted<float>(vm.value(op_forecastTime), ",");
@@ -302,7 +302,7 @@ void runStats(po::value_set& vm, CDMReader_p reader)
                         transform(lp.begin(), lp.end(), lp.begin(), bind1st(multiplies<float>(),10.));
                         layerVal10.insert(lp.begin(), lp.end());
                     }
-                    shared_array<float> zArray = zData->asFloat();
+                    auto zArray = zData->asFloat();
                     for (vector<CoordinateSystemSliceBuilder>::iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
                         for (size_t i = 0; i < zData->size(); i++) {
                             if (layerPos.size() && layerPos.find(i) == layerPos.end()) continue;

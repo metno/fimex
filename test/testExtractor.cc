@@ -56,7 +56,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("altitude")->size(), 50 * 50);
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 50 * 50 * 12);
     TEST4FIMEX_CHECK_EQ(extract->getData("air_temperature")->size(), 50 * 50 * 12);
-    shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
+    auto precData1 = extract->getData("air_temperature")->asFloat();
     TEST4FIMEX_CHECK(writeToFile(extract, "test_extract_1.nc"));
 
     // test chunked reading
@@ -72,7 +72,7 @@ TEST4FIMEX_TEST_CASE(test_extract)
     TEST4FIMEX_CHECK_EQ(extract->getData("x")->size(), 2);
     TEST4FIMEX_CHECK_EQ(extract->getData("time")->size(), 12);
     TEST4FIMEX_CHECK_EQ(extract->getData("precipitation_amount")->size(), 4 * 2 * 12);
-    shared_array<float> precData2 = extract->getData("air_temperature")->asFloat();
+    auto precData2 = extract->getData("air_temperature")->asFloat();
     // cerr << join (&precData2[0], &precData2[0]+(4*2*12));
     for (size_t t = 0; t < 12; t++) {
         TEST4FIMEX_CHECK_EQ(precData1[mifi_3d_array_position(0, 0, t, 50, 50, 12)], precData2[mifi_3d_array_position(0, 0, t, 2, 4, 12)]);

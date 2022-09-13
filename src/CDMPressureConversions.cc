@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMPressureConversions.cc
  *
- * (C) Copyright 2011-2021, met.no
+ * (C) Copyright 2011-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -220,11 +220,11 @@ private:
 DataPtr ThetaTemperatureConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    auto pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
 
     const float add_offset = reader_->getCDM().getAddOffset(theta_);
-    shared_array<float> thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
+    auto thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
 
     const float cp = 1004.; // J/kgK
     const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
@@ -313,12 +313,12 @@ private:
 DataPtr HumidityConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    auto pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
 
-    shared_array<float> shValues = checkData(reader_->getScaledDataSliceInUnit(specific_, "1", unLimDimPos), size, specific_)->asFloat();
-    shared_array<float> airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
-    shared_array<short> rhValues(new short[size]);
+    auto shValues = checkData(reader_->getScaledDataSliceInUnit(specific_, "1", unLimDimPos), size, specific_)->asFloat();
+    auto airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
+    auto rhValues = make_shared_array<short>(size);
     for (size_t i = 0; i < size; i++) {
         // we have pressure in hPa and need Pa for
         // mifi_specific_to_relative_humidity, we must multiply our
@@ -423,7 +423,7 @@ private:
 DataPtr OmegaVerticalConverter::getDataSlice(size_t unLimDimPos)
 {
     DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData); // unit: hPa
+    auto pressureValues = dataAs<VerticalData_t>(pressureData); // unit: hPa
     const size_t size = pressureData->size();
     VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_));
     VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(omega_, "hPa/s", unLimDimPos), size, omega_));

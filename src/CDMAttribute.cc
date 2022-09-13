@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -41,7 +41,7 @@ namespace {
 template <typename T>
 DataPtr initDataArray(const std::vector<std::string>& values)
 {
-    shared_array<T> array(new T[values.size()]);
+    auto array = make_shared_array<T>(values.size());
     std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
     return createData(values.size(), array);
 }
@@ -75,7 +75,7 @@ DataPtr initDataByArray(CDMDataType datatype, const std::vector<std::string>& va
         return createData(CDM_STRING, value.begin(), value.end());
     }
     case CDM_STRINGS: {
-        shared_array<std::string> array(new std::string[values.size()]);
+        auto array = make_shared_array<std::string>(values.size());
         std::copy(values.begin(), values.end(), &array[0]);
         return createData(values.size(), array);
     }

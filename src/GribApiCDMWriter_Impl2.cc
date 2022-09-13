@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -145,9 +145,9 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             if (xData->size() < 2 || yData->size() < 2) throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongXAxis", xData->size()),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
-            const shared_array<double> xArray = xData->asDouble();
+            const auto xArray = xData->asDouble();
             GRIB_CHECK(grib_set_double(gribHandle.get(), "DxInMetres", (xArray[1] - xArray[0])),"");
-            const shared_array<double> yArray = yData->asDouble();
+            const auto yArray = yData->asDouble();
             GRIB_CHECK(grib_set_double(gribHandle.get(), "DyInMetres", (yArray[1] - yArray[0])),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
@@ -172,8 +172,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             if (ni < 2 || nj < 2) {
                 throw CDMException("longitude, latitude for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
             }
-            const shared_array<double> longs = lonData->asDouble();
-            const shared_array<double> lats = latData->asDouble();
+            const auto longs = lonData->asDouble();
+            const auto lats = latData->asDouble();
             const double di = longs[1] - longs[0];
             const double dj = lats[1] - lats[0];
             const double lat0 = lats[0];
@@ -217,8 +217,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
                                    + type2string(ni) + "," + type2string(nj) + ")");
             }
             double di, dj, rlon0, rlat0, rlonX, rlatX;
-            const shared_array<double> rlongs = rLonData->asDouble();
-            const shared_array<double> rlats = rLatData->asDouble();
+            const auto rlongs = rLonData->asDouble();
+            const auto rlats = rLatData->asDouble();
             di = rlongs[1] - rlongs[0];
             dj = rlats[1] - rlats[0];
             rlat0 = rlats[0];
@@ -299,9 +299,9 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
             const DataPtr yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
             if (xData->size() < 2 || yData->size() < 2)
                 throw CDMException(varName + " variable has too small x-y dimensions, not a grid for GRIB");
-            shared_array<double> xArray = xData->asDouble();
+            auto xArray = xData->asDouble();
             double dx = xArray[1] - xArray[0];
-            shared_array<double> yArray = yData->asDouble();
+            auto yArray = yData->asDouble();
             double dy = yArray[1] - yArray[0];
             std::string typeOfGrid("lambert");
             size_t tog_size = typeOfGrid.size();

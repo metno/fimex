@@ -57,7 +57,7 @@ TEST4FIMEX_TEST_CASE(interpolator)
     interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
 
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
-    shared_array<double> altArray = altitudeData->asDouble();
+    auto altArray = altitudeData->asDouble();
     int found = 0;
     for (size_t i = 0; i < altitudeData->size(); i++) {
         if (altArray[i] > 2000) {
@@ -85,7 +85,7 @@ TEST4FIMEX_TEST_CASE(interpolatorKDTree)
 
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
     TEST4FIMEX_REQUIRE(altitudeData);
-    shared_array<double> altArray = altitudeData->asDouble();
+    auto altArray = altitudeData->asDouble();
     TEST4FIMEX_REQUIRE(altArray);
 
     int found = 0;
@@ -126,7 +126,7 @@ TEST4FIMEX_TEST_CASE(interpolatorSatellite)
                                    "degrees_north", CDM_DOUBLE, CDM_DOUBLE);
     DataPtr cmaData = interpolator->getDataSlice("cma", 0);
     TEST4FIMEX_REQUIRE(cmaData);
-    shared_array<double> cmaArray = cmaData->asDouble();
+    auto cmaArray = cmaData->asDouble();
     TEST4FIMEX_REQUIRE(cmaArray);
 
     SliceBuilder cmaSb(interpolator->getCDM(), "cma");
@@ -155,7 +155,7 @@ TEST4FIMEX_TEST_CASE(interpolator2coords)
 
         int found = 0;
         DataPtr temp2Data = interpolator->getScaledDataSlice("temp2", 0);
-        shared_array<double> tmpArray = temp2Data->asDouble();
+        auto tmpArray = temp2Data->asDouble();
         for (size_t i = 0; i < temp2Data->size(); i++) {
             if (!mifi_isnan(tmpArray[i])) {
                 found++;
@@ -182,7 +182,7 @@ TEST4FIMEX_TEST_CASE(interpolator_template)
     TEST4FIMEX_REQUIRE(interpolator->getCDM().hasVariable("ga_skt"));
     DataPtr data = interpolator->getData("ga_skt");
     TEST4FIMEX_REQUIRE(data);
-    shared_array<double> array = data->asDouble();
+    auto array = data->asDouble();
     TEST4FIMEX_REQUIRE(array);
     for (size_t i = 0; i < 7; ++i) { // only first 7 datapoints are defined
         TEST4FIMEX_CHECK((!mifi_isnan(array[i])) && (array[i] < 280) && (array[i] > 270));
@@ -206,7 +206,7 @@ TEST4FIMEX_TEST_CASE(interpolator_latlon)
     TEST4FIMEX_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
 
     DataPtr data = interpolator->getData("ga_skt");
-    shared_array<double> array = data->asDouble();
+    auto array = data->asDouble();
     TEST4FIMEX_CHECK((!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
     for (size_t i = 0; i < data->size(); ++i) {
         TEST4FIMEX_CHECK((!mifi_isnan(array[i])) && (array[i] < 281.1) && (array[i] > 266));
@@ -242,7 +242,7 @@ TEST4FIMEX_TEST_CASE(interpolator_wrongaxes_latlon)
     DataPtr data = interpolator->getDataSlice("x_wind_pl", 0);
 #endif
     TEST4FIMEX_REQUIRE(data);
-    shared_array<double> array = data->asDouble();
+    auto array = data->asDouble();
     TEST4FIMEX_REQUIRE(array);
     for (size_t i = 0; i < data->size(); ++i) {
         TEST4FIMEX_CHECK((!mifi_isnan(array[i])));
@@ -315,8 +315,8 @@ TEST4FIMEX_TEST_CASE(interpolator_vector_backforth)
                     ip.lonAxis, ip.latAxis, "degrees_east", "degrees_north");
 
             DataPtr dxwind = iback->getScaledData("x_wind");
-            shared_array<float> xwind = dxwind->asFloat();
-            shared_array<float> ywind = iback->getScaledData("y_wind")->asFloat();
+            auto xwind = dxwind->asFloat();
+            auto ywind = iback->getScaledData("y_wind")->asFloat();
 
             size_t count_nan = 0;
             for (size_t i = 0; i < dxwind->size(); ++i) {
@@ -393,7 +393,7 @@ TEST4FIMEX_TEST_CASE(interpolator_forward)
     DataPtr interpolatedData = interpolator->getDataSlice("Amplitude_VV", 0);
     TEST4FIMEX_REQUIRE(interpolatedData);
     TEST4FIMEX_REQUIRE_EQ(interpolator_forward_N, interpolatedData->size());
-    shared_array<unsigned short> interpolatedValues = interpolatedData->asUShort();
+    auto interpolatedValues = interpolatedData->asUShort();
     int bad = 0;
     for (size_t i = 0; i < interpolator_forward_N; ++i) {
         if (interpolator_forward_ex[i] != interpolatedValues[i]) {

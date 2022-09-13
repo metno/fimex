@@ -581,7 +581,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             } else if (mode == "extraLevel1" || mode == "extraLevel2") {
                 vector<double> pv = readVarPv_(exampleVar);
                 size_t offset = (mode == "extraLevel1") ? 0 : pv.size()/2;
-                shared_array<unsigned int> lv = levelData->asUInt();
+                auto lv = levelData->asUInt();
                 for (size_t i = 0; i < levelData->size(); i++) {
                     size_t pos = offset + lv[i];
                     if (pos < pv.size()) {
@@ -595,7 +595,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             } else if (mode == "extraHalvLevel1" || mode == "extraHalvLevel2") {
                 bool asimofHeader = false;
                 vector<double> pv = readVarPv_(exampleVar,asimofHeader);
-                shared_array<unsigned int> lv = levelData->asUInt();
+                auto lv = levelData->asUInt();
                 if (pv.size()/2 < levelData->size()) {
                     // reread pv, try asimof header
                     asimofHeader=true;
@@ -643,15 +643,15 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                 const CDMVariable& p0 = getCDM().getVariable("p0"+ extension);
                 const CDMVariable& ap = getCDM().getVariable("ap" + extension);
                 const CDMVariable& b = getCDM().getVariable("b" + extension);
-                shared_array<double> p0Data = p0.getData()->asDouble();
-                shared_array<double> apData = ap.getData()->asDouble();
-                shared_array<double> bData = b.getData()->asDouble();
+                auto p0Data = p0.getData()->asDouble();
+                auto apData = ap.getData()->asDouble();
+                auto bData = b.getData()->asDouble();
                 for (size_t i = 0; i < ap.getData()->size(); ++i) {
                     retValues.push_back(apData[i]/p0Data[0] + bData[i]);
                 }
             } else {
                 LOG4FIMEX(logger, Logger::WARN, "unkown mode '"+ mode +"' to extract level-data for variable '" + exampleVar + "' using some dummy values");
-                shared_array<double> d = levelData->asDouble();
+                auto d = levelData->asDouble();
                 retValues = vector<double>(&d[0], &d[0]+levelData->size());
             }
             string sscale = getXmlProp(node, "scale_factor");
@@ -663,7 +663,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
         }
     }
     if (size == 0) {
-        shared_array<double> d = levelData->asDouble();
+        auto d = levelData->asDouble();
         retValues = vector<double>(&d[0], &d[0]+levelData->size());
     }
     return retValues;
@@ -937,7 +937,7 @@ void GribCDMReader::initAddEnsembles()
     cdm_->addDimension(CDMDimension(p_->ensembleDimName, p_->maxEnsembles));
 
     CDMVariable ensembleVar(p_->ensembleDimName, CDM_SHORT, {p_->ensembleDimName});
-    shared_array<short> eMembers(new short[p_->maxEnsembles]);
+    auto eMembers = make_shared_array<short>(p_->maxEnsembles);
     std::iota(eMembers.get(), eMembers.get() + p_->maxEnsembles, 0);
     DataPtr eData = createData(p_->maxEnsembles, eMembers);
     ensembleVar.setData(eData);
@@ -1352,7 +1352,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     const size_t maxXySize = maxSizes.at(0) * maxSizes.at(1);
 
     // storage for complete data
-    shared_array<double> doubleArray(new double[sliceSize]);
+    auto doubleArray = make_shared_array<double>(sliceSize);
     // prefill with missing values
 
     double missingValue = cdm_->getFillValue(varName);
@@ -1371,7 +1371,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     vector<size_t> orgSizes, orgSliceSize, newStart, newSizes;
     if (xyslice) {
         LOG4FIMEX(logger, Logger::DEBUG, "need xy slicing");
-        full_data_array = shared_array<double>(new double[maxXySize]);
+        full_data_array = make_shared_array<double>(maxXySize);
 
         orgSizes = {maxSizes.at(0), maxSizes.at(1)};
         orgSliceSize = {1, maxSizes.at(0)};

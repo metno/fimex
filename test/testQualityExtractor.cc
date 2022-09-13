@@ -98,7 +98,7 @@ TEST4FIMEX_TEST_CASE(test_qualityExtract_mask)
 
     const int NXSI = 21, NETA = 16, N_SRHO=35;
     TEST4FIMEX_CHECK_EQ(sliceM->size(), N_SRHO * NXSI * NETA);
-    shared_array<double> valuesM = sliceM->asDouble();
+    auto valuesM = sliceM->asDouble();
     const int offset0 = 0, offset1 = 12+NXSI*12;
     TEST4FIMEX_CHECK(valuesM[offset0] > 1e36);
     TEST4FIMEX_CHECK(fabs(valuesM[offset1] - 35.114) < 0.001);

@@ -1,7 +1,7 @@
 /*
  * Fimex, ForwardInterpolation.cc
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -135,7 +135,7 @@ CachedForwardInterpolation::CachedForwardInterpolation(const std::string& xDimNa
     : CachedInterpolationInterface(xDimName, yDimName, inx, iny, outx, outy)
 {
     const size_t outLayerSize = outX * outY;
-    pointsInIn = shared_array<vector<size_t>>(new vector<size_t>[outLayerSize]);
+    pointsInIn = make_shared_array<vector<size_t>>(outLayerSize);
     size_t minInX = 0, maxInX = 0, minInY = 0, maxInY = 0;
     maxPointsInIn = 0;
     const RoundAndClamp roundX(0, outX - 1, INVALID);
@@ -208,7 +208,7 @@ shared_array<float> CachedForwardInterpolation::interpolateValues(shared_array<f
     size_t inLayerSize = inX * inY;
     size_t inZ = size / inLayerSize;
     newSize = outLayerSize*inZ;
-    shared_array<float> outData(new float[newSize]);
+    auto outData = make_shared_array<float>(newSize);
     for (size_t z = 0; z < inZ; ++z) {
         float* outDataIt = &outData[z*outLayerSize];
         for (size_t i = 0; i < outLayerSize; i++) {

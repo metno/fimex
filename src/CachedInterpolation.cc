@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2021, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -175,7 +175,7 @@ shared_array<float> CachedInterpolation::interpolateValues(shared_array<float> i
     const size_t outLayerSize = outX * outY;
     const size_t inZ = size / (inX*inY);
     newSize = outLayerSize*inZ;
-    shared_array<float> outfield(new float[newSize]);
+    auto outfield = make_shared_array<float>(newSize);
 
 #ifdef _OPENMP
 #pragma omp parallel default(shared)
@@ -321,7 +321,7 @@ shared_array<float> CachedNNInterpolation::interpolateValues(shared_array<float>
     const size_t inZ = size / inLayerSize;
     newSize = outLayerSize * inZ;
 
-    shared_array<float> outData(new float[newSize]);
+    auto outData = make_shared_array<float>(newSize);
     std::fill(outData.get(), outData.get() + newSize, MIFI_UNDEFINED_F);
 
     for (size_t z = 0; z < inZ; ++z) {

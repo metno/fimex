@@ -1,7 +1,7 @@
 /*
  * Fimex, c_fimex.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -443,7 +443,7 @@ int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size
             *size = 0;
             return -1;
         }
-        shared_array<double> vArray = vData->asDouble();
+        auto vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {
@@ -463,7 +463,7 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
             *size = 0;
             return -1;
         }
-        shared_array<double> vArray = vData->asDouble();
+        auto vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {
@@ -488,7 +488,7 @@ int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varNa
             vData = reader->reader_->getScaledDataSlice(varName, *(sb->sb_));
         }
         *size = vData->size();
-        shared_array<double> vArray = vData->asDouble();
+        auto vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], data);
         return 0;
     } catch (exception& ex) {

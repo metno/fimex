@@ -126,7 +126,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_entire_atmosphere)
 
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
-    shared_array<float> va = vd->asFloat();
+    auto va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
 }
 #endif
@@ -148,7 +148,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_top_of_atmosphere)
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
     TEST4FIMEX_REQUIRE_EQ(N, vd->size());
-    shared_array<float> va = vd->asFloat();
+    auto va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
     TEST4FIMEX_CHECK_CLOSE(29910, va[0], 1);
     TEST4FIMEX_CHECK_CLOSE(23210, va[1], 1);
@@ -171,7 +171,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_mid_of_atmosphere)
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
     TEST4FIMEX_REQUIRE_EQ(N, vd->size());
-    shared_array<float> va = vd->asFloat();
+    auto va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
     const float expected[N] = {7372.33, 6982.44, 6610.17, 6253.85, 5912.13, 5584.08, 5269.03};
     for (size_t i = 0; i < N; ++i) {
@@ -196,7 +196,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_bottom_of_atmosphere)
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
     TEST4FIMEX_REQUIRE_EQ(N, vd->size());
-    shared_array<float> va = vd->asFloat();
+    auto va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
     const float expected[N] = {247.4, 222.2, 197.7, 173.6};
     for (size_t i = 0; i < N; ++i) {
@@ -246,7 +246,7 @@ TEST4FIMEX_TEST_CASE(test_pressure_integrator_up)
     DataPtr vd = altivc->getDataSlice(sb);
     TEST4FIMEX_REQUIRE(vd);
     TEST4FIMEX_REQUIRE_EQ(6, vd->size());
-    shared_array<float> va = vd->asFloat();
+    auto va = vd->asFloat();
     TEST4FIMEX_REQUIRE(va);
     TEST4FIMEX_CHECK_CLOSE(12.1, va[0], 1);
     TEST4FIMEX_CHECK_CLOSE(12.4, va[1], 1);

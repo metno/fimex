@@ -175,7 +175,7 @@ bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::st
             outStream << nm << found->getStringValue();
             return true;
         } else if (found->getData()->size() > 0) {
-            shared_array<double> d = found->getData()->asDouble();
+            auto d = found->getData()->asDouble();
             outStream << nm << join_formatted(&d[0], &d[0] + found->getData()->size(), MaxPrecisionFormatter<double>(), ",");
             return true;
         }

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -228,7 +228,7 @@ private:
 template <typename T>
 std::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, double newFillValue, double scalingFactor)
 {
-    shared_array<T> data(new T[indata.size()]);
+    auto data = make_shared_array<T>(indata.size());
     Scale<T> scale(newFillValue, scalingFactor);
     std::transform(&indata[0], &indata[0]+indata.size(), &data[0], scale);
     return MetNoFimex::createData(indata.size(), data);

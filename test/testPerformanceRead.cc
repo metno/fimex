@@ -1,7 +1,7 @@
 /*
   Fimex, test/testPerformanceRead.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < 67; ++i) {
         data = reader->getScaledDataSliceInUnit("air_temperature_pl", "mK", i);
     }
-    shared_array<double> da = data->asDouble();
+    auto da = data->asDouble();
     double sum = accumulate(&da[0], &da[0]+data->size(), 0.);
     cerr << "sum: " << sum << endl;
     return 0;

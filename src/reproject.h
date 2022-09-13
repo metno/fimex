@@ -25,7 +25,6 @@
 #define FIMEX_REPROJECT_H_
 
 #include "fimex/SharedArray.h"
-#include "fimex/mifi_constants.h"
 
 #include <string>
 

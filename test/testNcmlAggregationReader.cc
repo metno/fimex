@@ -101,7 +101,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
     DataPtr slice = reader->getDataSlice("unlim", 3);
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_EQ(slice->size(), 1);
-    shared_array<short> values = slice->asShort();
+    auto values = slice->asShort();
     TEST4FIMEX_REQUIRE(values);
     TEST4FIMEX_CHECK_EQ(values[0], 4);
 
@@ -138,7 +138,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
     DataPtr slice = reader->getDataSlice("notlimited", 2);
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_GT(slice->size(), 0);
-    shared_array<int> values = slice->asInt();
+    auto values = slice->asInt();
     TEST4FIMEX_REQUIRE(values);
     TEST4FIMEX_CHECK_EQ(values[0], 3);
     remove(test_output);
@@ -154,7 +154,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim2, TestConfig)
     DataPtr slice = reader->getDataSlice("multi", sb);
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_GE(slice->size(), 2);
-    const shared_array<int> values = slice->asInt();
+    const auto values = slice->asInt();
     TEST4FIMEX_REQUIRE(values);
     TEST4FIMEX_CHECK_EQ(values[0], 4);
     TEST4FIMEX_CHECK_EQ(values[1], -4);

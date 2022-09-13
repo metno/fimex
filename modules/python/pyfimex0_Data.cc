@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_Data.cc
  *
- * (C) Copyright 2017-2019, met.no
+ * (C) Copyright 2017-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -86,7 +86,7 @@ py::object Data_values(DataPtr data)
     case CDM_STRING:
         return py::str(data->asString());
     case CDM_STRINGS: {
-        shared_array<std::string> strings = data->asStrings();
+        auto strings = data->asStrings();
         py::list pystrings;
         const size_t count = data->size();
         for (size_t i = 0; i < count; ++i)

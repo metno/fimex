@@ -78,7 +78,7 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
         return DataPtr();
 
     ArrayDims dimsZ = makeArrayDims(sb);
-    shared_array<double> z_values(new double[dimsZ.volume()]);
+    auto z_values = make_shared_array<double>(dimsZ.volume());
 
     enum { S, C, DEPTH, Z, ETA }; // ETA must be last as it is optional
     ArrayGroup group = ArrayGroup().add(s.dims).add(c.dims).add(depth.dims).add(dimsZ);

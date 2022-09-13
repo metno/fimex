@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMQualityExtractor.cc
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -81,7 +81,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
         }
     } else {
         const CDMAttribute& attr = cdm.getAttribute(statusVarName, statusAttrName);
-        shared_array<double> validData = attr.getData()->asDouble();
+        auto validData = attr.getData()->asDouble();
         size_t validSize = attr.getData()->size();
         if (validSize > 0) {
             if (autoConfString == "all") {
@@ -280,7 +280,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
         }
         const double sizeRatio = double(sizeD)/sizeS;
         if (sizeRatio == int(sizeRatio) && sizeRatio >= 1) {
-            shared_array<double> sd = statusData->asDouble();
+            auto sd = statusData->asDouble();
             vector<double> useVals;
             if (variableValues.find(varName) != variableValues.end()) {
                 useVals = variableValues[varName];

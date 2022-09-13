@@ -1,7 +1,7 @@
 /*
   Fimex, include/fimex/SharedArray.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,7 +28,6 @@
   USA.
 */
 
-
 #ifndef FIMEX_SHARED_ARRAY_H
 #define FIMEX_SHARED_ARRAY_H
 
@@ -37,49 +36,16 @@
 namespace MetNoFimex {
 
 template <typename T>
-class shared_array
-{
-public:
-    shared_array() {}
-
-    shared_array(T* content)
-        : holder_(content, std::default_delete<T[]>())
-    {
-    }
-
-    template <class Deleter>
-    shared_array(T* content, Deleter d)
-        : holder_(content, d)
-    {
-    }
-
-    shared_array(const shared_array& other)
-        : holder_(other.holder_)
-    {
-    }
-
-    shared_array& operator=(const shared_array& other)
-    {
-        holder_ = other.holder_;
-        return *this;
-    }
-
-    operator bool() const { return static_cast<bool>(holder_); }
-
-    T* get() { return holder_.get(); }
-    const T* get() const { return holder_.get(); }
-
-    T& operator[](int i) { return get()[i]; }
-    const T& operator[](int i) const { return get()[i]; }
-
-private:
-    std::shared_ptr<T> holder_;
-};
+using shared_array = std::shared_ptr<T[]>;
 
 template <typename T>
 inline shared_array<T> make_shared_array(size_t size)
 {
-    return shared_array<T>(new T[size]);
+#if __cplusplus >= 201703L
+    return std::shared_ptr<T[]>(new T[size]);
+#else
+    return std::shared_ptr<T[]>(new T[size], std::default_delete<T[]>());
+#endif
 }
 
 } // namespace MetNoFimex

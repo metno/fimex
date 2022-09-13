@@ -1,7 +1,7 @@
 /*
   Fimex, src/CDMMergeUtils.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2022 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -27,7 +27,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
   USA.
 */
-
 
 #include "CDMMergeUtils.h"
 
@@ -63,7 +62,7 @@ values_v getAxisValues(const CDMReader_p reader, CoordinateAxis_cp axis, const s
     if (not axisData or axisData->size() < 2)
         THROW("no data for axis '" << name << "'");
 
-    shared_array<double> array = axisData->asDouble();
+    auto array = axisData->asDouble();
     return values_v(array.get(), array.get() + axisData->size());
 }
 

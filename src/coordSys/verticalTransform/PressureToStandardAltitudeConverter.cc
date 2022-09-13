@@ -63,9 +63,9 @@ std::vector<std::string> PressureToStandardAltitudeConverter::getShape() const
 DataPtr PressureToStandardAltitudeConverter::getDataSlice(const SliceBuilder& sb) const
 {
     DataPtr pressureData = pressure_->getDataSlice(sb);
-    shared_array<double> pVal = pressureData->asDouble();
+    auto pVal = pressureData->asDouble();
     const size_t size = pressureData->size();
-    shared_array<double> altiVal(new double[size]);
+    auto altiVal = make_shared_array<double>(size);
     mifi_barometric_standard_altitude(size, pVal.get(), altiVal.get());
     return createData(size, altiVal);
 }

@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMOverlay.cc
  *
- * (C) Copyright 2013-2021, met.no
+ * (C) Copyright 2013-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -74,8 +74,8 @@ template<> bool value_is_nan<double>(double d) { return mifi_isnan(d); }
 template <class T>
 DataPtr overlayDataSlices(T fillT, T fillB, DataPtr sliceT, DataPtr sliceB)
 {
-    const shared_array<T> valuesT = dataAs<T>(sliceT);
-    shared_array<T> valuesB = dataAs<T>(sliceB);
+    const auto valuesT = dataAs<T>(sliceT);
+    auto valuesB = dataAs<T>(sliceB);
     for (size_t i = 0; i < sliceB->size(); ++i) {
         const T valueT = valuesT[i];
         T& valueB = valuesB[i];
