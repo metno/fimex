@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2020, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -106,6 +106,7 @@ void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>
 {
     CDMDataType dt = getDataType();
     bool is_unsigned = false;
+    std::string comment;
     if (dt == CDM_UINT) {
         dt = CDM_INT;
         is_unsigned = true;
@@ -115,11 +116,15 @@ void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>
     } else if (dt == CDM_UCHAR) {
         dt = CDM_CHAR;
         is_unsigned = true;
+    } else if (dt == CDM_NAT) {
+        dt = CDM_INT;
+        comment = "  <!-- datatype NAT translated to INT for ncml -->\n";
     }
     out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(dt) << "\" ";
     shapeToXMLStream(out);
-    if (is_unsigned || !attrs.empty()) {
+    if (is_unsigned || !attrs.empty() || !comment.empty()) {
         out << ">" << std::endl;
+        out << comment;
         for (const auto& att : attrs) {
             att.toXMLStream(out, "  ");
         }

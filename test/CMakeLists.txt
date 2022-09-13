@@ -54,8 +54,9 @@ IF(ENABLE_FELT)
 
   SET(NETCDF_MI_SH_TESTS
     testFeltReadNetCDFWrite.sh
-    testNetCDFReadWrite.sh
     testNcmlRead.sh
+    testNetCDFReadWrite.sh
+    testPrintNcmlNAT.sh
     test_ncmlagg_with_config.sh
     )
 ENDIF(ENABLE_FELT)
