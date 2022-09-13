@@ -6,7 +6,7 @@ SET(libfimexf_SOURCES
 
 LINK_DIRECTORIES(${PC_LIBRARY_DIRS} ${BOOST_LIBRARY_DIRS})
 
-FIMEX_ADD_LIBRARY(fimexf "${libfimexf_SOURCES}" libfimex "" "")
+FIMEX_ADD_LIBRARY(fimexf "${libfimexf_SOURCES}" "libfimex;${openmp_F90_PACKAGES}")
 
 SET (F90_MOD_DIR "${CMAKE_CURRENT_BINARY_DIR}/libfimexf_mods")
 SET_TARGET_PROPERTIES(libfimexf PROPERTIES

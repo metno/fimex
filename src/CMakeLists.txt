@@ -288,11 +288,12 @@ SET(libfimex_PACKAGES
   ${log4cpp_PACKAGE}
   ${proj_PACKAGE}
   ${udunits2_PACKAGE}
+  ${openmp_CXX_PACKAGE}
 )
 
 FIMEX_ADD_LIBRARY(fimex "${libfimex_SOURCES}" "${libfimex_PACKAGES}")
 
-SET(IO_PACKAGES "libfimex;${libxml2_PACKAGE}")
+SET(IO_PACKAGES "libfimex;${libxml2_PACKAGE};${openmp_CXX_PACKAGE}")
 IF (ENABLE_NETCDF)
 ADD_SUBDIRECTORY(io/netcdf)
 ENDIF ()

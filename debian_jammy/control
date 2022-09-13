@@ -3,7 +3,7 @@ Priority: extra
 Maintainer: MET Norway <fimex@met.no>
 Build-Depends: debhelper (>= 11),
  dh-python,
- cmake,
+ cmake (>= 3.10),
  quilt,
  pkg-config,
  gfortran,
