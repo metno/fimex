@@ -1,3 +1,7 @@
+  * 2022-09-13 fimex 1.9.0
+    * printNcML no NAT
+    * replace shared_array<T> class with type alias shared_ptr<T[]>
+    * io plugins for many data formats
   * 2022-06-27 fimex 1.8.1
     * bugfix fortran null deref (thanks to Magnus Ulimoen)
     * option to write GRIB messages empty fields
