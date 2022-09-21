@@ -51,7 +51,7 @@ bool RotatedLatitudeLongitudeProjection::acceptsProj4(const std::string& proj4St
         std::smatch what;
         if (std::regex_search(proj4Str, what, std::regex("\\+o_proj=(\\S+)"))) {
             std::string orgProj = what[1].str();
-            if (orgProj == "latlong" || orgProj == "longlat" || orgProj == "eqc") {
+            if (orgProj == "latlong" || orgProj == "longlat") {
                 return true;
             }
         }
