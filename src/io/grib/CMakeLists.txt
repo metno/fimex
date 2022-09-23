@@ -25,5 +25,5 @@ SET(libfimex_grib_SOURCES
   GribIoFactory.h
   )
 
-FIMEX_ADD_LIBRARY(fimex-io-grib "${libfimex_grib_SOURCES}" "${IO_PACKAGES};${eccodes_PACKAGE};${grib_api_PACKAGE}")
+FIMEX_ADD_LIBRARY(fimex-io-grib "${libfimex_grib_SOURCES}" "${IO_PACKAGES};${eccodes_PACKAGE};${grib_api_PACKAGE};${date_PACKAGE}")
 TARGET_INCLUDE_DIRECTORIES(libfimex-io-grib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
