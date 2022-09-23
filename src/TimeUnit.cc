@@ -33,15 +33,8 @@
 #include <cmath>
 #include <limits>
 
-#include "fimex_config.h"
-#ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
-#else
-extern "C" {
-#include "udunits.h"
-}
-#endif
 
 // TODO: make thread-safe with mifi_units lock
 
@@ -52,13 +45,7 @@ extern OmpMutex& getUnitsMutex();
 
 static void void_ut_free(void* ptr)
 {
-    //    std::cerr << "trying to dealloc pUnit" << std::endl;
-#ifdef HAVE_UDUNITS2_H
     ut_free(reinterpret_cast<ut_unit*>(ptr));
-#else
-    // only the udunits1 wrapper of udunits2 contains utFree
-    // utFree(reinterpret_cast<utUnit*>(ptr));
-#endif
 }
 
 void TimeUnit::init(const std::string& timeUnitString)
@@ -69,14 +56,9 @@ void TimeUnit::init(const std::string& timeUnitString)
     } else {
         units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
         OmpScopedLock lock(getUnitsMutex());
-#ifdef HAVE_UDUNITS2_H
         pUnit = std::shared_ptr<void>(
             reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
         handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
-#else
-        pUnit = std::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
-        utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
-#endif
     }
 }
 
@@ -110,7 +92,6 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
     float second;
     int year, month, mday, hour, minute;
     OmpScopedLock lock(getUnitsMutex());
-#ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit seconds");
     std::shared_ptr<cv_converter> conv(ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime.get()), cv_free);
@@ -119,9 +100,6 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const
     double res, sec;
     ut_decode_time(encodedTime, &year, &month, &mday, &hour, &minute, &sec, &res);
     second = static_cast<float>(sec);
-#else
-    handleUdUnitError(utCalendar(unitTime, reinterpret_cast<utUnit*>(pUnit.get()), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
-#endif
     fiTime.setYear(static_cast<unsigned int>(year));
     fiTime.setMonth(static_cast<char>(month));
     fiTime.setMDay(static_cast<char>(mday));
@@ -147,7 +125,6 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime, double invalidValue
     float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
     double unitTime;
     OmpScopedLock lock(getUnitsMutex());
-#ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"), ut_free);
     double encodedTime = ut_encode_time(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second);
     handleUdUnitError(ut_get_status(), "encoding fimexTime");
@@ -155,9 +132,6 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime, double invalidValue
     handleUdUnitError(ut_get_status(), "converter calendar to double");
     unitTime = cv_convert_double(conv.get(), encodedTime);
     handleUdUnitError(ut_get_status(), "converting calendar to double");
-#else
-    handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
-#endif
     return unitTime;
 }
 

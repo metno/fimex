@@ -30,25 +30,14 @@
 
 #include <memory>
 
-#include "fimex_config.h"
-#ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
-#else // UDUNITS1
-extern "C" {
-#include "udunits.h"
-}
-// add forgotten utIsInit fom udunits
-extern "C" int utIsInit();
-#endif // UDUNITS2
 
 #include <cmath>
 
-namespace MetNoFimex
-{
-#ifdef HAVE_UDUNITS2_H
+namespace MetNoFimex {
+
 static ut_system* utSystem;
-#endif
 
 static OmpMutex unitsMutex;
 extern OmpMutex& getUnitsMutex()
@@ -61,7 +50,6 @@ static Logger_p logger = getLogger("fimex.Units");
 void handleUdUnitError(int unitErrCode, const std::string& message)
 {
     switch (unitErrCode) {
-#ifdef HAVE_UDUNITS2_H
     case UT_SUCCESS: break;
     case UT_BAD_ARG:  throw UnitException("An argument violates the function's contract: " + message);
     case UT_EXISTS: throw UnitException("Unit, prefix, or identifier already exists: " + message);
@@ -78,21 +66,6 @@ void handleUdUnitError(int unitErrCode, const std::string& message)
     case UT_OPEN_ENV: throw UnitException("Can't open environment-specified unit database: " + message);
     case UT_OPEN_DEFAULT: throw UnitException("Can't open installed, default, unit database: " + message);
     case UT_PARSE: throw UnitException("Error parsing unit specification: " + message);
-#else // udunits1
-    case 0: break;
-    case UT_EOF: throw UnitException("end-of-file encountered : " + message);
-    case UT_ENOFILE: throw UnitException("no units-file : " + message);
-    case UT_ESYNTAX: throw UnitException("syntax error : " + message);
-    case UT_EUNKNOWN: throw UnitException("unknown specification : " + message);
-    case UT_EIO: throw UnitException("I/O error : " + message);
-    case UT_EINVALID: throw UnitException("invalid unit-structure : " + message);
-    case UT_ENOINIT: throw UnitException("package not initialized : " + message);
-    case UT_ECONVERT: throw UnitException("two units are not convertable : " + message);
-    case UT_EALLOC: throw UnitException("memory allocation failure : " + message);
-    case UT_ENOROOM: throw UnitException("insufficient room supplied : " + message);
-    case UT_ENOTTIME: throw UnitException("not a unit of time : " + message);
-    case UT_DUP: throw UnitException("duplicate unit : " + message);
-#endif // UDUNITS2
     default: throw UnitException("unknown error");
     }
 }
@@ -122,7 +95,6 @@ public:
     }
 };
 
-#ifdef HAVE_UDUNITS2_H
 class Ud2UnitsConverter : public UnitsConverter {
     cv_converter* conv_;
 public:
@@ -186,22 +158,15 @@ public:
         }
     }
 };
-#endif
 
 Units::Units()
 {
     OmpScopedLock lock(unitsMutex);
-#ifdef HAVE_UDUNITS2_H
     if (utSystem == 0) {
         ut_set_error_message_handler(&ut_ignore);
         utSystem = ut_read_xml(0);
         handleUdUnitError(ut_get_status());
     }
-#else
-    if (!utIsInit()) {
-        handleUdUnitError(utInit(0));
-    }
-#endif
 }
 
 Units::Units(const Units& u)
@@ -220,14 +185,10 @@ bool Units::unload(bool force)
     bool retVal = false;
     if (force) {
         OmpScopedLock lock(unitsMutex);
-#ifdef HAVE_UDUNITS2_H
         if (utSystem != 0) {
           ut_free_system(utSystem);
           utSystem = 0;
         }
-#else
-        utTerm();
-#endif
         retVal = true;
     }
 
@@ -249,7 +210,6 @@ UnitsConverter_p Units::getConverter(const std::string& from, const std::string&
         return std::make_shared<LinearUnitsConverter>(1., 0.);
     }
     OmpScopedLock lock(unitsMutex);
-#ifdef HAVE_UDUNITS2_H
     std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
     handleUdUnitError(ut_get_status(), "'" + from + "'");
     std::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
@@ -257,14 +217,6 @@ UnitsConverter_p Units::getConverter(const std::string& from, const std::string&
     cv_converter* conv = ut_get_converter(fromUnit.get(), toUnit.get());
     handleUdUnitError(ut_get_status(), "'" + from + "' converted to '" +to + "'");
     return std::make_shared<Ud2UnitsConverter>(conv);
-#else
-    double slope, offset;
-    utUnit fromUnit, toUnit;
-    handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
-    handleUdUnitError(utScan(to.c_str(), &toUnit), to);
-    handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
-    return std::make_shared<LinearUnitsConverter>(slope, offset);
-#endif
 
 }
 
@@ -272,7 +224,6 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
     int areConv = 0;
-#ifdef HAVE_UDUNITS2_H
     try {
         OmpScopedLock lock(unitsMutex);
         std::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
@@ -283,42 +234,16 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
     } catch (UnitException& ue) {
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
-#else
-    ScopedLock lock(unitsMutex);
-    utUnit fromUnit, toUnit;
-    double slope, offset;
-    handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
-    handleUdUnitError(utScan(unit2.c_str(), &toUnit), unit2);
-    int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
-    switch (error) {
-    case 0: areConv = 1; break;
-    case UT_ECONVERT: areConv = 0; break;
-    default: handleUdUnitError(error);
-    }
-#endif
 
     return areConv;
 }
 bool Units::isTime(const std::string& timeUnit) const
 {
-#ifdef HAVE_UDUNITS2_H
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
-#else
-    bool isTime = false;
-    class ScopedCritical lock(unitsMutex);
-    utUnit unit;
-    handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
-    isTime = (utIsTime(&unit) != 0);
-    return isTime;
-#endif
 }
 
 const void* Units::exposeInternals() const {
-#ifdef HAVE_UDUNITS2_H
     return utSystem;
-#else
-    return 0;
-#endif
 }
 
-}
+} // namespace MetNoFimex
