@@ -1,3 +1,5 @@
+  * 2022-11-07 fimex 1.9.2
+    * help conda replacing install prefix in default io plugin search path
   * 2022-11-07 fimex 1.9.1
     * minor bugfixes
     * help conda replace install prefix
