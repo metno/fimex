@@ -66,17 +66,14 @@ static bool haveScannedForIoPlugins = false;
 
 std::vector<std::string> getIoPluginsDirs()
 {
-    // this must be 0-terminated: conda fills the placeholder with 0 bytes after the installation prefix,
-    // and these 0 bytes must not end up in the path
-    static const char default_plugins_path[] = FIMEX_IO_PLUGINS_PATH;
-
-    std::string plugins_path;
-    if (const char* iopp = getenv("FIMEX_IO_PLUGINS_PATH")) {
-        plugins_path = iopp;
-    } else {
-        plugins_path = default_plugins_path;
+    const char* iopp = iopp = getenv("FIMEX_IO_PLUGINS_PATH");
+    if (!iopp) {
+        // conda fills the placeholder with 0 bytes after the installation prefix,
+        // and these 0 bytes must not end up in the path
+        iopp = FIMEX_IO_PLUGINS_PATH;
     }
-    return tokenize(plugins_path, ":");
+    // construct std::string from "iopp" which is a "const char*"
+    return tokenize(iopp, ":");
 }
 
 // static
