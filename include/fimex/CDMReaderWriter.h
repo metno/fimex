@@ -37,6 +37,9 @@ namespace MetNoFimex {
  */
 /**
  * The CDMReaderWriter is an interface allowing to write data to an opened CDMReader.
+ *
+ * NOTE: When using the python binding with pypy, it might be necessary to call "sync" after using any of the putDataSlice
+ *       variants in order to write the changes to disk.
  */
 class CDMReaderWriter : public CDMReader
 {

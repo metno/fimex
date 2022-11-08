@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_CDMReader.cc
  *
- * (C) Copyright 2017, met.no
+ * (C) Copyright 2017-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -75,6 +75,7 @@ CDMReaderWriter_p createFileReaderWriter2(const std::string& fileType, const std
 void pyfimex0_CDMReaderWriter(py::module m)
 {
     py::class_<CDMReaderWriter, CDMReaderWriter_p, CDMReader>(m, "_CDMReaderWriter")
+        .def("sync", &CDMReaderWriter::sync)
         .def("putDataSlice", CDMReaderWriter__putDataSlice2)
         .def("putScaledDataSlice", CDMReaderWriter__putScaledDataSlice2)
         .def("putScaledDataSliceInUnit", CDMReaderWriter__putScaledDataSliceInUnit2);

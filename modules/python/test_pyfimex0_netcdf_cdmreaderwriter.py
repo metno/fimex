@@ -2,7 +2,7 @@
 
 # Fimex, modules/python/test_pyfimex0_netcdf_cdmreaderwriter.py
 #
-# Copyright (C) 2018 met.no
+# Copyright (C) 2018-2022 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -54,6 +54,7 @@ class TestNetCDFReaderWriter(unittest.TestCase):
 
         write1 = pyfimex0.createData(pyfimex0.CDMDataType.DOUBLE, [diff + x * scale for x in read1.values()])
         rw.putDataSlice("ga_2t_1", 0, write1)
+        rw.sync()
 
         del rw
 
@@ -87,6 +88,7 @@ class TestNetCDFReaderWriter(unittest.TestCase):
 
         wmod1 = pyfimex0.createData(pyfimex0.CDMDataType.DOUBLE, [x + addF for x in write1.values()])
         rw.putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, wmod1)
+        rw.sync()
 
         del rw
 
