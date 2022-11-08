@@ -1,7 +1,7 @@
 /* -*- c++ -*-
  * Fimex, CDMReaderWriter.h
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2013-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -30,8 +30,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/UnitsConverterDecl.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMReaderWriter.h
@@ -39,11 +38,11 @@ namespace MetNoFimex
 /**
  * The CDMReaderWriter is an interface allowing to write data to an opened CDMReader.
  */
-class CDMReaderWriter : public MetNoFimex::CDMReader
+class CDMReaderWriter : public CDMReader
 {
 public:
     CDMReaderWriter();
-    virtual ~CDMReaderWriter();
+    ~CDMReaderWriter();
 
     /**
      * @brief flush data to disc
@@ -65,6 +64,7 @@ public:
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
     virtual void putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data) = 0;
+
     /**
      * @brief data-writing  function for general slices
      *
@@ -88,6 +88,7 @@ public:
      * @see getScaledDataSlice(varName, unLimDimPos)
      */
     virtual void putScaledDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
+
     /**
      * @brief unscale and write a dataslice from a known unit
      *
@@ -103,6 +104,7 @@ public:
      * @see getScaledDataSliceInUnit(varName, unit, unLimDimPos)
      */
     virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos, const DataPtr data);
+
     /**
      * @brief unscale and write a dataslice
      * @param varName name of the variable to read
@@ -112,6 +114,7 @@ public:
      * @see getScaledDataSlice(varName, sb)
      */
     virtual void putScaledDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
+
     /**
      * @brief unscale and write a dataslice from a known unit
      * @param varName name of the variable to read
@@ -129,5 +132,6 @@ private:
     DataPtr unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit);
 }; /* class */
 
-} /* MetNoFimex */
+} // namespace MetNoFimex
+
 #endif /* CDMREADERWRITER_H_ */

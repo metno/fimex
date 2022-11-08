@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Fimex, modules/python/test_pyfimex0_netcdf_cdmreaderwriter.py
 #
 # Copyright (C) 2018 met.no
@@ -26,8 +28,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
 
-#!/usr/bin/env python
-
 import pyfimex0
 import os.path
 import shutil
@@ -35,32 +35,32 @@ import unittest
 
 test_srcdir = os.path.join(os.path.dirname(__file__), "..", "..", "test")
 
+
 # based on testNetCDFReaderWriter.cc
 class TestNetCDFReaderWriter(unittest.TestCase):
-
 
     def test_update(self):
         test_rwfile = 'test_update.nc'
         shutil.copyfile(os.path.join(test_srcdir, 'test_merge_inner.nc'), test_rwfile)
 
         diff = 10.0
-        scale = 1.2;
+        scale = 1.2
 
         rw = pyfimex0.createFileReaderWriter('netcdf', test_rwfile)
         self.assertIsNotNone(rw)
 
-        read1 = rw.getDataSlice("ga_2t_1", 0);
+        read1 = rw.getDataSlice("ga_2t_1", 0)
         self.assertIsNotNone(read1)
 
         write1 = pyfimex0.createData(pyfimex0.CDMDataType.DOUBLE, [diff + x * scale for x in read1.values()])
-        rw.putDataSlice("ga_2t_1", 0, write1);
+        rw.putDataSlice("ga_2t_1", 0, write1)
 
         del rw
 
         r = pyfimex0.createFileReader('netcdf', test_rwfile)
         self.assertIsNotNone(r)
 
-        read2 = r.getScaledDataSlice("ga_2t_1", 0);
+        read2 = r.getScaledDataSlice("ga_2t_1", 0)
         self.assertIsNotNone(read2)
 
         values1 = read1.values()
@@ -79,14 +79,14 @@ class TestNetCDFReaderWriter(unittest.TestCase):
         rw = pyfimex0.createFileReaderWriter('netcdf', test_rwfile)
         self.assertIsNotNone(rw)
 
-        read1 = rw.getScaledDataSlice("ga_2t_1", 0);
+        read1 = rw.getScaledDataSlice("ga_2t_1", 0)
         self.assertIsNotNone(read1)
 
-        write1 = rw.getScaledDataSliceInUnit("ga_2t_1", "deg_F", 0);
+        write1 = rw.getScaledDataSliceInUnit("ga_2t_1", "deg_F", 0)
         self.assertIsNotNone(write1)
 
         wmod1 = pyfimex0.createData(pyfimex0.CDMDataType.DOUBLE, [x + addF for x in write1.values()])
-        rw.putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, wmod1);
+        rw.putScaledDataSliceInUnit("ga_2t_1", "deg_F", 0, wmod1)
 
         del rw
 
@@ -94,7 +94,7 @@ class TestNetCDFReaderWriter(unittest.TestCase):
         r = pyfimex0.createFileReader('netcdf', test_rwfile)
         self.assertIsNotNone(r)
 
-        read2 = r.getScaledDataSlice("ga_2t_1", 0);
+        read2 = r.getScaledDataSlice("ga_2t_1", 0)
         self.assertIsNotNone(read2)
 
         values1 = read1.values()

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -44,18 +44,18 @@ class Nc;
  * @headerfile "fimex/NetCDF_CDMReader.h"
  */
 
-class NetCDF_CDMReader : public MetNoFimex::CDMReaderWriter
+class NetCDF_CDMReader : public CDMReaderWriter
 {
     const std::unique_ptr<Nc> ncFile;
 
 public:
     NetCDF_CDMReader(const std::string& fileName, bool writable = false);
-    virtual ~NetCDF_CDMReader();
-    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
-    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
-    virtual void sync();
-    virtual void putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
-    virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
+    ~NetCDF_CDMReader();
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos) override;
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
+    void sync() override;
+    void putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data) override;
+    void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data) override;
 
 private:
     void addAttribute(const std::string& varName, int varid, const std::string& attName);

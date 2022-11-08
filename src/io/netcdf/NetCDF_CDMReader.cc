@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2022, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -239,7 +239,7 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, size_t unLimDimP
         LOG4FIMEX(logger, Logger::DEBUG,
                   "ncPutValues for " << varName << ": (" << join(start, start + dimLen) << ") size (" << join(count, count + dimLen) << ")");
     }
-    return ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
+    ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
 }
 
 void NetCDF_CDMReader::putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data)
@@ -274,7 +274,7 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, const SliceBuild
               "ncPutValues SB for " << varName << ": (" << join(start.begin(), start.end()) << ") size (" << join(count.begin(), count.end()) << ")");
 
     OmpScopedLock lock(Nc::getMutex());
-    return ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
+    ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
 }
 
 void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const string& attName)
