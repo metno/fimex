@@ -1,3 +1,9 @@
+fimex-1.9 (1.9.3-1focal1) focal; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 08 Nov 2022 08:00:08 +0100
+
 fimex-1.9 (1.9.2-1focal1) focal; urgency=low
 
   * new fimex version
