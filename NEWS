@@ -1,3 +1,5 @@
+  * 2022-11-09 fimex 1.9.4
+    * try to detect zarr file urls
   * 2022-11-08 fimex 1.9.3
     * fix pypy build
   * 2022-11-07 fimex 1.9.2
