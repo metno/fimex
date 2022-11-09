@@ -79,6 +79,13 @@ bool isNetCDFType(const std::string& type)
     return (type == "nc" || type == "cdf" || type == "netcdf" || isNetCDF4Type(type));
 }
 
+bool isNetCDFZarrFile(const std::string& file)
+{
+    static const std::regex zarr_file("^file:.*#.*mode=.*zarr.*");
+    std::smatch zarr_file_match;
+    return std::regex_match(file, zarr_file_match, zarr_file);
+}
+
 } // namespace
 
 size_t NetCDFIoFactory::matchMagicSize()
@@ -127,6 +134,9 @@ int NetCDFIoFactory::matchFileName(const std::string& fileName)
             return 2;
     }
 
+    if (isNetCDFZarrFile(fileName))
+        return 1;
+
     return 0;
 }
 
@@ -156,8 +166,12 @@ CDMReader_p NetCDFIoFactory::createReader(const std::string& fileTypeName, const
         reader = std::make_shared<NcmlCDMReader>(XMLInputString(ncml.str()));
     } else {
         std::string file = fileName;
-        // remove file: URL-prefix
-        file = std::regex_replace(file, std::regex("^file:"), "", std::regex_constants::format_first_only);
+
+        // remove file: URL-prefix, except for zarr
+        if (!isNetCDFZarrFile(file)) {
+            file = std::regex_replace(file, std::regex("^file:"), "", std::regex_constants::format_first_only);
+        }
+
         // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
         file = std::regex_replace(file, std::regex("^dods:"), "http:", std::regex_constants::format_first_only);
 
