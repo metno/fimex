@@ -1,3 +1,5 @@
+  * 2023-01-06 fimex 1.9.5
+    * correct paths in pkg-config files
   * 2022-11-09 fimex 1.9.4
     * try to detect zarr file urls
   * 2022-11-08 fimex 1.9.3
