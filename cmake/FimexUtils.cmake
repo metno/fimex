@@ -74,7 +74,7 @@ FUNCTION(FIMEX_GEN_PKGCONFIG pc_in pc_out pc_deps pc_libs_ pc_libdirs_ pc_includ
   ENDFOREACH()
 
   FOREACH(X ${pc_libdirs_})
-    IF((${X} STREQUAL "/usr/lib") OR (${X} STREQUAL "/usr/lib/${CMAKE_INSTALL_LIBDIR}"))
+    IF((${X} STREQUAL "/usr/lib") OR (${X} STREQUAL "/usr/lib64"))
       # skip
     ELSE()
       SET(pc_libdirs "${pc_libdirs} -L${X}")
@@ -88,10 +88,6 @@ FUNCTION(FIMEX_GEN_PKGCONFIG pc_in pc_out pc_deps pc_libs_ pc_libdirs_ pc_includ
       SET(pc_includedirs "${pc_includedirs} -I${X}")
     ENDIF()
   ENDFOREACH()
-
-  SET(pc_prefix "${CMAKE_INSTALL_PREFIX}")
-  SET(pc_libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
-  SET(pc_includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 
   CONFIGURE_FILE(${pc_in} ${pc_out} @ONLY)
   INSTALL(FILES ${CMAKE_BINARY_DIR}/${pc_out} DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig")

@@ -196,14 +196,14 @@ ELSE()
   SET(lib_version "${lib_soversion}.0.0")
 ENDIF()
 SET(lib_name "fimex${MINUS_FIMEX_VERSION}")
-SET(FIMEX_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}${pc_fimex_includedir}")
+SET(FIMEX_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}${pc_fimex_includedir}")
 
 
 SET(FIMEX_PC "fimex${MINUS_FIMEX_VERSION}.pc")
 FIMEX_GEN_PKGCONFIG(fimex.pc.in "${FIMEX_PC}"
   ""
-  "" 
-  "${CMAKE_INSTALL_LIBDIR}"
+  "${lib_name}"
+  "${CMAKE_INSTALL_FULL_LIBDIR}"
   "${FIMEX_INSTALL_INCLUDEDIR};${udunits2_INC_DIR};${proj_INC_DIR};${grib_api_INC_DIR}"
 )
 INSTALL(FILES "${CMAKE_BINARY_DIR}/${FIMEX_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

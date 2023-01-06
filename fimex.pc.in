@@ -1,10 +1,6 @@
-prefix=@pc_prefix@
-libdir=@pc_libdir@
-includedir=${prefix}/include@pc_fimex_includedir@
-
 Name: fimex@MINUS_FIMEX_VERSION@
 Description: The fimex library
 Version: @FIMEX_VERSION_FULL@
 Requires: @pc_deps@
-Cflags: -I${includedir}
-Libs: -L${libdir} -l@lib_name@
+Cflags: @pc_includedirs@
+Libs: @pc_libdirs@ @pc_libs@
