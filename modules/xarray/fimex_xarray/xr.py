@@ -9,7 +9,7 @@ import os
 DTYPE_MAPPINGS = {
     pyfimex0.CDMDataType.FLOAT: np.float32,
     pyfimex0.CDMDataType.DOUBLE: np.float64,
-    pyfimex0.CDMDataType.INT: np.int,
+    pyfimex0.CDMDataType.INT: np.intc,
     pyfimex0.CDMDataType.INT64: np.int64,
     pyfimex0.CDMDataType.UINT: np.uint,
     pyfimex0.CDMDataType.UINT64: np.uint64,
