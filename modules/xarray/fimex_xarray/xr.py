@@ -41,12 +41,17 @@ class FimexBackendEntrypoint(BackendEntrypoint):
 
         coord_names = cdm.getDimensionNames()
         coords = dict()
-        for cname in coord_names:
+        for cname in set(coord_names).intersection(var_names):
             var = cdm.getVariable(cname)
-            values = var.getData().values()
-            shape = var.getShape()
-            if len(shape) != 1:
-                raise Exception()
+            vardata = var.getData()
+            if vardata is not None:
+                values = vardata.values()
+                shape = var.getShape()
+                if len(shape) != 1:
+                    raise Exception()
+            else:
+                values = fh.getData(cname).values()
+                shape = [len(values)]
 
             if scale_offset:
                 try:
