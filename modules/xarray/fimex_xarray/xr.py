@@ -152,8 +152,8 @@ class FimexDataVariable(BackendArray):
             elif isinstance(k, slice):
                 start = k.start if k.start is not None else 0
                 step = k.step if k.step is not None else 1
-                stop = k.stop if k.stop is not None else dim - 1
-                size = (stop - start) // step + 1
+                stop = k.stop if k.stop is not None else dim
+                size = (stop - start) // step
                 slicebuilder.setStartAndSize(dimname, start, size)
                 dimsizes.append(size)
             else:
