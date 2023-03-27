@@ -86,7 +86,7 @@ TEST4FIMEX_TEST_CASE(test_mifi_compute_vertical_velocity)
 
     float gInv = 1 / 9.806;
     auto zs = zsD->asFloat();
-    transform(&zs[0], &zs[0]+(nx*ny), &zs[0], std::bind1st(multiplies<float>(), gInv));
+    std::transform(&zs[0], &zs[0] + (nx * ny), &zs[0], std::bind(std::multiplies<float>(), gInv, std::placeholders::_1));
 
     //cerr << "transformed zs" << endl;
 

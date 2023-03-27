@@ -351,7 +351,7 @@ bool CDM::removeDimension(const std::string& name, bool ignoreInUse)
 
 const CDMDimension* CDM::getUnlimitedDim() const
 {
-    DimVec::const_iterator it = find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), std::mem_fun_ref(&CDMDimension::isUnlimited));
+    const auto it = std::find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), std::mem_fn(&CDMDimension::isUnlimited));
     if (it == pimpl_->dimensions.end()) {
         return 0;
     } else {
@@ -607,7 +607,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
     std::vector<std::string> dims;
     if (projectionName == "latitude_longitude") {
         std::vector<std::string> shape;
-        std::transform(getDimensions().begin(), getDimensions().end(), std::back_inserter(shape), std::mem_fun_ref(&CDMDimension::getName));
+        std::transform(getDimensions().begin(), getDimensions().end(), std::back_inserter(shape), std::mem_fn(&CDMDimension::getName));
         std::vector<std::string>::iterator sit = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
         if (sit == shape.end()) {
             throw CDMException("couldn't find projection longitude axis for projection " + projectionName);

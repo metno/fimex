@@ -552,12 +552,12 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordinateSystem_cp csI, cons
     const double valid_min = cdm_->getValidMin(varName);
     const double valid_max = cdm_->getValidMax(varName);
     if (!std::isnan(valid_min)) {
-        float minVal = static_cast<float>(valid_min);
-        replace_if(&oData[0], &oData[0]+oSize, bind2nd(less<float>(), minVal), minVal);
+        const float minVal = static_cast<float>(valid_min);
+        std::replace_if(&oData[0], &oData[0] + oSize, std::bind(std::less<float>(), std::placeholders::_1, minVal), minVal);
     }
     if (!std::isnan(valid_max)) {
-        float maxVal = static_cast<float>(valid_max);
-        replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
+        const float maxVal = static_cast<float>(valid_max);
+        std::replace_if(&oData[0], &oData[0] + oSize, std::bind(std::greater<float>(), std::placeholders::_1, maxVal), maxVal);
     }
 
     CDMDataType oType = getCDM().getVariable(varName).getDataType();

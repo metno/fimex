@@ -213,7 +213,7 @@ void CDMProcessor::addVerticalVelocity()
             }
         }
     }
-    vvcs.erase(remove_if(vvcs.begin(), vvcs.end(), mem_fun_ref(&VerticalVelocityComps::tempNotDefined)), vvcs.end());
+    vvcs.erase(std::remove_if(vvcs.begin(), vvcs.end(), std::mem_fn(&VerticalVelocityComps::tempNotDefined)), vvcs.end());
     if (vvcs.size() == 0) {
         LOG4FIMEX(logger, Logger::WARN, "no air_temperature found with correspondig x/y_wind");
         return;
@@ -262,7 +262,7 @@ void CDMProcessor::addVerticalVelocity()
             }
         }
     }
-    vvcs.erase(remove_if(vvcs.begin(), vvcs.end(), mem_fun_ref(&VerticalVelocityComps::geopotNotDefined)), vvcs.end());
+    vvcs.erase(std::remove_if(vvcs.begin(), vvcs.end(), std::mem_fn(&VerticalVelocityComps::geopotNotDefined)), vvcs.end());
     if (vvcs.size() == 0) {
         LOG4FIMEX(logger, Logger::WARN, "no geopotential/_height/altitude found for corresponding x/y_wind");
         return;

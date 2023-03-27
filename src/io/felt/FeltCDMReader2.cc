@@ -130,8 +130,8 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
             }
             string sscale = getXmlProp(node, "scale_factor");
             if (sscale != "") {
-                double scale = string2type<double>(sscale);
-                transform(retValues.begin(), retValues.end(), retValues.begin(), bind1st(multiplies<double>(), scale));
+                const double scale = string2type<double>(sscale);
+                std::transform(retValues.begin(), retValues.end(), retValues.begin(), std::bind(std::multiplies<double>(), scale, std::placeholders::_1));
             }
         }
     }

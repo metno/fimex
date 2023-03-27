@@ -37,6 +37,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iterator>
 #include <regex>
 #include <vector>
@@ -135,7 +136,8 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
         string timeDoubles = timeString2timeUnitString(timeStepStr, tu);
         vector<double> timeDoubleVec = tokenizeDotted<double>(timeDoubles, ",");
         // add the times as fimexTimes to timeSteps
-        transform(timeDoubleVec.begin(), timeDoubleVec.end(), back_inserter(timeSteps), std::bind1st(std::mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+        std::transform(timeDoubleVec.begin(), timeDoubleVec.end(), std::back_inserter(timeSteps),
+                       std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
     } else {
         // including x
         // relative times
@@ -166,8 +168,8 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
         string timeDoubles = join(times.begin(), times.end(), ",");
         vector<double> timeDoubleVec = tokenizeDotted<double>(timeDoubles, ",");
         // add the times as fimexTimes to timeSteps
-        transform(timeDoubleVec.begin(), timeDoubleVec.end(), back_inserter(timeSteps),
-                std::bind1st(std::mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+        std::transform(timeDoubleVec.begin(), timeDoubleVec.end(), std::back_inserter(timeSteps),
+                       std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
     }
 
     LOG4FIMEX(logger, Logger::DEBUG, "got parameters unit:" << outputUnit << ";relativeUnit:" << relativeUnit << ";steps:" << timeStepStr);

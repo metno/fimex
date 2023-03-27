@@ -299,7 +299,7 @@ void runStats(po::value_set& vm, CDMReader_p reader)
                     set<long> layerVal10;
                     if (vm.is_set(op_layerValue)) {
                         vector<float> lp = tokenizeDotted<float>(vm.value(op_layerValue));
-                        transform(lp.begin(), lp.end(), lp.begin(), bind1st(multiplies<float>(),10.));
+                        std::transform(lp.begin(), lp.end(), lp.begin(), std::bind(std::multiplies<float>(), 10, std::placeholders::_1));
                         layerVal10.insert(lp.begin(), lp.end());
                     }
                     auto zArray = zData->asFloat();

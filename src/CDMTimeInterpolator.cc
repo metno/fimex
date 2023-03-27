@@ -155,10 +155,8 @@ void CDMTimeInterpolator::changeTimeAxis(const string& timeSpec)
             vector<FimexTime> oldTimes;
             auto oldTimesPtr = times->asDouble();
             size_t nEl = times->size();
-            transform(oldTimesPtr.get(),
-                      oldTimesPtr.get()+nEl,
-                      back_inserter(oldTimes),
-                      bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime),tu));
+            std::transform(oldTimesPtr.get(), oldTimesPtr.get() + nEl, std::back_inserter(oldTimes),
+                           std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
             const TimeSpec ts(timeSpec, oldTimes[0], oldTimes[nEl - 1]);
 
             // create mapping of new time value positions to old time values (per time-axis)

@@ -233,11 +233,8 @@ void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxi
     }
 
     const CDM::VarVec& allVars = getCDM().getVariables();
-    set<string> allVarNames;
-    transform(allVars.begin(),
-              allVars.end(),
-              inserter(allVarNames, allVarNames.begin()),
-              mem_fun_ref(&CDMVariable::getName));
+    std::set<string> allVarNames;
+    std::transform(allVars.begin(), allVars.end(), std::inserter(allVarNames, allVarNames.begin()), std::mem_fn(&CDMVariable::getName));
 
     // find the variables in one list, but not in the other
     set<string> difference;

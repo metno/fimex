@@ -58,6 +58,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <limits>
 #include <map>
 #include <numeric>
@@ -681,8 +682,8 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             }
             string sscale = getXmlProp(node, "scale_factor");
             if (!sscale.empty()) {
-                double scale = string2type<double>(sscale);
-                transform(retValues.begin(), retValues.end(), retValues.begin(), bind1st(multiplies<double>(), scale));
+                const double scale = string2type<double>(sscale);
+                std::transform(retValues.begin(), retValues.end(), retValues.begin(), std::bind(std::multiplies<double>(), std::placeholders::_1, scale));
             }
         }
     }

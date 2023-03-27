@@ -99,7 +99,7 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     } while (loop.next());
 
     /* z as calculated by formulas is negative down, but we want positive down */
-    std::transform(z_values.get(), z_values.get() + dimsZ.volume(), z_values.get(), std::bind1st(std::multiplies<double>(),-1.));
+    std::transform(z_values.get(), z_values.get() + dimsZ.volume(), z_values.get(), std::bind(std::multiplies<double>(), -1, std::placeholders::_1));
 
     // TODO transform invalid -> nan, nan -> bad?
 

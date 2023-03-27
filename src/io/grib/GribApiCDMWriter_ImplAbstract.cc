@@ -227,7 +227,8 @@ void GribApiCDMWriter_ImplAbstract::run()
                     size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
                     sb.setReferenceTimePos(refTimePos);
                     TimeUnit tu("seconds since 1970-01-01 00:00:00");
-                    transform(&refs[0], &refs[0] + refTimesD->size(), back_inserter(refTimes), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+                    std::transform(&refs[0], &refs[0] + refTimesD->size(), std::back_inserter(refTimes),
+                                   std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
                 } else {
                     try {
                         refTimes.push_back(getUniqueForecastReferenceTimeFT(cdmReader));
@@ -244,7 +245,8 @@ void GribApiCDMWriter_ImplAbstract::run()
                 DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                 auto timesA = times->asInt64();
                 TimeUnit tu(ss.str());
-                transform(&timesA[0], &timesA[0] + times->size(), back_inserter(vTimes), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+                std::transform(&timesA[0], &timesA[0] + times->size(), std::back_inserter(vTimes),
+                               std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
                 if (times->size() > 1) {
                     stepUnit = gribSeconds2stepUnits(timesA[1] - timesA[0]);
                 }
@@ -288,7 +290,8 @@ void GribApiCDMWriter_ImplAbstract::run()
                     DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                     auto timesA = times->asInt64();
                     TimeUnit tu(ss.str());
-                    transform(&timesA[0], &timesA[0] + times->size(), back_inserter(vTimes), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+                    transform(&timesA[0], &timesA[0] + times->size(), back_inserter(vTimes),
+                              std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
                     if (times->size() > 1) {
                         stepUnit = gribSeconds2stepUnits(timesA[1] - timesA[0]);
                     }
@@ -534,7 +537,7 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
     if (timeDataVector.size() > 0) {
         TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
         std::transform(timeDataVector.begin(), timeDataVector.end(), std::back_inserter(timeData),
-                       std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
+                       std::bind(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu, std::placeholders::_1));
     }
     return timeData;
 }
