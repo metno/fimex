@@ -33,7 +33,7 @@ namespace MetNoFimex {
  * Scale a value using fill, offset and scale
  */
 template <typename IN, typename OUT>
-class ScaleValue : public std::unary_function<IN, OUT>
+class ScaleValue
 {
 private:
     IN oldFill_;
@@ -62,7 +62,7 @@ public:
  * Scale a value using fill, offset and scale, and a units-converter
  */
 template <typename IN, typename OUT>
-class ScaleValueUnits : public std::unary_function<IN, OUT>
+class ScaleValueUnits
 {
 private:
     IN oldFill_;
@@ -95,7 +95,7 @@ public:
  * Change the missing value
  */
 template <typename IN, typename OUT>
-class ChangeMissingValue : public std::unary_function<IN, OUT>
+class ChangeMissingValue
 {
 private:
     IN oldFill_;

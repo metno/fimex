@@ -55,7 +55,7 @@ namespace MetNoFimex {
 static Logger_p logger = getLogger("fimex.GribApi_CDMWriter");
 
 /** helper classes Scale and UnScale to transform double vectors */
-class Scale : public std::unary_function<std::string, bool>
+class Scale
 {
     const double scale_factor;
     const double add_offset;

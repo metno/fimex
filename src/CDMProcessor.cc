@@ -450,8 +450,8 @@ void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std:
     }
 }
 
-template<typename T>
-struct ScaleOffset : public std::unary_function<T, double>
+template <typename T>
+struct ScaleOffset
 {
     double scale_;
     double offset_;
@@ -461,8 +461,8 @@ struct ScaleOffset : public std::unary_function<T, double>
     }
 };
 
-template<typename T>
-struct UnScaleOffset : public std::unary_function<double, T>
+template <typename T>
+struct UnScaleOffset
 {
     double invscale_;
     double offset_;

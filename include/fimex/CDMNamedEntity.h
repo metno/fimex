@@ -24,13 +24,10 @@
 #ifndef CDMNAMEDENTITY_H_
 #define CDMNAMEDENTITY_H_
 
-#include <functional>
 #include <memory>
 #include <string>
 
-namespace MetNoFimex
-{
-
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMNamedEntity.h
@@ -49,7 +46,7 @@ public:
 /**
  * functor to compares names of two CDMNamedEntity using std::string::compare
  */
-struct CDMNameCompare : public std::binary_function<CDMNamedEntity, CDMNamedEntity, int>
+struct CDMNameCompare
 {
 public:
     int operator()(const CDMNamedEntity& e1, const CDMNamedEntity& e2) {return e1.getName().compare(e2.getName());}
@@ -58,10 +55,11 @@ public:
 /**
  * functor to find a CDMNamedEntity equal to the set name using std::string::operator==
  */
-class CDMNameEqual : public std::unary_function<CDMNamedEntity, bool>
+class CDMNameEqual
 {
 public:
-    explicit CDMNameEqual(std::string name) : name(name) {}
+    explicit CDMNameEqual(const std::string& name) : name(name) {}
+    explicit CDMNameEqual(std::string&& name) : name(std::move(name)) {}
     explicit CDMNameEqual(const CDMNamedEntity& entity) : name(entity.getName()) {}
     ~CDMNameEqual() {}
     bool operator()(const CDMNamedEntity& e) {return name == e.getName();}
@@ -72,10 +70,11 @@ private:
 /**
  * functor to find a std::shared_ptr<CDMNamedEntity> equal to the set name using std::string::operator==
  */
-class CDMNameEqualPtr : public std::unary_function<std::shared_ptr<CDMNamedEntity>, bool>
+class CDMNameEqualPtr
 {
 public:
-    explicit CDMNameEqualPtr(std::string name) : name(name) {}
+    explicit CDMNameEqualPtr(const std::string& name) : name(name) {}
+    explicit CDMNameEqualPtr(std::string&& name) : name(std::move(name)) {}
     explicit CDMNameEqualPtr(const std::shared_ptr<const CDMNamedEntity>& entity)
         : name(entity->getName())
     {
@@ -87,6 +86,6 @@ private:
     std::string name;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*CDMNAMEDENTITY_H_*/

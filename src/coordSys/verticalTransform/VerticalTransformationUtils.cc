@@ -50,7 +50,7 @@ static Logger_p logger = getLogger("fimex.VerticalTransformationUtils");
 
 typedef std::map<std::string, std::string> string_string_m;
 
-struct CompleteCSForVariable : public std::unary_function<std::string, bool>
+struct CompleteCSForVariable
 {
 public:
     CompleteCSForVariable(CoordinateSystem_cp cs)

@@ -63,7 +63,7 @@ inline bool equal(double a, double b)
     return std::abs(a - b) < 1e-6;
 }
 
-struct equal_float : public std::unary_function<bool, float>
+struct equal_float
 {
     float value;
     equal_float(float v)

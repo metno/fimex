@@ -27,19 +27,20 @@
 #ifndef FELT_TYPES_H_
 #define FELT_TYPES_H_
 
-#include <functional>
 #include <utility>
 
 namespace MetNoFelt {
+
 /**
  * a pair with two level values
  */
 typedef std::pair<short, short> LevelPair;
+
 /**
  * comparison operator for pair<short, short> used for LevelPairs
  *
  */
-struct LevelPairLess : public std::binary_function<const LevelPair, const LevelPair, bool>
+struct LevelPairLess
 {
     bool operator()(const LevelPair& p1, const LevelPair& p2) const
     {

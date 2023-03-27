@@ -59,7 +59,7 @@ struct CompareCoordinateAxis {
     bool operator()(CoordinateAxis_cp a, CoordinateAxis_cp b) const { return *a < *b; }
 };
 
-struct TypeCheck : public std::unary_function<CoordinateAxis_cp, bool>
+struct TypeCheck
 {
     CoordinateAxis::AxisType type_;
     TypeCheck(CoordinateAxis::AxisType type) : type_(type) {}

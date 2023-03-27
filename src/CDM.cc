@@ -36,7 +36,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <regex>
 #include <set>
 
@@ -51,7 +50,7 @@ static Logger_p logger = getLogger("fimex.CDM");
  * unfortunatley, udunits says degreesE == degreesN, so a string comparison
  * is required
  */
-class CDMCompatibleLatLongUnit : public std::unary_function<std::string, bool>
+class CDMCompatibleLatLongUnit
 {
     const CDM& cdm;
 protected:
@@ -219,45 +218,22 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
     return false;
 }
 
-namespace {
-
-/** object function for CDMVariable::checkDimension */
-class VariableDimensionCheck : public std::unary_function<std::string, bool>
-{
-    const CDMVariable& variable;
-public:
-    VariableDimensionCheck(const CDMVariable& var) : variable(var) {}
-    bool operator() (const std::string& dim) const { return variable.checkDimension(dim); }
-};
-
-/** object-function for checkVariableAttribute */
-class VariableAttributeCheck : public std::unary_function<std::pair<std::string, std::regex>, bool>
-{
-    const CDM& cdm;
-    const std::string& varName;
-public:
-    VariableAttributeCheck(const CDM& cdm, const std::string& varName) : cdm(cdm), varName(varName) { }
-    bool operator()(const std::pair<std::string, std::regex>& attrRegex) const
-    {
-        return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second);
-    }
-};
-
-} // namespace
-
 std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const
 {
     std::vector<std::string> results;
     // precalc regexp
-    std::map<std::string, std::regex> attrRegExps;
+    typedef std::map<std::string, std::regex> attrRegExps_t;
+    attrRegExps_t attrRegExps;
     for (const auto fa : findAttributes) {
         attrRegExps[fa.first] = std::regex(fa.second);
     }
     for (const auto& var : pimpl_->variables) {
         // test if all attributes are found in variable (find_if finds the first not found)
-        if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, var.getName()))) == attrRegExps.end()) {
+        auto missing_attr = [&](const attrRegExps_t::value_type& ar) { return !this->checkVariableAttribute(var.getName(), ar.first, ar.second); };
+        if (find_if(attrRegExps.begin(), attrRegExps.end(), missing_attr) == attrRegExps.end()) {
             // test if all dimensions are found in variable (find_if finds the first not found)
-            if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(var))) == findDimensions.end()) {
+            auto missing_dim = [&](const std::string& dim) { return !var.checkDimension(dim); };
+            if (find_if(findDimensions.begin(), findDimensions.end(), missing_dim) == findDimensions.end()) {
                 results.push_back(var.getName());
             }
         }

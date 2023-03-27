@@ -276,7 +276,7 @@ int findBestHorizontalCoordinateSystems(bool withProjection, CDMReader_p reader,
 /**
  * Functor to check if a coordinate system completely describes a variable, i.e. all axes match fully.
  */
-struct CompleteCoordinateSystemForComparator : public std::unary_function<CoordinateSystem_cp, bool>
+struct CompleteCoordinateSystemForComparator
 {
 public:
     CompleteCoordinateSystemForComparator(const std::string& varName) : varName(varName) {}
