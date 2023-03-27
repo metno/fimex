@@ -160,8 +160,12 @@ class FimexDataVariable(BackendArray):
                 raise TypeError(f"Unknown type of {k}: {type(k)}")
 
         data = self.fh.getDataSliceSB(vname, slicebuilder)
-        datav = data.values()
-        data_shaped = np.reshape(datav, dimsizes)
+        if len(dimsizes) == 0:
+            # Bug? Fimex can't read scalar data?
+            data_shaped = -1
+        else:
+            datav = data.values()
+            data_shaped = np.reshape(datav, dimsizes)
         if self.scale_offset:
             try:
                 scale_factor = self.cdm.getAttribute(vname, "scale_factor").getData().values()
