@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/MathUtils.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
@@ -153,8 +154,7 @@ DataPtr CDMReader::getData(const std::string& varName)
         if (cdm_->hasUnlimitedDim(variable)) {
             const CDMDimension* udim = cdm_->getUnlimitedDim();
             size_t uDimSize = udim->getLength();
-            std::vector<size_t> dims = getDimsSlice(varName);
-            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+            const auto sliceSize = product(getDimsSlice(varName));
             DataPtr data = createData(variable.getDataType(), uDimSize*sliceSize);
             for (size_t i = 0; i < uDimSize; i++) {
                 DataPtr slice = getDataSlice(varName, i);
@@ -252,8 +252,7 @@ DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t un
             return data;
         if (cdm_->hasUnlimitedDim(variable)) {
             // cut out the unlimited dim data
-            std::vector<size_t> dims = getDimsSlice(variable.getName());
-            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+            const auto sliceSize = product(getDimsSlice(variable.getName()));
             return createDataSlice(variable.getDataType(), *data, unLimDimPos * sliceSize, sliceSize);
         } else {
             return data->clone();

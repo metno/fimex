@@ -1,7 +1,7 @@
 /*
  * Fimex, testUtils.cc
  *
- * (C) Copyright 2009-2022, met.no
+ * (C) Copyright 2009-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -23,7 +23,6 @@
  *  Created on: Oct 5, 2009
  *      Author: Heiko Klein
  */
-
 
 #include "testinghelpers.h"
 
@@ -429,4 +428,11 @@ TEST4FIMEX_TEST_CASE(test_leap_iterator)
         *i -= 1;
     }
     TEST4FIMEX_CHECK_EQ(45 - 5, std::accumulate(numbers, numbers + N, 0));
+}
+
+TEST4FIMEX_TEST_CASE(test_product)
+{
+    const size_t count[] = {0x10000000, 16, 16, 8};
+    const size_t p = product(std::begin(count), std::end(count));
+    TEST4FIMEX_REQUIRE_EQ(p, 0x8000000000);
 }

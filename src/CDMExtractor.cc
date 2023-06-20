@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,6 +29,7 @@
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/StringUtils.h"
 #include "fimex/TimeUnit.h"
@@ -77,8 +78,7 @@ DataPtr joinSlices(CDMReader_p reader, std::string varName, const std::vector<Sl
     size_t totalSize = 0;
     for (size_t i = 0; i < slices.size(); i++) {
         const SliceBuilder& sb = slices[i];
-        const std::vector<std::size_t>& dimSizes = sb.getDimensionSizes();
-        sliceSizes[i] = std::accumulate(dimSizes.begin(), dimSizes.end(), 1ul, std::multiplies<size_t>());
+        sliceSizes[i] = product(sb.getDimensionSizes());
         totalSize += sliceSizes[i];
     }
 

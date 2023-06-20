@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -23,6 +23,8 @@
 
 #include "fimex/MathUtils.h"
 
+#include <numeric>
+
 namespace MetNoFimex {
 
 size_t RoundAndClamp::operator()(double d) const
@@ -41,6 +43,13 @@ size_t RoundAndClamp::clamped(size_t r) const
         return r;
     else
         return invalid;
+}
+
+size_t product(const size_t* begin, const size_t* end)
+{
+    // it is important to initialize with "size_t(1)" -- just using "1"
+    // will cause overflow at 32 bits
+    return std::accumulate(begin, end, size_t(1), std::multiplies<size_t>());
 }
 
 } // namespace MetNoFimex

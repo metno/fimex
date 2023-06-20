@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2019, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -230,6 +230,18 @@ template <typename C>
 int mifi_isnan(C x)
 {
     return std::isnan(x);
+}
+
+size_t product(const size_t* begin, const size_t* end);
+
+inline size_t product(const size_t* first, size_t count)
+{
+    return product(first, first + count);
+}
+
+inline size_t product(const std::vector<std::size_t>& sizes)
+{
+    return product(&sizes[0], sizes.size());
 }
 
 } // namespace MetNoFimex

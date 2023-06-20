@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -747,7 +747,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap)
                 // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
                 if (with_unlim)
                     count[unLimDimIdx] = 1; // just one slice
-                size_t size = (n_dims > 0) ? std::accumulate(count.get(), count.get() + n_dims, 1, std::multiplies<size_t>()) : 1;
+                size_t size = (n_dims > 0) ? product(count.get(), n_dims) : 1;
                 data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
             }
             if (data && data->size() > 0) {

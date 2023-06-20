@@ -1,7 +1,7 @@
 /*
  * Fimex, IndexedData.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,6 +29,7 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
+#include "fimex/MathUtils.h"
 #include "fimex/Type2String.h"
 
 #include <numeric>
@@ -66,7 +67,7 @@ void IndexedData::init(DataPtr data, const std::vector<std::size_t>& dims)
 
 void IndexedData::setDims(std::vector<std::size_t> dims)
 {
-    std::size_t size = std::accumulate(&dims[0], &dims[dims.size()], 1, std::multiplies<size_t>());
+    const auto size = product(dims);
     if (size == p_->data->size()) {
         p_->idx = DataIndex(dims);
     } else if (p_->data->size() == 0) {

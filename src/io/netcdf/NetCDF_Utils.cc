@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2023, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "fimex/MathUtils.h"
 #include "fimex/MutexLock.h"
 
 #include <functional>
@@ -281,7 +282,7 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         start = &zero;
         count = &one;
     } else {
-        sliceLen = std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
+        sliceLen = product(count, dimLen);
     }
 
     switch (dt) {
@@ -366,7 +367,7 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
         start = &zero;
         count = &one;
     } else {
-        sliceLen = std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
+        sliceLen = product(count, dimLen);
     }
     if (sliceLen != data->size()) {
         std::ostringstream msg;
