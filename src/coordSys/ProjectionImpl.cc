@@ -133,6 +133,27 @@ std::string ProjectionImpl::getProj4String() const
     return out.str();
 }
 
+namespace {
+/** Insert doubles with max precision into an std::ostream. */
+template<class T>
+struct MaxPrecisionFormatter {
+    void operator()(std::ostream& out, const T& v) const
+      { out << std::setprecision(std::numeric_limits<T>::digits10 + 1) << v; }
+};
+
+double getInverseFlatteningValue(const std::vector<CDMAttribute>& params)
+{
+    const auto found = std::find_if(params.begin(), params.end(), CDMNameEqual("inverse_flattening"));
+    if (found != params.end()) {
+        auto data = found->getData();
+        if (data->size() == 1) {
+            return data->getDouble(0);
+        }
+    }
+    return -1;
+}
+} // namespace
+
 std::string ProjectionImpl::getProj4EarthString() const
 {
     std::ostringstream out;
@@ -141,8 +162,12 @@ std::string ProjectionImpl::getProj4EarthString() const
     } else if (addParameterToStream(out, "semi_major_axis", " +a=")) {
         out << " ";
         bool hasSemiMinor = addParameterToStream(out, "semi_minor_axis", " +b=");
-        bool hasInverseFlattening = addParameterToStream(out, "inverse_flattening", " +rf=");
-        if  (!(hasInverseFlattening || hasSemiMinor)) {
+        const auto inverseFlattening = getInverseFlatteningValue(params_);
+        if (inverseFlattening > 0) {
+            out << " +rf=";
+            MaxPrecisionFormatter<double>()(out, inverseFlattening);
+        }
+        if (inverseFlattening <= 0 && !hasSemiMinor) {
             out << " +e=0"; // sphere
         }
     } else {
@@ -154,17 +179,6 @@ std::string ProjectionImpl::getProj4EarthString() const
 
     return out.str();
 }
-
-namespace {
-
-/** Insert doubles with max precision into an std::ostream. */
-template<class T>
-struct MaxPrecisionFormatter {
-    void operator()(std::ostream& out, const T& v) const
-      { out << std::setprecision(std::numeric_limits<T>::digits10 + 1) << v; }
-};
-
-} // namespace
 
 bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::string& name, const std::string& replaceName) const
 {
