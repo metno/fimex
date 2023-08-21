@@ -1,3 +1,7 @@
+  * 2023-08-21 fimex 1.9.6
+    * skip inverse flattening if 0 (ie do not emit +rf=0)
+    * drop std::unary_function, std::binary_function
+      plus some other deprecated C++
   * 2023-01-06 fimex 1.9.5
     * correct paths in pkg-config files
   * 2022-11-09 fimex 1.9.4
