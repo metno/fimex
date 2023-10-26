@@ -1,21 +1,24 @@
 
-EXECUTE_PROCESS(OUTPUT_VARIABLE PYFIMEX_INSTALL_LIBDIR
-  RESULT_VARIABLE PYFIMEX_INSTALL_EXIT_STATUS
-  COMMAND ${Python_EXECUTABLE} -c "
+IF (PYFIMEX_INSTALL_LIBDIR)
+  MESSAGE (STATUS "Configured PYFIMEX_INSTALL_LIBDIR='${PYFIMEX_INSTALL_LIBDIR}'")
+ELSE ()
+  EXECUTE_PROCESS(OUTPUT_VARIABLE PYFIMEX_INSTALL_LIBDIR
+    RESULT_VARIABLE PYFIMEX_INSTALL_EXIT_STATUS
+    COMMAND ${Python_EXECUTABLE} -c "
 import sys
 if sys.version_info >= (3, 10):
   import sysconfig as s
-  pl = s.get_path('platlib', 'posix_prefix')
-  pl = pl.replace(s.get_config_var('prefix'), '${CMAKE_INSTALL_PREFIX}')
+  pl = s.get_path('platlib', 'posix_prefix', vars={'platbase':'${CMAKE_INSTALL_PREFIX}'})
 else:
   from distutils import sysconfig as ds
   pl = ds.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}')
 sys.stdout.write(pl)
 ")
-IF (PYFIMEX_INSTALL_EXIT_STATUS)
-  MESSAGE(FATAL_ERROR "Could not find python library install directory")
-ELSE ()
-  MESSAGE (STATUS "Python library install directory=${PYFIMEX_INSTALL_LIBDIR}")
+  IF (PYFIMEX_INSTALL_EXIT_STATUS)
+    MESSAGE(FATAL_ERROR "Could not detect PYFIMEX_INSTALL_LIBDIR")
+  ELSE ()
+    MESSAGE (STATUS "Detected PYFIMEX_INSTALL_LIBDIR='${PYFIMEX_INSTALL_LIBDIR}'")
+  ENDIF()
 ENDIF()
 
 LINK_DIRECTORIES(

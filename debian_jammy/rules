@@ -25,7 +25,7 @@ override_dh_auto_configure:
 	    -DENABLE_FORTRAN=YES \
 	    -DENABLE_FIMEX_OMP=YES \
 	    -DENABLE_PYTHON=YES \
-	    -DPython_ADDITIONAL_VERSIONS=3.10
+	    -DPYFIMEX_INSTALL_LIBDIR=/usr/lib/python3/dist-packages
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:
