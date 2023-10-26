@@ -1,3 +1,6 @@
+  * 2023-10-26 fimex 1.9.7
+    * reset logger in mifi_set_default_loglevel
+    * adapt build for cmake 3.27 and python 3.12
   * 2023-08-21 fimex 1.9.6
     * skip inverse flattening if 0 (ie do not emit +rf=0)
     * drop std::unary_function, std::binary_function
