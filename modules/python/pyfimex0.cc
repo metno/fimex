@@ -39,6 +39,7 @@ void pyfimex0_CDMMerger(py::module m);
 void pyfimex0_CDMReader(py::module m);
 void pyfimex0_CDMReaderWriter(py::module m);
 void pyfimex0_CDMTimeInterpolator(py::module m);
+void pyfimex0_CDMVerticalInterpolator(py::module m);
 void pyfimex0_CDMWriter(py::module m);
 void pyfimex0_AggregationReader(py::module m);
 void pyfimex0_CoordinateSystem(py::module m);
@@ -61,6 +62,7 @@ PYBIND11_MODULE(pyfimex0, m)
     pyfimex0_CDMWriter(m);
     pyfimex0_CDMInterpolator(m);
     pyfimex0_CDMTimeInterpolator(m);
+    pyfimex0_CDMVerticalInterpolator(m);
     pyfimex0_CDMExtractor(m);
     pyfimex0_CDMMerger(m);
     pyfimex0_CoordinateSystem(m);

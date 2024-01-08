@@ -34,6 +34,7 @@ SET(pyfimex0_SOURCES
   pyfimex0_CDM.cc
   pyfimex0_CDMInterpolator.cc
   pyfimex0_CDMTimeInterpolator.cc
+  pyfimex0_CDMVerticalInterpolator.cc
   pyfimex0_CDMExtractor.cc
   pyfimex0_CDMMerger.cc
   pyfimex0_CDMReader.cc
@@ -66,6 +67,7 @@ IF (ENABLE_NETCDF)
     test_pyfimex0_coordinatesystem.py
     test_pyfimex0_extractor.py
     test_pyfimex0_interpolator.py
+    test_pyfimex0_vertical_interpolator.py
     test_pyfimex0_merger.py
     test_pyfimex0_netcdf.py
     test_pyfimex0_netcdf_cdmwriter.py
