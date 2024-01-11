@@ -28,32 +28,14 @@
 
 
 MACRO(FIMEX_CMAKE_SETUP)
-  IF(CMAKE_VERSION VERSION_LESS "3.1")
-    IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      SET(CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
-    ELSEIF (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-      SET(CMAKE_C_FLAGS "-std=c99 ${CMAKE_C_FLAGS}")
-    ELSE()
-      MESSAGE(WARNING "Do not know how to set C99 for compiler '${CMAKE_C_COMPILER_ID}'. Please set the CFLAGS environment variable before running cmake.")
-    ENDIF()
-  ELSE()
-    SET(CMAKE_C_STANDARD 99)
-  ENDIF()
+  SET(CMAKE_C_STANDARD 99)
 
   INCLUDE(CMakePackageConfigHelpers)
   INCLUDE(GNUInstallDirs)
-  IF (${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    # see https://github.com/Kitware/CMake/commit/ac5731a7e380349f19dc319e6c31e189b5faba93
-    INCLUDE(FindPkgConfigBugfixLibraryPaths)
-  ELSE ()
-    INCLUDE(FindPkgConfig)
-  ENDIF ()
+  INCLUDE(FindPkgConfig)
 
   SET(CMAKE_CXX_STANDARD 11)
   SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-  IF ((CMAKE_VERSION VERSION_LESS 3.6) AND (CMAKE_CXX_COMPILER_ID STREQUAL "Intel"))
-    SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-  ENDIF()
 
   # see https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
