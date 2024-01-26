@@ -30,6 +30,8 @@
 #include "fimex/String2Type.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -382,6 +384,42 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
         xmlNodePtr node = nodes->nodeTab[0];
         std::string levelId = getXmlProp(node, "id");
         GRIB_CHECK(grib_set_long(gribHandle.get(), "levelType", string2type<long>(levelId)), ("setting levelId " + levelId).c_str());
+        if (string2type<long>(levelId) == 105) {
+            // hybrid level, add both ap and b to pv
+            CoordinateSystem_cp_v coordsys = listCoordinateSystems(cdmReader);
+            CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordsys, varName);
+            if (cs->hasVerticalTransformation()) {
+                VerticalTransformation_cp vtrans = cs->getVerticalTransformation();
+                if (vtrans->getName() == HybridSigmaPressure1::NAME() && vtrans->isComplete()) {
+                    auto hsp = std::dynamic_pointer_cast<const HybridSigmaPressure1>(vtrans);
+                    LOG4FIMEX(logger, Logger::DEBUG, "found hybrid-sigma-transformation with ap: " << hsp->ap << " and b " << hsp->b);
+                    auto apData = cdmReader->getScaledDataInUnit(hsp->ap, "Pa");
+                    auto apD = apData->asDouble();
+                    auto bData = cdmReader->getScaledData(hsp->b);
+                    auto bD = bData->asDouble();
+                    std::vector<double> pvAp;
+                    std::vector<double> pvB;
+                    // convert from mid-levels to level border, i.e. ml[i] = (lb[i-1]+lb[i])/2
+                    // see also GribCDMReader::readValuesFromXPath_ for extraHalvLevels
+                    pvAp.push_back(0.);
+                    pvB.push_back(0.);
+                    for (int i = 0; i < apData->size(); i++) {
+                        pvAp.push_back(2*apD[i]-pvAp[i]);
+                        pvB.push_back(2*bD[i]-pvB[i]);
+                    }
+                    std::vector<double> pv;
+                    pv.insert(pv.end(), &pvAp[0], &pvAp[0]+pvAp.size());
+                    pv.insert(pv.end(), &pvB[0], &pvB[0]+pvB.size());
+                    GRIB_CHECK(grib_set_long(gribHandle.get(), "PVPresent", 1), 0);
+                    GRIB_CHECK(grib_set_double_array(gribHandle.get(), "pv", &pv[0], pv.size()), 0);
+                    LOG4FIMEX(logger, Logger::DEBUG, "hybrid-sigma levels added successfully to grib, " << varName << " levels: " << pv.size());
+                } else {
+                    LOG4FIMEX(logger, Logger::ERROR, "no hybrid-sigma-transformation for var " << varName << " found, cannot write pv to grib2");
+                }
+            } else {
+                LOG4FIMEX(logger, Logger::ERROR, "no hybrid-sigma-transformation for var " << varName << " found, cannot write pv to grib2");
+            }
+        }
     } else if (size > 1) {
         throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
     } else {
