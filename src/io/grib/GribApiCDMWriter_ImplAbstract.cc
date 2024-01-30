@@ -310,7 +310,7 @@ void GribApiCDMWriter_ImplAbstract::run()
                             double levelVal = levels.at(levelPos);
                             try {
                                 // level and var are dependent due to splitting possibilities
-                                setLevel(*var, levelVal);
+                                setLevel(*var, levelVal, levelPos);
                                 setParameter(*var, levelVal);
                                 DataPtr data = cdmReader->getDataSlice(*var, sb);
                                 if (data->size() != 0) {

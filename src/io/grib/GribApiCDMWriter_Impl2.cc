@@ -347,9 +347,9 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName)
     }
 }
 
-void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelValue)
+void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelValue, size_t levelPos)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ")");
+    LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ", " << levelPos << " )");
     // check for level/parameter dependencies
     const CDM& cdm = cdmReader->getCDM();
     std::string verticalAxis = cdm.getVerticalAxis(varName);
@@ -376,6 +376,7 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
         // cdmGribWriterConfig should contain something like standard_name=""
         verticalAxisXPath += "[@standard_name=\"\"]";
     }
+    bool isHybrid = false;
     verticalAxisXPath += "/grib2";
     xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
     xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
@@ -386,6 +387,7 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
         GRIB_CHECK(grib_set_long(gribHandle.get(), "levelType", string2type<long>(levelId)), ("setting levelId " + levelId).c_str());
         if (string2type<long>(levelId) == 105) {
             // hybrid level, add both ap and b to pv
+            isHybrid = true;
             CoordinateSystem_cp_v coordsys = listCoordinateSystems(cdmReader);
             CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordsys, varName);
             if (cs->hasVerticalTransformation()) {
@@ -401,18 +403,28 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
                     std::vector<double> pvB;
                     // convert from mid-levels to level border, i.e. ml[i] = (lb[i-1]+lb[i])/2
                     // see also GribCDMReader::readValuesFromXPath_ for extraHalvLevels
+                     // surface is initial
                     pvAp.push_back(0.);
-                    pvB.push_back(0.);
-                    for (int i = 0; i < apData->size(); i++) {
-                        pvAp.push_back(2*apD[i]-pvAp[i]);
-                        pvB.push_back(2*bD[i]-pvB[i]);
+                    pvB.push_back(1.);
+                    if (bD[0] > bD[bData->size()-1]) { // surface is first level
+                        for (int i = 0; i < apData->size(); i++) {
+                            pvAp.push_back(2*apD[i]-pvAp[i]);
+                            pvB.push_back(2*bD[i]-pvB[i]);
+                        }
+                    } else { // surface is last level
+                        int last = apData->size() - 1;
+                        for (int i = 0; i < apData->size(); i++) {
+                            pvAp.push_back(2*apD[last-i]-pvAp[i]);
+                            pvB.push_back(2*bD[last-i]-pvB[i]);
+                        }
+                        std::reverse(pvAp.begin(), pvAp.end());
+                        std::reverse(pvB.begin(), pvB.end());
                     }
                     std::vector<double> pv;
                     pv.insert(pv.end(), &pvAp[0], &pvAp[0]+pvAp.size());
                     pv.insert(pv.end(), &pvB[0], &pvB[0]+pvB.size());
                     GRIB_CHECK(grib_set_long(gribHandle.get(), "PVPresent", 1), 0);
                     GRIB_CHECK(grib_set_double_array(gribHandle.get(), "pv", &pv[0], pv.size()), 0);
-                    LOG4FIMEX(logger, Logger::DEBUG, "hybrid-sigma levels added successfully to grib, " << varName << " levels: " << pv.size());
                 } else {
                     LOG4FIMEX(logger, Logger::ERROR, "no hybrid-sigma-transformation for var " << varName << " found, cannot write pv to grib2");
                 }
@@ -425,7 +437,12 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
     } else {
         throw CDMException("could not find vertical Axis " + verticalAxisXPath + " in " + configFile + ", skipping parameter " + varName);
     }
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
+    if (isHybrid) {
+        // hybrid level, no value, just position in pv
+        GRIB_CHECK(grib_set_long(gribHandle.get(), "level", levelPos+1), "setting level position");
+    } else {
+        GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
+    }
 }
 
 DataPtr GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData)

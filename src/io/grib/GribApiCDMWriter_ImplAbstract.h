@@ -78,7 +78,7 @@ protected:
     virtual void setProjection(const std::string& varName) = 0;
     virtual void setParameter(const std::string& varName, double levelValue) = 0;
     virtual void setTime(const std::string& varName, const FimexTime& rTime, const FimexTime& vTime, const std::string& stepUnit);
-    virtual void setLevel(const std::string& varName, double levelValue) = 0;
+    virtual void setLevel(const std::string& varName, double levelValue, size_t levelPos) = 0;
     /**
      * get the levels from the cdm scaled to values used in grib (units/scale-factor)
      * assign at least 1 level, give it a default value if none is found in the cdm

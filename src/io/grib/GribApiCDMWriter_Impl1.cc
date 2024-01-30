@@ -350,9 +350,9 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
     }
 }
 
-void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue)
+void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue, size_t levelPos)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ")");
+    LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ", " << levelPos << ")");
     // check for level/parameter dependencies
     const CDM& cdm = cdmReader->getCDM();
     std::string verticalAxis = cdm.getVerticalAxis(varName);
