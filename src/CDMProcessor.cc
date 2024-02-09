@@ -37,6 +37,7 @@
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
+#include "fimex/coordSys/verticalTransform/VerticalConverter.h"
 #include "fimex/interpolation.h"
 
 #include "fimex/reproject.h"
@@ -85,6 +86,7 @@ struct VerticalVelocityComps {
     bool geopotNotDefined() {return geopotData.get() == 0;}
 };
 
+
 struct CDMProcessor::CDMProcessorImpl
 {
     CDMReader_p dataReader;
@@ -100,6 +102,8 @@ struct CDMProcessor::CDMProcessorImpl
     map<string, CachedVectorReprojection_p> cachedVectorReprojection;
     SliceCache sliceCache;
     VerticalVelocityComps vvComp;
+    VerticalConverter_p altitudeConverter;
+    string altitudeAirTempML;
 };
 
 CachedVectorReprojection_p makeCachedVectorReprojection(CDMReader_p dataReader, CoordinateSystem_cp cs, bool toLatLon)
@@ -158,6 +162,40 @@ CDMProcessor::CDMProcessor(CDMReader_p dataReader)
 CDMProcessor::~CDMProcessor()
 {
 }
+
+void CDMProcessor::addGeopotentialHeightInModelLayers()
+{
+    Logger_p logger = getLogger("fimex.CDMProcessor.addVerticalVelocity");
+    if (cdm_->hasVariable("geopotential_height_ml")) {
+        LOG4FIMEX(logger, Logger::INFO, "geopotential_ml already exists, not calculating new one");
+    }
+    const CoordinateSystem_cp_v coordSys = listCoordinateSystems(p_->dataReader);
+    // find a useful coordinate-system with air_temperature in ml
+    vector<string> temps = cdm_->findVariables("standard_name","air_temperature");
+    for (vector<string>::iterator tv = temps.begin(); tv != temps.end(); tv++) {
+        CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(coordSys, *tv);
+        if (cs.get() && cs->hasVerticalTransformation() && cs->isSimpleSpatialGridded()) {
+            VerticalTransformation_cp vtrans = cs->getVerticalTransformation();
+            auto altConv = vtrans->getConverter(p_->dataReader, cs, MIFI_VINT_ALTITUDE);
+            if (altConv != nullptr) {
+                p_->altitudeConverter = altConv;
+                p_->altitudeAirTempML = *tv;
+                // create upward_air_velocity_ml (same shape as wind)
+                string gph = "geopotential_height_ml";
+                CDMVariable gphv(gph, CDM_FLOAT, cdm_->getVariable(*tv).getShape());
+                cdm_->addVariable(gphv);
+                cdm_->addAttribute(gph, CDMAttribute("units", "m"));
+                cdm_->addAttribute(gph, CDMAttribute("standard_name", "geopotential_height"));
+                CDMAttribute coords;
+                if (cdm_->getAttribute(*tv, "coordinates", coords)) {
+                    cdm_->addAttribute(gph, coords);
+                }
+                break; // only create one geopotential_height_ml
+            }
+        }
+    }
+}
+
 
 void CDMProcessor::addVerticalVelocity()
 {
@@ -532,9 +570,18 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             throw CDMException("addVerticalVelocity: cannot calculate mifi_compute_vertical_velocity");
         }
         data = createData(nx*ny*nz, w);
-    } else {
+    } else if (varName == "geopotential_height_ml" && p_->altitudeConverter != nullptr) {
+        // create a slice-builder from unLimDimPos
+        SliceBuilder sb(*cdm_, p_->altitudeAirTempML);
+        if (const CDMDimension* unlimDim = cdm_->getUnlimitedDim()) {
+            if (cdm_->getVariable(p_->altitudeAirTempML).checkDimension(unlimDim->getName()))
+                sb.setStartAndSize(unlimDim->getName(), unLimDimPos, 1);
+        }
+        data = p_->altitudeConverter->getDataSlice(sb);
+    } else { // other variables
         data = p_->dataReader->getDataSlice(varName, unLimDimPos);
     }
+
 
     // accumulation
     if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {

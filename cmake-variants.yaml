@@ -45,3 +45,15 @@ python:
       short: NoPython
       settings:
         ENABLE_PYTHON: no
+
+log4cpp:
+  default: yes
+  choices:
+    yes:
+      short: Log4cpp
+      settings:
+        ENABLE_LOG4CPP: yes
+    no:
+      short: NoLog4cpp
+      settings:
+        ENABLE_LOG4CPP: no
