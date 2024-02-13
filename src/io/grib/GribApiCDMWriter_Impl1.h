@@ -40,7 +40,7 @@ public:
 
     virtual void setParameter(const std::string& varName, double levelValue);
     virtual void setProjection(const std::string& varName);
-    virtual void setLevel(const std::string& varName, double levelValue);
+    virtual void setLevel(const std::string& varName, double levelValue, size_t levelPos);
     virtual DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData);
 };
 
