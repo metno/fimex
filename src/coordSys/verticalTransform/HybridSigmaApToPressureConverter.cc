@@ -89,10 +89,12 @@ DataPtr HybridSigmaApToPressureConverter::getDataSlice(const SliceBuilder& sb) c
         mifi_atmosphere_hybrid_sigma_ap_pressure(shared, ps.values[loop[PS]], &ap.values[loop[AP]],
                 &b.values[loop[B]], &out_values[loop[OUT]]);
 
+#if 0 // logging here is very slow
         LOG4FIMEX(logger, Logger::DEBUG, "ps[" << loop[PS] << "]=" << ps.values[loop[PS]]
                 << " ap[" << loop[AP] << "]=" << ap.values[loop[AP]]
                 << " b[" << loop[B] << "]=" << b.values[loop[B]]
                 << " out[" << loop[OUT] << "]=" << out_values[loop[OUT]]);
+#endif
     } while (loop.next());
     return createData(out_dims.volume(), out_values);
 }
