@@ -164,7 +164,9 @@ void CDMProcessor::addVerticalVelocity()
     Logger_p logger = getLogger("fimex.CDMProcessor.addVerticalVelocity");
     if (cdm_->hasVariable("upward_air_velocity_ml")) {
         LOG4FIMEX(logger, Logger::INFO, "upward_air_velocity_ml already exists, not calculating new one");
+        return;
     }
+
     enhanceVectorProperties(p_->dataReader); // set spatial-vectors
     const CoordinateSystem_cp_v coordSys = listCoordinateSystems(p_->dataReader);
 
