@@ -25,5 +25,5 @@ SET(libfimex_felt_SOURCES
   FeltIoFactory.h
   )
 
-FIMEX_ADD_LIBRARY(fimex-io-felt "${libfimex_felt_SOURCES}" "${IO_PACKAGES};${proj_PACKAGE};${FELT_LIBRARY}")
+FIMEX_ADD_LIBRARY(fimex-io-felt "${libfimex_felt_SOURCES}" "${IO_PACKAGES};${date_PACKAGE};${proj_PACKAGE};${FELT_LIBRARY}")
 TARGET_INCLUDE_DIRECTORIES(libfimex-io-felt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
