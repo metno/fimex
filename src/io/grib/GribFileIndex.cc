@@ -1102,7 +1102,7 @@ FimexTime GribFileMessage::getValidTime() const
             throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_ + " (" + units + ")");
         }
     } else {
-        throw CDMException("found incomprehensible stepUnits in gribReader: " + stepUnits_);
+        throw CDMException("found incomprehensible stepUnits in gribReader: '" + stepUnits_ + "'");
     }
     return fromTimePoint(asTimePoint(reference) + timeOffset);
 }
