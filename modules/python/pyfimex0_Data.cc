@@ -40,16 +40,16 @@ namespace {
 struct py_object_deleter
 {
     py_object_deleter(py::object po)
-        : po_(po)
+        : po_(new py::object(po))
     {
     }
     void operator()(void*)
     {
         py::gil_scoped_acquire acquire;
-        po_ = py::none();
+        po_->release();
     }
 
-    py::object po_;
+    std::unique_ptr<py::object> po_;
 };
 
 template <class T>
