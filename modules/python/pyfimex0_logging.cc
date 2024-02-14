@@ -129,6 +129,14 @@ void PythonLoggingImpl::log(Logger::LogLevel level, const std::string& message, 
     PY_GIL_EXCEPTIONS(log_.attr("log")(pylevel, py_msg));
 }
 
+class NoLoggingImpl : public LoggerImpl {
+public:
+    NoLoggingImpl() { }
+    ~NoLoggingImpl() { }
+    bool isEnabledFor(Logger::LogLevel level) override { return false; }
+    void log(Logger::LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) override { }
+};
+
 class PythonLoggingClass : public LoggerClass {
 public:
     PythonLoggingClass();
@@ -145,9 +153,11 @@ PythonLoggingClass::PythonLoggingClass()
 LoggerImpl* PythonLoggingClass::loggerFor(Logger* logger, const std::string& className)
 {
     remember(logger);
-    py::object py_logger;
-    PY_GIL_EXCEPTIONS(py_logger = python_logging.attr("getLogger")(className));
-    return new PythonLoggingImpl(py_logger);
+    PY_GIL_EXCEPTIONS(
+        py::object py_logger = python_logging.attr("getLogger")(className);
+        return new PythonLoggingImpl(py_logger)
+    );
+    return new NoLoggingImpl();
 }
 
 } // namespace
