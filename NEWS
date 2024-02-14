@@ -1,3 +1,6 @@
+  * 2024-02-14 fimex 1.10.0
+    * add CDMProcessor::addGeopotentialHeight
+    * write hybrid levels in GRIB output
   * 2024-01-11 fimex 1.9.9
     * fix pypy build
     * minimal python binding for CDMVerticalInterpolator
