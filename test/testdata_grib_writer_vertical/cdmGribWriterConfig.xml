@@ -12,7 +12,7 @@
 <!-- output-file configuration, default-type: overwrite -->
 <!-- <output_file type="append" />  -->
 <global_attributes>
-    <attribute name="packingType" value="grid_ccsds" type="string" /> <!-- grid_simple, grid_second_order, png,  jpeg2000, grid_ccsds -->
+    <attribute name="packingType" value="grid_simple" type="string" /> <!-- grid_simple, grid_second_order, png,  jpeg2000, grid_ccsds -->
 <!-- type can be double, long, string -->
     <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
     <!-- use for grib1 only attributes -->
