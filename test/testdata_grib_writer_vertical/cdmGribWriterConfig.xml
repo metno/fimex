@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_gribwriter_config
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--                        xsi:noNamespaceSchemaLocation="cdmGribWriterConfig.xsd"> -->
+<!-- select a specialized grib-template instead of using the default grib_api file -->
+<!-- <template_file name="/disk1/Fimex/conc_Am-241.ID_328.grib" /> -->
+<!-- allow writing of fields with only missing-values, default true
+<processing_options>
+    <omitEmptyFields>false</omitEmptyFields>
+</processing_options>
+-->
+<!-- output-file configuration, default-type: overwrite -->
+<!-- <output_file type="append" />  -->
+<global_attributes>
+    <attribute name="packingType" value="grid_ccsds" type="string" /> <!-- grid_simple, grid_second_order, png,  jpeg2000, grid_ccsds -->
+<!-- type can be double, long, string -->
+    <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
+    <!-- use for grib1 only attributes -->
+    <!--  <g1attribute name="" value="" type="" /> -->
+    <!-- use for grib2 only attributes -->
+    <g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
+</global_attributes>
+<axes>
+<!-- no vertical axis -->
+<vertical_axis standard_name="">
+   <!-- using height in meter, 0 -->
+   <grib1 id="105" value="0" type="short"/>
+   <grib2 id="103" value="0" type="short"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="m">
+   <!-- no standard_name for height/depth, defined only by positive=up/down -->
+   <grib1 id="105" units="m" type="short"/>
+   <grib2 id="103" units="m" type="double"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="Pa">
+   <!-- no standard_name for pressure coord, defined only by unit of hPa -->
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="air_pressure">
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_sigma_coordinate">
+    <grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
+    <grib2 id="104" type="double" />
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_hybrid_sigma_pressure_coordinate">
+    <grib2 id="105" type="double" />
+</vertical_axis>
+</axes>
+<variables>
+<!-- translation section for parameter names/standard_names -->
+<parameter standard_name="altitude">
+    <grib1 parameterNumber="8" codeTable="128" units="m"/>
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="6" units="m"/>
+</parameter>
+<parameter standard_name="sea_surface_temperature">
+    <grib1 parameterNumber="80" codeTable="128" units="K"/>
+    <grib2 discipline="10" parameterCategory="3" parameterNumber="0" units="K"/>
+</parameter>
+<parameter name="air_temperature_2m">
+    <grib1 parameterNumber="11" codeTable="1" units="K"/>
+    <grib2 discipline="0" parameterCategory="0" parameterNumber="0" units="K"/>
+</parameter>
+<parameter name="air_temperature_pl">
+    <grib1 parameterNumber="11" codeTable="1" units="K"/>
+    <grib2 discipline="0" parameterCategory="0" parameterNumber="0" units="K"/>
+</parameter>
+<parameter name="air_temperature_ml">
+    <grib1 parameterNumber="11" codeTable="1" units="K"/>
+    <grib2 discipline="0" parameterCategory="0" parameterNumber="0" units="K"/>
+</parameter>
+
+<parameter standard_name="precipitation_amount">
+    <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
+</parameter>
+<!-- if standard_name is ambiguous, use the variable name -->
+<parameter name="x_wind">
+    <grib1 parameterNumber="131" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="x_wind_pl">
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="2" units="m/s"/>
+</parameter>
+<parameter name="x_wind_ml">
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="2" units="m/s" />
+</parameter>
+<parameter name="y_wind">
+    <grib1 parameterNumber="132" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="y_wind_pl">
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="3" units="m/s"/>
+</parameter>
+<parameter name="y_wind_ml">
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="3" units="m/s" />
+</parameter>
+<parameter name="x_wind_10m">
+    <grib1 parameterNumber="165" codeTable="128" units="m/s"/>
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="2" units="m/s"/>
+</parameter>
+<parameter name="y_wind_10m">
+    <grib1 parameterNumber="166" codeTable="128" units="m/s"/>
+    <grib2 discipline="0" parameterCategory="2" parameterNumber="3" units="m/s"/>
+</parameter>
+<parameter name="relative_humidity_2m">
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="1" units="%"/>
+</parameter>
+<parameter name="relative_humidity_pl">
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="1" units="%"/>
+</parameter>
+<parameter standard_name="relative_humidity">
+    <grib1 parameterNumber="157" codeTable="128" units="%"/>
+</parameter>
+<parameter standard_name="lagrangian_tendency_of_air_pressure">
+    <grib1 parameterNumber="135" codeTable="128" units="Pa/s"/>
+</parameter>
+<parameter standard_name="geopotential_height">
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="5"  units="m"/>
+    <grib1 parameterNumber="129" codeTable="128" units="m"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction">
+<!-- total -->
+    <grib1 parameterNumber="164" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="10000">
+<!-- fog -->
+    <grib1 parameterNumber="248" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="8500">
+<!-- low clouds  -->
+    <grib1 parameterNumber="186" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="5000">
+<!--  medium clouds  -->
+    <grib1 parameterNumber="187" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="3000">
+<!-- high clouds -->
+    <grib1 parameterNumber="188" codeTable="128" units="1/100"/>
+</parameter>
+<!-- waves -->
+<parameter standard_name="sea_surface_wave_stokes_drift_x_velocity">
+    <grib1 parameterNumber="247" codeTable="128" units="m/s"/>
+</parameter>
+<parameter standard_name="sea_surface_wave_stokes_drift_y_velocity">
+    <grib1 parameterNumber="248" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="mean_wave_period">
+    <grib1 parameterNumber="232" codeTable="128" units="s"/>
+</parameter>
+<parameter name="significant_wave_period">
+    <grib1 parameterNumber="232" codeTable="128" units="s"/>
+</parameter>
+<parameter standard_name="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment">
+    <grib1 parameterNumber="232" codeTable="128" units="s"/>
+</parameter>
+<parameter standard_name="sea_surface_wave_significant_height">
+    <grib1 parameterNumber="100" codeTable="128" units="m"/>
+</parameter>
+
+<parameter standard_name="atmosphere_boundary_layer_thickness">
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="18" units="m" />
+</parameter>
+
+<parameter standard_name="land_area_fraction">
+    <grib2 discipline="2" parameterCategory="0" parameterNumber="0" units="1" />
+</parameter>
+
+<parameter name="precipitation_rate">
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="7" units="kg m-2 s-1"/>
+</parameter>
+
+<parameter name="geopotential_height">
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="5"  units="m" />
+</parameter>
+
+
+
+</variables>
+</cdm_gribwriter_config>
