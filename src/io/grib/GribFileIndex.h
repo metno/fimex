@@ -1,7 +1,7 @@
 /*
  * Fimex, GribFileIndex.h
  *
- * (C) Copyright 2009-2019, met.no
+ * (C) Copyright 2009-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -151,7 +151,7 @@ private:
     long edition_;
     long dataTime_;
     long dataDate_;
-    std::string stepUnits_;
+    long stepUnits_;
     std::string stepType_;
     long stepStart_;
     long stepEnd_;
