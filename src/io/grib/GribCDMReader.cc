@@ -845,7 +845,7 @@ FimexTime GribCDMReader::getVariableValidTime(const GribFileMessage& gfm) const
 
 // IN1 and IN2 should both be collections
 template <typename IN1, typename IN2>
-class EqualFunctor : public unary_function<IN2, bool>
+class EqualFunctor
 {
 private:
     IN1 in1_;
@@ -1249,7 +1249,7 @@ size_t GribCDMReader::getVariableMaxEnsembles(const string& varName) const
 }
 
 template <typename T>
-class RoundValue : public unary_function<T, T>
+class RoundValue
 {
 private:
     T scale_;

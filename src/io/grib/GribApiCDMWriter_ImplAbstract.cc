@@ -537,7 +537,7 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
     if (timeDataVector.size() > 0) {
         TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
         std::transform(timeDataVector.begin(), timeDataVector.end(), std::back_inserter(timeData),
-                       std::bind(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu, std::placeholders::_1));
+                       std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), &tu, std::placeholders::_1));
     }
     return timeData;
 }
