@@ -40,25 +40,41 @@ namespace py = pybind11;
 
 namespace {
 
+std::vector<size_t> getSliceBuilderStartPositionsGilReleased(const SliceBuilder& sb)
+{
+    PY_GIL_RELEASE;
+    return sb.getDimensionStartPositions();
+}
+
+std::vector<size_t> getSliceBuilderDimensionSizesGilReleased(const SliceBuilder& sb)
+{
+    PY_GIL_RELEASE;
+    return sb.getDimensionSizes();
+}
+
+py::object convertToPyList(const std::vector<size_t>& v)
+{
+    py::list pylist;
+    for (size_t s : v)
+        pylist.append(s);
+    return std::move(pylist);
+}
+
+
 void SliceBuilder__setStartAndSizeDN(SliceBuilder& sb, const std::string& dimName, size_t start, size_t size)
 {
+    PY_GIL_RELEASE;
     sb.setStartAndSize(dimName, start, size);
 }
 
 py::object SliceBuilder__getDimensionStartPositions(const SliceBuilder& sb)
 {
-    py::list pystart;
-    for (size_t s : sb.getDimensionStartPositions())
-        pystart.append(s);
-    return std::move(pystart);
+    return convertToPyList(getSliceBuilderStartPositionsGilReleased(sb));
 }
 
 py::object SliceBuilder__getDimensionSizes(const SliceBuilder& sb)
 {
-    py::list pysize;
-    for (size_t s : sb.getDimensionSizes())
-        pysize.append(s);
-    return std::move(pysize);
+    return convertToPyList(getSliceBuilderDimensionSizesGilReleased(sb));
 }
 
 DataPtr CDMReader__getData(CDMReader_p reader, const std::string& varName)
@@ -119,15 +135,18 @@ DataPtr CDMReader__getScaledDataSliceInUnitSB(CDMReader_p reader, const std::str
 CDMReader_p createFileReader4(const std::string& fileType, const std::string& fileName,
         const std::string& configFile, const std::vector<std::string>& args)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::create(fileType, fileName, configFile, args);
 }
 CDMReader_p createFileReader3(const std::string& fileType, const std::string& fileName,
         const std::string& configFile)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::create(fileType, fileName, configFile);
 }
 CDMReader_p createFileReader2(const std::string& fileType, const std::string& fileName)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::create(fileType, fileName);
 }
 
