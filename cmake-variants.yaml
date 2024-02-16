@@ -1,0 +1,59 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: Debug
+      long: Emit debug information
+      buildType: Debug
+    release:
+      short: Release
+      long: Optimize generated code
+      buildType: Release
+
+linkage:
+  default: static
+  choices:
+    static:
+      short: Static
+      long: Create static libraries
+      linkage: static
+    shared:
+      short: Shared
+      long: Create shared libraries/DLLs
+      linkage: shared
+
+fortran:
+  default: yes
+  choices:
+    yes:
+      short: Fortran
+      settings:
+        ENABLE_FORTRAN: yes
+    no:
+      short: NoFortran
+      settings:
+        ENABLE_FORTRAN: no
+
+python:
+  default: yes
+  choices:
+    yes:
+      short: Python
+      settings:
+        ENABLE_PYTHON: yes
+    no:
+      short: NoPython
+      settings:
+        ENABLE_PYTHON: no
+
+log4cpp:
+  default: yes
+  choices:
+    yes:
+      short: Log4cpp
+      settings:
+        ENABLE_LOG4CPP: yes
+    no:
+      short: NoLog4cpp
+      settings:
+        ENABLE_LOG4CPP: no

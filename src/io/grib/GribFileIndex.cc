@@ -1,7 +1,7 @@
 /*
  * Fimex, GribFileIndex.cc
  *
- * (C) Copyright 2009-2022, met.no
+ * (C) Copyright 2009-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -717,7 +717,7 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
             dataDate_ = string2type<long>(getXmlProp(lNode, GK_dataDate));
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
-            stepUnits_ = getXmlProp(lNode, GK_stepUnits);
+            stepUnits_ = gribStepUnitsFromText(getXmlProp(lNode, GK_stepUnits));
             timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, GK_timeRangeIndicator));
             typeOfStatisticalProcessing_ = string2type<long>(getXmlProp(lNode, GK_typeOfStatisticalProcessing));
             stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
@@ -890,7 +890,7 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                     } else if (name == "dataTime") {
                         dataTime_ = value.to_long();
                     } else if (name == GK_stepUnits) {
-                        stepUnits_ = value.to_string();
+                        stepUnits_ = gribStepUnitsFromText(value.to_string());
                     } else if (name == GK_stepType) {
                         stepType_ = value.to_string();
                     } else if (name == GK_timeRangeIndicator) {
@@ -1077,32 +1077,24 @@ FimexTime GribFileMessage::getValidTime() const
 
     // add step offset
     std::chrono::seconds timeOffset;
-    static const std::regex re_stepUnits("(\\d+)?([A-Za-z])");
-    std::smatch what;
-    if (std::regex_match(stepUnits_, what, re_stepUnits)) {
-        int factor = 1;
-        if (what[1].matched)
-            factor = string2type<int>(what[1].str());
-        const std::string& units = what[2].str();
-        if (units == "s") {
-            timeOffset = std::chrono::seconds(factor * stepEnd_);
-        } else if (units == "m") {
-            timeOffset = std::chrono::minutes(factor * stepEnd_);
-        } else if (units == "h") {
-            timeOffset = std::chrono::hours(factor * stepEnd_);
-        } else if (units == "D") {
-            timeOffset = date::days(factor * stepEnd_);
-        } else if (units == "M") {
-            timeOffset = date::months(factor * stepEnd_);
-        } else if (units == "Y") {
-            timeOffset = date::years(factor * stepEnd_);
-        } else if (units == "C") {
-            timeOffset = date::years(100 * factor * stepEnd_);
-        } else {
-            throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_ + " (" + units + ")");
-        }
-    } else {
-        throw CDMException("found incomprehensible stepUnits in gribReader: " + stepUnits_);
+    switch (stepUnits_) {
+    case 13: timeOffset = std::chrono::seconds(stepEnd_); break;
+    case 0:  timeOffset = std::chrono::minutes(stepEnd_); break;
+    case 1:  timeOffset = std::chrono::hours(stepEnd_); break;
+    case 10: timeOffset = std::chrono::hours(3 * stepEnd_); break;
+    case 11: timeOffset = std::chrono::hours(6 * stepEnd_); break;
+    case 12: timeOffset = std::chrono::hours(12  *stepEnd_); break;
+    case 2:  date::days(1 * stepEnd_); break;
+    case 3:  date::months(1 * stepEnd_); break;
+    case 4:  date::years(1 * stepEnd_); break;
+    case 5:  date::years(10 * stepEnd_); break;
+    case 6:  date::years(30 * stepEnd_); break;
+    case 7:  date::years(100 * stepEnd_); break;
+    default: {
+        std::ostringstream msg;
+        msg << "unknown stepUnits value " << stepUnits_;
+        throw CDMException(msg.str());
+    }
     }
     return fromTimePoint(asTimePoint(reference) + timeOffset);
 }
@@ -1213,7 +1205,7 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("time")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_dataDate), xmlCast(type2string(dataDate_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("dataTime"), xmlCast(type2string(dataTime_))));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_stepUnits), xmlCast(stepUnits_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_stepUnits), xmlCast(gribStepUnitsToText(stepUnits_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_stepType), xmlCast(stepType_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_timeRangeIndicator), xmlCast(type2string(timeRangeIndicator_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_typeOfStatisticalProcessing), xmlCast(type2string(typeOfStatisticalProcessing_))));

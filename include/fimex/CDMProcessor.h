@@ -45,6 +45,13 @@ public:
     CDMProcessor(CDMReader_p dataReader);
     virtual ~CDMProcessor();
     /**
+     * add geopotential to this CDM, on model-levels using
+     * t_v = t * (1. + 0.609133 * q)
+     * and integrate from bottom up
+     * delta_z = R*T_v[l]/g0*np.log(p_half[l]/p_half[l-1])
+     */
+    void addGeopotentialHeight();
+    /**
      * add vertical velocity to this CDM, using continuity equation on model-levels
      */
     void addVerticalVelocity();

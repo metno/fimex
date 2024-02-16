@@ -36,7 +36,7 @@ class GribApiCDMWriter : public CDMWriter
 
 public:
     GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile);
-    virtual ~GribApiCDMWriter();
+     ~GribApiCDMWriter();
 
 private:
 };

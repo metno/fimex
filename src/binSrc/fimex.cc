@@ -122,6 +122,8 @@ const po::option op_process_rotateVector_all = po::option("process.rotateVector.
         "rotate all known vectors (e.g. standard_name) to given direction").set_narg(0);
 const po::option op_process_addVerticalVelocity = po::option("process.addVerticalVelocity",
         "calculate upward_air_velocity_ml");
+const po::option op_process_addGeopotentialHeight = po::option("process.addGeopotentialHeight",
+        "calculate geopotential_height (actually, calculate altitude as an approximation)");
 const po::option op_process_printNcML = po::option("process.printNcML",
         "print NcML description of process").set_implicit_value("-");
 const po::option op_process_printCS = po::option("process.printCS", "print CoordinateSystems of process").set_narg(0);
@@ -421,8 +423,8 @@ int getInterpolationMethod(const po::value_set& vm, const po::option& opt)
 CDMReader_p getCDMProcessor(const po::value_set& vm, CDMReader_p dataReader)
 {
     if (!(vm.is_set(op_process_accumulateVariable) || vm.is_set(op_process_deaccumulateVariable) || vm.is_set(op_process_rotateVector_direction) ||
-          vm.is_set(op_process_addVerticalVelocity))) {
-        LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
+          vm.is_set(op_process_addVerticalVelocity) || vm.is_set(op_process_addGeopotentialHeight))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity or addGeopotentialHeightML not found, no process used");
         return dataReader;
     }
     std::shared_ptr<CDMProcessor> processor(new CDMProcessor(dataReader));
@@ -466,6 +468,9 @@ CDMReader_p getCDMProcessor(const po::value_set& vm, CDMReader_p dataReader)
     }
     if (vm.is_set(op_process_addVerticalVelocity)) {
         processor->addVerticalVelocity();
+    }
+    if (vm.is_set(op_process_addGeopotentialHeight)) {
+        processor->addGeopotentialHeight();
     }
     return processor;
 }
@@ -921,6 +926,7 @@ int run(int argc, char* args[])
         << op_process_rotateVector_stdNameY
         << op_process_rotateVector_all
         << op_process_addVerticalVelocity
+        << op_process_addGeopotentialHeight
         << op_process_printNcML
         << op_process_printCS
         << op_process_printSize

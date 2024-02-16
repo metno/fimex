@@ -1,7 +1,7 @@
 /*
  * Fimex, GribUtils.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -138,6 +138,75 @@ std::string gribSeconds2stepUnits(unsigned long seconds)
     }
 
     return stepUnits;
+}
+
+// see https://codes.ecmwf.int/grib/format/grib2/ctables/4/4/
+/*
+0	Minute
+1	Hour
+2	Day
+3	Month
+4	Year
+5	Decade (10 years)
+6	Normal (30 years)
+7	Century (100 years)
+10	3 hours
+11	6 hours
+12	12 hours
+13	Second
+*/
+unsigned long gribStepUnitsFromText(const std::string& stepUnits)
+{
+    if (stepUnits == "s") {
+        return 13;
+    } else if (stepUnits == "m") {
+        return 0;
+    } else if (stepUnits == "h") {
+        return 1;
+    } else if (stepUnits == "3h") {
+        return 10;
+    } else if (stepUnits == "6h") {
+        return 11;
+    } else if (stepUnits == "12h") {
+        return 12;
+    } else if (stepUnits == "D") {
+        return 2;
+    } else if (stepUnits == "M") {
+        return 3;
+    } else if (stepUnits == "Y") {
+        return 4;
+    } else if (stepUnits == "10Y") {
+        return 5;
+    } else if (stepUnits == "30Y") {
+        return 6;
+    } else if (stepUnits == "C") {
+        return 7;
+    } else {
+        throw CDMException("unknown stepUnits text '" + stepUnits + "'");
+    }
+}
+
+std::string gribStepUnitsToText(unsigned long units)
+{
+    switch (units) {
+    case 13: return "s";
+    case 0:  return "m";
+    case 1:  return "h";
+    case 10: return "3h";
+    case 11: return "6h";
+    case 12: return "12h";
+    case 2:  return "D";
+    case 3:  return "M";
+    case 4:  return "Y";
+    case 5:  return  "10Y";
+    case 6:  return  "30Y";
+    case 7:  return  "C";
+    default: {
+        std::ostringstream msg;
+        msg << "unknown stepUnits value " << units;
+        throw CDMException(msg.str());
+    }
+    }
 }
 
 } // namespace MetNoFimex

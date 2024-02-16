@@ -120,6 +120,7 @@ ENDIF()
 IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
   CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
   LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
+  LIST(APPEND CC_TESTS testGribWriterVertical)
 ENDIF()
 IF (ENABLE_ECCODES)
   FIND_PROGRAM(GRIB_COUNT_PROGRAM
@@ -258,4 +259,8 @@ ENDIF()
 
 IF(ENABLE_FELT)
   TARGET_LINK_LIBRARIES(testFeltReader libfimex-io-felt)
+ENDIF()
+
+IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
+  TARGET_LINK_LIBRARIES(testGribWriterVertical libfimex-io-grib libfimex-io-netcdf)
 ENDIF()

@@ -1,7 +1,7 @@
 /*
  * Fimex, GribUtils.h
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2009-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -58,10 +58,21 @@ GridDefinition::Orientation gribGetGridOrientation(std::shared_ptr<grib_handle> 
  * @warning this method is not highly accurate for stepUnits >= month due to missing calendar support (month = 30days, year = 365 days)
  */
 unsigned long gribStepUnits2seconds(const std::string& stepUnits);
+
 /**
  * find the largest unit covering the seconds, i.e. the opposite of gribStepUnits2seconds()
  */
 std::string gribSeconds2stepUnits(unsigned long seconds);
+
+/*!
+ * Convert a text representation of GRIB step units into numerical step unit id as in GRIB2 section 4 table 4.
+ */
+unsigned long gribStepUnitsFromText(const std::string& stepUnits);
+
+/*!
+ * Convert numerical step unit id as in GRIB2 section 4 table 4 into a text representation.
+ */
+std::string gribStepUnitsToText(unsigned long units);
 
 } // namespace MetNoFimex
 

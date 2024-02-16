@@ -29,19 +29,18 @@
 namespace MetNoFimex {
 
 /**
- * Implemenationn of a writer using GribApi for grib2
- *
+ * Implementation of a writer using GribApi for grib2
  */
-class GribApiCDMWriter_Impl2 : public MetNoFimex::GribApiCDMWriter_ImplAbstract
+class GribApiCDMWriter_Impl2 : public GribApiCDMWriter_ImplAbstract
 {
 public:
     GribApiCDMWriter_Impl2(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
-    virtual ~GribApiCDMWriter_Impl2();
+    ~GribApiCDMWriter_Impl2();
 
-    virtual void setParameter(const std::string& varName, double levelValue);
-    virtual void setProjection(const std::string& varName);
-    virtual void setLevel(const std::string& varName, double levelValue);
-    virtual DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData);
+    void setParameter(const std::string& varName, double levelValue) override;
+    void setProjection(const std::string& varName) override;
+    void setLevel(const std::string& varName, double levelValue, size_t levelPos) override;
+    DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData) override;
 };
 
 } // namespace MetNoFimex
