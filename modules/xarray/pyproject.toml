@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fimex_xarray"
+version = "0.0.1"
+readme = "README.md"
+
+dependencies = [
+    # "pyfimex0",
+    "numpy",
+    "xarray",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.entry-points."xarray.backends"]
+fimex = "fimex_xarray.xr:FimexBackendEntrypoint"
