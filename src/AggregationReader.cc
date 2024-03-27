@@ -183,18 +183,15 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, size_t unLim
                                             << readerUdimPos_.at(unLimDimPos).second);
             return readers_.at(readerUdimPos_.at(unLimDimPos).first).second->getDataSlice(varName, readerUdimPos_.at(unLimDimPos).second);
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-        return gDataReader_->getDataSlice(varName, unLimDimPos);
     } else if (aggType_ == "union") {
-        if (varReader_.find(varName) == varReader_.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-            return gDataReader_->getDataSlice(varName, unLimDimPos);
-        } else {
-            std::pair<std::string, CDMReader_p>& r = readers_.at(varReader_[varName]);
+        const auto it = varReader_.find(varName);
+        if (it != varReader_.end()) {
+            auto& r = readers_.at(it->second);
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << r.first);
             return r.second->getDataSlice(varName, unLimDimPos);
         }
     }
+    LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
     return gDataReader_->getDataSlice(varName, unLimDimPos);
 }
 
@@ -260,19 +257,15 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, const SliceB
             }
             return retData;
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-        return gDataReader_->getDataSlice(varName, sb);
     } else if (aggType_ == "union") {
         const auto it = varReader_.find(varName);
-        if (it == varReader_.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-            return gDataReader_->getDataSlice(varName, sb);
-        } else {
+        if (it != varReader_.end()) {
             const auto& id_rd = readers_.at(it->second);
             LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << id_rd.first);
             return id_rd.second->getDataSlice(varName, sb);
         }
     }
+    LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
     return gDataReader_->getDataSlice(varName, sb);
 }
 
