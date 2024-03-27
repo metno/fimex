@@ -44,8 +44,6 @@
 
 namespace MetNoFimex {
 
-using namespace std;
-
 namespace {
 
 Logger_p logger = getLogger("fimex.NcmlAggregationReader");
@@ -60,9 +58,9 @@ public:
 
 } // namespace
 
-static void getFileTypeConfig(const string& location, string& file, string& type, string& config)
+static void getFileTypeConfig(const std::string& location, std::string& file, std::string& type, std::string& config)
 {
-    vector<string> locations = tokenize(location, " ");
+    const auto locations = tokenize(location, " ");
     file = (locations.size() > 0) ? locations.at(0) : "";
     type = (locations.size() > 1) ? locations.at(1) : "netcdf";
     config = (locations.size() > 2) ? locations.at(2) : "";
@@ -90,7 +88,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         if (nodesL.size() != 1) {
             LOG4FIMEX(logger, Logger::INFO, "config " << ncml.id() << " does not contain location-attribute, only ncml initialization");
         } else {
-            string file, type, config;
+            std::string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL[0], "location"), file, type, config);
             LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
             reader_ = CDMFileReaderFactory::create(type, file, config);
@@ -104,29 +102,29 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         size_t idx = 0;
         for (auto node : XPathNodeSet(doc, "./nc:netcdf", nodesAgg[0])) {
             // open <netcdf /> tags recursively
-            const string id = ncml.id() + ":netcdf:" + type2string(idx++);
-            const string current = doc->toString(node);
+            const std::string id = ncml.id() + ":netcdf:" + type2string(idx++);
+            const std::string current = doc->toString(node);
             agg->addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id);
         }
 
         // open reader by scan
         const XPathNodeSet nodesScan(doc, "./nc:scan", nodesAgg[0]);
         for (auto node : nodesScan) {
-            string dir, type, config;
+            std::string dir, type, config;
             getFileTypeConfig(getXmlProp(node, "location"), dir, type, config);
-            string suffix = getXmlProp(node, "suffix");
+            std::string suffix = getXmlProp(node, "suffix");
             std::string regExp;
             if (!suffix.empty()) {
                 regExp = ".*" + regex_escape(suffix) + "$";
             } else {
                 regExp = getXmlProp(node, "regExp"); // what type of regex is this?
             }
-            string subdirs = getXmlProp(node, "subdirs");
+            std::string subdirs = getXmlProp(node, "subdirs");
             int depth = -1; //negative depth == unlimited
             if (subdirs == "false" || subdirs == "FALSE" || subdirs == "False") {
                 depth = 0;
             }
-            vector<string> files;
+            std::vector<std::string> files;
             scanFiles(files, dir, depth, std::regex(regExp), true);
             for (size_t i = 0; i < files.size(); ++i) {
                 LOG4FIMEX(logger, Logger::DEBUG, "scanned file: " << files.at(i));
