@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <variable name="new" type="int" shape="new">
+    <values>17 19 23</values>
+  </variable>
+
+  <aggregation type="joinNew" dimName="new">
+    <variableAgg name="multi" />
+    <scan location="." regExp="joinExistingAgg\d+\.nc" />
+  </aggregation>
+
+</netcdf>

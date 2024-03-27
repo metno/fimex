@@ -96,7 +96,17 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
     } else if (nodesAgg.size() > 1) {
         LOG4FIMEX(logger, Logger::WARN, "found several ncml-aggregations in " << ncml.id() << ", using 1st");
     } else {
-        auto agg = std::make_shared<AggregationReader>(getXmlProp(nodesAgg[0], "type"));
+        const auto aggType = getXmlProp(nodesAgg[0], "type");
+        auto agg = std::make_shared<AggregationReader>(aggType);
+        if (aggType == "joinNew") {
+            const auto aggDim = getXmlProp(nodesAgg[0], "dimName");
+
+            std::set<std::string> aggVars;
+            for (auto nodeVar : XPathNodeSet(doc, "./nc:variableAgg", nodesAgg[0])) {
+                aggVars.insert(getXmlProp(nodeVar, "name"));
+            }
+            agg->joinNewVars(aggDim, aggVars);
+        }
 
         // find sources from location, scan, ...
         size_t idx = 0;

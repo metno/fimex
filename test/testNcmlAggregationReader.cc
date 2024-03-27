@@ -96,20 +96,15 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
     CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
     const CDMDimension* unlim = reader->getCDM().getUnlimitedDim();
     TEST4FIMEX_REQUIRE(unlim);
-    TEST4FIMEX_CHECK_EQ(unlim->getLength(), 5);
-    DataPtr slice = reader->getDataSlice("unlim", 3);
-    TEST4FIMEX_REQUIRE(slice);
-    TEST4FIMEX_REQUIRE_EQ(slice->size(), 1);
-    auto values = slice->asShort();
-    TEST4FIMEX_REQUIRE(values);
-    TEST4FIMEX_CHECK_EQ(values[0], 4);
-
-    slice = reader->getDataSlice("multi", 3);
+    TEST4FIMEX_CHECK_EQ(unlim->getLength(), 2);
+    TEST4FIMEX_CHECK_EQ(unlim->getName(), "time");
+    DataPtr slice = reader->getData("time");
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_EQ(slice->size(), 2);
-    values = slice->asShort();
+    auto values = slice->asShort();
     TEST4FIMEX_REQUIRE(values);
-    TEST4FIMEX_CHECK_EQ(values[1], -4);
+    TEST4FIMEX_CHECK_EQ(values[0], 1);
+    TEST4FIMEX_CHECK_EQ(values[1], 1);
 }
 
 TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNothing, TestConfig)
@@ -175,4 +170,28 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_union, TestConfig)
     SliceBuilder sb(reader->getCDM(), "multi");
     sb.setStartAndSize("unlim", 1, 1);
     TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", sb)->asShort()[1], -2);
+}
+
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggJoinNew, TestConfig)
+{
+    const string ncmlName = require("aggJoinNew.ncml");
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
+    const std::string test_output = std::string(oldDir) + "/test_aggJoinNew.nc";
+    CDMFileReaderFactory::createWriter(reader, "nc4", test_output);
+
+    const auto& cdm = reader->getCDM();
+    auto ulim = cdm.getUnlimitedDim();
+    TEST4FIMEX_REQUIRE(ulim);
+    TEST4FIMEX_CHECK_EQ(ulim->getName(), "new");
+
+    SliceBuilder sb(reader->getCDM(), "multi");
+    sb.setStartAndSize("new", 2, 1);
+    DataPtr slice = reader->getDataSlice("multi", sb);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_GE(slice->size(), 2);
+    const auto values = slice->asInt();
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[0], 4);
+    TEST4FIMEX_CHECK_EQ(values[1], -4);
+    remove(test_output);
 }
