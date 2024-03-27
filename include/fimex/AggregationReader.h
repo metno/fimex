@@ -48,7 +48,7 @@ public:
     DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
     DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
 
-protected:
+private:
     // main data-reader
     CDMReader_p gDataReader_;
 

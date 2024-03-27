@@ -27,7 +27,7 @@
 #ifndef NCMLAGGREGATIONREADER_H_
 #define NCMLAGGREGATIONREADER_H_
 
-#include "fimex/AggregationReader.h"
+#include "fimex/CDMReader.h"
 
 namespace MetNoFimex {
 
@@ -39,12 +39,18 @@ class XMLInput;
  *
  * This reader should usually be called from the NcmlCDMReader.
  */
-class NcmlAggregationReader : public AggregationReader
+class NcmlAggregationReader : public CDMReader
 {
 public:
     NcmlAggregationReader(const XMLInput& ncml);
-
     ~NcmlAggregationReader();
+
+    using CDMReader::getDataSlice;
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
+
+private:
+    CDMReader_p reader_;
 };
 
 } // namespace MetNoFimex

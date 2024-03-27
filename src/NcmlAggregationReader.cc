@@ -26,6 +26,7 @@
 
 #include "NcmlAggregationReader.h"
 
+#include "fimex/AggregationReader.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -46,8 +47,18 @@ namespace MetNoFimex {
 using namespace std;
 
 namespace {
+
 Logger_p logger = getLogger("fimex.NcmlAggregationReader");
-}
+
+class NullCDMReader : public CDMReader
+{
+public:
+    using CDMReader::getDataSlice;
+    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override { return nullptr; }
+    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override { return nullptr; }
+};
+
+} // namespace
 
 static void getFileTypeConfig(const string& location, string& file, string& type, string& config)
 {
@@ -58,7 +69,7 @@ static void getFileTypeConfig(const string& location, string& file, string& type
 }
 
 NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
-    : AggregationReader("")
+    : reader_(std::make_shared<NullCDMReader>())
 {
     XMLDoc_p doc;
     if (!ncml.isEmpty()) {
@@ -82,23 +93,22 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL[0], "location"), file, type, config);
             LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
-            gDataReader_ = CDMFileReaderFactory::create(type, file, config);
-            *(this->cdm_) = gDataReader_->getCDM();
+            reader_ = CDMFileReaderFactory::create(type, file, config);
         }
+    } else if (nodesAgg.size() > 1) {
+        LOG4FIMEX(logger, Logger::WARN, "found several ncml-aggregations in " << ncml.id() << ", using 1st");
     } else {
-        if (nodesAgg.size() > 1) {
-            LOG4FIMEX(logger, Logger::WARN, "found several ncml-aggregations in " << ncml.id() << ", using 1st");
-        }
+        auto agg = std::make_shared<AggregationReader>(getXmlProp(nodesAgg[0], "type"));
+
         // find sources from location, scan, ...
         size_t idx = 0;
         for (auto node : XPathNodeSet(doc, "./nc:netcdf", nodesAgg[0])) {
             // open <netcdf /> tags recursively
             const string id = ncml.id() + ":netcdf:" + type2string(idx++);
             const string current = doc->toString(node);
-            addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id);
+            agg->addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id);
         }
 
-        aggType_ = getXmlProp(nodesAgg[0], "type");
         // open reader by scan
         const XPathNodeSet nodesScan(doc, "./nc:scan", nodesAgg[0]);
         for (auto node : nodesScan) {
@@ -121,17 +131,30 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             for (size_t i = 0; i < files.size(); ++i) {
                 LOG4FIMEX(logger, Logger::DEBUG, "scanned file: " << files.at(i));
                 try {
-                    addReader(CDMFileReaderFactory::create(type, files.at(i), config), files.at(i));
+                    agg->addReader(CDMFileReaderFactory::create(type, files.at(i), config), files.at(i));
                 } catch (CDMException& ex) {
                     LOG4FIMEX(logger, Logger::ERROR, "cannot read scanned file '" << files.at(i) << "' type: " << type << ", config: " << files.at(i) );
 
                 }
             }
         }
-        initAggregation();
+        agg->initAggregation();
+        reader_ = agg;
     }
+
+    *(this->cdm_) = reader_->getCDM();
 }
 
 NcmlAggregationReader::~NcmlAggregationReader() {}
+
+DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
+{
+    return reader_->getDataSlice(varName, unLimDimPos);
+}
+
+DataPtr NcmlAggregationReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+{
+    return reader_->getDataSlice(varName, sb);
+}
 
 } /* namespace MetNoFimex */
