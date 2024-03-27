@@ -32,10 +32,10 @@
 #include "fimex/String2Type.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLUtils.h"
 #include "fimex/mifi_constants.h"
+
 #include <algorithm>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 #include <regex>
 #include <set>
 
@@ -132,40 +132,36 @@ CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string aut
         }
     }
     if (!configFile.empty()) {
-        XMLDoc doc(configFile);
-        xmlXPathObject_p xpathObj = doc.getXPathObject("/cdmQualityConfig");
-        size_t size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
-        if (size != 1) {
+        XMLDoc_p doc = std::make_shared<XMLDoc>(configFile);
+        XPathNodeSet nodesQC(doc, "/cdmQualityConfig");
+        if (nodesQC.size() != 1) {
             throw CDMException("config-file "+configFile+" does not contain cdmQualityConfig root element");
         }
+
         // loop over variables
-        xpathObj = doc.getXPathObject("/cdmQualityConfig/variable");
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        size = nodes ? nodes->nodeNr : 0;
-        for (size_t i = 0; i < size; i++) {
-            xmlNodePtr node = nodes->nodeTab[i];
+        XPathNodeSet variables(doc, "/cdmQualityConfig/variable");
+        for (auto node : variables) {
             string varName = getXmlProp(node, "name");
             string fillValStr = getXmlProp(node, "fillValue");
-            xmlXPathObject_p statusVarXPath = doc.getXPathObject("status_flag_variable", node);
-            int statusVarNr = statusVarXPath->nodesetval ? statusVarXPath->nodesetval->nodeNr : 0;
+            XPathNodeSet statusVar(doc, "status_flag_variable", node);
             string statusVarName;
             string statusVarUse;
             string statusVarValues;
             string statusVarFile, statusVarType, statusVarConfig;
-            if (statusVarNr == 1) {
-                statusVarName = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "name");
-                xmlXPathObject_p allowedXPath = doc.getXPathObject("allowed_values", statusVarXPath->nodesetval->nodeTab[0]);
-                int allowedSize = allowedXPath->nodesetval ? allowedXPath->nodesetval->nodeNr : 0;
-                if (allowedSize == 1) {
-                    statusVarUse = getXmlProp(allowedXPath->nodesetval->nodeTab[0], "use");
-                    xmlNodePtr valNode = allowedXPath->nodesetval->nodeTab[0]->children;
+            if (statusVar.size() == 1) {
+                auto statusNode = statusVar[0];
+                statusVarName = getXmlProp(statusNode, "name");
+                XPathNodeSet allowed(doc, "allowed_values", statusNode);
+                if (allowed.size() == 1) {
+                    statusVarUse = getXmlProp(allowed[0], "use");
+                    auto valNode = allowed[0]->children;
                     if (valNode && (valNode->type == XML_TEXT_NODE)) {
                         statusVarValues = reinterpret_cast<char *>(valNode->content);
                     }
                 }
-                statusVarFile = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "file");
-                statusVarType = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "type");
-                statusVarConfig = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "config");
+                statusVarFile = getXmlProp(statusNode, "file");
+                statusVarType = getXmlProp(statusNode, "type");
+                statusVarConfig = getXmlProp(statusNode, "config");
             }
             if (statusVarName.empty())
                 throw CDMException("could not find status_flag_variable for var: " + varName);

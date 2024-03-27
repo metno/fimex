@@ -30,11 +30,9 @@
 #include "fimex/String2Type.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
+#include "fimex/XMLUtils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
-
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 
 #include <grib_api.h>
 
@@ -390,11 +388,9 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
     }
     bool isHybrid = false;
     verticalAxisXPath += "/grib2";
-    xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
-    xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
-    const int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 1) {
-        xmlNodePtr node = nodes->nodeTab[0];
+    XPathNodeSet nodes(xmlConfig->getXPathObject(verticalAxisXPath));
+    if (nodes.size() == 1) {
+        auto node = nodes[0];
         std::string levelId = getXmlProp(node, "id");
         GRIB_CHECK(grib_set_long(gribHandle.get(), "levelType", string2type<long>(levelId)), ("setting levelId " + levelId).c_str());
         if (string2type<long>(levelId) == 105) {
@@ -436,7 +432,7 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
                 LOG4FIMEX(logger, Logger::ERROR, "no hybrid-sigma-transformation for var " << varName << " found, cannot write pv to grib2");
             }
         }
-    } else if (size > 1) {
+    } else if (nodes.size() > 1) {
         throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
     } else {
         throw CDMException("could not find vertical Axis " + verticalAxisXPath + " in " + configFile + ", skipping parameter " + varName);

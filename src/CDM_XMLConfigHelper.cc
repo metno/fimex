@@ -31,11 +31,7 @@
 #include "fimex/CDMVariable.h"
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/StringUtils.h"
-#include "fimex/XMLDoc.h"
-
-#include <libxml/tree.h>
-#include <libxml/xinclude.h>
-#include <libxml/xpath.h>
+#include "fimex/XMLUtils.h"
 
 #include <regex>
 
@@ -45,14 +41,14 @@ using namespace std;
 
 static string replaceTemplateAttribute(string value, const map<string, std::shared_ptr<ReplaceStringObject>> templateReplacements)
 {
-    for (map<string, std::shared_ptr<ReplaceStringObject>>::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
+    for (auto& tr : templateReplacements) {
         stringstream outString;
-        std::regex rgx("%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%");
+        std::regex rgx("%" + tr.first + "(\\(([^,]*),?(.*)?\\))?" + "%");
         string::const_iterator  begin = value.begin(), end = value.end();
         std::match_results<string::const_iterator> matches;
         while (std::regex_search(begin, end, matches, rgx)) {
             outString << string(begin, matches[0].first);
-            std::shared_ptr<ReplaceStringObject> rso = it->second;
+            auto& rso = tr.second;
             string var(matches[1].first, matches[1].second);
             if (matches.size() > 2) {
                 string match2(matches[2].first, matches[2].second);
@@ -77,7 +73,8 @@ static string replaceTemplateAttribute(string value, const map<string, std::shar
 void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
                                   const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
-    if (node == 0) return;
+    if (!node)
+        return;
     if ((node->type == XML_ELEMENT_NODE) &&
         (string("attribute") == reinterpret_cast<const char *>(node->name))) {
             string name = getXmlProp(node, "name");
@@ -93,12 +90,13 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
 int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes,
                                    std::vector<CDMAttribute>& varAttributes, const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
-    xmlXPathObject_p xpathObj = doc.getXPathObject(xpathString);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 0) return 0;
+    XPathNodeSet nodes(doc, xpathString);
+    if (nodes.size() == 0) {
+        return 0;
+    }
+
     // only parsing node[0]
-    xmlNodePtr node = nodes->nodeTab[0];
+    auto node = nodes[0];
     if (node->type != XML_ELEMENT_NODE) {
         throw CDMException("xpath does not point to XML_ELEMENT_NODE: " + xpathString);
     }
@@ -110,7 +108,7 @@ int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString,
         attr = attr->next;
     }
     fillAttributeListFromXMLNode(varAttributes, node->children, templateReplacements);
-    return size;
+    return nodes.size();
 }
 
 } // end of MetNoFimex

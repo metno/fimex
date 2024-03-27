@@ -36,12 +36,10 @@
 #include "fimex/Type2String.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/XMLInputString.h"
+#include "fimex/XMLUtils.h"
 
 #include <memory>
 #include <regex>
-
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 
 namespace MetNoFimex {
 
@@ -66,62 +64,54 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
     if (!ncml.isEmpty()) {
         doc = ncml.getXMLDoc();
         doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
-        xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf");
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        if (nodes->nodeNr != 1) {
+        XPathNodeSet nodes(doc, "/nc:netcdf");
+        if (nodes.size() != 1) {
             throw CDMException("config "+ncml.id()+" is not a ncml document with root /nc:netcdf");
         }
     }
 
     // warn if multiple aggregations, joinNew aggregations
     // and get a global file if no aggregations
-    xmlXPathObject_p xpathObj = doc->getXPathObject("/nc:netcdf/nc:aggregation");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 0) {
+    XPathNodeSet nodesAgg(doc, "/nc:netcdf/nc:aggregation");
+    if (nodesAgg.size() == 0) {
         LOG4FIMEX(logger, Logger::DEBUG, "found no ncml-aggregations in "<< ncml.id());
-        xmlXPathObject_p xpathObjL = doc->getXPathObject("/nc:netcdf[@location]");
-        xmlNodeSetPtr nodesL = xpathObjL->nodesetval;
-        if (nodesL->nodeNr != 1) {
+        XPathNodeSet nodesL(doc, "/nc:netcdf[@location]");
+        if (nodesL.size() != 1) {
             LOG4FIMEX(logger, Logger::INFO, "config " << ncml.id() << " does not contain location-attribute, only ncml initialization");
         } else {
             string file, type, config;
-            getFileTypeConfig(getXmlProp(nodesL->nodeTab[0], "location"), file, type, config);
+            getFileTypeConfig(getXmlProp(nodesL[0], "location"), file, type, config);
             LOG4FIMEX(logger, Logger::DEBUG, "reading file '" << file << "' type '" << type << "' config '" << config << "'");
             gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             *(this->cdm_) = gDataReader_->getCDM();
         }
     } else {
-        if (size > 1) {
+        if (nodesAgg.size() > 1) {
             LOG4FIMEX(logger, Logger::WARN, "found several ncml-aggregations in " << ncml.id() << ", using 1st");
         }
         // find sources from location, scan, ...
-        xmlXPathObject_p xpathObjNc = doc->getXPathObject("./nc:netcdf", nodes->nodeTab[0]);
-        xmlNodeSetPtr nodesNc = xpathObjNc->nodesetval;
-        int sizeNc = (nodesNc) ? nodesNc->nodeNr : 0;
-        for (int i = 0; i < sizeNc; i++) {
+        size_t idx = 0;
+        for (auto node : XPathNodeSet(doc, "./nc:netcdf", nodesAgg[0])) {
             // open <netcdf /> tags recursively
-            const string id = ncml.id() + ":netcdf:" + type2string(i);
-            const string current = doc->toString(nodesNc->nodeTab[i]);
+            const string id = ncml.id() + ":netcdf:" + type2string(idx++);
+            const string current = doc->toString(node);
             addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id);
         }
 
-        aggType_ = getXmlProp(nodes->nodeTab[0], "type");
+        aggType_ = getXmlProp(nodesAgg[0], "type");
         // open reader by scan
-        xmlXPathObject_p xpathObjScan = doc->getXPathObject("./nc:scan", nodes->nodeTab[0]);
-        xmlNodeSetPtr nodesScan = xpathObjScan->nodesetval;
-        int sizeScan = (nodesScan) ? nodesScan->nodeNr : 0;
-        for (int i = 0; i < sizeScan; i++) {
+        const XPathNodeSet nodesScan(doc, "./nc:scan", nodesAgg[0]);
+        for (auto node : nodesScan) {
             string dir, type, config;
-            getFileTypeConfig(getXmlProp(nodesScan->nodeTab[i], "location"), dir, type, config);
-            string suffix = getXmlProp(nodesScan->nodeTab[i], "suffix");
+            getFileTypeConfig(getXmlProp(node, "location"), dir, type, config);
+            string suffix = getXmlProp(node, "suffix");
             std::string regExp;
             if (!suffix.empty()) {
                 regExp = ".*" + regex_escape(suffix) + "$";
             } else {
-                regExp = getXmlProp(nodesScan->nodeTab[i], "regExp"); // what type of regex is this?
+                regExp = getXmlProp(node, "regExp"); // what type of regex is this?
             }
-            string subdirs = getXmlProp(nodesScan->nodeTab[i], "subdirs");
+            string subdirs = getXmlProp(node, "subdirs");
             int depth = -1; //negative depth == unlimited
             if (subdirs == "false" || subdirs == "FALSE" || subdirs == "False") {
                 depth = 0;

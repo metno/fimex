@@ -48,13 +48,10 @@
 #include "fimex/TimeUtils.h"
 #include "fimex/TokenizeDotted.h"
 #include "fimex/Type2String.h"
+#include "fimex/XMLUtils.h"
 #include "fimex/coordSys/Projection.h"
 
 #include "fimex_grib_config.h"
-
-#include <libxml/tree.h>
-#include <libxml/xinclude.h>
-#include <libxml/xpath.h>
 
 #include <algorithm>
 #include <cassert>
@@ -215,9 +212,8 @@ XMLDoc_p GribCDMReader::initXMLConfig(const XMLInput& configXML)
     doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
     {
         // check config for root element
-        xmlXPathObject_p xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig");
-        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (rootElements != 1)
+        XPathNodeSet nodes(doc, "/gr:cdmGribReaderConfig");
+        if (nodes.size() != 1)
             throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configXML.id());
     }
     return doc;
@@ -226,12 +222,10 @@ XMLDoc_p GribCDMReader::initXMLConfig(const XMLInput& configXML)
 std::string GribCDMReader::getConfigEarthFigure(XMLDoc_p doc)
 {
     // get the overruled earthform
-    xmlXPathObject_p xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
+    XPathNodeSet nodes(doc, "/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
     string replaceEarthString;
-    if (size == 1) {
-        replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
+    if (nodes.size() == 1) {
+        replaceEarthString = getXmlProp(nodes[0], "proj4");
     }
     return replaceEarthString;
 }
@@ -240,11 +234,8 @@ std::string GribCDMReader::getConfigExtraKeys(XMLDoc_p doc)
 {
     set<string> extraKeys;
     // get the additinal keys from the xml-document
-    xmlXPathObject_p xpathObj = doc->getXPathObject("//gr:extraKey");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    for (int i = 0; i < size; i++) {
-        extraKeys.insert(getXmlProp(nodes->nodeTab[0], "name"));
+    for (auto node : XPathNodeSet(doc, "//gr:extraKey")) {
+        extraKeys.insert(getXmlProp(node, "name"));
     }
     return join(extraKeys.begin(), extraKeys.end(), ",");
 }
@@ -264,10 +255,9 @@ void GribCDMReader::initPostIndices()
 {
     // select wanted indices from doc, default to all
     {
-        xmlXPathObject_p xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='selectParameters']");
-        size_t size = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (size > 0) {
-            string select = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+        XPathNodeSet nodes(p_->doc, "/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='selectParameters']");
+        if (nodes.size() > 0) {
+            string select = getXmlProp(nodes[0], "value");
             LOG4FIMEX(logger, Logger::DEBUG, "selecting parameters: " << select);
             initSelectParameters(select);
         }
@@ -295,18 +285,8 @@ void GribCDMReader::initPostIndices()
 void GribCDMReader::initXMLNodeIdx()
 {
     string xpathString = "/gr:cdmGribReaderConfig/gr:variables/gr:parameter";
-    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathString);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    size_t size = (nodes) ? nodes->nodeNr : 0;
-    // cerr << "found " << size << " parameters " << endl;
-    for (size_t i = 0; i < size; ++i) {
-        xmlNodePtr node = nodes->nodeTab[i];
-        string grib1Id = "gr:grib1";
-        xmlXPathObject_p xpathObj1 = p_->doc->getXPathObject(grib1Id, node);
-        xmlNodeSetPtr nodes1 = xpathObj1->nodesetval;
-        size_t size1 = (nodes1) ? nodes1->nodeNr : 0;
-        for (size_t i = 0; i < size1; ++i) {
-            xmlNodePtr node1 = nodes1->nodeTab[i];
+    for (auto node : XPathNodeSet(p_->doc, xpathString)) {
+        for (auto node1 : XPathNodeSet(p_->doc, "gr:grib1", node)) {
             string idVal = getXmlProp(node1, GK_indicatorOfParameter);
             if (idVal.empty())
                 continue;
@@ -314,12 +294,7 @@ void GribCDMReader::initXMLNodeIdx()
             p_->nodeIdx1[id].push_back(node1);
         }
         // and the same for grib2
-        string grib2Id = "gr:grib2";
-        xmlXPathObject_p xpathObj2 = p_->doc->getXPathObject(grib2Id, node);
-        xmlNodeSetPtr nodes2 = xpathObj2->nodesetval;
-        size_t size2 = (nodes2) ? nodes2->nodeNr : 0;
-        for (size_t i = 0; i < size2; ++i) {
-            xmlNodePtr node2 = nodes2->nodeTab[i];
+        for (auto node2 : XPathNodeSet(p_->doc, "gr:grib2", node)) {
             string idVal = getXmlProp(node2, "parameterNumber");
             if (idVal.empty())
                 continue;
@@ -327,7 +302,6 @@ void GribCDMReader::initXMLNodeIdx()
             p_->nodeIdx2[id].push_back(node2);
         }
     }
-    // cerr << "nodeIdx1: " << p_->nodeIdx1.size() << endl;
 }
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
@@ -404,11 +378,9 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             // check the options from msg.getOtherKeys()
             for (const auto& opt : msg.getOtherKeys()) {
                 string xpathStr = "gr:extraKey[@name='" + opt.first + "']";
-                xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathStr, node);
-                xmlNodeSetPtr nodes = xpathObj->nodesetval;
-                size_t size = (nodes) ? nodes->nodeNr : 0;
-                if (size != 0) {
-                    long val = string2type<long>(getXmlProp(nodes->nodeTab[0], "value"));
+                XPathNodeSet nodes(p_->doc, xpathStr, node);
+                if (nodes.size() != 0) {
+                    long val = string2type<long>(getXmlProp(nodes[0], "value"));
                     if (val != opt.second) {
                         allOptionalsMatch = false;
                         break;
@@ -461,16 +433,14 @@ void GribCDMReader::initSelectParameters(const string& select)
 void GribCDMReader::initAddGlobalAttributes()
 {
     string xpathString("/gr:cdmGribReaderConfig/gr:global_attributes");
-    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathString);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size != 1) {
+    XPathNodeSet nodes(p_->doc, xpathString);
+    if (nodes.size() != 1) {
         throw CDMException("unable to find " + xpathString + " in config: " + p_->configId);
     }
-    for (int i = 0; i < size; ++i) {
-        assert(nodes->nodeTab[i]->type == XML_ELEMENT_NODE);
+    for (auto node : nodes) {
+        assert(node->type == XML_ELEMENT_NODE);
         vector<CDMAttribute> globAttributes;
-        fillAttributeListFromXMLNode(globAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+        fillAttributeListFromXMLNode(globAttributes, node->children, p_->templateReplacementAttributes);
         for (vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
             cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
         }
@@ -489,22 +459,20 @@ void GribCDMReader::initLevels()
         long edition = string2type<long>(editionType.at(0));
         long typeId = string2type<long>(editionType.at(1));
         string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[@grib" + type2string(edition) + "_id='" + type2string(typeId) + "']");
-        xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathLevelString);
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        if (size > 1) {
+        XPathNodeSet nodes(p_->doc, xpathLevelString);
+        if (nodes.size() > 1) {
             throw CDMException("more than one 'vertical'-axis " + type2string(typeId) + " in config: " + p_->configId + " and xpath: " + xpathLevelString);
         }
         string levelName, levelId;
         CDMDataType levelDataType;
         xmlNodePtr node = 0;
-        if (size == 0) {
+        if (nodes.size() == 0) {
             LOG4FIMEX(logger, Logger::INFO, "no definition for vertical axis " + type2string(typeId) + " found, using default");
             levelName = "grib" + type2string(edition) + "_vLevel" + type2string(typeId);
             levelId = levelName;
             levelDataType = CDM_FLOAT;
         } else {
-            node = nodes->nodeTab[0];
+            node = nodes[0];
             assert(node->type == XML_ELEMENT_NODE);
             levelName = getXmlProp(node, "name");
             levelId = getXmlProp(node, "id");
@@ -540,16 +508,14 @@ void GribCDMReader::initLevels()
             if (node != 0) {
                 map<string, std::shared_ptr<ReplaceStringObject>> replacements;
                 replacements["EXT"] = std::make_shared<ReplaceStringTemplateObject<string>>(myExtension);
-                fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
+                fillAttributeListFromXMLNode(levelAttributes, nodes[0]->children, replacements);
 
                 // add special attributes for grib1 / grib2
                 {
                     string xpathGribLevelString("gr:grib" + type2string(edition));
-                    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
-                    xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
-                    int size = (gribNodes) ? gribNodes->nodeNr : 0;
-                    if (size == 1) {
-                        fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                    XPathNodeSet gribNodes(p_->doc, xpathGribLevelString, nodes[0]);
+                    if (gribNodes.size() == 1) {
+                        fillAttributeListFromXMLNode(levelAttributes, gribNodes[0]->children, p_->templateReplacementAttributes);
                     }
                 }
             } else {
@@ -566,9 +532,9 @@ void GribCDMReader::initLevels()
     }
 
     // create a fast lookup set for all level-names
-    for (map<string, vector<string>>::const_iterator levDimsIt = p_->levelDimNames.begin(); levDimsIt != p_->levelDimNames.end(); ++levDimsIt) {
-        for (vector<string>::const_iterator levDimsIt2 = levDimsIt->second.begin(); levDimsIt2 != levDimsIt->second.end(); ++levDimsIt2) {
-            p_->levelDimSet.insert(*levDimsIt2);
+    for (auto& levDims : p_->levelDimNames) {
+        for (auto& levDims2 : levDims.second) {
+            p_->levelDimSet.insert(levDims2);
         }
     }
 }
@@ -589,12 +555,8 @@ vector<double> GribCDMReader::readVarPv_(string exampleVar, bool asimofHeader)
 vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr levelData, string exampleVar, string extension)
 {
     vector<double> retValues;
-    string valuesXPath("./gr:values");
-    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(valuesXPath, node);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    for (int i = 0; i < size; i++) {
-        xmlNodePtr node = nodes->nodeTab[i];
+    XPathNodeSet nodes(p_->doc, "./gr:values", node);
+    for (auto node : nodes) {
         if (node->type == XML_ELEMENT_NODE) {
             string mode = getXmlProp(node, "mode");
             if (mode.empty() || mode == "inline") {
@@ -687,7 +649,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
             }
         }
     }
-    if (size == 0) {
+    if (nodes.size() == 0) {
         auto d = levelData->asDouble();
         retValues = vector<double>(&d[0], &d[0] + levelData->size());
     }
@@ -698,10 +660,8 @@ void GribCDMReader::initSpecialLevels_(xmlNodePtr node, const string& extension,
                                        DataPtr& levelData)
 {
     string xpathAdditional = "gr:additional_axis_variable";
-    xmlXPathObject_p xpathObj = p_->doc->getXPathObject(xpathAdditional, node);
-    xmlNodeSetPtr addNodes = xpathObj->nodesetval;
-    int size = (addNodes) ? addNodes->nodeNr : 0;
-    if (size > 0) {
+    XPathNodeSet addNodes(p_->doc, xpathAdditional, node);
+    if (addNodes.size() > 0) {
         string exampleVar;
         // find example variable
         for (const auto& vltp : p_->varLevelTypePos) {
@@ -712,8 +672,7 @@ void GribCDMReader::initSpecialLevels_(xmlNodePtr node, const string& extension,
                 break;
             }
         }
-        for (int i = 0; i < size; i++) {
-            xmlNodePtr inode = addNodes->nodeTab[i];
+        for (auto inode : addNodes) {
             string name = getXmlProp(inode, "name") + extension;
             string type = getXmlProp(inode, "type");
             string axis = getXmlProp(inode, "axis");
@@ -765,13 +724,12 @@ void GribCDMReader::initAddTimeDimension()
         p_->times = vector<FimexTime>(timesSet.begin(), timesSet.end());
     }
 
-    xmlXPathObject_p xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:axes/gr:time");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size != 1) {
+    XPathNodeSet nodes(p_->doc, "/gr:cdmGribReaderConfig/gr:axes/gr:time");
+    if (nodes.size() != 1) {
         throw CDMException("unable to find exactly 1 'time'-axis in config: " + p_->configId);
     }
-    xmlNodePtr node = nodes->nodeTab[0];
+
+    auto node = nodes[0];
     assert(node->type == XML_ELEMENT_NODE);
     p_->timeDimName = getXmlProp(node, "name");
     CDMDataType timeDataType = string2datatype(getXmlProp(node, "type"));
@@ -784,9 +742,9 @@ void GribCDMReader::initAddTimeDimension()
     CDMVariable timeVar(p_->timeDimName, timeDataType, timeShape);
     cdm_->addVariable(timeVar);
     vector<CDMAttribute> timeAttributes;
-    fillAttributeListFromXMLNode(timeAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
-    for (vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
-        cdm_->addAttribute(timeVar.getName(), *it);
+    fillAttributeListFromXMLNode(timeAttributes, nodes[0]->children, p_->templateReplacementAttributes);
+    for (auto attr : timeAttributes) {
+        cdm_->addAttribute(timeVar.getName(), attr);
     }
     CDMAttribute tunit;
     if (!cdm_->getAttribute(timeVar.getName(), "units", tunit)) {

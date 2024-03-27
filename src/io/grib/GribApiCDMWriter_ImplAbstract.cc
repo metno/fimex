@@ -36,12 +36,10 @@
 #include "fimex/TimeUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
+#include "fimex/XMLUtils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 
 #include <grib_api.h>
-
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 
 #include <algorithm>
 #include <cassert>
@@ -90,11 +88,9 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
 {
     {
         std::string templXPath("/cdm_gribwriter_config/template_file");
-        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
-        xmlNodeSetPtr nodes = xPObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        if (size == 1) {
-            const std::string gribTemplate = getXmlProp(nodes->nodeTab[0], "name");
+        XPathNodeSet nodes(xmlConfig, templXPath);
+        if (nodes.size() == 1) {
+            const auto gribTemplate = getXmlProp(nodes[0], "name");
             int error;
             FILE* fh = std::fopen(gribTemplate.c_str(), "r");
             if (!fh)
@@ -113,11 +109,9 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
     {
         std::ios_base::openmode mode = std::ios::binary | std::ios::out;
         std::string templXPath("/cdm_gribwriter_config/output_file[@type]");
-        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
-        xmlNodeSetPtr nodes = xPObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        if (size > 0) {
-            std::string openMode = getXmlProp(nodes->nodeTab[0], "type");
+        XPathNodeSet nodes(xmlConfig, templXPath);
+        if (nodes.size() > 0) {
+            std::string openMode = getXmlProp(nodes[0], "type");
             if (openMode == "append") {
                 // append or create
                 gribFile.open(outputFile.c_str(), mode | std::ios::app);
@@ -141,11 +135,9 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
     // check processing options
     {
         std::string templXPath("/cdm_gribwriter_config/processing_options/omitEmptyFields");
-        xmlXPathObject_p xPObj = xmlConfig->getXPathObject(templXPath);
-        xmlNodeSetPtr nodes = xPObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        if (size > 0) {
-            const std::string omitEmpty = getXmlContent(nodes->nodeTab[0]);
+        XPathNodeSet nodes(xmlConfig, templXPath);
+        if (nodes.size() > 0) {
+            const std::string omitEmpty = getXmlContent(nodes[0]);
             if (omitEmpty == "1" || omitEmpty == "yes" || omitEmpty == "true")
                 omitEmptyFields = true;
             else if (omitEmpty == "0" || omitEmpty == "no" || omitEmpty == "false")
@@ -360,16 +352,7 @@ void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
 
 void GribApiCDMWriter_ImplAbstract::setNodesAttributes(std::string attName, void* node)
 {
-    xmlXPathObject_p xPObj;
-    if (node == 0) {
-        xPObj = xmlConfig->getXPathObject(attName);
-    } else {
-        xPObj = xmlConfig->getXPathObject(attName, reinterpret_cast<xmlNodePtr>(node));
-    }
-    xmlNodeSetPtr nodes = xPObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    for (int j = 0; j < size; j++) {
-        xmlNodePtr node = nodes->nodeTab[j];
+    for (auto node : XPathNodeSet(xmlConfig->getXPathObject(attName, reinterpret_cast<xmlNodePtr>(node)))) {
         std::string name = getXmlProp(node, "name");
         std::string value = getXmlProp(node, "value");
         std::string type = getXmlProp(node, "type");
@@ -465,11 +448,9 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 
     // scale the levels according to grib
     verticalAxisXPath += "/grib" + type2string(gribVersion);
-    xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
-    xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 1) {
-        xmlNodePtr node = nodes->nodeTab[0];
+    XPathNodeSet nodes(xmlConfig, verticalAxisXPath);
+    if (nodes.size() == 1) {
+        auto node = nodes[0];
         if (levelData.size() == 0) {
             // add default value from config
             std::string value = getXmlProp(node, "value");
@@ -504,7 +485,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
             add_offset = string2type<double>(gribAddOffsetStr);
         }
         std::transform(levelData.begin(), levelData.end(), levelData.begin(), UnScale(scale_factor, add_offset));
-    } else if (size > 1) {
+    } else if (nodes.size() > 1) {
         throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
     } else {
         LOG4FIMEX(logger, Logger::WARN, "could not find vertical Axis " << verticalAxisXPath << " in " << configFile << ", skipping parameter " << varName);
@@ -559,67 +540,54 @@ bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, std::
     std::string parameterXPath = baseXPath + "[@name=\"" + varName + "\"]";
     parameterXPath += "/grib" + type2string(gribVersion);
     // try first with name
-    xmlXPathObject_p xpathObj = xmlConfig->getXPathObject(parameterXPath);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    size_t found = (nodes) ? (nodes->nodeNr > 0) : 0;
-    if (found == 0) {
-        CDMAttribute attr;
-        if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
-            std::string stdNameXPath = baseXPath + "[@standard_name=\"" + attr.getData()->asString() + "\"]";
-            stdNameXPath += "/grib" + type2string(gribVersion);
-            xmlXPathObject_p xpathObj2 = xmlConfig->getXPathObject(stdNameXPath);
-            nodes = xpathObj2->nodesetval;
-            found = (nodes) ? (nodes->nodeNr > 0) : 0;
-            if (found > 0)
-                usedXPath = stdNameXPath;
-        }
-    } else {
+    XPathNodeSet nodesP(xmlConfig, parameterXPath);
+    if (nodesP.size() > 0) {
         usedXPath = parameterXPath;
+        return true;
     }
-    return found > 0;
+
+    CDMAttribute attr;
+    if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
+        std::string stdNameXPath = baseXPath + "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+        stdNameXPath += "/grib" + type2string(gribVersion);
+        XPathNodeSet nodesS(xmlConfig, stdNameXPath);
+        if (nodesS.size() > 0) {
+            usedXPath = stdNameXPath;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue)
 {
-    xmlNodePtr node = 0;
-    std::vector<std::map<std::string, std::string>> levelParameters;
-    std::vector<int> possibleNodes;
     std::string usedXPath;
-    if (hasNodePtr(varName, usedXPath)) {
-        xmlXPathObject_p xpathObj = xmlConfig->getXPathObject(usedXPath);
-        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        assert(size > 0); // checked with hasNodePtr
-        if (size == 1) {
-            // find node with corresponding level
-            for (int i = 0; i < size; i++) {
-                xmlNodePtr node = nodes->nodeTab[i];
-                xmlNodePtr parent = node->parent;
-                std::string level = getXmlProp(parent, "level");
-                if (level != "") {
-                    LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
-                    double xLevelValue = string2type<double>(level);
-                    if (std::fabs(levelValue - xLevelValue) < (1e-6 * levelValue)) {
-                        LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
-                        possibleNodes.push_back(i);
-                    }
-                } else {
-                    LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
-                    possibleNodes.push_back(i);
-                }
-            }
-            if (possibleNodes.size() == 1) {
-                node = nodes->nodeTab[possibleNodes[0]];
-            } else {
-                throw CDMException("found " + type2string(possibleNodes.size()) + " entries in grib-config at " + configFile);
-            }
-        } else if (size > 1) {
-            throw CDMException(type2string(size) + " entries of '" + varName + "' in grib-config at " + configFile);
-        }
-    } else {
+    if (!hasNodePtr(varName, usedXPath)) {
         throw CDMException("could not find " + varName + " in " + configFile + " , skipping parameter");
     }
-    return node;
+
+    const XPathNodeSet nodes(xmlConfig, usedXPath);
+    if (nodes.size() != 1) {
+        throw CDMException(type2string(nodes.size()) + " entries of '" + varName + "' in grib-config at " + configFile);
+    }
+
+    // find node with corresponding level
+    xmlNodePtr node = nodes[0];
+    const auto level = getXmlProp(node->parent, "level");
+    if (level.empty()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
+        return node;
+    }
+
+    LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
+    double xLevelValue = string2type<double>(level);
+    if (std::fabs(levelValue - xLevelValue) < (1e-6 * levelValue)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+        return node;
+    }
+
+    throw CDMException("found 0 entries in grib-config at " + configFile);
 }
 
 } // namespace MetNoFimex

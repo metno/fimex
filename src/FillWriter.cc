@@ -32,16 +32,13 @@
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/TokenizeDotted.h"
-#include "fimex/XMLDoc.h"
+#include "fimex/XMLUtils.h"
 
 #include <algorithm>
 #include <map>
 #include <set>
 #include <utility>
 #include <vector>
-
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 
 namespace MetNoFimex {
 
@@ -63,21 +60,19 @@ std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName)
 
     XMLDoc doc(fileName);
     doc.registerNamespace("c", "http://www.met.no/schema/fimex/cdmFillWriterConfig");
-    xmlXPathObject_p xpathObj = doc.getXPathObject("/c:cdmFillWriter");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    if (nodes->nodeNr != 1) {
+    XPathNodeSet xpathFW(doc, "/c:cdmFillWriter");
+    if (xpathFW.size() != 1) {
         throw CDMException("file '" + fileName + "' is not a cdmFillWriterConfig with root /cdmFillWriter");
     }
+
     // translate
-    xpathObj = doc.getXPathObject("/c:cdmFillWriter/c:translate");
-    nodes = xpathObj->nodesetval;
-    const int size = (nodes) ? nodes->nodeNr : 0;
-    for (int i = 0; i < size; i++) {
+    XPathNodeSet xpath(doc, "/c:cdmFillWriter/c:translate");
+    for (auto node : xpath) {
         FillWriterTranslation fwt;
-        fwt.inputDim = getXmlProp(nodes->nodeTab[i], "inputDimension");
-        fwt.outputDim = getXmlProp(nodes->nodeTab[i], "outputDimension");
-        const auto iSlices = getXmlProp(nodes->nodeTab[i], "inputSlices");
-        const auto oSlices = getXmlProp(nodes->nodeTab[i], "outputSlices");
+        fwt.inputDim = getXmlProp(node, "inputDimension");
+        fwt.outputDim = getXmlProp(node, "outputDimension");
+        const auto iSlices = getXmlProp(node, "inputSlices");
+        const auto oSlices = getXmlProp(node, "outputSlices");
         fwt.inSlices = tokenizeDotted<size_t>(iSlices);
         fwt.outSlices = tokenizeDotted<size_t>(oSlices);
         if (fwt.outSlices.size() > 1) {

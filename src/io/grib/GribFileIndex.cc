@@ -669,28 +669,27 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
         msgPos_ = string2type<size_t>(msgPosStr);
 
     { // parameter
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":parameter", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size == 0)
+        XPathNodeSet nodes(doc, nsPrefix + ":parameter", node);
+        if (nodes.size() == 0)
             throw runtime_error("parameter not found in node");
-        xmlNodePtr pNode = xp->nodesetval->nodeTab[0];
+
+        auto pNode = nodes[0];
         parameterName_ = getXmlProp(pNode, "name");
         shortName_ = getXmlProp(pNode, "shortName");
+
         // grib
-        xmlXPathObject_p xpG = doc->getXPathObject(nsPrefix + ":grib1", pNode);
-        int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
-        if (gSize > 0) {
+        XPathNodeSet nodes1(doc, nsPrefix + ":grib1", pNode);
+        if (nodes1.size() > 0) {
             edition_ = 1;
-            xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
+            auto gNode = nodes1[0];
             gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_indicatorOfParameter)));
             gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_gribTablesVersionNo)));
             gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_identificationOfOriginatingGeneratingCentre)));
         } else {
-            xpG = doc->getXPathObject(nsPrefix + ":grib2", pNode);
-            int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
-            if (gSize > 0) {
+            XPathNodeSet nodes2(doc, nsPrefix + ":grib2", pNode);
+            if (nodes2.size() > 0) {
                 edition_ = 2;
-                xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
+                auto gNode = nodes2[0];
                 gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_parameterNumber)));
                 gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_parameterCategory)));
                 gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, GK_discipline)));
@@ -701,20 +700,18 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
     }
     {
         // level
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":level", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+        XPathNodeSet nodes(doc, nsPrefix + ":level", node);
+        if (nodes.size() > 0) {
+            auto lNode = nodes[0];
             levelNo_ = string2type<long>(getXmlProp(lNode, "no"));
             levelType_ = string2type<long>(getXmlProp(lNode, "type"));
         }
     }
     {
         // time
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":time", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+        XPathNodeSet nodes(doc, nsPrefix + ":time", node);
+        if (nodes.size() > 0) {
+            auto lNode = nodes[0];
             dataDate_ = string2type<long>(getXmlProp(lNode, GK_dataDate));
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
             stepUnits_ = gribStepUnitsFromText(getXmlProp(lNode, GK_stepUnits));
@@ -726,19 +723,16 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
     }
     {
         // typeOfGrid
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":typeOfGrid", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
-            typeOfGrid_ = getXmlProp(lNode, "name");
+        XPathNodeSet nodes(doc, nsPrefix + ":typeOfGrid", node);
+        if (nodes.size() > 0) {
+            typeOfGrid_ = getXmlProp(nodes[0], "name");
         }
     }
     {
         // ensemble
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":ensemble", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+        XPathNodeSet nodes(doc, nsPrefix + ":ensemble", node);
+        if (nodes.size() > 0) {
+            xmlNodePtr lNode = nodes[0];
             totalNumberOfEnsembles_ = string2type<long>(getXmlProp(lNode, "total"));
             perturbationNo_ = string2type<long>(getXmlProp(lNode, "no"));
         } else {
@@ -748,19 +742,16 @@ GribFileMessage::GribFileMessage(XMLDoc_p doc, string nsPrefix, xmlNodePtr node)
     }
     {
         // extraKeys
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":extraKey", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        for (int i = 0; i < size; ++i) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[i];
-            string keyName = getXmlProp(lNode, "name");
+        XPathNodeSet nodes(doc, nsPrefix + ":extraKey", node);
+        for (auto lNode : nodes) {
+            auto keyName = getXmlProp(lNode, "name");
             otherKeys_[keyName] = string2type<long>(getXmlProp(lNode, "value"));
         }
     }
     {
-        xmlXPathObject_p xp = doc->getXPathObject(nsPrefix + ":gridDefinition", node);
-        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+        XPathNodeSet nodes(doc, nsPrefix + ":gridDefinition", node);
+        if (nodes.size() > 0) {
+            auto lNode = nodes[0];
             string proj4 = getXmlProp(lNode, "proj4");
             bool isDegree = string2type<bool>(getXmlProp(lNode, "isDegree"));
             double startX = string2type<double>(getXmlProp(lNode, "startX"));
@@ -1482,17 +1473,14 @@ void GribFileIndex::initByXML(const std::string& grbmlFilePath)
     initByXMLReader(grbmlFilePath);
     XMLDoc_p doc = std::make_shared<XMLDoc>(grbmlFilePath);
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
-    xmlXPathObject_p xp = doc->getXPathObject("/gfi:gribFileIndex");
-    int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
-    if (size == 0) {
+    XPathNodeSet nodes(doc, "/gfi:gribFileIndex");
+    if (nodes.size() == 0) {
         throw runtime_error("grib-index xmlfile does not contain root node at: " + grbmlFilePath);
     }
-    url_ = getXmlProp(xp->nodesetval->nodeTab[0], "url");
+    url_ = getXmlProp(nodes[0], "url");
 
-    xp = doc->getXPathObject("gfi:gribMessage", xp->nodesetval->nodeTab[0]);
-    size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-    for (int i = 0; i < size; ++i) {
-        messages_.push_back(GribFileMessage(doc, "gfi", xp->nodesetval->nodeTab[i]));
+    for (auto node : XPathNodeSet(doc, "gfi:gribMessage", nodes[0])) {
+        messages_.push_back(GribFileMessage(doc, "gfi", node));
     }
 }
 

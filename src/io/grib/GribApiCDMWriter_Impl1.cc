@@ -30,9 +30,7 @@
 #include "fimex/String2Type.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
-
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
+#include "fimex/XMLUtils.h"
 
 #include <grib_api.h>
 
@@ -380,14 +378,11 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
         verticalAxisXPath += "[@standard_name=\"\"]";
     }
     verticalAxisXPath += "/grib" + type2string(gribVersion);
-    xmlXPathObject_p verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
-    xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 1) {
-        xmlNodePtr node = nodes->nodeTab[0];
-        std::string levelId = getXmlProp(node, "id");
+    XPathNodeSet nodes(xmlConfig->getXPathObject(verticalAxisXPath));
+    if (nodes.size() == 1) {
+        std::string levelId = getXmlProp(nodes[0], "id");
         GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfTypeOfLevel", string2type<long>(levelId)), "setting levelId");
-    } else if (size > 1) {
+    } else if (nodes.size() > 1) {
         throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
     } else {
         throw CDMException("could not find vertical Axis " + verticalAxisXPath + " in " + configFile + ", skipping parameter " + varName);

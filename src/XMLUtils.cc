@@ -62,4 +62,11 @@ size_t XmlCharPtr::len() const
     return xmlStrlen(p_);
 }
 
+XPathNodeSet::XPathNodeSet(xmlXPathObject_p xpo)
+    : xpo_(xpo)
+    , nodes_(xpo ? xpo_->nodesetval : nullptr)
+    , size_(nodes_ ? nodes_->nodeNr : 0)
+{
+}
+
 } // namespace MetNoFimex
