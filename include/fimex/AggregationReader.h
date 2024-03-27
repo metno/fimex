@@ -38,6 +38,13 @@ namespace MetNoFimex {
 class AggregationReader : public CDMReader
 {
 public:
+    typedef enum {
+        AGG_UNION,
+        AGG_JOIN_EXISTING,
+        // AGG_JOIN_NEW,
+    } AggType;
+
+public:
     AggregationReader(const std::string& aggregationType);
     ~AggregationReader();
 
@@ -48,11 +55,13 @@ public:
     DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
     DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
 
+    static AggType aggTypeFromText(const std::string& aggType);
+
 private:
     // main data-reader
     CDMReader_p gDataReader_;
 
-    std::string aggType_;
+    AggType aggType_;
 
     //! the readers_ as ordered in the aggregation
     std::vector<std::pair<std::string, CDMReader_p>> readers_;

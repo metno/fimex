@@ -38,11 +38,24 @@
 namespace MetNoFimex {
 
 namespace {
+
 Logger_p logger = getLogger("fimex.AggregationReader");
+
+} // namespace
+
+AggregationReader::AggType AggregationReader::aggTypeFromText(const std::string& aggType)
+{
+    if (aggType == "joinExisting") {
+        return AGG_JOIN_EXISTING;
+    } else if (aggType == "union") {
+        return AGG_UNION;
+    } else {
+        throw CDMException("aggregation type '" + aggType + "' not known");
+    }
 }
 
 AggregationReader::AggregationReader(const std::string& aggregationType)
-    : aggType_(aggregationType)
+    : aggType_(aggTypeFromText(aggregationType))
 {
 }
 
@@ -76,7 +89,7 @@ void AggregationReader::initAggregation()
         return;
     }
 
-    if (aggType_ == "joinExisting") {
+    if (aggType_ == AGG_JOIN_EXISTING) {
         // join unlimited from joinExisting, remember unlimdim->datasource map
         const CDMDimension* uDim = cdm_->getUnlimitedDim();
         if (uDim == 0) {
@@ -104,7 +117,7 @@ void AggregationReader::initAggregation()
         // change size of unlimited dimension
         CDMDimension& ulimDim = cdm_->getDimension(uDim->getName());
         ulimDim.setLength(readerUdimPos_.size());
-    } else if (aggType_ == "union") {
+    } else if (aggType_ == AGG_UNION) {
         // join variables/dimensions from union, remember variable->datasource map
         for (size_t ir = 0; ir < readers_.size(); ++ir) {
             auto& id_rd = readers_[ir];
@@ -160,7 +173,7 @@ void AggregationReader::initAggregation()
             }
         }
     } else {
-        throw CDMException("aggregation type " + aggType_ + " not supported (currently, only union and joinExisting are supported)");
+        throw CDMException("bad aggregation type");
     }
 }
 
@@ -176,14 +189,14 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, size_t unLim
         return createData(CDM_NAT, 0);
     }
 
-    if (aggType_ == "joinExisting") {
+    if (aggType_ == AGG_JOIN_EXISTING) {
         if (cdm_->hasUnlimitedDim(variable) && (unLimDimPos < readerUdimPos_.size())) {
             LOG4FIMEX(logger, Logger::DEBUG,
                       "fetching data from " << readers_.at(readerUdimPos_.at(unLimDimPos).first).first << " at uDimPos "
                                             << readerUdimPos_.at(unLimDimPos).second);
             return readers_.at(readerUdimPos_.at(unLimDimPos).first).second->getDataSlice(varName, readerUdimPos_.at(unLimDimPos).second);
         }
-    } else if (aggType_ == "union") {
+    } else if (aggType_ == AGG_UNION) {
         const auto it = varReader_.find(varName);
         if (it != varReader_.end()) {
             auto& r = readers_.at(it->second);
@@ -207,7 +220,7 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, const SliceB
         return createData(CDM_NAT, 0);
     }
 
-    if (aggType_ == "joinExisting") {
+    if (aggType_ == AGG_JOIN_EXISTING) {
         if (cdm_->hasUnlimitedDim(variable)) {
             // merge along the unlim-slices
             // this only works if the unlim dim is the highest (as in netcdf-3)
@@ -257,7 +270,7 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, const SliceB
             }
             return retData;
         }
-    } else if (aggType_ == "union") {
+    } else if (aggType_ == AGG_UNION) {
         const auto it = varReader_.find(varName);
         if (it != varReader_.end()) {
             const auto& id_rd = readers_.at(it->second);
