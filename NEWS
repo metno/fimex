@@ -1,3 +1,7 @@
+  * 2024-04-02 fimex 2.0.0
+    * ncml writer
+    * ncml joinNew
+    * ncml shape bugfix (reversed order of dimensions)
   * 2024-02-16 fimex 1.10.1
     * fix various problems in 1.10.0
     * support eccodes 2.34
