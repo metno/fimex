@@ -1,3 +1,5 @@
+  * 2024-06-18 fimex 2.0.1
+    * bugfix in interpolation unit tests
   * 2024-04-02 fimex 2.0.0
     * ncml writer
     * ncml joinNew
