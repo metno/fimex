@@ -1,7 +1,7 @@
 /*
  * Fimex, NcmlAggregationReader.cc
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2013-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -136,13 +136,12 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             }
             std::vector<std::string> files;
             scanFiles(files, dir, depth, std::regex(regExp), true);
-            for (size_t i = 0; i < files.size(); ++i) {
-                LOG4FIMEX(logger, Logger::DEBUG, "scanned file: " << files.at(i));
+            for (const auto& fileName : files) {
+                LOG4FIMEX(logger, Logger::DEBUG, "scanned file '" << fileName << "'");
                 try {
-                    agg->addReader(CDMFileReaderFactory::create(type, files.at(i), config), files.at(i));
+                    agg->addReader(CDMFileReaderFactory::create(type, fileName, config), fileName);
                 } catch (CDMException& ex) {
-                    LOG4FIMEX(logger, Logger::ERROR, "cannot read scanned file '" << files.at(i) << "' type: " << type << ", config: " << files.at(i) );
-
+                    LOG4FIMEX(logger, Logger::ERROR, "cannot read scanned file '" << fileName << "' type: " << type << ", config: " << config);
                 }
             }
         }
