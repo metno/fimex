@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2019-2022, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,6 +25,8 @@
 #define XMLUTILS_H_
 
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInput.h"
+#include "fimex/XMLInputDoc.h"
 
 #include <string>
 
@@ -95,6 +97,9 @@ private:
     xmlNodeSetPtr nodes_;
     int size_;
 };
+
+XMLInputDoc createXMLInput(const XMLInput& xi);
+XMLInputDoc createXMLInput(const std::string& configXML);
 
 } // namespace MetNoFimex
 

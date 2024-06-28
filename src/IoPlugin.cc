@@ -1,7 +1,7 @@
 /*
  * Fimex, IoFactory.h
  *
- * (C) Copyright 2019-2022, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -129,7 +129,8 @@ CDMReaderWriter_p IoPlugin::createReaderWriter(const std::string& fileTypeName, 
 {
     return wrapped_->createReaderWriter(fileTypeName, fileName, config, args);
 }
-void IoPlugin::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config)
+
+void IoPlugin::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
     return wrapped_->createWriter(input, fileTypeName, fileName, config);
 }

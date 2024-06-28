@@ -1,7 +1,7 @@
 /*
   Fimex, src/GribIoFactory.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -135,7 +135,7 @@ CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const s
     }
 }
 
-void GribIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile)
+void GribIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
     if (fileTypeName == GRBML || getExtension(fileName) == GRBML)
         throw CDMException("cannot write grbml-files");
@@ -147,9 +147,9 @@ void GribIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeN
     else if (isGribType(fileTypeName) || isGribType(ext))
         gribVersion = 1;
     else
-        IoFactory::createWriter(input, fileTypeName, fileName, configFile);
+        IoFactory::createWriter(input, fileTypeName, fileName, config);
 
-    GribApiCDMWriter(input, fileName, gribVersion, configFile);
+    GribApiCDMWriter(input, fileName, gribVersion, config);
 }
 
 } // namespace MetNoFimex

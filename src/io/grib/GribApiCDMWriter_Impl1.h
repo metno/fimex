@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -34,7 +34,7 @@ namespace MetNoFimex {
 class GribApiCDMWriter_Impl1 : public GribApiCDMWriter_ImplAbstract
 {
 public:
-    GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
+    GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const XMLInput& config);
     ~GribApiCDMWriter_Impl1();
 
     void setParameter(const std::string& varName, double levelValue) override;

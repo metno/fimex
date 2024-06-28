@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -78,12 +78,10 @@ public:
     virtual ~UnScale() {}
 };
 
-GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile,
-                                                             const std::string& configFile)
+GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const XMLInput& config)
     : CDMWriter(cdmReader, outputFile)
     , gribVersion(gribVersion)
-    , configFile(configFile)
-    , xmlConfig(new XMLDoc(configFile))
+    , xmlConfig(config.getXMLDoc())
     , omitEmptyFields(true)
 {
     {

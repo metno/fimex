@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -40,8 +40,8 @@ namespace MetNoFimex {
 
 static Logger_p logger = getLogger("fimex.GribApi_CDMWriter.Impl1");
 
-GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile)
-    : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
+GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(CDMReader_p cdmReader, const std::string& outputFile, const XMLInput& config)
+    : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, config)
 {
 }
 

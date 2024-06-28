@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMFileReaderFactory.cc
  *
- * (C) Copyright 2010-2022, met.no
+ * (C) Copyright 2010-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -35,10 +35,7 @@
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
-#include "fimex/XMLDoc.h"
-#include "fimex/XMLInputDoc.h"
-#include "fimex/XMLInputFile.h"
-#include "fimex/XMLInputString.h"
+#include "fimex/XMLUtils.h"
 #include "fimex/min_max.h"
 
 #include <algorithm>
@@ -178,22 +175,6 @@ IoFactory_p findFactory(const std::string& fileTypeName, const std::string& file
     return findFactoryFromFileName(fileName);
 }
 
-XMLInputDoc createXMLInput(const XMLInput& xi)
-{
-    return XMLInputDoc(xi.id(), xi.getXMLDoc());
-}
-
-XMLInputDoc createXMLInput(const std::string& configXML)
-{
-    if (configXML.empty()) {
-        return XMLInputDoc("", XMLDoc_p());
-    } else if (starts_with(configXML, "<?xml ")) {
-        return createXMLInput(XMLInputString(configXML));
-    } else {
-        return createXMLInput(XMLInputFile(configXML));
-    }
-}
-
 } // namespace
 
 // static
@@ -230,11 +211,18 @@ CDMReader_p CDMFileReaderFactory::create(const std::string& fileTypeName, const 
 }
 
 // static
-void CDMFileReaderFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile)
+void CDMFileReaderFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML)
 {
     if (IoFactory_p factory = findFactory(fileTypeName, fileName, true))
-        return factory->createWriter(input, fileTypeName, fileName, configFile);
+        return factory->createWriter(input, fileTypeName, fileName, configXML);
     throw CDMException("cannot create writer for type '" + fileTypeName + "' and file '" + fileName + "'");
+}
+
+// static
+void CDMFileReaderFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile)
+{
+    XMLInputDoc configXML = createXMLInput(configFile);
+    return createWriter(input, fileTypeName, fileName, configXML);
 }
 
 } // namespace MetNoFimex

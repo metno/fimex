@@ -1,7 +1,7 @@
 /*
   Fimex, src/NullIoFactory.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -27,7 +27,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
   USA.
 */
-
 
 #include "NullIoFactory.h"
 
@@ -55,7 +54,7 @@ CDMReader_p NullIoFactory::createReader(const std::string&, const std::string&, 
     throw CDMException("unable to create reader for 'null' file type");
 }
 
-void NullIoFactory::createWriter(CDMReader_p input, const std::string&, const std::string& fileName, const std::string&)
+void NullIoFactory::createWriter(CDMReader_p input, const std::string&, const std::string& fileName, const XMLInput&)
 {
     Null_CDMWriter(input, fileName);
 }

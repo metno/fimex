@@ -1,7 +1,7 @@
 /*
   Fimex, src/NcmlIoFactory.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,7 +28,6 @@
   USA.
 */
 
-
 #ifndef FIMEX_NCMLIOFACTORY_H
 #define FIMEX_NCMLIOFACTORY_H
 
@@ -44,7 +43,7 @@ public:
     CDMReader_p createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                              const std::vector<std::string>& args) override;
 
-    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config) override;
+    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config) override;
 };
 } // namespace MetNoFimex
 

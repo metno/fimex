@@ -1,7 +1,7 @@
 /*
   Fimex, src/NcmlIoFactory.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,7 +28,6 @@
   USA.
 */
 
-
 #include "NcmlIoFactory.h"
 
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -51,7 +50,7 @@ CDMReader_p NcmlIoFactory::createReader(const std::string&, const std::string& f
     return std::make_shared<NcmlCDMReader>(XMLInputFile(fileName));
 }
 
-void NcmlIoFactory::createWriter(CDMReader_p input, const std::string&, const std::string& fileName, const std::string&)
+void NcmlIoFactory::createWriter(CDMReader_p input, const std::string&, const std::string& fileName, const XMLInput&)
 {
     NcmlCDMWriter writer(input, fileName);
 }

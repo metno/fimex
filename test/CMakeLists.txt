@@ -239,7 +239,8 @@ IF(ENABLE_FELT AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
     TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
     APPEND PROPERTY DEPENDS testGribWriter
   )
-  TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib)
+  TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib ${libxml2_PACKAGE})
+  TARGET_LINK_LIBRARIES(testGribWriterVertical ${libxml2_PACKAGE})
 ENDIF()
 IF(ENABLE_GRIBAPI OR ENABLE_ECCODES)
   TARGET_LINK_LIBRARIES(testGribReader libfimex-io-grib)
@@ -250,7 +251,7 @@ IF(ENABLE_FELT AND ENABLE_NETCDF)
     TEST testNetCDFReadWrite.sh
     APPEND PROPERTY DEPENDS testNetcdfWriter
   )
-  TARGET_LINK_LIBRARIES(testNetcdfWriter libfimex-io-netcdf)
+  TARGET_LINK_LIBRARIES(testNetcdfWriter libfimex-io-netcdf ${libxml2_PACKAGE})
 ENDIF()
 
 IF(ENABLE_NETCDF)

@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,6 +25,7 @@
 #define GRIBAPICDMWRITER_H_
 
 #include "fimex/CDMWriter.h"
+#include "fimex/XMLInput.h"
 
 // pre-declaration of parameters
 struct grib_handle;
@@ -35,8 +36,8 @@ class GribApiCDMWriter : public CDMWriter
 {
 
 public:
-    GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile);
-     ~GribApiCDMWriter();
+    GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const XMLInput& config);
+    ~GribApiCDMWriter();
 
 private:
 };

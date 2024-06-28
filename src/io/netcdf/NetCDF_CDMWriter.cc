@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2023, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -49,7 +49,7 @@ namespace {
 
 Logger_p logger = getLogger("fimex.NetCDF_CDMWriter");
 
-int getNcVersion(int version, std::unique_ptr<XMLDoc>& doc)
+int getNcVersion(int version, XMLDoc_p doc)
 {
     int retVal = NC_CLOBBER;
     switch (version) {
@@ -108,15 +108,11 @@ void checkDoc(std::unique_ptr<XMLDoc>& doc, const std::string& filename)
 
 } // namespace
 
-NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& outputFile, std::string configFile, int version)
+NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& outputFile, const XMLInput& config, int version)
     : CDMWriter(reader, outputFile)
     , ncFile(new Nc())
 {
-    std::unique_ptr<XMLDoc> doc;
-    if (!configFile.empty()) {
-        doc.reset(new XMLDoc(configFile));
-        checkDoc(doc, configFile);
-    }
+    const auto& doc = config.getXMLDoc();
     const int ncVersion = getNcVersion(version, doc);
     ncFile->filename = outputFile;
 #ifdef HAVE_MPI
@@ -159,7 +155,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(CDMReader_p reader, const std::string& output
     init();
 }
 
-void NetCDF_CDMWriter::initNcmlReader(std::unique_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initNcmlReader(XMLDoc_p doc)
 {
     if (doc) {
         XPathNodeSet nodes(doc, "/cdm_ncwriter_config/ncmlConfig");
@@ -173,7 +169,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::unique_ptr<XMLDoc>& doc)
     }
 }
 
-void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initRemove(XMLDoc_p doc)
 {
     bool autoRemoveDims = true;
     if (doc) {
@@ -229,7 +225,7 @@ void NetCDF_CDMWriter::initRemove(std::unique_ptr<XMLDoc>& doc)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameDimension(std::unique_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameDimension(XMLDoc_p doc)
 {
     if (doc) {
         for (auto node : XPathNodeSet(doc, "/cdm_ncwriter_config/dimension[@newname]")) {
@@ -256,7 +252,7 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameVariable(XMLDoc_p doc)
 {
     if (doc) {
         for (auto node : XPathNodeSet(doc, "/cdm_ncwriter_config/variable[@newname]")) {
@@ -307,7 +303,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::unique_ptr<XMLDoc>& doc)
     }
 }
 
-void NetCDF_CDMWriter::initFillRenameAttribute(std::unique_ptr<XMLDoc>& doc)
+void NetCDF_CDMWriter::initFillRenameAttribute(XMLDoc_p doc)
 {
     // make a complete copy of the original attributes
     if (!doc)
