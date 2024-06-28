@@ -1,7 +1,7 @@
 /*
  * Fimex, AggregationReader.cc
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2013-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/StringUtils.h"
@@ -87,7 +88,7 @@ getData
 - other vars: find reader by varname (already qc-passed), return data
 */
 
-void AggregationReader::addReader(CDMReader_p reader, const std::string& id)
+void AggregationReader::addReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
 {
     auto id_ = id;
     if (!id_.empty()) {
@@ -96,13 +97,13 @@ void AggregationReader::addReader(CDMReader_p reader, const std::string& id)
     readers_.push_back(std::make_pair(id, reader));
 
     if (readers_.size() == 1) {
-        addFirstReader(reader, id_);
+        addFirstReader(reader, id_, coordValue);
     } else {
-        addOtherReader(reader, id_);
+        addOtherReader(reader, id_, coordValue);
     }
 }
 
-void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id)
+void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
 {
     // start out with CDM of first reader
     *cdm_ = readers_.front().second->getCDM();
@@ -120,10 +121,10 @@ void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id
                 }
             }
 
-            extendJoinedUnLimDimBy(uDim->getLength());
+            extendJoinedUnLimDimBy(uDim->getLength(), coordValue);
         } else {
             // if first reader does not have unlimited dimension, some unlimited dimension may appear later
-            extendJoinedUnLimDimBy(0);
+            extendJoinedUnLimDimBy(0, "");
         }
     } else if (aggType_ == AGG_JOIN_NEW) {
         if (const auto* uDim = cdm_->getUnlimitedDim()) {
@@ -144,7 +145,7 @@ void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id
             }
         }
 
-        extendJoinedUnLimDimBy(1);
+        extendJoinedUnLimDimBy(1, coordValue);
     }
 
     for (const auto& v : cdm_->getVariables()) {
@@ -156,7 +157,7 @@ void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id
     }
 }
 
-void AggregationReader::extendJoinedUnLimDimBy(size_t len)
+void AggregationReader::extendJoinedUnLimDimBy(size_t len, const std::string& coordValue)
 {
     const size_t before = readerUdimPos_.empty() ? 0 : readerUdimPos_.back();
     readerUdimPos_.push_back(before + len);
@@ -164,6 +165,16 @@ void AggregationReader::extendJoinedUnLimDimBy(size_t len)
     // change size of unlimited dimension
     if (auto uDim = cdm_->getUnlimitedDim()) {
         cdm_->getDimension(uDim->getName()).setLength(readerUdimPos_.back());
+    }
+
+    if (!coordValue.empty()) {
+        const auto coordValues = tokenize(coordValue);
+        if (coordValues.size() != len) {
+            std::ostringstream msg;
+            msg << "expected " << len << " but found " << coordValues.size() << " coordValues in '" << coordValue << "'";
+            throw CDMException(msg.str());
+        }
+        joinCoordValues.insert(joinCoordValues.end(), coordValues.begin(), coordValues.end());
     }
 }
 
@@ -184,7 +195,7 @@ void copyVar(const CDM& from, const CDMVariable& fromVar, CDM& to)
 
 } // namespace
 
-void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id)
+void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
 {
     CDM& aCdm = *cdm_;
     auto* aUdim = aCdm.getUnlimitedDim();
@@ -198,12 +209,12 @@ void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id
         if (!rUdim) {
             // added reader has no unlimited dimension
             LOG4FIMEX(logger, Logger::INFO, "reader '" << id << "' has no unlimited dimension");
-            extendJoinedUnLimDimBy(0);
+            extendJoinedUnLimDimBy(0, "");
         } else if (aUdim && rUdim->getName() != aUdim->getName()) {
             // agg and added reader both have an unlimited dimension, but they have different names
             LOG4FIMEX(logger, Logger::WARN,
                       "reader '" << id << "' has unlimited dimension '" << rUdim->getName() << "' while aggregation has '" << aUdim->getName() << "'");
-            extendJoinedUnLimDimBy(0);
+            extendJoinedUnLimDimBy(0, "");
         } else {
             if (!aUdim) {
                 // aggregation does not have an unlimited dimension from before; add, and add variables
@@ -241,7 +252,7 @@ void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id
                 }
             }
 
-            extendJoinedUnLimDimBy(rUdim->getLength());
+            extendJoinedUnLimDimBy(rUdim->getLength(), coordValue);
         }
     } else if (aggType_ == AGG_JOIN_NEW) {
         // for all join variables not known already, copy and change shape
@@ -257,7 +268,7 @@ void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id
             }
         }
 
-        extendJoinedUnLimDimBy(1);
+        extendJoinedUnLimDimBy(1, coordValue);
     }
 
     // remaining variables are treated as for "union"
@@ -304,7 +315,33 @@ void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id
     }
 }
 
-void AggregationReader::initAggregation() {}
+void AggregationReader::initAggregation()
+{
+    if (joinCoordValues.empty()) {
+        return;
+    }
+    if (aggType_ == AGG_JOIN_NEW) {
+        CDMDataType joinDataType = CDM_DOUBLE;
+        DataPtr joinData;
+        try {
+            joinData = initDataByArray(joinDataType, joinCoordValues);
+        } catch (string2type_error& ex) {
+        }
+        if (!joinData) {
+            joinDataType = CDM_STRINGS;
+            joinData = initDataByArray(joinDataType, joinCoordValues);
+        }
+        CDMVariable joinVar(joinNewDim, joinDataType, {joinNewDim});
+        joinVar.setData(joinData);
+        cdm_->addVariable(joinVar);
+    } else if (aggType_ == AGG_JOIN_EXISTING) {
+        const auto& joinName = cdm_->getUnlimitedDim()->getName();
+        if (cdm_->hasVariable(joinName)) {
+            auto& joinVar = cdm_->getVariable(joinName);
+            joinVar.setData(initDataByArray(joinVar.getDataType(), joinCoordValues));
+        }
+    }
+}
 
 CDMReader_p AggregationReader::findJoinReader(size_t& unLimDimPos) const
 {

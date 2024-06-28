@@ -1,7 +1,7 @@
 /*
  * Fimex, AggregationReader.h
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2013-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -49,9 +49,11 @@ public:
     AggregationReader(const std::string& aggregationType);
     ~AggregationReader();
 
+    AggType aggType() const { return aggType_; }
+
     void joinNewVars(const std::string& jnd, const std::set<std::string>& jnv) { joinNewDim = jnd; joinVars = jnv; } // jnd=ncml dimName; knv=ncml variableAgg
 
-    void addReader(CDMReader_p reader, const std::string& id = std::string());
+    void addReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
     void initAggregation();
 
     using CDMReader::getDataSlice;
@@ -61,10 +63,10 @@ public:
     static AggType aggTypeFromText(const std::string& aggType);
 
 private:
-    void extendJoinedUnLimDimBy(size_t len);
+    void extendJoinedUnLimDimBy(size_t len, const std::string& coordValue);
 
-    void addFirstReader(CDMReader_p reader, const std::string& id);
-    void addOtherReader(CDMReader_p reader, const std::string& id);
+    void addFirstReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
+    void addOtherReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
 
     CDMReader_p findJoinReader(size_t& unLimDimPos) const;
     bool checkJoinExistingDims(CDMReader_p reader, const std::string& varName) const;
@@ -79,6 +81,7 @@ private:
     std::vector<std::pair<std::string, CDMReader_p>> readers_;
 
     std::string joinNewDim; // from ncml dimName
+    std::vector<std::string> joinCoordValues;
     std::set<std::string> joinVars;
 
     //! accumulated length of unlimited dimension for readers_

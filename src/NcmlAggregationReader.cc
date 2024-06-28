@@ -98,7 +98,8 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
     } else {
         const auto aggType = getXmlProp(nodesAgg[0], "type");
         auto agg = std::make_shared<AggregationReader>(aggType);
-        if (aggType == "joinNew") {
+        const bool aggJoinNew = agg->aggType() == AggregationReader::AGG_JOIN_NEW;
+        if (aggJoinNew) {
             const auto aggDim = getXmlProp(nodesAgg[0], "dimName");
 
             std::set<std::string> aggVars;
@@ -112,14 +113,33 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         size_t idx = 0;
         for (auto node : XPathNodeSet(doc, "./nc:netcdf", nodesAgg[0])) {
             // open <netcdf /> tags recursively
-            const std::string id = ncml.id() + ":netcdf:" + type2string(idx++);
+            const std::string id = ncml.id() + ":netcdf:" + type2string(idx);
             const std::string current = doc->toString(node);
-            agg->addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id);
+            auto coordValue = getXmlProp(node, "coordValue");
+            if (coordValue.empty() && aggJoinNew) {
+                // ncml description:
+                // If you do not specify a coordinate variable, and you do not add coordValue attributes, then a coordinate variable of type String will be
+                // added whose values are the names of the files.
+
+                // note: we do not use the location / filename to avoid leaking passwords which might be included in a http url
+                coordValue = "location_" + type2string(idx);
+            }
+            const auto timeUnitsChange = getXmlProp(node, "timeUnitsChange");
+            if (!timeUnitsChange.empty()) {
+                LOG4FIMEX(logger, Logger::WARN, "ncml aggregation timeUnitsChange not implemented");
+            }
+            agg->addReader(std::make_shared<NcmlCDMReader>(XMLInputString(current, id)), id, coordValue);
+            idx += 1;
         }
 
         // open reader by scan
+        idx = 0;
         const XPathNodeSet nodesScan(doc, "./nc:scan", nodesAgg[0]);
         for (auto node : nodesScan) {
+            const auto dateFormatMark = getXmlProp(node, "dateFormatMark");
+            if (!dateFormatMark.empty()) {
+                LOG4FIMEX(logger, Logger::WARN, "ncml aggregation dateFormatMark not implemented");
+            }
             std::string dir, type, config;
             getFileTypeConfig(getXmlProp(node, "location"), dir, type, config);
             std::string suffix = getXmlProp(node, "suffix");
@@ -136,14 +156,18 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
             }
             std::vector<std::string> files;
             scanFiles(files, dir, depth, std::regex(regExp), true);
+            std::string coordValue;
             for (const auto& fileName : files) {
                 LOG4FIMEX(logger, Logger::DEBUG, "scanned file '" << fileName << "'");
                 try {
-                    agg->addReader(CDMFileReaderFactory::create(type, fileName, config), fileName);
+                    if (aggJoinNew)
+                        coordValue = "location_" + type2string(idx);
+                    agg->addReader(CDMFileReaderFactory::create(type, fileName, config), fileName, coordValue);
                 } catch (CDMException& ex) {
                     LOG4FIMEX(logger, Logger::ERROR, "cannot read scanned file '" << fileName << "' type: " << type << ", config: " << config);
                 }
             }
+            idx += 1;
         }
         agg->initAggregation();
         reader_ = agg;

@@ -90,6 +90,32 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExisting, TestConfig)
     TEST4FIMEX_CHECK_EQ(reader->getDataSlice("unlim", sb)->asShort()[0], 4);
 }
 
+TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingCV, TestConfig)
+{
+    const string ncmlName = require("joinExistingCV.ncml");
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
+    TEST4FIMEX_REQUIRE(reader);
+    {
+        const std::string test_output = std::string(oldDir) + "/joinExistingCV.nc";
+        CDMFileReaderFactory::createWriter(reader, "nc4", test_output);
+    }
+    const auto dim_unlim = reader->getCDM().getUnlimitedDim();
+    TEST4FIMEX_REQUIRE(dim_unlim);
+    TEST4FIMEX_CHECK_EQ(dim_unlim->getLength(), 5);
+    TEST4FIMEX_CHECK_EQ(dim_unlim->getName(), "unlim");
+    TEST4FIMEX_CHECK(reader->getCDM().getVariable("unlim").hasData());
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("unlim", 3)->asShort()[0], 40);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", 3)->asShort()[1], -4);
+
+    SliceBuilder sb(reader->getCDM(), "multi");
+    sb.setStartAndSize("unlim", 3, 1);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("multi", sb)->asShort()[1], -4);
+
+    sb = SliceBuilder(reader->getCDM(), "unlim");
+    sb.setStartAndSize("unlim", 3, 1);
+    TEST4FIMEX_CHECK_EQ(reader->getDataSlice("unlim", sb)->asShort()[0], 40);
+}
+
 TEST4FIMEX_FIXTURE_TEST_CASE(test_joinExistingSuffix, TestConfig)
 {
     const string ncmlName = require("joinExistingAggSuffix.ncml");
@@ -201,5 +227,39 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggJoinNew, TestConfig)
     TEST4FIMEX_CHECK_EQ(values_new[0], 17);
     TEST4FIMEX_CHECK_EQ(values_new[1], 19);
     TEST4FIMEX_CHECK_EQ(values_new[2], 21);
+
+    remove(test_output);
+}
+
+TEST4FIMEX_FIXTURE_TEST_CASE(test_aggJoinNewCV, TestConfig)
+{
+    const string ncmlName = require("aggJoinNewCV.ncml");
+    CDMReader_p reader(CDMFileReaderFactory::create("ncml", ncmlName));
+    const std::string test_output = std::string(oldDir) + "/test_aggJoinNewCV.nc";
+    CDMFileReaderFactory::createWriter(reader, "nc4", test_output);
+
+    const auto& cdm = reader->getCDM();
+    auto ulim = cdm.getUnlimitedDim();
+    TEST4FIMEX_REQUIRE(ulim);
+    TEST4FIMEX_CHECK_EQ(ulim->getName(), "new");
+
+    SliceBuilder sb(reader->getCDM(), "multi");
+    sb.setStartAndSize("new", 2, 1);
+    DataPtr slice = reader->getDataSlice("multi", sb);
+    TEST4FIMEX_REQUIRE(slice);
+    TEST4FIMEX_REQUIRE_GE(slice->size(), 2);
+    const auto values = slice->asInt();
+    TEST4FIMEX_REQUIRE(values);
+    TEST4FIMEX_CHECK_EQ(values[0], 4);
+    TEST4FIMEX_CHECK_EQ(values[1], -4);
+
+    DataPtr data_new = reader->getData("new");
+    TEST4FIMEX_REQUIRE(data_new);
+    TEST4FIMEX_REQUIRE_GE(data_new->size(), 3);
+    const auto values_new = data_new->asInt();
+    TEST4FIMEX_CHECK_EQ(values_new[0], 17);
+    TEST4FIMEX_CHECK_EQ(values_new[1], 19);
+    TEST4FIMEX_CHECK_EQ(values_new[2], 23);
+
     remove(test_output);
 }
