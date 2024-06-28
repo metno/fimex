@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <variable name="new" type="int" shape="new">
-    <values>17 19 23</values>
+    <values start="17" increment="2" />
   </variable>
 
   <aggregation type="joinNew" dimName="new">

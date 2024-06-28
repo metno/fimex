@@ -193,5 +193,13 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggJoinNew, TestConfig)
     TEST4FIMEX_REQUIRE(values);
     TEST4FIMEX_CHECK_EQ(values[0], 4);
     TEST4FIMEX_CHECK_EQ(values[1], -4);
+
+    DataPtr data_new = reader->getData("new");
+    TEST4FIMEX_REQUIRE(data_new);
+    TEST4FIMEX_REQUIRE_GE(data_new->size(), 3);
+    const auto values_new = data_new->asInt();
+    TEST4FIMEX_CHECK_EQ(values_new[0], 17);
+    TEST4FIMEX_CHECK_EQ(values_new[1], 19);
+    TEST4FIMEX_CHECK_EQ(values_new[2], 21);
     remove(test_output);
 }

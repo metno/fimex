@@ -1,7 +1,7 @@
 /*
  * Fimex, NcmlCDMReader.cc
  *
- * (C) Copyright 2009-2022, met.no
+ * (C) Copyright 2009-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -264,6 +264,14 @@ void NcmlCDMReader::initVariableTypeChange()
     }
 }
 
+#define LOG_ERROR_THROW(info)                                                                                                                                  \
+    do {                                                                                                                                                       \
+        std::ostringstream msg;                                                                                                                                \
+        msg << info;                                                                                                                                           \
+        LOG4FIMEX(logger, Logger::ERROR, msg.str());                                                                                                           \
+        throw CDMException(msg.str());                                                                                                                         \
+    } while (0)
+
 void NcmlCDMReader::initVariableDataChange()
 {
     for (const auto node : XPathNodeSet(doc, "/nc:netcdf/nc:variable/nc:values")) {
@@ -273,23 +281,40 @@ void NcmlCDMReader::initVariableDataChange()
         if (cdm_->hasVariable(name)) {
             CDMVariable& var = cdm_->getVariable(name);
 
-            const auto values_list = split_ncml_values(getXmlContent(node), getXmlProp(node, "separator"));
-
-            // check that no. of values == shape-size
             size_t dataSize = 1;
             const vector<string>& dims = var.getShape();
             for (const string& d : dims) {
                 dataSize *= cdm_->getDimension(d).getLength();
             }
-            if ((dims.size() == 0 && values_list.size() > 1) // scalars
-                || (dims.size() > 0 && values_list.size() != dataSize)) {
-                std::ostringstream msg;
-                msg << "ncml for variable " << name << " has " << values_list.size() << " values while shape requires " << dataSize << " values";
-                LOG4FIMEX(logger, Logger::ERROR, msg.str());
-                throw CDMException(msg.str());
-            }
 
-            var.setData(initDataByArray(var.getDataType(), values_list));
+            const auto start = getXmlProp(node, "start");
+            const auto increment = getXmlProp(node, "increment");
+            const auto values_content = getXmlContent(node);
+            const bool have_start_inc = (!start.empty() && !increment.empty());
+            const bool have_values = (!values_content.empty());
+            if (start.empty() != increment.empty()) {
+                LOG_ERROR_THROW("values element must have either both 'start' and 'increment' or none of the two");
+            } else if (have_start_inc == have_values) {
+                LOG_ERROR_THROW("values element must have either 'start' and 'increment' or a value list as content");
+            } else if (have_start_inc) {
+                shared_array<double> array(new double[dataSize]);
+                array[0] = string2type<double>(start);
+                const double step = string2type<double>(increment);
+                for (size_t i = 1; i < dataSize; ++i) {
+                    array[i] = array[0] + i * step;
+                }
+                var.setData(convertValues(*createData(dataSize, array), var.getDataType()));
+            } else {
+                const auto values_list = split_ncml_values(values_content, getXmlProp(node, "separator"));
+
+                // check that no. of values == shape-size
+                if ((dims.size() == 0 && values_list.size() > 1) // scalars
+                    || (dims.size() > 0 && values_list.size() != dataSize)) {
+                    LOG_ERROR_THROW("ncml for variable " << name << " has " << values_list.size() << " values while shape requires " << dataSize << " values");
+                }
+
+                var.setData(initDataByArray(var.getDataType(), values_list));
+            }
         }
     }
 }
