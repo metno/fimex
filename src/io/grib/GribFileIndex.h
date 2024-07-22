@@ -72,7 +72,6 @@ public:
     GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, long msgPos,
                     const std::vector<std::pair<std::string, std::regex>>& members = std::vector<std::pair<std::string, std::regex>>(),
                     const std::vector<std::string>& extraKeys = std::vector<std::string>());
-    GribFileMessage(XMLDoc_p, std::string nsPrefix, xmlNodePtr node);
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
     ~GribFileMessage();
 
@@ -244,7 +243,6 @@ private:
 
     void init(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members);
     void initByGrib(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys);
-    void initByXML(const std::string& xmlFilePath);
     bool initByXMLReader(const std::string& xmlFilePath);
 };
 
