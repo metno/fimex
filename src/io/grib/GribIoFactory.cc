@@ -40,6 +40,7 @@
 #include "fimex/StringUtils.h"
 
 #include <cstring>
+#include <fstream>
 
 namespace MetNoFimex {
 
@@ -119,10 +120,22 @@ CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const s
     } else {
         std::vector<std::string> files;
         // scanfiles by a glob
-        std::string globStr("glob:");
-        if (fileName.find(globStr) == 0) {
-            std::string glob = fileName.substr(globStr.size());
+        static const std::string prefix_glob("glob:");
+        static const std::string prefix_many("many:");
+        static const std::string prefix_list("list:");
+        if (starts_with(fileName, prefix_glob)) {
+            const auto glob = fileName.substr(prefix_glob.size());
             globFiles(files, glob);
+        } else if (starts_with(fileName, prefix_many) && fileName.size() > prefix_many.size() + 1) {
+            const auto separator = fileName.substr(prefix_many.size(), 1);
+            const auto tail = fileName.substr(prefix_many.size() + 1);
+            files = tokenize(tail, separator);
+        } else if (starts_with(fileName, prefix_list)) {
+            const auto listFile = fileName.substr(prefix_list.size());
+            std::ifstream listS(listFile);
+            for (std::string line; std::getline(listS, line);) {
+                files.push_back(line);
+            }
         } else {
             files.push_back(fileName);
         }
