@@ -65,11 +65,10 @@ public:
      * @param gh grib_handle
      * @param fileURL url of the input file
      * @param filePos start of message in file
-     * @param msgPos start of real message within message (multimessage)
      * @param members list of member-names -> filepath-regexp
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
-    GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, long msgPos,
+    GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos,
                     const std::vector<std::pair<std::string, std::regex>>& members = std::vector<std::pair<std::string, std::regex>>(),
                     const std::vector<std::string>& extraKeys = std::vector<std::string>());
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
@@ -83,8 +82,6 @@ public:
     long getEdition() const;
     const std::string& getFileURL() const;
     off_t getFilePosition() const;
-    /// messages number within a multi-message
-    size_t getMessageNumber() const;
     const std::string& getName() const;
     const std::string& getShortName() const;
     FimexTime getValidTime() const;
@@ -141,7 +138,6 @@ private:
 private:
     std::string fileURL_;
     off_t filePos_;
-    size_t msgPos_; // for multiMessages: multimessages
     std::string parameterName_;
     std::string shortName_;
     // ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;

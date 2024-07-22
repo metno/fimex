@@ -481,11 +481,10 @@ const char GK_stepType[] = "stepType";
 const char GK_timeRangeIndicator[] = "timeRangeIndicator";
 const char GK_typeOfStatisticalProcessing[] = "typeOfStatisticalProcessing";
 
-GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, long msgPos,
-                                 const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys)
+GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, const std::vector<std::pair<std::string, std::regex>>& members,
+                                 const std::vector<std::string>& extraKeys)
     : fileURL_(fileURL)
     , filePos_(filePos)
-    , msgPos_(msgPos)
 {
     if (!gh) {
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
@@ -662,11 +661,6 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
             if (value.len() == 0)
                 throw runtime_error("could not find seekPos for node");
             filePos_ = value.to_longlong();
-        } else if (name == "messagePos") {
-            if (value.len() == 0)
-                msgPos_ = 0;
-            else
-                msgPos_ = value.to_longlong();
         }
     }
     // defaults
@@ -907,12 +901,6 @@ off_t GribFileMessage::getFilePosition() const
     return filePos_;
 }
 
-/// messages number within a multi-message
-size_t GribFileMessage::getMessageNumber() const
-{
-    return msgPos_;
-}
-
 const std::string& GribFileMessage::getName() const
 {
     return parameterName_;
@@ -1022,7 +1010,7 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gribMessage")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("url"), xmlCast(fileURL_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("seekPos"), xmlCast(type2string(filePos_))));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("messagePos"), xmlCast(type2string(msgPos_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("messagePos"), xmlCast("0"))); // write multi-grib message number for backward compatibility
         // parameter
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("parameter")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("shortName"), xmlCast(shortName_)));
@@ -1115,21 +1103,11 @@ grib_handle_p GribFileMessage::createGribHandle(bool asimofHeader) const
     const size_t position = asimofHeader ? 0 : getFilePosition();
     FILE_p fh = file_open_seek(url, position);
 
-    // enable multi-messages
-    grib_multi_support_on(0);
-
-    int err = 0;
-    const size_t message = asimofHeader ? 0 : getMessageNumber();
-    for (size_t i = 0; i < message; i++) {
-        // forward to correct multimessage
-        grib_handle_p gh = make_grib_handle(fh, err);
-    }
-
     // read the message of interest
+    int err = 0;
     grib_handle_p gh = make_grib_handle(fh, err);
     if (!gh)
-        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(position) + " msg: " + type2string(message) +
-                           " asimof: " + type2string(asimofHeader));
+        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(position) + " asimof: " + type2string(asimofHeader));
 
     if (err != GRIB_SUCCESS)
         GRIB_CHECK(err, 0);
@@ -1234,31 +1212,17 @@ void GribFileIndex::initByGrib(const std::string& gribFilePath, const std::vecto
 {
     url_ = "file:" + gribFilePath;
     std::shared_ptr<FILE> fh = file_open_seek(gribFilePath, 0);
-    // enable multi-messages
-    grib_multi_support_on(0);
-    off_t lastPos = static_cast<size_t>(-1);
-    size_t msgPos = 0;
     while (!feof(fh.get())) {
         // read the next message
-        off_t pos = ftello(fh.get());
+        const off_t pos = ftello(fh.get());
         int err = 0;
         grib_handle_p gh = make_grib_handle(fh, err);
-        off_t newPos = ftello(fh.get());
         if (gh) {
             MIFI_GRIB_CHECK(err, 0);
-            if (newPos != pos) {
-                // new message
-                lastPos = pos;
-                msgPos = 0;
-            } else {
-                // new part of multi-message
-                msgPos++;
-                // don't change lastPos
-            }
             try {
-                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members, extraKeys));
+                messages_.push_back(GribFileMessage(gh, url_, pos, members, extraKeys));
             } catch (CDMException& ex) {
-                LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << msgPos << ": " << ex.what());
+                LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << pos << ": " << ex.what());
             }
         }
     }

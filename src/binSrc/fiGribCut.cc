@@ -238,15 +238,16 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
             cerr << "cannot open file: " << *file << endl;
             ++errors;
         } else {
-            // enable multi-messages
-            grib_multi_support_on(0);
             while (!feof(fh.get())) {
                 // read the messages of interest
-                size_t pos = ftell(fh.get());
+                size_t pos;
+                if (debug > 0) {
+                    pos = ftell(fh.get());
+                }
                 int err = 0;
                 std::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
-                size_t newPos = ftell(fh.get());
                 if (debug > 0) {
+                    size_t newPos = ftell(fh.get());
                     cerr << "fetching handle from file " << *file << " from pos " << pos << " to pos " << newPos << endl;
                 }
                 // check for errors
