@@ -116,7 +116,8 @@ TEST4FIMEX_TEST_CASE(GribFileIndex_LevelType)
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
 
-    const GribFileIndex gfi(grib2file, "", members, options);
+    auto ca = createDefaultChunkReaderFactory();
+    const GribFileIndex gfi(ca, grib2file, "", members, options);
     for (const auto& gfm : gfi.listMessages())
         TEST4FIMEX_CHECK_NE(0, gfm.getLevelType());
 }

@@ -27,7 +27,7 @@
 #include "fimex/XMLInputFile.h"
 #include "fimex/XMLInputString.h"
 
-#include <cstdlib>
+#include "fimex/ChunkReader.h"
 
 namespace MetNoFimex {
 

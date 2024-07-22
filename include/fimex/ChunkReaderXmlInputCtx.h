@@ -1,0 +1,48 @@
+/*
+ * Fimex
+ *
+ * (C) Copyright 2024-2026, met.no
+ *
+ * Project Info:  https://github.com/metno/fimex/wiki
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ */
+
+#ifndef FIMEX_ChunkReaderXmlInputCtx_H_
+#define FIMEX_ChunkReaderXmlInputCtx_H_
+
+#include <fimex/ChunkReader.h>
+
+namespace MetNoFimex {
+
+class ChunkReaderXmlInputCtx
+{
+public:
+    ChunkReaderXmlInputCtx(ChunkReader_p cr);
+
+    int read(char* buffer, int len);
+
+private:
+    ChunkReader_p cr_;
+    size_t offset_;
+};
+
+int readChunkReaderXmlInputCtx(void* ctx, char* buffer, int len);
+int closeChunkReaderXmlInputCtx(void* ctx);
+
+} // namespace MetNoFimex
+
+#endif /* FIMEX_ChunkReaderXmlInputCtx_H_ */

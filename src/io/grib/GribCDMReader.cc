@@ -79,6 +79,10 @@ struct ProjectionInfo
 
 struct GribCDMReader::Impl
 {
+    Impl();
+
+    ChunkReaderFactory_p ca;
+
     string configId;
     vector<GribFileMessage> indices;
     XMLDoc_p doc;
@@ -117,6 +121,10 @@ struct GribCDMReader::Impl
      */
     map<string, std::shared_ptr<ReplaceStringObject>> templateReplacementAttributes;
 };
+
+GribCDMReader::Impl::Impl()
+    : ca(createDefaultChunkReaderFactory())
+{}
 
 /**
  * generating a unique index for a multidimensional grib-variable
@@ -189,8 +197,8 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     }
     options["extraKeys"] = getConfigExtraKeys(p_->doc);
 
-    for (const std::string& file : fileNames) {
-        vector<GribFileMessage> messages = GribFileIndex(file, p_->ensembleMemberIds, options).listMessages();
+    for (const std::string& fn : fileNames) {
+        const auto messages = GribFileIndex(p_->ca, fn, p_->ensembleMemberIds, options).listMessages();
         p_->indices.insert(p_->indices.end(), messages.begin(), messages.end());
     }
     initPostIndices();
@@ -201,7 +209,7 @@ GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& config
 {
     initXMLAndMembers(configXML, members);
 
-    p_->indices = GribFileIndex(grbmlFileName).listMessages();
+    p_->indices = GribFileIndex(p_->ca, grbmlFileName).listMessages();
 
     initPostIndices();
 }
@@ -544,8 +552,12 @@ vector<double> GribCDMReader::readVarPv_(string exampleVar, bool asimofHeader)
     vector<double> pv;
     // example gribFileMessage
     size_t gfiPos = p_->varTimeLevelEnsembleGFIBox[exampleVar].begin()->second.begin()->second.begin()->second;
+    auto& gfm = p_->indices.at(gfiPos);
+
     // Read asimof header if true
-    size_t count = p_->indices.at(gfiPos).readLevelData(pv, MIFI_FILL_DOUBLE, asimofHeader);
+    auto cr = p_->ca->readerFor(gfm.getFileURL());
+
+    const size_t count = gfm.readLevelData(cr, pv, MIFI_FILL_DOUBLE, asimofHeader);
     if (count <= 0) {
         LOG4FIMEX(logger, Logger::WARN, "could not find extra level data (PV)");
     }
@@ -1382,7 +1394,8 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
 #ifndef HAVE_GRIB_THREADSAFE
                 OmpScopedLock lock(p_->mutex);
 #endif
-                dataRead = gfm.readData(grib_out, maxXySize, missingValue);
+                auto cr= p_->ca->readerFor(gfm.getFileURL());
+                dataRead = gfm.readData(cr, grib_out, maxXySize, missingValue);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "done reading variable");
             if (dataRead != maxXySize) {

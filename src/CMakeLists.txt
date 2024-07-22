@@ -77,6 +77,22 @@ SET(libfimex_SOURCES
   ${INCF}/CDMWriter.h
   CDM_XMLConfigHelper.cc
   ${INCF}/CDM_XMLConfigHelper.h
+
+  ChunkReader.cc
+  ${INCF}/ChunkReader.h
+  FileChunkReader.cc
+  FileChunkReader.h
+  HttpChunkReader.cc
+  HttpChunkReader.h
+
+  ChunkReaderFactory.cc
+  ${INCF}/ChunkReaderFactory.h
+  DefaultChunkReaderFactory.cc
+  DefaultChunkReaderFactory.h
+
+  ChunkReaderXmlInputCtx.cc
+  ${INCF}/ChunkReaderXmlInputCtx.h
+
   CoordinateSystemSliceBuilder.cc
   ${INCF}/CoordinateSystemSliceBuilder.h
   Data.cc

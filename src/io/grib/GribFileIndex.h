@@ -31,6 +31,8 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
 
+#include "fimex/ChunkReaderFactory.h"
+
 #include <cstdio>
 #include <iosfwd>
 #include <map>
@@ -63,14 +65,15 @@ public:
 
     /**
      * @param gh grib_handle
-     * @param fileURL url of the input file
-     * @param filePos start of message in file
+     * @param msgURL url of the input
+     * @param msgPos start of message
+     * @param msgSize size of message
      * @param members list of member-names -> filepath-regexp
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
-    GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos,
-                    const std::vector<std::pair<std::string, std::regex>>& members = std::vector<std::pair<std::string, std::regex>>(),
-                    const std::vector<std::string>& extraKeys = std::vector<std::string>());
+    GribFileMessage(grib_handle_p gh, const std::string& msgURL, long msgPos, long msgSize,
+                    const std::vector<std::pair<std::string, std::regex>>& members = {},
+                    const std::vector<std::string>& extraKeys = {});
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
     ~GribFileMessage();
 
@@ -121,7 +124,7 @@ public:
      * @param missingValue the missing- / fill-value the returned data will have
      * @return the actual amount of data read
      */
-    size_t readData(double* data, std::size_t data_size, double missingValue) const;
+    size_t readData(ChunkReader_p cr, double* data, std::size_t data_size, double missingValue) const;
 
     /**
      * Read the level-data from the underlying source to the vector levelData. In contrast to readData(), the
@@ -130,14 +133,15 @@ public:
      * @param missingValue the missing- / fill-value the returned data will have
      * @return the actual amount of data read
      */
-    size_t readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader = false) const;
+    size_t readLevelData(ChunkReader_p cr, std::vector<double>& levelData, double missingValue, bool asimofHeader = false) const;
 
 private:
-    grib_handle_p createGribHandle(bool asimofHeader) const;
+    std::unique_ptr<unsigned char[]> readGribMessage(ChunkReader_p cr) const;
 
 private:
     std::string fileURL_;
     off_t filePos_;
+    size_t msgSize_;
     std::string parameterName_;
     std::string shortName_;
     // ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
@@ -181,7 +185,7 @@ public:
      * @param members translation of members to filenames
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+    GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::vector<std::pair<std::string, std::regex>>& members,
                   std::map<std::string, std::string> options = std::map<std::string, std::string>());
 
     /**
@@ -204,7 +208,7 @@ public:
      * @param members translation of members to filenames
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+    GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members,
                   std::map<std::string, std::string> options = std::map<std::string, std::string>());
 
     /**
@@ -222,9 +226,9 @@ public:
      * @li file completely in memory: 1.1s
      * @li xml-file: 0.1s
      *
-     * @param gribmlFilePath path to gribml to append information from
+     * @param grbmlUrl path to grbml to append information from
      */
-    GribFileIndex(const std::string& gribmlFilePath);
+    GribFileIndex(ChunkReaderFactory_p ca, const std::string& grbmlUrl);
 
     virtual ~GribFileIndex();
 
@@ -237,9 +241,10 @@ private:
     std::vector<GribFileMessage> messages_;
     std::map<std::string, std::string> options_;
 
-    void init(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members);
-    void initByGrib(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys);
-    bool initByXMLReader(const std::string& xmlFilePath);
+    void init(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members);
+    void initByGrib(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys);
+    bool initByGrbml(ChunkReaderFactory_p ca, const std::string& grbmlUrl);
+    bool initByXMLReader(xmlTextReaderPtr reader, const std::string& url);
 };
 
 /// outputstream for a GribFileMessage

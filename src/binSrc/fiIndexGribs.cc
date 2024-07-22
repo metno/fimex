@@ -87,6 +87,14 @@ void initOptions(std::map<std::string, std::string>& options,
     }
 }
 
+std::string ensureScheme(const std::string& url)
+{
+    if (starts_with(url, "http://") || starts_with(url, "https://") || starts_with(url, "file://"))
+        return url;
+    else
+        return "file:" + url;
+}
+
 struct GribIndexWriter {
     GribIndexWriter(const string& output, const std::string& url);
     ~GribIndexWriter();
@@ -106,33 +114,33 @@ GribIndexWriter::~GribIndexWriter()
     os << "</gribFileIndex>" << endl;
 }
 
-void indexGribs(const std::vector<std::string>& inputs, const std::string& output, vector<string> extraKeys, string config,
+void indexGribs(ChunkReaderFactory_p ca, const std::vector<std::string>& inputs, const std::string& output, vector<string> extraKeys, string config,
                 vector<string> memberOptions)
 {
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
     initOptions(options, members, extraKeys, config, memberOptions);
 
-    GribIndexWriter w(output, "file:" + inputs.front());
+    GribIndexWriter w(output, ensureScheme(inputs.front()));
     for (const auto& input : inputs) {
         LOG4FIMEX(logger, Logger::DEBUG, "Start processing '" << input << "'");
-        const GribFileIndex gfi(input, "", members, options);
+        const GribFileIndex gfi(ca, input, "", members, options);
         for (const auto& gfm : gfi.listMessages())
             w.os << gfm;
     }
 }
 
-void indexGribAppend(const std::string& input, const std::string& append, vector<string> extraKeys, string config, vector<string> memberOptions)
+void indexGribAppend(ChunkReaderFactory_p ca, const std::string& input, const std::string& append, vector<string> extraKeys, string config, vector<string> memberOptions)
 {
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
     initOptions(options, members, extraKeys, config, memberOptions);
 
     LOG4FIMEX(logger, Logger::DEBUG, "Reading '" << append << "' and processing '" << input << "'");
-    const GribFileIndex gfi(input, append, members, options);
+    const GribFileIndex gfi(ca, input, append, members, options);
 
     LOG4FIMEX(logger, Logger::DEBUG, "Writing to '" << append << "'");
-    GribIndexWriter w(append, "file:" + input);
+    GribIndexWriter w(append, ensureScheme(input));
     for (const auto& gfm : gfi.listMessages())
         w.os << gfm;
 }
@@ -206,22 +214,24 @@ int main(int argc, char* args[])
     if (vm.is_set(op_input_optional)) {
         members = vm.values(op_input_optional);
     }
-    std::string appendFile;
+
+    auto ca = createDefaultChunkReaderFactory();
     if (vm.is_set(op_appendFile)) {
         if (inputs.size() != 1) {
             cerr << "When appending, exactly one input file must be specified." << endl;
             writeUsage(cout, options);
             return 1;
         }
+        std::string appendFile;
         outputFile = appendFile = vm.value(op_appendFile);
-        indexGribAppend(inputs.front(), appendFile, extraKeys, readerConfig, members);
+        indexGribAppend(ca, inputs.front(), appendFile, extraKeys, readerConfig, members);
     } else {
         if (inputs.empty()) {
             cerr << "missing input file" << endl;
             writeUsage(cout, options);
             return 1;
         }
-        indexGribs(inputs, outputFile, extraKeys, readerConfig, members);
+        indexGribs(ca, inputs, outputFile, extraKeys, readerConfig, members);
     }
     return 0;
 }

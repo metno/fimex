@@ -29,6 +29,7 @@
 #include "GribUtils.h"
 
 #include "fimex/CDMException.h"
+#include "fimex/ChunkReaderXmlInputCtx.h"
 #include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
@@ -37,21 +38,15 @@
 #include "fimex/TimeUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/XMLUtils.h"
-#include "fimex/interpolation.h"
 
 #include "fimex/reproject.h"
 
 #include <date/date.h>
 
 #include <algorithm>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 
-#include <libxml/tree.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
-#include <libxml/xpath.h>
 
 #include "grib_api.h"
 
@@ -66,22 +61,16 @@ Logger_p loggerGFM = getLogger("fimex.GribFileMessage");
 
 typedef std::shared_ptr<grib_handle> grib_handle_p;
 
-typedef std::shared_ptr<FILE> FILE_p;
-
-FILE_p file_open_seek(const std::string& path, size_t position)
+std::unique_ptr<unsigned char[]> readChunk(ChunkReader_p cr, size_t off, size_t size)
 {
-    FILE* fileh = fopen(path.c_str(), "rb");
-    if (!fileh)
-        throw runtime_error("cannot open file '" + path + "'");
-
-    FILE_p fh(fileh, fclose);
-    fseeko(fh.get(), position, SEEK_SET);
-    return fh;
+    std::unique_ptr<unsigned char[]> buffer(new unsigned char[size]);
+    cr->read(off, size, &buffer[0]);
+    return std::move(buffer);
 }
 
-grib_handle_p make_grib_handle(FILE_p fh, int& err)
+grib_handle_p make_grib_handle(const unsigned char* buffer, size_t size)
 {
-    return grib_handle_p(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    return grib_handle_p(grib_handle_new_from_message(0, static_cast<const void*>(&buffer[0]), size), grib_handle_delete);
 }
 
 int grib_get_nocheck(grib_handle_p gh, const char* key, std::string& value)
@@ -481,10 +470,11 @@ const char GK_stepType[] = "stepType";
 const char GK_timeRangeIndicator[] = "timeRangeIndicator";
 const char GK_typeOfStatisticalProcessing[] = "typeOfStatisticalProcessing";
 
-GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, long filePos, const std::vector<std::pair<std::string, std::regex>>& members,
-                                 const std::vector<std::string>& extraKeys)
-    : fileURL_(fileURL)
-    , filePos_(filePos)
+GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, long msgPos, long msgSize,
+                                 const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys)
+    : fileURL_(msgURL)
+    , filePos_(msgPos)
+    , msgSize_(msgSize)
 {
     if (!gh) {
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
@@ -587,12 +577,12 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     case GRIB_NOT_FOUND: {
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
-        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL << " in list of " << members.size());
+        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL_ << " in list of " << members.size());
         if (!members.empty()) {
             bool found = false;
             int i = 0;
             for (vector<std::pair<std::string, std::regex>>::const_iterator it = members.begin(); it != members.end(); ++it) {
-                if (std::regex_match(fileURL, it->second)) {
+                if (std::regex_match(fileURL_, it->second)) {
                     perturbationNo_ = i;
                     totalNumberOfEnsembles_ = members.size();
                     found = true;
@@ -602,9 +592,9 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
             }
             if (!found) {
                 LOG4FIMEX(logger, Logger::WARN,
-                          "perturbationNumber for " << fileURL << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+                          "perturbationNumber for " << fileURL_ << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
             } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
+                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL_ << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
             }
         }
         break;
@@ -661,6 +651,10 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
             if (value.len() == 0)
                 throw runtime_error("could not find seekPos for node");
             filePos_ = value.to_longlong();
+        } else if (name == "messageSize") {
+            if (value.len() == 0)
+                throw runtime_error("could not find messageSize for node");
+            msgSize_ = value.to_longlong();
         }
     }
     // defaults
@@ -1011,6 +1005,7 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("url"), xmlCast(fileURL_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("seekPos"), xmlCast(type2string(filePos_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("messagePos"), xmlCast("0"))); // write multi-grib message number for backward compatibility
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("messageSize"), xmlCast(type2string(msgSize_))));
         // parameter
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("parameter")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("shortName"), xmlCast(shortName_)));
@@ -1097,30 +1092,20 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*>(buffer->content));
 }
 
-grib_handle_p GribFileMessage::createGribHandle(bool asimofHeader) const
+std::unique_ptr<unsigned char[]> GribFileMessage::readGribMessage(ChunkReader_p cr) const
 {
-    const string url = getFileURL().substr(5); // remove 'file:' prefix, needs to be improved when streams are allowed
-    const size_t position = asimofHeader ? 0 : getFilePosition();
-    FILE_p fh = file_open_seek(url, position);
-
-    // read the message of interest
-    int err = 0;
-    grib_handle_p gh = make_grib_handle(fh, err);
-    if (!gh)
-        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(position) + " asimof: " + type2string(asimofHeader));
-
-    if (err != GRIB_SUCCESS)
-        GRIB_CHECK(err, 0);
-
-    return gh;
+    return std::move(readChunk(cr, filePos_, msgSize_));
 }
 
-size_t GribFileMessage::readData(double* data, size_t data_size, double missingValue) const
+size_t GribFileMessage::readData(ChunkReader_p cr, double* data, size_t data_size, double missingValue) const
 {
     if (!isValid())
         return 0;
 
-    grib_handle_p gh = createGribHandle(false);
+    auto buffer = readGribMessage(cr);
+    auto gh = make_grib_handle(&buffer[0], msgSize_);
+    if (!gh)
+        return 0;
 
     LOG4FIMEX(logger, Logger::DEBUG, "set missing = " << missingValue);
     MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", missingValue), 0);
@@ -1130,12 +1115,15 @@ size_t GribFileMessage::readData(double* data, size_t data_size, double missingV
     return data_size;
 }
 
-size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader) const
+size_t GribFileMessage::readLevelData(ChunkReader_p cr, std::vector<double>& levelData, double missingValue, bool asimofHeader) const
 {
     if (!isValid())
         return 0;
 
-    grib_handle_p gh = createGribHandle(asimofHeader);
+    auto buffer = readGribMessage(cr);
+    auto gh = make_grib_handle(&buffer[0], msgSize_);
+    if (!gh)
+        return 0;
 
     size_t size = 0;
     long pvpresent = 0;
@@ -1153,23 +1141,23 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     return size;
 }
 
-GribFileIndex::GribFileIndex(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
                              std::map<std::string, std::string> options)
     : options_(options)
 {
-    init(gribFilePath, "", members);
+    init(ca, gribFilePath, "", members);
 }
 
-GribFileIndex::GribFileIndex(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
                              std::map<std::string, std::string> options)
     : options_(options)
 {
-    init(gribFilePath, grbmlFilePath, members);
+    init(ca, gribFilePath, grbmlFilePath, members);
 }
 
-GribFileIndex::GribFileIndex(const std::string& grbmlFilePath)
+GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& grbmlFilePath)
 {
-    if (!initByXMLReader(grbmlFilePath))
+    if (!initByGrbml(ca, grbmlFilePath))
         throw runtime_error("error reading grbml-file: '" + grbmlFilePath + "'");
 }
 
@@ -1183,13 +1171,13 @@ struct HasSameUrl
     bool operator()(GribFileMessage& gfm) const { return gfm.getFileURL() == file_; }
 };
 
-void GribFileIndex::init(const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members)
+void GribFileIndex::init(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members)
 {
-    if (!grbmlFilePath.empty()) {
-        // append to existing grbml-file
-        initByXMLReader(grbmlFilePath);
-        // but remove existing messages for the same file
-        messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl("file:" + gribFilePath)), messages_.end());
+    if (!grbmlUrl.empty()) {
+        // append to existing grbml
+        initByGrbml(ca, grbmlUrl);
+        // but remove existing messages for the same url
+        messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl(gribUrl)), messages_.end());
     }
     std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
     if (efIt != options_.end()) {
@@ -1203,28 +1191,42 @@ void GribFileIndex::init(const std::string& gribFilePath, const std::string& grb
         extraKeys = tokenize(ekIt->second, ",");
     }
 
-    initByGrib(gribFilePath, members, extraKeys);
+    initByGrib(ca, gribUrl, members, extraKeys);
     earthFigure_ = ""; // remember to reset!
 }
 
-void GribFileIndex::initByGrib(const std::string& gribFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
+void GribFileIndex::initByGrib(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::vector<std::pair<std::string, std::regex>>& members,
                                const std::vector<std::string>& extraKeys)
 {
-    url_ = "file:" + gribFilePath;
-    std::shared_ptr<FILE> fh = file_open_seek(gribFilePath, 0);
-    while (!feof(fh.get())) {
+    url_ = gribUrl;
+    unsigned char buffer[16];
+    auto cr = ca->readerFor(gribUrl);
+    const size_t size = cr->size();
+    off_t grib_msg_start = 0;
+    while (grib_msg_start < size) {
         // read the next message
-        const off_t pos = ftello(fh.get());
-        int err = 0;
-        grib_handle_p gh = make_grib_handle(fh, err);
-        if (gh) {
-            MIFI_GRIB_CHECK(err, 0);
-            try {
-                messages_.push_back(GribFileMessage(gh, url_, pos, members, extraKeys));
-            } catch (CDMException& ex) {
-                LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << pos << ": " << ex.what());
-            }
+        cr->read(grib_msg_start, sizeof(buffer), buffer);
+        const char grib_version = buffer[7];
+        size_t s0, sn;
+        if (grib_version == 1) {
+            s0 = 4;
+            sn = 3;
+        } else if (grib_version == 2) {
+            s0 = 8;
+            sn = 8;
         }
+        size_t grib_msg_size = 0;
+        for (size_t i=0; i<sn; ++i) {
+            grib_msg_size = (grib_msg_size << 8) | size_t(buffer[s0+i]);
+        }
+        auto grib_buffer = readChunk(cr, grib_msg_start, grib_msg_size);
+        grib_handle_p gh = make_grib_handle(&grib_buffer[0], grib_msg_size);
+        try {
+            messages_.push_back(GribFileMessage(gh, url_, grib_msg_start, grib_msg_size, members, extraKeys));
+        } catch (CDMException& ex) {
+            LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << grib_msg_start << ": " << ex.what());
+        }
+        grib_msg_start += grib_msg_size;
     }
 }
 
@@ -1256,10 +1258,22 @@ static void processNode(xmlTextReaderPtr reader) {
 }
 #endif
 
-bool GribFileIndex::initByXMLReader(const std::string& grbmlFilePath)
+bool GribFileIndex::initByGrbml(ChunkReaderFactory_p ca, const std::string& grbmlUrl)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
-    xmlTextReaderPtr reader = xmlReaderForFile(grbmlFilePath.c_str(), NULL, 0);
+    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index '" << grbmlUrl << "'");
+    try {
+        auto cr = ca->readerFor(grbmlUrl);
+        ChunkReaderXmlInputCtx crctx(cr);
+        xmlTextReaderPtr reader = xmlReaderForIO(readChunkReaderXmlInputCtx, closeChunkReaderXmlInputCtx, &crctx,
+         grbmlUrl.c_str(), NULL, 0);
+        return initByXMLReader(reader, grbmlUrl);
+    } catch (std::runtime_error& not_found) {
+        return false;
+    }
+}
+
+bool GribFileIndex::initByXMLReader(xmlTextReaderPtr reader, const std::string& url)
+{
     if (!reader)
         return false;
 
@@ -1278,9 +1292,9 @@ bool GribFileIndex::initByXMLReader(const std::string& grbmlFilePath)
                 XmlCharPtr url = xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"));
                 url_ = url.to_string();
             } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
-                messages_.push_back(GribFileMessage(reader, grbmlFilePath));
+                messages_.push_back(GribFileMessage(reader, url));
             } else {
-                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << grbmlFilePath << " name: " << name);
+                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << url << " name: " << name);
             }
             break;
         }
@@ -1299,7 +1313,7 @@ bool GribFileIndex::initByXMLReader(const std::string& grbmlFilePath)
         ret = xmlTextReaderRead(reader);
     }
     if (ret != 0) {
-        LOG4FIMEX(logger, Logger::ERROR, "failed to parse '" << grbmlFilePath << "'");
+        LOG4FIMEX(logger, Logger::ERROR, "failed to parse '" << url << "'");
         return false;
     } else {
         return true;
