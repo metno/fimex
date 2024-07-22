@@ -92,44 +92,73 @@ bool is_close(const C &a, const C &b, const C &tol)
   return (d <= aa * tol) && (d <= bb * tol);
 }
 
-template<typename T>
-bool compareFloatValues(size_t count, shared_array<T> v1, shared_array<T> v2, T tol)
+template <typename T>
+bool compareFloatValues(bool silent, size_t count, shared_array<T> v1, shared_array<T> v2, T tol)
 {
   for (size_t i = 0; i < count; ++i) {
-    if (!is_close(v1[i], v2[i], tol))
-      return false;
+    if (!is_close(v1[i], v2[i], tol)) {
+        if (!silent) {
+            std::cerr << "index " << i << " value " << v1[i] << " and " << v2[i] << " are not within " << tol << std::endl;
+        }
+        return false;
+    }
   }
   return true;
 }
 
-template<typename T>
-bool compareValues(size_t count, shared_array<T> v1, shared_array<T> v2)
+template <typename T>
+bool compareValues(bool silent, size_t count, shared_array<T> v1, shared_array<T> v2)
 {
-  return std::equal(&v1[0], &v1[0] + count, &v2[0]);
+  for (size_t i = 0; i < count; ++i) {
+    if (v1[i] != v2[i]) {
+        if (!silent) {
+            std::cerr << "index " << i << " value " << v1[i] << " != " << v2[i] << std::endl;
+        }
+        return false;
+    }
+  }
+  return true;
 }
 
-bool compareData(DataPtr d1, DataPtr d2, float tol)
+bool compareData(bool silent, DataPtr d1, DataPtr d2, float tol)
 {
-    if (d1->size() != d2->size())
-        return false;
+  if (!d1 || !d2) {
+    if (!silent) {
+        std::cerr << "one dataset is null" << std::endl;
+    }
+    return false;
+  }
 
-    if (d1->getDataType() != d2->getDataType())
-        return false;
+  if (d1->size() != d2->size()) {
+    if (!silent) {
+        std::cerr << "size " << d1->size() << " != " << d2->size() << std::endl;
+    }
+    return false;
+  }
+
+  if (d1->getDataType() != d2->getDataType()) {
+    if (!silent) {
+        std::cerr << "datatype " << datatype2string(d1->getDataType()) << " != " << datatype2string(d2->getDataType()) << std::endl;
+    }
+    return false;
+  }
 
     switch (d1->getDataType()) {
+    // clang-format off
     case CDM_NAT: { return true; }
-    case CDM_CHAR: { return compareValues(d1->size(), d1->asChar(), d2->asChar()); break; }
-    case CDM_SHORT: { return compareValues(d1->size(), d1->asShort(), d2->asShort()); break; }
-    case CDM_INT: { return compareValues(d1->size(), d1->asInt(), d2->asInt()); break; }
-    case CDM_FLOAT: { return compareFloatValues(d1->size(), d1->asFloat(), d2->asFloat(), tol); break; }
-    case CDM_DOUBLE: { return compareFloatValues(d1->size(), d1->asDouble(), d2->asDouble(), (double)tol); break; }
+    case CDM_CHAR: { return compareValues(silent, d1->size(), d1->asChar(), d2->asChar()); break; }
+    case CDM_SHORT: { return compareValues(silent, d1->size(), d1->asShort(), d2->asShort()); break; }
+    case CDM_INT: { return compareValues(silent, d1->size(), d1->asInt(), d2->asInt()); break; }
+    case CDM_FLOAT: { return compareFloatValues(silent, d1->size(), d1->asFloat(), d2->asFloat(), tol); break; }
+    case CDM_DOUBLE: { return compareFloatValues(silent, d1->size(), d1->asDouble(), d2->asDouble(), (double)tol); break; }
     case CDM_STRING: { return d1->asString() == d2->asString(); break; }
-    case CDM_UCHAR: { return compareValues(d1->size(), d1->asUChar(), d2->asUChar()); break; }
-    case CDM_USHORT: { return compareValues(d1->size(), d1->asUShort(), d2->asUShort()); break; }
-    case CDM_UINT: { return compareValues(d1->size(), d1->asUInt(), d2->asUInt()); break; }
-    case CDM_INT64: { return compareValues(d1->size(), d1->asInt64(), d2->asInt64()); break; }
-    case CDM_UINT64: { return compareValues(d1->size(), d1->asUInt64(), d2->asUInt64()); break; }
-    case CDM_STRINGS: { return compareValues(d1->size(), d1->asStrings(), d2->asStrings()); break; }
+    case CDM_UCHAR: { return compareValues(silent, d1->size(), d1->asUChar(), d2->asUChar()); break; }
+    case CDM_USHORT: { return compareValues(silent, d1->size(), d1->asUShort(), d2->asUShort()); break; }
+    case CDM_UINT: { return compareValues(silent, d1->size(), d1->asUInt(), d2->asUInt()); break; }
+    case CDM_INT64: { return compareValues(silent, d1->size(), d1->asInt64(), d2->asInt64()); break; }
+    case CDM_UINT64: { return compareValues(silent, d1->size(), d1->asUInt64(), d2->asUInt64()); break; }
+    case CDM_STRINGS: { return compareValues(silent, d1->size(), d1->asStrings(), d2->asStrings()); break; }
+    // clang-format on
     }
     return false;
 }
@@ -219,7 +248,7 @@ bool compareReaders(bool ignore_nat, bool silent, CDMReader_p r1, CDMReader_p r2
                 } else {
                     equal = false;
                 }
-            } else if (!compareData(att1.getData(), att2.getData(), tol)) {
+            } else if (!compareData(silent, att1.getData(), att2.getData(), tol)) {
                 if (!silent) {
                     std::cerr << "data difference for var '" << varname << "' attr '" << attname << "'" << std::endl;
                 }
@@ -240,7 +269,7 @@ bool compareReaders(bool ignore_nat, bool silent, CDMReader_p r1, CDMReader_p r2
             } else {
                 equal = false;
             }
-        } else if (!compareData(r1->getData(varname), r2->getData(varname), tol)) {
+        } else if (!compareData(silent, r1->getData(varname), r2->getData(varname), tol)) {
             if (!silent) {
                 std::cerr << "data difference for var '" << varname << "'" << std::endl;
             }
@@ -265,6 +294,7 @@ int main(int argc, char* args[])
 
     po::option_set options;
     options
+        // clang-format off
         << op_help
         << op_silent
         << op_refuse_nat
@@ -273,6 +303,7 @@ int main(int argc, char* args[])
         << op_c1
         << op_t1
         << op_c1
+        // clang-format on
         ;
 
     // read the options
