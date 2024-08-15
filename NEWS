@@ -1,4 +1,4 @@
-  * 2024-06-18 fimex 2.1.0
+  * 2024-08-15 fimex 2.1.0
     * ncml joinNew with coordValue
   * 2024-06-18 fimex 2.0.1
     * bugfix in interpolation unit tests
