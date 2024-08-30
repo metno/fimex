@@ -100,7 +100,6 @@ std::string XMLDoc::toString(const xmlNodePtr node)
     std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ndoc(xmlNewDoc((const xmlChar*)"1.0"), &xmlFreeDoc);
     xmlNodePtr retNode = xmlCopyNodeList(node); // points to new memory
     xmlDocSetRootElement(ndoc.get(), retNode);  // transfer ownership
-    xmlSetTreeDoc(retNode, doc);
     xmlChar* str;
     int size;
     xmlDocDumpMemory(ndoc.get(), &str, &size);
