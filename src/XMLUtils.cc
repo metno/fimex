@@ -66,9 +66,14 @@ size_t XmlCharPtr::len() const
     return xmlStrlen(p_);
 }
 
+XPathNodeSet::XPathNodeSet(const XMLDoc& doc, const std::string& xpath, xmlNodePtr node)
+    : XPathNodeSet(doc.getXPathObject(xpath, node))
+{
+}
+
 XPathNodeSet::XPathNodeSet(xmlXPathObject_p xpo)
     : xpo_(xpo)
-    , nodes_(xpo ? xpo_->nodesetval : nullptr)
+    , nodes_(xpo_ ? xpo_->nodesetval : nullptr)
     , size_(nodes_ ? nodes_->nodeNr : 0)
 {
 }

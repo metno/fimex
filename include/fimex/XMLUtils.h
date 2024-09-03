@@ -77,13 +77,12 @@ public:
     };
 
 public:
-    XPathNodeSet(const XMLDoc& doc, const std::string& xpath, xmlNodePtr node = nullptr)
-        : XPathNodeSet(doc.getXPathObject(xpath, node)) { }
+    XPathNodeSet(const XMLDoc& doc, const std::string& xpath, xmlNodePtr node = nullptr);
     XPathNodeSet(XMLDoc_p doc, const std::string& xpath, xmlNodePtr node = nullptr)
-        : XPathNodeSet(doc->getXPathObject(xpath, node)) { }
+        : XPathNodeSet(*doc, xpath, node) { }
     XPathNodeSet(std::unique_ptr<XMLDoc>& doc, const std::string& xpath, xmlNodePtr node = nullptr)
-        : XPathNodeSet(doc->getXPathObject(xpath, node)) { }
-    XPathNodeSet(xmlXPathObject_p xpo_);
+        : XPathNodeSet(*doc, xpath, node) { }
+    XPathNodeSet(xmlXPathObject_p xpo);
 
     iterator begin() const { return iterator(*this, 0); }
     iterator end() const { return iterator(*this, size_); }
