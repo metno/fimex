@@ -98,7 +98,7 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
 std::string XMLDoc::toString(const xmlNodePtr node)
 {
     std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ndoc(xmlNewDoc((const xmlChar*)"1.0"), &xmlFreeDoc);
-    xmlNodePtr retNode = xmlCopyNodeList(node); // points to new memory
+    xmlNodePtr retNode = xmlDocCopyNode(node, ndoc.get(), 1); // points to new memory
     xmlDocSetRootElement(ndoc.get(), retNode);  // transfer ownership
     xmlChar* str;
     int size;
