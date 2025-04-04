@@ -22,12 +22,10 @@
  */
 
 #include "fimex/CDMVariable.h"
-#include "fimex/CDMAttribute.h"
+
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
-
-#include <algorithm>
-#include <ostream>
+#include "fimex/NcmlCDMWriter.h"
 
 namespace MetNoFimex {
 
@@ -86,54 +84,9 @@ void CDMVariable::setData(DataPtr d)
     data = d;
 }
 
-void CDMVariable::shapeToXMLStream(std::ostream& out) const
-{
-    if (shape.empty())
-        return;
-
-    out << "shape=\"";
-    bool first = true;
-    for (unsigned int i = 0; i < shape.size(); i++) {
-        if (!first)
-            out << ' ';
-        first = false;
-        out << shape[i];
-    }
-    out << "\" ";
-}
-
 void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const
 {
-    CDMDataType dt = getDataType();
-    bool is_unsigned = false;
-    std::string comment;
-    if (dt == CDM_UINT) {
-        dt = CDM_INT;
-        is_unsigned = true;
-    } else if (dt == CDM_USHORT) {
-        dt = CDM_SHORT;
-        is_unsigned = true;
-    } else if (dt == CDM_UCHAR) {
-        dt = CDM_CHAR;
-        is_unsigned = true;
-    } else if (dt == CDM_NAT) {
-        dt = CDM_INT;
-        comment = "  <!-- datatype NAT translated to INT for ncml -->\n";
-    }
-    out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(dt) << "\" ";
-    shapeToXMLStream(out);
-    if (is_unsigned || !attrs.empty() || !comment.empty()) {
-        out << ">" << std::endl;
-        out << comment;
-        for (const auto& att : attrs) {
-            att.toXMLStream(out, "  ");
-        }
-        if (is_unsigned)
-            out << "  <attribute name=\"_Unsigned\" value=\"true\" />" << std::endl;
-        out << "</variable>" << std::endl;
-    } else {
-        out << "/>" << std::endl;
-    }
+    NcmlCDMWriter::write(out, *this, attrs, true);
 }
 
 void CDMVariable::toXMLStream(std::ostream& out) const

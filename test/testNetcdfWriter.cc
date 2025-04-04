@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,6 +25,7 @@
 
 #include "fimex/CDMException.h"
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/XMLUtils.h"
 
 #include "NetCDF_CDMWriter.h"
 
@@ -49,7 +50,8 @@ TEST4FIMEX_TEST_CASE(test_feltNetcdfWriteConfig)
         return;
 
     const std::string outputFileName = "test_feltNetcdfWriteConfig.nc";
-    NetCDF_CDMWriter writer(feltReader, outputFileName, pathShareEtc("cdmWriterConfigDeprecated.xml"));
+    const auto config = createXMLInput(pathShareEtc("cdmWriterConfigDeprecated.xml"));
+    NetCDF_CDMWriter writer(feltReader, outputFileName, config);
     TEST4FIMEX_CHECK_EQ(writer.getVariableName("sea_level_pressure"), "sea_pressure");
     TEST4FIMEX_CHECK_EQ(writer.getDimensionName("x"), "x_c");
     TEST4FIMEX_CHECK_EQ(writer.getVariableName("x"), "x_c");

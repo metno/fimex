@@ -23,7 +23,7 @@
 
 #include "fimex/CDMDimension.h"
 
-#include <iostream>
+#include <fimex/NcmlCDMWriter.h>
 
 namespace MetNoFimex
 {
@@ -44,11 +44,7 @@ CDMDimension::~CDMDimension()
 
 void CDMDimension::toXMLStream(std::ostream& out) const
 {
-	out << "<dimension name=\"" << getName() << "\" length=\"" << getLength() << "\" ";
-	if (isUnlimited()) {
-		out << "isUnlimited=\"true\" ";
-	}
-	out << "/>" << std::endl;
+    NcmlCDMWriter::write(out, *this);
 }
 
-}
+} // namespace MetNoFimex

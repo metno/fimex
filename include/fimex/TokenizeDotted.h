@@ -43,6 +43,7 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
 {
     std::vector<std::string> tokens = tokenize(str, delimiter);
     std::vector<T> vals;
+    vals.reserve(tokens.size());
     for (std::vector<std::string>::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
         std::string current = trim(*tok);
         if (current == "...") {

@@ -1,7 +1,7 @@
 /*
  * Fimex, IoFactory.h
  *
- * (C) Copyright 2019, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -50,7 +50,7 @@ CDMReaderWriter_p IoFactory::createReaderWriter(const std::string& fileTypeName,
     throw CDMException("unable to create reader-writer for file type '" + fileTypeName + "'");
 }
 
-void IoFactory::createWriter(CDMReader_p, const std::string& fileTypeName, const std::string&, const std::string&)
+void IoFactory::createWriter(CDMReader_p, const std::string& fileTypeName, const std::string&, const XMLInput&)
 {
     throw CDMException("unable to write file type: '" + fileTypeName + "'");
 }

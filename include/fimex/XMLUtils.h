@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2019-2022, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -24,8 +24,14 @@
 #ifndef XMLUTILS_H_
 #define XMLUTILS_H_
 
+#include "fimex/XMLDoc.h"
+#include "fimex/XMLInput.h"
+#include "fimex/XMLInputDoc.h"
+
 #include <string>
+
 #include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
 
 namespace MetNoFimex {
 
@@ -50,6 +56,49 @@ public:
 private:
   xmlChar* p_;
 };
+
+class XPathNodeSet {
+public:
+    class iterator {
+    public:
+        iterator(const XPathNodeSet& p, int i) : parent(p), index(i) {}
+
+        iterator& operator++() { ++index; return *this; }
+        iterator operator++(int) { iterator it(*this); ++index; return it; }
+
+        xmlNodePtr operator*() { return parent.at(index); }
+
+        bool operator==(const iterator& other) const { return &parent == &other.parent && index == other.index; }
+        bool operator!=(const iterator& other) const { return !(*this == other); }
+
+    private:
+        const XPathNodeSet& parent;
+        int index;
+    };
+
+public:
+    XPathNodeSet(const XMLDoc& doc, const std::string& xpath, xmlNodePtr node = nullptr);
+    XPathNodeSet(XMLDoc_p doc, const std::string& xpath, xmlNodePtr node = nullptr)
+        : XPathNodeSet(*doc, xpath, node) { }
+    XPathNodeSet(std::unique_ptr<XMLDoc>& doc, const std::string& xpath, xmlNodePtr node = nullptr)
+        : XPathNodeSet(*doc, xpath, node) { }
+    XPathNodeSet(xmlXPathObject_p xpo);
+
+    iterator begin() const { return iterator(*this, 0); }
+    iterator end() const { return iterator(*this, size_); }
+
+    int size() const { return size_; }
+    xmlNodePtr at(int index) const { if (index >= 0 && index < size_) return nodes_->nodeTab[index]; else return nullptr; }
+    xmlNodePtr operator[](int index) const { return at(index); }
+
+private:
+    xmlXPathObject_p xpo_;
+    xmlNodeSetPtr nodes_;
+    int size_;
+};
+
+XMLInputDoc createXMLInput(const XMLInput& xi);
+XMLInputDoc createXMLInput(const std::string& configXML);
 
 } // namespace MetNoFimex
 

@@ -1,7 +1,7 @@
 /*
  * Fimex, IoFactory.h
  *
- * (C) Copyright 2019-2022, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -70,7 +70,7 @@ public:
                              const std::vector<std::string>& args) override;
     CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                                          const std::vector<std::string>& args) override;
-    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config) override;
+    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config) override;
 
 private:
     void* lib_;

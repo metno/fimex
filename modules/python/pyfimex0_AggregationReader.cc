@@ -1,7 +1,7 @@
 /*
  * Fimex, pyfimex0_AggregationReader.cc
  *
- * (C) Copyright 2019, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -42,12 +42,17 @@ AggregationReader_p createAggregationReader(const std::string& aggregationType)
 // handle default args
 void addReader1(AggregationReader_p agg, CDMReader_p rd)
 {
-    agg->addReader(rd);
+    agg->addReader(rd, std::string(), std::string());
 }
 
 void addReader2(AggregationReader_p agg, CDMReader_p rd, const std::string& id)
 {
-    agg->addReader(rd, id);
+    agg->addReader(rd, id, std::string());
+}
+
+void addReader3(AggregationReader_p agg, CDMReader_p rd, const std::string& id, const std::string& coordValue)
+{
+    agg->addReader(rd, id, coordValue);
 }
 
 } // namespace
@@ -62,8 +67,12 @@ void pyfimex0_AggregationReader(py::module m)
              "Add a reader.\n\n"
              ":param reader: a CDMReader\n"
              ":param id: optional reader id (for debug messages)\n")
-        .def("initAggregation", &AggregationReader::initAggregation,
-             "Prepare for aggregation reading after adding all readers with addReader.\n");
+        .def("addReader", addReader3,
+             "Add a reader.\n\n"
+             ":param reader: a CDMReader\n"
+             ":param id: optional reader id (for debug messages)\n"
+             ":param coordValue: coordinate value(s) along join axis)\n")
+        .def("initAggregation", &AggregationReader::initAggregation, "Prepare for aggregation reading after adding all readers with addReader.\n");
 
     m.def("createAggregationReader", createAggregationReader);
 }

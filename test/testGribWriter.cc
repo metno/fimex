@@ -1,7 +1,7 @@
 /*
  * Fimex, testGribWriter.cc
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,6 +27,7 @@
 #include "testinghelpers.h"
 
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/XMLUtils.h"
 
 #include "GribApiCDMWriter.h"
 
@@ -41,14 +42,16 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Append)
     if (!feltReader)
         return;
 
+    const auto config = createXMLInput(pathTest("cdmGribWriterConfig_append.xml"));
+
     const string outputFile("test_append.grb1");
     MetNoFimex::remove(outputFile);
-    GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
+    GribApiCDMWriter(feltReader, outputFile, 1, config);
     TEST4FIMEX_CHECK(MetNoFimex::exists(outputFile));
     TEST4FIMEX_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
 
     const size_t size = MetNoFimex::file_size(outputFile);
-    GribApiCDMWriter(feltReader, outputFile, 1, pathTest("cdmGribWriterConfig_append.xml"));
+    GribApiCDMWriter(feltReader, outputFile, 1, config);
     TEST4FIMEX_CHECK(::exists(outputFile));
     TEST4FIMEX_CHECK_EQ(MetNoFimex::file_size(outputFile), 2 * size);
     MetNoFimex::remove(outputFile);
@@ -60,8 +63,9 @@ TEST4FIMEX_TEST_CASE(test_feltGrib1Write)
     if (!feltReader)
         return;
 
+    const auto config = createXMLInput(pathShareEtc("cdmGribWriterConfig.xml"));
     const string outputFile("test.grb1");
-    GribApiCDMWriter(feltReader, outputFile, 1, pathShareEtc("cdmGribWriterConfig.xml"));
+    GribApiCDMWriter(feltReader, outputFile, 1, config);
     TEST4FIMEX_CHECK(MetNoFimex::exists(outputFile));
     TEST4FIMEX_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
     // cannot remove file as it is used by other tests
@@ -73,8 +77,9 @@ TEST4FIMEX_TEST_CASE(test_feltGrib2Write)
     if (!feltReader)
         return;
 
+    const auto config = createXMLInput(pathShareEtc("cdmGribWriterConfig.xml"));
     const string outputFile("test.grb2");
-    GribApiCDMWriter(feltReader, outputFile, 2, pathShareEtc("cdmGribWriterConfig.xml"));
+    GribApiCDMWriter(feltReader, outputFile, 2, config);
     TEST4FIMEX_CHECK(MetNoFimex::exists(outputFile));
     TEST4FIMEX_CHECK(MetNoFimex::file_size(outputFile) > 5000000);
     // cannot remove file as it is used by other tests

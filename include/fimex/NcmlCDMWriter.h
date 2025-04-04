@@ -1,7 +1,7 @@
 /*
- * Fimex, NcmlAggregationReader.h
+ * Fimex
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -19,40 +19,39 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
- *
- *  Created on: Apr 17, 2013
- *      Author: heikok
  */
 
-#ifndef NCMLAGGREGATIONREADER_H_
-#define NCMLAGGREGATIONREADER_H_
+#ifndef NULL_CDMWRITER_H_
+#define NULL_CDMWRITER_H_
 
-#include "fimex/CDMReader.h"
+#include "fimex/CDMWriter.h"
+
+#include <iosfwd>
 
 namespace MetNoFimex {
 
-class XMLInput;
+class CDMAttribute;
+class CDMDimension;
+class CDMVariable;
 
 /**
- * A CDM-Reader reading data from several-files defined by
- * ncml-aggregations.
- *
- * This reader should usually be called from the NcmlCDMReader.
+ * Write CDM content to a text file.
  */
-class NcmlAggregationReader : public CDMReader
+class NcmlCDMWriter : public CDMWriter
 {
 public:
-    NcmlAggregationReader(const XMLInput& ncml);
-    ~NcmlAggregationReader();
+    NcmlCDMWriter(const CDMReader_p cdmReader, const std::string& outputFile);
+    NcmlCDMWriter(const CDMReader_p cdmReader, std::ostream& output, bool withData);
+    ~NcmlCDMWriter();
 
-    using CDMReader::getDataSlice;
-    DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
-    DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
+    static void write(std::ostream& out, const CDMDimension& dim);
+    static void write(std::ostream& out, const CDMAttribute& att, const std::string& indent);
+    static void write(std::ostream& out, const CDMVariable& var, const std::vector<CDMAttribute>& attrs, bool closeXML);
 
 private:
-    CDMReader_p reader_;
+    void write(std::ostream& out, bool withData);
 };
 
 } // namespace MetNoFimex
 
-#endif /* NCMLAGGREGATIONREADER_H_ */
+#endif /*NULL_CDMWRITER_H_*/

@@ -24,15 +24,16 @@
 #ifndef CDMVARIABLE_H_
 #define CDMVARIABLE_H_
 
-#include <string>
-#include <vector>
-#include <iosfwd>
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
+#include "fimex/deprecated.h"
 
-namespace MetNoFimex
-{
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/CDMVariable.h
@@ -82,10 +83,10 @@ public:
     bool checkDimension(const std::string& dimension) const;
 
     /// print a xml representation to the stream without attributes
-    void toXMLStream(std::ostream& out) const;
+    MIFI_DEPRECATED(void toXMLStream(std::ostream& out) const);
 
     /// print a xml representation to the stream with attributes
-    void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const;
+    MIFI_DEPRECATED(void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const);
 
     /// add data to the variable
     void setData(DataPtr data);
@@ -106,12 +107,11 @@ private:
     std::string name;
     CDMDataType datatype;
     std::vector<std::string> shape;
-    void shapeToXMLStream(std::ostream& out) const;
     DataPtr data;
     std::string spatialVectorCounterpart;
     SpatialVectorDirection spatialVectorDirection;
 };
 
-}
+} // namespace MetNoFimex
 
 #endif /*CDMVARIABLE_H_*/

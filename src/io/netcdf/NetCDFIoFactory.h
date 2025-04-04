@@ -1,7 +1,7 @@
 /*
   Fimex, src/NetCDFIoFactory.h
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -48,7 +48,7 @@ public:
                              const std::vector<std::string>& args) override;
     CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                                          const std::vector<std::string>& args) override;
-    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config) override;
+    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config) override;
 
 private:
     bool matchFileType(const std::string& type, bool& is_rw);

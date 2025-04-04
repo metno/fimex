@@ -1,7 +1,7 @@
 /*
  * Fimex, AggregationReader.cc
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2013-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMException.h"
 #include "fimex/Data.h"
+#include "fimex/DataUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/StringUtils.h"
@@ -38,164 +39,431 @@
 namespace MetNoFimex {
 
 namespace {
+
 Logger_p logger = getLogger("fimex.AggregationReader");
+
+} // namespace
+
+AggregationReader::AggType AggregationReader::aggTypeFromText(const std::string& aggType)
+{
+    if (aggType == "joinExisting") {
+        return AGG_JOIN_EXISTING;
+    } else if (aggType == "joinNew") {
+        return AGG_JOIN_NEW;
+    } else if (aggType == "union") {
+        return AGG_UNION;
+    } else {
+        throw CDMException("aggregation type '" + aggType + "' not known");
+    }
 }
 
 AggregationReader::AggregationReader(const std::string& aggregationType)
-    : aggType_(aggregationType)
+    : aggType_(aggTypeFromText(aggregationType))
 {
 }
 
 AggregationReader::~AggregationReader() {}
 
-void AggregationReader::addReader(CDMReader_p reader, const std::string& id)
+/*
+joinex:
+- condition = variable has unlim dim
+- var may appear in some readers only; fillvalue for other readers
+- for other readers
+  - must have same shape and same sizes (size except for unlim dim)
+  - else fillvalue
+
+union:
+- not joined (different from has "unlim dim" if agg==union)
+- not bad
+- from first reader where it appears
+- add only if dimension sizes and unlim-ness match with first reader that has the dimension
+*/
+
+/*
+getData
+- no reader: nullptr
+- 1 reader: read from this reader
+- more readers:
+- if aggtype=join, check join condition, find reader by unlimdimpos, check dimensions, return data or fill
+- other vars: find reader by varname (already qc-passed), return data
+*/
+
+void AggregationReader::addReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
 {
-    if (gDataReader_)
-        throw CDMException("reference reader already set");
-    if (!id.empty()) {
-        readers_.push_back(std::make_pair(id, reader));
+    auto id_ = id;
+    if (!id_.empty()) {
+        id_ = "reader_" + type2string(readers_.size());
+    }
+    readers_.push_back(std::make_pair(id, reader));
+
+    if (readers_.size() == 1) {
+        addFirstReader(reader, id_, coordValue);
     } else {
-        const std::string dummy_id = "reader_" + type2string(readers_.size());
-        readers_.push_back(std::make_pair(dummy_id, reader));
+        addOtherReader(reader, id_, coordValue);
+    }
+}
+
+void AggregationReader::addFirstReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
+{
+    // start out with CDM of first reader
+    *cdm_ = readers_.front().second->getCDM();
+
+    if (aggType_ == AGG_JOIN_EXISTING) {
+        if (const auto* uDim = cdm_->getUnlimitedDim()) {
+            // disable all cached information about variable-data for variables with unlimited dimension
+            // also update set of variables for join and union
+            for (const auto& var : cdm_->getVariables()) {
+                const auto& varName = var.getName();
+                if (cdm_->hasUnlimitedDim(var)) {
+                    cdm_->getVariable(varName).setData(nullptr);
+                    LOG4FIMEX(logger, Logger::DEBUG, "adding jex var '" << varName << "' from reader '" << id << "'");
+                    joinVars.insert(varName);
+                }
+            }
+
+            extendJoinedUnLimDimBy(uDim->getLength(), coordValue);
+        } else {
+            // if first reader does not have unlimited dimension, some unlimited dimension may appear later
+            extendJoinedUnLimDimBy(0, "");
+        }
+    } else if (aggType_ == AGG_JOIN_NEW) {
+        if (const auto* uDim = cdm_->getUnlimitedDim()) {
+            auto& aUdim = cdm_->getDimension(uDim->getName());
+            aUdim.setUnlimited(false);
+        }
+        CDMDimension joinUdim(joinNewDim, 0);
+        joinUdim.setUnlimited(true);
+        cdm_->addDimension(joinUdim);
+
+        // for all join variables, copy and change shape
+        for (const auto& varName : joinVars) {
+            if (cdm_->hasVariable(varName)) {
+                auto& var = cdm_->getVariable(varName);
+                auto shape = var.getShape(); // take a copy
+                shape.push_back(joinNewDim);
+                var.setShape(shape);
+            }
+        }
+
+        extendJoinedUnLimDimBy(1, coordValue);
+    }
+
+    for (const auto& v : cdm_->getVariables()) {
+        const auto& varName = v.getName();
+        if (!joinVars.count(varName)) {
+            LOG4FIMEX(logger, Logger::DEBUG, "adding union var '" << varName << "' from reader '" << id << "'");
+            unionReaders_[varName] = 0;
+        }
+    }
+}
+
+void AggregationReader::extendJoinedUnLimDimBy(size_t len, const std::string& coordValue)
+{
+    const size_t before = readerUdimPos_.empty() ? 0 : readerUdimPos_.back();
+    readerUdimPos_.push_back(before + len);
+
+    // change size of unlimited dimension
+    if (auto uDim = cdm_->getUnlimitedDim()) {
+        cdm_->getDimension(uDim->getName()).setLength(readerUdimPos_.back());
+    }
+
+    if (!coordValue.empty()) {
+        const auto coordValues = tokenize(coordValue);
+        if (coordValues.size() != len) {
+            std::ostringstream msg;
+            msg << "expected " << len << " but found " << coordValues.size() << " coordValues in '" << coordValue << "'";
+            throw CDMException(msg.str());
+        }
+        joinCoordValues.insert(joinCoordValues.end(), coordValues.begin(), coordValues.end());
+    }
+}
+
+namespace {
+
+void copyAttributes(const CDM& from, const std::string& fromVarName, CDM& to)
+{
+    for (const auto& attr : from.getAttributes(fromVarName)) {
+        to.addAttribute(fromVarName, attr);
+    }
+}
+
+void copyVar(const CDM& from, const CDMVariable& fromVar, CDM& to)
+{
+    to.addVariable(fromVar);
+    copyAttributes(from, fromVar.getName(), to);
+}
+
+} // namespace
+
+void AggregationReader::addOtherReader(CDMReader_p reader, const std::string& id, const std::string& coordValue)
+{
+    CDM& aCdm = *cdm_;
+    auto* aUdim = aCdm.getUnlimitedDim();
+
+    auto& rCdm = reader->getCDM();
+    auto* rUdim = rCdm.getUnlimitedDim();
+
+    if (aggType_ == AGG_JOIN_EXISTING) {
+        // join all variables with unlimited dimension
+
+        if (!rUdim) {
+            // added reader has no unlimited dimension
+            LOG4FIMEX(logger, Logger::INFO, "reader '" << id << "' has no unlimited dimension");
+            extendJoinedUnLimDimBy(0, "");
+        } else if (aUdim && rUdim->getName() != aUdim->getName()) {
+            // agg and added reader both have an unlimited dimension, but they have different names
+            LOG4FIMEX(logger, Logger::WARN,
+                      "reader '" << id << "' has unlimited dimension '" << rUdim->getName() << "' while aggregation has '" << aUdim->getName() << "'");
+            extendJoinedUnLimDimBy(0, "");
+        } else {
+            if (!aUdim) {
+                // aggregation does not have an unlimited dimension from before; add, and add variables
+                aCdm.addDimension(*rUdim);
+            } else {
+                // aggregation and reader both have the same unlimited dimension
+            }
+
+            // add all variables with unlim dim to join
+            for (const auto& rVar : rCdm.getVariables()) {
+                const auto& rVarName = rVar.getName();
+                if (aCdm.hasVariable(rVar.getName())) {
+                    // variable already in CDM from another reader; all other checks in getData
+                } else if (rCdm.hasUnlimitedDim(rVar)) {
+                    bool dimsOk = true;
+                    for (const auto& rDimName : rVar.getShape()) {
+                        if (rDimName == rUdim->getName()) {
+                            continue;
+                        }
+                        if (!aCdm.hasDimension(rDimName)) {
+                            aCdm.addDimension(rCdm.getDimension(rDimName));
+                        } else if (aCdm.getDimension(rDimName).getLength() != rCdm.getDimension(rDimName).getLength()) {
+                            dimsOk = false;
+                            LOG4FIMEX(logger, Logger::DEBUG, "dim '" << rDimName << "' from reader '" << id << "' has length mismatch");
+                        }
+                    }
+
+                    if (dimsOk) {
+                        copyVar(rCdm, rVar, aCdm);
+                        const auto& rVarName = rVar.getName();
+                        cdm_->getVariable(rVarName).setData(nullptr);
+                        LOG4FIMEX(logger, Logger::DEBUG, "adding jex var '" << rVarName << "' from reader '" << id << "'");
+                        joinVars.insert(rVarName);
+                    }
+                }
+            }
+
+            extendJoinedUnLimDimBy(rUdim->getLength(), coordValue);
+        }
+    } else if (aggType_ == AGG_JOIN_NEW) {
+        // for all join variables not known already, copy and change shape
+        for (const auto& rVar : rCdm.getVariables()) {
+            const auto& varName = rVar.getName();
+            if (!aCdm.hasVariable(varName) && joinVars.count(varName)) {
+                auto aVar = rVar;
+                auto shape = rVar.getShape(); // take a copy
+                shape.push_back(joinNewDim);
+                aVar.setShape(shape);
+                aCdm.addVariable(aVar);
+                copyAttributes(rCdm, varName, *cdm_);
+            }
+        }
+
+        extendJoinedUnLimDimBy(1, coordValue);
+    }
+
+    // remaining variables are treated as for "union"
+
+    const size_t readerIndex = readers_.size() - 1;
+    for (const auto& rVar : rCdm.getVariables()) {
+        const auto& rVarName = rVar.getName();
+
+        if (joinVars.count(rVarName)) {
+            // variable is joined
+            continue;
+        }
+
+        if (unionReaders_.count(rVarName)) {
+            // variable coming from a previous reader
+            continue;
+        }
+
+        // check that dimensions of shape have same length
+        bool dimsOk = true;
+        for (const auto& rshpdim : rVar.getShape()) {
+            const auto& rDim = rCdm.getDimension(rshpdim);
+            if (aCdm.hasDimension(rshpdim)) {
+                CDMDimension& dim = aCdm.getDimension(rshpdim);
+                if (dim.isUnlimited() != rDim.isUnlimited()) {
+                    dimsOk = false;
+                    LOG4FIMEX(logger, Logger::WARN, rVar.getName() << " differs in unlimited-ness in " << id);
+                } else if (rDim.getLength() != dim.getLength()) {
+                    dimsOk = false;
+                    LOG4FIMEX(logger, Logger::WARN, rVar.getName() << " differs in length in " << id);
+                }
+            } else if (rDim.isUnlimited() && aCdm.getUnlimitedDim()) {
+                dimsOk = false;
+                LOG4FIMEX(logger, Logger::WARN, "two unlimited dimensions: " << rDim.getName() << " at " << id);
+            } else {
+                aCdm.addDimension(rDim); // FIXME this should wait until all dims are checked
+            }
+        }
+        if (dimsOk) {
+            LOG4FIMEX(logger, Logger::DEBUG, "adding union var '" << rVarName << "' from reader '" << id << "'");
+            unionReaders_[rVarName] = readerIndex;
+            copyVar(rCdm, rVar, aCdm);
+        }
     }
 }
 
 void AggregationReader::initAggregation()
 {
-    // find the reference-file, choose penultimate, no readers also possible
-    if (readers_.size() == 1) {
-        gDataReader_ = readers_.at(0).second;
-    } else if (readers_.size() > 1) {
-        gDataReader_ = readers_.at(readers_.size() - 2).second;
-    }
-    if (gDataReader_)
-        *(this->cdm_) = gDataReader_->getCDM();
-
-    if (readers_.size() <= 1) {
-        // aggregation only with more than 1 reader
+    if (joinCoordValues.empty()) {
         return;
     }
-
-    if (aggType_ == "joinExisting") {
-        // join unlimited from joinExisting, remember unlimdim->datasource map
-        const CDMDimension* uDim = cdm_->getUnlimitedDim();
-        if (uDim == 0) {
-            throw CDMException("cannot aggregate files with joinExisting without unlimited dimension");
+    if (aggType_ == AGG_JOIN_NEW) {
+        CDMDataType joinDataType = CDM_DOUBLE;
+        DataPtr joinData;
+        try {
+            joinData = initDataByArray(joinDataType, joinCoordValues);
+        } catch (string2type_error& ex) {
         }
-        // disable all cached information about variable-data for variables with unlimited dimension
-        for (const CDMVariable& var : cdm_->getVariables()) {
-            if (cdm_->hasUnlimitedDim(var)) {
-                cdm_->getVariable(var.getName()).setData(DataPtr());
-            }
+        if (!joinData) {
+            joinDataType = CDM_STRINGS;
+            joinData = initDataByArray(joinDataType, joinCoordValues);
         }
-        const std::string& uDimName = uDim->getName();
-        for (size_t i = 0; i < readers_.size(); ++i) {
-            auto& id_rd = readers_[i];
-            const CDMDimension* readerUdim = id_rd.second->getCDM().getUnlimitedDim();
-            if (readerUdim == 0 || (readerUdim->getName() != uDimName)) {
-                LOG4FIMEX(logger, Logger::INFO, "file '" << id_rd.first << "' does not have matching unlimited dimension: " << uDimName);
-                id_rd.second.reset(); // no longer needed-
-            } else {
-                for (size_t j = 0; j < readerUdim->getLength(); ++j) {
-                    readerUdimPos_.push_back(std::make_pair(i, j));
-                }
-            }
+        CDMVariable joinVar(joinNewDim, joinDataType, {joinNewDim});
+        joinVar.setData(joinData);
+        cdm_->addVariable(joinVar);
+    } else if (aggType_ == AGG_JOIN_EXISTING) {
+        const auto& joinName = cdm_->getUnlimitedDim()->getName();
+        if (cdm_->hasVariable(joinName)) {
+            auto& joinVar = cdm_->getVariable(joinName);
+            joinVar.setData(initDataByArray(joinVar.getDataType(), joinCoordValues));
         }
-        // change size of unlimited dimension
-        CDMDimension& ulimDim = cdm_->getDimension(uDim->getName());
-        ulimDim.setLength(readerUdimPos_.size());
-    } else if (aggType_ == "union") {
-        // join variables/dimensions from union, remember variable->datasource map
-        for (size_t ir = 0; ir < readers_.size(); ++ir) {
-            auto& id_rd = readers_[ir];
-            const CDM& rCdm = id_rd.second->getCDM();
-            for (const CDMVariable& rv : rCdm.getVariables()) {
-                const CDM::VarVec& knownVars = cdm_->getVariables();
-                if (find_if(knownVars.begin(), knownVars.end(), CDMNameEqual(rv.getName())) == knownVars.end()) {
-                    LOG4FIMEX(logger, Logger::INFO, "found new variable '" << rv.getName() << " in " << id_rd.first);
-                    // check dimensions
-                    const std::vector<std::string>& rshape = rv.getShape();
-                    bool dimsOk = true;
-                    for (const std::string& rshpdim : rshape) {
-                        const CDMDimension& rdim = rCdm.getDimension(rshpdim);
-                        if (cdm_->hasDimension(rshpdim)) {
-                            CDMDimension& dim = cdm_->getDimension(rshpdim);
-                            if (dim.isUnlimited()) {
-                                if (!rdim.isUnlimited()) {
-                                    dimsOk = false;
-                                    LOG4FIMEX(logger, Logger::WARN, rv.getName() << " not unlimited in " << id_rd.first);
-                                } else {
-                                    if (rdim.getLength() > dim.getLength()) {
-                                        dim.setLength(rdim.getLength());
-                                    }
-                                }
-                            } else {
-                                if (rdim.isUnlimited()) {
-                                    dimsOk = false;
-                                    LOG4FIMEX(logger, Logger::WARN, rv.getName() << " unlimited in " << id_rd.first);
-                                } else {
-                                    if (rdim.getLength() != dim.getLength()) {
-                                        dimsOk = false;
-                                        LOG4FIMEX(logger, Logger::WARN, rv.getName() << " changes size in dim " << rdim.getName() << " at " << id_rd.first);
-                                    }
-                                }
-                            }
-                        } else {
-                            if (!rdim.isUnlimited() || !cdm_->getUnlimitedDim()) {
-                                cdm_->addDimension(rdim);
-                            } else {
-                                dimsOk = false;
-                                LOG4FIMEX(logger, Logger::WARN, "two unlimited dimensions: " << rdim.getName() << " at " << id_rd.first);
-                            }
-                        }
-                    }
-                    if (dimsOk) {
-                        varReader_[rv.getName()] = ir;
-                        cdm_->addVariable(rv);
-                        for (const CDMAttribute& attr : rCdm.getAttributes(rv.getName())) {
-                            cdm_->addAttribute(rv.getName(), attr);
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        throw CDMException("aggregation type " + aggType_ + " not supported (currently, only union and joinExisting are supported)");
     }
+}
+
+CDMReader_p AggregationReader::findJoinReader(size_t& unLimDimPos) const
+{
+    const auto it = std::upper_bound(readerUdimPos_.begin(), readerUdimPos_.end(), unLimDimPos);
+    if (it == readerUdimPos_.end()) {
+        // out of bounds for unlimited dim
+        return nullptr;
+    }
+
+    const size_t idx = std::distance(readerUdimPos_.begin(), it);
+    const size_t before = it == readerUdimPos_.begin() ? 0 : *(it - 1);
+    unLimDimPos -= before;
+    return readers_[idx].second;
+}
+
+bool AggregationReader::checkJoinExistingDims(CDMReader_p reader, const std::string& varName) const
+{
+    const auto& rCdm = reader->getCDM();
+    if (!rCdm.hasVariable(varName)) {
+        return false;
+    }
+
+    const auto& rShape = rCdm.getVariable(varName).getShape();
+    if (rShape != cdm_->getVariable(varName).getShape()) {
+        return false;
+    }
+
+    const auto& rUdim = rCdm.getUnlimitedDim();
+    for (const auto& dim : rShape) {
+        if (!rUdim || dim != rUdim->getName()) {
+            if (cdm_->getDimension(dim).getLength() != rCdm.getDimension(dim).getLength()) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool AggregationReader::checkJoinNewDims(CDMReader_p reader, const std::string& varName) const
+{
+    const auto& rCdm = reader->getCDM();
+    if (!rCdm.hasVariable(varName)) {
+        return false;
+    }
+
+    auto aShape = cdm_->getVariable(varName).getShape();
+    aShape.pop_back();
+
+    const auto& rShape = rCdm.getVariable(varName).getShape();
+    if (rShape != aShape) {
+        return false;
+    }
+
+    for (const auto& dim : rShape) {
+        if (cdm_->getDimension(dim).getLength() != rCdm.getDimension(dim).getLength()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+CDMReader_p AggregationReader::findUnionReader(const std::string& varName) const
+{
+    const auto it = unionReaders_.find(varName);
+    if (it != unionReaders_.end()) {
+        const auto& id_rd = readers_.at(it->second);
+        return id_rd.second;
+    }
+    return nullptr;
 }
 
 DataPtr AggregationReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,uDim): (" << varName << "," << unLimDimPos << ")");
-    const CDMVariable& variable = cdm_->getVariable(varName);
-    if (variable.hasData())
-        return getDataSliceFromMemory(variable, unLimDimPos);
-
-    if (!gDataReader_) {
-        // no datasource, return empty
-        return createData(CDM_NAT, 0);
+    const CDMVariable& aVar = cdm_->getVariable(varName);
+    if (aVar.hasData()) {
+        return getDataSliceFromMemory(aVar, unLimDimPos);
     }
 
-    if (aggType_ == "joinExisting") {
-        if (cdm_->hasUnlimitedDim(variable) && (unLimDimPos < readerUdimPos_.size())) {
-            LOG4FIMEX(logger, Logger::DEBUG,
-                      "fetching data from " << readers_.at(readerUdimPos_.at(unLimDimPos).first).first << " at uDimPos "
-                                            << readerUdimPos_.at(unLimDimPos).second);
-            return readers_.at(readerUdimPos_.at(unLimDimPos).first).second->getDataSlice(varName, readerUdimPos_.at(unLimDimPos).second);
+    if (joinVars.count(varName)) {
+        if (auto rd = findJoinReader(unLimDimPos)) {
+            if (aggType_ == AGG_JOIN_EXISTING) {
+                if (checkJoinExistingDims(rd, varName)) {
+                    return rd->getDataSlice(varName, unLimDimPos);
+                } else {
+                    auto aUdim = cdm_->getUnlimitedDim();
+                    size_t unLimSliceSize = 1;
+                    for (const auto& dim : aVar.getShape()) {
+                        if (!aUdim || dim != aUdim->getName()) {
+                            unLimSliceSize *= cdm_->getDimension(dim).getLength();
+                        }
+                    }
+                    return createData(aVar.getDataType(), unLimSliceSize, cdm_->getFillValue(varName));
+                }
+            } else if (aggType_ == AGG_JOIN_NEW) {
+                if (checkJoinNewDims(rd, varName)) {
+                    // read everything
+                    SliceBuilder sb(rd->getCDM(), varName);
+                    return rd->getDataSlice(varName, sb);
+                } else {
+                    // set everything to fillValue
+                    size_t unLimSliceSize = 1;
+                    for (const auto& dim : aVar.getShape()) {
+                        unLimSliceSize *= cdm_->getDimension(dim).getLength();
+                    }
+                    return createData(aVar.getDataType(), unLimSliceSize, cdm_->getFillValue(varName));
+                }
+            }
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-        return gDataReader_->getDataSlice(varName, unLimDimPos);
-    } else if (aggType_ == "union") {
-        if (varReader_.find(varName) == varReader_.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-            return gDataReader_->getDataSlice(varName, unLimDimPos);
-        } else {
-            std::pair<std::string, CDMReader_p>& r = readers_.at(varReader_[varName]);
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << r.first);
-            return r.second->getDataSlice(varName, unLimDimPos);
-        }
+
+        return nullptr; // out of bounds for unlimited dim
     }
-    return gDataReader_->getDataSlice(varName, unLimDimPos);
+
+    // all other variables behave as for "union"
+    if (auto rd = findUnionReader(varName)) {
+        return rd->getDataSlice(varName, unLimDimPos);
+    }
+
+    LOG4FIMEX(logger, Logger::ERROR, "no reader for aggregation/union of variable '" << varName << "'");
+    return nullptr;
 }
 
 DataPtr AggregationReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -205,75 +473,77 @@ DataPtr AggregationReader::getDataSlice(const std::string& varName, const SliceB
     if (variable.hasData())
         return getDataSliceFromMemory(variable, sb);
 
-    if (!gDataReader_) {
-        // no datasource, return empty
-        return createData(CDM_NAT, 0);
-    }
+    if (joinVars.count(varName)) {
+        // merge along the unlim-slices
+        // this only works if the unlim dim is the highest (as in netcdf-3)
+        const std::string& uDimName = cdm_->getUnlimitedDim()->getName();
+        const std::vector<std::string> dimNames = sb.getDimensionNames();
+        const std::vector<size_t>& dimStart = sb.getDimensionStartPositions();
+        const std::vector<size_t>& dimSize = sb.getDimensionSizes();
+        // get the data along the unlimited dimension and join
+        // unlimited dimension must be outer=first dimension!
+        size_t unLimDimStart = 0;
+        size_t unLimDimSize = 0;
+        size_t unLimSliceSize = 1;
+        for (size_t i = 0; i < dimNames.size(); ++i) {
+            if (dimNames.at(i) == uDimName) {
+                unLimDimStart = dimStart.at(i);
+                unLimDimSize = dimSize.at(i);
+            } else {
+                unLimSliceSize *= dimSize.at(i);
+            }
+        }
+        if (unLimDimSize == 0 || unLimSliceSize == 0) {
+            return createData(variable.getDataType(), 0);
+        }
 
-    if (aggType_ == "joinExisting") {
-        if (cdm_->hasUnlimitedDim(variable)) {
-            // merge along the unlim-slices
-            // this only works if the unlim dim is the highest (as in netcdf-3)
-            const std::string& unLimDim = cdm_->getUnlimitedDim()->getName();
-            const std::vector<std::string> dimNames = sb.getDimensionNames();
-            const std::vector<size_t>& dimStart = sb.getDimensionStartPositions();
-            const std::vector<size_t>& dimSize = sb.getDimensionSizes();
-            // get the data along the unlimited dimension and join
-            // unlimited dimension must be outer=first dimension!
-            size_t unLimDimStart = 0;
-            size_t unLimDimSize = 0;
-            size_t unLimSliceSize = 1;
-            for (size_t i = 0; i < dimNames.size(); ++i) {
-                if (dimNames.at(i) == unLimDim) {
-                    unLimDimStart = dimStart.at(i);
-                    unLimDimSize = dimSize.at(i);
-                } else {
-                    unLimSliceSize *= dimSize.at(i);
-                }
-            }
-            if (unLimDimSize == 0 || unLimSliceSize == 0) {
-                return createData(variable.getDataType(), 0);
-            }
-            // read now each unlimdim-slice
-            // slice that slice according to the other dimensions
-            // join those slices
-            DataPtr retData = createData(variable.getDataType(), unLimSliceSize * unLimDimSize, cdm_->getFillValue(varName));
-            for (size_t i = 0; i < unLimDimSize; ++i) {
-                LOG4FIMEX(logger, Logger::DEBUG,
-                          "fetching data from " << readers_.at(readerUdimPos_.at(unLimDimStart + i).first).first << " at uDimPos "
-                                                << readerUdimPos_.at(unLimDimStart + i).second);
-                CDMReader_p reader = readers_.at(readerUdimPos_.at(i + unLimDimStart).first).second;
-                SliceBuilder sbi(reader->getCDM(), varName);
-                for (size_t j = 0; j < dimNames.size(); ++j) {
-                    if (dimNames.at(j) == unLimDim) {
-                        sbi.setStartAndSize(unLimDim, readerUdimPos_.at(i + unLimDimStart).second, 1);
-                    } else {
-                        sbi.setStartAndSize(dimNames.at(j), dimStart.at(j), dimSize.at(j));
+        // read now each unlimdim-slice
+        // slice that slice according to the other dimensions
+        // join those slices
+        DataPtr retData = createData(variable.getDataType(), unLimSliceSize * unLimDimSize, cdm_->getFillValue(varName));
+        for (size_t i = 0; i < unLimDimSize; ++i) {
+            size_t unLimDimPos = unLimDimStart + i;
+            if (auto reader = findJoinReader(unLimDimPos)) {
+                DataPtr sliceData;
+                if (aggType_ == AGG_JOIN_EXISTING) {
+                    if (checkJoinExistingDims(reader, varName)) {
+                        SliceBuilder sbi(reader->getCDM(), varName);
+                        for (size_t j = 0; j < dimNames.size(); ++j) {
+                            if (dimNames[j] == uDimName) {
+                                sbi.setStartAndSize(dimNames[j], unLimDimPos, 1);
+                            } else {
+                                sbi.setStartAndSize(dimNames[j], dimStart[j], dimSize[j]);
+                            }
+                        }
+                        sliceData = reader->getDataSlice(varName, sbi);
+                    }
+                } else if (aggType_ == AGG_JOIN_NEW) {
+                    if (checkJoinNewDims(reader, varName)) {
+                        SliceBuilder sbi(reader->getCDM(), varName);
+                        for (size_t j = 0; j < dimNames.size(); ++j) {
+                            if (dimNames[j] != uDimName) {
+                                sbi.setStartAndSize(dimNames[j], dimStart[j], dimSize[j]);
+                            }
+                        }
+                        sliceData = reader->getDataSlice(varName, sbi);
                     }
                 }
-                DataPtr unLimDimData = reader->getDataSlice(varName, sbi);
-                // gDataReader_->getDataSlice(varName, sb); //getDataSlice(varName, i+unLimDimStart);
-                if (unLimDimData->size() != 0) {
-                    assert(unLimDimData->size() == unLimSliceSize);
-                    retData->setValues(i * unLimSliceSize, *unLimDimData);
+                if (sliceData && sliceData->size() != 0) {
+                    assert(sliceData->size() == unLimSliceSize);
+                    retData->setValues(i * unLimSliceSize, *sliceData);
                 }
             }
-            return retData;
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-        return gDataReader_->getDataSlice(varName, sb);
-    } else if (aggType_ == "union") {
-        const auto it = varReader_.find(varName);
-        if (it == varReader_.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data from default reader");
-            return gDataReader_->getDataSlice(varName, sb);
-        } else {
-            const auto& id_rd = readers_.at(it->second);
-            LOG4FIMEX(logger, Logger::DEBUG, "fetching data of " << varName << " from " << id_rd.first);
-            return id_rd.second->getDataSlice(varName, sb);
-        }
+        return retData;
     }
-    return gDataReader_->getDataSlice(varName, sb);
+
+    // all other variables behave as for "union"
+    if (auto rd = findUnionReader(varName)) {
+        return rd->getDataSlice(varName, sb);
+    }
+
+    LOG4FIMEX(logger, Logger::ERROR, "no reader for aggregation/union of variable '" << varName << "'");
+    return nullptr;
 }
 
 } // namespace MetNoFimex

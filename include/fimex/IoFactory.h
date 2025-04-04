@@ -1,7 +1,7 @@
 /*
  * Fimex, IoFactory.h
  *
- * (C) Copyright 2019, met.no
+ * (C) Copyright 2019-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -54,7 +54,7 @@ public:
                                      const std::vector<std::string>& args) = 0;
     virtual CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                                                  const std::vector<std::string>& args);
-    virtual void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config);
+    virtual void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config);
 
     static bool install(const std::string& id, IoFactory_p iof);
     static IoFactory_pm& factories();

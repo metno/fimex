@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,6 +29,7 @@
 #include "fimex/CDMException.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/XMLInput.h"
 
 #include <fstream>
 
@@ -46,7 +47,7 @@ public:
      *
      * @warning remember to call run to actually do something
      */
-    GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const std::string& configFile);
+    GribApiCDMWriter_ImplAbstract(int gribVersion, CDMReader_p cdmReader, const std::string& outputFile, const XMLInput& config);
     virtual ~GribApiCDMWriter_ImplAbstract();
     /**
      * @brief actually write the data

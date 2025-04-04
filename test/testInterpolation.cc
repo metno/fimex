@@ -34,7 +34,15 @@
 #include <fstream>
 #include <string>
 
+// #define DEBUG_INTERPOLATION_TESTS 1
+#ifdef DEBUG_INTERPOLATION_TESTS
+#include <iostream>
+#endif /* DEBUG_INTERPOLATION_TESTS */
+
 using MetNoFimex::pathTest;
+#ifdef DEBUG_INTERPOLATION_TESTS
+using MetNoFimex::rad_to_deg;
+#endif /* DEBUG_INTERPOLATION_TESTS */
 using namespace MetNoFimex::reproject;
 
 namespace {
@@ -74,12 +82,16 @@ TEST4FIMEX_TEST_CASE(mifi_get_values_bilinear_f)
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
     TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0.0001, 2, 2, 1);
-    //std::cerr << outvalues[0] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+    std::cerr << outvalues[0] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
     TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-4));
     mifi_get_values_bilinear_f(infield, outvalues, 0., 0.3, 2, 2, 1);
     TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-6));
     mifi_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
-    //std::cerr << outvalues[0] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+    std::cerr << outvalues[0] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
     TEST4FIMEX_CHECK(near(outvalues[0], 1.3, 1e-4));
 
     // check for border values / nan
@@ -183,7 +195,6 @@ TEST4FIMEX_TEST_CASE(mifi_get_values_linear_d)
         TEST4FIMEX_CHECK_CLOSE(outfield[i], .5 * (infieldA[i] + infieldB[i]), 1e-5);
     }
 
-
     // extrapolation values between a and b
     mifi_get_values_linear_d(infieldA, infieldB, outfield, nr, 0., 1., 2.);
     for (int i = 0; i < nr; i++) {
@@ -243,12 +254,12 @@ TEST4FIMEX_TEST_CASE(mifi_get_values_log_log_f)
 }
 
 namespace {
-const std::string latlongProj = "+proj=latlong +a=6370 +e=0";
+const std::string latlongProj = "+proj=latlong +ellps=WGS84";
 } // namespace
 
 TEST4FIMEX_TEST_CASE(mifi_project_axes)
 {
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
 
     double emepX[] = {6,7,8};
     double emepY[] = {108,109,110};
@@ -269,7 +280,7 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     const int latSize = 90;
     float inArray[iSize*jSize*zSize]; // emep i, j, z
     float outArray[lonSize*latSize*zSize]; // long, lat, z
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
     double emepIAxis[iSize];
     double emepJAxis[jSize];
     double latitudeAxis[latSize];
@@ -284,10 +295,10 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     }
     // initialization of axis (originally fortran arrays, therefore i+1)
     for (int i = 0; i < iSize; ++i) {
-        emepIAxis[i] = i + 1;
+        emepIAxis[i] = (i + 1 - (iSize / 2.0))*50000;
     }
     for (int i = 0; i < jSize; ++i) {
-        emepJAxis[i] = i + 1;
+        emepJAxis[i] = (i + 1 - (jSize / 2.0))*50000;
     }
     for (int i = 0; i < lonSize; ++i) {
         longitudeAxis[i] = ((i+1)/2.) - 30;
@@ -323,12 +334,20 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize,
                                           zSize, latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
-    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
-#if 0
-    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " "
-              << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-    std::cerr << "emepProj: " << emepProj << " latlonProj: " << latlongProj << std::endl;
-#endif
+    const int idx_x = 9, idx_y = 77;
+    const auto idx = mifi_3d_array_position(idx_x, idx_y, 0, lonSize, latSize, zSize);
+    const float expected_country = 33;
+
+#ifdef DEBUG_INTERPOLATION_TESTS
+    std::cerr << "long lat val: " << longitudeAxis[idx_x] << " " << latitudeAxis[idx_y] << " " << outArray[idx] << std::endl;
+    std::cerr << "emepProj: '" << emepProj << "'\nlatlonProj: '" << latlongProj << "'" << std::endl;
+    for (int lon = 0; lon < lonSize; ++lon) {
+        for (int lat = 0; lat < latSize; ++lat) {
+            std::cerr << "out[" << lon << "," << lat << "] = " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize, zSize)] << std::endl;
+        }
+    }
+#endif /* DEBUG_INTERPOLATION_TESTS */
+    TEST4FIMEX_CHECK(near(outArray[idx], expected_country, 1e-6));
 
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
@@ -336,17 +355,16 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_BILINEAR, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
                                           latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
-    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
-#if 0
-    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
-              << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+    std::cerr << "long lat val: " << longitudeAxis[idx_x] << " " << latitudeAxis[idx_y] << " " << outArray[idx] << std::endl;
     std::ofstream bilinearOut("bilinearOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bilinearOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
         }
     }
-#endif
+#endif /* DEBUG_INTERPOLATION_TESTS */
+    TEST4FIMEX_CHECK(near(outArray[idx], expected_country, 1e-6));
 
     for (int i = 0; i < latSize*lonSize*zSize; ++i) {
         outArray[i] = MIFI_UNDEFINED_F;
@@ -354,23 +372,22 @@ TEST4FIMEX_TEST_CASE(mifi_interpolate_f)
     TEST4FIMEX_CHECK_NO_THROW(reproject_f(MIFI_INTERPOL_BICUBIC, emepProj, inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
                                           latlongProj, outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize));
     // -25 43 32 (long, lat, val)
-    TEST4FIMEX_CHECK(near(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)], 32, 1e-6));
-#if 0
-    std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25]
-              << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+    std::cerr << "long lat val: " << longitudeAxis[idx_x] << " " << latitudeAxis[idx_y] << " " << outArray[idx] << std::endl;
     std::ofstream bicubicOut("bicubicOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bicubicOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
         }
     }
-#endif
+#endif /* DEBUG_INTERPOLATION_TESTS */
+    TEST4FIMEX_CHECK(near(outArray[idx], expected_country, 1e-6));
 }
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
 {
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
-    const std::string emepProj2 = "+proj=stere +a=127.4 +lat_0=90 +lon_0=90 +lat_ts=60";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=0 +lat_ts=60";
+    const std::string emepProj2 = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=90 +lat_ts=60";
 
     double emepIAxis[5];
     double emepJAxis[5];
@@ -403,26 +420,30 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_90)
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
             vRot[j*5+i] = vOut[j*5+i];
-            //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
-            //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
+            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
         }
     }
     TEST4FIMEX_CHECK_NO_THROW(vector_reproject_values_f(emepProj, emepProj2, uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
-//            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
-//            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << " " << uRot[j*5+i] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
+            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << " " << uRot[j*5+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
             // rotation of 90deg -> u->-v, v->u
-TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] - uOut[j * 5 + i]) < 1e-4);
-TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
+            TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] - uOut[j * 5 + i]) < 1e-4);
+            TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
         }
     }
 }
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
 {
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
-    const std::string emepProj2 = "+proj=stere +a=127.4 +lat_0=90 +lon_0=180 +lat_ts=60";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=0 +lat_ts=60";
+    const std::string emepProj2 = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=180 +lat_ts=60";
 
     double emepIAxis[5];
     double emepJAxis[5];
@@ -455,25 +476,29 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_values_rotate_180)
         for (int j = 0; j < 5; ++j) {
             uRot[j*5+i] = uOut[j*5+i];
             vRot[j*5+i] = vOut[j*5+i];
-            //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
-            //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
+            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
         }
     }
     TEST4FIMEX_CHECK_NO_THROW(vector_reproject_values_f(emepProj, emepProj2, uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1));
     for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j) {
-            //std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
-            //std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
-            // rotation of 90deg -> u->v, v->-u
-            TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-5);
-            TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + uOut[j * 5 + i]) < 1e-5);
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " uRot(..) = " << uRot[j*5+i] << std::endl;
+            std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << " vRot(..) = " << vRot[j*5+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
+            // rotation of 180deg -> u->-v, v->-u
+            TEST4FIMEX_CHECK(fabs(vRot[j * 5 + i] + vOut[j * 5 + i]) < 1e-4);
+            TEST4FIMEX_CHECK(fabs(uRot[j * 5 + i] + uOut[j * 5 + i]) < 1e-4);
         }
     }
 }
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
 {
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109";
 
     double emepIAxis[4];
     double emepJAxis[4];
@@ -510,8 +535,10 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
                                           latlongProj, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4));
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
-            //std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
+            std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
             uRot[j*4+i] = uOut[j*4+i];
             vRot[j*4+i] = vOut[j*4+i];
         }
@@ -520,12 +547,16 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
         vector_reproject_values_f(emepProj, latlongProj, uOut, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1));
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            //std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
-            //std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+            std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
+            std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
             // check equal length
             double diff2 = (uOut[j*4+i]*uOut[j*4+i] + vOut[j*4+i]*vOut[j*4+i] - uRot[j*4+i]*uRot[j*4+i] - vRot[j*4+i]*vRot[j*4+i]);
             if (!std::isnan(diff2)) {
-                //std::cerr << diff2  << std::endl;
+#ifdef DEBUG_INTERPOLATION_TESTS
+                std::cerr << diff2  << std::endl;
+#endif /* DEBUG_INTERPOLATION_TESTS */
                 TEST4FIMEX_CHECK(fabs(diff2) < 1e-3);
             }
         }
@@ -534,7 +565,7 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_keep_size)
 
 TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
 {
-    const std::string emepProj = "+proj=stere +a=127.4 +lat_0=90 +lon_0=0 +lat_ts=60";
+    const std::string emepProj = "+proj=stere +ellps=WGS84 +lat_0=90 +lon_0=0 +lat_ts=60";
 
     int ox = 5;
     int oy = 5;
@@ -557,7 +588,7 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
             in_x_field[i+oy*j] = emepIAxis[i];
             in_y_field[i+oy*j] = emepJAxis[j];
         }
-     }
+    }
 
 
     double xOut[ox*oy];
@@ -568,15 +599,15 @@ TEST4FIMEX_TEST_CASE(mifi_vector_reproject_directions)
     TEST4FIMEX_CHECK_NO_THROW(matrix = get_vector_reproject_matrix_field(emepProj, latlongProj, in_x_field, in_y_field, ox, oy));
 
     TEST4FIMEX_CHECK_NO_THROW(vector_reproject_direction_by_matrix_f(matrix, angles, oz));
-#if 0
+#ifdef DEBUG_INTERPOLATION_TESTS
     for (int i = 0; i < ox; ++i) {
         for (int j = 0; j < oy; ++j) {
             std::cerr << "(" << i << "," << j << ") = ("
-                      <<(xOut[oy*j+i]*RAD_TO_DEG) <<"," << (yOut[oy*j+i]*RAD_TO_DEG)
+                      <<(rad_to_deg(xOut[oy*j+i])) <<"," << rad_to_deg((yOut[oy*j+i]))
                       << ") -> " << angles[oy*j+i] << std::endl;
         }
     }
-#endif
+#endif /* DEBUG_INTERPOLATION_TESTS */
     TEST4FIMEX_CHECK_CLOSE(315, angles[0 + oy * 0], 1);
     TEST4FIMEX_CHECK_CLOSE(270, angles[0 + oy * 2], 1);
     TEST4FIMEX_CHECK_CLOSE(225, angles[0 + oy * 4], 1);

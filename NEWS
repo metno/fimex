@@ -1,3 +1,13 @@
+  * 2024-09-09 fimex 2.1.1
+    * attempt to fix memory leak in XMLDoc::toString
+  * 2024-08-15 fimex 2.1.0
+    * ncml joinNew with coordValue
+  * 2024-06-18 fimex 2.0.1
+    * bugfix in interpolation unit tests
+  * 2024-04-02 fimex 2.0.0
+    * ncml writer
+    * ncml joinNew
+    * ncml shape bugfix (reversed order of dimensions)
   * 2024-02-16 fimex 1.10.1
     * fix various problems in 1.10.0
     * support eccodes 2.34

@@ -53,8 +53,8 @@
  * 0xBX = betaX, 0xCX= releaseCandidateX
  * touch configure.ac after changing these numbers
  */
-#define MIFI_VERSION_MAJOR  1
-#define MIFI_VERSION_MINOR  10
+#define MIFI_VERSION_MAJOR  2
+#define MIFI_VERSION_MINOR  1
 #define MIFI_VERSION_PATCH  1
 #define MIFI_VERSION_STATUS 0xF0
 

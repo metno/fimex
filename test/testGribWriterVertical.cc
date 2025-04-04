@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/Data.h"
+#include "fimex/XMLUtils.h"
 
 #include "GribApiCDMWriter.h"
 
@@ -52,7 +53,8 @@ TEST4FIMEX_TEST_CASE(Grib2WriteVertical)
     TEST4FIMEX_CHECK(inputReader->getCDM().hasVariable("hybrid"));
 
     {
-        GribApiCDMWriter gw(inputReader, pathGrib, 2, pathTest("testdata_grib_writer_vertical/cdmGribWriterConfig.xml"));
+        const auto config = createXMLInput(pathTest("testdata_grib_writer_vertical/cdmGribWriterConfig.xml"));
+        GribApiCDMWriter gw(inputReader, pathGrib, 2, config);
         TEST4FIMEX_CHECK(MetNoFimex::exists(pathGrib));
     }
 

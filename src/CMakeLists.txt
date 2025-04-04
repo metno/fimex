@@ -6,10 +6,14 @@ SET(INCF "${CMAKE_SOURCE_DIR}/include/fimex")
 SET(libfimex_ncml_SOURCES
   NcmlCDMReader.cc
   ${INCF}/NcmlCDMReader.h
+  NcmlCDMWriter.cc
+  ${INCF}/NcmlCDMWriter.h
   NcmlIoFactory.cc
   NcmlIoFactory.h
   NcmlAggregationReader.cc
   NcmlAggregationReader.h
+  NcmlUtils.cc
+  NcmlUtils.h
 )
 
 SET(libfimex_SOURCES
@@ -77,6 +81,8 @@ SET(libfimex_SOURCES
   ${INCF}/CoordinateSystemSliceBuilder.h
   Data.cc
   ${INCF}/Data.h
+  DataUtils.cc
+  ${INCF}/DataUtils.h
   DataImpl.h
   DataIndex.cc
   ${INCF}/DataIndex.h
@@ -140,7 +146,6 @@ SET(libfimex_SOURCES
   ${INCF}/MathUtils.h
   FileUtils.cc
   ${INCF}/FileUtils.h
-  ${INCF}/DataUtils.h
   ${INCF}/min_max.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h

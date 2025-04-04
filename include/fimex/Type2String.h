@@ -41,6 +41,8 @@ std::ostream& type2stream(std::ostream& out, T in)
 //! specialization for high prececision
 template <>
 std::ostream& type2stream<double>(std::ostream& out, double in);
+template <>
+std::ostream& type2stream<float>(std::ostream& out, float in);
 
 //! convert char from digits
 template <>

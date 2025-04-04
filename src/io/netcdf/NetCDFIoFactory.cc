@@ -1,7 +1,7 @@
 /*
   Fimex, src/NetCDFIoFactory.cc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2024 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -189,7 +189,7 @@ CDMReaderWriter_p NetCDFIoFactory::createReaderWriter(const std::string&, const 
     return std::make_shared<NetCDF_CDMReader>(fileName, true);
 }
 
-void NetCDFIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& config)
+void NetCDFIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
     const int version = isNetCDF4Type(fileTypeName) ? 4 : 3;
     NetCDF_CDMWriter(input, fileName, config, version);

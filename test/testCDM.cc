@@ -319,6 +319,6 @@ TEST4FIMEX_TEST_CASE(CDMVariable_NcML)
     std::ostringstream xml;
     var.toXMLStream(xml);
     const std::string xmls = xml.str();
-    TEST4FIMEX_CHECK(xmls.find("shape=\"x y time\"") != std::string::npos);
+    TEST4FIMEX_CHECK(xmls.find("shape=\"time y x\"") != std::string::npos);
     TEST4FIMEX_CHECK(xmls.find("attribute name=\"_Unsigned\" value=\"true\"") != std::string::npos);
 }

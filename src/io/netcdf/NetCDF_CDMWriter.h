@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008-2022, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -26,6 +26,8 @@
 
 #include "fimex/CDM.h"
 #include "fimex/CDMWriter.h"
+#include "fimex/XMLDocDecl.h"
+#include "fimex/XMLInput.h"
 
 #include <map>
 #include <string>
@@ -48,7 +50,7 @@ public:
      * @param configFile xml-configuration
      * @param version netcdf version, can be 3 or 4; 4 requires compilation against netcdf-4.0 or higher
      */
-    NetCDF_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
+    NetCDF_CDMWriter(const CDMReader_p cdmReader, const std::string& outputFile, const MetNoFimex::XMLInput& config, int version = 3);
     virtual ~NetCDF_CDMWriter();
     /**
      * @warning only public for testing
@@ -70,12 +72,12 @@ public:
 
 private:
     void init();
-    void initNcmlReader(std::unique_ptr<XMLDoc>& doc);
-    void initFillRenameDimension(std::unique_ptr<XMLDoc>& doc);
-    void initFillRenameVariable(std::unique_ptr<XMLDoc>& doc);
-    void initFillRenameAttribute(std::unique_ptr<XMLDoc>& doc);
+    void initNcmlReader(XMLDoc_p doc);
+    void initFillRenameDimension(XMLDoc_p doc);
+    void initFillRenameVariable(XMLDoc_p doc);
+    void initFillRenameAttribute(XMLDoc_p doc);
     /** clear all fields to remove */
-    void initRemove(std::unique_ptr<XMLDoc>& doc);
+    void initRemove(XMLDoc_p doc);
     /** test if the variable exists in the cdmReader or throw an CDMException */
     void testVariableExists(const std::string& varName);
 

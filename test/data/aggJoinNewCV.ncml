@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <variable name="new" type="int" shape="new">
+  </variable>
+
+  <aggregation type="joinNew" dimName="new">
+    <variableAgg name="multi" />
+    <netcdf location="joinExistingAgg1.nc" coordValue="17"/>
+    <netcdf location="joinExistingAgg3.nc" coordValue="19"/>
+    <netcdf location="joinExistingAgg4.nc" coordValue="23"/>
+  </aggregation>
+
+</netcdf>

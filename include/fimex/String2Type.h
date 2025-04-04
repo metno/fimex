@@ -24,6 +24,7 @@
 #ifndef FIMEX_STRING2TYPE_H_
 #define FIMEX_STRING2TYPE_H_
 
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -66,6 +67,9 @@ T string2type(const std::string& s)
     bool ok = !s.empty();
 
     if (std::is_arithmetic<T>() && ok) {
+        if (std::is_floating_point<T>() && s == "nan") {
+            return std::numeric_limits<T>::quiet_NaN();
+        }
         const char c = s[0];
         ok = (c == '-') || (std::is_floating_point<T>() && c == '.') || std::isdigit(c);
     }

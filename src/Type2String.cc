@@ -45,4 +45,13 @@ std::ostream& type2stream<double>(std::ostream& out, double in)
     return out;
 }
 
+template <>
+std::ostream& type2stream<float>(std::ostream& out, float in)
+{
+    std::ostringstream buffer;
+    buffer << std::setprecision(std::numeric_limits<float>::digits10 + 1) << in;
+    out << buffer.str();
+    return out;
+}
+
 } // namespace MetNoFimex

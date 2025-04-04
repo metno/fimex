@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMFileReaderFactory.h
  *
- * (C) Copyright 2010-2018, met.no
+ * (C) Copyright 2010-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -85,6 +85,7 @@ public:
     static CDMReaderWriter_p createReaderWriter(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
                                                 const std::vector<std::string>& args = std::vector<std::string>());
 
+    static void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config);
     static void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const std::string& configFile = std::string());
 };
 

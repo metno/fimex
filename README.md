@@ -4,6 +4,26 @@ Fimex is a library and a program to convert gridded geospatial data
 between different formats and projections.
 
 
+## NcML Changes in version 2.0
+
+In fimex 2.0, there are some major changesd in the behaviour of ncml
+in fimex.
+1. In fimex before 2.0, the order of the dimensions for the shape of
+   variables in ncml was reversed with respect to the ncml
+   description. In 2.0, the dimension order in fimex and the ncml
+   description should be the same. As both the old and new ncml text
+   are valid, but only one of them yields useful results, this change
+   requires manual review. This is the main reason to increase the
+   major version number of fimex.
+2. There is now support for `joinNew`. As part of this implementation,
+   the behaviour of `union` and `joinExisting` has also changed and
+   should be closer to the ncml description. Again, for the same input
+   ncml this might produce different output compared to fimex before
+   2.0.
+3. There is now support for writing to ncml, including values. This is
+   probably only useful for small datasets, as output files might
+   become huge for large datasets.
+
 ## Dependencies
 
 Fimex requires at least the following libraries to be installed for

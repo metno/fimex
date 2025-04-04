@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2008-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -29,13 +29,13 @@
 
 namespace MetNoFimex {
 
-GribApiCDMWriter::GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile)
+GribApiCDMWriter::GribApiCDMWriter(CDMReader_p cdmReader, const std::string& outputFile, const int gribVersion, const XMLInput& config)
     : CDMWriter(cdmReader, outputFile)
 {
     if (gribVersion == 1) {
-        GribApiCDMWriter_Impl1(cdmReader, outputFile, configFile).run();
+        GribApiCDMWriter_Impl1(cdmReader, outputFile, config).run();
     } else if (gribVersion == 2) {
-        GribApiCDMWriter_Impl2(cdmReader, outputFile, configFile).run();
+        GribApiCDMWriter_Impl2(cdmReader, outputFile, config).run();
     } else {
         throw CDMException("Unknown grib Version: " + type2string(gribVersion));
     }

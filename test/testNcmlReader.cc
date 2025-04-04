@@ -88,13 +88,35 @@ TEST4FIMEX_TEST_CASE(cdm_ncml)
 
     const CDM& cdm = reader->getCDM();
 
-    TEST4FIMEX_REQUIRE(cdm.hasVariable("x_wind"));
-    CDMVariable var = cdm.getVariable("x_wind");
+    const std::string wx = "x_wind_10m", wy = "y_wind_10m";
+    TEST4FIMEX_REQUIRE(cdm.hasVariable(wx));
+    CDMVariable var = cdm.getVariable(wx);
     TEST4FIMEX_CHECK(var.isSpatialVector());
-    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "y_wind");
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), wy);
 
-    TEST4FIMEX_REQUIRE(cdm.hasVariable("y_wind"));
-    var = cdm.getVariable("y_wind");
+    TEST4FIMEX_REQUIRE(cdm.hasVariable(wy));
+    var = cdm.getVariable(wy);
     TEST4FIMEX_CHECK(var.isSpatialVector());
-    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), "x_wind");
+    TEST4FIMEX_CHECK_EQ(var.getSpatialVectorCounterpart(), wx);
+
+    TEST4FIMEX_CHECK(!cdm.hasVariable("x_wind"));
+
+    {
+        const CDMAttribute& att = cdm.getAttribute("dummy", "important");
+        TEST4FIMEX_CHECK_EQ(att.getDataType(), CDM_SHORT);
+        DataPtr att_data = att.getData();
+        TEST4FIMEX_REQUIRE(att_data);
+        TEST4FIMEX_CHECK_EQ(att_data->getDataType(), CDM_SHORT);
+        TEST4FIMEX_REQUIRE_EQ(att_data->size(), 4);
+        shared_array<short> att_values = att_data->asShort();
+        TEST4FIMEX_CHECK_EQ(att_values[2], 4);
+    }
+    {
+        DataPtr data = reader->getData("dummy");
+        TEST4FIMEX_REQUIRE(data);
+        TEST4FIMEX_CHECK_EQ(data->getDataType(), CDM_FLOAT);
+        TEST4FIMEX_REQUIRE_EQ(data->size(), 3);
+        shared_array<float> values = data->asFloat();
+        TEST4FIMEX_CHECK_EQ(values[2], -17);
+    }
 }

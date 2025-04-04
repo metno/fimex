@@ -1,7 +1,7 @@
 /*
  * Fimex, AggregationReader.h
  *
- * (C) Copyright 2013-2019, met.no
+ * (C) Copyright 2013-2024, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -28,6 +28,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 
 namespace MetNoFimex {
@@ -38,30 +39,56 @@ namespace MetNoFimex {
 class AggregationReader : public CDMReader
 {
 public:
+    typedef enum {
+        AGG_UNION,
+        AGG_JOIN_EXISTING,
+        AGG_JOIN_NEW,
+    } AggType;
+
+public:
     AggregationReader(const std::string& aggregationType);
     ~AggregationReader();
 
-    void addReader(CDMReader_p reader, const std::string& id = std::string());
+    AggType aggType() const { return aggType_; }
+
+    void joinNewVars(const std::string& jnd, const std::set<std::string>& jnv) { joinNewDim = jnd; joinVars = jnv; } // jnd=ncml dimName; knv=ncml variableAgg
+
+    void addReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
     void initAggregation();
 
     using CDMReader::getDataSlice;
     DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0) override;
     DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
 
-protected:
-    // main data-reader
-    CDMReader_p gDataReader_;
+    static AggType aggTypeFromText(const std::string& aggType);
 
-    std::string aggType_;
+private:
+    void extendJoinedUnLimDimBy(size_t len, const std::string& coordValue);
 
-    //! the readers_ as ordered in the aggregation
+    void addFirstReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
+    void addOtherReader(CDMReader_p reader, const std::string& id, const std::string& coordValue);
+
+    CDMReader_p findJoinReader(size_t& unLimDimPos) const;
+    bool checkJoinExistingDims(CDMReader_p reader, const std::string& varName) const;
+    bool checkJoinNewDims(CDMReader_p reader, const std::string& varName) const;
+
+    CDMReader_p findUnionReader(const std::string& varName) const;
+
+private:
+    AggType aggType_;
+
+    //! the readers as ordered in the aggregation
     std::vector<std::pair<std::string, CDMReader_p>> readers_;
 
-    //! udim -> readerId,udimPos, joinExiting mapping of this udim to the readers_(i) udim (j)
-    std::vector<std::pair<std::size_t, std::size_t>> readerUdimPos_;
+    std::string joinNewDim; // from ncml dimName
+    std::vector<std::string> joinCoordValues;
+    std::set<std::string> joinVars;
 
-    //! varName -> readerId, union mapping of varName to readers_(i)
-    std::map<std::string, std::size_t> varReader_;
+    //! accumulated length of unlimited dimension for readers_
+    std::vector<size_t> readerUdimPos_;
+
+    //! varName -> readerId, for "union" variables
+    std::map<std::string, size_t> unionReaders_;
 };
 
 } // namespace MetNoFimex

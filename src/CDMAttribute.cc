@@ -24,67 +24,11 @@
 #include "fimex/CDMAttribute.h"
 
 #include "fimex/CDMException.h"
-#include "fimex/CDMNamedEntity.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
-#include "fimex/String2Type.h"
-#include "fimex/StringUtils.h"
-#include "fimex/coordSys/Projection.h"
-#include <cmath>
-#include <memory>
-#include <regex>
+#include "fimex/DataUtils.h"
+#include "fimex/NcmlCDMWriter.h"
 
 namespace MetNoFimex {
-
-namespace {
-/* init data arrays for all types */
-template <typename T>
-DataPtr initDataArray(const std::vector<std::string>& values)
-{
-    auto array = make_shared_array<T>(values.size());
-    std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
-    return createData(values.size(), array);
-}
-
-DataPtr initDataByArray(CDMDataType datatype, const std::vector<std::string>& values)
-{
-    switch (datatype) {
-    case CDM_FLOAT:
-        return initDataArray<float>(values);
-    case CDM_DOUBLE:
-        return initDataArray<double>(values);
-    case CDM_INT64:
-        return initDataArray<long long>(values);
-    case CDM_UINT64:
-        return initDataArray<unsigned long long>(values);
-    case CDM_INT:
-        return initDataArray<int>(values);
-    case CDM_UINT:
-        return initDataArray<unsigned int>(values);
-    case CDM_SHORT:
-        return initDataArray<short>(values);
-    case CDM_USHORT:
-        return initDataArray<unsigned short>(values);
-    case CDM_CHAR:
-        return initDataArray<char>(values);
-    case CDM_UCHAR:
-        return initDataArray<unsigned char>(values);
-    case CDM_STRING: {
-        /* string may only have one dimension */
-        const std::string value = join(values.begin(), values.end(), " ");
-        return createData(CDM_STRING, value.begin(), value.end());
-    }
-    case CDM_STRINGS: {
-        auto array = make_shared_array<std::string>(values.size());
-        std::copy(values.begin(), values.end(), &array[0]);
-        return createData(values.size(), array);
-    }
-    default:
-        throw CDMException("Unknown type to generate attribute");
-    }
-}
-
-} // namespace
 
 CDMAttribute::CDMAttribute()
     : data(createData(CDM_NAT, 0))
@@ -153,10 +97,7 @@ std::string CDMAttribute::getStringValue() const
 {
     if (!data)
         return std::string();
-    if (data->getDataType() == CDM_STRING)
-        return data->asString(" ");
-    else
-        return data->asString(" ");
+    return data->asString(" ");
 }
 
 CDMDataType CDMAttribute::getDataType() const
@@ -166,8 +107,7 @@ CDMDataType CDMAttribute::getDataType() const
 
 void CDMAttribute::toXMLStream(std::ostream& out, const std::string& indent) const
 {
-    out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />"
-        << std::endl;
+    NcmlCDMWriter::write(out, *this, indent);
 }
 
 } // namespace MetNoFimex

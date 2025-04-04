@@ -10,8 +10,8 @@
 <dimension name="Sigma" orgName="sigma" />
 <variable name="dummy" shape="dummy" type="float">
   <attribute name="test" value="lon_rho"/>
-  <values>1
-  15.3 17</values>
+  <attribute name="important" type="short">1 2 4 8</attribute>
+  <values separator="---">1---15.3----17</values>
 </variable>
 
 <variable name="valueless" type="float">
@@ -30,6 +30,13 @@
 </variable>
 <variable name="y_wind">
   <spatial_vector direction="y,latitude" counterpart="x_wind" />
+</variable>
+
+<variable name="x_wind_10m">
+  <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
+</variable>
+<variable name="y_wind_10m">
+  <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
 </variable>
 
 <variable name="projection_1">

@@ -53,7 +53,7 @@ XMLDoc::XMLDoc(const std::string& filename)
     :doc(0), xpathCtx(0)
 {
     init();
-    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, 0);
+    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, XML_PARSE_HUGE);
     if (pdoc == 0)
         throw CDMException("cannot read xml-file '" + filename + "'");
     setDoc(pdoc);
@@ -98,9 +98,8 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
 std::string XMLDoc::toString(const xmlNodePtr node)
 {
     std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ndoc(xmlNewDoc((const xmlChar*)"1.0"), &xmlFreeDoc);
-    xmlNodePtr retNode = xmlCopyNodeList(node); // points to new memory
+    xmlNodePtr retNode = xmlDocCopyNode(node, ndoc.get(), 1); // points to new memory
     xmlDocSetRootElement(ndoc.get(), retNode);  // transfer ownership
-    xmlSetTreeDoc(retNode, doc);
     xmlChar* str;
     int size;
     xmlDocDumpMemory(ndoc.get(), &str, &size);
