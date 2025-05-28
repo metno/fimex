@@ -636,7 +636,7 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& fileURL, l
     //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
     if (typeOfGrid_ == "regular_ll") {
         gridDefinition_ = getGridDefRegularLL(edition_, gh);
-    } else if (typeOfGrid_ == "lambert") {
+    } else if ((typeOfGrid_ == "lambert") || (typeOfGrid_ == "lambert_lam")) {
         gridDefinition_ = getGridDefLambert(edition_, gh);
     } else if (typeOfGrid_ == "mercator") {
         gridDefinition_ = getGridDefMercator(edition_, gh);
