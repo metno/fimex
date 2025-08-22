@@ -35,6 +35,7 @@
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
+#include "fimex/StringUtils.h"
 
 #include "CDMMergeUtils.h"
 
@@ -183,6 +184,27 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
 CDM CDMBorderSmoothingPrivate::makeCDM()
 {
     return makeMergedCDM(readerI, readerO, gridInterpolationMethod, interpolatedO, nameX, nameY);
+}
+
+// ########################################################################
+
+CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string& specification)
+{
+    if (starts_with(specification, "LINEAR")) {
+        std::smatch what;
+        if (std::regex_match(specification, what, std::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
+            try {
+                int transition = string2type<int>(what[1]);
+                int border = string2type<int>(what[2]);
+                return std::make_shared<CDMBorderSmoothing_LinearFactory>(transition, border);
+            } catch (string2type_error& ex) {
+                throw CDMException("problem parsing parameters for linear smoothing: '" + specification + "', error is: " + ex.what());
+            }
+        } else {
+            throw CDMException("malformed linear smoothing specification: " + specification);
+        }
+    }
+    throw CDMException("unknown smoothing: " + specification);
 }
 
 } // namespace MetNoFimex

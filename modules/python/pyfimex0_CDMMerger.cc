@@ -25,8 +25,7 @@
  */
 
 #include "fimex/CDMMerger.h"
-
-#include "CDMMergeUtils.h"
+#include "fimex/CDMBorderSmoothing.h"
 
 #include "pyfimex0_helpers.h"
 
