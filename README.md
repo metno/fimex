@@ -50,36 +50,33 @@ To build the python interface, it requires:
 
 ## Installation
 
-Since version 0.64.0~rc1, fimex is built with
-[cmake](https://cmake.org/). The minimum required cmake version is
-2.8.12.
+Since version 0.64.0~rc1, fimex is built with [cmake](https://cmake.org/).
+The minimum required cmake version is currently 3.16.
 
 These commands illustrate how fimex might be compiled:
 
-    SRC=/fimex/source
-    BLD=/fimex/build
-    INS=/fimex/install
+    SRC=/path-to-fimex-source
+    BLD=/path-to-fimex-build
+    INS=/path-to-fimex-install
     
-    GENERATOR="Unix Makefiles" # unix
-    GENERATOR="CodeBlocks - $GENERATOR" # for qtcreator and others
-    #GENERATOR="Eclipse CDT4 - $GENERATOR" # for eclipse
-    
-    mkdir $BLD
-    cd $BLD
-    cmake -G"$GENERATOR" \
+    cmake \
         -DBUILD_SHARED_LIBS=ON \
-        -DENABLE_GRIBAPI=YES -Dgrib_api_DIR=/path/to/grib_api \
-        -DENABLE_THIS=YES \
-        -DENABLE_THAT=NO \
+        -DENABLE_PYTHON=NO \
         -DCMAKE_INSTALL_PREFIX="$INS" \
-        "$SRC"
+        -B"$BLD" -H"$SRC"
     
-    make all test install
+    cmake --build "$BLD"
+    cmake --build "$BLD" --target test
+    cmake --build "$BLD" --target install
 
-Of course, `ENABLE_THIS` and `ENABLE_THAT` should be replaced with
-actual config options.
+To use `ninja` instead of `make`, add `-GNinja`.
 
-There are several ways to edit available config options
+For development with a LSP server, add `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` and
+add a symlink `ln -s "$BLD/compile_commands.json` once cmake has configured the build.
+
+Here, `-DENABLE_PYTHON=NO` is an example for setting a configuration option.
+
+There are several ways to edit available configuration options
 
   1. read the top-level `CMakeLists.txt` and pass values to `cmake`
      via `-D...`
@@ -93,16 +90,11 @@ it might be necessary to have `PKG_CONFIG_PATH` set properly if
 packages are installed in non-standard locations or if you wrote your
 own `.pc` files.
 
-It is recommended to build fimex outside the source directory, ie BLD
-!= SRC in the above example.
-
 Since Fimex makes some floating-point calculations in large loops, it
-is advisable to switch on SIMD/SSE operations in your compiler. On a
-Xeon machine with a x386 CPU and gcc, the following flags might help
-(those are default for x86-64)
+is advisable to switch on SIMD/SSE/AVX2 instructions in your compiler.
+On x86-64, the following options might be useful:
 
-    CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' cmake ...
-
+    CXXFLAGS='-O2 -mavx2 -ftree-vectorize -fno-math-errno' ; CFLAGS="$CXXFLAGS" ; cmake ...
 
 ### Testing the Installation
 
@@ -151,18 +143,18 @@ Converting a model output from felt to NetCDF:
 
 ### Library usage
 
-To use the fimex >= 1.2 from CMake projects, please use
+To use fimex from CMake projects, please use
 
     -Dfimex_DIR=.../lib/cmake/fimex
 
 and
 
-    find_package(fimex "1.2" REQUIRED)
+    find_package(fimex "2.1" REQUIRED)
 
 or, if you want a specific version
 
-    -Dfimex-1.0_DIR=.../lib/cmake/fimex-1.0
-    find_package(fimex-1.0 REQUIRED)
+    -Dfimex-2.1_DIR=.../lib/cmake/fimex-2.1
+    find_package(fimex-2.1 REQUIRED)
 
 In both cases, include paths etc are set implicitly when using
 
