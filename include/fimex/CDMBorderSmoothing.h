@@ -99,6 +99,8 @@ private:
 
 typedef std::shared_ptr<CDMBorderSmoothing> CDMBorderSmoothing_p;
 
+CDMBorderSmoothing::SmoothingFactory_p createSmoothingFactory(const std::string& specification);
+
 } // namespace MetNoFimex
 
 #endif /* fimex_CDMBorderSmoothing_H */

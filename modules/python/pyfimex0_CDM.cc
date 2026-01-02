@@ -121,7 +121,8 @@ void pyfimex0_CDM(py::module m)
         .def("setShape", &CDMVariable::setShape)
         .def("checkDimension", &CDMVariable::checkDimension)
         .def("getData", &CDMVariable::getData)
-        .def("setData", &CDMVariable::setData);
+        .def("setData", &CDMVariable::setData)
+        .def("getDataType", &CDMVariable::getDataType);
 
     py::class_<CDM> pyCDM(m, "CDM");
     pyCDM.def(py::init<>()).def(py::init<const CDM&>());
