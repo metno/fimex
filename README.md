@@ -64,19 +64,17 @@ These commands illustrate how fimex might be compiled:
     GENERATOR="CodeBlocks - $GENERATOR" # for qtcreator and others
     #GENERATOR="Eclipse CDT4 - $GENERATOR" # for eclipse
     
-    mkdir $BLD
+    mkdir -p $BLD
     cd $BLD
     cmake -G"$GENERATOR" \
         -DBUILD_SHARED_LIBS=ON \
-        -DENABLE_GRIBAPI=YES -Dgrib_api_DIR=/path/to/grib_api \
-        -DENABLE_THIS=YES \
-        -DENABLE_THAT=NO \
+        -DENABLE_PYTHON=NO \
         -DCMAKE_INSTALL_PREFIX="$INS" \
         "$SRC"
     
     make all test install
 
-Of course, `ENABLE_THIS` and `ENABLE_THAT` should be replaced with
+Of course, `ENABLE_PYTHON` can be replaced with other
 actual config options.
 
 There are several ways to edit available config options
@@ -103,6 +101,9 @@ Xeon machine with a x386 CPU and gcc, the following flags might help
 
     CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' cmake ...
 
+On x86-64 the following options are useful:
+
+    CFLAGS='-O2 -mavx2 -ftree-vectorize -fno-math-errno' CXXFLAGS='-O2 -msse2 -ftree-vectorize -fno-math-errno' cmake ...
 
 ### Testing the Installation
 
