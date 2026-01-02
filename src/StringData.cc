@@ -30,7 +30,7 @@
 
 #include "StringData.h"
 
-#include "fimex/Type2String.h"
+#include "fimex/CDMDataType.h"
 
 namespace MetNoFimex {
 
@@ -42,7 +42,7 @@ void StringData::setValues(size_t startPos, const Data& data, size_t first, size
     else if (data.getDataType() == CDM_STRINGS && data.size() == 1)
         text = data.asStrings()[0];
     else
-        throw CDMException("cannot set string data from " + type2string(data.getDataType()) + " datatype");
+        throw CDMException("cannot set string data from " + datatype2string(data.getDataType()) + " datatype");
     if (end == size_t(-1))
         end = text.length();
     size_t n = end - first;
@@ -73,7 +73,7 @@ DataPtr StringData::convertDataType(double, double, double, CDMDataType newType,
     } else if (newType == CDM_STRINGS) {
         return createData(1, asStrings());
     } else {
-        throw CDMException("cannot convert string to " + type2string(newType) + " datatype");
+        throw CDMException("cannot convert string to " + datatype2string(newType) + " datatype");
     }
 }
 
