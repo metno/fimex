@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
 fi
 
 EXP_NC="${TEST_SRCDIR}/verticalSigmaHybridFromPressure.nc"
-if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
+if ./cdmcmp "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else

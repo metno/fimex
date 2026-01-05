@@ -158,12 +158,19 @@ ENDIF()
 
 CONFIGURE_FILE(fimex_test_config.h.in fimex_test_config.h)
 
-CONFIGURE_FILE(nccmp.sh.in nccmp.sh @ONLY)
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
+
+ADD_EXECUTABLE(cdmcmp
+  cdmcmp.cc
+)
+TARGET_LINK_LIBRARIES(cdmcmp PRIVATE
+  mi-programoptions
+  libfimex
+)
 
 ADD_LIBRARY(testinghelpers STATIC
   testinghelpers.cc

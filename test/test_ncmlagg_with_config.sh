@@ -14,7 +14,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-if "${TEST_BINDIR}/nccmp.sh" "test_ncmlagg_with_config_expected.nc" "${file}" ; then
+if "${TEST_BINDIR}/cdmcmp" "test_ncmlagg_with_config_expected.nc" "${file}" ; then
     echo "success $TESTNAME"
     E=0
 else

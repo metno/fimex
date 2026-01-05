@@ -20,7 +20,7 @@ if [ $? != 0 ]; then
   rm -f "$OUT_NC"
   exit 1
 fi
-if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
+if ./cdmcmp "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else

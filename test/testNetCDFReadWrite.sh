@@ -15,7 +15,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-if ./nccmp.sh "${FILE1}" testNcRdWr.nc ; then
+if ./cdmcmp "${FILE1}" testNcRdWr.nc ; then
   echo "success"
   E=0
 else

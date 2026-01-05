@@ -51,7 +51,7 @@ if [ ! -f "${file2}" ]; then
   exit 1
 fi
 
-if "${TEST_BINDIR}/nccmp.sh" "${file1}" "${file2}" ; then
+if "${TEST_BINDIR}/cdmcmp" "${file1}" "${file2}" ; then
     echo "success"
     E=0
 else

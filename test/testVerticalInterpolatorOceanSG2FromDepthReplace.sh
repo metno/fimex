@@ -16,7 +16,7 @@ if [ $? != 0 ]; then
   exit 1
 fi
 EXP_NC="${TEST_SRCDIR}/verticalOceanSG2_tohybrid_replace.nc"
-if ./nccmp.sh "$EXP_NC" "$OUT_NC" ; then
+if ./cdmcmp "$EXP_NC" "$OUT_NC" ; then
   echo "success"
   E=0
 else
