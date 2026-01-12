@@ -30,6 +30,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 namespace MetNoFimex {
 typedef std::shared_ptr<CDMExtractor> CDMExtractor_p;
 } // namespace MetNoFimex
@@ -41,11 +43,13 @@ namespace {
 
 CDMExtractor_p createExtractor(CDMReader_p reader)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<CDMExtractor>(reader);
 }
 
 void reduceTimeStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& tStart, const std::string& tEnd)
 {
+    PY_GIL_RELEASE;
     FimexTime start(FimexTime::min_date_time);
     if (!start.parseISO8601(tStart))
         throw CDMException("cannot parse time '" + tStart + "'");
@@ -59,23 +63,28 @@ void reduceTimeStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& tStart,
 
 void reduceDimensionStartEnd(MetNoFimex::CDMExtractor_p e, const std::string& dimName, size_t start, long long end)
 {
+    PY_GIL_RELEASE;
     e->reduceDimensionStartEnd(dimName, start, end);
 }
 
 // wrapper for overload
 void reduceDimension_1(MetNoFimex::CDMExtractor_p e, const std::string& dimName, py::iterable slices)
 {
-    e->reduceDimension(dimName, to_std_container< std::set<std::size_t> >(slices));
+    const auto slcs = to_std_container< std::set<std::size_t> >(slices);
+    PY_GIL_RELEASE;
+    e->reduceDimension(dimName, slcs);
 }
 
 void reduceDimension_2(MetNoFimex::CDMExtractor_p e, const std::string& dimName, size_t start, size_t length)
 {
+    PY_GIL_RELEASE;
     e->reduceDimension(dimName, start, length);
 }
 
 void selectVariables_2(MetNoFimex::CDMExtractor_p e, const py::iterable& variables, bool addAuxiliary)
 {
-  const std::set<std::string> vars = to_std_container< std::set<std::string> >(variables);
+  const auto vars = to_std_container< std::set<std::string> >(variables);
+  PY_GIL_RELEASE;
   e->selectVariables(vars, addAuxiliary);
 }
 

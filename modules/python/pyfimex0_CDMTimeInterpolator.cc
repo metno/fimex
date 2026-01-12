@@ -25,6 +25,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -36,6 +38,7 @@ namespace {
 
 CDMTimeInterpolator_p createTimeInterpolator(CDMReader_p reader)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<CDMTimeInterpolator>(reader);
 }
 

@@ -29,6 +29,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -36,6 +38,7 @@ namespace {
 
 CDMMerger_p createMerger(CDMReader_p inner, CDMReader_p outer)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<CDMMerger>(inner, outer);
 }
 
@@ -43,6 +46,7 @@ CDMMerger_p createMerger(CDMReader_p inner, CDMReader_p outer)
 void setTargetGrid1(CDMMerger_p m, const std::string& proj, const std::string& tx_axis, const std::string& ty_axis, const std::string& tx_unit,
                     const std::string& ty_unit, const std::string& tx_type, const std::string& ty_type)
 {
+    PY_GIL_RELEASE;
     m->setTargetGrid(proj, tx_axis, ty_axis, tx_unit, ty_unit, tx_type, ty_type);
 }
 
@@ -51,11 +55,13 @@ void setTargetGrid2(CDMMerger_p m, const std::string& proj, const py::iterable& 
 {
     const std::vector<double> tx = to_std_container<std::vector<double>>(tx_axis);
     const std::vector<double> ty = to_std_container<std::vector<double>>(ty_axis);
+    PY_GIL_RELEASE;
     m->setTargetGrid(proj, tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 }
 
 void setSmoothingFromSpec(CDMMerger_p m, const std::string& specification)
 {
+    PY_GIL_RELEASE;
     m->setSmoothing(createSmoothingFactory(specification));
 }
 

@@ -31,6 +31,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -43,6 +45,7 @@ void createNetCDFWriter_4(CDMReader_p reader, const std::string& filename, const
         throw CDMException("pyfimex createNetCDFWriter only supports version 3 or 4");
 
     const std::string filetype = (version == 4) ? "nc4" : "netcdf";
+    PY_GIL_RELEASE;
     createWriter(reader, filetype, filename, configfile);
 }
 

@@ -25,6 +25,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -36,6 +38,7 @@ namespace {
 
 CDMVerticalInterpolator_p createVerticalInterpolator(CDMReader_p reader, const std::string& vtype, const std::string& vmethod)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<CDMVerticalInterpolator>(reader, vtype, vmethod);
 }
 

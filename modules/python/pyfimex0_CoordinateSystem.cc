@@ -30,6 +30,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -37,7 +39,11 @@ namespace {
 
 py::list listCoordinateSystems1(CDMReader_p reader)
 {
-    const CoordinateSystem_cp_v cs = listCoordinateSystems(reader);
+    CoordinateSystem_cp_v cs;
+    {
+        PY_GIL_RELEASE;
+        cs = listCoordinateSystems(reader);
+    }
     py::list py_cs;
     for (size_t i=0; i<cs.size(); ++i)
         py_cs.append(cs[i]);
@@ -46,16 +52,19 @@ py::list listCoordinateSystems1(CDMReader_p reader)
 
 CoordinateSystem_cp findCompleteCoordinateSystemFor1(const std::vector<CoordinateSystem_cp>& cs, const std::string& varName)
 {
+    PY_GIL_RELEASE;
     return findCompleteCoordinateSystemFor(cs, varName);
 }
 
 CoordinateAxis_cp CoordinateSystem__findAxisOfType1(CoordinateSystem_cp cs, CoordinateAxis::AxisType type)
 {
+    PY_GIL_RELEASE;
     return cs->findAxisOfType(type);
 }
 
 CoordinateAxis_cp CoordinateSystem__findAxisOfType2(CoordinateSystem_cp cs, const std::vector<CoordinateAxis::AxisType>& types)
 {
+    PY_GIL_RELEASE;
     return cs->findAxisOfType(types);
 }
 

@@ -25,6 +25,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 namespace MetNoFimex {
 typedef std::shared_ptr<AggregationReader> AggregationReader_p;
 } // namespace MetNoFimex
@@ -36,22 +38,26 @@ namespace {
 
 AggregationReader_p createAggregationReader(const std::string& aggregationType)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<AggregationReader>(aggregationType);
 }
 
 // handle default args
 void addReader1(AggregationReader_p agg, CDMReader_p rd)
 {
+    PY_GIL_RELEASE;
     agg->addReader(rd, std::string(), std::string());
 }
 
 void addReader2(AggregationReader_p agg, CDMReader_p rd, const std::string& id)
 {
+    PY_GIL_RELEASE;
     agg->addReader(rd, id, std::string());
 }
 
 void addReader3(AggregationReader_p agg, CDMReader_p rd, const std::string& id, const std::string& coordValue)
 {
+    PY_GIL_RELEASE;
     agg->addReader(rd, id, coordValue);
 }
 

@@ -29,6 +29,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -54,6 +56,7 @@ enum InterpolationMethod {
 
 CDMInterpolator_p createInterpolator(CDMReader_p reader)
 {
+    PY_GIL_RELEASE;
     return std::make_shared<CDMInterpolator>(reader);
 }
 
@@ -64,6 +67,7 @@ void changeProjection1(CDMInterpolator_p i, InterpolationMethod method, const st
 {
   const std::vector<double> x_axis = to_std_container< std::vector<double> >(out_x_axis);
   const std::vector<double> y_axis = to_std_container< std::vector<double> >(out_y_axis);
+  PY_GIL_RELEASE;
   i->changeProjection(method, proj_input, x_axis, y_axis,
                       out_x_axis_unit, out_y_axis_unit,
                       out_x_axis_type, out_y_axis_type);
@@ -73,6 +77,7 @@ void changeProjection2(CDMInterpolator_p i, InterpolationMethod method, const py
 {
     const std::vector<double> lons = to_std_container< std::vector<double> >(lonVals);
     const std::vector<double> lats = to_std_container< std::vector<double> >(latVals);
+    PY_GIL_RELEASE;
     i->changeProjection(method, lons, lats);
 }
 

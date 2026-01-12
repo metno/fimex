@@ -31,6 +31,8 @@
 
 #include "pyfimex0_helpers.h"
 
+#define PY_GIL_RELEASE py::gil_scoped_release release
+
 using namespace MetNoFimex;
 namespace py = pybind11;
 
@@ -39,12 +41,14 @@ namespace {
 // wrapper for overload
 void CDMReaderWriter__putDataSlice2(CDMReaderWriter_p reader, const std::string& varName, size_t unLimDimPos, const DataPtr data)
 {
+    PY_GIL_RELEASE;
     reader->putDataSlice(varName, unLimDimPos, data);
 }
 
 // wrapper for overload
 void CDMReaderWriter__putScaledDataSlice2(CDMReaderWriter_p reader, const std::string& varName, size_t unLimDimPos, const DataPtr data)
 {
+    PY_GIL_RELEASE;
     reader->putScaledDataSlice(varName, unLimDimPos, data);
 }
 
@@ -52,6 +56,7 @@ void CDMReaderWriter__putScaledDataSlice2(CDMReaderWriter_p reader, const std::s
 void CDMReaderWriter__putScaledDataSliceInUnit2(CDMReaderWriter_p rw, const std::string& varName, const std::string& unit, size_t unLimDimPos,
                                                 const DataPtr data)
 {
+    PY_GIL_RELEASE;
     rw->putScaledDataSliceInUnit(varName, unit, unLimDimPos, data);
 }
 
@@ -59,14 +64,19 @@ void CDMReaderWriter__putScaledDataSliceInUnit2(CDMReaderWriter_p rw, const std:
 CDMReaderWriter_p createFileReaderWriter4(const std::string& fileType, const std::string& fileName, const std::string& configFile,
                                           const std::vector<std::string>& args)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::createReaderWriter(fileType, fileName, configFile, args);
 }
+
 CDMReaderWriter_p createFileReaderWriter3(const std::string& fileType, const std::string& fileName, const std::string& configFile)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::createReaderWriter(fileType, fileName, configFile);
 }
+
 CDMReaderWriter_p createFileReaderWriter2(const std::string& fileType, const std::string& fileName)
 {
+    PY_GIL_RELEASE;
     return CDMFileReaderFactory::createReaderWriter(fileType, fileName);
 }
 
