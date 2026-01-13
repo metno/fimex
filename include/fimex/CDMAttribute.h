@@ -81,6 +81,9 @@ public:
 
     MIFI_DEPRECATED(void toXMLStream(std::ostream& out, const std::string& indent = "") const);
 
+    /// retrieve the stringified value of the attribute with a specific separator
+    std::string getStringValueWithSeparator(const std::string& separator) const;
+
 private:
     std::string name;
     DataPtr data;

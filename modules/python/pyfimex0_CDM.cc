@@ -100,6 +100,7 @@ void pyfimex0_CDM(py::module m)
         .def("getName", &CDMAttribute::getName)
         .def("setName", &CDMAttribute::setName)
         .def("getStringValue", &CDMAttribute::getStringValue)
+        .def("getStringValueWithSeparator", &CDMAttribute::getStringValueWithSeparator)
         .def("getData", &CDMAttribute::getData)
         .def("setData", &CDMAttribute::setData)
         .def("getDataType", &CDMAttribute::getDataType);

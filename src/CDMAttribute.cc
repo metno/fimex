@@ -95,9 +95,14 @@ CDMAttribute::~CDMAttribute()
 
 std::string CDMAttribute::getStringValue() const
 {
+    return getStringValueWithSeparator(" ");
+}
+
+std::string CDMAttribute::getStringValueWithSeparator(const std::string& separator) const
+{
     if (!data)
         return std::string();
-    return data->asString(" ");
+    return data->asString(separator);
 }
 
 CDMDataType CDMAttribute::getDataType() const

@@ -48,6 +48,7 @@ const NcmlDataType ncml_FLOAT = {"float", false};
 const NcmlDataType ncml_DOUBLE = {"double", false};
 const NcmlDataType ncml_STRING = {"string", false};
 const NcmlDataType ncml_STRING_CAP = {"String", false};
+const NcmlDataType ncml_extension_STRINGS = {"strings", false}; // fimex extension of ncml for netcdf4 strings
 
 const NcmlDataType ncml_NAT = {std::string(), false};
 
@@ -81,7 +82,8 @@ const NcmlDataType& datatype_cdm2ncml(CDMDataType dt)
         return ncml_DOUBLE;
     case CDM_STRING:
         return ncml_STRING;
-    // case CDM_STRINGS: return ncml_STRING;
+    case CDM_STRINGS:
+        return ncml_extension_STRINGS;
     default:
         return ncml_NAT;
     }
@@ -110,7 +112,9 @@ CDMDataType datatype_ncml2cdm(const NcmlDataType& dt)
     } else if (dt == ncml_DOUBLE) {
         return CDM_DOUBLE;
     } else if (dt == ncml_STRING || dt == ncml_STRING_CAP) {
-        return CDM_STRING /*S*/;
+        return CDM_STRING;
+    } else if (dt == ncml_extension_STRINGS) {
+        return CDM_STRINGS;
     } else {
         return CDM_NAT;
     }
@@ -119,8 +123,8 @@ CDMDataType datatype_ncml2cdm(const NcmlDataType& dt)
 CDMDataType datatype_ncml2cdm(const std::string& name, bool is_unsigned)
 {
     const NcmlDataType ndt(name, is_unsigned);
-    const NcmlDataType* types[]{&ncml_BYTE,  &ncml_SHORT, &ncml_INT,   &ncml_LONG,   &ncml_UBYTE,  &ncml_USHORT,    &ncml_UINT,
-                                &ncml_ULONG, &ncml_CHAR,  &ncml_FLOAT, &ncml_DOUBLE, &ncml_STRING, &ncml_STRING_CAP};
+    const NcmlDataType* types[]{&ncml_BYTE,  &ncml_SHORT, &ncml_INT,   &ncml_LONG,   &ncml_UBYTE,  &ncml_USHORT,     &ncml_UINT,
+                                &ncml_ULONG, &ncml_CHAR,  &ncml_FLOAT, &ncml_DOUBLE, &ncml_STRING, &ncml_STRING_CAP, &ncml_extension_STRINGS};
     const auto it = std::find_if(std::begin(types), std::end(types), [&](const NcmlDataType* f) { return *f == ndt; });
     if (it != std::end(types))
         return datatype_ncml2cdm(**it);

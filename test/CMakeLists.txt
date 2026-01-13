@@ -100,6 +100,7 @@ IF(ENABLE_NETCDF)
     testVerticalInterpolatorOceanSG2ToDepth.sh
     testVerticalInterpolatorOceanSG2FromDepth.sh
     testVerticalInterpolatorOceanSG2FromDepthReplace.sh
+    testWriteNcStrings.sh
     testQualityExtractorFimex.sh
     testMerger.sh
     testMergerTarget.sh

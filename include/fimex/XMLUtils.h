@@ -100,6 +100,33 @@ private:
 XMLInputDoc createXMLInput(const XMLInput& xi);
 XMLInputDoc createXMLInput(const std::string& configXML);
 
+std::string escapeXmlString(const std::string& input);
+void escapeXmlToStream(std::ostream& output, const std::string& input);
+
+/// Helper for ostream operator
+class EscapeXmlOp
+{
+public:
+    explicit EscapeXmlOp(const std::string& str)
+        : input(str)
+    {
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const EscapeXmlOp& esc)
+    {
+        escapeXmlToStream(os, esc.input);
+        return os;
+    }
+
+private:
+    const std::string& input;
+};
+
+inline EscapeXmlOp escapeXml(const std::string& str)
+{
+    return EscapeXmlOp(str);
+}
+
 } // namespace MetNoFimex
 
 #endif /* XMLUTILS_H_ */

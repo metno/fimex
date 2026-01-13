@@ -24,10 +24,13 @@
 #include "fimex/NcmlCDMWriter.h"
 
 #include "fimex/CDM.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/CDMException.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/Type2String.h"
+#include "fimex/XMLUtils.h"
 
 #include "NcmlUtils.h"
 
@@ -46,6 +49,29 @@ void shapeToXMLStream(std::ostream& out, const std::vector<std::string>& fimex_s
 
     // ncml shape is slowest varying dimension first, fimex shape is fastest varying dimension first
     out << " shape=\"" << join(fimex_shape.rbegin(), fimex_shape.rend(), " ") << "\"";
+}
+
+std::string findStringsSeparator(DataPtr data)
+{
+    const auto strings = data->asStrings();
+    const size_t n_strings = data->size();
+    const char* separators[] = {" ", ",", "|", "#", "---NEXT-NCML-STRING---"};
+    const size_t n_separators = sizeof(separators) / sizeof(separators[0]);
+    size_t isep = 0;
+    for (; isep < n_separators; ++isep) {
+        bool present = false;
+        for (size_t i = 0; i < n_strings; ++i) {
+            if (strings[i].find(separators[isep]) != std::string::npos) {
+                // separator candidate found, we cannot use it, try next
+                present = true;
+                break;
+            }
+        }
+        if (!present) {
+            return separators[isep];
+        }
+    }
+    throw CDMException("unable to find separator for strings");
 }
 
 } // namespace
@@ -141,7 +167,7 @@ void NcmlCDMWriter::write(std::ostream& out, bool withData)
 // static
 void NcmlCDMWriter::write(std::ostream& out, const CDMDimension& dim)
 {
-    out << "<dimension name=\"" << dim.getName() << "\" length=\"" << dim.getLength() << "\" ";
+    out << "<dimension name=\"" << escapeXml(dim.getName()) << "\" length=\"" << dim.getLength() << "\" ";
     if (dim.isUnlimited()) {
         out << "isUnlimited=\"true\" ";
     }
@@ -152,13 +178,21 @@ void NcmlCDMWriter::write(std::ostream& out, const CDMDimension& dim)
 void NcmlCDMWriter::write(std::ostream& out, const CDMAttribute& att, const std::string& indent)
 {
     const NcmlDataType& dt = datatype_cdm2ncml(att.getDataType());
-    out << indent << "<attribute name=\"" << att.getName() << "\" type=\"" << dt.name << "\" value=\"" << att.getStringValue() << "\" />" << std::endl;
+    std::string separator = " ";
+    if (att.getDataType() == CDM_STRINGS) {
+        separator = findStringsSeparator(att.getData());
+    }
+    out << indent << "<attribute name=\"" << escapeXml(att.getName()) << "\" type=\"" << dt.name << "\"";
+    if (separator != " ") {
+        out << " separator=\"" << separator << "\"";
+    }
+    out << " value=\"" << escapeXml(att.getStringValueWithSeparator(separator)) << "\" />" << std::endl;
 }
 
 // static
 void NcmlCDMWriter::write(std::ostream& out, const CDMVariable& var, const std::vector<CDMAttribute>& attrs, bool closeXML)
 {
-    out << "<variable name=\"" << var.getName() << "\"";
+    out << "<variable name=\"" << escapeXml(var.getName()) << "\"";
     shapeToXMLStream(out, var.getShape());
     const NcmlDataType& dt = datatype_cdm2ncml(var.getDataType());
     bool opened = false;

@@ -359,7 +359,7 @@ CDMAttribute createAttributeFromXML(const xmlNodePtr node, const std::string& va
         throw CDMException("cannot create att name='" + name + "' with type '" + type + "'");
 
     vector<string> values;
-    if (type == "string") {
+    if (type == "string" || type == "String") {
         // string attributes always have a single value
         values = {value};
     } else {

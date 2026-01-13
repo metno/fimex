@@ -94,4 +94,52 @@ XMLInputDoc createXMLInput(const std::string& configXML)
     }
 }
 
+namespace {
+bool needsXmlEscape(const std::string& input)
+{
+    return input.find_first_of("&<>\"'") != std::string::npos;
+}
+} // namespace
+
+std::string escapeXmlString(const std::string& input)
+{
+    if (needsXmlEscape(input)) {
+        std::ostringstream output;
+        escapeXmlToStream(output, input);
+        return output.str();
+    } else {
+        return input;
+    }
+}
+
+void escapeXmlToStream(std::ostream& output, const std::string& input)
+{
+    if (needsXmlEscape(input)) {
+        for (char c : input) {
+            switch (c) {
+            case '&':
+                output << "&amp;";
+                break;
+            case '<':
+                output << "&lt;";
+                break;
+            case '>':
+                output << "&gt;";
+                break;
+            case '"':
+                output << "&quot;";
+                break;
+            case '\'':
+                output << "&apos;";
+                break;
+            default:
+                output.put(c); // Write the character directly to the stream
+                break;
+            }
+        }
+    } else {
+        output << input;
+    }
+}
+
 } // namespace MetNoFimex
