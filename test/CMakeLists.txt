@@ -6,7 +6,7 @@ MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
 SET (CURRENT_TEST_EXTRADATA_VERSION 20220211T1614)
 SET(TEST_EXTRADATA_PAGE "https://wiki.met.no/fimex/download")
-SET(TEST_EXTRADATA_URL "https://wiki.met.no/_media/fimex/fimex-test-data-${CURRENT_TEST_EXTRADATA_VERSION}.tar.gz")
+SET(TEST_EXTRADATA_URL "https://rgw.met.no/0c541cf629a545769d10585a9ea2043f:unit-test-data/fimex-test-data-${CURRENT_TEST_EXTRADATA_VERSION}.tar.gz")
 SET(TEST_EXTRADATA_MESSAGE "in '${TEST_EXTRADATA_DIR}', please consider downloading version ${CURRENT_TEST_EXTRADATA_VERSION} from ${TEST_EXTRADATA_PAGE}")
 
 IF (EXISTS "${TEST_EXTRADATA_DIR}/VERSION")
