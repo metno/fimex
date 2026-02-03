@@ -53,7 +53,6 @@ int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, const doubl
 
 }
 
-
 int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps, const double* a, const double* b, double* pressure)
 {
     while (n--) {
@@ -66,6 +65,14 @@ int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* 
 {
     while (n--) {
         *pressure++ = (*ap++) + (*b++ * ps);
+    }
+    return MIFI_OK;
+}
+
+int mifi_atmosphere_hybrid_height(size_t n, double orog, const double* a, const double* b, double* height)
+{
+    while (n--) {
+        *height++ = (*a++) + (*b++ * orog);
     }
     return MIFI_OK;
 }

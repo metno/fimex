@@ -1,7 +1,7 @@
 /*
  * Fimex, testVLevelConverter.cc
  *
- * (C) Copyright 2015-2022, met.no
+ * (C) Copyright 2015-2026, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -283,5 +283,54 @@ TEST4FIMEX_TEST_CASE(height_altitude_detection)
         TEST4FIMEX_REQUIRE(data);
         TEST4FIMEX_CHECK(data->size() == 3);
         TEST4FIMEX_CHECK(data->getDouble(0) > 1e35); // FIXME should be NaN
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_atmosphere_hybrid_height)
+{
+    auto reader = CDMFileReaderFactory::create("netcdf", pathTest("test_atmosphere_hybrid_height.nc"));
+    TEST4FIMEX_REQUIRE(reader);
+    auto cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "example");
+    TEST4FIMEX_REQUIRE(cs);
+    auto vt = cs->getVerticalTransformation();
+    TEST4FIMEX_REQUIRE(vt);
+    VerticalConverter_p altivc = vt->getConverter(reader, cs, MIFI_VINT_ALTITUDE);
+    TEST4FIMEX_REQUIRE(altivc);
+
+    const auto shape_ac = altivc->getShape();
+    TEST4FIMEX_REQUIRE_EQ(3, shape_ac.size());
+    TEST4FIMEX_CHECK_EQ("lon", shape_ac[0]);
+    TEST4FIMEX_CHECK_EQ("lat", shape_ac[1]);
+    TEST4FIMEX_CHECK_EQ("lev", shape_ac[2]);
+
+    {
+        auto sb = createSliceBuilder(reader->getCDM(), altivc);
+        sb.setStartAndSize("lon", 0, 2);
+        sb.setStartAndSize("lat", 0, 2);
+        sb.setStartAndSize("lev", 0, 2);
+        auto vd = altivc->getDataSlice(sb);
+        TEST4FIMEX_REQUIRE(vd);
+        const size_t N = 8;
+        TEST4FIMEX_REQUIRE_EQ(N, vd->size());
+        auto va = vd->asFloat();
+        TEST4FIMEX_REQUIRE(va);
+        const float expected[N] = {11 + 1.1 * 11, 11 + 1.1 * 12, 11 + 1.1 * 21, 11 + 1.1 * 22, 22 + 2.2 * 11, 22 + 2.2 * 12, 22 + 2.2 * 21, 22 + 2.2 * 22};
+        for (size_t i = 0; i < N; ++i) {
+            TEST4FIMEX_CHECK_CLOSE(expected[i], va[i], 0.01);
+        }
+    }
+
+    {
+        auto sb = createSliceBuilder(reader->getCDM(), altivc);
+        sb.setStartAndSize("lon", 1, 1);
+        sb.setStartAndSize("lat", 1, 1);
+        sb.setStartAndSize("lev", 1, 1);
+        auto vd = altivc->getDataSlice(sb);
+        TEST4FIMEX_REQUIRE(vd);
+        const size_t N = 1;
+        TEST4FIMEX_REQUIRE_EQ(N, vd->size());
+        auto va = vd->asFloat();
+        TEST4FIMEX_REQUIRE(va);
+        TEST4FIMEX_CHECK_CLOSE(22 + 2.2 * 22, va[0], 0.01);
     }
 }

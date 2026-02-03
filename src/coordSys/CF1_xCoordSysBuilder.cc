@@ -34,6 +34,7 @@
 #include "fimex/Units.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include <fimex/coordSys/verticalTransform/AtmosphereHybridHeight.h>
 #include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
 #include <fimex/coordSys/verticalTransform/Depth.h>
 #include <fimex/coordSys/verticalTransform/Height.h>
@@ -513,6 +514,10 @@ CoordinateSystem_cp_v CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
                                 cs->setVerticalTransformation(std::make_shared<OceanSG1>(vars));
                             else // if (standardNameValue == OceanSG2::NAME())
                                 cs->setVerticalTransformation(std::make_shared<OceanSG2>(vars));
+                        } else if (standardNameValue == AtmosphereHybridHeight::NAME()) {
+                            if (!(isCSForTerm(cdm, *cs, terms["a"]) && isCSForTerm(cdm, *cs, terms["b"]) && isCSForTerm(cdm, *cs, terms["orog"])))
+                                continue;
+                            cs->setVerticalTransformation(std::make_shared<AtmosphereHybridHeight>(terms["a"], terms["b"], terms["orog"]));
                         } else {
                             LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }

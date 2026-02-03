@@ -108,6 +108,8 @@ extern int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps,
  */
 extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* ap, const double* b, double* pressure);
 
+extern int mifi_atmosphere_hybrid_height(size_t n, double orog, const double* a, const double* b, double* height);
+
 /**
  * convert height above base-layer (usually altitude, i.e. height above MSL) to pressure
  * using the formula http://en.wikipedia.org/wiki/Barometric_formula

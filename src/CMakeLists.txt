@@ -212,6 +212,8 @@ SET(libfimex_SOURCES
   ${INCF}/coordSys/verticalTransform/AltitudeHeightConverter.h
   coordSys/verticalTransform/AltitudeStandardToPressureConverter.cc
   ${INCF}/coordSys/verticalTransform/AltitudeStandardToPressureConverter.h
+  coordSys/verticalTransform/AtmosphereHybridHeight.cc
+  ${INCF}/coordSys/verticalTransform/AtmosphereHybridHeight.h
   coordSys/verticalTransform/AtmosphereSigma.cc
   ${INCF}/coordSys/verticalTransform/AtmosphereSigma.h
   coordSys/verticalTransform/Depth.cc
