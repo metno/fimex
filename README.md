@@ -98,10 +98,10 @@ On x86-64, the following options might be useful:
 
 ### Testing the Installation
 
-Some tests require extra test data which can be downloaded from
-https://wiki.met.no/fimex/download. The test data archive must be
-unpacked, and the directory containing the file `VERSION` should be
-specified to cmake
+Some tests require extra test data which can be downloaded from the
+url printed by CMake if the test data are not found. The test data
+archive must be unpacked, and the directory containing the file
+`VERSION` should be specified to cmake
 
 
     cmake  ... -DTEST_EXTRADATA_DIR=/path/to/extra/test/data ...
