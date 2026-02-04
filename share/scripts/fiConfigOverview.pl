@@ -37,7 +37,7 @@ Heiko Klein, E<lt>Heiko.Klein@met.noE<gt>
 
 =head1 SEE ALSO
 
-https://wiki.met.no/fimex/
+https://github.com/metno/fimex/wiki
 
 =cut
 

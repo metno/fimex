@@ -1,6 +1,6 @@
 # Fimex, modules/python/test_pyfimex0_extractor.py
 #
-# Copyright (C) 2018-2019 met.no
+# Copyright (C) 2018-2026 met.no
 #
 # Contact information:
 # Norwegian Meteorological Institute
@@ -9,7 +9,7 @@
 # NORWAY
 # email: diana@met.no
 #
-# Project Info:  https://wiki.met.no/fimex/start
+# Project Info:  https://github.com/metno/fimex/wiki
 #
 # This library is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by

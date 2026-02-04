@@ -5,7 +5,7 @@
 	<attribute name="product_name" value="ECMWF model data" type="string" />
 	<attribute name="project_name" value="ECMWF" type="string" />
 	<attribute name="title" value="ECMWF deterministic model forecast" type="string" />
-	<attribute name="abstract" value="Products from the ECMWF Atmospheric Deterministic medium-range weather forecasts up to ten days. Check out http://www.ecmwf.int/ for details. The model output has been subsetted, reprojected and reformatted using FIMEX (http://wiki.met.no/fimex/)." type="string" />
+	<attribute name="abstract" value="Products from the ECMWF Atmospheric Deterministic medium-range weather forecasts up to ten days. Check out http://www.ecmwf.int/ for details. The model output has been subsetted, reprojected and reformatted using FIMEX (https://github.com/metno/fimex/wiki)." type="string" />
 	<attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere, Oceans" type="string" />
 	<attribute name="keywords" value="Model Forecast Temperature Wind Humidity Clouds" type="string" />
 	<attribute name="activity_type" value="Model run" type="string" />

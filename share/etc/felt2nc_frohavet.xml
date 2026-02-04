@@ -12,7 +12,7 @@
     <attribute name="product_name" value="Frohavet" type="string" />
     <attribute name="project_name" value="Frohavet" type="string" />
     <attribute name="title" value="Frohavet oceanographic model forecast" type="string" />
-    <attribute name="abstract" value="Products from the METNO Numerical Weather Prediction model. METNO is running the HIRLAM model. The model output has been reformatted using FIMEX (http://wiki.met.no/fimex/)." type="string" />
+    <attribute name="abstract" value="Products from the METNO Numerical Weather Prediction model. METNO is running the HIRLAM model. The model output has been reformatted using FIMEX (https://github.com/metno/fimex/wiki)." type="string" />
     <attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere" type="string" />
     <attribute name="keywords" value="Model Forecast Temperature Wind Humidity Clouds" type="string" />
     <attribute name="activity_type" value="Model run" type="string" />

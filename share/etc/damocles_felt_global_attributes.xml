@@ -5,7 +5,7 @@
 	<attribute name="product_name" value="HIRLAM" type="string" />
 	<attribute name="project_name" value="HIRLAM" type="string" />
 	<attribute name="title" value="HIRLAM12 model forecast" type="string" />
-	<attribute name="abstract" value="Products from the METNO Numerical Weather Prediction model. METNO is running the HIRLAM model. Check out http://www.hirlam.org/ for details. The model output has been subsetted, reprojected and reformatted using FIMEX (http://wiki.met.no/fimex/)." type="string" />
+	<attribute name="abstract" value="Products from the METNO Numerical Weather Prediction model. METNO is running the HIRLAM model. Check out http://www.hirlam.org/ for details. The model output has been subsetted, reprojected and reformatted using FIMEX (https://github.com/metno/fimex/wiki)." type="string" />
 	<attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere" type="string" />
 	<attribute name="keywords" value="Model Forecast Temperature Wind Humidity Clouds" type="string" />
 	<attribute name="activity_type" value="Model run" type="string" />
