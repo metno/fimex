@@ -69,14 +69,25 @@ bool detectNetCDF(const char* magic)
     return true;
 }
 
-bool isNetCDF4Type(const std::string& type)
+int getNetCDFVersion(const std::string& type)
 {
-    return (type == "nc4");
+    if (type == "nc4" || type == "nc") {
+        return 5;
+    }
+    if (type == "nc4classic" || type == "netcdf4classic") {
+        return 4;
+    }
+    if (type == "nc3" || type == "cdf" || type == "netcdf")
+        return 3;
+    return 5; // default to nc4
 }
 
 bool isNetCDFType(const std::string& type)
 {
-    return (type == "nc" || type == "cdf" || type == "netcdf" || isNetCDF4Type(type));
+    if (type == "nc4" || type == "nc" || type == "nc4classic" || type == "netcdf4classic" ||
+        type == "nc3" || type == "cdf" || type == "netcdf")
+        return true;
+    return false;
 }
 
 bool isNetCDFZarrFile(const std::string& file)
@@ -191,7 +202,7 @@ CDMReaderWriter_p NetCDFIoFactory::createReaderWriter(const std::string&, const 
 
 void NetCDFIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
-    const int version = isNetCDF4Type(fileTypeName) ? 4 : 3;
+    const int version = getNetCDFVersion(fileTypeName);
     NetCDF_CDMWriter(input, fileName, config, version);
 }
 
