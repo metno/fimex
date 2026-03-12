@@ -1,3 +1,11 @@
+  * 2026-03-12 fimex 2.3.0
+    * make netcdf4 the default netcdf filetype
+    * update wiki links, update test data url
+    * implement CF atmosphere_hybrid_height coordinate
+  * 2026-01-22 fimex 2.2.0
+    * BUGFIX add back ncml extension for "strings" datatype
+    * basic support for lambert_lam
+    * updates to python bindings (new version with xarray support on pypi.org)
   * 2024-09-09 fimex 2.1.1
     * attempt to fix memory leak in XMLDoc::toString
   * 2024-08-15 fimex 2.1.0
