@@ -69,25 +69,38 @@ bool detectNetCDF(const char* magic)
     return true;
 }
 
+bool isNetCDF4Type(const std::string& type)
+{
+    return (type == "nc4" || type == "nc" || type == "netcdf4" || type == "netcdf");
+}
+
+bool isNetCDF4ClassicType(const std::string& type)
+{
+    return (type == "nc4c" || type == "nc4classic" || type == "netcdf4classic");
+}
+
+bool isNetCDF3Type(const std::string& type)
+{
+    return (type == "nc3" || type == "cdf" || type == "netcdf3");
+}
+
 int getNetCDFVersion(const std::string& type)
 {
-    if (type == "nc4" || type == "nc") {
+    if (isNetCDF4Type(type)) {
         return 5;
     }
-    if (type == "nc4classic" || type == "netcdf4classic") {
+    if (isNetCDF4ClassicType(type)) {
         return 4;
     }
-    if (type == "nc3" || type == "cdf" || type == "netcdf")
+    if (isNetCDF3Type(type)) {
         return 3;
-    return 5; // default to nc4
+    }
+    return 0;
 }
 
 bool isNetCDFType(const std::string& type)
 {
-    if (type == "nc4" || type == "nc" || type == "nc4classic" || type == "netcdf4classic" ||
-        type == "nc3" || type == "cdf" || type == "netcdf")
-        return true;
-    return false;
+    return getNetCDFVersion(type) != 0;
 }
 
 bool isNetCDFZarrFile(const std::string& file)
@@ -202,7 +215,10 @@ CDMReaderWriter_p NetCDFIoFactory::createReaderWriter(const std::string&, const 
 
 void NetCDFIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
-    const int version = getNetCDFVersion(fileTypeName);
+    auto version = getNetCDFVersion(fileTypeName);
+    if (version == 0) {
+        version = 5; // default to netcdf-4
+    }
     NetCDF_CDMWriter(input, fileName, config, version);
 }
 
