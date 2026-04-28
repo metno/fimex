@@ -1,3 +1,6 @@
+  * 2026-04-28 fimex 2.4.0
+    * support reading GRIB from http
+    * add GRIB protobuf index
   * 2026-03-12 fimex 2.3.0
     * make netcdf4 the default netcdf filetype
     * update wiki links, update test data url
