@@ -1,7 +1,7 @@
 /*
-  Fimex, src/GribIoFactory.h
+  Fimex, src/CDMUtils.cc
 
-  Copyright (C) 2019-2026 met.no
+  Copyright (C) 2024-2026 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -28,30 +28,15 @@
   USA.
 */
 
-#ifndef FIMEX_GRIBIOFACTORY_H
-#define FIMEX_GRIBIOFACTORY_H
-
-#include "fimex/IoFactory.h"
+#include "fimex/CDMUtils.h"
 
 namespace MetNoFimex {
 
-extern const char FILETYPE_GRBML[];
-extern const char FILETYPE_GRBFP[];
-bool isGribType(const std::string& type);
-
-class GribIoFactory : public IoFactory
+void addAttributes(CDM& cdm, const std::string& varName, const std::vector<CDMAttribute>& attributes)
 {
-public:
-    size_t matchMagicSize() override;
-    int matchMagic(const char* magic, size_t count) override;
-
-    int matchFileTypeName(const std::string& type) override;
-
-    CDMReader_p createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& config,
-                             const std::vector<std::string>& args) override;
-    void createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config) override;
-};
+    for (const CDMAttribute& attr : attributes) {
+        cdm.addAttribute(varName, attr);
+    }
+}
 
 } // namespace MetNoFimex
-
-#endif // FIMEX_GRIBIOFACTORY_H

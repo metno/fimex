@@ -42,23 +42,29 @@
 #include <cstring>
 #include <fstream>
 
+#include "fimex_grib_config.h"
+#ifdef HAVE_PROTOBUF
+#include "GribProtobufIndexReader.h"
+#endif
+
 namespace MetNoFimex {
 
 namespace {
-
-const char GRBML[] = "grbml";
 
 bool isGrib2Type(const std::string& type)
 {
     return (type == "grb2" || type == "grib2");
 }
 
+} // namespace
+
+const char FILETYPE_GRBML[] = "grbml";
+const char FILETYPE_GRBFP[] = "grbfp";
+
 bool isGribType(const std::string& type)
 {
     return (type == "grb" || type == "grib" || type == "grb1" || type == "grib1" || isGrib2Type(type));
 }
-
-} // namespace
 
 void parseGribArgs(const std::vector<std::string>& args, std::vector<std::pair<std::string, std::string>>& members, std::vector<std::string>& files)
 {
@@ -86,20 +92,30 @@ void parseGribArgs(const std::vector<std::string>& args, std::vector<std::pair<s
 
 size_t GribIoFactory::matchMagicSize()
 {
+#ifdef HAVE_PROTOBUF
+    return std::max(size_t(4), getGribProtobufIndexMagicSize());
+#else
     return 4;
+#endif
 }
 
 int GribIoFactory::matchMagic(const char* magic, size_t count)
 {
-    if (count >= 4 && strncmp(magic, "GRIB", 4) == 0)
+    if (count >= 4 && strncmp(magic, "GRIB", 4) == 0) {
         return 1;
+    }
+#ifdef HAVE_PROTOBUF
+    if (checkGribProtobufIndexMagic(magic, count)) {
+        return 1;
+    }
+#endif
     // TODO check for GRBML
     return 0;
 }
 
 int GribIoFactory::matchFileTypeName(const std::string& type)
 {
-    if (type == GRBML) {
+    if (type == FILETYPE_GRBML || type == FILETYPE_GRBFP) {
         // actually correct only for reading
         return 1;
     }
@@ -109,7 +125,7 @@ int GribIoFactory::matchFileTypeName(const std::string& type)
 CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML,
                                         const std::vector<std::string>& args)
 {
-    if (fileTypeName == GRBML || getExtension(fileName) == GRBML) {
+    if (fileTypeName == FILETYPE_GRBML || getExtension(fileName) == FILETYPE_GRBML) {
         std::vector<std::pair<std::string, std::string>> members;
         std::vector<std::string> files; // files not used for grbml
         parseGribArgs(args, members, files);
@@ -117,6 +133,8 @@ CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const s
             throw CDMException("config file required for grbml-files");
         }
         return std::make_shared<GribCDMReader>(fileName, configXML, members);
+    } else if (fileTypeName == FILETYPE_GRBFP || getExtension(fileName) == FILETYPE_GRBFP) {
+        return std::make_shared<GribCDMReader>(fileName, configXML);
     } else {
         std::vector<std::string> files;
         // scanfiles by a glob
@@ -150,7 +168,7 @@ CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const s
 
 void GribIoFactory::createWriter(CDMReader_p input, const std::string& fileTypeName, const std::string& fileName, const XMLInput& config)
 {
-    if (fileTypeName == GRBML || getExtension(fileName) == GRBML)
+    if (fileTypeName == FILETYPE_GRBML || getExtension(fileName) == FILETYPE_GRBML)
         throw CDMException("cannot write grbml-files");
 
     int gribVersion = 0;

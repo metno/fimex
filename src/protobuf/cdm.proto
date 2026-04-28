@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package fimex_index;
+
+enum CDMDataType {
+  CDM_NAT = 0;
+  CDM_CHAR = 1;
+  CDM_SHORT = 2;
+  CDM_INT = 3;
+  CDM_FLOAT = 4;
+  CDM_DOUBLE = 5;
+  CDM_STRING = 6;
+  CDM_UCHAR = 7;
+  CDM_USHORT = 8;
+  CDM_UINT = 9;
+  CDM_INT64 = 10;
+  CDM_UINT64 = 11;
+  CDM_STRINGS = 12;
+}
+
+message CDMData {
+  CDMDataType data_type = 1;
+  repeated fixed32 values_u32 = 4; // for SHORT, INT, USHORT, UINT
+  repeated fixed64 values_u64 = 5; // for INT64, UINT64
+  repeated float values_f32 = 6; // for FLOAT
+  repeated double values_f64 = 7; // for DOUBLE
+  repeated uint32 strings = 8; // for STRING (one), STRINGS
+  bytes values_u8 = 9; // for CHAR, UCHAR
+}
+
+message CDMAttribute {
+  uint32 name = 1;
+  CDMData data = 2;
+}
+
+message CDMDimension {
+  uint32 name = 1;
+  uint32 length = 2;
+  bool is_unlimited = 3;
+}
+
+message CDMVariable {
+  uint32 name = 1;
+  CDMData data = 2;
+  repeated uint32 shape = 3;
+  repeated CDMAttribute attributes = 4;
+}
+
+message CDM {
+  repeated string strings = 1;
+  repeated CDMDimension dimensions = 2;
+  repeated CDMVariable variables = 3;
+  repeated CDMAttribute global_attributes = 4;
+}

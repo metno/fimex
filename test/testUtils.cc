@@ -436,3 +436,61 @@ TEST4FIMEX_TEST_CASE(test_product)
     const size_t p = product(std::begin(count), std::end(count));
     TEST4FIMEX_REQUIRE_EQ(p, 0x8000000000);
 }
+
+TEST4FIMEX_TEST_CASE(test_stringlistbuilder)
+{
+    const std::string first = "hei", second = "hello";
+    StringListBuilder builder;
+    TEST4FIMEX_CHECK_EQ(0, builder.add(first));
+    TEST4FIMEX_CHECK_EQ(1, builder.add(second));
+    TEST4FIMEX_CHECK_EQ(0, builder.add(first)); // add first again, must be same index
+
+    StringListBuilder builder_from_strings(builder.strings());
+    TEST4FIMEX_CHECK_EQ(0, builder_from_strings.add(first)); // add first again, must be same index
+}
+
+TEST4FIMEX_TEST_CASE(test_stringlistbuilder_no0)
+{
+    const std::string first = "hei", second = "hello";
+    StringListBuilder builder(true);
+    TEST4FIMEX_CHECK_EQ(1, builder.add(first));
+    TEST4FIMEX_CHECK_EQ(2, builder.add(second));
+    TEST4FIMEX_CHECK_EQ(1, builder.add(first)); // add first again, must be same index
+
+    StringListBuilder builder_from_strings(builder.strings(), true);
+    TEST4FIMEX_CHECK_EQ(1, builder_from_strings.add(first)); // add first again, must be same index
+    TEST4FIMEX_CHECK_EQ(2, builder_from_strings.add(second));
+}
+
+TEST4FIMEX_TEST_CASE(test_extract_filename)
+{
+    TEST4FIMEX_CHECK_EQ("fimex", extractFilename("/usr/bin/fimex"));
+    TEST4FIMEX_CHECK_EQ("fimex", extractFilename("fimex"));
+    TEST4FIMEX_CHECK_EQ("", extractFilename("/usr/bin/"));
+    TEST4FIMEX_CHECK_EQ("index", extractFilename("http://www.met.no/path/to/dataset/index"));
+}
+
+TEST4FIMEX_TEST_CASE(test_remove_filename)
+{
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", removeFilename("/usr/bin/fimex"));
+    TEST4FIMEX_CHECK_EQ("", removeFilename("fimex"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", removeFilename("/usr/bin/"));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/", removeFilename("http://www.met.no/path/to/dataset/index"));
+}
+
+TEST4FIMEX_TEST_CASE(test_replace_filename)
+{
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex++", replaceFilename("/usr/bin/fimex", "fimex++"));
+    TEST4FIMEX_CHECK_EQ("fimex++", replaceFilename("fimex", "fimex++"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", replaceFilename("/usr/bin/x", ""));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", replaceFilename("http://www.met.no/path/to/dataset/index", "file1"));
+}
+
+TEST4FIMEX_TEST_CASE(test_join_filename)
+{
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin", "fimex"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin/", "fimex"));
+    TEST4FIMEX_CHECK_EQ("fimex", joinFilename("", "fimex"));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset", "file1"));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset/", "file1"));
+}

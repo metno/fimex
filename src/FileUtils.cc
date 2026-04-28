@@ -238,4 +238,38 @@ std::string getExtension(const std::string& fileName)
     return ext;
 }
 
+std::string extractFilename(const std::string& path)
+{
+    const auto slash = path.find_last_of("/");
+    if (slash != std::string::npos) {
+        return path.substr(slash + 1);
+    } else {
+        return path;
+    }
+}
+
+std::string removeFilename(const std::string& path)
+{
+    const auto slash = path.find_last_of("/");
+    if (slash != std::string::npos) {
+        return path.substr(0, slash + 1);
+    } else {
+        return "";
+    }
+}
+
+std::string replaceFilename(const std::string& path, const std::string& filename)
+{
+    return removeFilename(path) + filename;
+}
+
+std::string joinFilename(const std::string& path, const std::string& filename)
+{
+    auto joined = path;
+    if (!path.empty() && path.back() != '/') {
+        joined += "/";
+    }
+    joined += filename;
+    return joined;
+}
 } // namespace MetNoFimex

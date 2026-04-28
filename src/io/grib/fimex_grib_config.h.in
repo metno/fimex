@@ -6,4 +6,6 @@
 #cmakedefine HAVE_GRIB_API 1 // defined if using (outdated) grib-api for GRIB reading
 #cmakedefine HAVE_GRIB_THREADSAFE 1 // defined if ecCodes / grib-api are thread-safe
 
+#cmakedefine HAVE_PROTOBUF 1 // defined if protobuf support is enabled
+
 #endif // FIMEX_GRIB_CONFIG_H

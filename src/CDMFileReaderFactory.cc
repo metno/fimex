@@ -29,6 +29,7 @@
 #include "fimex/CDMException.h"
 #include "fimex/CDMWriter.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/ChunkReaderFactory.h"
 #include "fimex/FileUtils.h"
 #include "fimex/IoFactory.h"
 #include "fimex/IoPlugin.h"
@@ -113,9 +114,6 @@ IoFactory_pm& ioFactories()
 
 IoFactory_p findFactoryFromFileType(const std::string& fileTypeName)
 {
-    if (fileTypeName.empty())
-        return IoFactory_p();
-
     IoFactory_p factory;
     int bestType = 0;
     for (const auto& id_f : ioFactories()) {
@@ -131,19 +129,27 @@ IoFactory_p findFactoryFromMagic(const std::string& fileName)
     for (const auto& id_f : ioFactories())
         maximize(magicSize, id_f.second->matchMagicSize());
 
-    std::ifstream fs(fileName.c_str());
-    if (!fs.is_open())
-        return nullptr; // acceptable, fileName might be a url
+    auto ca = createDefaultChunkReaderFactory();
+    ChunkReader_p cr;
+    try {
+        cr = ca->readerFor(fileName);
+    } catch (std::exception& ex) {
+        return nullptr;
+    }
 
     std::unique_ptr<char[]> magic(new char[magicSize]);
-    fs.read(magic.get(), magicSize);
-    const size_t actualMagicSize = fs.gcount();
-    fs.close();
+    try {
+        cr->read(0, magicSize, (unsigned char*)magic.get());
+    } catch (std::exception& ex) {
+        // this is not necessarily an error; for example, OpenDAP2 URLs need
+        // a suffix (.das, .dds, .dods) to become valid
+        return nullptr;
+    }
 
     int bestType = 0;
     IoFactory_p factory;
     for (const auto& id_f : ioFactories()) {
-        if (maximize(bestType, id_f.second->matchMagic(magic.get(), actualMagicSize)))
+        if (maximize(bestType, id_f.second->matchMagic(magic.get(), magicSize)))
             factory = id_f.second;
     }
     return factory;
@@ -164,8 +170,10 @@ IoFactory_p findFactory(const std::string& fileTypeName, const std::string& file
 {
     scanForIoPlugins();
 
-    if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
-        return f;
+    if (!fileTypeName.empty()) {
+        if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
+            return f;
+    }
 
     if (!write) {
         if (IoFactory_p f = findFactoryFromMagic(fileName))

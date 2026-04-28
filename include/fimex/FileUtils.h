@@ -54,6 +54,11 @@ void globFiles(std::vector<std::string>& files, const std::string& glob);
 
 std::string getExtension(const std::string& fileName);
 
+std::string extractFilename(const std::string& path);
+std::string removeFilename(const std::string& path);
+std::string replaceFilename(const std::string& path, const std::string& filename);
+std::string joinFilename(const std::string& path, const std::string& filename);
+
 } // namespace MetNoFimex
 
 #endif /*FIMEX_FILEUTILS_H_*/

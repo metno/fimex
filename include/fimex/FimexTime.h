@@ -44,21 +44,22 @@ private:
     /// year (2008 as of writing)
     unsigned short year;
     /// month (1-12)
-    char month;
+    unsigned char month;
     /// day of month (1-31)
-    char mday;
+    unsigned char mday;
     /// hour (0-23)
-    char hour;
+    unsigned char hour;
     /// minute (0-59)
-    char minute;
+    unsigned char minute;
     /// second (0-59)
-    char second;
+    unsigned char second;
     /// millisecond
     unsigned short msecond;
 
 public:
     enum special_values { min_date_time, max_date_time };
-    FimexTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
+    FimexTime(unsigned short year, unsigned char month, unsigned char mday, unsigned char hour = 0, unsigned char minute = 0, unsigned char second = 0,
+              unsigned short msecond = 0);
     FimexTime(special_values val = min_date_time);
     /**
      *  parse and set the time in ISO8601 formats (not all), e.g. YYYY-MM-DD, HH:MM:SS, YYYY-MM-DD HH:MM:SS, YYYY-MM-DDTHH:MM:SS
@@ -70,7 +71,8 @@ public:
     bool invalid() const;
 
     /// set all the time-parameters at once
-    void setTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
+    void setTime(unsigned short year, unsigned char month, unsigned char mday, unsigned char hour = 0, unsigned char minute = 0, unsigned char second = 0,
+                 unsigned short msecond = 0);
     /// year (2008 as of writing)
     unsigned short getYear() const { return year; }
     void setYear(unsigned short year) { this->year = year; }
@@ -98,7 +100,7 @@ public:
     /// compare two fimexTimes
     bool operator!=(const FimexTime& rhs) const { return !(*this == rhs); }
     /// compare two fimexTimes
-    bool operator>(const FimexTime& rhs) const { return (toLong() > rhs.toLong()); }
+    bool operator>(const FimexTime& rhs) const { return (toEncoded() > rhs.toEncoded()); }
     /// compare two fimexTimes
     bool operator<(const FimexTime& rhs) const { return (rhs > *this); }
     /// compare two fimexTimes
@@ -106,12 +108,10 @@ public:
     /// compare two fimexTimes
     bool operator<=(const FimexTime& rhs) const { return !(*this > rhs); }
 
-private:
     /// this representation can be used for comparison (==, <, >) not for calculation
-    long long toLong() const
-    {
-        return year * 10000000000000LL + month * 100000000000LL + mday * 1000000000LL + hour * 10000000LL + minute * 100000 + second * 1000 + msecond;
-    }
+    unsigned long long toEncoded() const;
+
+    static FimexTime fromEncoded(unsigned long long enc);
 };
 
 std::ostream& operator<<(std::ostream& out, const FimexTime& fTime);

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package fimex_index;
+
+import "cdm.proto";
+
+message GribChunk {
+  // file_index == 0 represents an invalid message; see comment on GribIndex.files
+  uint32 file_index = 1;
+
+  uint64 message_start = 2;
+  uint32 message_size = 3;
+}
+
+message GribVariable {
+  string name = 1;
+  double scale_factor = 2;
+  double add_offset = 3;
+  repeated GribChunk chunks = 4;
+}
+
+message GribIndex {
+  CDM cdm = 1;
+
+  // string 0 must be a dummy as GribChunk with file_index == 0 represents an invalid message
+  repeated string files = 2;
+
+  repeated GribVariable variables = 3;
+}

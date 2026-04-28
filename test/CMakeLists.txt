@@ -111,18 +111,25 @@ IF(ENABLE_NETCDF)
   ENDIF()
 ENDIF(ENABLE_NETCDF)
 
+IF(ENABLE_PROTOBUF)
+  LIST(APPEND CC_TESTS testProtobufCdmIo)
+ENDIF()
+
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   LIST(APPEND CC_TESTS 
     ${GRIBAPI_MI_TESTS}
     ${GRIBAPI_NC_TESTS}
     testGribReader
     )
-ENDIF()
-IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
-  LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
-  LIST(APPEND CC_TESTS testGribWriterVertical)
-  LIST(APPEND SH_CDMCMP_TESTS testGribContent.sh)
+  IF(ENABLE_NETCDF)
+    CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
+    LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
+    LIST(APPEND CC_TESTS testGribWriterVertical)
+    LIST(APPEND SH_CDMCMP_TESTS testGribContent.sh)
+  ENDIF()
+  IF(ENABLE_PROTOBUF)
+    LIST(APPEND SH_CDMCMP_TESTS testFiIndexGribfpFromGrbml.sh testFiIndexGribfpFromGRIB.sh)
+  ENDIF()
 ENDIF()
 IF (ENABLE_ECCODES)
   FIND_PROGRAM(GRIB_COUNT_PROGRAM
@@ -247,15 +254,28 @@ SET_PROPERTY(
   APPEND PROPERTY ENVIRONMENT "FIMEX_IO_PLUGINS_PATH=${FIMEX_IO_PLUGINS_PATH}"
 )
 
-IF(ENABLE_FELT AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  SET_PROPERTY(
-    TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
-    APPEND PROPERTY DEPENDS testGribWriter
+IF(ENABLE_PROTOBUF)
+  TARGET_LINK_LIBRARIES(testProtobufCdmIo ${PROTOBUF_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(testProtobufCdmIo
+    PRIVATE
+      "${CMAKE_BINARY_DIR}/src" # for cdm.pb.h
   )
-  TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib ${libxml2_PACKAGE})
-  TARGET_LINK_LIBRARIES(testGribWriterVertical ${libxml2_PACKAGE})
 ENDIF()
+
 IF(ENABLE_GRIBAPI OR ENABLE_ECCODES)
+  IF(ENABLE_FELT)
+    SET_PROPERTY(
+      TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
+      APPEND PROPERTY DEPENDS testGribWriter
+    )
+    TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib ${libxml2_PACKAGE})
+    TARGET_LINK_LIBRARIES(testGribWriterVertical ${libxml2_PACKAGE})
+  ENDIF()
+
+  IF(ENABLE_NETCDF)
+    TARGET_LINK_LIBRARIES(testGribWriterVertical libfimex-io-grib libfimex-io-netcdf)
+  ENDIF()
+
   TARGET_LINK_LIBRARIES(testGribReader libfimex-io-grib)
 ENDIF()
 
@@ -273,8 +293,4 @@ ENDIF()
 
 IF(ENABLE_FELT)
   TARGET_LINK_LIBRARIES(testFeltReader libfimex-io-felt)
-ENDIF()
-
-IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  TARGET_LINK_LIBRARIES(testGribWriterVertical libfimex-io-grib libfimex-io-netcdf)
 ENDIF()

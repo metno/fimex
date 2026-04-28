@@ -42,6 +42,8 @@ class ReplaceStringObject;
 class CDMAttribute;
 class XMLDoc;
 
+std::string replaceTemplateAttribute(std::string value, const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements);
+
 /**
  * some function to help reading xml-configuration files containing
  * cdm information like attribute - name/value pairs

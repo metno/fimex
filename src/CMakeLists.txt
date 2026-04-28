@@ -69,6 +69,8 @@ SET(libfimex_SOURCES
   ${INCF}/CDMReaderWriter.h
   CDMTimeInterpolator.cc
   ${INCF}/CDMTimeInterpolator.h
+  CDMUtils.cc
+  ${INCF}/CDMUtils.h
   CDMVariable.cc
   ${INCF}/CDMVariable.h
   CDMVerticalInterpolator.cc
@@ -313,6 +315,21 @@ SET(libfimex_PACKAGES
   ${udunits2_PACKAGE}
   ${openmp_CXX_PACKAGE}
 )
+
+IF(ENABLE_PROTOBUF)
+  SET (cdm_protos cdm.proto)
+  protoc_generated(cdm_proto_gen "${CMAKE_CURRENT_BINARY_DIR}" cdm)
+  protoc_generate("${cdm_proto_gen}" "${cdm_protos}" "")
+
+  LIST(APPEND libfimex_PACKAGES ${PROTOBUF_LIBRARIES})
+  LIST(APPEND libfimex_SOURCES
+    ProtobufCDM.cc
+    ${INCF}/ProtobufCDM.h
+
+    "${cdm_proto_gen}"
+  )
+  list_prepend_dir(libfimex_SOURCES "${metno_protos_dir}" ${cdm_protos})
+ENDIF(ENABLE_PROTOBUF)
 
 FIMEX_ADD_LIBRARY(fimex "${libfimex_SOURCES}" "${libfimex_PACKAGES}")
 

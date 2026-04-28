@@ -459,7 +459,50 @@ const char GK_typeOfGrid[] = "typeOfGrid";
 // currently unused
 const char GK_indicatorOfUnitOfTimeRange[] = "indicatorOfUnitOfTimeRange";
 
+size_t readGribMessageSize(ChunkReader_p cr, size_t offset)
+{
+    unsigned char buffer[16];
+    cr->read(offset, sizeof(buffer), buffer);
+    const char grib_version = buffer[7];
+    size_t s0, sn;
+    if (grib_version == 1) {
+        s0 = 4;
+        sn = 3;
+    } else if (grib_version == 2) {
+        s0 = 8;
+        sn = 8;
+    }
+    size_t grib_msg_size = 0;
+    for (size_t i = 0; i < sn; ++i) {
+        grib_msg_size = (grib_msg_size << 8) | size_t(buffer[s0 + i]);
+    }
+    return grib_msg_size;
+}
+
 } // namespace
+
+size_t readGribData(ChunkReader_p cr, size_t msg_pos, size_t msg_size, double* data, size_t data_size, double missingValue)
+{
+    if (msg_size == 0) {
+        msg_size = readGribMessageSize(cr, msg_pos);
+    }
+
+    auto buffer = readChunk(cr, msg_pos, msg_size);
+    auto gh = make_grib_handle(&buffer[0], msg_size);
+    if (!gh)
+        return 0;
+
+#if 0
+    LOG4FIMEX(logger, Logger::DEBUG, "set missing = " << missingValue);
+#endif
+    MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", missingValue), 0);
+#if 0
+    LOG4FIMEX(logger, Logger::DEBUG, "retrieve values");
+#endif
+    MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &data_size), 0);
+
+    return data_size;
+}
 
 const char GK_discipline[] = "discipline";
 const char GK_gribTablesVersionNo[] = "gribTablesVersionNo";
@@ -483,11 +526,12 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, lo
     grib_get(gh, GK_edition, edition_);
 
     if (edition_ == 1) {
-        gridParameterIds_ = vector<long>(3, 0);
-        grib_get(gh, GK_indicatorOfParameter, gridParameterIds_[0]);
-        grib_get(gh, GK_gribTablesVersionNo, gridParameterIds_[1]);
-        grib_get(gh, "centre", gridParameterIds_[2]);
-        if (gridParameterIds_[0] == 254) {
+        long iop, tvn, ctr;
+        grib_get(gh, GK_indicatorOfParameter, iop);
+        grib_get(gh, GK_gribTablesVersionNo, tvn);
+        grib_get(gh, "centre", ctr);
+        gridParameterIds_ = {iop, tvn, ctr};
+        if (iop == 254) {
             long level = -1;
             grib_get(gh, GK_level, level);
             if (level == GRIB_MISSING_LONG) {
@@ -495,10 +539,11 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, lo
             }
         }
     } else if (edition_ == 2) {
-        gridParameterIds_ = vector<long>(3, 0);
-        grib_get(gh, GK_parameterNumber, gridParameterIds_[0]);
-        grib_get(gh, GK_parameterCategory, gridParameterIds_[1]);
-        grib_get(gh, GK_discipline, gridParameterIds_[2]);
+        long pnm, pct, dis;
+        grib_get(gh, GK_parameterNumber, pnm);
+        grib_get(gh, GK_parameterCategory, pct);
+        grib_get(gh, GK_discipline, dis);
+        gridParameterIds_ = {pnm, pct, dis};
     } else {
         throw runtime_error("unknown grib version: " + type2string(edition_));
     }
@@ -507,13 +552,17 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, lo
     if ((nameError != GRIB_NOT_FOUND) && (parameterName_ != "unknown")) {
         MIFI_GRIB_CHECK(nameError, 0);
     } else {
-        parameterName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), ",");
+        std::ostringstream pn;
+        pn << get<0>(gridParameterIds_) << ',' << get<1>(gridParameterIds_) << ',' << get<2>(gridParameterIds_);
+        parameterName_ = pn.str();
     }
     const int shortNameError = grib_get_nocheck(gh, "shortName", shortName_);
     if ((shortNameError != GRIB_NOT_FOUND) && (shortName_ != "unknown")) {
         MIFI_GRIB_CHECK(shortNameError, 0);
     } else {
-        shortName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), "_");
+        std::ostringstream sn;
+        sn << get<0>(gridParameterIds_) << '_' << get<1>(gridParameterIds_) << '_' << get<2>(gridParameterIds_);
+        shortName_ = sn.str();
     }
 
     for (std::vector<std::string>::const_iterator keyIt = extraKeys.begin(); keyIt != extraKeys.end(); ++keyIt) {
@@ -641,18 +690,18 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, lo
 GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName)
 {
     while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-        XmlCharPtr name = xmlTextReaderName(reader);
-        XmlCharPtr value = xmlTextReaderValue(reader);
+        const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+        const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
         if (name == "url") {
-            if (value.len() == 0)
+            if (value.empty())
                 throw runtime_error("could not find url for node");
             fileURL_ = value.to_string();
         } else if (name == "seekPos") {
-            if (value.len() == 0)
+            if (value.empty())
                 throw runtime_error("could not find seekPos for node");
             filePos_ = value.to_longlong();
         } else if (name == "messageSize") {
-            if (value.len() == 0)
+            if (value.empty())
                 throw runtime_error("could not find messageSize for node");
             msgSize_ = value.to_longlong();
         }
@@ -661,34 +710,32 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
     perturbationNo_ = 0;
     totalNumberOfEnsembles_ = 0;
 
+    bool have_grib_parameters = false;
     int ret = xmlTextReaderRead(reader);
     while (ret == 1) {
         int type = xmlTextReaderNodeType(reader);
         switch (type) {
         case XML_READER_TYPE_ELEMENT: {
-            const xmlChar* name = xmlTextReaderConstName(reader);
-            if (name == NULL)
-                name = reinterpret_cast<const xmlChar*>("-- NONAME");
-            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("parameter"))) {
+            const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+            if (name == "parameter") {
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == "name") {
                         parameterName_ = value.to_string();
                     } else if (name == "shortName") {
                         shortName_ = value.to_string();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("grib1"))) {
-                // grib1
+            } else if (name == "grib1") {
                 edition_ = 1;
                 int id = 0;
                 int centre = 0;
                 int table = 0;
 
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == GK_indicatorOfParameter) {
                         id = value.to_long();
                     } else if (name == GK_gribTablesVersionNo) {
@@ -697,19 +744,17 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                         centre = value.to_long();
                     }
                 }
-                gridParameterIds_.push_back(id);
-                gridParameterIds_.push_back(table);
-                gridParameterIds_.push_back(centre);
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("grib2"))) {
-                // grib1
+                gridParameterIds_ = {id, table, centre};
+                have_grib_parameters = true;
+            } else if (name == "grib2") {
                 edition_ = 2;
                 int no = 0;
                 int cat = 0;
                 int dis = 0;
 
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == GK_parameterNumber) {
                         no = value.to_long();
                     } else if (name == GK_parameterCategory) {
@@ -718,27 +763,24 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                         dis = value.to_long();
                     }
                 }
-                gridParameterIds_.push_back(no);
-                gridParameterIds_.push_back(cat);
-                gridParameterIds_.push_back(dis);
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("level"))) {
+                gridParameterIds_ = {no, cat, dis};
+                have_grib_parameters = true;
+            } else if (name == "level") {
                 // level
 
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == "no") {
                         levelNo_ = value.to_long();
                     } else if (name == "type") {
                         levelType_ = value.to_long();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("time"))) {
-                // time
-
+            } else if (name == "time") {
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == GK_dataDate) {
                         dataDate_ = value.to_long();
                     } else if (name == "dataTime") {
@@ -757,34 +799,30 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                         stepEnd_ = value.to_long();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>(GK_typeOfGrid))) {
-
+            } else if (name == GK_typeOfGrid) {
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
                     if (name == "name") {
+                        const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                         typeOfGrid_ = value.to_string();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("ensemble"))) {
-                // ensemble
-
+            } else if (name == "ensemble") {
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == "total") {
                         totalNumberOfEnsembles_ = value.to_long();
                     } else if (name == "no") {
                         perturbationNo_ = value.to_long();
                     }
                 }
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("extraKey"))) {
-                // extraKeys
-                string keyName;
+            } else if (name == "extraKey") {
+                std::string keyName;
                 long keyVal = 0;
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == "name") {
                         keyName = value.to_string();
                     } else if (name == "value") {
@@ -792,9 +830,8 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                     }
                 }
                 otherKeys_[keyName] = keyVal;
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gridDefinition"))) {
-                // gridDefinition
-                string proj4 = "";
+            } else if (name == "gridDefinition") {
+                std::string proj4 = "";
                 int isDegree = 0;
                 double startX = 0;
                 double startY = 0;
@@ -808,8 +845,8 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 double incrY = 0;
                 GridDefinition::Orientation scanMode = GridDefinition::LeftLowerHorizontal;
                 while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
-                    XmlCharPtr name = xmlTextReaderName(reader);
-                    XmlCharPtr value = xmlTextReaderValue(reader);
+                    const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+                    const XmlConstCharPtr value = xmlTextReaderConstValue(reader);
                     if (name == "proj4") {
                         proj4 = value.to_string();
                     } else if (name == "isDegree") {
@@ -839,16 +876,14 @@ GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fil
                 const double lonLatResolution = (haveStartLon && haveStartLat) ? lonLatResolutionForEdition(edition_) : -1;
                 gridDefinition_ = GridDefinition(proj4, isDegree, sizeX, sizeY, incrX, incrY, startX, startY, startLon, startLat, lonLatResolution, scanMode);
             } else {
-                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name);
+                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name.to_string());
             }
             break;
         }
         case XML_READER_TYPE_END_ELEMENT: {
-            const xmlChar* name = xmlTextReaderConstName(reader);
-            if (name == NULL)
-                name = reinterpret_cast<const xmlChar*>("");
-            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
-                if (gridParameterIds_.size() != 3)
+            const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+            if (name == "gribMessage") {
+                if (!have_grib_parameters)
                     throw runtime_error("no grib parameters found in " + fileName);
                 if (!isValid())
                     throw runtime_error("unable to parse gribMessage from " + fileName);
@@ -878,21 +913,6 @@ static void checkLXML(int status, string msg = "")
 static const xmlChar* xmlCast(const std::string& msg)
 {
     return reinterpret_cast<const xmlChar*>(msg.c_str());
-}
-
-long GribFileMessage::getEdition() const
-{
-    return edition_;
-}
-
-const std::string& GribFileMessage::getFileURL() const
-{
-    return fileURL_;
-}
-
-off_t GribFileMessage::getFilePosition() const
-{
-    return filePos_;
 }
 
 const std::string& GribFileMessage::getName() const
@@ -947,50 +967,6 @@ FimexTime GribFileMessage::getValidTime() const
     return fromTimePoint(asTimePoint(reference) + timeOffset);
 }
 
-long GribFileMessage::getTimeRangeIndicator() const
-{
-    return timeRangeIndicator_;
-}
-
-long GribFileMessage::getTypeOfStatisticalProcessing() const
-{
-    return typeOfStatisticalProcessing_;
-}
-
-const std::string& GribFileMessage::getStepType() const
-{
-    return stepType_;
-}
-
-long GribFileMessage::getLevelNumber() const
-{
-    return levelNo_;
-}
-long GribFileMessage::getLevelType() const
-{
-    return levelType_;
-}
-
-const std::map<std::string, long>& GribFileMessage::getOtherKeys() const
-{
-    return otherKeys_;
-}
-
-const vector<long>& GribFileMessage::getParameterIds() const
-{
-    return gridParameterIds_;
-}
-
-const std::string& GribFileMessage::getTypeOfGrid() const
-{
-    return typeOfGrid_;
-}
-
-const GridDefinition& GribFileMessage::getGridDefinition() const
-{
-    return gridDefinition_;
-}
-
 string GribFileMessage::toString() const
 {
 #if defined(LIBXML_WRITER_ENABLED)
@@ -1012,16 +988,16 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("name"), xmlCast(parameterName_)));
         if (edition_ == 1) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib1")));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_indicatorOfParameter), xmlCast(type2string(gridParameterIds_.at(0)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_gribTablesVersionNo), xmlCast(type2string(gridParameterIds_.at(1)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_indicatorOfParameter), xmlCast(type2string(get<0>(gridParameterIds_)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_gribTablesVersionNo), xmlCast(type2string(get<1>(gridParameterIds_)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_identificationOfOriginatingGeneratingCentre),
-                                                  xmlCast(type2string(gridParameterIds_.at(2)))));
+                                                  xmlCast(type2string(get<2>(gridParameterIds_)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else if (edition_ == 2) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib2")));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterNumber), xmlCast(type2string(gridParameterIds_.at(0)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterCategory), xmlCast(type2string(gridParameterIds_.at(1)))));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_discipline), xmlCast(type2string(gridParameterIds_.at(2)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterNumber), xmlCast(type2string(get<0>(gridParameterIds_)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_parameterCategory), xmlCast(type2string(get<1>(gridParameterIds_)))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(GK_discipline), xmlCast(type2string(get<2>(gridParameterIds_)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else {
             throw runtime_error("unknown gribEdition: " + type2string(edition_));
@@ -1092,27 +1068,12 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*>(buffer->content));
 }
 
-std::unique_ptr<unsigned char[]> GribFileMessage::readGribMessage(ChunkReader_p cr) const
-{
-    return std::move(readChunk(cr, filePos_, msgSize_));
-}
-
 size_t GribFileMessage::readData(ChunkReader_p cr, double* data, size_t data_size, double missingValue) const
 {
     if (!isValid())
         return 0;
 
-    auto buffer = readGribMessage(cr);
-    auto gh = make_grib_handle(&buffer[0], msgSize_);
-    if (!gh)
-        return 0;
-
-    LOG4FIMEX(logger, Logger::DEBUG, "set missing = " << missingValue);
-    MIFI_GRIB_CHECK(grib_set_double(gh.get(), "missingValue", missingValue), 0);
-    LOG4FIMEX(logger, Logger::DEBUG, "retrieve values");
-    MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &data_size), 0);
-
-    return data_size;
+    return readGribData(cr, filePos_, msgSize_, data, data_size, missingValue);
 }
 
 size_t GribFileMessage::readLevelData(ChunkReader_p cr, std::vector<double>& levelData, double missingValue, bool asimofHeader) const
@@ -1120,8 +1081,18 @@ size_t GribFileMessage::readLevelData(ChunkReader_p cr, std::vector<double>& lev
     if (!isValid())
         return 0;
 
-    auto buffer = readGribMessage(cr);
-    auto gh = make_grib_handle(&buffer[0], msgSize_);
+    size_t file_pos = filePos_;
+    size_t msg_size = msgSize_;
+    if (asimofHeader) {
+        file_pos = 0;
+        msg_size = 0;
+    }
+
+    if (msg_size == 0) {
+        msg_size = readGribMessageSize(cr, file_pos);
+    }
+    auto buffer = readChunk(cr, file_pos, msg_size);
+    auto gh = make_grib_handle(&buffer[0], msg_size);
     if (!gh)
         return 0;
 
@@ -1148,8 +1119,8 @@ GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribFil
     init(ca, gribFilePath, "", members);
 }
 
-GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribFilePath, const std::string& grbmlFilePath, const std::vector<std::pair<std::string, std::regex>>& members,
-                             std::map<std::string, std::string> options)
+GribFileIndex::GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribFilePath, const std::string& grbmlFilePath,
+                             const std::vector<std::pair<std::string, std::regex>>& members, std::map<std::string, std::string> options)
     : options_(options)
 {
     init(ca, gribFilePath, grbmlFilePath, members);
@@ -1171,7 +1142,8 @@ struct HasSameUrl
     bool operator()(GribFileMessage& gfm) const { return gfm.getFileURL() == file_; }
 };
 
-void GribFileIndex::init(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members)
+void GribFileIndex::init(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl,
+                         const std::vector<std::pair<std::string, std::regex>>& members)
 {
     if (!grbmlUrl.empty()) {
         // append to existing grbml
@@ -1179,13 +1151,13 @@ void GribFileIndex::init(ChunkReaderFactory_p ca, const std::string& gribUrl, co
         // but remove existing messages for the same url
         messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl(gribUrl)), messages_.end());
     }
-    std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
+    const auto efIt = options_.find("earthfigure");
     if (efIt != options_.end()) {
         earthFigure_ = efIt->second;
         LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure '" << earthFigure_ << "'");
     }
     vector<string> extraKeys;
-    std::map<std::string, std::string>::const_iterator ekIt = options_.find("extraKeys");
+    const auto ekIt = options_.find("extraKeys");
     if (ekIt != options_.end()) {
         LOG4FIMEX(logger, Logger::DEBUG, "using extraKeys '" << ekIt->second << "'");
         extraKeys = tokenize(ekIt->second, ",");
@@ -1199,26 +1171,12 @@ void GribFileIndex::initByGrib(ChunkReaderFactory_p ca, const std::string& gribU
                                const std::vector<std::string>& extraKeys)
 {
     url_ = gribUrl;
-    unsigned char buffer[16];
     auto cr = ca->readerFor(gribUrl);
     const size_t size = cr->size();
     off_t grib_msg_start = 0;
     while (grib_msg_start < size) {
         // read the next message
-        cr->read(grib_msg_start, sizeof(buffer), buffer);
-        const char grib_version = buffer[7];
-        size_t s0, sn;
-        if (grib_version == 1) {
-            s0 = 4;
-            sn = 3;
-        } else if (grib_version == 2) {
-            s0 = 8;
-            sn = 8;
-        }
-        size_t grib_msg_size = 0;
-        for (size_t i=0; i<sn; ++i) {
-            grib_msg_size = (grib_msg_size << 8) | size_t(buffer[s0+i]);
-        }
+        const size_t grib_msg_size = readGribMessageSize(cr, grib_msg_start);
         auto grib_buffer = readChunk(cr, grib_msg_start, grib_msg_size);
         grib_handle_p gh = make_grib_handle(&grib_buffer[0], grib_msg_size);
         try {
@@ -1264,8 +1222,7 @@ bool GribFileIndex::initByGrbml(ChunkReaderFactory_p ca, const std::string& grbm
     try {
         auto cr = ca->readerFor(grbmlUrl);
         ChunkReaderXmlInputCtx crctx(cr);
-        xmlTextReaderPtr reader = xmlReaderForIO(readChunkReaderXmlInputCtx, closeChunkReaderXmlInputCtx, &crctx,
-         grbmlUrl.c_str(), NULL, 0);
+        xmlTextReaderPtr reader = xmlReaderForIO(readChunkReaderXmlInputCtx, closeChunkReaderXmlInputCtx, &crctx, grbmlUrl.c_str(), NULL, 0);
         return initByXMLReader(reader, grbmlUrl);
     } catch (std::runtime_error& not_found) {
         return false;
@@ -1277,32 +1234,30 @@ bool GribFileIndex::initByXMLReader(xmlTextReaderPtr reader, const std::string& 
     if (!reader)
         return false;
 
+#if 1
+    messages_.reserve(10000);
+#endif
     std::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
-    const xmlChar* name;
     int ret = xmlTextReaderRead(reader);
     while (ret == 1) {
         // int depth = xmlTextReaderDepth(reader);
         int type = xmlTextReaderNodeType(reader);
         switch (type) {
         case XML_READER_TYPE_ELEMENT: {
-            name = xmlTextReaderConstName(reader);
-            if (name == NULL)
-                name = reinterpret_cast<const xmlChar*>("");
-            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+            const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+            if (name == "gribFileIndex") {
                 XmlCharPtr url = xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"));
                 url_ = url.to_string();
-            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
+            } else if (name == "gribMessage") {
                 messages_.push_back(GribFileMessage(reader, url));
             } else {
-                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << url << " name: " << name);
+                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << url << " name: " << name.to_string());
             }
             break;
         }
         case XML_READER_TYPE_END_ELEMENT: {
-            name = xmlTextReaderConstName(reader);
-            if (name == NULL)
-                name = reinterpret_cast<const xmlChar*>("");
-            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+            const XmlConstCharPtr name = xmlTextReaderConstName(reader);
+            if (name == "gribFileIndex") {
                 return true; // finished
             }
             break;
@@ -1333,10 +1288,8 @@ std::ostream& operator<<(std::ostream& os, const GribFileIndex& gfm)
 {
     os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
     os << "<gribFileIndex url=\"" << gfm.getUrl() << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << endl;
-
-    const vector<GribFileMessage>& messages = gfm.listMessages();
-    for (vector<GribFileMessage>::const_iterator it = messages.begin(); it != messages.end(); ++it) {
-        os << *it;
+    for (const auto& msg : gfm.listMessages()) {
+        os << msg;
     }
     os << "</gribFileIndex>" << endl;
     return os;

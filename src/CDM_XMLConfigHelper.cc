@@ -39,7 +39,7 @@ namespace MetNoFimex {
 
 using namespace std;
 
-static string replaceTemplateAttribute(string value, const map<string, std::shared_ptr<ReplaceStringObject>> templateReplacements)
+std::string replaceTemplateAttribute(string value, const map<string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
     for (auto& tr : templateReplacements) {
         stringstream outString;
@@ -73,18 +73,17 @@ static string replaceTemplateAttribute(string value, const map<string, std::shar
 void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNodePtr node,
                                   const std::map<std::string, std::shared_ptr<ReplaceStringObject>>& templateReplacements)
 {
-    if (!node)
-        return;
-    if ((node->type == XML_ELEMENT_NODE) &&
-        (string("attribute") == reinterpret_cast<const char *>(node->name))) {
-            string name = getXmlProp(node, "name");
-            string value = getXmlProp(node, "value");
-            string type = getXmlProp(node, "type");
+    static const std::string k_attribute = "attribute";
+    for (xmlNodePtr n = node; n; n = n->next) {
+        if ((n->type == XML_ELEMENT_NODE) && k_attribute == reinterpret_cast<const char*>(n->name)) {
+            string name = getXmlProp(n, "name");
+            string value = getXmlProp(n, "value");
+            string type = getXmlProp(n, "type");
 
             value = replaceTemplateAttribute(value, templateReplacements);
-            attributes.push_back(CDMAttribute(name,type,value));
+            attributes.push_back(CDMAttribute(name, type, value));
+        }
     }
-    fillAttributeListFromXMLNode(attributes, node->next, templateReplacements);
 }
 
 int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes,
@@ -100,12 +99,10 @@ int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString,
     if (node->type != XML_ELEMENT_NODE) {
         throw CDMException("xpath does not point to XML_ELEMENT_NODE: " + xpathString);
     }
-    xmlAttrPtr attr = node->properties;
-    while (attr != 0) {
+    for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
         string name(reinterpret_cast<const char *>(attr->name));
         string value(reinterpret_cast<const char *>(attr->children->content));
         xmlAttributes[name] = value;
-        attr = attr->next;
     }
     fillAttributeListFromXMLNode(varAttributes, node->children, templateReplacements);
     return nodes.size();

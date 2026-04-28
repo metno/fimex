@@ -37,6 +37,7 @@
 #include <iosfwd>
 #include <map>
 #include <regex>
+#include <tuple>
 #include <vector>
 
 // forward decl, originally in <libxml/xmlreader.h>
@@ -61,6 +62,9 @@ extern const char GK_typeOfStatisticalProcessing[];
 class GribFileMessage
 {
 public:
+    typedef std::tuple<long, long, long> param_id_t;
+
+public:
     GribFileMessage();
 
     /**
@@ -71,8 +75,7 @@ public:
      * @param members list of member-names -> filepath-regexp
      * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
      */
-    GribFileMessage(grib_handle_p gh, const std::string& msgURL, long msgPos, long msgSize,
-                    const std::vector<std::pair<std::string, std::regex>>& members = {},
+    GribFileMessage(grib_handle_p gh, const std::string& msgURL, long msgPos, long msgSize, const std::vector<std::pair<std::string, std::regex>>& members = {},
                     const std::vector<std::string>& extraKeys = {});
     GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
     ~GribFileMessage();
@@ -82,19 +85,20 @@ public:
     /// give a xml-string representation
     std::string toString() const;
     /// accessors
-    long getEdition() const;
-    const std::string& getFileURL() const;
-    off_t getFilePosition() const;
+    long getEdition() const { return edition_; }
+    const std::string& getFileURL() const { return fileURL_; }
+    off_t getFilePosition() const { return filePos_; }
+    size_t getMsgSize() const { return msgSize_; }
     const std::string& getName() const;
     const std::string& getShortName() const;
     FimexTime getValidTime() const;
     FimexTime getReferenceTime() const;
     /// return gribs timeRangeIndicator (0=instant, 2,4=accumulated)
-    long getTimeRangeIndicator() const;
-    long getTypeOfStatisticalProcessing() const;
-    const std::string& getStepType() const;
-    long getLevelNumber() const;
-    long getLevelType() const;
+    long getTimeRangeIndicator() const { return timeRangeIndicator_; }
+    long getTypeOfStatisticalProcessing() const { return typeOfStatisticalProcessing_; }
+    const std::string& getStepType() const { return stepType_; }
+    long getLevelNumber() const { return levelNo_; }
+    long getLevelType() const { return levelType_; }
     /**
      * give the total number of ensembles for this parameter
      */
@@ -107,16 +111,16 @@ public:
      * get other keys - the other keys need to be available already during initialization
      * @return map with key -> value
      */
-    const std::map<std::string, long>& getOtherKeys() const;
+    const std::map<std::string, long>& getOtherKeys() const { return otherKeys_; }
 
     /**
      * Get the parameter ids as list with the following meanings:
      * @li ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
      * @li ed2: parameterNumber, paramterCategory, discipline
      */
-    const std::vector<long>& getParameterIds() const;
-    const std::string& getTypeOfGrid() const;
-    const GridDefinition& getGridDefinition() const;
+    const param_id_t& getParameterIds() const { return gridParameterIds_; }
+    const std::string& getTypeOfGrid() const { return typeOfGrid_; }
+    const GridDefinition& getGridDefinition() const { return gridDefinition_; }
     /**
      * Read the data from the underlying source to the vector data.
      * Data of at maximum data.size() will be read.
@@ -136,9 +140,6 @@ public:
     size_t readLevelData(ChunkReader_p cr, std::vector<double>& levelData, double missingValue, bool asimofHeader = false) const;
 
 private:
-    std::unique_ptr<unsigned char[]> readGribMessage(ChunkReader_p cr) const;
-
-private:
     std::string fileURL_;
     off_t filePos_;
     size_t msgSize_;
@@ -146,7 +147,7 @@ private:
     std::string shortName_;
     // ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
     // ed2: parameterNumber, paramterCategory, discipline
-    std::vector<long> gridParameterIds_;
+    param_id_t gridParameterIds_;
     long edition_;
     long dataTime_;
     long dataDate_;
@@ -208,7 +209,8 @@ public:
      * @param members translation of members to filenames
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members,
+    GribFileIndex(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl,
+                  const std::vector<std::pair<std::string, std::regex>>& members,
                   std::map<std::string, std::string> options = std::map<std::string, std::string>());
 
     /**
@@ -242,7 +244,8 @@ private:
     std::map<std::string, std::string> options_;
 
     void init(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::string& grbmlUrl, const std::vector<std::pair<std::string, std::regex>>& members);
-    void initByGrib(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::vector<std::pair<std::string, std::regex>>& members, const std::vector<std::string>& extraKeys);
+    void initByGrib(ChunkReaderFactory_p ca, const std::string& gribUrl, const std::vector<std::pair<std::string, std::regex>>& members,
+                    const std::vector<std::string>& extraKeys);
     bool initByGrbml(ChunkReaderFactory_p ca, const std::string& grbmlUrl);
     bool initByXMLReader(xmlTextReaderPtr reader, const std::string& url);
 };
@@ -251,6 +254,8 @@ private:
 std::ostream& operator<<(std::ostream& os, const GribFileMessage& gfm);
 /// outputstream for a GribFileIndex
 std::ostream& operator<<(std::ostream& os, const GribFileIndex& gfm);
+
+size_t readGribData(ChunkReader_p cr, size_t msg_pos, size_t msg_size, double* data, size_t data_size, double missingValue);
 
 } // namespace MetNoFimex
 

@@ -131,4 +131,33 @@ std::vector<std::string> split_any(const std::string& str, const std::string& de
     return out;
 }
 
+StringListBuilder::StringListBuilder(bool no_index_0)
+{
+    if (no_index_0) {
+        // do not add to indexes_, therefore index==0 will never be returned from "add"
+        strings_.push_back({});
+    }
+}
+
+StringListBuilder::StringListBuilder(const std::vector<std::string>& strings, bool no_index_0)
+    : strings_(strings)
+{
+    const size_t i0 = no_index_0 ? 1 : 0;
+    for (size_t i = i0; i < strings_.size(); ++i)
+        indexes_[strings[i]] = i;
+}
+
+size_t StringListBuilder::add(const std::string& key)
+{
+    const auto it = indexes_.find(key);
+    if (it == indexes_.end()) {
+        size_t idx = strings_.size();
+        indexes_.insert(std::make_pair(key, idx));
+        strings_.push_back(key);
+        return idx;
+    } else {
+        return it->second;
+    }
+}
+
 } // namespace MetNoFimex

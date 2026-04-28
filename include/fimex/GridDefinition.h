@@ -72,11 +72,11 @@ public:
     };
 
     GridDefinition();
-    GridDefinition(std::string projDefinition_, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
+    GridDefinition(const std::string& projDefinition_, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
                    double lonStart, double latStart, double lonLatResolution, Orientation orient);
 
     /// return a proj4 string
-    std::string getProjDefinition() const { return projDefinition_; }
+    const std::string& getProjDefinition() const { return projDefinition_; }
     void setProjDefinition(const std::string& proj) { projDefinition_ = proj; }
 
     // check if start and increment are degree or metric
