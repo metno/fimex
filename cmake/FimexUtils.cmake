@@ -34,7 +34,7 @@ MACRO(FIMEX_CMAKE_SETUP)
   INCLUDE(GNUInstallDirs)
   INCLUDE(FindPkgConfig)
 
-  SET(CMAKE_CXX_STANDARD 11)
+  SET(CMAKE_CXX_STANDARD 20)
   SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
   # see https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling

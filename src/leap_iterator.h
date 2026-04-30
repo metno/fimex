@@ -38,7 +38,7 @@
  * one step in the leap_iterator are n steps in the adapted iterator.
  */
 template <class I>
-class leap_iterator : public std::iterator<std::bidirectional_iterator_tag, typename std::iterator_traits<I>::value_type>
+class leap_iterator
 {
 public:
     typedef typename std::iterator_traits<I>::value_type value_type;

@@ -38,37 +38,37 @@ namespace MetNoFimex
 class GridDefinition
 {
 public:
-    /**
-     *  Use these flags to build an Orientation.
-     *  Left, Upper, Horizontal and not Alternating are defaults and don't require flags.
-     *
-     */
-    enum OrientationFlags {
-        ScanStartRight =    binary<010000000>::value,
-        ScanStartBottom =   binary<001000000>::value,
-        ScanIsVertical =    binary<000100000>::value,
-        /// change direction between succeeding rows (horizontal) or columns (vertical)
-        ScanIsAlternating = binary<000010000>::value
-    };
     // grib2 binary representations
     enum Orientation {
-        LeftUpperHorizontal =             binary<000000000>::value,
-        RightUpperHorizontal =            binary<010000000>::value,
-        LeftLowerHorizontal =             binary<001000000>::value,
-        RightLowerHorizontal =            binary<011000000>::value,
-        LeftUpperVertical =               binary<000100000>::value,
-        RightUpperVertical =              binary<010100000>::value,
-        LeftLowerVertical =               binary<001100000>::value,
-        RightLowerVertical =              binary<011100000>::value,
+        LeftUpperHorizontal = binary<000000000>::value,
+        RightUpperHorizontal = binary<010000000>::value,
+        LeftLowerHorizontal = binary<001000000>::value,
+        RightLowerHorizontal = binary<011000000>::value,
+        LeftUpperVertical = binary<000100000>::value,
+        RightUpperVertical = binary<010100000>::value,
+        LeftLowerVertical = binary<001100000>::value,
+        RightLowerVertical = binary<011100000>::value,
 
-        LeftUpperHorizontalAlternating =  binary<000010000>::value,
+        LeftUpperHorizontalAlternating = binary<000010000>::value,
         RightUpperHorizontalAlternating = binary<010010000>::value,
-        LeftLowerHorizontalAlternating =  binary<001010000>::value,
+        LeftLowerHorizontalAlternating = binary<001010000>::value,
         RightLowerHorizontalAlternating = binary<011010000>::value,
-        LeftUpperVerticalAlternating =    binary<000110000>::value,
-        RightUpperVerticalAlternating =   binary<010110000>::value,
-        LeftLowerVerticalAlternating =    binary<001110000>::value,
-        RightLowerVerticalAlternating =   binary<011110000>::value,
+        LeftUpperVerticalAlternating = binary<000110000>::value,
+        RightUpperVerticalAlternating = binary<010110000>::value,
+        LeftLowerVerticalAlternating = binary<001110000>::value,
+        RightLowerVerticalAlternating = binary<011110000>::value,
+
+        // Use the following flags to build an Orientation.
+        // Left, Upper, Horizontal and not Alternating are defaults and don't require flags.
+
+        // These values were in `OrientationFlags` before using C++20.
+        // As bitwise operations between different enumeration types are deprecated with C++20,
+        // they were moved into `Orientation`.
+        ScanStartRight = RightUpperHorizontal,
+        ScanStartBottom = LeftLowerHorizontal,
+        ScanIsVertical = LeftUpperVertical,
+        /// change direction between succeeding rows (horizontal) or columns (vertical)
+        ScanIsAlternating = LeftUpperHorizontalAlternating
     };
 
     GridDefinition();

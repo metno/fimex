@@ -214,7 +214,7 @@ std::vector<std::shared_ptr<Felt_Array2>> Felt_File2::listFeltArrays() const
 }
 
 template <typename T>
-class Scale : public unary_function<short, T>
+class Scale
 {
 public:
     Scale(T newFillValue, double scalingFactor)
