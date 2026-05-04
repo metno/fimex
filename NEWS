@@ -1,3 +1,5 @@
+  * 2026-04-28 fimex 2.4.1
+    * build with C++20
   * 2026-04-28 fimex 2.4.0
     * support reading GRIB from http
     * add GRIB protobuf index
