@@ -52,5 +52,5 @@ IF(ENABLE_PROTOBUF)
   list_prepend_dir(libfimex_grib_SOURCES "${metno_protos_dir}" ${grib_protos})
 ENDIF(ENABLE_PROTOBUF)
 
-FIMEX_ADD_LIBRARY(fimex-io-grib "${libfimex_grib_SOURCES}" "${IO_PACKAGES};${eccodes_PACKAGE};${grib_api_PACKAGE};${date_PACKAGE}")
+FIMEX_ADD_LIBRARY(fimex-io-grib "${libfimex_grib_SOURCES}" "${IO_PACKAGES};${eccodes_PACKAGE};${grib_api_PACKAGE};${date_PACKAGE};${PROTOBUF_LIBRARIES}")
 TARGET_INCLUDE_DIRECTORIES(libfimex-io-grib PUBLIC "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_BINARY_DIR}/src")
