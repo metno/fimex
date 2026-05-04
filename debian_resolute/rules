@@ -15,7 +15,7 @@ ifeq ($(DEB_HOST_ARCH),i386)
 endif
 
 %:
-	dh $@ --parallel
+	dh $@ --parallel --with python3
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
