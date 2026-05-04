@@ -308,6 +308,7 @@ SET(FIMEX_IO_PLUGINS_PATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 CONFIGURE_FILE(fimex_config.h.in fimex_config.h)
 
 SET(libfimex_PACKAGES
+  ${curl_PACKAGE}
   ${date_PACKAGE}
   ${libxml2_PACKAGE}
   ${log4cpp_PACKAGE}
