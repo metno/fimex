@@ -52,12 +52,12 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, WriteBuffer* wb)
     size_t count = size * nmemb;
     size_t oldLength = wb->position;
     if (wb->position + count > wb->capacity) {
-        LOG4FIMEX(logger, MetNoFimex::Logger::ERROR, "cannot read " << count << " to buffer position " << wb->position << " with capacity " << wb->capacity);
-#if 0
+#if 1
         std::ostringstream msg;
         msg << "buffer would overflow when adding " << count << " to buffer with capacity " << wb->capacity << " at " << wb->position;
         throw std::runtime_error(msg.str());
 #else
+        LOG4FIMEX(logger, MetNoFimex::Logger::ERROR, "cannot read " << count << " to buffer position " << wb->position << " with capacity " << wb->capacity);
         return 0;
 #endif
     }
