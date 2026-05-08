@@ -119,7 +119,7 @@ size_t NetCDFIoFactory::matchMagicSize()
 
 int NetCDFIoFactory::matchMagic(const char* magic, size_t count)
 {
-    if ((count >= 4 && detectHDF5(magic)) || (count >= 7 && detectNetCDF(magic)))
+    if ((count >= 7 && detectHDF5(magic)) || (count >= 4 && detectNetCDF(magic)))
         return 1;
     return 0;
 }
