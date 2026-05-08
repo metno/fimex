@@ -301,8 +301,8 @@ int main(int argc, char* args[])
         << op_tol
         << op_t1
         << op_c1
-        << op_t1
-        << op_c1
+        << op_t2
+        << op_c2
         // clang-format on
         ;
 
