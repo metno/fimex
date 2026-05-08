@@ -335,8 +335,20 @@ int main(int argc, char* args[])
     const std::string& c2 = vm.value(op_c2);
 
     if (!silent) {
-        std::cout << "comparing '" << f1 << "' ..." << std::endl
-                  << "     with '" << f2 << "' ..." << std::endl;
+        std::cout << "comparing '" << f1 << "'";
+        if (!t1.empty() || !c1.empty()) std::cout << " (";
+        if (!t1.empty()) std::cout << "type '" << t1 << "'";
+        if (!t1.empty() && !c1.empty()) std::cout << " ";
+        if (!c1.empty()) std::cout << "config '" << c1 << "'";
+        if (!t1.empty() || !c1.empty()) std::cout << ")";
+        std::cout << " ...\n"
+                  << "     with '" << f2 << "'";
+        if (!t2.empty() || !c2.empty()) std::cout << " (";
+        if (!t2.empty()) std::cout << "type '" << t2 << "'";
+        if (!t2.empty() && !c2.empty()) std::cout << " ";
+        if (!c2.empty()) std::cout << "config '" << c2 << "'";
+        if (!t2.empty() || !c2.empty()) std::cout << ")";
+        std::cout << " ..." << std::endl;
     }
 
     try {
