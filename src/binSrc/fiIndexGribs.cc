@@ -62,13 +62,22 @@ Logger_p logger = getLogger("fiIndexGribs");
 
 void writeUsage(std::ostream& out, const po::option_set& options)
 {
-    out << "usage: fiIndexGribs -o/--outputFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile [[-i] gribFile2 [...]]" << std::endl;
+    out << "usage: fiIndexGribs -o/--output.file GRBML_NAME [--output.type grbml] [-c/--input.config gribreaderconfig.xml] [-i] gribFile [[-i] gribFile2 [...]] " << std::endl;
     out << "  When creating, one or more input file(s) must be specified." << std::endl;
-    out << "usage: fiIndexGribs -a/--appendFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile" << std::endl;
+    out << "usage: fiIndexGribs -a/--append.file GRBML_NAME [-c/--input.config gribreaderconfig.xml] [-i] gribFile" << std::endl;
     out << "  When appending, exactly one input file must be specified." << std::endl;
-    out << "usage: fiIndexGribs --indexFile GRBML_NAME FIIN_FILE [-c/--readerConfig gribreaderconfig.xml]" << std::endl;
-    out << "  When creating an index, no input file may be specified." << std::endl;
-    out << std::endl;
+    out << "usage: fiIndexGribs --output.file GRBFP_FILE --output.type grbfp [-c/--input.config gribreaderconfig.xml] [--input.type grbml] --input.file GRBML_NAME [[-i] index2.grbml [...]]" << std::endl;
+    out << "  Create a protbuf index from grbml file(s) and gribreaderconfig.xml." << std::endl;
+    out << "usage: fiIndexGribs --output.file GRBFP_FILE --output.type grbfp [-c/--input.config gribreaderconfig.xml] [--input.type grib] [[-i] gribFile [...]]" << std::endl;
+    out << "  Create a protbuf index from GRIB file(s) and gribreaderconfig.xml." << std::endl;
+    out << "\n"
+        << "Each input filename is expanded if it starts with certain prefixes:\n"
+        << " - if it starts with 'glob:', use the remainder as glob pattern\n"
+        << " - if it starts with 'many:', use the first char after as separator and split\n"
+        << "   the remainder on this separator (e.g. many:|a.grb|b.grb|c.grb)\n"
+        << " - if it starts with 'list:', use the remainder as path to a list of files\n"
+        << "   one per line\n";
+    out << "\n";
     options.help(out);
 }
 
