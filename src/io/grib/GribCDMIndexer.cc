@@ -705,8 +705,9 @@ void GribCDMIndexer::initCreateVarMessages(std::shared_ptr<CDM> cdm, std::shared
         const auto& shape = var.getShape();
 
         // level data
-        const auto& level_type = init_->varHas.at(varName).level_type;
-        const auto& level_pos = init_->varHas.at(varName).level_pos;
+        const auto& varHas = init_->varHas.at(varName);
+        const auto& level_type = varHas.level_type;
+        const auto& level_pos = varHas.level_pos;
         const auto& levels = init_->levelValsOfType.at(level_type).at(level_pos).values;
 
         size_t shapeidx = 0;
@@ -732,7 +733,7 @@ void GribCDMIndexer::initCreateVarMessages(std::shared_ptr<CDM> cdm, std::shared
         msgs = grib_index_v(size_msgs, invalid_msg);
         const auto& box_time_lev_ens = gm.second;
         for (const auto& items_time_lev_ens : box_time_lev_ens) {
-            const size_t idx_t = find_index(init_->times, items_time_lev_ens.first);
+            const size_t idx_t = varHas.has_time ? find_index(init_->times, items_time_lev_ens.first) : 0;
 
             const auto& box_lev_ens = items_time_lev_ens.second;
             for (const auto& items_lev_ens : box_lev_ens) {
