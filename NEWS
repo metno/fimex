@@ -1,3 +1,5 @@
+  * 2026-05-18 fimex 2.4.3
+    * bugfix
   * 2026-05-18 fimex 2.4.2
     * do not strip filenames when creating grbfp
     * expand files (glob:..., list:...) in more places
