@@ -165,6 +165,8 @@ SET(libfimex_SOURCES
   FileUtils.cc
   ${INCF}/FileUtils.h
   ${INCF}/min_max.h
+  ProtobufUtils.cc
+  ${INCF}/ProtobufUtils.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h
   ${INCF}/XMLInput.h
