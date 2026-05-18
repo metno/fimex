@@ -39,6 +39,7 @@
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/MutexLock.h"
+#include "fimex/ProtobufUtils.h"
 #include "fimex/RecursiveSliceCopy.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/XMLUtils.h"
@@ -140,14 +141,7 @@ std::shared_ptr<GribCDMReader> GribCDMReader::fromGrbfp(const std::string& fileN
 #ifdef HAVE_PROTOBUF
     auto r = std::shared_ptr<GribCDMReader>(new GribCDMReader);
     readGribProtobufIndex(fileName, *r->cdm_, *r->p_->grib_indexed);
-
-    r->p_->root_path = removeFilename(fileName);
-    if (const auto doc = configXML.getXMLDoc()) {
-        XPathNodeSet nodes(doc, "/cdm_fimex_index_reader_config/root_path");
-        if (nodes.size() == 1) {
-            r->p_->root_path = XmlCharPtr(xmlNodeGetContent(nodes[0])).to_string();
-        }
-    }
+    r->p_->root_path = protobufIndexRootPath(fileName, configXML);
     return r;
 #else
     throw std::runtime_error("compiled without protobuf support");
