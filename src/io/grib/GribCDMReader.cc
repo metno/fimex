@@ -105,36 +105,50 @@ GribCDMReader::Impl::Impl()
 {
 }
 
-GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML,
-                             const std::vector<std::pair<std::string, std::string>>& members)
+GribCDMReader::GribCDMReader()
     : p_(new Impl())
 {
-    GribCDMIndexer grind(configXML, members, p_->ca);
-    grind.load(fileNames);
-    grind.build(cdm_, p_->grib_indexed);
 }
 
-GribCDMReader::GribCDMReader(const std::string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members)
-    : p_(new Impl())
+// static
+std::shared_ptr<GribCDMReader> GribCDMReader::fromGRIB(const std::vector<std::string>& fileNames, const XMLInput& configXML,
+                                                       const std::vector<std::pair<std::string, std::string>>& members)
 {
-    GribCDMIndexer grind(configXML, members, p_->ca);
-    grind.load(grbmlFileName);
-    grind.build(cdm_, p_->grib_indexed);
+    auto r = std::shared_ptr<GribCDMReader>(new GribCDMReader);
+    GribCDMIndexer grind(configXML, members, r->p_->ca);
+    grind.loadGRIB(fileNames);
+    grind.build(r->cdm_, r->p_->grib_indexed);
+    return r;
 }
 
-GribCDMReader::GribCDMReader(const std::string& fiinFileName, const XMLInput& configXML)
-    : p_(new Impl())
+// static
+std::shared_ptr<GribCDMReader> GribCDMReader::fromGrbml(const std::vector<std::string>& fileNames, const XMLInput& configXML,
+                                                        const std::vector<std::pair<std::string, std::string>>& members)
+{
+    auto r = std::shared_ptr<GribCDMReader>(new GribCDMReader);
+    GribCDMIndexer grind(configXML, members, r->p_->ca);
+    for (const auto& f : fileNames) {
+        grind.loadGrbml(f);
+    }
+    grind.build(r->cdm_, r->p_->grib_indexed);
+    return r;
+}
+
+// static
+std::shared_ptr<GribCDMReader> GribCDMReader::fromGrbfp(const std::string& fileName, const XMLInput& configXML)
 {
 #ifdef HAVE_PROTOBUF
-    readGribProtobufIndex(fiinFileName, *cdm_, *p_->grib_indexed);
+    auto r = std::shared_ptr<GribCDMReader>(new GribCDMReader);
+    readGribProtobufIndex(fileName, *r->cdm_, *r->p_->grib_indexed);
 
-    p_->root_path = removeFilename(fiinFileName);
+    r->p_->root_path = removeFilename(fileName);
     if (const auto doc = configXML.getXMLDoc()) {
         XPathNodeSet nodes(doc, "/cdm_fimex_index_reader_config/root_path");
         if (nodes.size() == 1) {
-            p_->root_path = XmlCharPtr(xmlNodeGetContent(nodes[0])).to_string();
+            r->p_->root_path = XmlCharPtr(xmlNodeGetContent(nodes[0])).to_string();
         }
     }
+    return r;
 #else
     throw std::runtime_error("compiled without protobuf support");
 #endif

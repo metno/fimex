@@ -47,15 +47,18 @@ namespace MetNoFimex {
 class GribCDMReader : public CDMReader
 {
 public:
-    GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members);
-    GribCDMReader(const std::string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members);
-    GribCDMReader(const std::string& fiinFileName, const XMLInput& configXML);
+    static std::shared_ptr<GribCDMReader> fromGRIB(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members);
+    static std::shared_ptr<GribCDMReader> fromGrbml(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string>>& members);
+    static std::shared_ptr<GribCDMReader> fromGrbfp(const std::string& fileName, const XMLInput& configXML);
+
     ~GribCDMReader();
 
     DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos) override;
     DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb) override;
 
 private:
+    GribCDMReader();
+
     struct Impl;
     std::unique_ptr<Impl> p_;
 };

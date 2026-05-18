@@ -77,8 +77,8 @@ public:
     GribCDMIndexer(const XMLInput& configXML, const std::vector<std::pair<std::string, std::regex>>& members, ChunkReaderFactory_p ca);
     ~GribCDMIndexer();
 
-    void load(const std::vector<std::string>& fileNames);
-    void load(const std::string& grbmlFileName);
+    void loadGRIB(const std::vector<std::string>& fileNames);
+    void loadGrbml(const std::string& grbmlFileName);
 
     void build(std::shared_ptr<CDM> cdm, std::shared_ptr<grib_indexed> gi);
 

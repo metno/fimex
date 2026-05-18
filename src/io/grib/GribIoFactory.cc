@@ -124,25 +124,21 @@ int GribIoFactory::matchFileTypeName(const std::string& type)
 CDMReader_p GribIoFactory::createReader(const std::string& fileTypeName, const std::string& fileName, const XMLInput& configXML,
                                         const std::vector<std::string>& args)
 {
-    if (fileTypeName == FILETYPE_GRBML || getExtension(fileName) == FILETYPE_GRBML) {
-        std::vector<std::pair<std::string, std::string>> members;
-        std::vector<std::string> files; // files not used for grbml
-        parseGribArgs(args, members, files);
-        if (configXML.isEmpty()) {
-            throw CDMException("config file required for grbml-files");
-        }
-        return std::make_shared<GribCDMReader>(fileName, configXML, members);
-    } else if (fileTypeName == FILETYPE_GRBFP || getExtension(fileName) == FILETYPE_GRBFP) {
-        return std::make_shared<GribCDMReader>(fileName, configXML);
+    if (fileTypeName == FILETYPE_GRBFP || getExtension(fileName) == FILETYPE_GRBFP) {
+        return GribCDMReader::fromGrbfp(fileName, configXML);
     } else {
+        std::vector<std::pair<std::string, std::string>> members;
         std::vector<std::string> files;
         expand_files(files, fileName);
-        std::vector<std::pair<std::string, std::string>> members;
         parseGribArgs(args, members, files);
         if (configXML.isEmpty()) {
-            throw CDMException("config file required for grib-files");
+            throw CDMException("config file required for GRIB/grbml-files");
         }
-        return std::make_shared<GribCDMReader>(files, configXML, members);
+        if (fileTypeName == FILETYPE_GRBML || getExtension(fileName) == FILETYPE_GRBML) {
+            return GribCDMReader::fromGrbml(files, configXML, members);
+        } else {
+            return GribCDMReader::fromGRIB(files, configXML, members);
+        }
     }
 }
 

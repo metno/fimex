@@ -186,7 +186,7 @@ GribCDMIndexer::Init::Init()
 {
 }
 
-void GribCDMIndexer::load(const std::vector<std::string>& fileNames)
+void GribCDMIndexer::loadGRIB(const std::vector<std::string>& fileNames)
 {
     std::map<std::string, std::string> options;
     if (!init_->config->replaceEarthString.empty()) {
@@ -202,7 +202,7 @@ void GribCDMIndexer::load(const std::vector<std::string>& fileNames)
     }
 }
 
-void GribCDMIndexer::load(const std::string& grbmlFileName)
+void GribCDMIndexer::loadGrbml(const std::string& grbmlFileName)
 {
     LOGTIMER_MSG("grbml");
     const auto messages = GribFileIndex(init_->ca, grbmlFileName).listMessages();

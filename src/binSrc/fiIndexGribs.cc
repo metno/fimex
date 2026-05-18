@@ -166,7 +166,7 @@ void createGribfpFromGrbml(ChunkReaderFactory_p ca, const std::vector<std::strin
     GribCDMIndexer grind(configXML, members, ca);
     for (const auto& grbml : inputs) {
       LOG4FIMEX(logger, Logger::DEBUG, "Reading grbml file '" << grbml << "' ...");
-      grind.load(grbml);
+      grind.loadGrbml(grbml);
     }
     auto cdm = std::make_shared<CDM>();
     auto grib_indexed = std::make_shared<GribCDMIndexer::grib_indexed>();
@@ -190,7 +190,7 @@ void createGrbfpFromGRIB(ChunkReaderFactory_p ca, const std::vector<std::string>
     XMLInputDoc configXML = createXMLInput(config);
 
     GribCDMIndexer grind(configXML, members, ca);
-    grind.load(inputs);
+    grind.loadGRIB(inputs);
     auto cdm = std::make_shared<CDM>();
     auto grib_indexed = std::make_shared<GribCDMIndexer::grib_indexed>();
     grind.build(cdm, grib_indexed);
