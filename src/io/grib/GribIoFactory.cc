@@ -55,10 +55,15 @@ bool isGrib2Type(const std::string& type)
     return (type == "grb2" || type == "grib2");
 }
 
+/// GRIB messages start with "GRIB", see WMO specification
+const char GRIB_MAGIC[] = "GRIB";
+const size_t GRIB_MAGIC_SIZE = sizeof(GRIB_MAGIC);
+
 } // namespace
 
 const char FILETYPE_GRBML[] = "grbml";
 const char FILETYPE_GRBFP[] = "grbfp";
+
 
 bool isGribType(const std::string& type)
 {
@@ -92,15 +97,15 @@ void parseGribArgs(const std::vector<std::string>& args, std::vector<std::pair<s
 size_t GribIoFactory::matchMagicSize()
 {
 #ifdef HAVE_PROTOBUF
-    return std::max(size_t(4), getGribProtobufIndexMagicSize());
+    return std::max(GRIB_MAGIC_SIZE, getGribProtobufIndexMagicSize());
 #else
-    return 4;
+    return GRIB_MAGIC_SIZE;
 #endif
 }
 
 int GribIoFactory::matchMagic(const char* magic, size_t count)
 {
-    if (count >= 4 && strncmp(magic, "GRIB", 4) == 0) {
+    if (count >= GRIB_MAGIC_SIZE && strncmp(magic, GRIB_MAGIC, GRIB_MAGIC_SIZE) == 0) {
         return 1;
     }
 #ifdef HAVE_PROTOBUF
