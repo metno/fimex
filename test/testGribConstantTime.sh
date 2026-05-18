@@ -21,4 +21,4 @@ else
     E=1
 fi
 rm -vf "$TEST_GCT/output.nc"
-return $E
+exit $E
