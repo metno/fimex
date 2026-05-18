@@ -68,6 +68,25 @@ std::string removeFilename(const std::string& path);
 std::string replaceFilename(const std::string& path, const std::string& filename);
 std::string joinFilename(const std::string& path, const std::string& filename);
 
+/**
+ * Replace the file extension in @p path with @p newExtension.
+ * The extension is the suffix after the last '.' in the filename part of the
+ * path (i.e. dots in directory components are ignored).  If the filename has
+ * no extension the new extension is appended.
+ *
+ * @param path         File path (may include directory components).
+ * @param newExtension New extension without leading dot (e.g. "ncfp").
+ * @return             Path with the extension replaced.
+ *
+ * Examples:
+ *   replaceExtension("data.nc",         "ncfp") == "data.ncfp"
+ *   replaceExtension("/path/data.nc",   "ncfp") == "/path/data.ncfp"
+ *   replaceExtension("data.tar.gz",     "ncfp") == "data.tar.ncfp"
+ *   replaceExtension("/p.q/data",       "ncfp") == "/p.q/data.ncfp"
+ *   replaceExtension("data",            "ncfp") == "data.ncfp"
+ */
+std::string replaceExtension(const std::string& path, const std::string& newExtension);
+
 } // namespace MetNoFimex
 
 #endif /*FIMEX_FILEUTILS_H_*/

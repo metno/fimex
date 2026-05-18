@@ -592,3 +592,20 @@ TEST4FIMEX_TEST_CASE(test_expand_files)
         TEST4FIMEX_CHECK_EQ(0u, result.size());
     }
 }
+
+TEST4FIMEX_TEST_CASE(test_replace_extension)
+{
+    // Basic replacement
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data.nc",           "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path/to/data.ncfp",     replaceExtension("/path/to/data.nc",  "ncfp"));
+    // Only the last extension is replaced
+    TEST4FIMEX_CHECK_EQ("data.tar.ncfp",          replaceExtension("data.tar.gz",       "ncfp"));
+    // No extension: new extension is appended
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data",              "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path/to/data.ncfp",     replaceExtension("/path/to/data",     "ncfp"));
+    // Dots in directory components must not be mistaken for file extensions
+    TEST4FIMEX_CHECK_EQ("/path.d/data.ncfp",      replaceExtension("/path.d/data.nc",   "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path.d/data.ncfp",      replaceExtension("/path.d/data",      "ncfp"));
+    // Empty extension (trailing dot) is replaced
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data.",             "ncfp"));
+}

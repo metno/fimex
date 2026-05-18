@@ -293,6 +293,19 @@ std::string replaceFilename(const std::string& path, const std::string& filename
     return removeFilename(path) + filename;
 }
 
+std::string replaceExtension(const std::string& path, const std::string& newExtension)
+{
+    // Ignore dots in directory components: only search in the filename part.
+    const auto slash = path.find_last_of('/');
+    const auto fname_start = (slash != std::string::npos) ? slash + 1 : 0;
+    const auto dot = path.find_last_of('.');
+    if (dot != std::string::npos && dot >= fname_start) {
+        return path.substr(0, dot) + "." + newExtension;
+    } else {
+        return path + "." + newExtension;
+    }
+}
+
 std::string joinFilename(const std::string& path, const std::string& filename)
 {
     auto joined = path;
