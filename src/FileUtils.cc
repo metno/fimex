@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 
@@ -224,6 +225,35 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
     }
     std::regex globReg(output.str());
     scanFiles(files, dir, depth, globReg, false);
+}
+
+void  expand_files(std::vector<std::string>& files, const std::string& fileName)
+{
+    static const std::string prefix_glob("glob:");
+    static const std::string prefix_many("many:");
+    static const std::string prefix_list("list:");
+    if (starts_with(fileName, prefix_glob)) {
+        // scanfiles by a glob
+        const auto glob = fileName.substr(prefix_glob.size());
+        globFiles(files, glob);
+    } else if (starts_with(fileName, prefix_many)){
+        if (fileName.size() > prefix_many.size() + 1) {
+            // many files with a separator, first char after many:
+            const auto separator = fileName.substr(prefix_many.size(), 1);
+            const auto tail = fileName.substr(prefix_many.size() + 1);
+            files = tokenize(tail, separator);
+        }
+    } else if (starts_with(fileName, prefix_list)) {
+        // filename of a text file with one file per line
+        const auto listFile = fileName.substr(prefix_list.size());
+        std::ifstream listS(listFile);
+        for (std::string line; std::getline(listS, line);) {
+            files.push_back(line);
+        }
+    } else {
+        // no expansion
+        files.push_back(fileName);
+    }
 }
 
 std::string getExtension(const std::string& fileName)

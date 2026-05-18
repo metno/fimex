@@ -36,6 +36,7 @@
 #include "leap_iterator.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <cctype>
 #include <numeric>
@@ -493,4 +494,101 @@ TEST4FIMEX_TEST_CASE(test_join_filename)
     TEST4FIMEX_CHECK_EQ("fimex", joinFilename("", "fimex"));
     TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset", "file1"));
     TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset/", "file1"));
+}
+
+TEST4FIMEX_TEST_CASE(test_expand_files)
+{
+    // ---- plain filename: no expansion, pushed as-is -----------------------
+    {
+        vector<string> result;
+        expand_files(result, "/some/path/data.nc");
+        TEST4FIMEX_CHECK_EQ(1u, result.size());
+        TEST4FIMEX_CHECK_EQ("/some/path/data.nc", result.at(0));
+    }
+
+    // ---- plain filename: appended to existing content ---------------------
+    {
+        vector<string> result = {"pre-existing"};
+        expand_files(result, "extra.nc");
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ("extra.nc", result.at(1));
+    }
+
+    // ---- many: separator is the first char after "many:" ------------------
+    {
+        vector<string> result;
+        expand_files(result, "many:|a.grb|b.grb|c.grb");
+        TEST4FIMEX_CHECK_EQ(3u, result.size());
+        TEST4FIMEX_CHECK_EQ("a.grb", result.at(0));
+        TEST4FIMEX_CHECK_EQ("b.grb", result.at(1));
+        TEST4FIMEX_CHECK_EQ("c.grb", result.at(2));
+    }
+
+    // ---- many: different separator ----------------------------------------
+    {
+        vector<string> result;
+        expand_files(result, "many:,x.nc,y.nc");
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ("x.nc", result.at(0));
+        TEST4FIMEX_CHECK_EQ("y.nc", result.at(1));
+    }
+
+    // ---- many: too short (no char after "many:") → ignore -
+    {
+        vector<string> result;
+        expand_files(result, "many:");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
+
+    // ---- list: one filename per line from a text file ---------------------
+    {
+        // Write a temporary list file
+        const string listPath = "fimex_testUtils_expand_files.txt";
+        {
+            std::ofstream f(listPath);
+            f << "line1.nc\n";
+            f << "line2.nc\n";
+            f << "line3.nc\n";
+        }
+        vector<string> result;
+        expand_files(result, "list:" + listPath);
+        remove(listPath.c_str());
+
+        TEST4FIMEX_CHECK_EQ(3u, result.size());
+        TEST4FIMEX_CHECK_EQ("line1.nc", result.at(0));
+        TEST4FIMEX_CHECK_EQ("line2.nc", result.at(1));
+        TEST4FIMEX_CHECK_EQ("line3.nc", result.at(2));
+    }
+
+    // ---- list: non-existent file → produces zero entries (ifstream fails) -
+    {
+        vector<string> result;
+        expand_files(result, "list:fimex_no_such_file.txt");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
+
+    // ---- glob: match files that actually exist on disk --------------------
+    {
+        // Create a couple of temp files to glob for
+        const string a = "./fimex_testUtils_glob_a.nc";
+        const string b = "./fimex_testUtils_glob_b.nc";
+        { std::ofstream touch_a(a); std::ofstream touch_b(b); }
+
+        vector<string> result;
+        expand_files(result, "glob:fimex_testUtils_glob_*.nc");
+        remove(a.c_str());
+        remove(b.c_str());
+
+        // globFiles sorts alphabetically
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ(a, result.at(0));
+        TEST4FIMEX_CHECK_EQ(b, result.at(1));
+    }
+
+    // ---- glob: no matches → produces zero entries -------------------------
+    {
+        vector<string> result;
+        expand_files(result, "glob:fimex_testUtils_no_such_*.nc");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
 }

@@ -29,6 +29,7 @@
 #include "fimex/CDMconstants.h"
 
 #include "fimex/Data.h"
+#include "fimex/FileUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
@@ -250,10 +251,16 @@ int main(int argc, char* args[])
         return 0;
     }
 
-    std::vector<std::string> inputs;
+    // first collect input files from all arguments
+    std::vector<std::string> inputs_args;
     if (vm.is_set(op_input_file))
-        inputs = vm.values(op_input_file);
-    inputs.insert(inputs.end(), positional.begin(), positional.end());
+        inputs_args = vm.values(op_input_file);
+    inputs_args.insert(inputs_args.end(), positional.begin(), positional.end());
+
+    // then expand glob:, many:, list:, ...
+    std::vector<std::string> inputs;
+    for (const auto& i : inputs_args)
+        expand_files(inputs, i);
 
     std::vector<std::string> extraKeys;
     if (vm.is_set(op_extraKey)) {

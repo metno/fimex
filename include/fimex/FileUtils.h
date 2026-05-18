@@ -52,6 +52,15 @@ void scanFiles(std::vector<std::string>& files, const std::string& dir, int dept
  */
 void globFiles(std::vector<std::string>& files, const std::string& glob);
 
+/// Expand a @p fileName, adding to @p files:
+/// - if it starts with 'glob:', use the remainder as glob pattern
+/// - if it starts with 'many:', use the first char after as separator and split
+///   the remainder on this separator (e.g. main:|a.grb|b.grb|c.grb)
+/// - if it starts with 'list:', use the remainder as path to a list of files,
+///   one per line
+/// - otherweise just use fileName as is
+void  expand_files(std::vector<std::string>& files, const std::string& fileName);
+
 std::string getExtension(const std::string& fileName);
 
 std::string extractFilename(const std::string& path);
