@@ -151,10 +151,9 @@ void appendToGrbml(ChunkReaderFactory_p ca, const std::string& input, const std:
 }
 
 #ifdef HAVE_PROTOBUF
-void createGribfpFromGrbml(ChunkReaderFactory_p ca, const std::string& grbml, const std::string& output, std::vector<std::string> extraKeys,
+void createGribfpFromGrbml(ChunkReaderFactory_p ca, const std::vector<std::string>& inputs, const std::string& output, std::vector<std::string> extraKeys,
                            const std::string& config, const std::vector<std::string>& memberOptions)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "Reading grbml file '" << grbml << "' ...");
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
     initOptions(options, members, extraKeys, config, memberOptions);
@@ -165,7 +164,10 @@ void createGribfpFromGrbml(ChunkReaderFactory_p ca, const std::string& grbml, co
     XMLInputDoc configXML = createXMLInput(config);
 
     GribCDMIndexer grind(configXML, members, ca);
-    grind.load(grbml);
+    for (const auto& grbml : inputs) {
+      LOG4FIMEX(logger, Logger::DEBUG, "Reading grbml file '" << grbml << "' ...");
+      grind.load(grbml);
+    }
     auto cdm = std::make_shared<CDM>();
     auto grib_indexed = std::make_shared<GribCDMIndexer::grib_indexed>();
     grind.build(cdm, grib_indexed);
@@ -332,9 +334,9 @@ int main(int argc, char* args[])
             createGrbmlFromGRIB(ca, inputs, output_file, extraKeys, readerConfig, members);
 #ifdef HAVE_PROTOBUF
         } else if (output_type == FILETYPE_GRBFP) {
-            if (inputs.size() == 1 && ((vm.is_set(op_input_type) && vm.value(op_input_type) == FILETYPE_GRBML) || ends_with(inputs.front(), FILETYPE_GRBML))) {
-                // create protobuf index from a grbml index
-                createGribfpFromGrbml(ca, inputs.front(), output_file, extraKeys, readerConfig, members);
+            if ((vm.is_set(op_input_type) && vm.value(op_input_type) == FILETYPE_GRBML) || ends_with(inputs.front(), FILETYPE_GRBML)) {
+                // create protobuf index from a grbml indices
+                createGribfpFromGrbml(ca, inputs, output_file, extraKeys, readerConfig, members);
             } else if (!vm.is_set(op_input_type) || isGribType(vm.value(op_input_type))) {
                 // create protobuf index from a set of GRIB messages
                 createGrbfpFromGRIB(ca, inputs, output_file, extraKeys, readerConfig, members);

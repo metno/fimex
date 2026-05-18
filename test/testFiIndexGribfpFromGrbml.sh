@@ -7,7 +7,8 @@ TOP_SRCDIR="${TEST_SRCDIR}/.."
 TOOLS="`dirname $0`/../run"
 TOOLS="`realpath $TOOLS`"
 
-FILE_GRBML=gefs_gribfx_0p5_20240717.grbml
+FILE_GRBML_C=gefs_gribfx_0p5_20240717_c.grbml
+FILE_GRBML_P=gefs_gribfx_0p5_20240717_p.grbml
 FILE_GRBFP=gefs_gribfx_0p5_20240717.grbfp
 
 GRIB_ROOT_PATH="$TEST_EXTRADATA_DIR/grib/gefs/gefs_0p5_20240717_00"
@@ -20,14 +21,19 @@ if test ! -r "$GRBML_CONFIG"; then
 fi
 
 ./fiIndexGribs.sh \
-    -o "$FILE_GRBML" \
+    -o "$FILE_GRBML_C" \
     -c "$GRBML_CONFIG" \
-    "$GRIB_ROOT_PATH/"*
+    "$GRIB_ROOT_PATH"/gefs_gec*
+
+./fiIndexGribs.sh \
+    -o "$FILE_GRBML_P" \
+    -c "$GRBML_CONFIG" \
+    "$GRIB_ROOT_PATH"/gefs_gep*
 
 ./fiIndexGribs.sh \
     -c "$GRBML_CONFIG" \
     --output.file "$FILE_GRBFP" \
-    --input.file "$FILE_GRBML"
+    --input.file "$FILE_GRBML_C" "$FILE_GRBML_P"
 
 EXP_NC="$TEST_EXTRADATA_DIR/grib/gefs/gefs_0p5_20240717_00.nc"
 if ./cdmcmp -c1 "$CONFIG_GRBFP" "$FILE_GRBFP" "$EXP_NC" ; then
