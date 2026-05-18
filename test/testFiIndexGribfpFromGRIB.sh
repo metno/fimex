@@ -11,7 +11,7 @@ FILE_GRBML=gefs_gribfx_0p5_20240717.grbml
 FILE_GRBFP=gefs_gribfx_0p5_20240717.grbfp
 
 GRIB_ROOT_PATH="$TEST_EXTRADATA_DIR/grib/gefs/gefs_0p5_20240717_00"
-CONFIG_GRBFP="<?xml version=\"1.0\" encoding=\"UTF-8\"?><cdm_fimex_index_reader_config><root_path>$GRIB_ROOT_PATH</root_path></cdm_fimex_index_reader_config>"
+CONFIG_GRBFP="<?xml version=\"1.0\" encoding=\"UTF-8\"?><cdm_fimex_index_reader_config><root_path></root_path></cdm_fimex_index_reader_config>"
 
 GRBML_CONFIG="$TEST_EXTRADATA_DIR/grib/gefs/cdmGribReaderConfigGEFS.xml"
 if test ! -r "$GRBML_CONFIG"; then

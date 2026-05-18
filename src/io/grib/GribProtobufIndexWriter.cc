@@ -22,7 +22,6 @@
 #include "GribProtobufIndexWriter.h"
 
 #include "fimex/Data.h"
-#include "fimex/FileUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/ProtobufCDM.h"
 
@@ -62,7 +61,7 @@ void GribProtobufIndexWriter::write(const MetNoFimex::CDM& cdm, const GribCDMInd
 void GribProtobufIndexWriter::writeGribIndex(fimex_index::GribIndex* fgrib_index, const GribCDMIndexer::grib_indexed& grib_indexed)
 {
     for (const auto& gs : grib_indexed.grib_files) {
-        fgrib_index->add_files(extractFilename(gs));
+        fgrib_index->add_files(gs);
     }
 
     for (const auto& gvv : grib_indexed.grib_vars) {
