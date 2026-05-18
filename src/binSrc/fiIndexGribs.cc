@@ -336,7 +336,7 @@ int main(int argc, char* args[])
         }
 
         if (output_type == FILETYPE_GRBML) {
-            if (vm.is_set(op_input_type) && isGribType(vm.value(op_input_type))) {
+            if (vm.is_set(op_input_type) && !isGribType(vm.value(op_input_type))) {
                 std::cerr << "Only GRIB message input is supported for writing " << FILETYPE_GRBML << " index." << std::endl;
                 return 1;
             }
