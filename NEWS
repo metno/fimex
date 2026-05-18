@@ -1,3 +1,7 @@
+  * 2026-05-18 fimex 2.4.2
+    * do not strip filenames when creating grbfp
+    * expand files (glob:..., list:...) in more places
+    * bugfixes
   * 2026-04-28 fimex 2.4.1
     * build with C++20
   * 2026-04-28 fimex 2.4.0
