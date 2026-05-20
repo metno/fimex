@@ -1,3 +1,11 @@
+  * 2026-05-20 fimex 2.5.0
+    * add NetCDF protobuf index and fiIndexNc, input type and extension ncfp;
+      this does not use libnetcdf/libhdf5 for reading and supports reading
+      in multiple threads; can be read from http(s) / object store
+    * netcdf io no longer assumes that http(s) is OPeNDAP, instead it probes;
+      use the new input type "ncdap" to avoid probing
+    * example python script to manipulate protobuf index files
+      (use at your own risk)
   * 2026-05-18 fimex 2.4.3
     * bugfix
   * 2026-05-18 fimex 2.4.2
