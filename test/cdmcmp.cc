@@ -163,7 +163,7 @@ bool compareData(bool silent, DataPtr d1, DataPtr d2, float tol)
     return false;
 }
 
-bool compareReaders(bool ignore_nat, bool silent, CDMReader_p r1, CDMReader_p r2, float tol)
+bool compareReaders(bool ignore_nat, bool ignore_unlimited, bool silent, CDMReader_p r1, CDMReader_p r2, float tol)
 {
     const auto& cdm1 = r1->getCDM();
     const auto& cdm2 = r2->getCDM();
@@ -192,10 +192,15 @@ bool compareReaders(bool ignore_nat, bool silent, CDMReader_p r1, CDMReader_p r2
         }
 
         if (dim1.isUnlimited() != dim2.isUnlimited()) {
-            if (!silent) {
-                std::cerr << "unlimited-ness difference for dim '" << dimname << "'" << std::endl;
+            if (ignore_unlimited) {
+                // OPeNDAP and similar protocols have no unlimited dimension concept;
+                // ignore mismatches when comparing against such sources.
+            } else {
+                if (!silent) {
+                    std::cerr << "unlimited-ness difference for dim '" << dimname << "'" << std::endl;
+                }
+                equal = false;
             }
-            equal = false;
         }
     }
 
@@ -286,6 +291,7 @@ int main(int argc, char* args[])
     const po::option op_help = po::option("help", "help message").set_shortkey("h").set_narg(0);
     const po::option op_silent = po::option("silent", "do not write messages").set_narg(0);
     const po::option op_refuse_nat = po::option("no-ignore-nat", "refuse different datatypes even if one of them is NAT").set_narg(0);
+    const po::option op_ignore_unlimited = po::option("ignore-unlimited", "ignore differences in unlimited-ness of dimensions (e.g. when comparing against OPeNDAP sources)").set_narg(0);
     const po::option op_tol = po::option("tolerance", "tolerance for float/double equality").set_shortkey("tol").set_default_value("0.001");
     const po::option op_t1 = po::option("type-1", "filetype for first dataset").set_shortkey("t1").set_default_value("");
     const po::option op_c1 = po::option("config-1", "config for first dataset").set_shortkey("c1").set_default_value("");
@@ -298,6 +304,7 @@ int main(int argc, char* args[])
         << op_help
         << op_silent
         << op_refuse_nat
+        << op_ignore_unlimited
         << op_tol
         << op_t1
         << op_c1
@@ -324,6 +331,7 @@ int main(int argc, char* args[])
     }
 
     const bool ignore_nat = !vm.is_set(op_refuse_nat);
+    const bool ignore_unlimited = vm.is_set(op_ignore_unlimited);
     const float tol = string2type<float>(vm.value(op_tol));
 
     const std::string& t1 = vm.value(op_t1);
@@ -355,7 +363,7 @@ int main(int argc, char* args[])
         const auto r1 = CDMFileReaderFactory::create(t1, f1, c1);
         const auto r2 = CDMFileReaderFactory::create(t2, f2, c2);
 
-        if (!compareReaders(ignore_nat, silent, r1, r2, tol)) {
+        if (!compareReaders(ignore_nat, ignore_unlimited, silent, r1, r2, tol)) {
             return 1;
         }
     } catch (std::runtime_error& ex) {
