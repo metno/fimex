@@ -92,6 +92,11 @@ string pathTest(const std::string& filename)
     return require(src_test + filename);
 }
 
+const std::string& dirTestExtra()
+{
+    return extra_data_dir;
+}
+
 string pathTestExtra(const std::string& filename)
 {
     return require(extra_data_dir + filename);

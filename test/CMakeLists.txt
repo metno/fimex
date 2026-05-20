@@ -115,6 +115,10 @@ IF(ENABLE_PROTOBUF)
   LIST(APPEND CC_TESTS testProtobufCdmIo)
 ENDIF()
 
+IF(ENABLE_NETCDF AND ENABLE_PROTOBUF AND HAVE_NETCDF_HDF5_LIB)
+  LIST(APPEND CC_TESTS testNetCDFProtobufIndex)
+ENDIF()
+
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   LIST(APPEND CC_TESTS 
     ${GRIBAPI_MI_TESTS}
@@ -164,12 +168,16 @@ IF (ENABLE_NETCDF)
     MESSAGE (STATUS "Found no ncdump, trying without absolute path")
     SET(NCDUMP_PROGRAM "ncdump")
   ENDIF()
+  LIST(APPEND SH_TESTS
+    testFiIndexNetCDF.sh
+  )
 ENDIF()
 
 CONFIGURE_FILE(fimex_test_config.h.in fimex_test_config.h)
 
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 
+CONFIGURE_FILE(fiIndexNc.sh.in fiIndexNc.sh @ONLY)
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
@@ -290,6 +298,18 @@ ENDIF()
 
 IF(ENABLE_NETCDF)
   TARGET_LINK_LIBRARIES(testNcmlAggregationReader libfimex-io-netcdf)
+ENDIF()
+
+IF(ENABLE_NETCDF AND ENABLE_PROTOBUF AND HAVE_NETCDF_HDF5_LIB)
+  TARGET_LINK_LIBRARIES(testNetCDFProtobufIndex
+    libfimex-io-netcdf
+    ${PROTOBUF_LIBRARIES}
+  )
+  TARGET_INCLUDE_DIRECTORIES(testNetCDFProtobufIndex
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/src/io/netcdf"
+      "${CMAKE_BINARY_DIR}/src/io/netcdf"  # for fimex_netcdf_config.h, netcdf_index.pb.h
+  )
 ENDIF()
 
 IF(ENABLE_FELT)

@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package fimex_index;
+
+import "cdm.proto";
+
+// Byte order of the raw element data stored in each chunk.
+enum ByteOrder {
+  BYTE_ORDER_LE = 0; // little-endian (default / most common)
+  BYTE_ORDER_BE = 1; // big-endian
+}
+
+// One HDF5 chunk of a variable.  All coordinates and sizes are in CDM dimension
+// order (dimension 0 is the fastest-varying / innermost axis, which is the
+// reverse of the HDF5/C-row-major convention used inside the file).
+message NetCDFChunk {
+  uint64 addr            = 1; // byte offset of the chunk in the source file
+  uint64 size            = 2; // storage size in bytes (may be compressed)
+  repeated uint64 offset = 3; // dataspace origin of the chunk in CDM dim order
+  // Index into NetCDFIndex.files.  0 is always invalid (reserved sentinel, as
+  // in GribIndex); a chunk with file_index == 0 is treated as missing data and
+  // the fill value is returned.  Valid source files start at index 1.
+  uint32 file_index      = 4;
+}
+
+// HDF5 shuffle filter (H5Z_FILTER_SHUFFLE = 2).  No parameters needed for
+// decompression; presence in the filters list means shuffle was applied.
+message FilterShuffle {}
+
+// HDF5 deflate/gzip filter (H5Z_FILTER_DEFLATE = 1).  The compression level
+// is a write-time parameter only and is not needed for decompression, so it
+// is not stored.
+message FilterDeflate {}
+
+// HDF5 SZIP filter (H5Z_FILTER_SZIP = 4).  All four libaec parameters are
+// required to reconstruct the aec_stream at decompression time.
+message FilterSzip {
+  bool   nn_coding           = 1; // cd_values[0] & H5_SZIP_NN_OPTION_MASK (0x20)
+  uint32 pixels_per_block    = 2; // cd_values[1]: libaec block_size
+  uint32 bits_per_pixel      = 3; // cd_values[2]: bits per data element
+  uint32 pixels_per_scanline = 4; // cd_values[3]: rsi = pixels_per_scanline / pixels_per_block
+}
+
+// Catch-all for HDF5 plugin or unknown filters.  Stores the raw filter id and
+// cd_values so the index remains forward-compatible: new filter support can be
+// added to the reader without regenerating existing index files.
+message FilterGeneric {
+  uint32          filter_id = 1; // raw H5Z_filter_t value
+  repeated uint32 cd_values = 2; // raw cd_values array from H5Pget_filter2
+}
+
+// One entry in a variable's filter pipeline.  Filters are stored in HDF5
+// application order (i.e. the order they were applied during compression);
+// decompression must apply them in reverse order.
+message Filter {
+  oneof kind {
+    FilterShuffle  shuffle  = 1;
+    FilterDeflate  deflate  = 2;
+    FilterSzip     szip     = 3;
+    FilterGeneric  generic  = 4;
+  }
+}
+
+// Chunk-layout metadata for one NetCDF variable.  The CDM metadata (type,
+// shape, attributes) lives in the enclosing NetCDFIndex.cdm field.
+message NetCDFVariable {
+  string              name        = 1;
+  repeated uint64     chunk_shape = 2; // tile shape in CDM dim order
+  ByteOrder           byte_order  = 3; // byte order of raw element data
+  repeated NetCDFChunk chunks     = 4;
+  // HDF5 filter pipeline in application (compression) order.
+  // Decompression applies filters in reverse.
+  repeated Filter     filters     = 5;
+}
+
+// Top-level index for one or more NetCDF files.
+message NetCDFIndex {
+  // Full CDM model: dimensions, variables (with attributes and any embedded
+  // coordinate-variable data), and global attributes.
+  CDM    cdm         = 1;
+
+  // List of source filenames (basenames, resolved relative to the index file).
+  // Entry 0 must always be an empty string — it is the sentinel for "no file /
+  // invalid chunk" (matching the GribIndex convention).  Real source files
+  // start at index 1.
+  repeated string files = 2;
+
+  // Per-variable chunk layout.  Only variables whose data is not already
+  // embedded in cdm are listed here.
+  repeated NetCDFVariable variables = 3;
+}

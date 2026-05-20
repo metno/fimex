@@ -32,6 +32,8 @@
 
 #include "fimex/Logger.h"
 
+#include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -67,6 +69,34 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, WriteBuffer* wb)
     return count;
 }
 
+/// Collects selected response headers from a HEAD request.
+struct HeadInfo
+{
+    bool accepts_ranges = false; ///< true iff "Accept-Ranges: bytes" was seen
+};
+
+/// curl HEADERFUNCTION callback — called once per header line (including CRLF).
+size_t HeaderCallback(char* buffer, size_t size, size_t nitems, HeadInfo* info)
+{
+    const size_t total = size * nitems;
+    // Build a lower-case copy so we can do case-insensitive matching (HTTP
+    // header field names are case-insensitive per RFC 7230 §3.2).
+    std::string line(buffer, total);
+    std::transform(line.begin(), line.end(), line.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    // Strip trailing CRLF / LF.
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+        line.pop_back();
+
+    // "accept-ranges: bytes"  →  server supports byte-range requests.
+    // "accept-ranges: none"   →  server explicitly declares no range support.
+    // Absent header           →  treat as no-range (conservative default).
+    if (line.rfind("accept-ranges:", 0) == 0) {
+        info->accepts_ranges = (line.find("bytes") != std::string::npos);
+        LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "curl Accept-Ranges: " << (info->accepts_ranges ? "bytes" : "none/absent"));
+    }
+    return total;
+}
+
 } // namespace
 
 namespace MetNoFimex {
@@ -75,10 +105,17 @@ HttpChunkReader::HttpChunkReader(const std::string& url)
     : url_(url)
     , curl_(curl_open())
     , size_(0)
+    , accepts_ranges_(false)
 {
+    HeadInfo head;
     curl_easy_setopt(curl_.get(), CURLOPT_NOBODY, 1L);
+    curl_easy_setopt(curl_.get(), CURLOPT_HEADERFUNCTION, HeaderCallback);
+    curl_easy_setopt(curl_.get(), CURLOPT_HEADERDATA, &head);
     CURLcode res = curl_easy_perform(curl_.get());
+    // Tear down HEAD-specific options before any subsequent GET requests.
     curl_easy_setopt(curl_.get(), CURLOPT_NOBODY, 0L);
+    curl_easy_setopt(curl_.get(), CURLOPT_HEADERFUNCTION, nullptr);
+    curl_easy_setopt(curl_.get(), CURLOPT_HEADERDATA, nullptr);
     if (res == CURLE_OK) {
         curl_off_t cl;
         res = curl_easy_getinfo(curl_.get(), CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
@@ -92,6 +129,8 @@ HttpChunkReader::HttpChunkReader(const std::string& url)
         msg << "curl HEAD / Content-Length error";
         throw std::runtime_error(msg.str());
     }
+    accepts_ranges_ = head.accepts_ranges;
+    LOG4FIMEX(logger, Logger::DEBUG, "curl '" << url_ << "' accepts_ranges=" << accepts_ranges_);
 }
 
 std::shared_ptr<CURL> HttpChunkReader::curl_open() const
@@ -115,11 +154,26 @@ void HttpChunkReader::read(size_t off, size_t count, unsigned char* buffer)
         msg << "reading past end";
         throw std::runtime_error(msg.str());
     }
+    if (!accepts_ranges_ && off != 0) {
+        std::ostringstream msg;
+        msg << "server does not support HTTP range requests; cannot read at offset " << off << " from '" << url_ << "'";
+        throw std::runtime_error(msg.str());
+    }
 
-    char range[64];
-    snprintf(range, sizeof(range), "%ld-%ld", off, off + count - 1);
-    LOG4FIMEX(logger, Logger::DEBUG, "curl range='" << range << "'");
-    curl_easy_setopt(curl_.get(), CURLOPT_RANGE, range);
+    if (off == 0 && count == size_) {
+        // Full-file read — no Range header needed (works even without range support).
+        curl_easy_setopt(curl_.get(), CURLOPT_RANGE, nullptr);
+    } else if (accepts_ranges_) {
+        char range[64];
+        snprintf(range, sizeof(range), "%ld-%ld", off, off + count - 1);
+        LOG4FIMEX(logger, Logger::DEBUG, "curl range='" << range << "'");
+        curl_easy_setopt(curl_.get(), CURLOPT_RANGE, range);
+    } else {
+        // server does not accept range requests, so we cannot fulfil the read request
+        std::ostringstream msg;
+        msg << "HTTPChunkReader: refusing range request for '" << url_ << "' as the server does not announce support for that";
+        throw std::runtime_error(msg.str());
+    }
 
     WriteBuffer wb{buffer, 0, count};
     curl_easy_setopt(curl_.get(), CURLOPT_WRITEFUNCTION, WriteCallback);

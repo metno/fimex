@@ -53,11 +53,16 @@ public:
 private:
     std::shared_ptr<CURL> curl_open() const;
 
+    /// Returns true when the server advertised Accept-Ranges: bytes.
+    /// read() will throw for non-zero offsets when this is false.
+    bool acceptsRanges() const { return accepts_ranges_; }
+
 private:
     std::mutex mutex_;
     std::string url_;
     std::shared_ptr<CURL> curl_;
     size_t size_;
+    bool accepts_ranges_;
 };
 
 typedef std::shared_ptr<HttpChunkReader> HttpChunkReader_p;
