@@ -40,6 +40,7 @@
 #include "fimex/min_max.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -64,14 +65,19 @@ static bool haveScannedForIoPlugins = false;
 
 std::vector<std::string> getIoPluginsDirs()
 {
-    const char* iopp = iopp = getenv("FIMEX_IO_PLUGINS_PATH");
+    const char* iopp = getenv("FIMEX_IO_PLUGINS_PATH");
     if (!iopp) {
-        // conda fills the placeholder with 0 bytes after the installation prefix,
-        // and these 0 bytes must not end up in the path
         iopp = FIMEX_IO_PLUGINS_PATH;
     }
-    // construct std::string from "iopp" which is a "const char*"
-    return tokenize(iopp, ":");
+    // Use std::strlen() on the pointer variable (not the literal) so the
+    // compiler cannot constant-fold it to the full placeholder length.
+    // Without this, GCC/Clang may bake the compile-time literal length into
+    // the std::string constructor, causing std::filesystem::path to see the
+    // zero-fill bytes that conda writes after the real prefix into the
+    // binary (after compilation) such that a compile-time string length is
+    // no longer correct when running the binary.
+    const std::string path(iopp, std::strlen(iopp));
+    return tokenize(path, ":");
 }
 
 // static
