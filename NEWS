@@ -1,3 +1,5 @@
+  * 2026-05-27 fimex 2.5.1
+    * try to fix FIMEX_IO_PLUGINS_PATH for conda
   * 2026-05-20 fimex 2.5.0
     * add NetCDF protobuf index and fiIndexNc, input type and extension ncfp;
       this does not use libnetcdf/libhdf5 for reading and supports reading
