@@ -101,8 +101,49 @@ size_t HeaderCallback(char* buffer, size_t size, size_t nitems, HeadInfo* info)
 
 namespace MetNoFimex {
 
-HttpChunkReader::HttpChunkReader(const std::string& url)
-    : url_(url)
+// --- HttpServerShare --------------------------------------------------------
+
+namespace {
+
+void share_lock_cb(CURL*, curl_lock_data data, curl_lock_access, void* userptr)
+{
+    auto* s = static_cast<HttpServerShare*>(userptr);
+    if (data == CURL_LOCK_DATA_SSL_SESSION)
+        s->ssl_mutex.lock();
+    else if (data == CURL_LOCK_DATA_DNS)
+        s->dns_mutex.lock();
+}
+
+void share_unlock_cb(CURL*, curl_lock_data data, void* userptr)
+{
+    auto* s = static_cast<HttpServerShare*>(userptr);
+    if (data == CURL_LOCK_DATA_SSL_SESSION)
+        s->ssl_mutex.unlock();
+    else if (data == CURL_LOCK_DATA_DNS)
+        s->dns_mutex.unlock();
+}
+
+} // namespace
+
+HttpServerShare::HttpServerShare()
+    : sh(curl_share_init(), [](CURLSH* s) { curl_share_cleanup(s); })
+{
+    if (!sh)
+        throw std::runtime_error("curl_share_init failed");
+    curl_share_setopt(sh.get(), CURLSHOPT_LOCKFUNC, share_lock_cb);
+    curl_share_setopt(sh.get(), CURLSHOPT_UNLOCKFUNC, share_unlock_cb);
+    // userptr is the address of this HttpServerShare, which is stable because
+    // instances are always heap-allocated and managed by shared_ptr.
+    curl_share_setopt(sh.get(), CURLSHOPT_USERDATA, this);
+    curl_share_setopt(sh.get(), CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+    curl_share_setopt(sh.get(), CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+}
+
+// --- HttpChunkReader --------------------------------------------------------
+
+HttpChunkReader::HttpChunkReader(const std::string& url, HttpServerShare_p share)
+    : share_(std::move(share))
+    , url_(url)
     , curl_(curl_open())
     , size_(0)
     , accepts_ranges_(false)
@@ -137,6 +178,8 @@ std::shared_ptr<CURL> HttpChunkReader::curl_open() const
 {
     std::shared_ptr<CURL> curl(curl_easy_init(), curl_easy_cleanup);
     curl_easy_setopt(curl.get(), CURLOPT_URL, url_.c_str());
+    if (share_)
+        curl_easy_setopt(curl.get(), CURLOPT_SHARE, share_->sh.get());
     return curl;
 }
 

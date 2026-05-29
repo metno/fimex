@@ -36,7 +36,52 @@
 #include "FileChunkReader.h"
 #include "HttpChunkReader.h"
 
+#include <curl/urlapi.h>
+
 namespace MetNoFimex {
+
+namespace {
+
+// Returns a key identifying a server and its embedded credentials.
+// The key covers scheme, userinfo (user:password), host, and port — but NOT
+// the path — because TLS sessions and DNS results are bound to the server,
+// not individual files.  Two URLs that differ only in path produce the same
+// key and will therefore share TLS sessions and DNS results.
+//
+// Using libcurl's own URL parser (CURLU) avoids ambiguities with IPv6 address
+// literals, percent-encoded characters, and default-port normalization.
+//
+// Falls back to a key built from the full URL string if parsing fails —
+// safe but forfeits sharing.
+ServerKey serverKey(const std::string& url)
+{
+    struct CurluGuard {
+        CURLU* u;
+        ~CurluGuard() { if (u) curl_url_cleanup(u); }
+    } g{curl_url()};
+    if (!g.u || curl_url_set(g.u, CURLUPART_URL, url.c_str(), 0) != CURLUE_OK)
+        return ServerKey{url, {}, {}, {}, {}};
+
+    auto get = [&](CURLUPart part, unsigned int flags = 0) -> std::string {
+        char* val = nullptr;
+        curl_url_get(g.u, part, &val, flags);
+        std::string s;
+        if (val) { s = val; curl_free(val); }
+        return s;
+    };
+
+    return ServerKey{
+        get(CURLUPART_SCHEME),
+        get(CURLUPART_USER),
+        get(CURLUPART_PASSWORD),
+        get(CURLUPART_HOST),
+        // CURLU_DEFAULT_PORT fills in the scheme's default (80 / 443) when
+        // absent, so https://host and https://host:443 produce the same key.
+        get(CURLUPART_PORT, CURLU_DEFAULT_PORT),
+    };
+}
+
+} // namespace
 
 ChunkReader_p DefaultChunkReaderFactory::readerFor(const std::string& url)
 {
@@ -52,10 +97,13 @@ ChunkReader_p DefaultChunkReaderFactory::readerFor(const std::string& url)
 
 ChunkReader_p DefaultChunkReaderFactory::httpReaderFor(const std::string& url)
 {
-    // TODO compare scheme + pass + host, but not path
-    if (!http_cache_ || http_cache_->url() != url)
-        http_cache_ = std::make_shared<HttpChunkReader>(url);
-    return http_cache_;
+    // Look up or create the share handle for this server + credentials.
+    // readerFor() already holds mutex_, so server_shares_ needs no extra locking.
+    const ServerKey key = serverKey(url);
+    auto it = server_shares_.find(key);
+    if (it == server_shares_.end())
+        it = server_shares_.emplace(key, std::make_shared<HttpServerShare>()).first;
+    return std::make_shared<HttpChunkReader>(url, it->second);
 }
 
 ChunkReader_p DefaultChunkReaderFactory::fileReaderFor(const std::string& filename)

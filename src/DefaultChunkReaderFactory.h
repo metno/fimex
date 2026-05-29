@@ -36,11 +36,47 @@
 #include "FileChunkReader.h"
 #include "HttpChunkReader.h"
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 
 namespace MetNoFimex {
+
+// Key identifying a server and its embedded credentials.
+// The path is excluded: TLS sessions and DNS results are bound to the server,
+// not to individual files, so readers for different files on the same server
+// can share them.
+struct ServerKey
+{
+    std::string scheme;
+    std::string user;
+    std::string password;
+    std::string host;
+    std::string port; // normalised to include the default for the scheme
+
+    bool operator==(const ServerKey&) const = default;
+};
+
+struct ServerKeyHash
+{
+    size_t operator()(const ServerKey& k) const
+    {
+        // Mix hashes of all five fields using a standard combination step so
+        // that no single field's hash dominates and field order matters.
+        size_t h = 0;
+        auto mix = [&](const std::string& s) {
+            h ^= std::hash<std::string>{}(s) + 0x9e3779b9u + (h << 6) + (h >> 2);
+        };
+        mix(k.scheme);
+        mix(k.user);
+        mix(k.password);
+        mix(k.host);
+        mix(k.port);
+        return h;
+    }
+};
 
 class DefaultChunkReaderFactory : public ChunkReaderFactory
 {
@@ -55,7 +91,11 @@ private:
     std::mutex mutex_;
 
     FileChunkReader_p file_cache_;
-    HttpChunkReader_p http_cache_;
+
+    // One HttpServerShare per ServerKey (scheme + credentials + host + port).
+    // Readers for different files on the same server share TLS sessions and
+    // DNS results; see HttpServerShare for details.
+    std::unordered_map<ServerKey, HttpServerShare_p, ServerKeyHash> server_shares_;
 };
 
 } // namespace MetNoFimex
