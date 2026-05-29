@@ -33,6 +33,7 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/XMLInput.h"
 
+#include <cstdint>
 #include <map>
 #include <regex>
 #include <vector>
@@ -50,9 +51,9 @@ class GribCDMIndexer
 public:
     struct grib_index
     {
-        size_t file_index;
-        size_t message_start;
-        size_t message_size; // > 1 for a valid grib message
+        uint32_t file_index;   // 1-based; 0 is the invalid sentinel
+        uint64_t message_start;
+        uint32_t message_size; // > 1 for a valid grib message
         bool is_valid() const { return file_index > 0; }
     };
     typedef std::vector<grib_index> grib_index_v;

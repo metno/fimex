@@ -47,6 +47,8 @@
 #include "fimex_grib_config.h"
 
 #include <cassert>
+#include <mutex>
+#include <unordered_map>
 
 namespace MetNoFimex {
 
@@ -93,6 +95,21 @@ struct GribCDMReader::Impl
     Impl();
 
     ChunkReaderFactory_p ca;
+
+    // File handles cached by file_index (1-based; 0 is the invalid sentinel).
+    // Protected by cr_cache_mutex; the returned shared_ptr is safe to use
+    // after the lock is released (FileChunkReader uses pread, no internal lock).
+    std::mutex cr_cache_mutex;
+    std::unordered_map<size_t, ChunkReader_p> cr_cache;
+
+    ChunkReader_p getReader(size_t file_index, const std::string& url)
+    {
+        std::lock_guard<std::mutex> lock(cr_cache_mutex);
+        auto it = cr_cache.find(file_index);
+        if (it == cr_cache.end())
+            it = cr_cache.emplace(file_index, ca->readerFor(url)).first;
+        return it->second;
+    }
 
     OmpMutex mutex;
 
@@ -264,7 +281,7 @@ DataPtr GribCDMReader::getDataSlice(const std::string& varName, const SliceBuild
                     OmpScopedLock lock(p_->mutex);
 #endif
                     const auto url = joinFilename(p_->root_path, p_->grib_indexed->grib_files.at(msg.file_index));
-                    auto cr = p_->ca->readerFor(url);
+                    auto cr = p_->getReader(msg.file_index, url);
                     dataRead = readGribData(cr, msg.message_start, msg.message_size, grib_out, maxXySize, missingValue);
                 }
 #if 0

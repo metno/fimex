@@ -75,7 +75,16 @@ struct ProjectionInfo
 
 GribCDMIndexer::grib_index intoIndex(StringListBuilder& grib_files, const GribFileMessage& gfm)
 {
-    return {grib_files.add(gfm.getFileURL()), static_cast<size_t>(gfm.getFilePosition()), gfm.getMsgSize()};
+    const size_t fi = grib_files.add(gfm.getFileURL());
+    if (fi > std::numeric_limits<uint32_t>::max())
+        throw std::runtime_error("GRIB file count exceeds uint32_t range");
+    const off_t pos = gfm.getFilePosition();
+    if (pos < 0)
+        throw std::runtime_error("GRIB message position is negative");
+    const size_t sz = gfm.getMsgSize();
+    if (sz > std::numeric_limits<uint32_t>::max())
+        throw std::runtime_error("GRIB message size exceeds uint32_t range");
+    return {static_cast<uint32_t>(fi), static_cast<uint64_t>(pos), static_cast<uint32_t>(sz)};
 }
 
 typedef std::pair<long, long> leveltype_t;
