@@ -308,6 +308,9 @@ std::string replaceExtension(const std::string& path, const std::string& newExte
 
 std::string joinFilename(const std::string& path, const std::string& filename)
 {
+    // If filename is absolute (POSIX path or URL with scheme), use it as-is.
+    if (!filename.empty() && (filename.front() == '/' || filename.find("://") != std::string::npos))
+        return filename;
     auto joined = path;
     if (!path.empty() && path.back() != '/') {
         joined += "/";

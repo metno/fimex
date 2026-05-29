@@ -489,11 +489,20 @@ TEST4FIMEX_TEST_CASE(test_replace_filename)
 
 TEST4FIMEX_TEST_CASE(test_join_filename)
 {
+    // relative filename joined with directory path
     TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin", "fimex"));
     TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin/", "fimex"));
+    // relative filename with empty root
     TEST4FIMEX_CHECK_EQ("fimex", joinFilename("", "fimex"));
+    // relative filename joined with HTTP root
     TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset", "file1"));
     TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset/", "file1"));
+    // absolute POSIX filename: root is ignored
+    TEST4FIMEX_CHECK_EQ("/data/nwp/file.nc4", joinFilename("/some/other/dir", "/data/nwp/file.nc4"));
+    TEST4FIMEX_CHECK_EQ("/data/nwp/file.nc4", joinFilename("", "/data/nwp/file.nc4"));
+    // absolute URL filename: root is ignored
+    TEST4FIMEX_CHECK_EQ("http://server/data/file.nc4", joinFilename("/local/dir", "http://server/data/file.nc4"));
+    TEST4FIMEX_CHECK_EQ("https://server/data/file.nc4", joinFilename("http://other/root", "https://server/data/file.nc4"));
 }
 
 TEST4FIMEX_TEST_CASE(test_expand_files)
