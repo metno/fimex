@@ -31,32 +31,46 @@
 #include "FileChunkReader.h"
 
 #include "fimex/Logger.h"
-#include "fimex/StringUtils.h"
 
 #include <sstream>
 #include <stdexcept>
 
+#include <cerrno>
+#include <cstring>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 namespace {
 MetNoFimex::Logger_p logger = MetNoFimex::getLogger("fimex.FileChunkReader");
-
-std::shared_ptr<FILE> open_binary(const std::string& path)
-{
-    FILE* fileh = fopen(path.c_str(), "rb");
-    if (!fileh)
-        throw std::runtime_error("cannot open file '" + path + "'");
-    return std::shared_ptr<FILE>(fileh, fclose);
-}
 } // namespace
 
 namespace MetNoFimex {
 
 FileChunkReader::FileChunkReader(const std::string& path)
     : path_(path)
-    , file_(open_binary(path_))
+    , fd_(-1)
+    , size_(0)
 {
-    fseeko(file_.get(), 0, SEEK_END);
-    size_ = ftello(file_.get());
+    fd_ = ::open(path_.c_str(), O_RDONLY);
+    if (fd_ < 0)
+        throw std::runtime_error("cannot open file '" + path_ + "': " + std::strerror(errno));
+
+    struct stat st;
+    if (::fstat(fd_, &st) != 0) {
+        ::close(fd_);
+        throw std::runtime_error("cannot stat file '" + path_ + "': " + std::strerror(errno));
+    }
+    size_ = static_cast<size_t>(st.st_size);
+
     LOG4FIMEX(logger, Logger::DEBUG, "opened file '" << path_ << "'");
+}
+
+FileChunkReader::~FileChunkReader()
+{
+    if (fd_ >= 0)
+        ::close(fd_);
 }
 
 size_t FileChunkReader::size()
@@ -66,18 +80,25 @@ size_t FileChunkReader::size()
 
 void FileChunkReader::read(size_t off, size_t count, unsigned char* buffer)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     LOG4FIMEX(logger, Logger::DEBUG, "file '" << path_ << "' read " << count << " bytes from " << off);
-    if (fseeko(file_.get(), off, SEEK_SET) != 0) {
-        std::ostringstream msg;
-        msg << "error seeking to " << off << " in '" << path_ << "'";
-        throw std::runtime_error(msg.str());
-    }
-    const size_t actual = fread(buffer, 1, count, file_.get());
-    if (actual != count) {
-        std::ostringstream msg;
-        msg << "error reading " << count << " bytes starting at " << off << " from '" << path_ << "'";
-        throw std::runtime_error(msg.str());
+
+    size_t done = 0;
+    while (done < count) {
+        const ssize_t n = ::pread(fd_, buffer + done, count - done, static_cast<off_t>(off + done));
+        if (n > 0) {
+            done += static_cast<size_t>(n);
+        } else if (n == 0) {
+            // unexpected EOF
+            std::ostringstream msg;
+            msg << "unexpected EOF reading " << count << " bytes at offset " << off << " from '" << path_ << "' (got " << done << ")";
+            throw std::runtime_error(msg.str());
+        } else if (errno == EINTR) {
+            continue; // signal interrupted — retry
+        } else {
+            std::ostringstream msg;
+            msg << "error reading " << count << " bytes at offset " << off << " from '" << path_ << "': " << std::strerror(errno);
+            throw std::runtime_error(msg.str());
+        }
     }
 }
 

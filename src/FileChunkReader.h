@@ -33,29 +33,30 @@
 
 #include "fimex/ChunkReader.h"
 
-#include <memory>
-#include <mutex>
 #include <string>
-
-#include <cstdio>
 
 namespace MetNoFimex {
 
+/**
+ * A ChunkReader backed by a local file.
+ *
+ * Uses pread(2) for all data access, so concurrent reads from multiple
+ * threads on the same instance are safe without any locking.
+ */
 class FileChunkReader : public ChunkReader
 {
 public:
     FileChunkReader(const std::string& path);
-    const std::string& path() { return path_; }
+    ~FileChunkReader();
+
+    const std::string& path() const { return path_; }
 
     size_t size() override;
     void read(size_t offset, size_t count, unsigned char* buffer) override;
 
 private:
-    typedef std::shared_ptr<FILE> FILE_p;
-
-    std::mutex mutex_;
     std::string path_;
-    FILE_p file_;
+    int fd_;
     size_t size_;
 };
 

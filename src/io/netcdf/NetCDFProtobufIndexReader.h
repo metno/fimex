@@ -72,6 +72,16 @@ struct NetCDFVarChunks
     bool big_endian = false;           ///< True if chunk data bytes are big-endian.
     std::vector<NetCDFFilter> filters; ///< HDF5 filter pipeline, compression order.
     std::vector<NetCDFChunkInfo> chunks;
+
+    // Optional flat grid for O(intersecting) chunk lookup.
+    //
+    // grid_dims[d] is the number of chunk tiles in CDM dimension d.
+    // chunk_grid is indexed by g_0 + grid_dims[0]*(g_1 + grid_dims[1]*(...)),
+    // where g_d = offset[d]/chunk_shape[d] — dimension 0 is fastest.
+    // A value of -1 means the cell has no valid chunk (fill or absent).
+    // chunk_grid is empty when the grid was not built (sparse dataset fallback).
+    std::vector<size_t>  grid_dims;
+    std::vector<int32_t> chunk_grid;
 };
 
 /// Complete parsed index for one or more NetCDF source files.

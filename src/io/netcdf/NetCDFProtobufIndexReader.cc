@@ -46,6 +46,62 @@ constexpr int MAX_CHUNKS_PER_VAR = 1 << 24;             // 16M chunks per variab
 constexpr uint64_t MAX_CHUNK_BYTES = uint64_t(1) << 30; // 1 GiB raw (compressed) per chunk
 constexpr int MAX_FILES = 1 << 16;                      // 64K source files per index
 
+/// Attempt to build a flat grid lookup table for @p vc (ndims dimensions).
+/// On success, vc.grid_dims and vc.chunk_grid are populated and read-time
+/// chunk lookup becomes O(intersecting) instead of O(all chunks).
+/// Silently does nothing when the layout is misaligned, would overflow, or
+/// would produce a grid larger than MAX_CHUNKS_PER_VAR cells.
+void buildChunkGrid(NetCDFVarChunks& vc, int ndims)
+{
+    // Compute grid dimensions from valid-chunk offsets.
+    // Also validates that every offset is an exact multiple of chunk_shape.
+    std::vector<size_t> gdims(static_cast<size_t>(ndims), 0);
+    for (const auto& ci : vc.chunks) {
+        if (ci.file_index == 0)
+            continue;
+        for (int d = 0; d < ndims; d++) {
+            if (vc.chunk_shape[d] == 0 || ci.offset[d] % vc.chunk_shape[d] != 0)
+                return; // misaligned — skip grid
+            const size_t g = static_cast<size_t>(ci.offset[d]) / static_cast<size_t>(vc.chunk_shape[d]);
+            if (g + 1 > gdims[d])
+                gdims[d] = g + 1;
+        }
+    }
+
+    // Compute total grid cells with overflow protection.
+    // For ndims == 0 (scalar) the grid has exactly one cell.
+    size_t grid_total = 1;
+    for (int d = 0; d < ndims; d++) {
+        if (gdims[d] == 0) {
+            grid_total = 0;
+            break;
+        }
+        if (gdims[d] > static_cast<size_t>(MAX_CHUNKS_PER_VAR) / grid_total)
+            return; // overflow — skip grid
+        grid_total *= gdims[d];
+    }
+    if (grid_total > static_cast<size_t>(MAX_CHUNKS_PER_VAR))
+        return; // too sparse — sorted-vector fallback will be used
+
+    // Flat strides: g_stride[0]=1, g_stride[d] = g_stride[d-1]*gdims[d-1].
+    std::vector<size_t> g_stride(static_cast<size_t>(ndims), 1);
+    for (int d = 1; d < ndims; d++)
+        g_stride[d] = g_stride[d - 1] * gdims[d - 1];
+
+    vc.grid_dims = std::move(gdims);
+    vc.chunk_grid.assign(grid_total, -1);
+
+    for (size_t i = 0; i < vc.chunks.size(); i++) {
+        const NetCDFChunkInfo& ci = vc.chunks[i];
+        if (ci.file_index == 0)
+            continue;
+        size_t flat = 0;
+        for (int d = 0; d < ndims; d++)
+            flat += (static_cast<size_t>(ci.offset[d]) / static_cast<size_t>(vc.chunk_shape[d])) * g_stride[d];
+        vc.chunk_grid[flat] = static_cast<int32_t>(i);
+    }
+}
+
 void parseNetCDFIndex(NetCDFIndexed& indexed, const fimex_index::NetCDFIndex& nix)
 {
     // ---- populate files list ------------------------------------------------
@@ -145,6 +201,17 @@ void parseNetCDFIndex(NetCDFIndexed& indexed, const fimex_index::NetCDFIndex& ni
             }
             return false;
         });
+
+        // Build a flat grid lookup table for O(intersecting) chunk access.
+        //
+        // Only valid chunks (file_index > 0) determine the grid extents; fill
+        // placeholders (file_index == 0) are not stored so their grid cells remain
+        // -1 and copyChunksIntoSlice propagates fill values without extra branches.
+        //
+        // Skip grid construction when the layout is misaligned, would overflow, or
+        // would produce a very sparse grid (MAX_CHUNKS_PER_VAR bound).  The
+        // sorted-vector fallback is then used at read time.
+        buildChunkGrid(vc, ndims);
     }
 }
 
