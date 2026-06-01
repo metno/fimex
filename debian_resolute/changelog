@@ -1,3 +1,9 @@
+fimex-2.5 (2.5.2-1resolute1) resolute; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 01 Jun 2026 08:00:08 +0200
+
 fimex-2.5 (2.5.1-1resolute1) resolute; urgency=low
 
   * new fimex version

@@ -1,3 +1,6 @@
+  * 2026-06-01 fimex 2.5.2
+    * optimizations for indexed NetCDF / GRIB readers
+    * change filename handling in index files
   * 2026-05-27 fimex 2.5.1
     * try to fix FIMEX_IO_PLUGINS_PATH for conda
   * 2026-05-20 fimex 2.5.0
