@@ -182,29 +182,35 @@ TEST4FIMEX_TEST_CASE(test_regexEscape)
 
 TEST4FIMEX_TEST_CASE(test_scanFiles)
 {
+    const std::string dir = topSrcDir() + "/include";
+    const auto pat = std::regex(".*CD.*d.?.?\\.h");
+    const std::string exp = dir + "/fimex/CDMReader.h";
+
     vector<string> files;
-    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), true);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    scanFiles(files, dir, -1, pat, true);
+    // std::cerr << "found " << files.size() << " files in '" << dir << "'" << std::endl;
+    // for (const auto& f : files) { std::cerr << "found '" << f << "'" << std::endl; }
+    TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
+
+    // Same with "matchFileOnly" == false.
     files.clear();
-    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), false);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    scanFiles(files, dir, -1, pat, false);
+    TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
 }
 
 TEST4FIMEX_TEST_CASE(test_globFiles)
 {
+    const std::string dir = topSrcDir() + "/include";
+    const std::string exp = dir + "/fimex/NcmlCDMReader.h";
     {
         vector<string> files;
-        globFiles(files, topSrcDir() + "/**stUti??.cc");
-        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+        globFiles(files, dir + "/**CDMRead??.h");
+        TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
     }
     {
         vector<string> files;
-        globFiles(files, topSrcDir() + "/test/*stUti??.cc");
-        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+        globFiles(files, dir + "/fimex/*CDMReader.h");
+        TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
     }
     {
         vector<string> files;

@@ -43,13 +43,12 @@
 #endif
 
 #if defined(HAVE_STD_FILESYSTEM)
-#warning "using std::filesystem"
 #include <filesystem>
 #elif defined(HAVE_BOOST_FILESYSTEM)
 #warning "using boost::filesystem"
 #include <boost/filesystem.hpp>
 #else
-// #warning "using stat/dirent"
+#warning "using stat/dirent"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -164,11 +163,12 @@ static void scanFiles_(std::vector<std::string>& files, const path_t& dir, int d
         const filetype_t ft = file_type(e);
         if (ft == DIRECTORY) {
             if (depth != 0) {
+                std::string subRelDir;
                 if (!matchFileOnly) {
                     // remember the directory behind start-directory
-                    currentRelDir += path_filename_string(e) + "/";
+                    subRelDir = currentRelDir + path_filename_string(e) + "/";
                 }
-                scanFiles_(files, e, depth - 1, regexp, matchFileOnly, currentRelDir, depthCount + 1);
+                scanFiles_(files, e, depth - 1, regexp, matchFileOnly, subRelDir, depthCount + 1);
             }
         } else if (ft == REGULAR_FILE) {
             const std::string filename = (matchFileOnly ? "" : currentRelDir) + path_filename_string(e);
