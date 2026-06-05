@@ -63,6 +63,14 @@ Logger_p logger = getLogger("fimex.CDMFileReaderFactory");
 
 static bool haveScannedForIoPlugins = false;
 
+void trim_at_first_zero(std::string& str)
+{
+    const size_t zero = str.find_first_of('\0');
+    if (zero != std::string::npos) {
+        str.erase(zero); // Remove everything after the first null byte
+    }
+}
+
 std::vector<std::string> getIoPluginsDirs()
 {
     const char* iopp = getenv("FIMEX_IO_PLUGINS_PATH");
@@ -76,7 +84,8 @@ std::vector<std::string> getIoPluginsDirs()
     // zero-fill bytes that conda writes after the real prefix into the
     // binary (after compilation) such that a compile-time string length is
     // no longer correct when running the binary.
-    const std::string path(iopp, std::strlen(iopp));
+    std::string path = iopp;
+    trim_at_first_zero(path);
     return tokenize(path, ":");
 }
 
