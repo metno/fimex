@@ -688,6 +688,8 @@ GribFileMessage::GribFileMessage(grib_handle_p gh, const std::string& msgURL, lo
 }
 
 GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName)
+    : filePos_(0)
+    , msgSize_(0)
 {
     while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
         const XmlConstCharPtr name = xmlTextReaderConstName(reader);
