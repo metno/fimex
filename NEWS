@@ -1,4 +1,6 @@
-  * 2026-06-01 fimex 2.5.3
+  * 2026-06-09 fimex 2.5.4
+    * limit chunk reader cache size
+  * 2026-06-08 fimex 2.5.3
     * bugfix
     * fix FIMEX_IO_PLUGINS_PATH for conda
   * 2026-06-01 fimex 2.5.2
