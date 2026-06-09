@@ -96,19 +96,10 @@ struct GribCDMReader::Impl
 
     ChunkReaderFactory_p ca;
 
-    // File handles cached by file_index (1-based; 0 is the invalid sentinel).
-    // Protected by cr_cache_mutex; the returned shared_ptr is safe to use
-    // after the lock is released (FileChunkReader uses pread, no internal lock).
-    std::mutex cr_cache_mutex;
-    std::unordered_map<size_t, ChunkReader_p> cr_cache;
-
-    ChunkReader_p getReader(size_t file_index, const std::string& url)
+    ChunkReader_p getReader(size_t file_index)
     {
-        std::lock_guard<std::mutex> lock(cr_cache_mutex);
-        auto it = cr_cache.find(file_index);
-        if (it == cr_cache.end())
-            it = cr_cache.emplace(file_index, ca->readerFor(url)).first;
-        return it->second;
+        const auto url = joinFilename(root_path, grib_indexed->grib_files.at(file_index));
+        return ca->readerFor(url);
     }
 
     OmpMutex mutex;
@@ -280,8 +271,7 @@ DataPtr GribCDMReader::getDataSlice(const std::string& varName, const SliceBuild
 #ifndef HAVE_GRIB_THREADSAFE
                     OmpScopedLock lock(p_->mutex);
 #endif
-                    const auto url = joinFilename(p_->root_path, p_->grib_indexed->grib_files.at(msg.file_index));
-                    auto cr = p_->getReader(msg.file_index, url);
+                    auto cr = p_->getReader(msg.file_index);
                     dataRead = readGribData(cr, msg.message_start, msg.message_size, grib_out, maxXySize, missingValue);
                 }
 #if 0

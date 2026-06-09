@@ -35,6 +35,7 @@ SET(CC_TESTS
   testUtils
   testVerticalCoordinates
   testXMLDoc
+  testLruCache
 )
 
 IF(ENABLE_FELT)
@@ -216,6 +217,7 @@ FOREACH(T ${CC_TESTS})
   )
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
+TARGET_INCLUDE_DIRECTORIES(testLruCache PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 TARGET_LINK_LIBRARIES(testXMLDoc ${libxml2_PACKAGE})
 

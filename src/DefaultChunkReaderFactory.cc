@@ -36,7 +36,9 @@
 #include "FileChunkReader.h"
 #include "HttpChunkReader.h"
 
+#include <cstdlib>
 #include <curl/urlapi.h>
+#include <list>
 
 namespace MetNoFimex {
 
@@ -81,7 +83,32 @@ ServerKey serverKey(const std::string& url)
     };
 }
 
+size_t parseCapacity(const char* name, size_t def)
+{
+    const char* v = std::getenv(name);
+    if (!v)
+        return def;
+    char* end = nullptr;
+    long val = std::strtol(v, &end, 10);
+    if (end == v || val < 0)
+        return def;
+    return static_cast<size_t>(val);
+}
 } // namespace
+
+DefaultChunkReaderFactory::DefaultChunkReaderFactory()
+    : file_cache_(parseCapacity("FIMEX_CHUNK_READER_CACHE_FILES", 128))
+    , http_cache_(parseCapacity("FIMEX_CHUNK_READER_CACHE_HTTP", 64))
+{
+}
+
+DefaultChunkReaderFactory::~DefaultChunkReaderFactory()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    http_cache_.clear();
+    file_cache_.clear();
+    server_shares_.clear();
+}
 
 ChunkReader_p DefaultChunkReaderFactory::readerFor(const std::string& url)
 {
@@ -103,14 +130,12 @@ ChunkReader_p DefaultChunkReaderFactory::httpReaderFor(const std::string& url)
     auto it = server_shares_.find(key);
     if (it == server_shares_.end())
         it = server_shares_.emplace(key, std::make_shared<HttpServerShare>()).first;
-    return std::make_shared<HttpChunkReader>(url, it->second);
+    return http_cache_.getOrInsert(url, [&]() -> HttpChunkReader_p { return std::make_shared<HttpChunkReader>(url, it->second); });
 }
 
 ChunkReader_p DefaultChunkReaderFactory::fileReaderFor(const std::string& filename)
 {
-    if (!file_cache_ || file_cache_->path() != filename)
-        file_cache_ = std::make_shared<FileChunkReader>(filename);
-    return file_cache_;
+    return file_cache_.getOrInsert(filename, [&]() -> FileChunkReader_p { return std::make_shared<FileChunkReader>(filename); });
 }
 
 } // namespace MetNoFimex

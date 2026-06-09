@@ -35,8 +35,10 @@
 
 #include "FileChunkReader.h"
 #include "HttpChunkReader.h"
+#include "LruCache.h"
 
 #include <functional>
+#include <list>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -81,6 +83,9 @@ struct ServerKeyHash
 class DefaultChunkReaderFactory : public ChunkReaderFactory
 {
 public:
+    DefaultChunkReaderFactory();
+    ~DefaultChunkReaderFactory();
+
     ChunkReader_p readerFor(const std::string& url) override;
 
 private:
@@ -90,7 +95,8 @@ private:
 private:
     std::mutex mutex_;
 
-    FileChunkReader_p file_cache_;
+    LruCache<std::string, FileChunkReader_p> file_cache_;
+    LruCache<std::string, HttpChunkReader_p> http_cache_;
 
     // One HttpServerShare per ServerKey (scheme + credentials + host + port).
     // Readers for different files on the same server share TLS sessions and

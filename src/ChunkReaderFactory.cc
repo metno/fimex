@@ -38,7 +38,8 @@ ChunkReaderFactory::~ChunkReaderFactory() {}
 
 ChunkReaderFactory_p createDefaultChunkReaderFactory()
 {
-    return std::make_shared<DefaultChunkReaderFactory>();
+    static ChunkReaderFactory_p inst = std::make_shared<DefaultChunkReaderFactory>();
+    return inst;
 }
 
 } // namespace MetNoFimex

@@ -603,26 +603,10 @@ struct NetCDFProtobufCDMReader::Impl
     std::string root_path;
     ChunkReaderFactory_p chunk_factory;
 
-    // File handles cached by file_index (1-based; 0 is the missing-data sentinel).
-    // One entry per distinct source file in the index; typically a small number.
-    // Access is protected by cr_cache_mutex so that concurrent getDataSlice calls
-    // from different threads share handles without re-opening files.
-    std::mutex cr_cache_mutex;
-    std::unordered_map<uint32_t, ChunkReader_p> cr_cache;
-
-    /// Return (or open) the ChunkReader for source file @p fi.
-    /// Thread-safe: the returned shared_ptr keeps the reader alive after the
-    /// lock is released, so callers may use it concurrently (FileChunkReader
-    /// uses pread and requires no per-read locking).
     ChunkReader_p getReader(uint32_t fi)
     {
-        std::lock_guard<std::mutex> lock(cr_cache_mutex);
-        auto it = cr_cache.find(fi);
-        if (it == cr_cache.end()) {
-            const std::string path = joinFilename(root_path, indexed.files[fi]);
-            it = cr_cache.emplace(fi, chunk_factory->readerFor(path)).first;
-        }
-        return it->second;
+        const std::string path = joinFilename(root_path, indexed.files[fi]);
+        return chunk_factory->readerFor(path);
     }
 };
 
