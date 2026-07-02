@@ -270,9 +270,8 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         return getDataSliceFromMemory(variable, unLimDimPos);
 
     SliceBuilder sb(*cdm_, varName);
-    if (const CDMDimension* unlimDim = cdm_->getUnlimitedDim()) {
-        if (cdm_->hasUnlimitedDim(variable))
-            sb.setStartAndSize(unlimDim->getName(), unLimDimPos, 1);
+    if (cdm_->hasUnlimitedDim(variable)) {
+        sb.setStartAndSize(cdm_->getUnlimitedDim()->getName(), unLimDimPos, 1);
     }
     return getDataSlice(varName, sb);
 }
