@@ -218,16 +218,19 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
 
     CachedInterpolationInterface_p ci = itCI->second;
     DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, sb);
-    if (data->size() == 0)
+    const auto data_size = data->size(); // keep size for after freeing "data"
+    if (data_size == 0)
         return data;
 
     const double badValue = cdm_->getFillValue(varName);
     auto array = data2InterpolationArray(data, badValue);
-    processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
+    data = nullptr; // no longer needed, possibly release memory
+    processArray_(p_->preprocesses, array.get(), data_size, ci->getInX(), ci->getInY());
 
     size_t newSize = 0;
     LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(slicebuilder)");
-    auto iArray = ci->interpolateValues(array, data->size(), newSize);
+    auto iArray = ci->interpolateValues(array, data_size, newSize);
+    array = nullptr; // no longer needed, possibly release memory
 
     if (variable.isSpatialVector()) {
         // vector in x/y direction
@@ -243,9 +246,9 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
                     // fetch and transpose vector-data
                     // transposing needed once for each direction (or caching, but that needs to much memory)
                     auto counterPartArray = data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
-                    processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
+                    processArray_(p_->preprocesses, counterPartArray.get(), data_size, ci->getInX(), ci->getInY());
                     LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(slicebuilder)");
-                    auto counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
+                    auto counterpartiArray = ci->interpolateValues(counterPartArray, data_size, newSize);
                     if (dir == CDMVariable::SPATIAL_VECTOR_X)
                         cvr->reprojectValues(iArray, counterpartiArray, newSize);
                     else
