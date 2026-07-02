@@ -838,7 +838,8 @@ void GribCDMIndexer::loadAddProjection(const GridDefinition& gridDef, const std:
 
     pi.gridMapping = std::string("projection_" + gridType + appendix);
     // projection-variable without datatype and dimension
-    CDMVariable projVar(pi.gridMapping, CDM_NAT, std::vector<std::string>());
+    CDMVariable projVar(pi.gridMapping, CDM_INT, std::vector<std::string>());
+    projVar.setData(createData(projVar.getDataType(), 1, MIFI_FILL_INT));
     init_->cdm.addVariable(projVar);
     const auto projAttr = Projection::createByProj4(projStr)->getParameters(); // create a copy
     addAttributes(init_->cdm, pi.gridMapping, projAttr);
