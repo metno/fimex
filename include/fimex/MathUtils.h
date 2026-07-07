@@ -241,7 +241,7 @@ inline size_t product(const size_t* first, size_t count)
 
 inline size_t product(const std::vector<std::size_t>& sizes)
 {
-    return product(&sizes[0], sizes.size());
+    return product(sizes.data(), sizes.size());
 }
 
 } // namespace MetNoFimex
