@@ -1265,8 +1265,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
         LOG4FIMEX(logger, Logger::DEBUG, "start calculating positions");
-        mifi_points2position(&orgLonVals[0], orgXYSize, &out_x_axis[0], out_x_axis.size(), miupXAxis);
-        mifi_points2position(&orgLatVals[0], orgXYSize, &out_y_axis[0], out_y_axis.size(), miupYAxis);
+        mifi_points2position(&orgLonVals[0], orgXYSize, out_x_axis.data(), out_x_axis.size(), miupXAxis);
+        mifi_points2position(&orgLatVals[0], orgXYSize, out_y_axis.data(), out_y_axis.size(), miupYAxis);
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
@@ -1388,7 +1388,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         auto pointsOnXAxis = make_shared_array<double>(fieldSize);
         auto pointsOnYAxis = make_shared_array<double>(fieldSize);
         const std::string orgProjStr = cs->getProjection()->getProj4String();
-        reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
+        reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], out_y_axis.data(), out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
                                   &pointsOnYAxis[0]);
         LOG4FIMEX(logger, Logger::DEBUG,
                   "mifi_project_axes: " << proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << pointsOnXAxis[0] << ","
@@ -1412,7 +1412,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             LOG4FIMEX(logger, Logger::DEBUG,
                       "creating cached vector projection interpolation matrix " << orgXAxisSize << "x" << orgYAxisSize << " => " << out_x_axis.size() << "x"
                                                                                 << out_y_axis.size());
-            reproject::Matrix_cp matrix = reproject::get_vector_reproject_matrix(orgProjStr, proj_input, &out_x_axis[0], &out_y_axis[0], outXAxisType,
+            reproject::Matrix_cp matrix = reproject::get_vector_reproject_matrix(orgProjStr, proj_input, out_x_axis.data(), out_y_axis.data(), outXAxisType,
                                                                                  outYAxisType, out_x_axis.size(), out_y_axis.size());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] = std::make_shared<CachedVectorReprojection>(matrix);

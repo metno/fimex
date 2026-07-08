@@ -1104,11 +1104,11 @@ size_t GribFileMessage::readLevelData(ChunkReader_p cr, std::vector<double>& lev
     if (pvpresent) {
         grib_get(gh, "pv", size);
         levelData.resize(size);
-        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "pv", &levelData[0], &size), 0);
+        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "pv", levelData.data(), &size), 0);
         double inputMissing;
         grib_get(gh, "missingValue", inputMissing);
         if (inputMissing != missingValue) {
-            transform(&levelData[0], &levelData[0] + size, &levelData[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
+            transform(levelData.begin(), levelData.end(), levelData.begin(), ChangeMissingValue<double, double>(inputMissing, missingValue));
         }
     }
     return size;
