@@ -118,7 +118,7 @@
 #define MIFI_VERSION_STATUS_STRING "~rc9"
 
 #elif (MIFI_VERSION_STATUS == 0xF0)
-#define MIFI_VERSION_STATUS_STRING "-3patchfc44"
+#define MIFI_VERSION_STATUS_STRING ""
 
 #else
 #error "unknown MIFI_VERSION_STATUS"
