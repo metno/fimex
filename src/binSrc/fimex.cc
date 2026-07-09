@@ -1046,7 +1046,7 @@ int run(int argc, char* args[])
         return 0;
     }
     if (vm.is_set(op_version)) {
-        cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "-" << std::hex << mifi_version_status() << ")" << endl;
+        cout << "fimex version " << fimexVersion() << endl;
         return 0;
     }
 
