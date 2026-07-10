@@ -255,6 +255,12 @@ std::ostream& operator<<(std::ostream& os, const GribFileMessage& gfm);
 /// outputstream for a GribFileIndex
 std::ostream& operator<<(std::ostream& os, const GribFileIndex& gfm);
 
+/// Search for the start of GRIB message ('GRIB') and extract the message size in bytes from section 0.
+/// Returns a pair {start, size}. If no message is found, the returned size is 0.
+///
+/// Throws a `CDMException` if the GRIB magic is not found or if the GRIB version is unknown or the message is too big.
+std::pair<size_t, size_t> findGribMessageReadSize(ChunkReader_p cr, size_t pos);
+
 size_t readGribData(ChunkReader_p cr, size_t msg_pos, size_t msg_size, double* data, size_t data_size, double missingValue);
 
 } // namespace MetNoFimex

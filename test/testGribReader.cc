@@ -121,3 +121,16 @@ TEST4FIMEX_TEST_CASE(GribFileIndex_LevelType)
     for (const auto& gfm : gfi.listMessages())
         TEST4FIMEX_CHECK_NE(0, gfm.getLevelType());
 }
+
+TEST4FIMEX_TEST_CASE(GribFileIndex_findGribMessageReadSize)
+{
+    auto cr = MetNoFimex::createDefaultChunkReaderFactory()->readerFor(pathTest("grib/constantTime/input.grib2"));
+
+    auto [start0, size0] = findGribMessageReadSize(cr, 0);
+    TEST4FIMEX_CHECK(start0 == 0);
+    TEST4FIMEX_CHECK(size0 == 2298);
+
+    auto [start1, size1] = findGribMessageReadSize(cr, 20);
+    TEST4FIMEX_CHECK(start1 == start0 + size0);
+    TEST4FIMEX_CHECK(size1 == 2298);
+}

@@ -44,6 +44,8 @@
 #include <date/date.h>
 
 #include <algorithm>
+#include <array>
+#include <cstring> // std::memcmp
 
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
@@ -459,32 +461,74 @@ const char GK_typeOfGrid[] = "typeOfGrid";
 // currently unused
 const char GK_indicatorOfUnitOfTimeRange[] = "indicatorOfUnitOfTimeRange";
 
-size_t readGribMessageSize(ChunkReader_p cr, size_t offset)
-{
-    unsigned char buffer[16];
-    cr->read(offset, sizeof(buffer), buffer);
-    const char grib_version = buffer[7];
-    size_t s0, sn;
-    if (grib_version == 1) {
-        s0 = 4;
-        sn = 3;
-    } else if (grib_version == 2) {
-        s0 = 8;
-        sn = 8;
-    }
-    size_t grib_msg_size = 0;
-    for (size_t i = 0; i < sn; ++i) {
-        grib_msg_size = (grib_msg_size << 8) | size_t(buffer[s0 + i]);
-    }
-    return grib_msg_size;
-}
-
 } // namespace
 
+std::pair<size_t, size_t> findGribMessageReadSize(ChunkReader_p cr, size_t pos)
+{
+    static constexpr size_t SCAN_CHUNK_SIZE = 4096;
+    static constexpr size_t MIN_MSG = 20; // cannot be shorter (>= header length)
+    static constexpr unsigned char MAGIC[] = {'G', 'R', 'I', 'B'};
+    static constexpr size_t MAGIC_LEN = sizeof(MAGIC);
+
+    // buffer with space for chunk plus MIN_MSG from previous read
+    std::array<unsigned char, MIN_MSG + SCAN_CHUNK_SIZE> buf;
+    size_t carry = 0;
+
+    const size_t file_size = cr->size();
+    while (pos < file_size) {
+        // read at least 1 byte
+        const size_t n_read = std::min(SCAN_CHUNK_SIZE, file_size - pos);
+        cr->read(pos, n_read, buf.data() + carry);
+
+        const size_t buf_size = carry + n_read;
+        for (size_t i = 0; i + MIN_MSG < buf_size; ++i) {
+            if (std::memcmp(&buf[i], MAGIC, MAGIC_LEN) == 0) {
+                const size_t pos_found = pos - carry + i;
+
+                // header is inside buffer because MIN_MSG >= header len
+                const unsigned char* buf_found = buf.data() + i;
+                const unsigned char grib_version = buf_found[7];
+                size_t s0 = 0, sn = 0;
+                switch (grib_version) {
+                case 1:
+                    s0 = 4;
+                    sn = 3;
+                    break;
+                case 2:
+                    s0 = 8;
+                    sn = 8;
+                    break;
+                default:
+                    throw CDMException(std::string("unknown GRIB version ") + std::to_string((int)grib_version) + " at offset " + std::to_string(pos_found));
+                }
+                // read big-endian size
+                uint64_t grib_msg_size = 0;
+                for (size_t j = 0; j < sn; ++j)
+                    grib_msg_size = (grib_msg_size << 8) | size_t(buf_found[s0 + j]);
+                // FIXME fimex only supports GRIB messages with size below (1<32), see GribCDMIndexer::grib_index::message_size
+                if (grib_msg_size > std::numeric_limits<uint32_t>::max()) {
+                    throw CDMException("GRIB message size exceeds supported maximum size");
+                }
+                return {pos_found, (size_t)grib_msg_size};
+            }
+        }
+
+        // shift last MIN_MSG bytes to front
+        // - first byte has already been checked, but MIN_MSG-1 = 19 is an odd number
+        // - not needed if at end of file, but not a huge waste either
+        std::memmove(buf.data(), buf.data() + buf_size - MIN_MSG, MIN_MSG);
+        carry = MIN_MSG;
+        pos += n_read;
+    }
+
+    return {file_size, 0};
+}
 size_t readGribData(ChunkReader_p cr, size_t msg_pos, size_t msg_size, double* data, size_t data_size, double missingValue)
 {
     if (msg_size == 0) {
-        msg_size = readGribMessageSize(cr, msg_pos);
+        auto ps = findGribMessageReadSize(cr, msg_pos);
+        msg_pos = ps.first;
+        msg_size = ps.second;
     }
 
     auto buffer = readChunk(cr, msg_pos, msg_size);
@@ -1091,10 +1135,12 @@ size_t GribFileMessage::readLevelData(ChunkReader_p cr, std::vector<double>& lev
     }
 
     if (msg_size == 0) {
-        msg_size = readGribMessageSize(cr, file_pos);
+        auto ps = findGribMessageReadSize(cr, file_pos);
+        file_pos = ps.first;
+        msg_size = ps.second;
     }
     auto buffer = readChunk(cr, file_pos, msg_size);
-    auto gh = make_grib_handle(&buffer[0], msg_size);
+    auto gh = make_grib_handle(buffer.get(), msg_size);
     if (!gh)
         return 0;
 
@@ -1178,13 +1224,20 @@ void GribFileIndex::initByGrib(ChunkReaderFactory_p ca, const std::string& gribU
     off_t grib_msg_start = 0;
     while (grib_msg_start < size) {
         // read the next message
-        const size_t grib_msg_size = readGribMessageSize(cr, grib_msg_start);
+        auto ps = findGribMessageReadSize(cr, grib_msg_start);
+        grib_msg_start = ps.first;
+        const size_t grib_msg_size = ps.second;
+        if (grib_msg_size == 0)
+            break;
         auto grib_buffer = readChunk(cr, grib_msg_start, grib_msg_size);
-        grib_handle_p gh = make_grib_handle(&grib_buffer[0], grib_msg_size);
-        try {
-            messages_.push_back(GribFileMessage(gh, url_, grib_msg_start, grib_msg_size, members, extraKeys));
-        } catch (CDMException& ex) {
-            LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << grib_msg_start << ": " << ex.what());
+        if (grib_handle_p gh = make_grib_handle(&grib_buffer[0], grib_msg_size)) {
+            try {
+                messages_.push_back(GribFileMessage(gh, url_, grib_msg_start, grib_msg_size, members, extraKeys));
+            } catch (CDMException& ex) {
+                LOG4FIMEX(logger, Logger::WARN, "ignoring grib message at byte " << grib_msg_start << ": " << ex.what());
+            }
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "no grib handle for data at byte " << grib_msg_start << ", ignoring");
         }
         grib_msg_start += grib_msg_size;
     }
