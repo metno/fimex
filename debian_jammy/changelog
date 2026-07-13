@@ -1,3 +1,9 @@
+fimex-2.5 (2.5.5-1jammy1) jammy; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 13 Jul 2026 08:00:08 +0200
+
 fimex-2.5 (2.5.4-1jammy1) jammy; urgency=low
 
   * new fimex version

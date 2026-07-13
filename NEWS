@@ -1,3 +1,7 @@
+  * 2026-07-13 fimex 2.5.5
+    * bugfixes WRF, product function
+    * GRIB projection variable has datatype INT
+    * search for GRIB magic (skip padding)
   * 2026-06-09 fimex 2.5.4
     * limit chunk reader cache size
   * 2026-06-08 fimex 2.5.3
