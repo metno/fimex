@@ -52,7 +52,40 @@ void scanFiles(std::vector<std::string>& files, const std::string& dir, int dept
  */
 void globFiles(std::vector<std::string>& files, const std::string& glob);
 
+/// Expand a @p fileName, adding to @p files:
+/// - if it starts with 'glob:', use the remainder as glob pattern
+/// - if it starts with 'many:', use the first char after as separator and split
+///   the remainder on this separator (e.g. main:|a.grb|b.grb|c.grb)
+/// - if it starts with 'list:', use the remainder as path to a list of files,
+///   one per line
+/// - otherweise just use fileName as is
+void  expand_files(std::vector<std::string>& files, const std::string& fileName);
+
 std::string getExtension(const std::string& fileName);
+
+std::string extractFilename(const std::string& path);
+std::string removeFilename(const std::string& path);
+std::string replaceFilename(const std::string& path, const std::string& filename);
+std::string joinFilename(const std::string& path, const std::string& filename);
+
+/**
+ * Replace the file extension in @p path with @p newExtension.
+ * The extension is the suffix after the last '.' in the filename part of the
+ * path (i.e. dots in directory components are ignored).  If the filename has
+ * no extension the new extension is appended.
+ *
+ * @param path         File path (may include directory components).
+ * @param newExtension New extension without leading dot (e.g. "ncfp").
+ * @return             Path with the extension replaced.
+ *
+ * Examples:
+ *   replaceExtension("data.nc",         "ncfp") == "data.ncfp"
+ *   replaceExtension("/path/data.nc",   "ncfp") == "/path/data.ncfp"
+ *   replaceExtension("data.tar.gz",     "ncfp") == "data.tar.ncfp"
+ *   replaceExtension("/p.q/data",       "ncfp") == "/p.q/data.ncfp"
+ *   replaceExtension("data",            "ncfp") == "data.ncfp"
+ */
+std::string replaceExtension(const std::string& path, const std::string& newExtension);
 
 } // namespace MetNoFimex
 

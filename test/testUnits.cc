@@ -126,3 +126,20 @@ TEST4FIMEX_TEST_CASE(test_TimeUnit)
     TEST4FIMEX_CHECK(ft < maxTime);
     TEST4FIMEX_CHECK(ft2 < maxTime);
 }
+
+TEST4FIMEX_TEST_CASE(test_FimexTimeEncoding)
+{
+    {
+        const FimexTime ft(2024, 7, 6, 8, 0, 8, 808);
+        const uint64_t enc = 0x7e87060800080328;
+        TEST4FIMEX_CHECK_EQ(enc, ft.toEncoded());
+        TEST4FIMEX_CHECK_EQ(ft, FimexTime::fromEncoded(enc));
+    }
+    {
+        const FimexTime ft(2023, 12, 31, 23, 59, 59, 999);
+        const uint64_t enc = 0x7e7c1f173b3b03e7;
+        TEST4FIMEX_CHECK_EQ(enc, ft.toEncoded());
+        TEST4FIMEX_CHECK_EQ(ft, FimexTime::fromEncoded(enc));
+    }
+    TEST4FIMEX_CHECK_EQ(0, FimexTime().toEncoded());
+}

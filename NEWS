@@ -1,3 +1,44 @@
+  * 2026-07-13 fimex 2.5.5
+    * bugfixes WRF, product function
+    * GRIB projection variable has datatype INT
+    * search for GRIB magic (skip padding)
+  * 2026-06-09 fimex 2.5.4
+    * limit chunk reader cache size
+  * 2026-06-08 fimex 2.5.3
+    * bugfix
+    * fix FIMEX_IO_PLUGINS_PATH for conda
+  * 2026-06-01 fimex 2.5.2
+    * optimizations for indexed NetCDF / GRIB readers
+    * change filename handling in index files
+  * 2026-05-27 fimex 2.5.1
+    * try to fix FIMEX_IO_PLUGINS_PATH for conda
+  * 2026-05-20 fimex 2.5.0
+    * add NetCDF protobuf index and fiIndexNc, input type and extension ncfp;
+      this does not use libnetcdf/libhdf5 for reading and supports reading
+      in multiple threads; can be read from http(s) / object store
+    * netcdf io no longer assumes that http(s) is OPeNDAP, instead it probes;
+      use the new input type "ncdap" to avoid probing
+    * example python script to manipulate protobuf index files
+      (use at your own risk)
+  * 2026-05-18 fimex 2.4.3
+    * bugfix
+  * 2026-05-18 fimex 2.4.2
+    * do not strip filenames when creating grbfp
+    * expand files (glob:..., list:...) in more places
+    * bugfixes
+  * 2026-04-28 fimex 2.4.1
+    * build with C++20
+  * 2026-04-28 fimex 2.4.0
+    * support reading GRIB from http
+    * add GRIB protobuf index
+  * 2026-03-12 fimex 2.3.0
+    * make netcdf4 the default netcdf filetype
+    * update wiki links, update test data url
+    * implement CF atmosphere_hybrid_height coordinate
+  * 2026-01-22 fimex 2.2.0
+    * BUGFIX add back ncml extension for "strings" datatype
+    * basic support for lambert_lam
+    * updates to python bindings (new version with xarray support on pypi.org)
   * 2024-09-09 fimex 2.1.1
     * attempt to fix memory leak in XMLDoc::toString
   * 2024-08-15 fimex 2.1.0

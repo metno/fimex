@@ -35,6 +35,10 @@
 
 namespace MetNoFimex {
 
+extern const char FILETYPE_GRBML[];
+extern const char FILETYPE_GRBFP[];
+bool isGribType(const std::string& type);
+
 class GribIoFactory : public IoFactory
 {
 public:

@@ -69,6 +69,8 @@ SET(libfimex_SOURCES
   ${INCF}/CDMReaderWriter.h
   CDMTimeInterpolator.cc
   ${INCF}/CDMTimeInterpolator.h
+  CDMUtils.cc
+  ${INCF}/CDMUtils.h
   CDMVariable.cc
   ${INCF}/CDMVariable.h
   CDMVerticalInterpolator.cc
@@ -77,6 +79,22 @@ SET(libfimex_SOURCES
   ${INCF}/CDMWriter.h
   CDM_XMLConfigHelper.cc
   ${INCF}/CDM_XMLConfigHelper.h
+
+  ChunkReader.cc
+  ${INCF}/ChunkReader.h
+  FileChunkReader.cc
+  FileChunkReader.h
+  HttpChunkReader.cc
+  HttpChunkReader.h
+
+  ChunkReaderFactory.cc
+  ${INCF}/ChunkReaderFactory.h
+  DefaultChunkReaderFactory.cc
+  DefaultChunkReaderFactory.h
+
+  ChunkReaderXmlInputCtx.cc
+  ${INCF}/ChunkReaderXmlInputCtx.h
+
   CoordinateSystemSliceBuilder.cc
   ${INCF}/CoordinateSystemSliceBuilder.h
   Data.cc
@@ -147,6 +165,8 @@ SET(libfimex_SOURCES
   FileUtils.cc
   ${INCF}/FileUtils.h
   ${INCF}/min_max.h
+  ProtobufUtils.cc
+  ${INCF}/ProtobufUtils.h
   XMLDoc.cc
   ${INCF}/XMLDoc.h
   ${INCF}/XMLInput.h
@@ -290,6 +310,7 @@ SET(FIMEX_IO_PLUGINS_PATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 CONFIGURE_FILE(fimex_config.h.in fimex_config.h)
 
 SET(libfimex_PACKAGES
+  ${curl_PACKAGE}
   ${date_PACKAGE}
   ${libxml2_PACKAGE}
   ${log4cpp_PACKAGE}
@@ -297,6 +318,21 @@ SET(libfimex_PACKAGES
   ${udunits2_PACKAGE}
   ${openmp_CXX_PACKAGE}
 )
+
+IF(ENABLE_PROTOBUF)
+  SET (cdm_protos cdm.proto)
+  protoc_generated(cdm_proto_gen "${CMAKE_CURRENT_BINARY_DIR}" cdm)
+  protoc_generate("${cdm_proto_gen}" "${cdm_protos}" "")
+
+  LIST(APPEND libfimex_PACKAGES ${PROTOBUF_LIBRARIES})
+  LIST(APPEND libfimex_SOURCES
+    ProtobufCDM.cc
+    ${INCF}/ProtobufCDM.h
+
+    "${cdm_proto_gen}"
+  )
+  list_prepend_dir(libfimex_SOURCES "${metno_protos_dir}" ${cdm_protos})
+ENDIF(ENABLE_PROTOBUF)
 
 FIMEX_ADD_LIBRARY(fimex "${libfimex_SOURCES}" "${libfimex_PACKAGES}")
 

@@ -24,71 +24,92 @@
  *      Author: Heiko Klein
  */
 
+#include "GribIoFactory.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMconstants.h"
 
+#include "fimex/Data.h"
+#include "fimex/FileUtils.h"
 #include "fimex/Logger.h"
 #include "fimex/StringUtils.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/XMLInputFile.h"
+#include "fimex/XMLUtils.h"
 
-#define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "GribCDMReader.h"
-#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#include "GribCDMIndexer.h"
 #include "GribFileIndex.h"
+#include "GribReaderConfig.h"
 
 #include <mi_programoptions.h>
 
-#include <grib_api.h>
-
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 
+#include "fimex_grib_config.h"
+#ifdef HAVE_PROTOBUF
+#include "GribProtobufIndexWriter.h"
+#endif
+
 namespace po = miutil::program_options;
-using namespace std;
 using namespace MetNoFimex;
 
 namespace {
 
-static Logger_p logger = getLogger("fiIndexGribs");
+Logger_p logger = getLogger("fiIndexGribs");
 
-void writeUsage(ostream& out, const po::option_set& options)
+void writeUsage(std::ostream& out, const po::option_set& options)
 {
-    out << "usage: fiIndexGribs -o/--outputFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile [[-i] gribFile2 [...]]" << endl;
-    out << "  When creating, one or more input file(s) must be specified." << endl;
-    out << "usage: fiIndexGribs -a/--appendFile GRBML_NAME [-c/--readerConfig gribreaderconfig.xml] [-i] gribFile" << endl;
-    out << "  When appending, exactly one input file must be specified." << endl;
-    out << endl;
+    out << "usage: fiIndexGribs -o/--output.file GRBML_NAME [--output.type grbml] [-c/--input.config gribreaderconfig.xml] [-i] gribFile [[-i] gribFile2 [...]] " << std::endl;
+    out << "  When creating, one or more input file(s) must be specified." << std::endl;
+    out << "usage: fiIndexGribs -a/--append.file GRBML_NAME [-c/--input.config gribreaderconfig.xml] [-i] gribFile" << std::endl;
+    out << "  When appending, exactly one input file must be specified." << std::endl;
+    out << "usage: fiIndexGribs --output.file GRBFP_FILE --output.type grbfp [-c/--input.config gribreaderconfig.xml] [--input.type grbml] --input.file GRBML_NAME [[-i] index2.grbml [...]]" << std::endl;
+    out << "  Create a protbuf index from grbml file(s) and gribreaderconfig.xml." << std::endl;
+    out << "usage: fiIndexGribs --output.file GRBFP_FILE --output.type grbfp [-c/--input.config gribreaderconfig.xml] [--input.type grib] [[-i] gribFile [...]]" << std::endl;
+    out << "  Create a protbuf index from GRIB file(s) and gribreaderconfig.xml." << std::endl;
+    out << "\n"
+        << "Each input filename is expanded if it starts with certain prefixes:\n"
+        << " - if it starts with 'glob:', use the remainder as glob pattern\n"
+        << " - if it starts with 'many:', use the first char after as separator and split\n"
+        << "   the remainder on this separator (e.g. many:|a.grb|b.grb|c.grb)\n"
+        << " - if it starts with 'list:', use the remainder as path to a list of files\n"
+        << "   one per line\n";
+    out << "\n";
     options.help(out);
 }
 
-void initOptions(std::map<std::string, std::string>& options,
-                 std::vector<std::pair<std::string, std::regex>>& members,
-                 vector<string> extraKeys, string config, vector<string> memberOptions)
+void initOptions(std::map<std::string, std::string>& options, std::vector<std::pair<std::string, std::regex>>& members, std::vector<std::string> extraKeys,
+                 std::string config, std::vector<std::string> memberOptions)
 {
     if (!config.empty()) {
-        using namespace MetNoFimex;
-        XMLDoc_p doc = GribCDMReader::initXMLConfig(XMLInputFile(config));
-        options["earthfigure"] = GribCDMReader::getConfigEarthFigure(doc);
-        extraKeys.push_back(GribCDMReader::getConfigExtraKeys(doc));
+        XMLDoc_p doc = GribReader::initXMLConfig(XMLInputFile(config));
+        options["earthfigure"] = GribReader::getConfigEarthFigure(doc);
+        extraKeys.push_back(GribReader::getConfigExtraKeys(doc));
     }
     if (!extraKeys.empty()) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
     if (!memberOptions.empty()) {
-        vector<pair<string, string> > memberStrings;
-        vector<string> files;
+        std::vector<std::pair<std::string, std::string>> memberStrings;
+        std::vector<std::string> files;
         MetNoFimex::parseGribArgs(memberOptions, memberStrings, files);
-        for (vector<pair<string, string> >::const_iterator memIt = memberStrings.begin(); memIt != memberStrings.end(); ++memIt) {
-            members.push_back(make_pair(memIt->first, std::regex(memIt->second)));
-        }
+        members = GribCDMIndexer::makeMembersRegex(memberStrings);
     }
 }
 
+std::string ensureScheme(const std::string& url)
+{
+    if (starts_with(url, "http://") || starts_with(url, "https://") || starts_with(url, "file://"))
+        return url;
+    else
+        return "file:" + url;
+}
+
 struct GribIndexWriter {
-    GribIndexWriter(const string& output, const std::string& url);
+    GribIndexWriter(const std::string& output, const std::string& url);
     ~GribIndexWriter();
 
     std::ofstream os;
@@ -97,45 +118,97 @@ struct GribIndexWriter {
 GribIndexWriter::GribIndexWriter(const std::string& output, const std::string& url)
     : os(output, std::ios::binary)
 {
-    os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-    os << "<gribFileIndex url=\"" << url << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << endl;
+    os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+    os << "<gribFileIndex url=\"" << url << "\" xmlns=\"http://www.met.no/schema/fimex/gribFileIndex\">" << std::endl;
 }
 
 GribIndexWriter::~GribIndexWriter()
 {
-    os << "</gribFileIndex>" << endl;
+    os << "</gribFileIndex>" << std::endl;
 }
 
-void indexGribs(const std::vector<std::string>& inputs, const std::string& output, vector<string> extraKeys, string config,
-                vector<string> memberOptions)
+void createGrbmlFromGRIB(ChunkReaderFactory_p ca, const std::vector<std::string>& inputs, const std::string& output, std::vector<std::string> extraKeys,
+                         std::string config, std::vector<std::string> memberOptions)
 {
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
     initOptions(options, members, extraKeys, config, memberOptions);
 
-    GribIndexWriter w(output, "file:" + inputs.front());
+    GribIndexWriter w(output, ensureScheme(inputs.front()));
     for (const auto& input : inputs) {
         LOG4FIMEX(logger, Logger::DEBUG, "Start processing '" << input << "'");
-        const GribFileIndex gfi(input, "", members, options);
+        const GribFileIndex gfi(ca, input, "", members, options);
         for (const auto& gfm : gfi.listMessages())
             w.os << gfm;
     }
 }
 
-void indexGribAppend(const std::string& input, const std::string& append, vector<string> extraKeys, string config, vector<string> memberOptions)
+void appendToGrbml(ChunkReaderFactory_p ca, const std::string& input, const std::string& append, std::vector<std::string> extraKeys, std::string config,
+                   std::vector<std::string> memberOptions)
 {
     std::map<std::string, std::string> options;
     std::vector<std::pair<std::string, std::regex>> members;
     initOptions(options, members, extraKeys, config, memberOptions);
 
     LOG4FIMEX(logger, Logger::DEBUG, "Reading '" << append << "' and processing '" << input << "'");
-    const GribFileIndex gfi(input, append, members, options);
+    const GribFileIndex gfi(ca, input, append, members, options);
 
     LOG4FIMEX(logger, Logger::DEBUG, "Writing to '" << append << "'");
-    GribIndexWriter w(append, "file:" + input);
+    GribIndexWriter w(append, ensureScheme(input));
     for (const auto& gfm : gfi.listMessages())
         w.os << gfm;
 }
+
+#ifdef HAVE_PROTOBUF
+void createGribfpFromGrbml(ChunkReaderFactory_p ca, const std::vector<std::string>& inputs, const std::string& output, std::vector<std::string> extraKeys,
+                           const std::string& config, const std::vector<std::string>& memberOptions)
+{
+    std::map<std::string, std::string> options;
+    std::vector<std::pair<std::string, std::regex>> members;
+    initOptions(options, members, extraKeys, config, memberOptions);
+
+    if (config.empty()) {
+        throw std::runtime_error("grib reader config required to create FimexIndex from grbml");
+    }
+    XMLInputDoc configXML = createXMLInput(config);
+
+    GribCDMIndexer grind(configXML, members, ca);
+    for (const auto& grbml : inputs) {
+      LOG4FIMEX(logger, Logger::DEBUG, "Reading grbml file '" << grbml << "' ...");
+      grind.loadGrbml(grbml);
+    }
+    auto cdm = std::make_shared<CDM>();
+    auto grib_indexed = std::make_shared<GribCDMIndexer::grib_indexed>();
+    grind.build(cdm, grib_indexed);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "Writing to '" << output << "' ...");
+    GribProtobufIndexWriter writer;
+    writer.write(*cdm, *grib_indexed, output);
+}
+
+void createGrbfpFromGRIB(ChunkReaderFactory_p ca, const std::vector<std::string>& inputs, const std::string& output, std::vector<std::string> extraKeys,
+                         const std::string& config, const std::vector<std::string>& memberOptions)
+{
+    std::map<std::string, std::string> options;
+    std::vector<std::pair<std::string, std::regex>> members;
+    initOptions(options, members, extraKeys, config, memberOptions);
+
+    if (config.empty()) {
+        throw std::runtime_error("grib reader config required to create FimexIndex from grbml");
+    }
+    XMLInputDoc configXML = createXMLInput(config);
+
+    GribCDMIndexer grind(configXML, members, ca);
+    grind.loadGRIB(inputs);
+    auto cdm = std::make_shared<CDM>();
+    auto grib_indexed = std::make_shared<GribCDMIndexer::grib_indexed>();
+    grind.build(cdm, grib_indexed);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "Writing to '" << output << "' ...");
+    GribProtobufIndexWriter writer;
+    writer.write(*cdm, *grib_indexed, output);
+}
+#endif
 
 } // namespace
 
@@ -148,80 +221,145 @@ int main(int argc, char* args[])
     const po::option op_debug = po::option("debug", "debug option").set_narg(0);
     const po::option op_version = po::option("version", "program version").set_narg(0);
     const po::option op_extraKey = po::option("extraKey", "multiple extraKey to index").set_composing();
-    const po::option op_readerConfig = po::option("readerConfig", "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.").set_shortkey("c");
-    const po::option op_outputFile = po::option("outputFile", "output grbml file").set_shortkey("o");
-    const po::option op_inputFile = po::option("inputFile", "input gribFile").set_shortkey("i").set_composing();
+    const po::option op_input_config = po::option("input.config", "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.").add_key("readerConfig").set_shortkey("c").set_default_value("");
+    const po::option op_output_file = po::option("output.file", "output index file").add_key("outputFile").set_shortkey("o");
+    const po::option op_output_type = po::option("output.type", "type of index to be written: grbml or gribfp");
+    const po::option op_input_file = po::option("input.file", "input file(s)").add_key("inputFile").set_shortkey("i").set_composing();
+    const po::option op_input_type = po::option("input.type", "type of input: grbml (single file) or grib (GRIB message file(s))").set_default_value("");
     const po::option op_input_optional = po::option("input.optional", "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs").set_composing();
-    const po::option op_appendFile = po::option("appendFile", "append output new index to a grbml-file").set_shortkey("a");
+    const po::option op_append_file = po::option("appendFile", "append output new index to a grbml-file").set_shortkey("a");
 
     po::option_set options;
     options
+        // clang-format off
         << op_help
         << op_debug
         << op_version
         << op_extraKey
-        << op_readerConfig
-        << op_outputFile
-        << op_inputFile
+        << op_input_config
+        << op_output_file
+        << op_output_type
+        << op_input_file
+        << op_input_type
         << op_input_optional
-        << op_appendFile
+        << op_append_file
         ;
+        // clang-format on
 
     // read the options
     po::string_v positional;
     po::value_set vm = po::parse_command_line(argc, args, options, positional);
 
     if (argc == 1 || vm.is_set(op_help)) {
-        writeUsage(cout, options);
+        writeUsage(std::cout, options);
         return 0;
     }
     if (vm.is_set(op_debug)) {
         MetNoFimex::defaultLogLevel(MetNoFimex::Logger::DEBUG);
     }
     if (vm.is_set(op_version)) {
-        cout << "fiIndexGribs version " << fimexVersion() << endl;
+        std::cout << "fiIndexGribs version " << fimexVersion() << std::endl;
         return 0;
     }
 
-    vector<string> inputs;
-    if (vm.is_set(op_inputFile))
-        inputs = vm.values(op_inputFile);
-    inputs.insert(inputs.end(), positional.begin(), positional.end());
+    // first collect input files from all arguments
+    std::vector<std::string> inputs_args;
+    if (vm.is_set(op_input_file))
+        inputs_args = vm.values(op_input_file);
+    inputs_args.insert(inputs_args.end(), positional.begin(), positional.end());
 
-    std::string outputFile;
-    if (vm.is_set(op_outputFile))
-        outputFile = vm.value(op_outputFile);
-    else if (!inputs.empty())
-        outputFile = inputs.front() + ".grbml";
+    // then expand glob:, many:, list:, ...
+    std::vector<std::string> inputs;
+    for (const auto& i : inputs_args)
+        expand_files(inputs, i);
 
-    vector<string> extraKeys;
+    std::vector<std::string> extraKeys;
     if (vm.is_set(op_extraKey)) {
         extraKeys = vm.values(op_extraKey);
     }
-    string readerConfig("");
-    if (vm.is_set(op_readerConfig)) {
-        readerConfig = vm.value(op_readerConfig);
-    }
-    vector<string> members;
+
+    std::vector<std::string> members;
     if (vm.is_set(op_input_optional)) {
         members = vm.values(op_input_optional);
     }
-    std::string appendFile;
-    if (vm.is_set(op_appendFile)) {
-        if (inputs.size() != 1) {
-            cerr << "When appending, exactly one input file must be specified." << endl;
-            writeUsage(cout, options);
+
+    const std::string& readerConfig = vm.value(op_input_config);
+
+    const auto op_append = vm.is_set(op_append_file);
+    const auto op_output = vm.is_set(op_output_file);
+    if (op_append && op_output) {
+        std::cerr << "Only one of"
+                  << " --" << op_append_file.key() << " and --" << op_output_file.key() << " may be specified." << std::endl;
+        writeUsage(std::cerr, options);
+        return 1;
+    }
+
+    auto ca = createDefaultChunkReaderFactory();
+    if (op_append) {
+        if (vm.is_set(op_output_type) && vm.value(op_output_type) != FILETYPE_GRBML) {
+            std::cerr << "Appending is only supported for " << FILETYPE_GRBML << " indices." << std::endl;
+            writeUsage(std::cerr, options);
             return 1;
         }
-        outputFile = appendFile = vm.value(op_appendFile);
-        indexGribAppend(inputs.front(), appendFile, extraKeys, readerConfig, members);
+        if (inputs.size() != 1) {
+            std::cerr << "When appending, exactly one input file must be specified." << std::endl;
+            writeUsage(std::cerr, options);
+            return 1;
+        }
+        const auto& appendFile = vm.value(op_append_file);
+        appendToGrbml(ca, inputs.front(), appendFile, extraKeys, readerConfig, members);
     } else {
         if (inputs.empty()) {
-            cerr << "missing input file" << endl;
-            writeUsage(cout, options);
+            std::cerr << "missing input file(s)." << std::endl;
+            writeUsage(std::cerr, options);
             return 1;
         }
-        indexGribs(inputs, outputFile, extraKeys, readerConfig, members);
+
+        std::string output_type;
+        if (vm.is_set(op_output_type)) {
+            output_type = vm.value(op_output_type);
+        }
+
+        std::string output_file;
+        if (vm.is_set(op_output_file)) {
+            output_file = vm.value(op_output_file);
+            if (!vm.is_set(op_output_type)) {
+                if (ends_with(output_file, FILETYPE_GRBML)) {
+                    output_type = FILETYPE_GRBML;
+                } else if (ends_with(output_file, FILETYPE_GRBFP)) {
+                    output_type = FILETYPE_GRBFP;
+                }
+            }
+        } else {
+            output_type = FILETYPE_GRBML;
+            output_file = inputs.front() + "." + output_type;
+        }
+
+        if (output_type == FILETYPE_GRBML) {
+            if (vm.is_set(op_input_type) && !isGribType(vm.value(op_input_type))) {
+                std::cerr << "Only GRIB message input is supported for writing " << FILETYPE_GRBML << " index." << std::endl;
+                return 1;
+            }
+            createGrbmlFromGRIB(ca, inputs, output_file, extraKeys, readerConfig, members);
+#ifdef HAVE_PROTOBUF
+        } else if (output_type == FILETYPE_GRBFP) {
+            if ((vm.is_set(op_input_type) && vm.value(op_input_type) == FILETYPE_GRBML) || ends_with(inputs.front(), FILETYPE_GRBML)) {
+                // create protobuf index from a grbml indices
+                createGribfpFromGrbml(ca, inputs, output_file, extraKeys, readerConfig, members);
+            } else if (!vm.is_set(op_input_type) || isGribType(vm.value(op_input_type))) {
+                // create protobuf index from a set of GRIB messages
+                createGrbfpFromGRIB(ca, inputs, output_file, extraKeys, readerConfig, members);
+            } else {
+                std::cerr << "Unsupported index input type '" << vm.value(op_input_type) << "' or input count for " << FILETYPE_GRBFP << " index." << std::endl;
+                writeUsage(std::cerr, options);
+                return 1;
+            }
+#endif // HAVE_PROTOBUF
+        } else {
+            std::cerr << "Unknown index output type '" << output_type << "'." << std::endl;
+            writeUsage(std::cerr, options);
+            return 1;
+        }
     }
     return 0;
 }

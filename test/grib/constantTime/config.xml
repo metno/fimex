@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmGribReaderConfig xmlns="http://www.met.no/schema/fimex/cdmGribReaderConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <processOptions>
+    <option name="selectParameters" value="all"/>
+  </processOptions>
+  <overrule>
+  </overrule>
+  <global_attributes>
+    <attribute name="Conventions" value="CF-1.0" type="string"/>
+    <attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string"/>
+    <attribute name="source" value="ECMWF" type="string"/>
+    <attribute name="title" value="IFS deterministic model" type="string"/>
+    <attribute name="min_time" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string"/>
+    <attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string"/>
+  </global_attributes>
+  <axes>
+    <time id="time" name="time" type="double">
+      <attribute name="long_name" value="Uninitialized analysis / image product / forecast product valid for RT + P1" type="string"/>
+      <attribute name="standard_name" value="time" type="string"/>
+      <attribute name="units" value="seconds since 1970-01-01 00:00:00 +0000" type="string"/>
+    </time>
+    <spatial_axis typeOfGrid="regular_ll" id="x" name="longitude" type="float">
+      <attribute name="long_name" value="longitude" type="string"/>
+      <attribute name="units" value="degrees_east" type="string"/>
+    </spatial_axis>
+    <spatial_axis typeOfGrid="regular_ll" id="y" name="latitude" type="float">
+      <attribute name="long_name" value="latitude" type="string"/>
+      <attribute name="units" value="degrees_north" type="string"/>
+    </spatial_axis>
+    <spatial_axis id="longitude" name="longitude">
+      <attribute name="valid_max" value="180." type="float"/>
+      <attribute name="valid_min" value="-180." type="float"/>
+      <attribute name="long_name" value="longitude" type="string"/>
+      <attribute name="standard_name" value="longitude" type="string"/>
+      <attribute name="units" value="degrees_east" type="string"/>
+    </spatial_axis>
+    <spatial_axis id="latitude" name="latitude">
+      <attribute name="valid_max" value="90." type="float"/>
+      <attribute name="valid_min" value="-90." type="float"/>
+      <attribute name="long_name" value="latitude" type="string"/>
+      <attribute name="standard_name" value="latitude" type="string"/>
+      <attribute name="units" value="degrees_north" type="string"/>
+  </spatial_axis>
+    <!-- grib2 code table 4.5; grib1 code table 3 / 3a -->
+    <vertical_axis id="surface" name="surface" grib2_id="1" grib1_id="1" type="short">
+      <attribute name="_FillValue" value="-32767" type="short"/>
+      <attribute name="description" value="ground or water surface" type="string"/>
+      <attribute name="long_name" value="surface" type="string"/>
+      <attribute name="positive" value="up" type="string"/>
+      <attribute name="units" value="m" type="string"/>
+    </vertical_axis>
+  </axes>
+  <variables>
+    <parameter name="surface_geopotential" type="float" constantTime="true">
+      <grib2 discipline="0" parameterCategory="3" parameterNumber="4" typeOfLevel="1"/>
+      <attribute name="long_name" value="Surface geopotential (fis)" type="string" />
+      <attribute name="standard_name" value="surface_geopotential" type="string" />
+      <attribute name="units" value="m^2/s^2" type="string" />
+    </parameter>
+  </variables>
+</cdmGribReaderConfig>

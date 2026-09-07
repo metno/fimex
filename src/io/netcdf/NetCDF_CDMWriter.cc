@@ -60,6 +60,9 @@ int getNcVersion(int version, XMLDoc_p doc)
     case 4:
         retVal = NC_CLOBBER | NC_CLASSIC_MODEL | NC_NETCDF4;
         break;
+    case 5:
+        retVal = NC_CLOBBER | NC_NETCDF4;
+        break;
 #endif
     default:
         LOG4FIMEX(logger, Logger::ERROR, "unknown netcdf-version " << version << " using 3 instead");

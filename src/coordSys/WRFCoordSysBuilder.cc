@@ -143,7 +143,11 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         }
         break;
     case 3:
-        proj4 << "+proj=merc +lon_0="<<standardLon<<" +lat_0="<<standardLat;
+        // https://proj.org/en/stable/operations/projections/merc.html
+        proj4 << "+proj=merc"
+            << " +lon_0=" << standardLon
+            << " +lat_ts=" << standardLat
+            ;
         break;
     case 6:
         // rotert sperical
@@ -156,15 +160,11 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
     }
     const int R0 = 6370000; // WRF earth radius = 6370km
     proj4 << " +R=" << R0 << " +no_defs";
-    //cerr << proj4.str() << endl;
+    LOG4FIMEX(logger, Logger::DEBUG, "proj4='" << proj4.str() << "'");
     Projection_p proj = Projection::createByProj4(proj4.str());
-    double centerX = deg_to_rad(centralLon);
-    double centerY = deg_to_rad(centralLat);
+    double centerX = centralLon;
+    double centerY = centralLat;
     reproject::reproject_values(MIFI_WGS84_LATLON_PROJ4, proj4.str(), &centerX, &centerY, 1);
-    if (isLatLon) {
-        centerX = rad_to_deg(centerX);
-        centerY = rad_to_deg(centerY);
-    }
 
     // TODO: the following variables might be called uninitialized when the coordinate-system
     //       is build twice
@@ -386,7 +386,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
         // ref-time
         string reftime = "forecast_reference_time";
         if (!cdm.hasVariable(reftime)) {
-            cdm.addVariable(CDMVariable(reftime, CDM_INT, vector<string>(0)));
+            cdm.addVariable(CDMVariable(reftime, CDM_FLOAT, vector<string>(0)));
             string ref = cdm.getAttribute(cdm.globalAttributeNS(),
                     "SIMULATION_START_DATE").getStringValue();
             vector<string> refdatetime = tokenize(ref, "_");
@@ -435,7 +435,7 @@ static CoordinateSystem_cp_v wrfListCoordinateSystems(CDM& cdm, CDMReader_p read
                         if (!cdm.hasVariable(*dimIt)) {
                             // add a dimension without a variable with a 'virtual' variable
                             vector<string> myshape(1, *dimIt);
-                            cdm.addVariable(CDMVariable(*dimIt, CDM_INT, myshape));
+                            cdm.addVariable(CDMVariable(*dimIt, CDM_FLOAT, myshape));
                             size_t dimSize = cdm.getDimension(*dimIt).getLength();
                             auto vals = make_shared_array<float>(dimSize);
                             for (size_t i = 0; i < dimSize; i++) {

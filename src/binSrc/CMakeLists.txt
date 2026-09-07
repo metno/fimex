@@ -26,7 +26,16 @@ ADD_EXE(fiXYcontents "")
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   SET(GRIB_PACKAGES ${eccodes_PACKAGE} ${grib_api_PACKAGE} libfimex-io-grib)
 
-  ADD_EXE(fiIndexGribs "${GRIB_PACKAGES}")
+  ADD_EXE(fiIndexGribs "${GRIB_PACKAGES};${PROTOBUF_LIBRARIES}")
   ADD_EXE(fiGribCut    "${GRIB_PACKAGES}")
   ADD_EXE(fiGrbmlCat   "")
+ENDIF()
+
+IF(ENABLE_NETCDF AND ENABLE_PROTOBUF AND HAVE_NETCDF_HDF5_LIB)
+  ADD_EXE(fiIndexNc "libfimex-io-netcdf;${PROTOBUF_LIBRARIES}")
+  TARGET_INCLUDE_DIRECTORIES(fiIndexNc
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/src/io/netcdf"
+      "${CMAKE_BINARY_DIR}/src/io/netcdf"  # for fimex_netcdf_config.h
+  )
 ENDIF()

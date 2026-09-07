@@ -15,7 +15,7 @@ ifeq ($(DEB_HOST_ARCH),i386)
 endif
 
 %:
-	dh $@ --parallel
+	dh $@ --parallel --with python3
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
@@ -24,7 +24,8 @@ override_dh_auto_configure:
 	    -DENABLE_ECCODES=YES \
 	    -DENABLE_FORTRAN=YES \
 	    -DENABLE_FIMEX_OMP=YES \
-	    -DENABLE_PYTHON=YES
+	    -DENABLE_PYTHON=YES \
+	    -DPYFIMEX_INSTALL_LIBDIR=/usr/lib/python3/dist-packages
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:

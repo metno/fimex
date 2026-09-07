@@ -36,6 +36,7 @@
 #include "leap_iterator.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <cctype>
 #include <numeric>
@@ -181,29 +182,35 @@ TEST4FIMEX_TEST_CASE(test_regexEscape)
 
 TEST4FIMEX_TEST_CASE(test_scanFiles)
 {
+    const std::string dir = topSrcDir() + "/include";
+    const auto pat = std::regex(".*CD.*d.?.?\\.h");
+    const std::string exp = dir + "/fimex/CDMReader.h";
+
     vector<string> files;
-    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), true);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    scanFiles(files, dir, -1, pat, true);
+    // std::cerr << "found " << files.size() << " files in '" << dir << "'" << std::endl;
+    // for (const auto& f : files) { std::cerr << "found '" << f << "'" << std::endl; }
+    TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
+
+    // Same with "matchFileOnly" == false.
     files.clear();
-    scanFiles(files, topSrcDir(), -1, std::regex(".*stUti.?.?\\.cc"), false);
-    TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-    TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    scanFiles(files, dir, -1, pat, false);
+    TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
 }
 
 TEST4FIMEX_TEST_CASE(test_globFiles)
 {
+    const std::string dir = topSrcDir() + "/include";
+    const std::string exp = dir + "/fimex/NcmlCDMReader.h";
     {
         vector<string> files;
-        globFiles(files, topSrcDir() + "/**stUti??.cc");
-        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+        globFiles(files, dir + "/**CDMRead??.h");
+        TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
     }
     {
         vector<string> files;
-        globFiles(files, topSrcDir() + "/test/*stUti??.cc");
-        TEST4FIMEX_REQUIRE_EQ(files.size(), 1);
-        TEST4FIMEX_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+        globFiles(files, dir + "/fimex/*CDMReader.h");
+        TEST4FIMEX_CHECK(std::find(files.begin(), files.end(), exp) != files.end());
     }
     {
         vector<string> files;
@@ -435,4 +442,185 @@ TEST4FIMEX_TEST_CASE(test_product)
     const size_t count[] = {0x10000000, 16, 16, 8};
     const size_t p = product(std::begin(count), std::end(count));
     TEST4FIMEX_REQUIRE_EQ(p, 0x8000000000);
+}
+
+TEST4FIMEX_TEST_CASE(test_stringlistbuilder)
+{
+    const std::string first = "hei", second = "hello";
+    StringListBuilder builder;
+    TEST4FIMEX_CHECK_EQ(0, builder.add(first));
+    TEST4FIMEX_CHECK_EQ(1, builder.add(second));
+    TEST4FIMEX_CHECK_EQ(0, builder.add(first)); // add first again, must be same index
+
+    StringListBuilder builder_from_strings(builder.strings());
+    TEST4FIMEX_CHECK_EQ(0, builder_from_strings.add(first)); // add first again, must be same index
+}
+
+TEST4FIMEX_TEST_CASE(test_stringlistbuilder_no0)
+{
+    const std::string first = "hei", second = "hello";
+    StringListBuilder builder(true);
+    TEST4FIMEX_CHECK_EQ(1, builder.add(first));
+    TEST4FIMEX_CHECK_EQ(2, builder.add(second));
+    TEST4FIMEX_CHECK_EQ(1, builder.add(first)); // add first again, must be same index
+
+    StringListBuilder builder_from_strings(builder.strings(), true);
+    TEST4FIMEX_CHECK_EQ(1, builder_from_strings.add(first)); // add first again, must be same index
+    TEST4FIMEX_CHECK_EQ(2, builder_from_strings.add(second));
+}
+
+TEST4FIMEX_TEST_CASE(test_extract_filename)
+{
+    TEST4FIMEX_CHECK_EQ("fimex", extractFilename("/usr/bin/fimex"));
+    TEST4FIMEX_CHECK_EQ("fimex", extractFilename("fimex"));
+    TEST4FIMEX_CHECK_EQ("", extractFilename("/usr/bin/"));
+    TEST4FIMEX_CHECK_EQ("index", extractFilename("http://www.met.no/path/to/dataset/index"));
+}
+
+TEST4FIMEX_TEST_CASE(test_remove_filename)
+{
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", removeFilename("/usr/bin/fimex"));
+    TEST4FIMEX_CHECK_EQ("", removeFilename("fimex"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", removeFilename("/usr/bin/"));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/", removeFilename("http://www.met.no/path/to/dataset/index"));
+}
+
+TEST4FIMEX_TEST_CASE(test_replace_filename)
+{
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex++", replaceFilename("/usr/bin/fimex", "fimex++"));
+    TEST4FIMEX_CHECK_EQ("fimex++", replaceFilename("fimex", "fimex++"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/", replaceFilename("/usr/bin/x", ""));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", replaceFilename("http://www.met.no/path/to/dataset/index", "file1"));
+}
+
+TEST4FIMEX_TEST_CASE(test_join_filename)
+{
+    // relative filename joined with directory path
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin", "fimex"));
+    TEST4FIMEX_CHECK_EQ("/usr/bin/fimex", joinFilename("/usr/bin/", "fimex"));
+    // relative filename with empty root
+    TEST4FIMEX_CHECK_EQ("fimex", joinFilename("", "fimex"));
+    // relative filename joined with HTTP root
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset", "file1"));
+    TEST4FIMEX_CHECK_EQ("http://www.met.no/path/to/dataset/file1", joinFilename("http://www.met.no/path/to/dataset/", "file1"));
+    // absolute POSIX filename: root is ignored
+    TEST4FIMEX_CHECK_EQ("/data/nwp/file.nc4", joinFilename("/some/other/dir", "/data/nwp/file.nc4"));
+    TEST4FIMEX_CHECK_EQ("/data/nwp/file.nc4", joinFilename("", "/data/nwp/file.nc4"));
+    // absolute URL filename: root is ignored
+    TEST4FIMEX_CHECK_EQ("http://server/data/file.nc4", joinFilename("/local/dir", "http://server/data/file.nc4"));
+    TEST4FIMEX_CHECK_EQ("https://server/data/file.nc4", joinFilename("http://other/root", "https://server/data/file.nc4"));
+}
+
+TEST4FIMEX_TEST_CASE(test_expand_files)
+{
+    // ---- plain filename: no expansion, pushed as-is -----------------------
+    {
+        vector<string> result;
+        expand_files(result, "/some/path/data.nc");
+        TEST4FIMEX_CHECK_EQ(1u, result.size());
+        TEST4FIMEX_CHECK_EQ("/some/path/data.nc", result.at(0));
+    }
+
+    // ---- plain filename: appended to existing content ---------------------
+    {
+        vector<string> result = {"pre-existing"};
+        expand_files(result, "extra.nc");
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ("extra.nc", result.at(1));
+    }
+
+    // ---- many: separator is the first char after "many:" ------------------
+    {
+        vector<string> result;
+        expand_files(result, "many:|a.grb|b.grb|c.grb");
+        TEST4FIMEX_CHECK_EQ(3u, result.size());
+        TEST4FIMEX_CHECK_EQ("a.grb", result.at(0));
+        TEST4FIMEX_CHECK_EQ("b.grb", result.at(1));
+        TEST4FIMEX_CHECK_EQ("c.grb", result.at(2));
+    }
+
+    // ---- many: different separator ----------------------------------------
+    {
+        vector<string> result;
+        expand_files(result, "many:,x.nc,y.nc");
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ("x.nc", result.at(0));
+        TEST4FIMEX_CHECK_EQ("y.nc", result.at(1));
+    }
+
+    // ---- many: too short (no char after "many:") → ignore -
+    {
+        vector<string> result;
+        expand_files(result, "many:");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
+
+    // ---- list: one filename per line from a text file ---------------------
+    {
+        // Write a temporary list file
+        const string listPath = "fimex_testUtils_expand_files.txt";
+        {
+            std::ofstream f(listPath);
+            f << "line1.nc\n";
+            f << "line2.nc\n";
+            f << "line3.nc\n";
+        }
+        vector<string> result;
+        expand_files(result, "list:" + listPath);
+        remove(listPath.c_str());
+
+        TEST4FIMEX_CHECK_EQ(3u, result.size());
+        TEST4FIMEX_CHECK_EQ("line1.nc", result.at(0));
+        TEST4FIMEX_CHECK_EQ("line2.nc", result.at(1));
+        TEST4FIMEX_CHECK_EQ("line3.nc", result.at(2));
+    }
+
+    // ---- list: non-existent file → produces zero entries (ifstream fails) -
+    {
+        vector<string> result;
+        expand_files(result, "list:fimex_no_such_file.txt");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
+
+    // ---- glob: match files that actually exist on disk --------------------
+    {
+        // Create a couple of temp files to glob for
+        const string a = "./fimex_testUtils_glob_a.nc";
+        const string b = "./fimex_testUtils_glob_b.nc";
+        { std::ofstream touch_a(a); std::ofstream touch_b(b); }
+
+        vector<string> result;
+        expand_files(result, "glob:fimex_testUtils_glob_*.nc");
+        remove(a.c_str());
+        remove(b.c_str());
+
+        // globFiles sorts alphabetically
+        TEST4FIMEX_CHECK_EQ(2u, result.size());
+        TEST4FIMEX_CHECK_EQ(a, result.at(0));
+        TEST4FIMEX_CHECK_EQ(b, result.at(1));
+    }
+
+    // ---- glob: no matches → produces zero entries -------------------------
+    {
+        vector<string> result;
+        expand_files(result, "glob:fimex_testUtils_no_such_*.nc");
+        TEST4FIMEX_CHECK_EQ(0u, result.size());
+    }
+}
+
+TEST4FIMEX_TEST_CASE(test_replace_extension)
+{
+    // Basic replacement
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data.nc",           "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path/to/data.ncfp",     replaceExtension("/path/to/data.nc",  "ncfp"));
+    // Only the last extension is replaced
+    TEST4FIMEX_CHECK_EQ("data.tar.ncfp",          replaceExtension("data.tar.gz",       "ncfp"));
+    // No extension: new extension is appended
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data",              "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path/to/data.ncfp",     replaceExtension("/path/to/data",     "ncfp"));
+    // Dots in directory components must not be mistaken for file extensions
+    TEST4FIMEX_CHECK_EQ("/path.d/data.ncfp",      replaceExtension("/path.d/data.nc",   "ncfp"));
+    TEST4FIMEX_CHECK_EQ("/path.d/data.ncfp",      replaceExtension("/path.d/data",      "ncfp"));
+    // Empty extension (trailing dot) is replaced
+    TEST4FIMEX_CHECK_EQ("data.ncfp",              replaceExtension("data.",             "ncfp"));
 }

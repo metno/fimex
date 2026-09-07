@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 
@@ -42,13 +43,12 @@
 #endif
 
 #if defined(HAVE_STD_FILESYSTEM)
-#warning "using std::filesystem"
 #include <filesystem>
 #elif defined(HAVE_BOOST_FILESYSTEM)
 #warning "using boost::filesystem"
 #include <boost/filesystem.hpp>
 #else
-// #warning "using stat/dirent"
+#warning "using stat/dirent"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -163,11 +163,12 @@ static void scanFiles_(std::vector<std::string>& files, const path_t& dir, int d
         const filetype_t ft = file_type(e);
         if (ft == DIRECTORY) {
             if (depth != 0) {
+                std::string subRelDir;
                 if (!matchFileOnly) {
                     // remember the directory behind start-directory
-                    currentRelDir += path_filename_string(e) + "/";
+                    subRelDir = currentRelDir + path_filename_string(e) + "/";
                 }
-                scanFiles_(files, e, depth - 1, regexp, matchFileOnly, currentRelDir, depthCount + 1);
+                scanFiles_(files, e, depth - 1, regexp, matchFileOnly, subRelDir, depthCount + 1);
             }
         } else if (ft == REGULAR_FILE) {
             const std::string filename = (matchFileOnly ? "" : currentRelDir) + path_filename_string(e);
@@ -226,6 +227,35 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
     scanFiles(files, dir, depth, globReg, false);
 }
 
+void  expand_files(std::vector<std::string>& files, const std::string& fileName)
+{
+    static const std::string prefix_glob("glob:");
+    static const std::string prefix_many("many:");
+    static const std::string prefix_list("list:");
+    if (starts_with(fileName, prefix_glob)) {
+        // scanfiles by a glob
+        const auto glob = fileName.substr(prefix_glob.size());
+        globFiles(files, glob);
+    } else if (starts_with(fileName, prefix_many)){
+        if (fileName.size() > prefix_many.size() + 1) {
+            // many files with a separator, first char after many:
+            const auto separator = fileName.substr(prefix_many.size(), 1);
+            const auto tail = fileName.substr(prefix_many.size() + 1);
+            files = tokenize(tail, separator);
+        }
+    } else if (starts_with(fileName, prefix_list)) {
+        // filename of a text file with one file per line
+        const auto listFile = fileName.substr(prefix_list.size());
+        std::ifstream listS(listFile);
+        for (std::string line; std::getline(listS, line);) {
+            files.push_back(line);
+        }
+    } else {
+        // no expansion
+        files.push_back(fileName);
+    }
+}
+
 std::string getExtension(const std::string& fileName)
 {
     static const std::regex re_extension(".*\\.(\\w+)$");
@@ -238,4 +268,54 @@ std::string getExtension(const std::string& fileName)
     return ext;
 }
 
+std::string extractFilename(const std::string& path)
+{
+    const auto slash = path.find_last_of("/");
+    if (slash != std::string::npos) {
+        return path.substr(slash + 1);
+    } else {
+        return path;
+    }
+}
+
+std::string removeFilename(const std::string& path)
+{
+    const auto slash = path.find_last_of("/");
+    if (slash != std::string::npos) {
+        return path.substr(0, slash + 1);
+    } else {
+        return "";
+    }
+}
+
+std::string replaceFilename(const std::string& path, const std::string& filename)
+{
+    return removeFilename(path) + filename;
+}
+
+std::string replaceExtension(const std::string& path, const std::string& newExtension)
+{
+    // Ignore dots in directory components: only search in the filename part.
+    const auto slash = path.find_last_of('/');
+    const auto fname_start = (slash != std::string::npos) ? slash + 1 : 0;
+    const auto dot = path.find_last_of('.');
+    if (dot != std::string::npos && dot >= fname_start) {
+        return path.substr(0, dot) + "." + newExtension;
+    } else {
+        return path + "." + newExtension;
+    }
+}
+
+std::string joinFilename(const std::string& path, const std::string& filename)
+{
+    // If filename is absolute (POSIX path or URL with scheme), use it as-is.
+    if (!filename.empty() && (filename.front() == '/' || filename.find("://") != std::string::npos))
+        return filename;
+    auto joined = path;
+    if (!path.empty() && path.back() != '/') {
+        joined += "/";
+    }
+    joined += filename;
+    return joined;
+}
 } // namespace MetNoFimex

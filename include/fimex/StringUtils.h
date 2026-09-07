@@ -144,6 +144,31 @@ void regex_escape(std::ostream& out, const std::string& s);
  */
 std::string regex_escape(const std::string& s);
 
+/**
+ * Helper class to build a list of strings.
+ */
+class StringListBuilder
+{
+public:
+    /** If `no_index_0` is true, add an empty dummy string to prevent strings with index==0. */
+    StringListBuilder(bool no_index_0 = false);
+
+    StringListBuilder(const std::vector<std::string>& strings, bool no_index_0 = false);
+
+    /** Add or lookup a string, returning the index to the string list. */
+    size_t add(const std::string& key);
+
+    /** Access to the string list. */
+    const std::vector<std::string>& strings() const { return strings_; }
+
+    /** Access to an element of the string list. */
+    const std::string& at(size_t idx) const { return strings_.at(idx); }
+
+private:
+    std::map<std::string, size_t> indexes_;
+    std::vector<std::string> strings_;
+};
+
 } // namespace MetNoFimex
 
 #endif // FIMEX_STRINGUTILS_H_

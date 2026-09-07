@@ -311,21 +311,21 @@ DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double old
         return convertValues(*this, newType);
 
     // clang-format off
-        switch (newType) {
-        case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_SHORT:  return createData(size(), convertArrayType<short>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_INT:    return createData(size(), convertArrayType<int>               (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_UCHAR:  return createData(size(), convertArrayType<unsigned char>     (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_USHORT: return createData(size(), convertArrayType<unsigned short>    (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_UINT:   return createData(size(), convertArrayType<unsigned int>      (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_INT64:  return createData(size(), convertArrayType<long long>         (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_UINT64: return createData(size(), convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_FLOAT:  return createData(size(), convertArrayType<float>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_DOUBLE: return createData(size(), convertArrayType<double>            (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
-        case CDM_STRING:
-        case CDM_STRINGS:
-        case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
-        }
+    switch (newType) {
+    case CDM_CHAR:   return createData(size(), convertArrayType<char>              (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_SHORT:  return createData(size(), convertArrayType<short>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_INT:    return createData(size(), convertArrayType<int>               (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_UCHAR:  return createData(size(), convertArrayType<unsigned char>     (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_USHORT: return createData(size(), convertArrayType<unsigned short>    (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_UINT:   return createData(size(), convertArrayType<unsigned int>      (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_INT64:  return createData(size(), convertArrayType<long long>         (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_UINT64: return createData(size(), convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_FLOAT:  return createData(size(), convertArrayType<float>             (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_DOUBLE: return createData(size(), convertArrayType<double>            (theData, size(), oldFill, oldScale, oldOffset, unitsConverter, newFill, newScale, newOffset));
+    case CDM_STRING:
+    case CDM_STRINGS:
+    case CDM_NAT: throw CDMException("cannot convert " + type2string(newType) + " datatype");
+    }
     // clang-format on
     throw CDMException("cannot convert unknown datatype");
 }

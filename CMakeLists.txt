@@ -32,6 +32,9 @@ PROJECT(fimex)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 INCLUDE(FimexUtils)
 
+SET (metno_protos_dir "${CMAKE_SOURCE_DIR}/src/protobuf")
+INCLUDE(MetnoProtobuf)
+
 FIMEX_CMAKE_SETUP()
 FIMEX_VERSION_DEFINES(FIMEX "include/fimex/CDMconstants.h")
 
@@ -82,6 +85,10 @@ ELSE ()
   # >=8.0
   SET(HAVE_PROJ_H 1)
 ENDIF()
+
+FIMEX_FIND_PACKAGE(curl
+  PKGCONFIG_NAME "libcurl"
+)
 
 OPTION(ENABLE_PYTHON "Use python" ON)
 
@@ -155,6 +162,29 @@ OPTION(ENABLE_FORTRAN "Use fortran" OFF)
 IF(ENABLE_FORTRAN)
   ENABLE_LANGUAGE(Fortran)
 ENDIF()
+
+OPTION(ENABLE_PROTOBUF "Enable Fimex Protobuf Index" ON)
+IF(ENABLE_PROTOBUF)
+  set(protobuf_MODULE_COMPATIBLE TRUE)
+  find_package(Protobuf CONFIG)
+  if(PROTOBUF_FOUND)
+    message(STATUS "Using protobuf ${Protobuf_VERSION}")
+
+    set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
+    if(CMAKE_CROSSCOMPILING)
+      find_program(_PROTOBUF_PROTOC protoc)
+    else()
+      set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+    endif()
+  ELSE()
+    PKG_CHECK_MODULES(PC_PROTOBUF REQUIRED IMPORTED_TARGET protobuf)
+    SET(PROTOBUF_LIBRARIES PkgConfig::PC_PROTOBUF)
+    SET(PROTOBUF_VERSION ${PC_PROTOBUF_VERSION})
+    message(STATUS "Using protobuf ${PROTOBUF_VERSION} from pkg-config")
+    find_program(_PROTOBUF_PROTOC protoc)
+  ENDIF()
+  SET(PROTOC ${_PROTOBUF_PROTOC})
+ENDIF(ENABLE_PROTOBUF)
 
 OPTION(ENABLE_FIMEX_VERSIONNUMBERED "Use version numbers in filenames" ON)
 

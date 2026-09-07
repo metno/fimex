@@ -24,6 +24,7 @@
 #include "fimex/XMLDoc.h"
 
 #include "fimex/CDMException.h"
+#include "fimex/ChunkReaderXmlInputCtx.h"
 
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
@@ -47,51 +48,58 @@ int doXmlInitParser()
     LIBXML_TEST_VERSION
     return 1;
 }
-} // namespace
 
-XMLDoc::XMLDoc(const std::string& filename)
-    :doc(0), xpathCtx(0)
-{
-    init();
-    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, XML_PARSE_HUGE);
-    if (pdoc == 0)
-        throw CDMException("cannot read xml-file '" + filename + "'");
-    setDoc(pdoc);
-    setXPathCtx(pdoc);
-}
-
-XMLDoc::XMLDoc()
-    : doc(0), xpathCtx(0)
-{
-    init();
-}
-
-void XMLDoc::init()
+void init()
 {
     static int done = doXmlInitParser();
     (void)done;
 }
 
-void XMLDoc::setDoc(xmlDoc* pdoc)
+xmlDoc* xmlDocFromFile(const std::string& filename)
 {
-    doc = pdoc;
-    if (doc == 0) {
-        cleanup();
-        throw CDMException("unable to parse content");
-    }
-    // apply the XInclude process
-    if (xmlXIncludeProcess(doc) < 0) {
-        cleanup();
-        throw CDMException("XInclude processing failed");
-    }
+    init();
+    return xmlReadFile(filename.c_str(), NULL, XML_PARSE_HUGE);
 }
 
-void XMLDoc::setXPathCtx(xmlDoc* pdoc)
+xmlDoc* xmlDocFromChunkReader(ChunkReader_p cr, const std::string& url)
 {
+    init();
+    ChunkReaderXmlInputCtx crctx(cr);
+    return xmlReadIO(readChunkReaderXmlInputCtx, closeChunkReaderXmlInputCtx, &crctx, url.c_str(), NULL, XML_PARSE_HUGE);
+}
+
+xmlDoc* checkXmlDoc(xmlDoc* doc, const std::string& url)
+{
+    if (!doc) {
+        throw CDMException("cannot read xml from '" + url + "'");
+    }
+    return doc;
+}
+
+} // namespace
+
+XMLDoc::XMLDoc(const std::string& filename)
+    : XMLDoc(xmlDocFromFile(filename), filename)
+{
+}
+
+XMLDoc::XMLDoc(ChunkReader_p cr, const std::string& url)
+    : XMLDoc(xmlDocFromChunkReader(cr, url), url)
+{
+}
+
+XMLDoc::XMLDoc(xmlDoc* pdoc, const std::string& url)
+    : doc(checkXmlDoc(pdoc, url))
+    , xpathCtx(0)
+{
+    // apply the XInclude process
+    if (xmlXIncludeProcess(doc) < 0) {
+        throw CDMException("XInclude processing failed for '" + url + "'");
+    }
+
     xpathCtx = xmlXPathNewContext(pdoc);
-    if (xpathCtx == 0) {
-        cleanup();
-        throw CDMException("unable to generate xpath context");
+    if (!xpathCtx) {
+        throw CDMException("unable to generate xpath context for '" + url + "'");
     }
 }
 
@@ -113,11 +121,8 @@ XMLDoc_p XMLDoc::fromFile(const std::string& filename)
 
 XMLDoc_p XMLDoc::fromString(const std::string& buffer, const std::string& url)
 {
-    XMLDoc_p pdoc(new XMLDoc());
-    xmlDoc* pxmldoc = xmlReadMemory(buffer.c_str(), buffer.length(), url.c_str(), NULL, 0);
-    pdoc->setDoc(pxmldoc);
-    pdoc->setXPathCtx(pxmldoc);
-    return pdoc;
+    // cannot use make_shared here as XMLDoc ctor is private
+    return XMLDoc_p(new XMLDoc(xmlReadMemory(buffer.c_str(), buffer.length(), url.c_str(), NULL, 0), url));
 }
 
 void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href)
@@ -128,19 +133,14 @@ void XMLDoc::registerNamespace(const std::string& prefix, const std::string& hre
     }
 }
 
-void XMLDoc::cleanup()
-{
-    if (doc != 0) {
-        xmlFreeDoc(doc);
-    }
-    if (xpathCtx != 0) {
-        xmlXPathFreeContext(xpathCtx);
-    }
-}
-
 XMLDoc::~XMLDoc()
 {
-    cleanup();
+    if (doc) {
+        xmlFreeDoc(doc);
+    }
+    if (xpathCtx) {
+        xmlXPathFreeContext(xpathCtx);
+    }
 }
 
 xmlXPathObject_p XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const

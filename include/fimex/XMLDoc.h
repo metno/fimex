@@ -42,6 +42,9 @@ typedef struct _xmlXPathObject xmlXPathObject;
 
 namespace MetNoFimex {
 
+class ChunkReader;
+typedef std::shared_ptr<ChunkReader> ChunkReader_p;
+
 typedef std::shared_ptr<xmlXPathObject> xmlXPathObject_p;
 
 /**
@@ -61,6 +64,8 @@ public:
      */
     explicit XMLDoc(const std::string& filename);
 
+    XMLDoc(ChunkReader_p cr, const std::string& url);
+
     XMLDoc(const XMLDoc&) = delete;
     XMLDoc& operator=(const XMLDoc&) = delete;
 
@@ -75,6 +80,7 @@ public:
      * @throw CDMException if xpath is not parsable
      */
     xmlXPathObject_p getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
+
     /**
      * @brief register a namespace for later xpath
      *
@@ -97,19 +103,10 @@ public:
     static XMLDoc_p fromString(const std::string& buffer, const std::string& url = "");
 
 private:
-        /**
-          * helper functions
-          */
-        explicit XMLDoc();
-        void init();
-        void setDoc(xmlDoc* pdoc);
-        void setXPathCtx(xmlDoc* pdoc);
-        /**
-          * some helper functions
-          */
+    XMLDoc(xmlDoc* pdoc, const std::string& url);
+
     xmlDoc* doc;
     xmlXPathContext* xpathCtx;
-    void cleanup();
 };
 
 /**

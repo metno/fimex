@@ -35,7 +35,11 @@ FMX="fimex-${PKG_VERSION_FULL}"
 ORIGTAR="$TARGETDIR/fimex-${PKG_VERSION}_${PKG_VERSION_FULL}.orig.tar.gz"
 if test ! -f "$ORIGTAR" ; then
     mkdir "$TARGETDIR/$FMX"
-    git archive --format=tar HEAD | tar xf - -C "$TARGETDIR/$FMX"
+    if test -d .git ; then
+        git archive --format=tar HEAD | tar xf - -C "$TARGETDIR/$FMX"
+    else
+        cp -a . "$TARGETDIR/$FMX"
+    fi
     rm -rf "$TARGETDIR/$FMX"/debian*
     tar czf "$ORIGTAR" -C "$TARGETDIR" "$FMX"
 fi

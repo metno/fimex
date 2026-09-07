@@ -48,7 +48,8 @@ static std::string twoDigits(int i)
     return std::string(digits, digits + 2);
 }
 
-void FimexTime::setTime(unsigned short year, char month, char mday, char hour, char minute, char second, unsigned short msecond)
+void FimexTime::setTime(unsigned short year, unsigned char month, unsigned char mday, unsigned char hour, unsigned char minute, unsigned char second,
+                        unsigned short msecond)
 {
     this->year = year;
     this->month = month;
@@ -59,7 +60,8 @@ void FimexTime::setTime(unsigned short year, char month, char mday, char hour, c
     this->msecond = msecond;
 }
 
-FimexTime::FimexTime(unsigned short year, char month, char mday, char hour, char minute, char second, unsigned short msecond)
+FimexTime::FimexTime(unsigned short year, unsigned char month, unsigned char mday, unsigned char hour, unsigned char minute, unsigned char second,
+                     unsigned short msecond)
     : year(year)
     , month(month)
     , mday(mday)
@@ -74,10 +76,10 @@ FimexTime::FimexTime(special_values val)
 {
     switch (val) {
     case min_date_time:
-        setTime(0, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, 0);
+        setTime(0, 0, 0, 0, 0, 0, 0);
         break;
     case max_date_time:
-        setTime(USHRT_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, USHRT_MAX);
+        setTime(USHRT_MAX, UCHAR_MAX, UCHAR_MAX, UCHAR_MAX, UCHAR_MAX, UCHAR_MAX, USHRT_MAX);
         break;
     default:
         throw CDMException("unimplemented special_value: " + type2string(val));
@@ -143,6 +145,61 @@ bool FimexTime::operator==(const FimexTime& rhs) const
 {
     return year == rhs.year && month == rhs.month && mday == rhs.mday && hour == rhs.hour && minute == rhs.minute && second == rhs.second &&
            msecond == rhs.msecond;
+}
+
+namespace {
+
+// try to use multiples of 4 to make it possible (if hard) to read in hex
+static const size_t WIDTH_MSECOND = 16;
+static const size_t WIDTH_SECOND = 8;
+static const size_t WIDTH_MINUTE = 8;
+static const size_t WIDTH_HOUR = 8;
+static const size_t WIDTH_MDAY = 8;
+static const size_t WIDTH_MONTH = 4;
+static const size_t WIDTH_YEAR = 12;
+
+static const size_t SHIFT_SECOND = WIDTH_MSECOND;
+static const size_t SHIFT_MINUTE = SHIFT_SECOND + WIDTH_SECOND;
+static const size_t SHIFT_HOUR = SHIFT_MINUTE + WIDTH_MINUTE;
+static const size_t SHIFT_MDAY = SHIFT_HOUR + WIDTH_HOUR;
+static const size_t SHIFT_MONTH = SHIFT_MDAY + WIDTH_MDAY;
+static const size_t SHIFT_YEAR = SHIFT_MONTH + WIDTH_MONTH;
+static_assert(SHIFT_YEAR + WIDTH_YEAR <= 64, "oversized FimexTime encoding");
+
+static const size_t MASK_MSECOND = ((1 << WIDTH_MSECOND) - 1);
+static const size_t MASK_SECOND = ((1 << WIDTH_SECOND) - 1);
+static const size_t MASK_MINUTE = ((1 << WIDTH_MINUTE) - 1);
+static const size_t MASK_HOUR = ((1 << WIDTH_HOUR) - 1);
+static const size_t MASK_MDAY = ((1 << WIDTH_MDAY) - 1);
+static const size_t MASK_MONTH = ((1 << WIDTH_MONTH) - 1);
+static const size_t MASK_YEAR = ((1 << WIDTH_YEAR) - 1);
+
+} // namespace
+
+unsigned long long FimexTime::toEncoded() const
+{
+    // clang-format off
+    return (uint64_t(year)  << SHIFT_YEAR)
+         | (uint64_t(month) << SHIFT_MONTH)
+         | (uint64_t(mday) << SHIFT_MDAY)
+         | (uint64_t(hour) << SHIFT_HOUR)
+         | (minute << SHIFT_MINUTE)
+         | (second << SHIFT_SECOND)
+         | msecond;
+    // clang-format on
+}
+
+/// this representation can be used for comparison (==, <, >) not for calculation
+FimexTime FimexTime::fromEncoded(unsigned long long enc)
+{
+    const unsigned short year = (enc >> SHIFT_YEAR) & MASK_YEAR;
+    const unsigned char month = (enc >> SHIFT_MONTH) & MASK_MONTH;
+    const unsigned char mday = (enc >> SHIFT_MDAY) & MASK_MDAY;
+    const unsigned char hour = (enc >> SHIFT_HOUR) & MASK_HOUR;
+    const unsigned char minute = (enc >> SHIFT_MINUTE) & MASK_MINUTE;
+    const unsigned char second = (enc >> SHIFT_SECOND) & MASK_SECOND;
+    const unsigned short msecond = enc & MASK_MSECOND;
+    return FimexTime(year, month, mday, hour, minute, second, msecond);
 }
 
 std::ostream& operator<<(std::ostream& out, const FimexTime& fTime)

@@ -47,8 +47,8 @@ GridDefinition::GridDefinition()
 {
 }
 
-GridDefinition::GridDefinition(std::string projDefinition, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart, double yStart,
-                               double lonStart, double latStart, double lonLatResolution, Orientation orient)
+GridDefinition::GridDefinition(const std::string& projDefinition, bool isDegree, size_t xSize, size_t ySize, double xIncr, double yIncr, double xStart,
+                               double yStart, double lonStart, double latStart, double lonLatResolution, Orientation orient)
     : projDefinition_(projDefinition)
     , isDegree_(isDegree)
     , xSize_(xSize)

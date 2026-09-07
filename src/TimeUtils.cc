@@ -34,6 +34,9 @@
 #include "fimex/TimeUnit.h"
 
 #include <date/date.h>
+#if 0 && __cplusplus >= 202001L // c++ 20 has utc clock, but gcc on Ubuntu 22.04 does not support it
+#include <chrono>
+#endif
 
 #include <cstdio>
 
@@ -96,7 +99,7 @@ std::string make_time_string_extended(const time_point& tp)
 
 time_point make_time_utc_now()
 {
-#if __cplusplus >= 202001L // c++ 20 has utc clock
+#if 0 && __cplusplus >= 202001L // c++ 20 has utc clock, but gcc on Ubuntu 22.04 does not support it
     std::chrono::utc_clock::time_point tp = std::chrono::utc_clock::now();
     return std::chrono::time_point_cast<std::chrono::seconds>(tp);
 #else

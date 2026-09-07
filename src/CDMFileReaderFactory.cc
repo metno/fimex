@@ -29,6 +29,7 @@
 #include "fimex/CDMException.h"
 #include "fimex/CDMWriter.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/ChunkReaderFactory.h"
 #include "fimex/FileUtils.h"
 #include "fimex/IoFactory.h"
 #include "fimex/IoPlugin.h"
@@ -39,6 +40,7 @@
 #include "fimex/min_max.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -61,16 +63,30 @@ Logger_p logger = getLogger("fimex.CDMFileReaderFactory");
 
 static bool haveScannedForIoPlugins = false;
 
+void trim_at_first_zero(std::string& str)
+{
+    const size_t zero = str.find_first_of('\0');
+    if (zero != std::string::npos) {
+        str.erase(zero); // Remove everything after the first null byte
+    }
+}
+
 std::vector<std::string> getIoPluginsDirs()
 {
-    const char* iopp = iopp = getenv("FIMEX_IO_PLUGINS_PATH");
+    const char* iopp = getenv("FIMEX_IO_PLUGINS_PATH");
     if (!iopp) {
-        // conda fills the placeholder with 0 bytes after the installation prefix,
-        // and these 0 bytes must not end up in the path
         iopp = FIMEX_IO_PLUGINS_PATH;
     }
-    // construct std::string from "iopp" which is a "const char*"
-    return tokenize(iopp, ":");
+    // Use std::strlen() on the pointer variable (not the literal) so the
+    // compiler cannot constant-fold it to the full placeholder length.
+    // Without this, GCC/Clang may bake the compile-time literal length into
+    // the std::string constructor, causing std::filesystem::path to see the
+    // zero-fill bytes that conda writes after the real prefix into the
+    // binary (after compilation) such that a compile-time string length is
+    // no longer correct when running the binary.
+    std::string path = iopp;
+    trim_at_first_zero(path);
+    return tokenize(path, ":");
 }
 
 // static
@@ -113,9 +129,6 @@ IoFactory_pm& ioFactories()
 
 IoFactory_p findFactoryFromFileType(const std::string& fileTypeName)
 {
-    if (fileTypeName.empty())
-        return IoFactory_p();
-
     IoFactory_p factory;
     int bestType = 0;
     for (const auto& id_f : ioFactories()) {
@@ -131,19 +144,27 @@ IoFactory_p findFactoryFromMagic(const std::string& fileName)
     for (const auto& id_f : ioFactories())
         maximize(magicSize, id_f.second->matchMagicSize());
 
-    std::ifstream fs(fileName.c_str());
-    if (!fs.is_open())
-        return nullptr; // acceptable, fileName might be a url
+    auto ca = createDefaultChunkReaderFactory();
+    ChunkReader_p cr;
+    try {
+        cr = ca->readerFor(fileName);
+    } catch (std::exception& ex) {
+        return nullptr;
+    }
 
     std::unique_ptr<char[]> magic(new char[magicSize]);
-    fs.read(magic.get(), magicSize);
-    const size_t actualMagicSize = fs.gcount();
-    fs.close();
+    try {
+        cr->read(0, magicSize, (unsigned char*)magic.get());
+    } catch (std::exception& ex) {
+        // this is not necessarily an error; for example, OpenDAP2 URLs need
+        // a suffix (.das, .dds, .dods) to become valid
+        return nullptr;
+    }
 
     int bestType = 0;
     IoFactory_p factory;
     for (const auto& id_f : ioFactories()) {
-        if (maximize(bestType, id_f.second->matchMagic(magic.get(), actualMagicSize)))
+        if (maximize(bestType, id_f.second->matchMagic(magic.get(), magicSize)))
             factory = id_f.second;
     }
     return factory;
@@ -164,8 +185,10 @@ IoFactory_p findFactory(const std::string& fileTypeName, const std::string& file
 {
     scanForIoPlugins();
 
-    if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
-        return f;
+    if (!fileTypeName.empty()) {
+        if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
+            return f;
+    }
 
     if (!write) {
         if (IoFactory_p f = findFactoryFromMagic(fileName))

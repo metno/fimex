@@ -218,16 +218,19 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
 
     CachedInterpolationInterface_p ci = itCI->second;
     DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, sb);
-    if (data->size() == 0)
+    const auto data_size = data->size(); // keep size for after freeing "data"
+    if (data_size == 0)
         return data;
 
     const double badValue = cdm_->getFillValue(varName);
     auto array = data2InterpolationArray(data, badValue);
-    processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
+    data = nullptr; // no longer needed, possibly release memory
+    processArray_(p_->preprocesses, array.get(), data_size, ci->getInX(), ci->getInY());
 
     size_t newSize = 0;
     LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(slicebuilder)");
-    auto iArray = ci->interpolateValues(array, data->size(), newSize);
+    auto iArray = ci->interpolateValues(array, data_size, newSize);
+    array = nullptr; // no longer needed, possibly release memory
 
     if (variable.isSpatialVector()) {
         // vector in x/y direction
@@ -243,9 +246,9 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
                     // fetch and transpose vector-data
                     // transposing needed once for each direction (or caching, but that needs to much memory)
                     auto counterPartArray = data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
-                    processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
+                    processArray_(p_->preprocesses, counterPartArray.get(), data_size, ci->getInX(), ci->getInY());
                     LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(slicebuilder)");
-                    auto counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
+                    auto counterpartiArray = ci->interpolateValues(counterPartArray, data_size, newSize);
                     if (dir == CDMVariable::SPATIAL_VECTOR_X)
                         cvr->reprojectValues(iArray, counterpartiArray, newSize);
                     else
@@ -270,9 +273,8 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         return getDataSliceFromMemory(variable, unLimDimPos);
 
     SliceBuilder sb(*cdm_, varName);
-    if (const CDMDimension* unlimDim = cdm_->getUnlimitedDim()) {
-        if (cdm_->hasUnlimitedDim(variable))
-            sb.setStartAndSize(unlimDim->getName(), unLimDimPos, 1);
+    if (cdm_->hasUnlimitedDim(variable)) {
+        sb.setStartAndSize(cdm_->getUnlimitedDim()->getName(), unLimDimPos, 1);
     }
     return getDataSlice(varName, sb);
 }
@@ -1263,8 +1265,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
         LOG4FIMEX(logger, Logger::DEBUG, "start calculating positions");
-        mifi_points2position(&orgLonVals[0], orgXYSize, &out_x_axis[0], out_x_axis.size(), miupXAxis);
-        mifi_points2position(&orgLatVals[0], orgXYSize, &out_y_axis[0], out_y_axis.size(), miupYAxis);
+        mifi_points2position(&orgLonVals[0], orgXYSize, out_x_axis.data(), out_x_axis.size(), miupXAxis);
+        mifi_points2position(&orgLatVals[0], orgXYSize, out_y_axis.data(), out_y_axis.size(), miupYAxis);
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
@@ -1386,7 +1388,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         auto pointsOnXAxis = make_shared_array<double>(fieldSize);
         auto pointsOnYAxis = make_shared_array<double>(fieldSize);
         const std::string orgProjStr = cs->getProjection()->getProj4String();
-        reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
+        reproject::reproject_axes(proj_input, orgProjStr, &out_x_axis[0], out_y_axis.data(), out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0],
                                   &pointsOnYAxis[0]);
         LOG4FIMEX(logger, Logger::DEBUG,
                   "mifi_project_axes: " << proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << pointsOnXAxis[0] << ","
@@ -1410,7 +1412,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             LOG4FIMEX(logger, Logger::DEBUG,
                       "creating cached vector projection interpolation matrix " << orgXAxisSize << "x" << orgYAxisSize << " => " << out_x_axis.size() << "x"
                                                                                 << out_y_axis.size());
-            reproject::Matrix_cp matrix = reproject::get_vector_reproject_matrix(orgProjStr, proj_input, &out_x_axis[0], &out_y_axis[0], outXAxisType,
+            reproject::Matrix_cp matrix = reproject::get_vector_reproject_matrix(orgProjStr, proj_input, out_x_axis.data(), out_y_axis.data(), outXAxisType,
                                                                                  outYAxisType, out_x_axis.size(), out_y_axis.size());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] = std::make_shared<CachedVectorReprojection>(matrix);

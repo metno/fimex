@@ -27,7 +27,7 @@
 #include "fimex/XMLInputFile.h"
 #include "fimex/XMLInputString.h"
 
-#include <cstdlib>
+#include "fimex/ChunkReader.h"
 
 namespace MetNoFimex {
 
@@ -62,6 +62,44 @@ int XmlCharPtr::cmp(const char* text) const
 }
 
 size_t XmlCharPtr::len() const
+{
+    return xmlStrlen(p_);
+}
+
+// static
+const xmlChar* XmlConstCharPtr::null_ = reinterpret_cast<const xmlChar*>("NULL");
+
+std::string XmlConstCharPtr::to_string() const
+{
+    return std::string(to_cc());
+}
+
+float XmlConstCharPtr::to_float() const
+{
+    return atof(to_cc());
+}
+
+double XmlConstCharPtr::to_double() const
+{
+    return atof(to_cc());
+}
+
+long XmlConstCharPtr::to_long() const
+{
+    return atol(to_cc());
+}
+
+long long XmlConstCharPtr::to_longlong() const
+{
+    return atoll(to_cc());
+}
+
+int XmlConstCharPtr::cmp(const char* text) const
+{
+    return xmlStrcmp(p_, reinterpret_cast<const xmlChar*>(text));
+}
+
+size_t XmlConstCharPtr::len() const
 {
     return xmlStrlen(p_);
 }

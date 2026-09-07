@@ -3,5 +3,9 @@
 
 #cmakedefine HAVE_NETCDF_H 1
 #cmakedefine HAVE_NETCDF_HDF5_LIB 1
+#cmakedefine HAVE_PROTOBUF 1
+#cmakedefine HAVE_LIBAEC 1
+
+#cmakedefine NCCOPY_EXECUTABLE "@NCCOPY_EXECUTABLE@"
 
 #endif // FIMEX_NETCDF_CONFIG_H

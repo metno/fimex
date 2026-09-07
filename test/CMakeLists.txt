@@ -4,7 +4,7 @@ IF (NOT TEST_EXTRADATA_DIR)
 ENDIF ()
 MESSAGE (STATUS "Tests will try to find extra data in '${TEST_EXTRADATA_DIR}'")
 
-SET (CURRENT_TEST_EXTRADATA_VERSION 20220211T1614)
+SET (CURRENT_TEST_EXTRADATA_VERSION 20240719T1200)
 SET(TEST_EXTRADATA_PAGE "https://github.com/metno/fimex/wiki/Build")
 SET(TEST_EXTRADATA_URL "https://rgw.met.no/0c541cf629a545769d10585a9ea2043f:unit-test-data/fimex-test-data-${CURRENT_TEST_EXTRADATA_VERSION}.tar.gz")
 SET(TEST_EXTRADATA_MESSAGE "in '${TEST_EXTRADATA_DIR}', please consider downloading version ${CURRENT_TEST_EXTRADATA_VERSION} from ${TEST_EXTRADATA_PAGE}")
@@ -35,6 +35,7 @@ SET(CC_TESTS
   testUtils
   testVerticalCoordinates
   testXMLDoc
+  testLruCache
 )
 
 IF(ENABLE_FELT)
@@ -111,17 +112,30 @@ IF(ENABLE_NETCDF)
   ENDIF()
 ENDIF(ENABLE_NETCDF)
 
+IF(ENABLE_PROTOBUF)
+  LIST(APPEND CC_TESTS testProtobufCdmIo)
+ENDIF()
+
+IF(ENABLE_NETCDF AND ENABLE_PROTOBUF AND HAVE_NETCDF_HDF5_LIB)
+  LIST(APPEND CC_TESTS testNetCDFProtobufIndex)
+ENDIF()
+
 IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
   LIST(APPEND CC_TESTS 
     ${GRIBAPI_MI_TESTS}
     ${GRIBAPI_NC_TESTS}
     testGribReader
     )
-ENDIF()
-IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
-  LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
-  LIST(APPEND CC_TESTS testGribWriterVertical)
+  IF(ENABLE_NETCDF)
+    CONFIGURE_FILE(testGrib2SomeUndefined.sh.in testGrib2SomeUndefined.sh @ONLY)
+    LIST(APPEND SH_BIN_TESTS testGrib2SomeUndefined.sh)
+    LIST(APPEND CC_TESTS testGribWriterVertical)
+    LIST(APPEND SH_CDMCMP_TESTS testGribContent.sh)
+    LIST(APPEND SH_TESTS testGribConstantTime.sh)
+  ENDIF()
+  IF(ENABLE_PROTOBUF)
+    LIST(APPEND SH_CDMCMP_TESTS testFiIndexGribfpFromGrbml.sh testFiIndexGribfpFromGRIB.sh)
+  ENDIF()
 ENDIF()
 IF (ENABLE_ECCODES)
   FIND_PROGRAM(GRIB_COUNT_PROGRAM
@@ -155,12 +169,16 @@ IF (ENABLE_NETCDF)
     MESSAGE (STATUS "Found no ncdump, trying without absolute path")
     SET(NCDUMP_PROGRAM "ncdump")
   ENDIF()
+  LIST(APPEND SH_TESTS
+    testFiIndexNetCDF.sh
+  )
 ENDIF()
 
 CONFIGURE_FILE(fimex_test_config.h.in fimex_test_config.h)
 
 CONFIGURE_FILE(fimex.sh.in fimex.sh @ONLY)
 
+CONFIGURE_FILE(fiIndexNc.sh.in fiIndexNc.sh @ONLY)
 CONFIGURE_FILE(fiIndexGribs.sh.in fiIndexGribs.sh @ONLY)
 CONFIGURE_FILE(fiGrbmlCat.sh.in   fiGrbmlCat.sh   @ONLY)
 CONFIGURE_FILE(testQEmask.xml.in testQEmask.xml @ONLY)
@@ -199,6 +217,7 @@ FOREACH(T ${CC_TESTS})
   )
   ADD_TEST(NAME ${T} COMMAND ${T})
 ENDFOREACH()
+TARGET_INCLUDE_DIRECTORIES(testLruCache PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 TARGET_LINK_LIBRARIES(testXMLDoc ${libxml2_PACKAGE})
 
@@ -226,31 +245,48 @@ ENDIF(ENABLE_FELT)
 FOREACH(T ${SH_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")
 ENDFOREACH()
+FOREACH(T ${SH_CDMCMP_TESTS})
+  ADD_TEST(NAME ${T} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${T}")
+  SET_TESTS_PROPERTIES(${T} PROPERTIES DEPENDS cdmcmp)
+ENDFOREACH()
 FOREACH(T ${SH_BIN_TESTS})
   ADD_TEST(NAME ${T} COMMAND "${T}")
 ENDFOREACH()
 
-SET_TESTS_PROPERTIES(${SH_TESTS};${SH_BIN_TESTS} PROPERTIES DEPENDS fimex)
+SET_TESTS_PROPERTIES(${SH_TESTS};${SH_BIN_TESTS};${SH_CDMCMP_TESTS} PROPERTIES DEPENDS fimex)
 
 SET_PROPERTY(
-  TEST ${SH_TESTS} ${SH_BIN_TESTS} ${C_TESTS} ${CC_TESTS}
+  TEST ${SH_TESTS} ${SH_BIN_TESTS} ${SH_CDMCMP_TESTS} ${C_TESTS} ${CC_TESTS}
   APPEND PROPERTY ENVIRONMENT "TEST_EXTRADATA_DIR=${TEST_EXTRADATA_DIR}"
 )
 
 SET_PROPERTY(
-  TEST ${SH_TESTS} ${SH_BIN_TESTS} ${C_TESTS} ${CC_TESTS}
+  TEST ${SH_TESTS} ${SH_CDMCMP_TESTS} ${SH_BIN_TESTS} ${C_TESTS} ${CC_TESTS}
   APPEND PROPERTY ENVIRONMENT "FIMEX_IO_PLUGINS_PATH=${FIMEX_IO_PLUGINS_PATH}"
 )
 
-IF(ENABLE_FELT AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  SET_PROPERTY(
-    TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
-    APPEND PROPERTY DEPENDS testGribWriter
+IF(ENABLE_PROTOBUF)
+  TARGET_LINK_LIBRARIES(testProtobufCdmIo ${PROTOBUF_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(testProtobufCdmIo
+    PRIVATE
+      "${CMAKE_BINARY_DIR}/src" # for cdm.pb.h
   )
-  TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib ${libxml2_PACKAGE})
-  TARGET_LINK_LIBRARIES(testGribWriterVertical ${libxml2_PACKAGE})
 ENDIF()
+
 IF(ENABLE_GRIBAPI OR ENABLE_ECCODES)
+  IF(ENABLE_FELT)
+    SET_PROPERTY(
+      TEST testGribReader testFiIndexGribs.sh testFiGrbmlCat.sh
+      APPEND PROPERTY DEPENDS testGribWriter
+    )
+    TARGET_LINK_LIBRARIES(testGribWriter libfimex-io-grib ${libxml2_PACKAGE})
+    TARGET_LINK_LIBRARIES(testGribWriterVertical ${libxml2_PACKAGE})
+  ENDIF()
+
+  IF(ENABLE_NETCDF)
+    TARGET_LINK_LIBRARIES(testGribWriterVertical libfimex-io-grib libfimex-io-netcdf)
+  ENDIF()
+
   TARGET_LINK_LIBRARIES(testGribReader libfimex-io-grib)
 ENDIF()
 
@@ -266,10 +302,18 @@ IF(ENABLE_NETCDF)
   TARGET_LINK_LIBRARIES(testNcmlAggregationReader libfimex-io-netcdf)
 ENDIF()
 
-IF(ENABLE_FELT)
-  TARGET_LINK_LIBRARIES(testFeltReader libfimex-io-felt)
+IF(ENABLE_NETCDF AND ENABLE_PROTOBUF AND HAVE_NETCDF_HDF5_LIB)
+  TARGET_LINK_LIBRARIES(testNetCDFProtobufIndex
+    libfimex-io-netcdf
+    ${PROTOBUF_LIBRARIES}
+  )
+  TARGET_INCLUDE_DIRECTORIES(testNetCDFProtobufIndex
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/src/io/netcdf"
+      "${CMAKE_BINARY_DIR}/src/io/netcdf"  # for fimex_netcdf_config.h, netcdf_index.pb.h
+  )
 ENDIF()
 
-IF(ENABLE_NETCDF AND (ENABLE_GRIBAPI OR ENABLE_ECCODES))
-  TARGET_LINK_LIBRARIES(testGribWriterVertical libfimex-io-grib libfimex-io-netcdf)
+IF(ENABLE_FELT)
+  TARGET_LINK_LIBRARIES(testFeltReader libfimex-io-felt)
 ENDIF()

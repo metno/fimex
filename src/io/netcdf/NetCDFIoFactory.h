@@ -35,6 +35,8 @@
 
 namespace MetNoFimex {
 
+extern const char FILETYPE_NCFP[];
+
 class NetCDFIoFactory : public IoFactory
 {
 public:

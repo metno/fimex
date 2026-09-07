@@ -57,6 +57,34 @@ private:
   xmlChar* p_;
 };
 
+class XmlConstCharPtr
+{
+  public:
+  XmlConstCharPtr(const xmlChar* p)
+      : p_(p ? p : null_)
+  {
+  }
+  ~XmlConstCharPtr() {}
+
+  const char* to_cc() const { return reinterpret_cast<const char*>(p_); }
+
+  std::string to_string() const;
+  float to_float() const;
+  double to_double() const;
+  long to_long() const;
+  long long to_longlong() const;
+
+  int cmp(const char* text) const;
+  size_t len() const;
+  bool empty() const { return len() == 0; }
+
+  bool operator==(const char* text) const { return cmp(text) == 0; }
+
+  private:
+  static const xmlChar* null_;
+  const xmlChar* p_;
+};
+
 class XPathNodeSet {
 public:
     class iterator {
@@ -87,14 +115,15 @@ public:
     iterator begin() const { return iterator(*this, 0); }
     iterator end() const { return iterator(*this, size_); }
 
-    int size() const { return size_; }
+    size_t size() const { return size_; }
+    bool empty() const { return size() == 0; }
     xmlNodePtr at(int index) const { if (index >= 0 && index < size_) return nodes_->nodeTab[index]; else return nullptr; }
     xmlNodePtr operator[](int index) const { return at(index); }
 
 private:
     xmlXPathObject_p xpo_;
     xmlNodeSetPtr nodes_;
-    int size_;
+    size_t size_;
 };
 
 XMLInputDoc createXMLInput(const XMLInput& xi);

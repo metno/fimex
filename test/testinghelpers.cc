@@ -92,6 +92,11 @@ string pathTest(const std::string& filename)
     return require(src_test + filename);
 }
 
+const std::string& dirTestExtra()
+{
+    return extra_data_dir;
+}
+
 string pathTestExtra(const std::string& filename)
 {
     return require(extra_data_dir + filename);
@@ -137,7 +142,11 @@ int main(int argc, char* args[])
 {
     using namespace MetNoFimex;
     Logger::setClass(Logger::LOG2STDERR);
+#if 1
     defaultLogLevel(Logger::OFF);
+#else
+    defaultLogLevel(Logger::DEBUG);
+#endif
 
 #if MI_CPPTEST_VERSION_CURRENT_INT >= MI_CPPTEST_VERSION_INT(0, 2, 0)
     miutil::cpptest::test_recorder::set_file_prefix(TOP_SRCDIR);

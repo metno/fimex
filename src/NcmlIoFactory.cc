@@ -30,6 +30,7 @@
 
 #include "NcmlIoFactory.h"
 
+#include "fimex/Logger.h"
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/NcmlCDMWriter.h"
@@ -37,6 +38,9 @@
 #include "fimex/XMLInputFile.h"
 
 namespace MetNoFimex {
+namespace {
+Logger_p logger = getLogger("fimex.NetCDFIoFactory");
+} // namespace
 
 const bool installed = IoFactory::install("ncml", std::make_shared<NcmlIoFactory>());
 
@@ -47,6 +51,7 @@ int NcmlIoFactory::matchFileTypeName(const std::string& type)
 
 CDMReader_p NcmlIoFactory::createReader(const std::string&, const std::string& fileName, const XMLInput&, const std::vector<std::string>&)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "creating NcmlCDMReader for '" << fileName << "'");
     return std::make_shared<NcmlCDMReader>(XMLInputFile(fileName));
 }
 
