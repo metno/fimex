@@ -125,13 +125,11 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DxInMetres", static_cast<long>(xArray[1] - xArray[0])), "");
             auto yArray = yData->asDouble();
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DyInMetres", static_cast<long>(yArray[1] - yArray[0])), "");
-            std::string latitude, longitude;
-            if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asDouble()[0]), "");
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getData(longitude)->asDouble()[0]), "");
-            } else {
-                throw CDMException("unable to find latitude/longitude for variable " + varName);
-            }
+            std::vector<double> firstX(1, xArray[0]);
+            std::vector<double> firstY(1, yArray[0]);
+            proj->convertToLonLat(firstX, firstY);
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", firstY[0]), "");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", firstX[0]), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees), "");
             if (std::fabs(latitudeWhereDxAndDyAreSpecifiedInDegrees - 60.) > 1.e-5) {
                 LOG4FIMEX(logger, Logger::ERROR,
@@ -325,7 +323,20 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
                     grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]),
                     "");
             } else {
-                throw CDMException("unable to find latitude/longitude for variable " + varName);
+                LOG4FIMEX(logger, Logger::DEBUG, "unable to find latitude/longitude for variable " << varName << " using projected first grid point as lat/lon");
+                Projection_cp proj = cdm.getProjectionOf(varName);
+                if (proj.get() == 0) {
+                    throw CDMException("unable to find projection for variable " + varName);
+                }
+                std::vector<double> firstX(1, xArray[0]);
+                std::vector<double> firstY(1, yArray[0]);
+                proj->convertToLonLat(firstX, firstY);
+                GRIB_CHECK(
+                    grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", firstY[0]),
+                    "");
+                GRIB_CHECK(
+                    grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", firstX[0]),
+                    "");
             }
             if (dy < 0) {
                 // reading north -> south
