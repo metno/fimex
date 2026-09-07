@@ -386,8 +386,46 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const Fi
     } else {
         const FimexTime& ft = rtime;
         date = ft.getYear() * 10000 + ft.getMonth() * 100 + ft.getMDay();
-        time = ft.getHour() * 100 + ft.getMinute();
-        long steps = static_cast<long>(.5 + ((asTimePoint(vTime) - asTimePoint(rtime)).count() / gribStepUnits2seconds(stepUnits)));
+        // cast to long long to avoid overflow for negative time-diffs
+        auto step_units_s = static_cast<long long>(gribStepUnits2seconds(stepUnits));
+        // round time to nearest step-unit, e.g. 1h, 3h, 6h, 12h, 24h
+        auto hours = 0;
+        auto minutes = 0;
+        if (step_units_s < 3600) {
+            time = ft.getHour() * 100 + ft.getMinute();
+            minutes = ft.getMinute();
+        } else if (step_units_s < (3*3600)) {
+            // hourly
+            hours = ft.getHour();
+            minutes = vTime.getMinute(); // align minutes to vTime
+            time = hours * 100;
+        } else if (step_units_s < (6*3600)) {
+            // 3 hourly
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 3*(ft.getHour()/3) - vTime.getHour()%3; // align hours to vTime
+            time = 3*(hours) * 100;
+        } else if (step_units_s < (12*3600)) {
+            // 6 hourly
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 6*(ft.getHour()/6) - vTime.getHour()%6; // align hours to vTime
+            time = 6*(hours) * 100;
+        } else if (step_units_s < (24*3600)) {
+            // 12 hourly
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 12*(ft.getHour()/12) - vTime.getHour()%12; // align hours to vTime
+            time = 12*(hours) * 100;
+        } else {
+            // daily
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 24*(ft.getHour()/24) - vTime.getHour()%24; // align hours to vTime
+            time = 0;
+        }
+        auto rtime_aligned = FimexTime(ft.getYear(), ft.getMonth(), ft.getMDay(), hours, minutes);
+
+        auto time_diff_s = ((asTimePoint(vTime) - asTimePoint(rtime_aligned)).count());
+        // cast to long long to avoid overflow for negative time-diffs
+        auto denominator = static_cast<long long>(gribStepUnits2seconds(stepUnits));
+        auto steps = static_cast<long>(.5 + (time_diff_s / denominator));
         startStep = steps;
         // TODO: step length should be determined by bounds
         endStep = steps;
