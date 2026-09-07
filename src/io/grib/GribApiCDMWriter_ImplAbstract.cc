@@ -397,21 +397,27 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const Fi
         } else if (step_units_s < (3*3600)) {
             // hourly
             hours = ft.getHour();
+            minutes = vTime.getMinute(); // align minutes to vTime
             time = hours * 100;
         } else if (step_units_s < (6*3600)) {
             // 3 hourly
-            hours = 3*(ft.getHour()/3);
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 3*(ft.getHour()/3) - vTime.getHour()%3; // align hours to vTime
             time = 3*(hours) * 100;
         } else if (step_units_s < (12*3600)) {
             // 6 hourly
-            hours = 6*(ft.getHour()/6);
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 6*(ft.getHour()/6) - vTime.getHour()%6; // align hours to vTime
             time = 6*(hours) * 100;
         } else if (step_units_s < (24*3600)) {
             // 12 hourly
-            hours = 12*(ft.getHour()/12);
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 12*(ft.getHour()/12) - vTime.getHour()%12; // align hours to vTime
             time = 12*(hours) * 100;
         } else {
             // daily
+            minutes = vTime.getMinute(); // align minutes to vTime
+            hours = 24*(ft.getHour()/24) - vTime.getHour()%24; // align hours to vTime
             time = 0;
         }
         auto rtime_aligned = FimexTime(ft.getYear(), ft.getMonth(), ft.getMDay(), hours, minutes);
