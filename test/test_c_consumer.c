@@ -31,15 +31,13 @@
 #include <stdlib.h>
 
 int testFeltRead(const char* feltFile, const char* configFile) {
-    int retVal = 0;
-
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
     mifi_free_cdm_reader(feltReader);
-    return retVal;
+    return 0;
 }
 
 int testFeltVariables(const char* feltFile, const char* configFile) {
@@ -47,8 +45,8 @@ int testFeltVariables(const char* feltFile, const char* configFile) {
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
     size_t varCount = mifi_get_variable_number(feltReader);
     int found = 0;
@@ -77,8 +75,8 @@ int testFeltData(const char* feltFile, const char* configFile) {
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
 
     {
@@ -154,8 +152,8 @@ int testFeltReadNetcdfWrite(const char* feltFile, const char* configFile) {
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
 
     if (mifi_writer(feltReader, "netcdf", from_felt_nc, 0) != 0) {
@@ -174,8 +172,8 @@ int testNetcdfReadNetcdfWrite()
 
     mifi_cdm_reader* ncReader = mifi_new_io_reader("netcdf", from_felt_nc, "");
     if (ncReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading nc-file %s\n", from_felt_nc);
+        return 1;
     }
 
     if (mifi_writer(ncReader, "netcdf", w_filename, 0) != 0) {
@@ -207,8 +205,8 @@ int testCReader(const char* feltFile, const char* configFile) {
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
 
     mifi_cdm_reader *cReader = mifi_new_c_reader(feltReader);
@@ -233,14 +231,14 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
 
     mifi_cdm_reader* feltReader = mifi_new_io_reader("felt", feltFile, configFile);
     if (feltReader == NULL) {
-        retVal++;
         fprintf(stderr, "error reading felt-file\n");
+        return 1;
     }
 
     mifi_slicebuilder *sb = mifi_new_slicebuilder(feltReader, "sea_surface_temperature");
     if (sb == NULL) {
-        retVal++;
         fprintf(stderr, "error getting sb\n");
+        return 1;
     }
 
     int ndims = mifi_slicebuilder_ndims(sb);
