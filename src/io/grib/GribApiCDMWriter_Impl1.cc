@@ -176,17 +176,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon0), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", latX), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", lonX), "");
-            if (dj < 0) {
-                // reading north -> south
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1), "");
-            }
-            if (di < 0) {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0), "");
-            }
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", dj < 0 ? 0 : 1), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", di < 0 ? 1 : 0), "");
 
         } else if (projection == "rotated_latitude_longitude") {
             LOG4FIMEX(logger, Logger::INFO, "rotated latlong projection for " << varName);
@@ -247,17 +238,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", rlon0), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", rlatX), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", rlonX), "");
-            if (dj < 0) {
-                // reading north -> south
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1), "");
-            }
-            if (di < 0) {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0), "");
-            }
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", dj < 0 ? 0 : 1), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", di < 0 ? 1 : 0), "");
         } else if (projection == "lambert_conformal_conic") {
             //            projection_6:grid_mapping_name = "lambert_conformal_conic" ;
             //            projection_6:standard_parallel = 63., 63. ;
@@ -318,26 +300,13 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "LoVInDegrees", lonV), "");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                GRIB_CHECK(
-                    grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]),
-                    "");
-                GRIB_CHECK(
-                    grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]),
-                    "");
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]), "");
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]), "");
             } else {
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
             }
-            if (dy < 0) {
-                // reading north -> south
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1), "");
-            }
-            if (dx < 0) {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1), "");
-            } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0), "");
-            }
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", dy < 0 ? 0 : 1), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", dx < 0 ? 1 : 0), "");
         } else if (projection == "transverse_mercator") {
             throw CDMException("projection " + projection + " not supported yet by GribApiCDMWriter");
         } else {
