@@ -61,6 +61,22 @@ void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double lev
     setNodesAttributes("g1attribute", node);
 }
 
+void GribApiCDMWriter_Impl1::setFirstLonLatFromLonLatOrXY(const CDM& cdm, const std::string& varName, Projection_cp proj, double x0, double y0)
+{
+    std::string latitude, longitude;
+    if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
+        GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]), "");
+        GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]), "");
+    } else {
+        LOG4FIMEX(logger, Logger::DEBUG, "unable to find latitude/longitude for variable " << varName << " using projected first grid point as lat/lon");
+        std::vector<double> firstX(1, x0);
+        std::vector<double> firstY(1, y0);
+        proj->convertToLonLat(firstX, firstY);
+        GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", firstX[0]), "");
+        GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", firstY[0]), "");
+    }
+}
+
 void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "setProjection(" << varName << ")");
@@ -125,13 +141,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DxInMetres", static_cast<long>(xArray[1] - xArray[0])), "");
             auto yArray = yData->asDouble();
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DyInMetres", static_cast<long>(yArray[1] - yArray[0])), "");
-            std::string latitude, longitude;
-            if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asDouble()[0]), "");
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getData(longitude)->asDouble()[0]), "");
-            } else {
-                throw CDMException("unable to find latitude/longitude for variable " + varName);
-            }
+            setFirstLonLatFromLonLatOrXY(cdm, varName, proj, xArray[0], yArray[0]);
             GRIB_CHECK(grib_set_double(gribHandle.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees), "");
             if (std::fabs(latitudeWhereDxAndDyAreSpecifiedInDegrees - 60.) > 1.e-5) {
                 LOG4FIMEX(logger, Logger::ERROR,
@@ -298,13 +308,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             GRIB_CHECK(grib_set_double(gribHandle.get(), "Latin1InDegrees", lat1), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "Latin2InDegrees", lat2), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "LoVInDegrees", lonV), "");
-            std::string latitude, longitude;
-            if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]), "");
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]), "");
-            } else {
-                throw CDMException("unable to find latitude/longitude for variable " + varName);
-            }
+            setFirstLonLatFromLonLatOrXY(cdm, varName, proj, xArray[0], yArray[0]);
             GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", dy < 0 ? 0 : 1), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", dx < 0 ? 1 : 0), "");
         } else if (projection == "transverse_mercator") {

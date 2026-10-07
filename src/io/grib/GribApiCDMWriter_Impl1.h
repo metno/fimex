@@ -41,6 +41,9 @@ public:
     void setProjection(const std::string& varName) override;
     void setLevel(const std::string& varName, double levelValue, size_t levelPos) override;
     DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData) override;
+
+private:
+    void setFirstLonLatFromLonLatOrXY(const CDM& cdm, const std::string& varName, Projection_cp proj, double x0, double y0);
 };
 
 } // namespace MetNoFimex

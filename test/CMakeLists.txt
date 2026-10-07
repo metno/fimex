@@ -134,6 +134,7 @@ IF((ENABLE_GRIBAPI) OR (ENABLE_ECCODES))
     LIST(APPEND SH_TESTS
       testGribConstantTime.sh
       testGribReftimeAfterVtime.sh
+      testGribInputNoLonLat.sh
     )
   ENDIF()
   IF(ENABLE_PROTOBUF)
