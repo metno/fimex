@@ -46,15 +46,14 @@ namespace MetNoFimex {
 
 using namespace std;
 
-FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
+static std::set<FimexTime> getAllForecastReferenceTimesFT(CDMReader_p reader)
 {
     const CDM& cdm = reader->getCDM();
     // try CF-1.x forecast_reference_time
     const vector<string> refVarnames = cdm.findVariables("standard_name", "forecast_reference_time");
-    set<FimexTime> refTimes;
+    std::set<FimexTime> refTimes;
     for (const string& varname : refVarnames) {
-        const string units = cdm.getUnits(varname);
-        TimeUnit tu(units);
+        const TimeUnit tu(cdm.getUnits(varname));
         DataPtr timeData = reader->getData(varname);
         auto times = timeData->asDouble();
         const double* tPtr = &times[0];
@@ -67,14 +66,17 @@ FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
         // try WRF-Convention SIMULATION_START_DATE attribute
         CDMAttribute attr;
         if (cdm.getAttribute(cdm.globalAttributeNS(), "SIMULATION_START_DATE", attr)) {
-            string sd = attr.getStringValue();
-            // replace _ with space
-            if (sd.find("_") != string::npos) {
-                sd = sd.replace(sd.find("_"), 1, " ");
-            }
+            std::string sd = attr.getStringValue();
+            std::replace(sd.begin(), sd.end(), '_', ' ');
             refTimes.insert(string2FimexTime(sd));
         }
     }
+    return refTimes;
+}
+
+FimexTime getUniqueForecastReferenceTimeFT(CDMReader_p reader)
+{
+    const auto refTimes = getAllForecastReferenceTimesFT(reader);
     if (refTimes.empty()) {
         throw CDMException("no forecast reference time found");
     } else if (refTimes.size() > 1) {
