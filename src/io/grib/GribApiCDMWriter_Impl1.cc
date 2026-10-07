@@ -117,7 +117,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             const DataPtr xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");
             const DataPtr yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
             if (xData->size() < 2 || yData->size() < 2)
-                throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
+                throw CDMException(varName + " variable has too small x-y dimensions, not a grid for GRIB");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongXAxis", xData->size()), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()), "");
             // grib1 doesn't allow to set double values for this! // (grib2 not checked)
@@ -148,7 +148,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             size_t ni = lonData->size();
             size_t nj = latData->size();
             if (ni < 2 || nj < 2) {
-                throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+                throw CDMException("(ni,nj) for varName " + varName + " has too small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
             }
             double di, dj, lon0, lat0, lonX, latX;
             auto longs = lonData->asDouble();
@@ -197,7 +197,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName)
             size_t ni = rLonData->size();
             size_t nj = rLatData->size();
             if (ni < 2 || nj < 2) {
-                throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+                throw CDMException("(ni,nj) for varName " + varName + " has too small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
             }
             double di, dj, rlon0, rlat0, rlonX, rlatX;
             auto rlongs = rLonData->asDouble();
