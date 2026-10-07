@@ -267,6 +267,10 @@ void GribApiCDMWriter_ImplAbstract::run()
             sb.setReferenceTimePos(refTimePos);
 
             FimexTime actualRefTime = refTime;
+            if (actualRefTime.getSecond() != 0) {
+                LOG4FIMEX(logger, Logger::WARN, "GRIB cannot handle reference time second=" << static_cast<int>(actualRefTime.getSecond()) << ", overwriting with 0");
+                actualRefTime.setSecond(0);
+            }
             std::vector<long long> vTimes; // valid times in seconds since actualRefTime
             std::string stepUnit = "s";    // step unit
             long long stepSeconds = 1;     // number of seconds for one step unit
