@@ -37,7 +37,10 @@
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
 #include "fimex/XMLUtils.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+
+#include "enumerate.h"
 
 #include <grib_api.h>
 
@@ -47,6 +50,7 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <numeric>
 
 namespace MetNoFimex {
 
@@ -148,192 +152,192 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, CD
 
 GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract() {}
 
+std::vector<FimexTime> convertToFimexTime(shared_array<long long> timeValues, size_t timeCount, const std::string& timeUnitText)
+{
+    std::vector<FimexTime> times;
+    times.reserve(timeCount);
+    const TimeUnit timeUnit(timeUnitText);
+    std::transform(&timeValues[0], &timeValues[0] + timeCount, std::back_inserter(times), [&](auto tv) { return timeUnit.unitTime2fimexTime(tv); });
+    return times;
+}
+
+static const std::string SECONDS_SINCE_1970 = "seconds since 1970-01-01 00:00:00";
+
+std::string makeTimeUnitText(const FimexTime& time)
+{
+    if (time.invalid()) {
+        return SECONDS_SINCE_1970;
+    } else {
+        std::ostringstream timeUnitText;
+        timeUnitText << "seconds since " << make_time_string_extended(time);
+        return timeUnitText.str();
+    }
+}
+
+FimexTime add(const FimexTime& time, long long seconds)
+{
+    const TimeUnit unit(SECONDS_SINCE_1970);
+    const auto orig = unit.fimexTime2unitTime(time);
+    return unit.unitTime2fimexTime(orig + seconds);
+}
+
 void GribApiCDMWriter_ImplAbstract::run()
 {
-    using namespace std;
-    LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  ");
+    LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()");
 
     // default to grid_second_order
     //    string pType("grid_second_order");
     //    try {
     //        size_t pTypeSize = pType.size();
-    //        GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
+    //        GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting packingType ");
     //    } catch (...) {
     //        LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
     //    }
     setGlobalAttributes();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    CoordinateSystem_cp_v coordSys = listCoordinateSystems(cdmReader);
-    const CDM& cdm = cdmReader->getCDM();
-    const CDM::VarVec& vars = cdm.getVariables();
-    set<string> usedVariables;
-    for (CoordinateSystem_cp_v::iterator varSysIt = coordSys.begin(); varSysIt != coordSys.end(); ++varSysIt) {
+    const auto allCoordSys = listCoordinateSystems(cdmReader);
+    const auto& cdm = cdmReader->getCDM();
+    const auto& vars = cdm.getVariables();
 
-        if ((*varSysIt)->isSimpleSpatialGridded()) {
-            vector<string> csVars;
-            // iterator over all variables
-            for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
-                if (CompleteCoordinateSystemForComparator(vi->getName())(*varSysIt)) {
-                    std::string usedXPath;
-                    if (hasNodePtr(vi->getName(), usedXPath)) {
-                        csVars.push_back(vi->getName());
-                    } else {
-                        LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << vi->getName() << ": not declared in config-file " << configFile);
-                    }
+    std::map<std::string, std::string> variableWarnings;
+    std::set<std::string> unwrittenVariables;
+    for (const auto& var : vars) {
+        unwrittenVariables.insert(var.getName());
+    }
+
+    for (const auto& coordSys : allCoordSys) {
+        if (!coordSys->isSimpleSpatialGridded()) {
+            continue;
+        }
+
+        // find variables in this coordSys that appear in GRIB writer configuration
+        std::string dummyUsedXPath;
+        std::vector<std::string> csVars;
+        for (const auto& var : vars) {
+            if (coordSys->isCSAndCompleteFor(var.getName())) {
+                if (hasNodePtr(var.getName(), dummyUsedXPath)) {
+                    csVars.push_back(var.getName());
+                } else {
+                    LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << var.getName() << ": not declared in config-file " << configFile);
                 }
             }
-            if (csVars.empty())
-                continue;
-            usedVariables.insert(csVars.begin(), csVars.end());
-            try {
-                // TODO: this would be nicer with varSysIt->getProjection() instead of csVars[0]
-                setProjection(csVars.at(0));
-            } catch (CDMException& e) {
-                LOG4FIMEX(logger, Logger::WARN,
-                          "cannot write variable " << join(csVars.begin(), csVars.end(), ", ") << " due to projection problems: " << e.what());
-                continue;
-            }
+        }
+        if (csVars.empty()) {
+            continue;
+        }
 
-            CoordinateAxis_cp xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
-            CoordinateAxis_cp yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
-            CoordinateAxis_cp zAxis = (*varSysIt)->getGeoZAxis(); // Z
-            CoordinateAxis_cp tAxis = (*varSysIt)->getTimeAxis(); // time
-            string stepUnit = "s";
+        try {
+            // TODO: this would be nicer with varSysIt->getProjection() instead of csVars[0]
+            setProjection(csVars.at(0));
+        } catch (CDMException& e) {
+            LOG4FIMEX(logger, Logger::WARN,
+                      "cannot write variable " << join(csVars.begin(), csVars.end(), ", ") << " due to projection problems: " << e.what());
+            continue;
+        }
 
-            CoordinateSystemSliceBuilder sb(cdm, *varSysIt);
-            sb.setAll(xAxis->getName());
-            sb.setAll(yAxis->getName());
-            // handling of time
-            vector<FimexTime> refTimes;
-            vector<FimexTime> vTimes;
-            if (tAxis.get() != 0) {
-                // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
-                if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
-                    CoordinateAxis_cp rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
-                    DataPtr refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(), "seconds since 1970-01-01 00:00:00");
-                    auto refs = refTimesD->asUInt64();
-                    /* do something with the refTimes and select the wanted Position */
-                    size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
-                    sb.setReferenceTimePos(refTimePos);
-                    TimeUnit tu("seconds since 1970-01-01 00:00:00");
-                    std::transform(&refs[0], &refs[0] + refTimesD->size(), std::back_inserter(refTimes),
-                                   std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
-                } else {
-                    try {
-                        refTimes.push_back(getUniqueForecastReferenceTimeFT(cdmReader));
-                    } catch (CDMException& ex) {
-                        refTimes.push_back(FimexTime(FimexTime::max_date_time));
+        const auto zAxis = coordSys->getGeoZAxis(); // Z
+        const auto tAxis = coordSys->getTimeAxis(); // time
+
+        // build vec of reference times
+        const auto refTimes = getReferenceTimes(coordSys);
+
+        // fetch the levels from first variable
+        const auto levels = getLevels(csVars.at(0));
+
+        // TODO: handle ensembles
+
+        CoordinateSystemSliceBuilder sb(cdm, coordSys);
+        sb.setAll(coordSys->getGeoXAxis()); // X or Lon
+        sb.setAll(coordSys->getGeoYAxis()); // Y or Lat
+        // set reftime, time, vertical dimensions for unset dimension test below
+        sb.setReferenceTimePos(0);
+        sb.setStartAndSize(zAxis, 0, 1); // silently ignores null zAxis
+        if (tAxis) {
+            sb.setTimeStartAndSize(0, 1); // would print warning for null tAxis
+        }
+        // reduce all unset dimensions to the first slice
+        for (const auto& dim : sb.getUnsetDimensionNames()) {
+            LOG4FIMEX(logger, Logger::WARN, "unknown dimension in grib-writer: '" << dim << "' using first slice");
+            sb.setStartAndSize(dim, 0, 1);
+        }
+
+        // loop over ref-times, times, variables and levels
+        for (const auto [refTimePos, refTime] : enumerate(refTimes)) {
+            sb.setReferenceTimePos(refTimePos);
+
+            FimexTime actualRefTime = refTime;
+            std::vector<long long> vTimes; // valid times in seconds since actualRefTime
+            std::string stepUnit = "s";    // step unit
+            long long stepSeconds = 1;     // number of seconds for one step unit
+            if (tAxis) {
+                const auto timeUnitText = makeTimeUnitText(actualRefTime);
+                auto tsb = sb.getTimeVariableSliceBuilder(); // new slicebuild for time axis ...
+                tsb.setAll(tAxis->getName());                // ... fetching all time values for the current reference time
+                auto vTimeData = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), timeUnitText, tsb);
+                auto vTimeValues = vTimeData->asInt64();
+                vTimes = std::vector<long long>(&vTimeValues[0], &vTimeValues[0] + vTimeData->size());
+                if (vTimes[0] < 0) {
+                    // shift vTimes and actualRefTime to avoid negative vTime values (unsupported in GRIB1)
+                    const auto shift = vTimes[0];
+                    actualRefTime = add(actualRefTime, shift);
+                    for (auto& vt : vTimes) {
+                        vt -= shift;
                     }
                 }
-                stringstream ss;
-                if (refTimes.at(0).invalid()) {
-                    ss << "seconds since 1970-01-01 00:00:00";
-                } else {
-                    ss << "seconds since " << make_time_string_extended(refTimes[0]);
+                if (vTimes.size() >= 2) {
+                    size_t idx = (vTimes[0] > 0) ? 0 : 1;
+                    auto step_gcd = vTimes[idx++];
+                    for (; idx < vTimes.size(); ++idx) {
+                        step_gcd = std::gcd(step_gcd, vTimes[idx]);
+                    }
+                    stepUnit = gribSeconds2stepUnits(step_gcd);
+                    stepSeconds = gribStepUnits2seconds(stepUnit);
                 }
-                DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
-                auto timesA = times->asInt64();
-                TimeUnit tu(ss.str());
-                std::transform(&timesA[0], &timesA[0] + times->size(), std::back_inserter(vTimes),
-                               std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
-                if (times->size() > 1) {
-                    stepUnit = gribSeconds2stepUnits(timesA[1] - timesA[0]);
-                }
-                /* select the first startTime and the size for the time-dimension */
-                sb.setTimeStartAndSize(0, 1); // default is all of ReferenceTimePos
             } else {
-                // no times found
-                FimexTime refTime;
-                try {
-                    refTime = getUniqueForecastReferenceTimeFT(cdmReader);
-                } catch (CDMException& ex) {
-                    // ignore
+                vTimes = {0};
+            }
+
+            for (const auto [vtPos, vTime] : enumerate(vTimes)) {
+                if (tAxis) {
+                    sb.setTimeStartAndSize(vtPos, 1); // would print warning for null tAxis
                 }
-                refTimes.push_back(refTime);
-                vTimes.push_back(refTime);
-            }
-
-            // fetch the levels from first variable
-            std::vector<double> levels = getLevels(csVars.at(0));
-            if (zAxis.get() != 0) {
-                sb.setStartAndSize(zAxis->getName(), 0, 1);
-            }
-
-            // TODO: handle ensembles
-            // reducing all unset dimensions to the first slice
-            vector<string> dims = sb.getUnsetDimensionNames();
-            for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
-                LOG4FIMEX(logger, Logger::WARN, "unknown dimension in grib-writer: '" << *dim << "' using first slice");
-                sb.setStartAndSize(*dim, 0, 1);
-            }
-
-            // loops over ref-times, times, variables and levels
-            map<string, string> variableWarnings;
-            size_t rtPos = 0;
-            for (const FimexTime& rTime : refTimes) {
-                if (refTimes.size() > 1) {
-                    vTimes.clear(); // will be filled anew
-                    sb.setReferenceTimePos(rtPos);
-                    stringstream ss;
-                    ss << "seconds since " << make_time_string_extended(rTime);
-                    DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
-                    auto timesA = times->asInt64();
-                    TimeUnit tu(ss.str());
-                    transform(&timesA[0], &timesA[0] + times->size(), back_inserter(vTimes),
-                              std::bind(std::mem_fn(&TimeUnit::unitTime2fimexTime), tu, std::placeholders::_1));
-                    if (times->size() > 1) {
-                        stepUnit = gribSeconds2stepUnits(timesA[1] - timesA[0]);
-                    }
-                }
-                size_t vtPos = 0;
-                for (vector<FimexTime>::iterator vTime = vTimes.begin(); vTime != vTimes.end(); ++vTime, ++vtPos) {
-                    if (vTimes.size() > 1) {
-                        sb.setTimeStartAndSize(vtPos, 1);
-                    }
-                    for (vector<string>::iterator var = csVars.begin(); var != csVars.end(); ++var) {
-                        setTime(*var, rTime, *vTime, stepUnit);
-                        for (size_t levelPos = 0; levelPos < levels.size(); ++levelPos) {
-                            if (zAxis.get() != 0) {
-                                sb.setStartAndSize(zAxis, levelPos, 1);
-                            }
-                            double levelVal = levels.at(levelPos);
-                            try {
-                                // level and var are dependent due to splitting possibilities
-                                setLevel(*var, levelVal, levelPos);
-                                setParameter(*var, levelVal);
-                                DataPtr data = cdmReader->getDataSlice(*var, sb);
-                                if (data->size() != 0) {
-                                    auto da = data->asDouble();
-                                    bool writeData = true;
-                                    if (omitEmptyFields) {
-                                        const size_t countMissing = count(&da[0], &da[0] + data->size(), cdm.getFillValue(*var));
-                                        writeData = (countMissing < data->size());
-                                    }
-                                    if (writeData) {
-                                        data = handleTypeScaleAndMissingData(*var, levelVal, data);
-                                        setData(data);
-                                        writeGribHandleToFile();
-                                    } else {
-                                        LOG4FIMEX(logger, Logger::DEBUG, "all vals invalid, dropping " << *var << " level " << levelVal << " time " << *vTime);
-                                    }
+                for (const auto& var : csVars) {
+                    unwrittenVariables.erase(var);
+                    for (const auto [levelPos, levelVal] : enumerate(levels)) {
+                        sb.setStartAndSize(zAxis, levelPos, 1); // silently ignores null zAxis
+                        try {
+                            DataPtr data = cdmReader->getDataSlice(var, sb);
+                            if (data && data->size() != 0) {
+                                auto da = data->asDouble();
+                                bool writeData = true;
+                                if (omitEmptyFields) {
+                                    const size_t countMissing = std::count(&da[0], &da[0] + data->size(), cdm.getFillValue(var));
+                                    writeData = (countMissing < data->size());
                                 }
-                            } catch (CDMException& ex) {
-                                variableWarnings[*var] = ex.what();
+                                if (writeData) {
+                                    setTime(actualRefTime, vTime, stepSeconds, stepUnit);
+                                    setLevel(var, levelVal, levelPos); // level and var are dependent due to splitting possibilities
+                                    setParameter(var, levelVal);
+                                    setData(handleTypeScaleAndMissingData(var, levelVal, data));
+                                    writeGribHandleToFile();
+                                } else {
+                                    LOG4FIMEX(logger, Logger::DEBUG, "all vals invalid, dropping " << var << " level " << levelVal << " time " << vTime);
+                                }
                             }
+                        } catch (CDMException& ex) {
+                            variableWarnings[var] = ex.what();
                         }
                     }
                 }
             }
-            for (map<string, string>::iterator w = variableWarnings.begin(); w != variableWarnings.end(); ++w) {
-                LOG4FIMEX(logger, Logger::WARN, "unable to write parameter " << w->first << ": " << w->second);
-            }
+        }
+        for (const auto& [var, warning] : variableWarnings) {
+            LOG4FIMEX(logger, Logger::WARN, "unable to write parameter " << var << ": " << warning);
         }
     }
-    for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
-        if (usedVariables.find(vi->getName()) == usedVariables.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "variable not written to grib: " << vi->getName());
-        }
+    for (const auto& uwvar : unwrittenVariables) {
+        LOG4FIMEX(logger, Logger::DEBUG, "variable not written to grib: " << uwvar);
     }
 }
 
@@ -373,36 +377,61 @@ void GribApiCDMWriter_ImplAbstract::setData(const DataPtr& data)
     GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
 }
 
-void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& rtime, const FimexTime& vTime, const std::string& stepUnits)
+static long gribDate(const FimexTime& time)
 {
-    // LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << rtime << ", " << vTime << ")" );
-    long date, time, startStep, endStep;
-    if (is_invalid_time_point(rtime)) {
+    return time.getYear() * 10000 + time.getMonth() * 100 + time.getMDay();
+}
+
+static long gribTime(const FimexTime& time)
+{
+    return time.getHour() * 100 + time.getMinute();
+}
+
+void GribApiCDMWriter_ImplAbstract::setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnit)
+{
+    // LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << refTime << ", " << vTimeDiff << ")" );
+    long dataDate, dataTime, startStep, endStep;
+    if (is_invalid_time_point(refTime)) {
         // no reference-time, using time itself as reference-time
-        date = vTime.getYear() * 10000 + vTime.getMonth() * 100 + vTime.getMDay();
-        time = vTime.getHour() * 100 + vTime.getMinute();
+        const auto vTime = TimeUnit(SECONDS_SINCE_1970).unitTime2fimexTime(vTimeDiff);
+        dataDate = gribDate(vTime);
+        dataTime = gribTime(vTime);
         startStep = 0;
         endStep = 0;
     } else {
-        const FimexTime& ft = rtime;
-        date = ft.getYear() * 10000 + ft.getMonth() * 100 + ft.getMDay();
-        time = ft.getHour() * 100 + ft.getMinute();
-        long steps = static_cast<long>(.5 + ((asTimePoint(vTime) - asTimePoint(rtime)).count() / gribStepUnits2seconds(stepUnits)));
-        startStep = steps;
-        // TODO: step length should be determined by bounds
-        endStep = steps;
+        dataDate = gribDate(refTime);
+        dataTime = gribTime(refTime);
+        const auto step = vTimeDiff / stepSeconds;
+        startStep = step;
+        endStep = step; // TODO: step length should be determined by bounds
     }
-    if (vTime == FimexTime(FimexTime::min_date_time)) {
-        date = 10101; // seems to be the minimum date for grib 0001-01-01
-        time = 0;
-    }
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", time), "setting dataTime");
-    size_t sSize = stepUnits.size();
-    GRIB_CHECK(grib_set_string(gribHandle.get(), "stepUnits", stepUnits.c_str(), &sSize), "setting stepUnits");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", dataDate), "setting dataDate");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", dataTime), "setting dataTime");
+    size_t sSize = stepUnit.size();
+    GRIB_CHECK(grib_set_string(gribHandle.get(), "stepUnits", stepUnit.c_str(), &sSize), "setting stepUnits");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "startStep", startStep), "setting startStep");
     // TODO: step length should be determined by bounds
     GRIB_CHECK(grib_set_long(gribHandle.get(), "endStep", endStep), "setting endStep");
+}
+
+std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getReferenceTimes(CoordinateSystem_cp coordSys)
+{
+    std::vector<FimexTime> refTimes;
+    // time-Axis might be multi-dimensional, i.e. forecast_reference_time
+    if (CoordinateAxis_cp rtAxis = coordSys->findAxisOfType(CoordinateAxis::ReferenceTime)) {
+        auto refTimeData = cdmReader->getScaledDataInUnit(rtAxis->getName(), SECONDS_SINCE_1970);
+        auto refTimeValues = refTimeData->asInt64();
+        refTimes = convertToFimexTime(refTimeValues, refTimeData->size(), SECONDS_SINCE_1970);
+    }
+    if (refTimes.empty()) {
+        FimexTime refTime;
+        try {
+            refTime = getUniqueForecastReferenceTimeFT(cdmReader);
+        } catch (CDMException& ex) {
+        }
+        refTimes = {refTime};
+    }
+    return refTimes;
 }
 
 std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& varName)

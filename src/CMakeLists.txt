@@ -293,6 +293,7 @@ SET(libfimex_SOURCES
   reproject.cc
   ${INCF}/reproject.h
 
+  enumerate.h
   leap_iterator.h
 )
 LIST (APPEND libfimex_SOURCES ${libfimex_ncml_SOURCES})

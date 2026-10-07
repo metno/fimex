@@ -30,6 +30,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/XMLInput.h"
+#include "fimex/coordSys/CoordSysDecl.h"
 
 #include <fstream>
 
@@ -78,8 +79,20 @@ protected:
      */
     virtual void setProjection(const std::string& varName) = 0;
     virtual void setParameter(const std::string& varName, double levelValue) = 0;
-    virtual void setTime(const std::string& varName, const FimexTime& rTime, const FimexTime& vTime, const std::string& stepUnit);
+    /**
+     * set the time in the GRIB output
+     * @param refTime reference time (dataDate + dataTime); if invalid, unix epoch is assumed
+     * @param vTimeDiff time difference in seconds between valid time and reference time
+     * @param stepSeconds number of seconds for 1 stepUnit
+     * @param stepUnit step unit as text
+     */
+    virtual void setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnit);
     virtual void setLevel(const std::string& varName, double levelValue, size_t levelPos) = 0;
+    /**
+     * get reference times
+     * @return reference times, or a single invalid time if no reference time is found
+     */
+    std::vector<FimexTime> getReferenceTimes(CoordinateSystem_cp coordSys);
     /**
      * get the levels from the cdm scaled to values used in grib (units/scale-factor)
      * assign at least 1 level, give it a default value if none is found in the cdm
