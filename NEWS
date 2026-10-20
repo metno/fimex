@@ -1,3 +1,6 @@
+  * 2026-10-20 fimex 2.5.6
+    * allow writing GRIB files from sources not containing lon/lat
+    * bugfixes for time and reference time handling in GRIB writer
   * 2026-07-13 fimex 2.5.5
     * bugfixes WRF, product function
     * GRIB projection variable has datatype INT

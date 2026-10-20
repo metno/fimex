@@ -1,3 +1,9 @@
+fimex-2.5 (2.5.6-1noble1) noble; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 20 Oct 2026 08:00:08 +0200
+
 fimex-2.5 (2.5.5-1noble1) noble; urgency=low
 
   * new fimex version
