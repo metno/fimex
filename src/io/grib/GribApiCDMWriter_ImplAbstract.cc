@@ -29,6 +29,7 @@
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/Data.h"
+#include "fimex/FimexTime.h"
 #include "fimex/Logger.h"
 #include "fimex/String2Type.h"
 #include "fimex/StringUtils.h"
@@ -163,7 +164,7 @@ std::vector<FimexTime> convertToFimexTime(shared_array<long long> timeValues, si
 
 static const std::string SECONDS_SINCE_1970 = "seconds since 1970-01-01 00:00:00";
 
-std::string makeTimeUnitText(const FimexTime& time)
+static std::string makeTimeUnitText(const FimexTime& time)
 {
     if (time.invalid()) {
         return SECONDS_SINCE_1970;
@@ -172,13 +173,6 @@ std::string makeTimeUnitText(const FimexTime& time)
         timeUnitText << "seconds since " << make_time_string_extended(time);
         return timeUnitText.str();
     }
-}
-
-FimexTime add(const FimexTime& time, long long seconds)
-{
-    const TimeUnit unit(SECONDS_SINCE_1970);
-    const auto orig = unit.fimexTime2unitTime(time);
-    return unit.unitTime2fimexTime(orig + seconds);
 }
 
 void GribApiCDMWriter_ImplAbstract::run()
@@ -391,28 +385,12 @@ static long gribTime(const FimexTime& time)
     return time.getHour() * 100 + time.getMinute();
 }
 
-void GribApiCDMWriter_ImplAbstract::setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnit)
+void GribApiCDMWriter_ImplAbstract::setGribTime(const FimexTime& dataDateTime, const std::string& stepUnits, long long startStep, long long endStep)
 {
-    // LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << refTime << ", " << vTimeDiff << ")" );
-    long dataDate, dataTime, startStep, endStep;
-    if (is_invalid_time_point(refTime)) {
-        // no reference-time, using time itself as reference-time
-        const auto vTime = TimeUnit(SECONDS_SINCE_1970).unitTime2fimexTime(vTimeDiff);
-        dataDate = gribDate(vTime);
-        dataTime = gribTime(vTime);
-        startStep = 0;
-        endStep = 0;
-    } else {
-        dataDate = gribDate(refTime);
-        dataTime = gribTime(refTime);
-        const auto step = vTimeDiff / stepSeconds;
-        startStep = step;
-        endStep = step; // TODO: step length should be determined by bounds
-    }
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", dataDate), "setting dataDate");
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", dataTime), "setting dataTime");
-    size_t sSize = stepUnit.size();
-    GRIB_CHECK(grib_set_string(gribHandle.get(), "stepUnits", stepUnit.c_str(), &sSize), "setting stepUnits");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", gribDate(dataDateTime)), "setting dataDate");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", gribTime(dataDateTime)), "setting dataTime");
+    size_t sSize = stepUnits.size();
+    GRIB_CHECK(grib_set_string(gribHandle.get(), "stepUnits", stepUnits.c_str(), &sSize), "setting stepUnits");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "startStep", startStep), "setting startStep");
     // TODO: step length should be determined by bounds
     GRIB_CHECK(grib_set_long(gribHandle.get(), "endStep", endStep), "setting endStep");

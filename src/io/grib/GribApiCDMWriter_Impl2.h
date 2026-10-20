@@ -40,6 +40,7 @@ public:
     void setParameter(const std::string& varName, double levelValue) override;
     void setProjection(const std::string& varName) override;
     void setLevel(const std::string& varName, double levelValue, size_t levelPos) override;
+    void setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnits) override;
     DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData) override;
 };
 

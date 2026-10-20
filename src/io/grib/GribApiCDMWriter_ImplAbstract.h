@@ -80,13 +80,21 @@ protected:
     virtual void setProjection(const std::string& varName) = 0;
     virtual void setParameter(const std::string& varName, double levelValue) = 0;
     /**
-     * set the time in the GRIB output
+     * Set the time in the GRIB output by calling setGribTime.
      * @param refTime reference time (dataDate + dataTime); if invalid, unix epoch is assumed
      * @param vTimeDiff time difference in seconds between valid time and reference time
      * @param stepSeconds number of seconds for 1 stepUnit
-     * @param stepUnit step unit as text
+     * @param stepUnits step units as text
      */
-    virtual void setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnit);
+    virtual void setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnits) = 0;
+    /**
+     * set the time in the GRIB output
+     * @param dataDateTime reference time (dataDate + dataTime)
+     * @param startStep start of valid time
+     * @param endStep end of valid time
+     * @param stepUnits step units as text
+     */
+    void setGribTime(const FimexTime& dataDateTime, const std::string& stepUnits, long long startStep, long long endStep);
     virtual void setLevel(const std::string& varName, double levelValue, size_t levelPos) = 0;
     /**
      * get reference times

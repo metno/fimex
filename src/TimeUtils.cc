@@ -139,4 +139,18 @@ epoch_seconds fimexTime2epochTime(const FimexTime& time)
     return timePoint2epochTime(asTimePoint(time));
 }
 
+static const std::string SECONDS_SINCE_1970 = "seconds since 1970-01-01 00:00:00";
+
+FimexTime fromUnixEpoch(epoch_seconds secondsSinceEpoch)
+{
+    return TimeUnit(SECONDS_SINCE_1970).unitTime2fimexTime(secondsSinceEpoch);
+}
+
+FimexTime add(const FimexTime& time, epoch_seconds seconds)
+{
+    const TimeUnit unit(SECONDS_SINCE_1970);
+    const auto orig = unit.fimexTime2unitTime(time);
+    return unit.unitTime2fimexTime(orig + seconds);
+}
+
 } // namespace MetNoFimex

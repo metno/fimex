@@ -66,6 +66,10 @@ typedef long epoch_seconds;
 epoch_seconds timePoint2epochTime(const time_point& time);
 epoch_seconds fimexTime2epochTime(const FimexTime& time);
 
+FimexTime fromUnixEpoch(epoch_seconds secondsSinceEpoch);
+
+FimexTime add(const FimexTime& time, epoch_seconds seconds);
+
 } // namespace MetNoFimex
 
 #endif // FIMEX_TIMEUTILS_H

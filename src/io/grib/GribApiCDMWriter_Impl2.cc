@@ -28,6 +28,7 @@
 #include "fimex/Logger.h"
 #include "fimex/MathUtils.h"
 #include "fimex/String2Type.h"
+#include "fimex/TimeUtils.h"
 #include "fimex/Type2String.h"
 #include "fimex/Units.h"
 #include "fimex/XMLUtils.h"
@@ -442,6 +443,19 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
         GRIB_CHECK(grib_set_long(gribHandle.get(), "level", levelPos+1), "setting level position");
     } else {
         GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
+    }
+}
+
+void GribApiCDMWriter_Impl2::setTime(const FimexTime& refTime, long long vTimeDiff, long long stepSeconds, const std::string& stepUnit)
+{
+    // LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << refTime << ", " << vTimeDiff << ")" );
+    // TODO: step length should be determined by bounds
+    const auto step = vTimeDiff / stepSeconds;
+    if (is_invalid_time_point(refTime)) {
+        // using valid time itself as reference-time
+        setGribTime(fromUnixEpoch(vTimeDiff), stepUnit, 0, 0);
+    } else {
+        setGribTime(refTime, stepUnit, step, step);
     }
 }
 
