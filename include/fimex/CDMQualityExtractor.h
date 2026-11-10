@@ -30,8 +30,11 @@
 #include "CDMReader.h"
 
 #include <map>
-#include <vector>
+#include <memory>
+#include <optional>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace MetNoFimex {
 
@@ -58,6 +61,25 @@ namespace MetNoFimex {
 class CDMQualityExtractor : public CDMReader
 {
 public:
+    struct QualityAssignment
+    {
+        /* the variable which contains the flags */
+        std::string statusVariable;
+
+        /* the flags, which should be valid in the statusVariable, i.e. highest,lowest,all; used if values is not set */
+        std::string flags;
+
+        /* the valid values in the statusVariable; if set, takes precedence over flags */
+        std::optional<std::set<double>> values;
+
+        /* fillValue for the variable (default = _FillValue of the variable, or set per variable in config) */
+        std::optional<double> fillValue;
+
+        /* reader used for getting values of the statusVariable, null if dataReader is used */
+        CDMReader_p statusReader;
+    };
+
+public:
     /**
      * Initialize the CDMQualityExtractor
      *
@@ -67,46 +89,20 @@ public:
      * @param configFile filename of a cdmQualityConfig.xml file. If empty, no quality-file will be used.
      */
     CDMQualityExtractor(CDMReader_p dataReader, std::string autoConfString="", std::string configFile="");
-    virtual ~CDMQualityExtractor() {};
+
     using CDMReader::getDataSlice;
     /**
      * Read and manipulate the data
      */
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
-    /**
-     * Read the internals of statusVariable. This code is mainly thought for testing/debugging.
-     */
-    const std::map<std::string, std::string>& getStatusVariable() const {return statusVariable;}
-    /**
-     * Read the internals of variableFlags, for testing/debugging.
-     */
-    const std::map<std::string, std::string>& getVariableFlags() const {return variableFlags;}
-    /**
-     * Read the internals of variableValues, for testing/debugging.
-     */
-    const std::map<std::string, std::vector<double> >& getVariableValues() const {return variableValues;}
+
+    std::shared_ptr<const QualityAssignment> getQualityAssignment(const std::string& varName);
+
 private:
     const CDMReader_p dataReader;
-    /* map of variableName to the variable which contains the flags */
-    std::map<std::string, std::string> statusVariable;
-    /*
-     * map of the variableName to the flags, which should be valid in the statusVariable, i.e. highest,lowest,all.
-     * statusVariable needs to be set!
-     */
-    std::map<std::string, std::string> variableFlags;
-    /*
-     * fillValue for each variable (default = _FillValue, or set per variable in config)
-     */
-    std::map<std::string, double> variableFill;
-    /*
-     * map of the variableName to the valid values in the statusVariable.
-     * statusVariable needs to be set!
-     */
-    std::map<std::string, std::vector<double> > variableValues;
-    /*
-     * map of the variableName to the reader used for getting values of the statusVariable.
-     */
-    std::map<std::string, CDMReader_p> statusReaders;
+
+    /* map of variableName to its quality-assignment; may be shared between variables */
+    std::map<std::string, std::shared_ptr<const QualityAssignment>> qualities;
 };
 
 } // namespace MetNoFimex

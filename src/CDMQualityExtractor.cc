@@ -36,8 +36,10 @@
 #include "fimex/mifi_constants.h"
 
 #include <algorithm>
+#include <map>
 #include <regex>
 #include <set>
+#include <tuple>
 
 using namespace std;
 
@@ -70,12 +72,18 @@ static vector<string> findCorrespondingVariables(const CDM& cdm, const string& s
     return correspondingVars;
 }
 
-static vector<double> getValidValues(const CDM& cdm, const string& statusVarName, const string& autoConfString, const string& statusAttrName) {
-    vector<double> validVals;
+static inline std::set<double> into_set(std::vector<double> vec)
+{
+    return std::set<double>(vec.begin(), vec.end());
+}
+
+static std::set<double> getValidValues(const CDM& cdm, const string& statusVarName, const string& autoConfString, const string& statusAttrName)
+{
+    std::set<double> validVals;
     std::smatch matches;
     std::regex rgx("values=(.*)");
     if (std::regex_match(autoConfString, matches, rgx)) {
-        validVals = tokenizeDotted<double>(matches[1], ",");
+        validVals = into_set(tokenizeDotted<double>(matches[1], ","));
         if (validVals.size() == 0) {
             LOG4FIMEX(logger, Logger::WARN, "could not find values autoConfString: "+autoConfString);
         }
@@ -85,11 +93,11 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
         size_t validSize = attr.getData()->size();
         if (validSize > 0) {
             if (autoConfString == "all") {
-                copy(&validData[0], &validData[validSize], back_inserter(validVals));
+                validVals.insert(&validData[0], &validData[validSize]);
             } else if (autoConfString == "highest") {
-                validVals[0] = validData[validSize-1];
+                validVals.insert(validData[validSize - 1]);
             } else if (autoConfString == "lowest") {
-                validVals[0] = validData[0];
+                validVals.insert(validData[0]);
             } else {
                 LOG4FIMEX(logger, Logger::WARN, "unable to interpret autoConfString: "+autoConfString);
             }
@@ -100,114 +108,244 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
     return validVals;
 }
 
-CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string autoConfString, std::string configFile)
-: dataReader(dataReader)
-{
-    *cdm_.get() = dataReader->getCDM();
-    const CDM& cdm = dataReader->getCDM();
-    if (!autoConfString.empty()) {
-        // precheck allowed autoConfStrings, in case no variable is found, but string
-        // is wrong
-        set<string> allowedString;
-        allowedString.insert("all");
-        allowedString.insert("highest");
-        allowedString.insert("lowest");
-        if (allowedString.find(autoConfString) == allowedString.end()) {
-            throw CDMException("auto-configure-string '"+ autoConfString +"' unknown");
-        }
+static const std::string ALLOWED_ALL = "all";
+static const std::string ALLOWED_HIGHEST = "highest";
+static const std::string ALLOWED_LOWEST = "lowest";
 
-        vector<string> vars = cdm.findVariables("flag_values",".*");
-        for (vector<string>::iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-            vector<string> correspondingVars = findCorrespondingVariables(cdm, *varIt);
-            for (vector<string>::iterator cVarIt = correspondingVars.begin(); cVarIt != correspondingVars.end(); ++cVarIt) {
-                statusVariable[*cVarIt] = *varIt;
-                variableFill[*cVarIt] = cdm.getFillValue(*cVarIt);
-                variableValues[*cVarIt] = getValidValues(cdm, *varIt, autoConfString, "flag_values");
-            }
+using QualityMap = std::map<std::string, std::shared_ptr<const CDMQualityExtractor::QualityAssignment>>;
+
+static void addAutoConfigQualities(const CDM& cdm, const string& autoConfString, QualityMap& qualities)
+{
+    // precheck allowed autoConfStrings, in case no variable is found, but string
+    // is wrong
+    if (autoConfString != ALLOWED_ALL && autoConfString != ALLOWED_HIGHEST && autoConfString != ALLOWED_LOWEST) {
+        throw CDMException("auto-configure-string '" + autoConfString + "' unknown");
+    }
+
+    const auto vars = cdm.findVariables("flag_values", ".*");
+    for (const auto& var : vars) {
+        const auto correspondingVars = findCorrespondingVariables(cdm, var);
+        if (correspondingVars.empty()) {
+            continue;
         }
-        vars = cdm.findVariables("flag_masks", ".*");
-        if (!vars.empty()) {
-            // TODO: implement
-            LOG4FIMEX(logger, Logger::INFO, "flag_masks not implemented yet");
+        auto assignment = std::make_shared<CDMQualityExtractor::QualityAssignment>();
+        assignment->statusVariable = var;
+        assignment->values = getValidValues(cdm, var, autoConfString, "flag_values");
+        for (const auto& cvar : correspondingVars) {
+            qualities[cvar] = assignment;
         }
     }
-    if (!configFile.empty()) {
-        XMLDoc_p doc = std::make_shared<XMLDoc>(configFile);
-        XPathNodeSet nodesQC(doc, "/cdmQualityConfig");
-        if (nodesQC.size() != 1) {
-            throw CDMException("config-file "+configFile+" does not contain cdmQualityConfig root element");
+
+    const auto flag_mask_vars = cdm.findVariables("flag_masks", ".*");
+    if (!flag_mask_vars.empty()) {
+        // TODO: implement
+        LOG4FIMEX(logger, Logger::INFO, "flag_masks not implemented yet");
+    }
+}
+
+/**
+ * Find all variables whose name fully matches one of the regular expression in namePattern.
+ */
+static std::set<string> findNamedVariables(const CDM& cdm, const string& namePattern)
+{
+    std::regex rgx;
+    try {
+        rgx = std::regex(namePattern);
+    } catch (const std::regex_error& e) {
+        throw CDMException("invalid variable regular expression '" + namePattern + "': " + e.what());
+    }
+
+    std::set<string> found;
+    for (const auto& var : cdm.getVariables()) {
+        if (std::regex_match(var.getName(), rgx)) {
+            found.insert(var.getName());
+        }
+    }
+
+    return found;
+}
+
+/**
+ * Check that the shape of the status variable is compatible with the shape of the variable.
+ * @return true if compatible, otherwise false and the reason in reason
+ */
+static bool checkShapeCompatibility(const CDM& cdm, const string& varName, const CDMReader_p& statusReader,
+                                    const string& statusVarName, string& reason)
+{
+    // TODO improve shape compatibility check
+    LOG4FIMEX(logger,Logger::DEBUG, "getting shape for variable '" << varName << "'");
+    const vector<string> shapeVar = cdm.getVariable(varName).getShape();
+    LOG4FIMEX(logger,Logger::DEBUG, "getting shape for status variable '" << statusVarName << "'");
+    vector<string> shapeStatus;
+    if (statusReader->getCDM().hasVariable(statusVarName)) {
+        shapeStatus = statusReader->getCDM().getVariable(statusVarName).getShape();
+    }
+    if (shapeVar == shapeStatus) {
+        return true;
+    }
+    if (shapeVar.size() < shapeStatus.size()) {
+        reason = "external status variable '" + statusVarName + "' has more dimensions than variable '" + varName + "'";
+        return false;
+    }
+    for (size_t i=0; i<shapeStatus.size(); ++i) {
+        if (cdm.getDimension(shapeVar[i]).getLength() != statusReader->getCDM().getDimension(shapeStatus[i]).getLength()) {
+            reason = "external status variable '" + statusVarName + "' and variable '" + varName
+                   + "' have different shapes, quality extract not implemented";
+            return false;
+        }
+    }
+    LOG4FIMEX(logger,Logger::INFO, "shapes of variable '" << varName << "' and statusVar '" << statusVarName
+              << "' are different but hopefully compatible");
+    return true;
+}
+
+static void addConfigFileQualities(CDMReader_p dataReader, const string& configFile, QualityMap& qualities)
+{
+    const CDM& cdm = dataReader->getCDM();
+
+    // one CDMReader per (file, type, config) combination
+    std::map<std::tuple<string, string, string>, CDMReader_p> statusReaderCache;
+
+    XMLDoc_p doc = std::make_shared<XMLDoc>(configFile);
+    XPathNodeSet nodesQC(doc, "/cdmQualityConfig");
+    if (nodesQC.size() != 1) {
+        throw CDMException("config-file " + configFile + " does not contain cdmQualityConfig root element");
+    }
+
+    // loop over variables
+    XPathNodeSet variables(doc, "/cdmQualityConfig/variable");
+    for (auto node : variables) {
+        string varName = getXmlProp(node, "name");
+        string fillValStr = getXmlProp(node, "fillValue");
+        XPathNodeSet statusVar(doc, "status_flag_variable", node);
+        string statusVarName;
+        string statusVarUse;
+        string statusVarValues;
+        string statusVarFile, statusVarType, statusVarConfig;
+        if (statusVar.size() == 1) {
+            auto statusNode = statusVar[0];
+            statusVarName = getXmlProp(statusNode, "name");
+            XPathNodeSet allowed(doc, "allowed_values", statusNode);
+            if (allowed.size() == 1) {
+                statusVarUse = getXmlProp(allowed[0], "use");
+                auto valNode = allowed[0]->children;
+                if (valNode && (valNode->type == XML_TEXT_NODE)) {
+                    statusVarValues = reinterpret_cast<char*>(valNode->content);
+                }
+            }
+            statusVarFile = getXmlProp(statusNode, "file");
+            statusVarType = getXmlProp(statusNode, "type");
+            statusVarConfig = getXmlProp(statusNode, "config");
+        }
+        if (statusVarName.empty()) {
+            throw CDMException("could not find status_flag_variable for var: " + varName);
+        }
+        if (statusVarFile.empty() && (!statusVarConfig.empty() || !statusVarType.empty())) {
+            throw CDMException("could not find status_flag_variable has type/config but no filename: " + varName);
+        }
+        LOG4FIMEX(logger, Logger::DEBUG,
+                  "adding (variable,statusVar,use,vals): (" << varName << "," << statusVarName << "," << statusVarUse << "," << statusVarValues << ")");
+        CDMReader_p statusReader = dataReader;
+        CDMReader_p externalReader;
+        if (!statusVarFile.empty()) {
+            // status var from a different reader
+            const auto key = std::make_tuple(statusVarFile, statusVarType, statusVarConfig);
+            auto cached = statusReaderCache.find(key);
+            if (cached == statusReaderCache.end()) {
+                externalReader = CDMFileReaderFactory::create(statusVarType, statusVarFile, statusVarConfig);
+                statusReaderCache[key] = externalReader;
+            } else {
+                externalReader = cached->second;
+            }
+            statusReader = externalReader;
         }
 
-        // loop over variables
-        XPathNodeSet variables(doc, "/cdmQualityConfig/variable");
-        for (auto node : variables) {
-            string varName = getXmlProp(node, "name");
-            string fillValStr = getXmlProp(node, "fillValue");
-            XPathNodeSet statusVar(doc, "status_flag_variable", node);
-            string statusVarName;
-            string statusVarUse;
-            string statusVarValues;
-            string statusVarFile, statusVarType, statusVarConfig;
-            if (statusVar.size() == 1) {
-                auto statusNode = statusVar[0];
-                statusVarName = getXmlProp(statusNode, "name");
-                XPathNodeSet allowed(doc, "allowed_values", statusNode);
-                if (allowed.size() == 1) {
-                    statusVarUse = getXmlProp(allowed[0], "use");
-                    auto valNode = allowed[0]->children;
-                    if (valNode && (valNode->type == XML_TEXT_NODE)) {
-                        statusVarValues = reinterpret_cast<char *>(valNode->content);
-                    }
+        std::optional<double> fillValue;
+        if (!fillValStr.empty()) {
+            fillValue = string2type<double>(fillValStr);
+        }
+        std::optional<std::set<double>> values;
+        string flags;
+        const auto statusVarVals = into_set(tokenizeDotted<double>(statusVarValues));
+        if (!statusVarVals.empty()) {
+            values = statusVarVals;
+        } else if (!statusVarUse.empty()) {
+            flags = statusVarUse;
+        } else {
+            throw CDMException("unable to quality-assure variable " + varName + ": no use or values given");
+        }
+
+        const auto matches = findNamedVariables(cdm, varName);
+        if (matches.empty()) {
+            LOG4FIMEX(logger, Logger::WARN, "no variable matches '" << varName << "' in quality config, skipping");
+            continue;
+        }
+        // assignment shared by all matches without an existing entry
+        auto shared = std::make_shared<CDMQualityExtractor::QualityAssignment>();
+        shared->statusVariable = statusVarName;
+        shared->statusReader = externalReader;
+        shared->fillValue = fillValue;
+        if (values) {
+            shared->values = values;
+        } else {
+            shared->flags = flags;
+        }
+
+        for (const auto& name : matches) {
+            string reason;
+            if (!checkShapeCompatibility(cdm, name, statusReader, statusVarName, reason)) {
+                if (matches.size() == 1) {
+                    throw CDMException(reason);
                 }
-                statusVarFile = getXmlProp(statusNode, "file");
-                statusVarType = getXmlProp(statusNode, "type");
-                statusVarConfig = getXmlProp(statusNode, "config");
-            }
-            if (statusVarName.empty())
-                throw CDMException("could not find status_flag_variable for var: " + varName);
-            if (statusVarFile.empty() && (!statusVarConfig.empty() || !statusVarType.empty()))
-                throw CDMException("could not find status_flag_variable has type/config but no filename: " + varName);
-            LOG4FIMEX(logger,Logger::DEBUG, "adding (variable,statusVar,use,vals): ("<<varName<<","<<statusVarName<<","<<statusVarUse<<","<<statusVarValues<<")");
-            statusVariable[varName] = statusVarName;
-            CDMReader_p sr = dataReader;
-            if (!statusVarFile.empty()) {
-                // status var from a different reader
-                sr = CDMFileReaderFactory::create(statusVarType, statusVarFile, statusVarConfig);
-                statusReaders[varName] = sr;
-            }
-            // simple check if shapes are compatible
-            // TODO improve shape compatibility check
-            LOG4FIMEX(logger,Logger::DEBUG, "getting shape for variable '" << varName << "'");
-            vector<string> shapeVar;
-            if (cdm.hasVariable(varName)) {
-                shapeVar = cdm_->getVariable(varName).getShape();
-            }
-            LOG4FIMEX(logger,Logger::DEBUG, "getting shape for status variable '" << statusVarName << "'");
-            vector<string> shapeStatus;
-            if (sr->getCDM().hasVariable(statusVarName)) {
-                shapeStatus = sr->getCDM().getVariable(statusVarName).getShape();
-            }
-            if (cdm.hasVariable(varName) && (shapeVar != shapeStatus)) {
-                if (shapeVar.size() < shapeStatus.size())
-                    throw CDMException("external status variable '" + statusVarName + "' has more dimensions than variable '" + varName + "'");
-                for (size_t i=0; i<shapeStatus.size(); ++i) {
-                    if (cdm.getDimension(shapeVar[i]).getLength() != sr->getCDM().getDimension(shapeStatus[i]).getLength())
-                        throw CDMException("external status variable '" + statusVarName + "' and variable '"
-                                           + varName + "' have different shapes, quality extract not implemented");
+                // coordinate variables (1-dim, named after their dimension) are expected to be skipped silently
+                const auto shape = cdm.getVariable(name).getShape();
+                const bool isCoordinate = shape.size() == 1 && shape[0] == name;
+                if (!shape.empty() && !isCoordinate) {
+                    LOG4FIMEX(logger, Logger::WARN, "skipping variable '" << name << "' for '" << varName << "': " << reason);
                 }
-                LOG4FIMEX(logger,Logger::INFO, "shapes of variable '" << varName << "' and statusVar '" << statusVarName
-                          << "' are different but hopefully compatible");
+                continue;
             }
-            variableFill[varName] = fillValStr.empty() ? cdm.getFillValue(varName) : string2type<double>(fillValStr);
-            vector<double> statusVarVals = tokenizeDotted<double>(statusVarValues);
-            if (!statusVarVals.empty()) {
-                variableValues[varName] = statusVarVals;
-            } else if (!statusVarUse.empty()) {
-                variableFlags[varName] = statusVarUse;
+
+            if (const auto existing = qualities.find(name); existing != qualities.end()) {
+                // copy-on-write: merge with the existing entry, leaving the shared object untouched
+                auto q = std::make_shared<CDMQualityExtractor::QualityAssignment>(*existing->second);
+                q->statusVariable = shared->statusVariable;
+                if (shared->statusReader) {
+                    q->statusReader = shared->statusReader;
+                }
+                q->fillValue = shared->fillValue;
+                if (shared->values) {
+                    q->values = shared->values;
+                } else {
+                    q->flags = shared->flags;
+                }
+                qualities[name] = q;
             } else {
-                throw CDMException("unable to quality-assure variable " + varName + ": no use or values given");
+                qualities[name] = shared;
             }
         }
+    }
+}
+
+CDMQualityExtractor::CDMQualityExtractor(CDMReader_p dataReader, std::string autoConfString, std::string configFile)
+    : dataReader(dataReader)
+{
+    *cdm_.get() = dataReader->getCDM();
+
+    if (!autoConfString.empty()) {
+        addAutoConfigQualities(dataReader->getCDM(), autoConfString, qualities);
+    }
+    if (!configFile.empty()) {
+        addConfigFileQualities(dataReader, configFile, qualities);
+    }
+}
+
+std::shared_ptr<const CDMQualityExtractor::QualityAssignment> CDMQualityExtractor::getQualityAssignment(const std::string& varName)
+{
+    if (const auto it = qualities.find(varName); it != qualities.end()) {
+        return it->second;
+    } else {
+        return {};
     }
 }
 
@@ -238,33 +376,32 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
 
     DataPtr data = dataReader->getDataSlice(varName, unLimDimPos);
     // test if variable has quality assignment
-    if (statusVariable.find(varName) != statusVariable.end()) {
-        const string& statusVar = statusVariable[varName];
+    const auto q_it = qualities.find(varName);
+    if (q_it != qualities.end()) {
+        const auto& q = *q_it->second;
+        const auto& statusVar = q.statusVariable;
+
         DataPtr statusData;
-        const std::map<std::string, CDMReader_p>::iterator sit = statusReaders.find(varName);
-        CDMReader_p readerS = dataReader;
-        if( sit != statusReaders.end() ) {
-            readerS = sit->second;
-            statusData = readerS->getDataSlice(statusVar, unLimDimPos);
-            if (statusData->size() == 0) {
-                statusData = readerS->getDataSlice(statusVar, 0); // get the default slice
-            }
-        } else if (statusVar == varName) {
+        CDMReader_p statusReader = q.statusReader ? q.statusReader : dataReader;
+
+        if (statusVar == varName && statusReader == dataReader) {
             // reuse data in case of own status data
             statusData = data;
         } else {
-            statusData = getDataSlice(statusVar, unLimDimPos); // reading statusData after applying QualityExtractor
+            statusData = statusReader->getDataSlice(statusVar, unLimDimPos);
             if (statusData->size() == 0) {
-                statusData = getDataSlice(statusVar, 0); // get the default slice
+                statusData = statusReader->getDataSlice(statusVar, 0); // get the default slice
             }
         }
 
-        const CDM& cdmS = readerS->getCDM();
+        const auto& cdmS = statusReader->getCDM();
+
+        const double fillValue = q.fillValue ? *q.fillValue : cdm_->getFillValue(varName);
         const size_t sizeD = data->size(), sizeS = statusData->size();
         if (sizeD == 0 && sizeS == 0) {
             // special case: only undefined data
-            const CDMVariable& var = cdm_->getVariable(varName);
-            const vector<string>& shape = var.getShape();
+            const auto& var = cdm_->getVariable(varName);
+            const auto& shape = var.getShape();
             size_t length = 1;
             size_t sliceDims = cdm_->hasUnlimitedDim(var) ? shape.size()-1 : shape.size();
             for (size_t i = 0; i < sliceDims; ++i) {
@@ -272,18 +409,18 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
             }
 
             // return undefined data with new fill-value
-            return createData(cdm_->getVariable(varName).getDataType(), length, variableFill[varName]);
+            return createData(var.getDataType(), length, fillValue);
         }
+
         const double sizeRatio = double(sizeD)/sizeS;
         if (sizeRatio == int(sizeRatio) && sizeRatio >= 1) {
             auto sd = statusData->asDouble();
-            vector<double> useVals;
-            if (variableValues.find(varName) != variableValues.end()) {
-                useVals = variableValues[varName];
-                sort(useVals.begin(), useVals.end());
-            } else if (variableFlags.find(varName) != variableFlags.end()) {
-                const string& flag = variableFlags[varName];
-                double statusFill = cdmS.getFillValue(statusVar);
+            std::set<double> useVals;
+            if (q.values) {
+                useVals = *q.values;
+            } else if (!q.flags.empty()) {
+                const auto& flag = q.flags;
+                const double statusFill = cdmS.getFillValue(statusVar);
                 double minFlag = MIFI_UNDEFINED_D;
                 double maxFlag = MIFI_UNDEFINED_D;
                 CDMAttribute attr;
@@ -325,7 +462,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     }
                 }
                 std::smatch match;
-                if (flag == "all") {
+                if (flag == ALLOWED_ALL) {
                     // no more to do
                 } else if (std::regex_match(flag, match, std::regex("max:(.+)"))) {
                     double max = string2type<double>(match[1]);
@@ -349,29 +486,28 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                         sdIt++;
                     }
                     LOG4FIMEX(logger, Logger::DEBUG, "using min="<<min<<" for statusVar "<<statusVar<< " on var "<< varName << ": removed points: " << count);
-                } else if (flag == "highest") {
+                } else if (flag == ALLOWED_HIGHEST) {
                     double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &max<double>);
                     if (!std::isnan(testVal))
-                        useVals.push_back(testVal);
-                } else if (flag == "lowest") {
+                        useVals.insert(testVal);
+                } else if (flag == ALLOWED_LOWEST) {
                     double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &min<double>);
                     if (!std::isnan(testVal))
-                        useVals.push_back(testVal);
+                        useVals.insert(testVal);
                 } else {
                     throw CDMException("undefined quality-flag: "+flag+" for variable: "+varName);
                 }
             }
-            if (useVals.size() > 0) {
+            if (!useVals.empty()) {
                 // useVals are externally given flag-values or internally derived min/max
                 double* sdIt = &sd[0];
                 while (sdIt != &sd[sizeS]) {
-                    if (!binary_search(useVals.begin(), useVals.end(), *sdIt)) {
+                    if (useVals.find(*sdIt) == useVals.end()) {
                         *sdIt = MIFI_UNDEFINED_D;
                     }
                     sdIt++;
                 }
             }
-            double fillValue = variableFill[varName];
             for(size_t iD = 0; iD < sizeD; ) {
                 double *sdIt = &sd[0];
                 for (size_t iS = 0; iS < sizeS; ++iS, ++iD) {

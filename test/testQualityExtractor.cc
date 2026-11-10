@@ -23,6 +23,7 @@
 
 #include "testinghelpers.h"
 
+#include "fimex/CDM.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/Data.h"
@@ -34,73 +35,55 @@
 using namespace std;
 using namespace MetNoFimex;
 
-//#define TEST_DEBUG
-
-#ifdef HAVE_FELT
+#ifdef ENABLE_FELT
 TEST4FIMEX_TEST_CASE(test_qualityExtract)
 {
-    CDMReader_p feltReader = getFLTH00Reader();
+    auto feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
 
-    std::shared_ptr<CDMQualityExtractor> extract = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
+    auto extract = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
 
-    map<string, string> statusVariables = extract->getStatusVariable();
-    map<string, string> variableFlags = extract->getVariableFlags();
-    map<string, vector<double>> variableValues = extract->getVariableValues();
-#ifdef TEST_DEBUG
-    for (map<string, string>::iterator svIt = statusVariables.begin(); svIt != statusVariables.end(); ++svIt) {
-        string varName = svIt->first;
-        string statusVarName = svIt->second;
-        cerr << varName << ": " << statusVarName;
-        if (variableFlags.find(varName) != variableFlags.end()) {
-            cerr << ": flag: " << variableFlags[varName];
-        }
-        if (variableValues.find(varName) != variableValues.end()) {
-            cerr << ": values: ";
-            vector<double> vals = variableValues[varName];
-            for (size_t i = 0; i < vals.size(); i++) {
-                cerr << i << ", ";
-            }
-        }
-        cerr << endl;
-    }
-#endif /* TEST_DEBUG */
-    TEST4FIMEX_CHECK(statusVariables.find("air_temperature") != statusVariables.end());
-    TEST4FIMEX_CHECK_EQ(statusVariables["bla"], "blub");
-    TEST4FIMEX_CHECK(variableFlags.find("bla") == variableFlags.end());
-    TEST4FIMEX_CHECK_EQ(variableValues["bla"][2], 3);
+    TEST4FIMEX_CHECK(extract->getQualityAssignment("air_temperature"));
+
+    const auto qa_bla = extract->getQualityAssignment("relative_humidity");
+    TEST4FIMEX_REQUIRE(qa_bla != nullptr);
+    TEST4FIMEX_CHECK_EQ(qa_bla->statusVariable, "cloud_area_fraction");
+    TEST4FIMEX_CHECK(qa_bla->flags.empty());
+    TEST4FIMEX_REQUIRE(qa_bla->values.has_value());
+    TEST4FIMEX_CHECK_EQ(qa_bla->values.value().size(), 6);
 }
 
 TEST4FIMEX_TEST_CASE(test_qualityExtract_convert)
 {
-    CDMReader_p feltReader = getFLTH00Reader();
+    auto feltReader = getFLTH00Reader();
     if (!feltReader)
         return;
-    std::shared_ptr<CDMQualityExtractor> qe = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
+    auto qe = std::make_shared<CDMQualityExtractor>(feltReader, "", pathTest("testQualityConfig.xml"));
 
     TEST4FIMEX_CHECK(writeToFile(qe, "test_qualityExtract_convert.nc"));
 }
-#endif // HAVE_FELT
+#endif // ENABLE_FELT
 
-#ifdef HAVE_NETCDF_H
+#ifdef ENABLE_NETCDF
 TEST4FIMEX_TEST_CASE(test_qualityExtract_mask)
 {
     const string fileNameD = pathTest("testQEmask_data.nc");
     const string fileNameX = require("testQEmask.xml");
     const string fileNameM = pathTest("testQEmask_mask.nc");
 
-    CDMReader_p readerD = CDMFileReaderFactory::create("netcdf", fileNameD);
-    std::shared_ptr<CDMQualityExtractor> mask = std::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
+    auto readerD = CDMFileReaderFactory::create("netcdf", fileNameD);
+    auto mask = std::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
-    DataPtr sliceM = mask->getDataSlice("salt", 0);
+    auto sliceM = mask->getDataSlice("salt", 0);
     TEST4FIMEX_CHECK(sliceM);
+    auto fillValue = mask->getCDM().getFillValue("salt");
 
     const int NXSI = 21, NETA = 16, N_SRHO=35;
-    TEST4FIMEX_CHECK_EQ(sliceM->size(), N_SRHO * NXSI * NETA);
+    TEST4FIMEX_REQUIRE_EQ(sliceM->size(), N_SRHO * NXSI * NETA);
     auto valuesM = sliceM->asDouble();
     const int offset0 = 0, offset1 = 12+NXSI*12;
-    TEST4FIMEX_CHECK(valuesM[offset0] > 1e36);
+    TEST4FIMEX_CHECK_EQ(valuesM[offset0], fillValue);
     TEST4FIMEX_CHECK(fabs(valuesM[offset1] - 35.114) < 0.001);
 }
-#endif /* HAVE_NETCDF_H */
+#endif /* ENABLE_NETCDF */

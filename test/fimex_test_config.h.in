@@ -4,6 +4,7 @@
 #define FIMEX_DATADIR "@FIMEX_DATADIR@"
 
 // defined if configured
-#cmakedefine HAVE_FELT 1
+#cmakedefine ENABLE_FELT 1
+#cmakedefine ENABLE_NETCDF 1
 
 #endif // FIMEX_CONFIG_H

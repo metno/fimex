@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdmQualityConfig>
 
-<variable name="bla">
-   <status_flag_variable name="blub">
+<variable name="relative_humidity">
+   <status_flag_variable name="cloud_area_fraction">
       <allowed_values>1,2,...,6</allowed_values>
       <!-- or config by highest valid or lowest valid or all valid values  -->
       <!-- highest and lowest will be retrieved per data-slice, not for the whole variable -->
