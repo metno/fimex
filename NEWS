@@ -1,3 +1,5 @@
+  * 2026-11-10 fimex 2.6.0
+    * QualityExtractor now interprets name as regex
   * 2026-10-20 fimex 2.5.6
     * allow writing GRIB files from sources not containing lon/lat
     * bugfixes for time and reference time handling in GRIB writer
