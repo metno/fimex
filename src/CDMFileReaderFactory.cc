@@ -186,8 +186,7 @@ IoFactory_p findFactory(const std::string& fileTypeName, const std::string& file
     scanForIoPlugins();
 
     if (!fileTypeName.empty()) {
-        if (IoFactory_p f = findFactoryFromFileType(fileTypeName))
-            return f;
+        return findFactoryFromFileType(fileTypeName);
     }
 
     if (!write) {
