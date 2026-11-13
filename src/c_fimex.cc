@@ -87,10 +87,10 @@ void mifi_free_slicebuilder(mifi_slicebuilder* sb)
     delete(sb);
 }
 
-mifi_cdm_reader* mifi_new_io_reader(const char* file_type, const char* filename, const char* configFile)
+mifi_cdm_reader* mifi_new_io_reader(const char* file_type, const char* filename, const char* config)
 {
     try {
-            CDMReader_p reader = CDMFileReaderFactory::create(file_type, std::string(filename), XMLInputFile(configFile));
+            CDMReader_p reader = CDMFileReaderFactory::create(file_type, filename, config);
             return new mifi_cdm_reader(reader);
         } catch (exception& ex) {
             LOG4FIMEX(logger, Logger::WARN, "error in reader: " << ex.what());
