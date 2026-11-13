@@ -1,3 +1,6 @@
+  * 2026-11-13 fimex 2.6.1
+    * bugfix c_fimex: config is not required
+    * bugfix CDMFileReaderFactory: unknown filetype is an error
   * 2026-11-10 fimex 2.6.0
     * QualityExtractor now interprets name as regex
   * 2026-10-20 fimex 2.5.6
