@@ -154,7 +154,7 @@ TEST4FIMEX_FIXTURE_TEST_CASE(test_aggNewDim, TestConfig)
     const std::string test_output = std::string(oldDir) + "/test_aggNewDim.nc";
     CDMFileReaderFactory::createWriter(reader, "nc4", test_output);
 
-    CDMReader_p reader2(CDMFileReaderFactory::create("NETCDF", test_output));
+    CDMReader_p reader2(CDMFileReaderFactory::create("netcdf", test_output));
     DataPtr slice = reader->getDataSlice("notlimited", 2);
     TEST4FIMEX_REQUIRE(slice);
     TEST4FIMEX_REQUIRE_GT(slice->size(), 0);
