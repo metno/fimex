@@ -1,4 +1,4 @@
-  * 2026-11-13 fimex 2.6.1
+  * 2026-11-13 fimex 2.6.2
     * bugfix c_fimex: config is not required
     * bugfix CDMFileReaderFactory: unknown filetype is an error
   * 2026-11-10 fimex 2.6.0
